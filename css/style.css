@@ -2,18 +2,57 @@
 @import url('https://fonts.googleapis.com/css2?family=Moul&family=Siemreap&display=swap');
 
 /* ២. កំណត់ Font សម្រាប់អត្ថបទ និងតួអក្សរទូទៅ (Body, Table, Input, Button) */
-*,
 body,
 input,
 select,
 button,
 textarea,
 p,
-span,
 td,
 th {
-  font-family: 'Khmer OS Siemreap', 'Siemreap', sans-serif !important;
+  font-family: 'Khmer OS Siemreap', 'Siemreap', sans-serif;
   line-height: 1.6;
+}
+
+/* ការពារ Font Awesome Icons មិនឱ្យបាត់ ឬក្លាយជាប្រអប់ទទេ (▯) */
+.fa,
+.fas,
+.far,
+.fab,
+.fa-solid,
+.fa-regular,
+.fa-brands,
+[class^="fa-"],
+[class*=" fa-"],
+i[class*="fa-"],
+i.fa-solid,
+i.fa-regular,
+i.fa-brands {
+  font-family: "Font Awesome 6 Free", "FontAwesome" !important;
+  font-style: normal !important;
+  line-height: 1 !important;
+  display: inline-block;
+}
+
+.fa-solid,
+.fas,
+i.fa-solid {
+  font-family: "Font Awesome 6 Free" !important;
+  font-weight: 900 !important;
+}
+
+.fa-regular,
+.far,
+i.fa-regular {
+  font-family: "Font Awesome 6 Free" !important;
+  font-weight: 400 !important;
+}
+
+.fa-brands,
+.fab,
+i.fa-brands {
+  font-family: "Font Awesome 6 Brands" !important;
+  font-weight: 400 !important;
 }
 
 /* ៣. កំណត់ Font សម្រាប់ចំណងជើងធំៗទាំងអស់ (Headings) */
