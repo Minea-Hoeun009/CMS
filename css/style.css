@@ -387,3 +387,36 @@ body {
     user-select: none;
     -webkit-user-select: none;
 }
+
+
+/* ========================================================
+   Mobile Bottom Navigation & Drawer Smooth Transitions
+======================================================== */
+#mobileBottomNav {
+    padding-bottom: max(6px, env(safe-area-inset-bottom, 8px));
+}
+
+@media (max-width: 767px) {
+    #appView main {
+        padding-bottom: 76px !important;
+    }
+}
+
+.mob-icon-wrap {
+    transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), background-color 0.2s ease, color 0.2s ease;
+}
+
+#mobileBottomNav button:active .mob-icon-wrap {
+    transform: scale(0.88);
+}
+
+.sidebar-btn-active {
+    background: linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%) !important;
+    color: #ffffff !important;
+    box-shadow: 0 4px 15px -3px rgba(79, 70, 229, 0.4) !important;
+}
+
+.sidebar-btn-active .nav-icon-box {
+    background-color: rgba(255, 255, 255, 0.2) !important;
+    color: #ffffff !important;
+}

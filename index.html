@@ -219,76 +219,87 @@
   <!-- ========================================== -->
   <div id="appView" class="hidden flex h-screen overflow-hidden fade-in">
     
+    <!-- Mobile Sidebar Backdrop Overlay -->
+    <div id="mobileSidebarBackdrop" onclick="window.toggleMobileSidebar(false)" class="fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-40 hidden opacity-0 transition-opacity duration-300 md:hidden" aria-hidden="true"></div>
+
     <!-- Sidebar -->
-    <aside id="appSidebar" class="w-64 bg-slate-900 text-slate-300 flex flex-col flex-shrink-0 shadow-2xl relative transition-all duration-300 ease-in-out z-20 print:hidden">
+    <aside id="appSidebar" class="fixed inset-y-0 left-0 z-50 w-72 max-w-[85vw] -translate-x-full md:translate-x-0 md:static md:w-64 md:z-20 bg-slate-900 text-slate-300 flex flex-col flex-shrink-0 shadow-2xl transition-transform duration-300 ease-in-out md:transition-[width] print:hidden">
       <!-- Header / Logo Area -->
       <div class="h-20 p-4 border-b border-white/10 flex items-center justify-between bg-black/20 shrink-0">
         <div class="flex items-center space-x-3 overflow-hidden">
-          <div class="w-10 h-10 shrink-0 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white shadow-lg text-xl border border-white/20">
+          <div class="w-10 h-10 shrink-0 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white shadow-lg text-lg border border-white/20">
              <img id="sidebarLogo" src="https://via.placeholder.com/150?text=Logo" alt="និមិត្តសញ្ញាសាលា" class="w-full h-full object-contain rounded-xl hidden" onerror="this.classList.add('hidden'); this.nextElementSibling.classList.remove('hidden');">
-             <span>🏫</span>
+             <i class="fa-solid fa-school"></i>
           </div>
           <div class="sidebar-text transition-opacity duration-300 whitespace-nowrap">
             <h3 id="sidebarSchoolName" class="font-moul text-white text-[13px] leading-tight w-[130px] truncate">សាលាគំរូ</h3>
             <span id="sidebarAcademicYear" class="text-[10px] text-indigo-300 font-bold uppercase">ឆ្នាំសិក្សា ២០២៦-២០២៧</span>
           </div>
         </div>
-        <button type="button" onclick="toggleSidebar()" title="បើក/បិទម៉ឺនុយ" aria-label="បើក/បិទម៉ឺនុយ" class="text-white/70 hover:text-white p-2 rounded-lg hover:bg-white/10 transition shrink-0 outline-none"><i class="fa-solid fa-bars"></i></button>
+        <div class="flex items-center gap-1">
+          <button type="button" onclick="window.toggleDesktopSidebarCollapse()" title="បង្រួម/ពង្រីក Sidebar" aria-label="បង្រួម/ពង្រីក Sidebar" class="hidden md:flex text-white/70 hover:text-white p-2 rounded-lg hover:bg-white/10 transition shrink-0 outline-none"><i class="fa-solid fa-bars"></i></button>
+          <button type="button" onclick="window.toggleMobileSidebar(false)" title="បិទម៉ឺនុយ" aria-label="បិទម៉ឺនុយ" class="md:hidden text-white/70 hover:text-rose-400 p-2 rounded-lg hover:bg-white/10 transition shrink-0 outline-none"><i class="fa-solid fa-xmark text-lg"></i></button>
+        </div>
       </div>
 
       <!-- Navigation Area -->
       <nav class="flex-1 overflow-y-auto custom-scrollbar p-3 space-y-1.5 text-[13px] font-semibold">
         
-        <button onclick="switchView('dashboard')" class="w-full flex items-center px-3 py-3 rounded-xl hover:bg-white/10 hover:text-white transition-all text-left group nav-btn bg-white/10 text-white border-l-4 border-indigo-400" id="nav-dashboard">
-          <span class="text-xl w-8 text-center shrink-0 group-hover:scale-110 group-hover:text-blue-400 transition-transform">📊</span>
-          <span class="sidebar-text ml-2 whitespace-nowrap">ផ្ទាំងគ្រប់គ្រង</span>
+        <button onclick="switchView('dashboard')" class="w-full flex items-center px-3 py-2.5 rounded-xl hover:bg-white/10 hover:text-white transition-all text-left group nav-btn sidebar-btn-active" id="nav-dashboard">
+          <span class="w-8 h-8 rounded-lg bg-blue-500/20 text-blue-400 flex items-center justify-center shrink-0 text-sm group-hover:scale-110 group-hover:bg-blue-500 group-hover:text-white transition-all shadow-sm"><i class="fa-solid fa-chart-pie"></i></span>
+          <span class="sidebar-text ml-3 whitespace-nowrap">ផ្ទាំងគ្រប់គ្រង</span>
         </button>
 
-        <button onclick="switchView('analytics')" class="w-full flex items-center px-3 py-3 rounded-xl hover:bg-white/10 hover:text-white transition-all text-left group nav-btn" id="nav-analytics">
-          <span class="text-xl w-8 text-center shrink-0 group-hover:scale-110 group-hover:text-indigo-400 transition-transform">📈</span>
-          <span class="sidebar-text ml-2 whitespace-nowrap">វិភាគការសិក្សា</span>
+        <button onclick="switchView('analytics')" class="w-full flex items-center px-3 py-2.5 rounded-xl hover:bg-white/10 hover:text-white transition-all text-left group nav-btn" id="nav-analytics">
+          <span class="w-8 h-8 rounded-lg bg-indigo-500/20 text-indigo-400 flex items-center justify-center shrink-0 text-sm group-hover:scale-110 group-hover:bg-indigo-500 group-hover:text-white transition-all shadow-sm"><i class="fa-solid fa-chart-line"></i></span>
+          <span class="sidebar-text ml-3 whitespace-nowrap">វិភាគការសិក្សា</span>
         </button>
         
-        <button onclick="switchView('students')" class="w-full flex items-center px-3 py-3 rounded-xl hover:bg-white/10 hover:text-white transition-all text-left group nav-btn" id="nav-students">
-          <span class="text-xl w-8 text-center shrink-0 group-hover:scale-110 group-hover:text-emerald-400 transition-transform">👥</span>
-          <span class="sidebar-text ml-2 whitespace-nowrap">គ្រប់គ្រងសិស្ស</span>
+        <button onclick="switchView('students')" class="w-full flex items-center px-3 py-2.5 rounded-xl hover:bg-white/10 hover:text-white transition-all text-left group nav-btn" id="nav-students">
+          <span class="w-8 h-8 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0 text-sm group-hover:scale-110 group-hover:bg-emerald-500 group-hover:text-white transition-all shadow-sm"><i class="fa-solid fa-user-graduate"></i></span>
+          <span class="sidebar-text ml-3 whitespace-nowrap">គ្រប់គ្រងសិស្ស</span>
         </button>
         
-        <button onclick="switchView('attendance')" class="w-full flex items-center px-3 py-3 rounded-xl hover:bg-white/10 hover:text-white transition-all text-left group nav-btn" id="nav-attendance">
-          <span class="text-xl w-8 text-center shrink-0 group-hover:scale-110 group-hover:text-rose-400 transition-transform">📅</span>
-          <span class="sidebar-text ml-2 whitespace-nowrap">កត់វត្តមានប្រចាំថ្ងៃ</span>
+        <button onclick="switchView('attendance')" class="w-full flex items-center px-3 py-2.5 rounded-xl hover:bg-white/10 hover:text-white transition-all text-left group nav-btn" id="nav-attendance">
+          <span class="w-8 h-8 rounded-lg bg-rose-500/20 text-rose-400 flex items-center justify-center shrink-0 text-sm group-hover:scale-110 group-hover:bg-rose-500 group-hover:text-white transition-all shadow-sm"><i class="fa-solid fa-clipboard-user"></i></span>
+          <span class="sidebar-text ml-3 whitespace-nowrap">កត់វត្តមានប្រចាំថ្ងៃ</span>
         </button>
         
-        <button onclick="switchView('scores')" class="w-full flex items-center px-3 py-3 rounded-xl hover:bg-white/10 hover:text-white transition-all text-left group nav-btn" id="nav-scores">
-          <span class="text-xl w-8 text-center shrink-0 group-hover:scale-110 group-hover:text-amber-400 transition-transform">📝</span>
-          <span class="sidebar-text ml-2 whitespace-nowrap">បញ្ចូលពិន្ទុ & និទ្ទេស</span>
+        <button onclick="switchView('scores')" class="w-full flex items-center px-3 py-2.5 rounded-xl hover:bg-white/10 hover:text-white transition-all text-left group nav-btn" id="nav-scores">
+          <span class="w-8 h-8 rounded-lg bg-amber-500/20 text-amber-400 flex items-center justify-center shrink-0 text-sm group-hover:scale-110 group-hover:bg-amber-500 group-hover:text-white transition-all shadow-sm"><i class="fa-solid fa-award"></i></span>
+          <span class="sidebar-text ml-3 whitespace-nowrap">បញ្ចូលពិន្ទុ & និទ្ទេស</span>
         </button>
 
-        <button onclick="switchView('timetable-homework')" class="w-full flex items-center px-3 py-3 rounded-xl hover:bg-white/10 hover:text-white transition-all text-left group nav-btn" id="nav-timetable-homework">
-          <span class="text-xl w-8 text-center shrink-0 group-hover:scale-110 group-hover:text-teal-400 transition-transform">🕒</span>
-          <span class="sidebar-text ml-2 whitespace-nowrap">កាលវិភាគ & កិច្ចការ</span>
+        <button onclick="switchView('timetable-homework')" class="w-full flex items-center px-3 py-2.5 rounded-xl hover:bg-white/10 hover:text-white transition-all text-left group nav-btn" id="nav-timetable-homework">
+          <span class="w-8 h-8 rounded-lg bg-teal-500/20 text-teal-400 flex items-center justify-center shrink-0 text-sm group-hover:scale-110 group-hover:bg-teal-500 group-hover:text-white transition-all shadow-sm"><i class="fa-solid fa-calendar-days"></i></span>
+          <span class="sidebar-text ml-3 whitespace-nowrap">កាលវិភាគ & កិច្ចការ</span>
         </button>
 
-        <div class="sidebar-text pt-3 mt-1 mb-1 border-t border-white/10 mx-3"></div>
+        <div class="sidebar-text pt-2 mt-1 mb-1 border-t border-white/10 mx-2"></div>
 
-        <button onclick="switchView('library')" class="w-full flex items-center px-3 py-3 rounded-xl hover:bg-white/10 hover:text-white transition-all text-left group nav-btn" id="nav-library">
-          <span class="text-xl w-8 text-center shrink-0 group-hover:scale-110 group-hover:text-fuchsia-400 transition-transform">📚</span>
-          <span class="sidebar-text ml-2 whitespace-nowrap">បណ្ណាល័យ & ទ្រព្យ</span>
+        <button onclick="switchView('library')" class="w-full flex items-center px-3 py-2.5 rounded-xl hover:bg-white/10 hover:text-white transition-all text-left group nav-btn" id="nav-library">
+          <span class="w-8 h-8 rounded-lg bg-fuchsia-500/20 text-fuchsia-400 flex items-center justify-center shrink-0 text-sm group-hover:scale-110 group-hover:bg-fuchsia-500 group-hover:text-white transition-all shadow-sm"><i class="fa-solid fa-book-bookmark"></i></span>
+          <span class="sidebar-text ml-3 whitespace-nowrap">បណ្ណាល័យ & ទ្រព្យ</span>
         </button>
 
-        <button onclick="switchView('tracking-book')" class="w-full flex items-center px-3 py-3 rounded-xl hover:bg-white/10 hover:text-white transition-all text-left group nav-btn" id="nav-tracking-book">
-          <span class="text-xl w-8 text-center shrink-0 group-hover:scale-110 group-hover:text-cyan-400 transition-transform">📖</span>
-          <span class="sidebar-text ml-2 whitespace-nowrap">សៀវភៅតាមដាន</span>
+        <button onclick="switchView('tracking-book')" class="w-full flex items-center px-3 py-2.5 rounded-xl hover:bg-white/10 hover:text-white transition-all text-left group nav-btn" id="nav-tracking-book">
+          <span class="w-8 h-8 rounded-lg bg-cyan-500/20 text-cyan-400 flex items-center justify-center shrink-0 text-sm group-hover:scale-110 group-hover:bg-cyan-500 group-hover:text-white transition-all shadow-sm"><i class="fa-solid fa-book-open-reader"></i></span>
+          <span class="sidebar-text ml-3 whitespace-nowrap">សៀវភៅតាមដាន</span>
         </button>
 
-        <button onclick="switchView('reports')" class="w-full flex items-center px-3 py-3 rounded-xl hover:bg-white/10 hover:text-white transition-all text-left group nav-btn" id="nav-reports">
-          <span class="text-xl w-8 text-center shrink-0 group-hover:scale-110 group-hover:text-fuchsia-400 transition-transform">📋</span>
-          <span class="sidebar-text ml-2 whitespace-nowrap">របាយការណ៍</span>
+        <button onclick="switchView('reports')" class="w-full flex items-center px-3 py-2.5 rounded-xl hover:bg-white/10 hover:text-white transition-all text-left group nav-btn" id="nav-reports">
+          <span class="w-8 h-8 rounded-lg bg-violet-500/20 text-violet-400 flex items-center justify-center shrink-0 text-sm group-hover:scale-110 group-hover:bg-violet-500 group-hover:text-white transition-all shadow-sm"><i class="fa-solid fa-file-invoice"></i></span>
+          <span class="sidebar-text ml-3 whitespace-nowrap">របាយការណ៍</span>
         </button>
 
-        <button onclick="switchView('settings')" class="w-full flex items-center px-3 py-3 rounded-xl hover:bg-white/10 hover:text-white transition-all text-left group mt-3 nav-btn" id="nav-settings">
-          <span class="text-xl w-8 text-center shrink-0 group-hover:scale-110 group-hover:text-slate-200 transition-transform">⚙️</span>
-          <span class="sidebar-text ml-2 whitespace-nowrap">ការកំណត់ (Settings)</span>
+        <button onclick="switchView('settings')" class="w-full flex items-center px-3 py-2.5 rounded-xl hover:bg-white/10 hover:text-white transition-all text-left group nav-btn" id="nav-settings">
+          <span class="w-8 h-8 rounded-lg bg-slate-500/20 text-slate-300 flex items-center justify-center shrink-0 text-sm group-hover:scale-110 group-hover:bg-slate-400 group-hover:text-white transition-all shadow-sm"><i class="fa-solid fa-sliders"></i></span>
+          <span class="sidebar-text ml-3 whitespace-nowrap">ការកំណត់ (Settings)</span>
+        </button>
+
+        <button onclick="switchView('settings'); setTimeout(() => window.switchSettingsTab && window.switchSettingsTab('backup-audit'), 50);" class="w-full flex items-center px-3 py-2.5 rounded-xl hover:bg-white/10 hover:text-white transition-all text-left group nav-btn" id="nav-backup">
+          <span class="w-8 h-8 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0 text-sm group-hover:scale-110 group-hover:bg-emerald-500 group-hover:text-white transition-all shadow-sm"><i class="fa-solid fa-shield-halved"></i></span>
+          <span class="sidebar-text ml-3 whitespace-nowrap">Backup & Audit Log</span>
         </button>
 
       </nav>
@@ -312,10 +323,17 @@
     <div class="flex-1 flex flex-col overflow-y-auto relative w-full h-full bg-slate-50 dark:bg-slate-900 transition-colors duration-300">
       
       <!-- Top Header -->
-      <header class="bg-white px-4 md:px-6 py-3 border-b border-slate-200 flex flex-col sm:flex-row sm:justify-between items-start sm:items-center gap-3 sticky top-0 z-10 shadow-sm no-print dark:bg-slate-800 dark:border-slate-700">
-         <div class="flex items-center gap-3">
-            <button onclick="toggleSidebar()" title="បើកម៉ឺនុយ" aria-label="បើកម៉ឺនុយ" class="md:hidden text-slate-500 hover:text-indigo-600 text-xl outline-none"><i class="fa-solid fa-bars"></i></button>
-            <h2 id="pageTitleHeader" class="text-lg font-bold text-slate-800 dark:text-slate-200 font-moul">ផ្ទាំងគ្រប់គ្រង (Dashboard)</h2>
+      <header class="bg-white px-3 sm:px-6 py-3 border-b border-slate-200 flex flex-col sm:flex-row sm:justify-between items-start sm:items-center gap-3 sticky top-0 z-10 shadow-sm no-print dark:bg-slate-800 dark:border-slate-700">
+         <div class="flex items-center gap-2.5">
+            <button type="button" onclick="window.toggleMobileSidebar(true)" title="បើកម៉ឺនុយ" aria-label="បើកម៉ឺនុយ" class="md:hidden w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-700 flex items-center justify-center text-slate-600 dark:text-slate-200 hover:text-indigo-600 text-base outline-none shadow-sm active:scale-95 transition-all">
+              <i class="fa-solid fa-bars"></i>
+            </button>
+            <div class="flex items-center gap-2">
+              <span id="pageTitleIcon" class="w-8 h-8 rounded-lg bg-indigo-50 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 flex items-center justify-center text-sm shadow-sm shrink-0">
+                <i class="fa-solid fa-chart-pie"></i>
+              </span>
+              <h2 id="pageTitleHeader" class="text-base sm:text-lg font-bold text-slate-800 dark:text-slate-200 font-moul truncate">ផ្ទាំងគ្រប់គ្រង (Dashboard)</h2>
+            </div>
          </div>
          
          <div class="flex flex-wrap items-center gap-2 sm:gap-3 w-full sm:w-auto">
@@ -361,6 +379,30 @@
       <main id="settingsView" class="hidden p-0 transition duration-200 h-full w-full overflow-hidden"><div id="settingsContainer" class="h-full w-full p-4 md:p-8 overflow-y-auto custom-scrollbar"></div></main>
       <main id="reportsView" class="hidden p-0 transition duration-200 h-full w-full overflow-hidden"><div id="reportsContainer" class="h-full w-full p-4 md:p-8 overflow-y-auto custom-scrollbar"></div></main>
     </div>
+
+    <!-- Mobile Bottom Navigation Bar (Visible on mobile < md only) -->
+    <nav id="mobileBottomNav" class="md:hidden fixed bottom-0 left-0 right-0 z-30 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-t border-slate-200 dark:border-slate-800 px-2 py-1.5 flex items-center justify-around shadow-2xl transition-all">
+      <button onclick="switchView('dashboard')" id="mob-nav-dashboard" class="flex flex-col items-center justify-center flex-1 py-1 text-indigo-600 dark:text-indigo-400 font-bold transition-all">
+        <i class="fa-solid fa-chart-pie text-base"></i>
+        <span class="text-[10px] font-bold mt-0.5 font-siemreap">ផ្ទាំងមេ</span>
+      </button>
+      <button onclick="switchView('students')" id="mob-nav-students" class="flex flex-col items-center justify-center flex-1 py-1 text-slate-500 dark:text-slate-400 hover:text-indigo-600 transition-all">
+        <i class="fa-solid fa-user-graduate text-base"></i>
+        <span class="text-[10px] font-bold mt-0.5 font-siemreap">សិស្ស</span>
+      </button>
+      <button onclick="switchView('attendance')" id="mob-nav-attendance" class="flex flex-col items-center justify-center flex-1 py-1 text-slate-500 dark:text-slate-400 hover:text-indigo-600 transition-all">
+        <i class="fa-solid fa-clipboard-user text-base"></i>
+        <span class="text-[10px] font-bold mt-0.5 font-siemreap">វត្តមាន</span>
+      </button>
+      <button onclick="switchView('scores')" id="mob-nav-scores" class="flex flex-col items-center justify-center flex-1 py-1 text-slate-500 dark:text-slate-400 hover:text-indigo-600 transition-all">
+        <i class="fa-solid fa-award text-base"></i>
+        <span class="text-[10px] font-bold mt-0.5 font-siemreap">ពិន្ទុ</span>
+      </button>
+      <button onclick="window.toggleMobileSidebar(true)" id="mob-nav-more" class="flex flex-col items-center justify-center flex-1 py-1 text-slate-500 dark:text-slate-400 hover:text-indigo-600 transition-all">
+        <i class="fa-solid fa-bars-staggered text-base"></i>
+        <span class="text-[10px] font-bold mt-0.5 font-siemreap">ម៉ឺនុយ</span>
+      </button>
+    </nav>
   </div>
 
   <!-- Global Toast Container -->
@@ -394,11 +436,25 @@
             targetView.classList.add('flex', 'flex-col');
         }
 
+        // Active state លើ Desktop Sidebar
         document.querySelectorAll('.nav-btn').forEach(btn => {
-            btn.classList.remove('bg-white/10', 'text-white', 'border-l-4', 'border-indigo-400');
+            btn.classList.remove('sidebar-btn-active', 'bg-white/10', 'text-white', 'border-l-4', 'border-indigo-400');
         });
         const activeNav = document.getElementById(`nav-${viewName}`);
-        if (activeNav) activeNav.classList.add('bg-white/10', 'text-white', 'border-l-4', 'border-indigo-400');
+        if (activeNav) {
+            activeNav.classList.add('sidebar-btn-active');
+        }
+
+        // Active state លើ Mobile Bottom Nav
+        document.querySelectorAll('#mobileBottomNav button').forEach(b => {
+            b.classList.remove('text-indigo-600', 'dark:text-indigo-400', 'font-bold', 'scale-105');
+            b.classList.add('text-slate-500', 'dark:text-slate-400');
+        });
+        const mobActive = document.getElementById(`mob-nav-${viewName}`);
+        if (mobActive) {
+            mobActive.classList.remove('text-slate-500', 'dark:text-slate-400');
+            mobActive.classList.add('text-indigo-600', 'dark:text-indigo-400', 'font-bold', 'scale-105');
+        }
 
         const titleMap = {
             'dashboard': 'ផ្ទាំងគ្រប់គ្រង (Dashboard)',
@@ -413,8 +469,27 @@
             'settings': 'ការកំណត់ទូទៅ (Settings)',
             'reports': 'របាយការណ៍រដ្ឋបាល'
         };
+        const iconMap = {
+            'dashboard': 'fa-chart-pie',
+            'analytics': 'fa-chart-line',
+            'students': 'fa-user-graduate',
+            'attendance': 'fa-clipboard-user',
+            'scores': 'fa-award',
+            'timetable-homework': 'fa-calendar-days',
+            'rankings': 'fa-ranking-star',
+            'library': 'fa-book-bookmark',
+            'tracking-book': 'fa-book-open-reader',
+            'settings': 'fa-sliders',
+            'reports': 'fa-file-invoice'
+        };
+
         const hd = document.getElementById("pageTitleHeader");
         if (hd) hd.innerText = titleMap[viewName] || 'ផ្ទាំងការងារ';
+
+        const pageTitleIcon = document.getElementById("pageTitleIcon");
+        if (pageTitleIcon) {
+            pageTitleIcon.innerHTML = `<i class="fa-solid ${iconMap[viewName] || 'fa-folder-open'}"></i>`;
+        }
         
         // Dispatch ទៅ Function របស់ Module នីមួយៗ
         if (viewName === 'dashboard' && typeof window.loadDashboard === 'function') window.loadDashboard();
@@ -429,49 +504,71 @@
         if (viewName === 'settings' && typeof window.loadSettingsView === 'function') window.loadSettingsView();
         if (viewName === 'reports' && typeof window.loadReportsView === 'function') window.loadReportsView();
 
+        // បិទ mobile sidebar នៅពេលចុចរើស view
         if (window.innerWidth < 768) {
-            const sidebar = document.getElementById("appSidebar");
-            if (sidebar && !sidebar.classList.contains("hidden")) {
-                sidebar.classList.add("hidden");
-                sidebar.style.display = "none";
-            }
+            window.toggleMobileSidebar(false);
         }
     };
 
+    // បើក/បិទ Mobile Drawer Sidebar
+    window.toggleMobileSidebar = function(show) {
+      const sidebar = document.getElementById("appSidebar");
+      const backdrop = document.getElementById("mobileSidebarBackdrop");
+      if (!sidebar) return;
+
+      const isCurrentlyOpen = !sidebar.classList.contains("-translate-x-full");
+      const willOpen = typeof show === 'boolean' ? show : !isCurrentlyOpen;
+
+      if (willOpen) {
+        sidebar.classList.remove("-translate-x-full");
+        sidebar.classList.add("translate-x-0");
+        if (backdrop) {
+          backdrop.classList.remove("hidden");
+          setTimeout(() => backdrop.classList.remove("opacity-0"), 10);
+        }
+        document.body.classList.add("overflow-hidden");
+      } else {
+        sidebar.classList.add("-translate-x-full");
+        sidebar.classList.remove("translate-x-0");
+        if (backdrop) {
+          backdrop.classList.add("opacity-0");
+          setTimeout(() => backdrop.classList.add("hidden"), 300);
+        }
+        document.body.classList.remove("overflow-hidden");
+      }
+    };
+
+    // បង្រួម/ពង្រីក Desktop Sidebar (w-64 <-> w-20)
     let isSidebarExpanded = true;
-    window.toggleSidebar = function() {
+    window.toggleDesktopSidebarCollapse = function() {
       const sidebar = document.getElementById("appSidebar");
       const texts = document.querySelectorAll(".sidebar-text");
-      
-      if (window.innerWidth < 768) {
-         if (sidebar.classList.contains("hidden") || sidebar.style.display === "none") {
-             sidebar.classList.remove("hidden");
-             sidebar.style.display = "flex";
-             sidebar.style.position = "absolute";
-             sidebar.style.height = "100%";
-             sidebar.style.zIndex = "50";
-         } else {
-             sidebar.classList.add("hidden");
-             sidebar.style.display = "none";
-         }
-         return;
-      }
+      if (!sidebar) return;
 
       isSidebarExpanded = !isSidebarExpanded;
       if (isSidebarExpanded) {
-        sidebar.classList.remove("w-20");
-        sidebar.classList.add("w-64");
+        sidebar.classList.remove("md:w-20");
+        sidebar.classList.add("md:w-64");
         texts.forEach(el => {
           el.classList.remove("hidden");
           setTimeout(() => el.classList.remove("opacity-0"), 50);
         });
       } else {
-        sidebar.classList.remove("w-64");
-        sidebar.classList.add("w-20");
+        sidebar.classList.remove("md:w-64");
+        sidebar.classList.add("md:w-20");
         texts.forEach(el => {
           el.classList.add("opacity-0");
           setTimeout(() => el.classList.add("hidden"), 300);
         });
+      }
+    };
+
+    // ភាពឆបគ្នាជាសកលសម្រាប់ toggleSidebar
+    window.toggleSidebar = function() {
+      if (window.innerWidth < 768) {
+        window.toggleMobileSidebar();
+      } else {
+        window.toggleDesktopSidebarCollapse();
       }
     };
 
