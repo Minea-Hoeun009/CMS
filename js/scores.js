@@ -457,15 +457,58 @@ window.calculateDynamicMonthlyAverage = function(studentId, semester) {
     return (totalScoreSum / countedMonths).toFixed(2);
 };
 
-window.getGradeLetter = function(avg, hasFail, schoolLevel) {
-    if (schoolLevel === "upper_sec") {
-        if (avg >= 90) return "A"; if (avg >= 80) return "B"; if (avg >= 70) return "C";
-        if (avg >= 60) return "D"; if (avg >= 50) return "E"; return "F";
+// ==========================================
+// ០៤. ប្រព័ន្ធកម្រិតពិន្ទុ និងការវាយតម្លៃ (SCR-04: Grade Scale & Rules)
+// ==========================================
+window.getGradeScaleConfig = function(schoolLevel) {
+    const sInfo = typeof appSettings !== 'undefined' ? appSettings : (JSON.parse(localStorage.getItem('school_settings') || '{}'));
+    if (sInfo.grade_scales && sInfo.grade_scales[schoolLevel]) {
+        return sInfo.grade_scales[schoolLevel];
     }
-    if (avg >= 9.5) return "ល្អណាស់"; if (avg >= 8.0) return "ល្អ"; if (avg >= 6.50) return "ល្អបង្គួរ";
-    if (avg >= 5.0) return "មធ្យម"; return "ធ្លាក់";
+    if (sInfo.grade_scale && Array.isArray(sInfo.grade_scale) && sInfo.grade_scale.length > 0) {
+        return sInfo.grade_scale;
+    }
+    if (schoolLevel === "upper_sec") {
+        return [
+            { min: 90, grade: "A", label: "ល្អប្រសើរ", color: "text-blue-700" },
+            { min: 80, grade: "B", label: "ល្អណាស់", color: "text-emerald-700" },
+            { min: 70, grade: "C", label: "ល្អ", color: "text-emerald-600" },
+            { min: 60, grade: "D", label: "ល្អបង្គួរ", color: "text-amber-500" },
+            { min: 50, grade: "E", label: "មធ្យម", color: "text-amber-600" },
+            { min: 0,  grade: "F", label: "ធ្លាក់", color: "text-rose-600" }
+        ];
+    }
+    return [
+        { min: 9.5, grade: "ល្អណាស់", label: "ល្អណាស់", color: "text-blue-800" },
+        { min: 8.0, grade: "ល្អ", label: "ល្អ", color: "text-emerald-700" },
+        { min: 6.5, grade: "ល្អបង្គួរ", label: "ល្អបង្គួរ", color: "text-emerald-600" },
+        { min: 5.0, grade: "មធ្យម", label: "មធ្យម", color: "text-amber-500" },
+        { min: 0,   grade: "ធ្លាក់", label: "ធ្លាក់", color: "text-rose-600" }
+    ];
 };
 
+window.getGradeLetter = function(avg, hasFail, schoolLevel) {
+    if (avg === undefined || avg === null || avg === "" || isNaN(parseFloat(avg))) return "-";
+    const numAvg = parseFloat(avg);
+    if (numAvg <= 0) return "-";
+    const scales = window.getGradeScaleConfig(schoolLevel);
+    for (let i = 0; i < scales.length; i++) {
+        if (numAvg >= scales[i].min) {
+            return scales[i].grade;
+        }
+    }
+    return scales[scales.length - 1]?.grade || "-";
+};
+
+window.getGradeColor = function(gradeLetter, schoolLevel) {
+    const scales = window.getGradeScaleConfig(schoolLevel);
+    const item = scales.find(s => s.grade === gradeLetter);
+    return item ? item.color : "text-slate-500";
+};
+
+// ==========================================
+// ០៥. គណនាពិន្ទុ និងចំណាត់ថ្នាក់ (SCR-02, SCR-03, SCR-05)
+// ==========================================
 window.calculateSectionScore = function(id, suffix, schoolLevel) {
     let totalScore = 0, overallMax = 0, divisorCount = 0; let hasFail = false;
 
@@ -476,8 +519,14 @@ window.calculateSectionScore = function(id, suffix, schoolLevel) {
             const inputEl = document.getElementById(inputId);
             if (inputEl) {
                 const valStr = inputEl.value.trim();
-                if (valStr !== "" && !isNaN(parseFloat(valStr))) {
+                const isAbs = (valStr === "អ" || valStr.toUpperCase() === "ABS");
+
+                if (isAbs) {
+                    inputEl.classList.add("text-rose-500", "font-black");
+                    inputEl.classList.remove("text-slate-800", "text-rose-600");
+                } else if (valStr !== "" && !isNaN(parseFloat(valStr))) {
                     let val = parseFloat(valStr);
+                    // Range validation: 0 <= val <= maxVal (SCR-02)
                     if (val > maxVal) {
                         val = maxVal;
                         inputEl.value = maxVal;
@@ -485,11 +534,21 @@ window.calculateSectionScore = function(id, suffix, schoolLevel) {
                         val = 0;
                         inputEl.value = 0;
                     }
-                    if (val < maxVal / 2) { inputEl.classList.add("text-rose-600"); inputEl.classList.remove("text-slate-800"); hasFail = true; } 
-                    else { inputEl.classList.remove("text-rose-600"); inputEl.classList.add("text-slate-800"); }
-                    groupScore += val; groupMax += maxVal; groupHasInput = true;
+                    if (val < maxVal / 2) { 
+                        inputEl.classList.add("text-rose-600"); 
+                        inputEl.classList.remove("text-slate-800", "text-rose-500", "font-black"); 
+                        hasFail = true; 
+                    } else { 
+                        inputEl.classList.remove("text-rose-600", "text-rose-500", "font-black"); 
+                        inputEl.classList.add("text-slate-800"); 
+                    }
+                    groupScore += val; 
+                    groupMax += maxVal; 
+                    groupHasInput = true;
                     if (schoolLevel === "primary") divisorCount++;
-                } else { inputEl.classList.remove("text-rose-600", "text-slate-800"); }
+                } else { 
+                    inputEl.classList.remove("text-rose-600", "text-rose-500", "font-black", "text-slate-800"); 
+                }
             }
         };
         
@@ -541,20 +600,9 @@ window.calculateSectionScore = function(id, suffix, schoolLevel) {
     }
 
     let letter = "-", color = "text-slate-500";
-    const pct = overallMax > 0 ? (totalScore / overallMax) * 100 : 0; 
-    if (schoolLevel === "upper_sec") {
-        if (pct >= 90) { letter = "A"; color = "text-blue-700"; }
-        else if (pct >= 80) { letter = "B"; color = "text-emerald-700"; }
-        else if (pct >= 70) { letter = "C"; color = "text-emerald-600"; }
-        else if (pct >= 60) { letter = "D"; color = "text-amber-500"; }
-        else if (pct >= 50) { letter = "E"; color = "text-amber-600"; }
-        else if (totalScore > 0 || divisorCount > 0) { letter = "F"; color = "text-rose-600"; }
-    } else {
-        if (finalAvgToGrade >= 9.5) { letter = "ល្អណាស់"; color = "text-blue-800"; } 
-        else if (finalAvgToGrade >= 8.0) { letter = "ល្អ"; color = "text-emerald-700"; }
-        else if (finalAvgToGrade >= 6.50) { letter = "ល្អបង្គួរ"; color = "text-emerald-600"; }
-        else if (finalAvgToGrade >= 5.0) { letter = "មធ្យម"; color = "text-amber-500"; }
-        else if (finalAvgToGrade > 0) { letter = "ធ្លាក់"; color = "text-rose-600"; }
+    if (divisorCount > 0 && finalAvgToGrade > 0) {
+        letter = window.getGradeLetter(finalAvgToGrade, hasFail, schoolLevel);
+        color = window.getGradeColor(letter, schoolLevel);
     }
 
     let gradeDomId = type === "annual" ? `grade_${suffix}_${id}` : `grade_${id}`;
@@ -581,15 +629,9 @@ window.calculateStudentScore = function(id) {
      annualAvg = divider > 0 ? (annualAvg / divider) : 0;
      
      let letter = "-", color = "text-slate-500";
-     if (schoolLevel === "upper_sec") {
-          letter = annualAvg >= 90 ? "A" : annualAvg >= 80 ? "B" : annualAvg >= 70 ? "C" : annualAvg >= 60 ? "D" : annualAvg >= 50 ? "E" : annualAvg > 0 ? "F" : "-"; 
-          color = letter === "F" ? "text-rose-600" : "text-blue-700";
-     } else {
-         if (annualAvg >= 9.5) { letter = "ល្អណាស់"; color = "text-blue-800"; } 
-         else if (annualAvg >= 8.0) { letter = "ល្អ"; color = "text-emerald-700"; }
-         else if (annualAvg >= 6.50) { letter = "ល្អបង្គួរ"; color = "text-emerald-600"; }
-         else if (annualAvg >= 5.0) { letter = "មធ្យម"; color = "text-amber-500"; }
-         else if (annualAvg > 0) { letter = "ធ្លាក់"; color = "text-rose-600"; }
+     if (divider > 0 && annualAvg > 0) {
+         letter = window.getGradeLetter(annualAvg, false, schoolLevel);
+         color = window.getGradeColor(letter, schoolLevel);
      }
 
      const annAvgEl = document.getElementById(`avg_annual_${id}`);
@@ -613,16 +655,160 @@ window.calculateAllScores = function() {
     window.updateRanksInMemory(); 
 };
 
+// ==========================================
+// ០៥.១ គណនាមធ្យមភាគមុខវិជ្ជាថ្នាក់ (SCR-03: Subject Averages across Class)
+// ==========================================
+window.renderSubjectAveragesRow = function() {
+    const tfoot = document.getElementById("scoreTableFoot");
+    if (!tfoot) return;
+    if (!window.scoresStudentList || window.scoresStudentList.length === 0) {
+        tfoot.innerHTML = "";
+        return;
+    }
+
+    const type = document.getElementById("globalPeriodType")?.value || "monthly";
+    const month = document.getElementById("globalPeriodValue")?.value || "មករា";
+    const levelStr = document.getElementById("globalLevelSelect")?.value || "";
+    const schoolLevel = window.getSchoolLevel(levelStr);
+
+    const W_SCORE = 50;
+
+    const calcSubjAvg = (key, suffix = "") => {
+        let sum = 0, count = 0;
+        window.scoresStudentList.forEach(stu => {
+            let inputId = suffix ? `${key}_${suffix}_${stu.id}` : `${key}_${stu.id}`;
+            let inEl = document.getElementById(inputId);
+            if (inEl) {
+                let v = inEl.value.trim();
+                if (v !== "" && !isNaN(parseFloat(v))) {
+                    sum += parseFloat(v);
+                    count++;
+                }
+            }
+        });
+        return count > 0 ? (sum / count).toFixed(2) : "-";
+    };
+
+    let footHtml = "";
+
+    if (type === "annual") {
+        let s1Cells = (window.activeSubjectKeys || []).map(k => {
+            let avgVal = calcSubjAvg(k, "s1");
+            return `<td class="p-1 border-b border-r border-slate-300 text-center font-bold font-mono text-[12px] bg-slate-100 text-slate-800" style="width: ${W_SCORE}px; min-width: ${W_SCORE}px;">${avgVal}</td>`;
+        }).join("");
+
+        let s2Cells = (window.activeSubjectKeys || []).map(k => {
+            let avgVal = calcSubjAvg(k, "s2");
+            return `<td class="p-1 border-b border-r border-slate-300 text-center font-bold font-mono text-[12px] bg-slate-100 text-slate-800" style="width: ${W_SCORE}px; min-width: ${W_SCORE}px;">${avgVal}</td>`;
+        }).join("");
+
+        let totAnnualAvg = 0, countAnnual = 0;
+        window.scoresStudentList.forEach(stu => {
+            let avgEl = document.getElementById(`avg_annual_${stu.id}`);
+            let v = avgEl ? parseFloat(avgEl.textContent) : NaN;
+            if (!isNaN(v) && v > 0) {
+                totAnnualAvg += v;
+                countAnnual++;
+            }
+        });
+        let classAnnualAvg = countAnnual > 0 ? (totAnnualAvg / countAnnual).toFixed(2) : "-";
+
+        footHtml = `
+          <tr class="bg-indigo-50 font-bold border-t-2 border-indigo-300 text-slate-800">
+             <td colspan="3" class="p-2 border-b border-r border-slate-300 text-center font-moul text-xs bg-indigo-100 text-indigo-900 sticky left-0 z-20 shadow-[2px_0_5px_rgba(0,0,0,0.05)]">
+               <i class="fa-solid fa-calculator mr-1"></i> មធ្យមភាគរួមថ្នាក់
+             </td>
+             ${s1Cells}
+             <td class="p-1 border-b border-r border-slate-300 text-center font-bold font-mono text-[12px] bg-slate-200" colspan="4">-</td>
+             ${s2Cells}
+             <td class="p-1 border-b border-r border-slate-300 text-center font-bold font-mono text-[12px] bg-slate-200" colspan="4">-</td>
+             <td class="p-1.5 border-b border-r border-slate-300 text-center font-black font-mono text-[14px] bg-amber-100 text-blue-900">${classAnnualAvg}</td>
+             <td class="p-1.5 border-b border-r border-slate-300 text-center font-bold font-mono text-[12px] bg-amber-100 text-slate-500">-</td>
+             <td class="p-1.5 border-b border-r border-slate-300 text-center font-bold font-moul text-[11px] bg-amber-100 text-emerald-800">${countAnnual > 0 ? window.getGradeLetter(parseFloat(classAnnualAvg), false, schoolLevel) : '-'}</td>
+             <td colspan="4" class="p-1 border-b border-slate-300 text-center font-bold text-slate-400 bg-purple-50 text-[11px]">-</td>
+          </tr>
+        `;
+    } else if (type === "semester") {
+        const sem = month.includes("២") ? "s2" : "s1";
+        let subjCells = (window.activeSubjectKeys || []).map(k => {
+            let avgVal = calcSubjAvg(k, sem);
+            return `<td class="p-1 border-b border-r border-slate-300 text-center font-bold font-mono text-[12px] bg-slate-100 text-slate-800" style="width: ${W_SCORE}px; min-width: ${W_SCORE}px;">${avgVal}</td>`;
+        }).join("");
+
+        let totSemAvg = 0, countSem = 0;
+        window.scoresStudentList.forEach(stu => {
+            let avgEl = document.getElementById(`avg_${stu.id}`);
+            let v = avgEl ? parseFloat(avgEl.textContent) : NaN;
+            if (!isNaN(v) && v > 0) {
+                totSemAvg += v;
+                countSem++;
+            }
+        });
+        let classSemAvg = countSem > 0 ? (totSemAvg / countSem).toFixed(2) : "-";
+
+        footHtml = `
+          <tr class="bg-indigo-50 font-bold border-t-2 border-indigo-300 text-slate-800">
+             <td colspan="3" class="p-2 border-b border-r border-slate-300 text-center font-moul text-xs bg-indigo-100 text-indigo-900 sticky left-0 z-20 shadow-[2px_0_5px_rgba(0,0,0,0.05)]">
+               <i class="fa-solid fa-calculator mr-1"></i> មធ្យមភាគរួមថ្នាក់
+             </td>
+             ${subjCells}
+             <td class="p-1 border-b border-r border-slate-300 text-center font-bold font-mono text-[12px] bg-slate-200" colspan="3">-</td>
+             <td class="p-1 border-b border-r border-slate-300 text-center font-black font-mono text-[14px] bg-emerald-100 text-emerald-900">${classSemAvg}</td>
+             <td class="p-1 border-b border-r border-slate-300 text-center font-bold font-mono text-[12px] bg-orange-100 text-slate-500">-</td>
+             <td class="p-1 border-b border-r border-slate-300 text-center font-bold font-moul text-[11px] bg-orange-100 text-emerald-800">${countSem > 0 ? window.getGradeLetter(parseFloat(classSemAvg), false, schoolLevel) : '-'}</td>
+             <td colspan="4" class="p-1 border-b border-slate-300 text-center font-bold text-slate-400 bg-purple-50 text-[11px]">-</td>
+          </tr>
+        `;
+    } else {
+        let subjCells = (window.activeSubjectKeys || []).map(k => {
+            let avgVal = calcSubjAvg(k, "");
+            return `<td class="p-1 border-b border-r border-slate-300 text-center font-bold font-mono text-[12px] bg-slate-100 text-slate-800" style="width: ${W_SCORE}px; min-width: ${W_SCORE}px;">${avgVal}</td>`;
+        }).join("");
+
+        let totMonAvg = 0, countMon = 0;
+        window.scoresStudentList.forEach(stu => {
+            let avgEl = document.getElementById(`avg_${stu.id}`);
+            let v = avgEl ? parseFloat(avgEl.textContent) : NaN;
+            if (!isNaN(v) && v > 0) {
+                totMonAvg += v;
+                countMon++;
+            }
+        });
+        let classMonAvg = countMon > 0 ? (totMonAvg / countMon).toFixed(2) : "-";
+
+        footHtml = `
+          <tr class="bg-indigo-50 font-bold border-t-2 border-indigo-300 text-slate-800">
+             <td colspan="3" class="p-2 border-b border-r border-slate-300 text-center font-moul text-xs bg-indigo-100 text-indigo-900 sticky left-0 z-20 shadow-[2px_0_5px_rgba(0,0,0,0.05)]">
+               <i class="fa-solid fa-calculator mr-1"></i> មធ្យមភាគរួមថ្នាក់
+             </td>
+             ${subjCells}
+             <td class="p-1 border-b border-r border-slate-300 text-center font-bold font-mono text-[12px] bg-slate-200">-</td>
+             <td class="p-1 border-b border-r border-slate-300 text-center font-black font-mono text-[14px] bg-blue-100 text-blue-900">${classMonAvg}</td>
+             <td class="p-1 border-b border-r border-slate-300 text-center font-bold font-mono text-[12px] bg-orange-100 text-slate-500">-</td>
+             <td class="p-1 border-b border-r border-slate-300 text-center font-bold font-moul text-[11px] bg-emerald-100 text-emerald-800">${countMon > 0 ? window.getGradeLetter(parseFloat(classMonAvg), false, schoolLevel) : '-'}</td>
+             <td colspan="4" class="p-1 border-b border-slate-300 text-center font-bold text-slate-400 bg-purple-50 text-[11px]">-</td>
+          </tr>
+        `;
+    }
+
+    tfoot.innerHTML = footHtml;
+};
+
+// ==========================================
+// ០៥.២ ចំណាត់ថ្នាក់សិស្ស (SCR-05: Rankings with Ties and Unentered Handling)
+// ==========================================
 window.updateRanksInMemory = function() {
     const type = document.getElementById("globalPeriodType")?.value || "monthly";
     const month = document.getElementById("globalPeriodValue")?.value || "មករា";
-    let studentAvgs = [];
+    let evaluatedStudents = [];
+    let unenteredStudents = [];
 
     window.scoresStudentList.forEach(s => {
         let avgId = type === "annual" ? `avg_annual_${s.id}` : `avg_${s.id}`;
         let avgEl = document.getElementById(avgId);
-        let avg = avgEl ? parseFloat(avgEl.textContent) : 0;
-        if (isNaN(avg)) avg = 0;
+        let avgText = avgEl ? avgEl.textContent.trim() : "";
+        let hasScore = avgText !== "" && !isNaN(parseFloat(avgText));
+        let avg = hasScore ? parseFloat(avgText) : 0;
         
         let gradeId = type === "annual" ? `grade_annual_${s.id}` : `grade_${s.id}`;
         let gradeEl = document.getElementById(gradeId);
@@ -640,7 +826,18 @@ window.updateRanksInMemory = function() {
             tScore = parseFloat(document.getElementById(`total_${s.id}`)?.textContent) || 0;
         }
 
-        let fullStuObj = { ...s, avg: avg, gradeLetter: gradeLetter, exam_avg: examAvg, monthly_avg: monthlyAvg, sem1_avg: s1Avg, sem2_avg: s2Avg, total_score: tScore, total_exam: tExam };
+        let fullStuObj = { 
+            ...s, 
+            hasScore: hasScore,
+            avg: avg, 
+            gradeLetter: gradeLetter, 
+            exam_avg: examAvg, 
+            monthly_avg: monthlyAvg, 
+            sem1_avg: s1Avg, 
+            sem2_avg: s2Avg, 
+            total_score: tScore, 
+            total_exam: tExam 
+        };
         
         window.activeSubjectKeys.forEach(k => {
             let inId = `${k}_${s.id}`;
@@ -650,17 +847,50 @@ window.updateRanksInMemory = function() {
             if(inEl) fullStuObj[k] = inEl.value;
         });
 
-        studentAvgs.push(fullStuObj);
+        if (hasScore) {
+            evaluatedStudents.push(fullStuObj);
+        } else {
+            fullStuObj.rank = "-";
+            unenteredStudents.push(fullStuObj);
+        }
     });
 
-    studentAvgs.sort((a, b) => b.avg - a.avg);
+    // Sort evaluated students by avg desc, then total_score desc
+    evaluatedStudents.sort((a, b) => {
+        if (b.avg !== a.avg) return b.avg - a.avg;
+        return (b.total_score || b.total_exam || 0) - (a.total_score || a.total_exam || 0);
+    });
+
+    // Standard competition ranking (Ties share same rank, next rank skips)
     let currentRank = 1;
-    for (let i = 0; i < studentAvgs.length; i++) {
-        if (i > 0 && studentAvgs[i].avg === studentAvgs[i-1].avg) { studentAvgs[i].rank = studentAvgs[i-1].rank; } 
-        else { studentAvgs[i].rank = currentRank; }
+    for (let i = 0; i < evaluatedStudents.length; i++) {
+        if (i > 0 && evaluatedStudents[i].avg === evaluatedStudents[i-1].avg && 
+            ((evaluatedStudents[i].total_score || evaluatedStudents[i].total_exam || 0) === 
+             (evaluatedStudents[i-1].total_score || evaluatedStudents[i-1].total_exam || 0))) {
+            evaluatedStudents[i].rank = evaluatedStudents[i-1].rank;
+        } else {
+            evaluatedStudents[i].rank = currentRank;
+        }
         currentRank++;
     }
-    window.rankingsDataList = studentAvgs;
+
+    // Combine evaluated and unentered
+    window.rankingsDataList = [...evaluatedStudents, ...unenteredStudents];
+
+    // Update DOM rank cells
+    window.scoresStudentList.forEach(s => {
+        let found = window.rankingsDataList.find(r => String(r.id) === String(s.id));
+        let rankId = type === "annual" ? `rank_annual_${s.id}` : `rank_${s.id}`;
+        let rankEl = document.getElementById(rankId);
+        if (rankEl) {
+            rankEl.textContent = (found && found.hasScore) ? found.rank : "-";
+        }
+    });
+
+    // Update Subject-Level Averages row in the footer
+    if (typeof window.renderSubjectAveragesRow === 'function') {
+        window.renderSubjectAveragesRow();
+    }
 };
 
 window.autoRankStudents = function() {
@@ -823,7 +1053,7 @@ window.saveScoresData = async function() {
     const btn = document.getElementById("btnSaveScores");
     const originalText = btn ? btn.innerHTML : "រក្សាទុក";
 
-    // 🔒 ពិនិត្យការចាក់សោពិន្ទុ (Assessment Lock Check)
+    // 🔒 ពិនិត្យការចាក់សោពិន្ទុ (Assessment Lock Check - SCR-06)
     if (window.isCurrentAssessmentLocked()) {
         alert("🔒 ពិន្ទុសម្រាប់វគ្គ/ខែនេះត្រូវបានចាក់សោ (Assessment Locked)! សូមទាក់ទង Admin ដើម្បីដោះសោប្រសិនបើត្រូវការកែប្រែ។");
         return;
@@ -839,6 +1069,12 @@ window.saveScoresData = async function() {
     const levelStr = document.getElementById("globalLevelSelect")?.value || "";
     const roomStr = document.getElementById("globalRoomSelect")?.value || "";
     const grade = `${levelStr} ${roomStr}`;
+
+    // 🔒 ពិនិត្យសិទ្ធិតាមរយៈ DataServiceGuard (SCR-06)
+    if (typeof window.DataServiceGuard !== 'undefined' && typeof window.DataServiceGuard.assertCan === 'function') {
+        const canRecord = window.DataServiceGuard.assertCan('record_scores', { grade, room: roomStr });
+        if (!canRecord) return;
+    }
 
     // 🔒 ពិនិត្យសិទ្ធិថ្នាក់ទទួលខុសត្រូវ (Section 3.4: គ្រូមិនអាចកែពិន្ទុរបស់ថ្នាក់ផ្សេង ប្រសិនបើគ្មានសិទ្ធិ)
     if (typeof window.isTeacher === 'function' && window.isTeacher() && !window.isCurrentUserAdmin()) {
@@ -900,17 +1136,21 @@ window.saveScoresData = async function() {
         allScores = [...allScores, ...scoresPayload]; 
         localStorage.setItem('academic_scores', JSON.stringify(allScores));
 
-        // រក្សាទុកក្នុង Firestore
+        // រក្សាទុកក្នុង Firestore (SCR-06)
         if (window.db && scoresPayload.length > 0) {
             try {
-                const currentYear = document.getElementById("globalAcademicYear")?.value || "2026-2027";
-                const scoreDocId = `${currentYear}_${grade.replace(/\s+/g, '_')}_${type}_${type === 'annual' ? 'annual' : month}`.replace(/\s+/g, '_');
+                const currentYear = document.getElementById("globalAcademicYear")?.value || localStorage.getItem('selected_academic_year') || "2026-2027";
+                const schoolId = window.AuthState?.school_id || localStorage.getItem('school_id') || 'SCH-001';
+                const scoreDocId = `${currentYear}_${schoolId}_${grade.replace(/\s+/g, '_')}_${type}_${type === 'annual' ? 'annual' : month}`.replace(/\s+/g, '_');
                 window.db.collection("scores").doc(scoreDocId).set({
+                    school_id: schoolId,
                     grade: grade,
                     period_type: type,
                     month: type === "annual" ? "ប្រចាំឆ្នាំ" : month,
                     academic_year: currentYear,
                     scores: scoresPayload,
+                    total_students: scoresPayload.length,
+                    recorded_by: window.AuthState?.displayName || localStorage.getItem('user_display_name') || 'Teacher',
                     last_updated: firebase.firestore.FieldValue.serverTimestamp()
                 }, { merge: true }).catch(console.warn);
             } catch(fsScoreErr) {
@@ -1025,14 +1265,35 @@ window.saveSemesterConfig = function() {
 // ==========================================
 // ០៨. រៀបចំ UI មេ (Main View & Navigation) 
 // ==========================================
+window.handleScoreClassChange = async function() {
+    const levelStr = document.getElementById("globalLevelSelect")?.value || "";
+    const roomStr = document.getElementById("globalRoomSelect")?.value || "";
+    const lbl = document.getElementById("scoreHeaderGradeDisplay");
+    if (lbl) lbl.textContent = `${levelStr} ${roomStr}`;
+    
+    if (typeof window.updateAssessmentLockUI === 'function') window.updateAssessmentLockUI();
+    
+    if (typeof window.fetchStudentsForScores === 'function') {
+        await window.fetchStudentsForScores();
+        window.calculateAllScores();
+    }
+};
+
 window.loadScoresView = async function() {
     const container = document.getElementById("scores") || document.getElementById("mainContentArea");
     if (!container) return;
 
     const sInfo = typeof appSettings !== 'undefined' ? appSettings : {};
-    const levelStr = sInfo.teacher_level || "ថ្នាក់ទី ១";
-    const roomStr = sInfo.teacher_room || "«ក»";
+    const teacherGradeInfo = typeof window.getTeacherGradeInfo === 'function' ? window.getTeacherGradeInfo() : { level: "ថ្នាក់ទី ១", room: "«ក»" };
+    const levelStr = teacherGradeInfo.level || sInfo.teacher_level || "ថ្នាក់ទី ១";
+    const roomStr = teacherGradeInfo.room || sInfo.teacher_room || "«ក»";
     const gradeFull = `${levelStr} ${roomStr}`;
+
+    const gradesList = ["ថ្នាក់ទី ១", "ថ្នាក់ទី ២", "ថ្នាក់ទី ៣", "ថ្នាក់ទី ៤", "ថ្នាក់ទី ៥", "ថ្នាក់ទី ៦", "ថ្នាក់ទី ៧", "ថ្នាក់ទី ៨", "ថ្នាក់ទី ៩", "ថ្នាក់ទី ១០", "ថ្នាក់ទី ១១", "ថ្នាក់ទី ១២"];
+    const gradesOptions = gradesList.map(g => `<option value="${g}" ${g === levelStr ? 'selected' : ''}>${g}</option>`).join('');
+
+    const roomsList = ["«ក»", "«ខ»", "«គ»", "«ឃ»", "«ង»"];
+    const roomsOptions = roomsList.map(r => `<option value="${r}" ${r === roomStr ? 'selected' : ''}>${r}</option>`).join('');
 
     container.className = "flex flex-col flex-1 w-full h-full bg-slate-50/50 transition duration-300 min-h-0 relative";
     
@@ -1088,14 +1349,23 @@ window.loadScoresView = async function() {
                     <h2 class="text-xl md:text-2xl font-moul text-slate-800 tracking-wide drop-shadow-sm">ប្រព័ន្ធគ្រប់គ្រងពិន្ទុ</h2>
                     <div class="flex items-center gap-2 mt-2">
                         <span class="bg-slate-100 text-slate-600 px-2.5 py-1 rounded-md text-xs font-bold font-siemreap flex items-center gap-1.5"><i class="fa-solid fa-school"></i> ថ្នាក់ទី៖</span>
-                        <strong class="text-indigo-700 bg-indigo-50 px-3 py-1 rounded-md border border-indigo-100 text-sm font-moul shadow-sm">${gradeFull}</strong>
+                        <strong id="scoreHeaderGradeDisplay" class="text-indigo-700 bg-indigo-50 px-3 py-1 rounded-md border border-indigo-100 text-sm font-moul shadow-sm">${gradeFull}</strong>
                     </div>
                 </div>
               </div>
               
               <div class="flex flex-wrap items-center gap-3 relative z-10 w-full 2xl:w-auto bg-slate-50/80 p-2 md:p-3 rounded-[1.5rem] border border-slate-200/80 backdrop-blur-md">
-                <input type="hidden" id="globalLevelSelect" value="${levelStr}">
-                <input type="hidden" id="globalRoomSelect" value="${roomStr}">
+                <!-- 🟢 SCR-02: ជ្រើសរើសថ្នាក់ និងបន្ទប់ (Interactive Class & Room Selection) 🟢 -->
+                <div class="flex items-center gap-1.5 bg-white border border-slate-200 rounded-[1.2rem] px-3 py-2 shadow-sm">
+                   <i class="fa-solid fa-graduation-cap text-indigo-600 text-sm"></i>
+                   <select id="globalLevelSelect" onchange="window.handleScoreClassChange()" class="border-none bg-transparent text-sm font-bold text-indigo-700 outline-none cursor-pointer font-siemreap py-0 pr-1">
+                      ${gradesOptions}
+                   </select>
+                   <span class="text-slate-300">|</span>
+                   <select id="globalRoomSelect" onchange="window.handleScoreClassChange()" class="border-none bg-transparent text-sm font-bold text-rose-600 outline-none cursor-pointer font-moul py-0 pl-1">
+                      ${roomsOptions}
+                   </select>
+                </div>
                 
                 <div class="flex items-center gap-2 bg-white border border-slate-200 rounded-[1.2rem] px-3 py-2 shadow-sm flex-1 sm:flex-none transition-shadow hover:shadow-md">
                    <div class="w-8 h-8 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 shadow-inner"><i class="fa-solid fa-calendar-check text-xs"></i></div>
@@ -1332,6 +1602,7 @@ window.renderScoreEntryContent = async function() {
               <tbody id="scoresTableBody" class="divide-y divide-slate-200 text-slate-700">
                 <tr><td colspan="100" class="p-16 text-center text-slate-400 font-bold"><i class="fa-solid fa-spinner fa-spin text-4xl mb-4 text-indigo-400"></i><br>កំពុងទាញយកទិន្នន័យពិន្ទុ...</td></tr>
               </tbody>
+              <tfoot id="scoreTableFoot" class="sticky bottom-0 z-30 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]"></tfoot>
             </table>
         </div>
       </div>
@@ -1582,13 +1853,15 @@ window.fetchStudentsForScores = async function() {
     document.getElementById("unsavedBadge")?.classList.add("hidden");
     
     const sInfo = typeof appSettings !== 'undefined' ? appSettings : {};
-    const levelStr = sInfo.teacher_level || "ថ្នាក់ទី ១";
-    const roomStr = sInfo.teacher_room || "«ក»";
+    const levelStr = document.getElementById("globalLevelSelect")?.value || sInfo.teacher_level || "ថ្នាក់ទី ១";
+    const roomStr = document.getElementById("globalRoomSelect")?.value || sInfo.teacher_room || "«ក»";
     const grade = `${levelStr} ${roomStr}`;
     const trackStr = document.getElementById("globalTrackSelect")?.value || "sci";
     const month = document.getElementById("globalPeriodValue")?.value || "មករា";
     const type = document.getElementById("globalPeriodType")?.value || "monthly";
     const schoolLevel = window.getSchoolLevel(levelStr);
+    const currentYear = document.getElementById("globalAcademicYear")?.value || localStorage.getItem('selected_academic_year') || "2026-2027";
+    const schoolId = window.AuthState?.school_id || localStorage.getItem('school_id') || 'SCH-001';
     
     window.activeSchema = window.getScoreSchema(schoolLevel, type, trackStr);
     window.activeSubjectKeys = window.extractSubjectKeys(window.activeSchema);
@@ -1614,7 +1887,8 @@ window.fetchStudentsForScores = async function() {
         let cleanRoom = roomStr.replace(/[«»\s]/g, '');
 
         window.scoresStudentList = allStus.filter(s => {
-            if (!s || s.status === "Dropped" || s.status === "អសកម្ម") return false;
+            if (!s || s.status === "Dropped" || s.status === "Withdrawn" || s.status === "អសកម្ម" || s.status === "បោះបង់") return false;
+            if (s.academic_year && s.academic_year !== currentYear) return false;
             let sGrade = String(s.grade || "").replace(/\s+/g, ''); 
             let sRoom = String(s.room || "").replace(/[«»\s]/g, '');
             let fullGradeDB = String(s.class_name || s.grade || "").replace(/\s+/g, ''); 
@@ -1646,6 +1920,17 @@ window.fetchStudentsForScores = async function() {
                 if (scRes && scRes.data) allScores = scRes.data;
             } catch(e) {} 
         }
+
+        // Fetch from Firestore if offline storage is empty (SCR-06)
+        if (window.db && (!allScores || allScores.length === 0)) {
+            try {
+                const scoreDocId = `${currentYear}_${schoolId}_${grade.replace(/\s+/g, '_')}_${type}_${type === 'annual' ? 'annual' : month}`.replace(/\s+/g, '_');
+                const docSnap = await window.db.collection("scores").doc(scoreDocId).get();
+                if (docSnap.exists && docSnap.data().scores) {
+                    allScores = docSnap.data().scores;
+                }
+            } catch(e) {}
+        }
         
         if (type === "annual") {
             window.s1Scores = allScores.filter(s => s.period_type === "semester" && s.month === "ឆមាសទី១" && s.grade === grade);
@@ -1676,7 +1961,9 @@ window.fetchStudentsForScores = async function() {
                     const maxVal = window.schemaMaxMap[key] || 10;
                     let val = scObj[key] !== undefined && scObj[key] !== "" ? scObj[key] : '';
                     const colorClass = (val !== '' && parseFloat(val) < maxVal/2) ? 'text-rose-600' : 'text-slate-800';
-                    return `<td class="border-b border-r border-slate-200 print:border-black p-1 relative ${bg}" style="width: ${W_SCORE}px; min-width: ${W_SCORE}px; max-width: ${W_SCORE}px;"><input type="number" inputmode="decimal" id="${key}_${suffix}_${stu.id}" data-row="${idx}" data-col="${colIndexTracker++}" value="${val}" oninput="this.value = this.value.replace(/,/g, '.').replace(/[^0-9.]/g, ''); window.calculateStudentScore('${stu.id}'); window.markUnsaved();" class="score-input ${colorClass}"></td>`;
+                    const isAbs = (val === 'អ' || String(val).toUpperCase() === 'ABS');
+                    const finalColor = isAbs ? 'text-rose-500 font-black' : colorClass;
+                    return `<td class="border-b border-r border-slate-200 print:border-black p-1 relative ${bg}" style="width: ${W_SCORE}px; min-width: ${W_SCORE}px; max-width: ${W_SCORE}px;"><input type="text" inputmode="decimal" id="${key}_${suffix}_${stu.id}" data-row="${idx}" data-col="${colIndexTracker++}" value="${val}" oninput="if(this.value.trim() !== 'អ' && this.value.toUpperCase() !== 'ABS') this.value = this.value.replace(/,/g, '.').replace(/[^0-9.]/g, ''); window.calculateStudentScore('${stu.id}'); window.markUnsaved();" class="score-input ${finalColor}"></td>`;
                 }).join("");
 
                 rowHtml += makeInputs(sc1, "s1", "bg-slate-50/50");
@@ -1692,8 +1979,9 @@ window.fetchStudentsForScores = async function() {
                 rowHtml += window.activeSubjectKeys.map((key, colIndex) => {
                     const maxVal = window.schemaMaxMap[key] || 10; 
                     let val = sc[key] !== undefined && sc[key] !== "" ? sc[key] : '';
-                    const colorClass = (val !== '' && parseFloat(val) < maxVal/2) ? 'text-rose-600' : 'text-slate-800';
-                    return `<td class="border-b border-r border-slate-200 print:border-black p-0 relative" style="width: ${W_SCORE}px; min-width: ${W_SCORE}px; max-width: ${W_SCORE}px;"><input type="number" inputmode="decimal" id="${key}_${sem}_${stu.id}" data-row="${idx}" data-col="${colIndex}" value="${val}" oninput="this.value = this.value.replace(/,/g, '.').replace(/[^0-9.]/g, ''); window.calculateStudentScore('${stu.id}'); window.markUnsaved();" class="score-input ${colorClass}"></td>`;
+                    const isAbs = (val === 'អ' || String(val).toUpperCase() === 'ABS');
+                    const colorClass = isAbs ? 'text-rose-500 font-black' : (val !== '' && parseFloat(val) < maxVal/2) ? 'text-rose-600' : 'text-slate-800';
+                    return `<td class="border-b border-r border-slate-200 print:border-black p-0 relative" style="width: ${W_SCORE}px; min-width: ${W_SCORE}px; max-width: ${W_SCORE}px;"><input type="text" inputmode="decimal" id="${key}_${sem}_${stu.id}" data-row="${idx}" data-col="${colIndex}" value="${val}" oninput="if(this.value.trim() !== 'អ' && this.value.toUpperCase() !== 'ABS') this.value = this.value.replace(/,/g, '.').replace(/[^0-9.]/g, ''); window.calculateStudentScore('${stu.id}'); window.markUnsaved();" class="score-input ${colorClass}"></td>`;
                 }).join("");
                 
                 const autoMonthlyAvg = parseFloat(window.calculateDynamicMonthlyAverage(stu.id, sem));
@@ -1714,8 +2002,9 @@ window.fetchStudentsForScores = async function() {
                 rowHtml += window.activeSubjectKeys.map((key, colIndex) => {
                     const maxVal = window.schemaMaxMap[key] || 10; 
                     let val = sc[key] !== undefined && sc[key] !== "" ? sc[key] : '';
-                    const colorClass = (val !== '' && parseFloat(val) < maxVal/2) ? 'text-rose-600' : 'text-slate-800';
-                    return `<td class="border-b border-r border-slate-200 print:border-black p-0 relative" style="width: ${W_SCORE}px; min-width: ${W_SCORE}px; max-width: ${W_SCORE}px;"><input type="number" inputmode="decimal" id="${key}_${stu.id}" data-row="${idx}" data-col="${colIndex}" value="${val}" oninput="this.value = this.value.replace(/,/g, '.').replace(/[^0-9.]/g, ''); window.calculateStudentScore('${stu.id}'); window.markUnsaved();" class="score-input ${colorClass}"></td>`;
+                    const isAbs = (val === 'អ' || String(val).toUpperCase() === 'ABS');
+                    const colorClass = isAbs ? 'text-rose-500 font-black' : (val !== '' && parseFloat(val) < maxVal/2) ? 'text-rose-600' : 'text-slate-800';
+                    return `<td class="border-b border-r border-slate-200 print:border-black p-0 relative" style="width: ${W_SCORE}px; min-width: ${W_SCORE}px; max-width: ${W_SCORE}px;"><input type="text" inputmode="decimal" id="${key}_${stu.id}" data-row="${idx}" data-col="${colIndex}" value="${val}" oninput="if(this.value.trim() !== 'អ' && this.value.toUpperCase() !== 'ABS') this.value = this.value.replace(/,/g, '.').replace(/[^0-9.]/g, ''); window.calculateStudentScore('${stu.id}'); window.markUnsaved();" class="score-input ${colorClass}"></td>`;
                 }).join("");
                 
                 rowHtml += `<td class="p-1 border-b border-r border-slate-200 print:border-black text-center font-bold text-slate-700 font-mono text-[13px] bg-slate-50" id="total_${stu.id}">${sc.total_score||''}</td><td class="p-1 border-b border-r border-slate-200 print:border-black text-center font-bold text-blue-700 font-mono text-[13px] bg-blue-50" id="avg_${stu.id}">${sc.average||''}</td><td class="p-1 border-b border-r border-slate-200 print:border-black text-center font-black text-rose-600 font-mono text-[13px] bg-orange-50" id="rank_${stu.id}">${sc.rank||''}</td><td class="p-1 border-b border-slate-200 print:border-black text-center font-bold text-emerald-700 font-moul text-[12px] bg-emerald-50" id="grade_${stu.id}">${sc.grade_letter||''}</td>`;
