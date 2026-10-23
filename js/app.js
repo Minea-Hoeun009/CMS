@@ -76,7 +76,12 @@ document.addEventListener("DOMContentLoaded", async () => {
             window.updateSidebarSystemInfo();
         }
 
-        // ៤. ចូលទៅកាន់ផ្ទាំង Dashboard ឬផ្ទាំងចុងក្រោយដែលបានបើក
+        // ៤. អនុវត្តសិទ្ធិមើលម៉ឺនុយតាមតួនាទី (Admin vs Class Teacher)
+        if (typeof window.applyRoleBasedNavigation === 'function') {
+            window.applyRoleBasedNavigation();
+        }
+
+        // ៥. ចូលទៅកាន់ផ្ទាំង Dashboard ឬផ្ទាំងចុងក្រោយដែលបានបើក
         const lastView = localStorage.getItem('activeMenu') || 'dashboard';
         if (typeof window.switchView === 'function') {
             window.switchView(lastView);

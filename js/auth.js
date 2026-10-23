@@ -650,6 +650,11 @@ window.AppAuth = {
         if (nameEl) nameEl.textContent = this.state.name || "លោកគ្រូ អ្នកគ្រូ";
         if (idEl) idEl.textContent = this.state.teacherId || "TCH-000";
 
+        // អនុវត្តសិទ្ធិមើលម៉ឺនុយតាមតួនាទី (Admin vs Class Teacher)
+        if (typeof window.applyRoleBasedNavigation === 'function') {
+            window.applyRoleBasedNavigation();
+        }
+
         // បើក Dashboard ជា Default
         if (typeof window.switchView === 'function') {
             const lastMenu = localStorage.getItem('activeMenu') || "dashboard";

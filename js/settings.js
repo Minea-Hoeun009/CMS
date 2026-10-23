@@ -106,6 +106,12 @@ window.saveAcademicStructure = async function(structure) {
 window.currentSettingsTab = "school";
 
 window.switchSettingsTab = function(tabName) {
+    const isSchoolOrSysAdmin = typeof window.isSchoolAdmin === 'function' ? window.isSchoolAdmin() : false;
+    if (!isSchoolOrSysAdmin && (tabName === "users" || tabName === "backup")) {
+        if (typeof window.showToast === 'function') window.showToast("⚠️ មុខងារនេះសម្រាប់តែ Admin ប៉ុណ្ណោះ!", true);
+        tabName = "school";
+    }
+
     window.currentSettingsTab = tabName;
     const tabs = ["school", "academic", "users", "backup"];
     
@@ -171,10 +177,10 @@ window.loadSettingsView = function() {
             <button id="tabBtn_academic" onclick="window.switchSettingsTab('academic')" class="flex-1 min-w-[140px] px-4 py-2.5 rounded-xl font-bold text-xs md:text-sm transition flex items-center justify-center gap-2 text-slate-500 hover:text-slate-700">
                 <i class="fa-solid fa-graduation-cap"></i> <span>គ្រប់គ្រងការសិក្សា</span>
             </button>
-            <button id="tabBtn_users" onclick="window.switchSettingsTab('users')" class="flex-1 min-w-[140px] px-4 py-2.5 rounded-xl font-bold text-xs md:text-sm transition flex items-center justify-center gap-2 text-slate-500 hover:text-slate-700">
+            <button id="tabBtn_users" onclick="window.switchSettingsTab('users')" class="${isAdmin ? '' : 'hidden'} flex-1 min-w-[140px] px-4 py-2.5 rounded-xl font-bold text-xs md:text-sm transition flex items-center justify-center gap-2 text-slate-500 hover:text-slate-700">
                 <i class="fa-solid fa-users-gear"></i> <span>គណនី & សិទ្ធិ</span>
             </button>
-            <button id="tabBtn_backup" onclick="window.switchSettingsTab('backup')" class="flex-1 min-w-[140px] px-4 py-2.5 rounded-xl font-bold text-xs md:text-sm transition flex items-center justify-center gap-2 text-slate-500 hover:text-slate-700">
+            <button id="tabBtn_backup" onclick="window.switchSettingsTab('backup')" class="${isAdmin ? '' : 'hidden'} flex-1 min-w-[140px] px-4 py-2.5 rounded-xl font-bold text-xs md:text-sm transition flex items-center justify-center gap-2 text-slate-500 hover:text-slate-700">
                 <i class="fa-solid fa-shield-halved"></i> <span>បម្រុងទុក & Audit</span>
             </button>
         </div>

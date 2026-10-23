@@ -2,8 +2,12 @@
 // ឯកសារ js/students.js - ប្រព័ន្ធគ្រប់គ្រងទិន្នន័យសិស្ស (Ultra-Safe Dynamic Edition)
 // ==========================================
 
-window.allStudents = [];
-window.filteredStudents = [];
+try {
+    window.allStudents = JSON.parse(localStorage.getItem('academic_students') || '[]');
+} catch(e) {
+    window.allStudents = [];
+}
+window.filteredStudents = [...window.allStudents];
 // ==========================================
 // មុខងារជំនួយ៖ បំប្លែងថ្ងៃខែឆ្នាំកំណើត ទៅជាទម្រង់ខ្មែរពេញលេញ (Super Clean & Khmer Format)
 // ==========================================
@@ -83,12 +87,14 @@ function toKhmerNum(str) {
 }
 
 function normalizeGrade(str) {
-    let s = String(str || "ថ្នាក់ទី ១").trim();
+    if (!str) return "";
+    let s = String(str).trim();
+    if (s === "all" || s === "គ្រប់ថ្នាក់") return "";
     const khmerToArabic = {'០':'0', '១':'1', '២':'2', '៣':'3', '៤':'4', '៥':'5', '៦':'6', '៧':'7', '៨':'8', '៩':'9'};
     let arabicStr = s.replace(/[០-៩]/g, match => khmerToArabic[match]);
     let match = arabicStr.match(/[0-9]+/);
     if (match) return "ថ្នាក់ទី " + toKhmerNum(match[0]);
-    return "ថ្នាក់ទី ១";
+    return s;
 }
 
 function formatDate(dateStr) {
@@ -134,12 +140,29 @@ window.loadStudentsView = async function() {
         const container = document.getElementById("studentsView") || document.getElementById("mainContentArea") || document.getElementById("appView");
         if (!container) return;
 
-        let gradesOptions = `<option value="all">គ្រប់ថ្នាក់</option>`;
+        const teacherScope = typeof window.getAssignedScope === 'function' ? window.getAssignedScope() : {};
+        const isSchoolOrSysAdmin = typeof window.isSchoolAdmin === 'function' ? window.isSchoolAdmin() : false;
+        
+        let initialSelectedGrade = "all";
+        let initialSelectedRoom = "all";
+        if (!isSchoolOrSysAdmin && teacherScope.grade) {
+            initialSelectedGrade = normalizeGrade(teacherScope.grade) || teacherScope.grade;
+            if (teacherScope.room) initialSelectedRoom = teacherScope.room;
+        }
+
+        let gradesOptions = `<option value="all" ${initialSelectedGrade === 'all' ? 'selected' : ''}>គ្រប់ថ្នាក់ (All Classes)</option>`;
         const toKhNum = typeof window.toKhmerNum === 'function' ? window.toKhmerNum : String;
         for(let i = 1; i <= 12; i++) {
             const khGrade = toKhNum(i);
-            gradesOptions += `<option value="ថ្នាក់ទី ${khGrade}">ថ្នាក់ទី ${khGrade}</option>`;
+            const gVal = `ថ្នាក់ទី ${khGrade}`;
+            gradesOptions += `<option value="${gVal}" ${gVal === initialSelectedGrade ? 'selected' : ''}>${gVal}</option>`;
         }
+
+        const roomsList = ["«ក»", "«ខ»", "«គ»", "«ឃ»", "«ង»"];
+        let roomsOptions = `<option value="all" ${initialSelectedRoom === 'all' ? 'selected' : ''}>គ្រប់បន្ទប់</option>`;
+        roomsList.forEach(r => {
+            roomsOptions += `<option value="${r}" ${r === initialSelectedRoom ? 'selected' : ''}>បន្ទប់ ${r}</option>`;
+        });
 
         const sInfo = typeof appSettings !== 'undefined' ? appSettings : (JSON.parse(localStorage.getItem('school_settings') || '{}'));
         const academicYear = document.getElementById("globalAcademicYear")?.value || localStorage.getItem('selected_academic_year') || sInfo.academic_year || "2026-2027";
@@ -199,23 +222,47 @@ window.loadStudentsView = async function() {
                     </div>
 
                     <div class="bg-white p-5 rounded-[2rem] border border-slate-200 shadow-sm mb-6 shrink-0 no-print relative z-20">
-                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
-                            <div class="relative col-span-1 md:col-span-2 lg:col-span-2 group">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3">
+                            <!-- ស្វែងរក -->
+                            <div class="relative col-span-1 sm:col-span-2 lg:col-span-2 group">
                                 <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-500 transition-colors"><i class="fa-solid fa-magnifying-glass text-[14px]"></i></span>
                                 <input type="text" id="stuSearchInput" oninput="if(typeof window.filterStudents === 'function') window.filterStudents();" placeholder="ស្វែងរកឈ្មោះ ឬ អត្តលេខ..." class="pl-11 pr-4 py-3 w-full border border-slate-200 rounded-2xl text-[13px] font-bold outline-none bg-slate-50 focus:bg-white focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400 transition-all shadow-inner">
                             </div>
+
+                            <!-- ជម្រើសកម្រិតថ្នាក់ (Class/Grade) -->
+                            <div class="relative col-span-1">
+                                <select id="stuFilterGrade" onchange="if(typeof window.filterStudents === 'function') window.filterStudents();" class="w-full border border-slate-200 rounded-2xl px-3 py-3 text-[13px] font-bold text-indigo-700 bg-slate-50 outline-none cursor-pointer focus:bg-white focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400 transition shadow-inner font-siemreap">
+                                    ${gradesOptions}
+                                </select>
+                            </div>
+
+                            <!-- ជម្រើសបន្ទប់ (Room) -->
+                            <div class="relative col-span-1">
+                                <select id="stuFilterRoom" onchange="if(typeof window.filterStudents === 'function') window.filterStudents();" class="w-full border border-slate-200 rounded-2xl px-3 py-3 text-[13px] font-bold text-rose-600 bg-slate-50 outline-none cursor-pointer focus:bg-white focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400 transition shadow-inner font-siemreap">
+                                    ${roomsOptions}
+                                </select>
+                            </div>
                            
-                            <select id="stuFilterGender" onchange="if(typeof window.filterStudents === 'function') window.filterStudents();" class="w-full border border-slate-200 rounded-2xl px-4 py-3 text-[13px] font-bold text-slate-700 bg-slate-50 outline-none cursor-pointer focus:bg-white focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400 transition shadow-inner">
-                                <option value="all">ប្រុស និង ស្រី</option><option value="ប្រុស">ប្រុស</option><option value="ស្រី">ស្រី</option>
-                            </select>
-                            <select id="stuFilterStatus" onchange="if(typeof window.filterStudents === 'function') window.filterStudents();" class="w-full border border-slate-200 rounded-2xl px-4 py-3 text-[13px] font-bold text-slate-700 bg-slate-50 outline-none cursor-pointer focus:bg-white focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400 transition shadow-inner">
-                                <option value="all">គ្រប់ស្ថានភាព</option>
-                                <option value="Active" selected>កំពុងសិក្សា (Active)</option>
-                                <option value="Transferred">បានផ្ទេរចេញ (Transferred)</option>
-                                <option value="Graduated">បានបញ្ចប់ការសិក្សា (Graduated)</option>
-                                <option value="Inactive">មិនសកម្ម (Inactive)</option>
-                                <option value="Withdrawn">បានឈប់រៀន (Withdrawn)</option>
-                            </select>
+                            <!-- ភេទ -->
+                            <div class="relative col-span-1">
+                                <select id="stuFilterGender" onchange="if(typeof window.filterStudents === 'function') window.filterStudents();" class="w-full border border-slate-200 rounded-2xl px-4 py-3 text-[13px] font-bold text-slate-700 bg-slate-50 outline-none cursor-pointer focus:bg-white focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400 transition shadow-inner">
+                                    <option value="all">ប្រុស និង ស្រី</option>
+                                    <option value="ប្រុស">ប្រុស</option>
+                                    <option value="ស្រី">ស្រី</option>
+                                </select>
+                            </div>
+
+                            <!-- ស្ថានភាព -->
+                            <div class="relative col-span-1">
+                                <select id="stuFilterStatus" onchange="if(typeof window.filterStudents === 'function') window.filterStudents();" class="w-full border border-slate-200 rounded-2xl px-4 py-3 text-[13px] font-bold text-slate-700 bg-slate-50 outline-none cursor-pointer focus:bg-white focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400 transition shadow-inner">
+                                    <option value="all">គ្រប់ស្ថានភាព</option>
+                                    <option value="Active" selected>កំពុងសិក្សា (Active)</option>
+                                    <option value="Transferred">បានផ្ទេរចេញ (Transferred)</option>
+                                    <option value="Graduated">បានបញ្ចប់ការសិក្សា (Graduated)</option>
+                                    <option value="Inactive">មិនសកម្ម (Inactive)</option>
+                                    <option value="Withdrawn">បានឈប់រៀន (Withdrawn)</option>
+                                </select>
+                            </div>
                         </div>
                     </div>
 
@@ -279,40 +326,45 @@ window.fetchStudentsData = function() {
         tbody.innerHTML = `<tr><td colspan="9" class="p-20 text-center"><i class="fa-solid fa-circle-notch fa-spin text-3xl text-indigo-500 mb-2"></i><br>កំពុងភ្ជាប់ទិន្នន័យពី Cloud...</td></tr>`;
     }
 
-    const currentYear = localStorage.getItem('selected_academic_year') || "2026-2027";
-    const currentTeacherId = window.AuthState ? window.AuthState.teacherId : localStorage.getItem('auth_teacher_id');
-
     // 🔴 ធានាថា db (Firestore) ពិតជាត្រូវបានភ្ជាប់រួចរាល់ 🔴
     if (typeof db === 'undefined') {
-        console.warn("បាត់ការភ្ជាប់ជាមួយ Firebase (db is undefined)។ សូមពិនិត្យឯកសារ firebase-config.js ឡើងវិញ។");
-        if(tbody && (!window.allStudents || window.allStudents.length === 0)) {
-            tbody.innerHTML = `<tr><td colspan="9" class="p-20 text-center text-rose-500"><i class="fa-solid fa-triangle-exclamation text-3xl mb-2"></i><br>គ្មានការតភ្ជាប់ទៅកាន់មូលដ្ឋានទិន្នន័យទេ!</td></tr>`;
-        }
+        console.warn("បាត់ការភ្ជាប់ជាមួយ Firebase (db is undefined)។");
+        try {
+            const cached = JSON.parse(localStorage.getItem('academic_students') || '[]');
+            if (cached.length > 0) {
+                window.allStudents = cached;
+                if (typeof window.filterStudents === 'function') window.filterStudents();
+            }
+        } catch(e) {}
         return;
     }
 
     try {
         db.collection("students")
-          .where("academic_year", "==", currentYear)
-          // .where("teacher_id", "==", currentTeacherId)
           .onSnapshot((snapshot) => {
               let stus = [];
               snapshot.forEach((doc) => {
-                  stus.push({ fb_id: doc.id, ...doc.data() });
+                  stus.push({ fb_id: doc.id, id: doc.id, ...doc.data() });
               });
 
-              // ដាក់ចូល Memory របស់ប្រព័ន្ធ
-              window.allStudents = stus;
-              
-              // រក្សាទុកបម្រុងក្នុង LocalStorage
-              localStorage.setItem('academic_students', JSON.stringify(stus));
+              if (stus.length > 0) {
+                  window.allStudents = stus;
+                  localStorage.setItem('academic_students', JSON.stringify(stus));
+              }
 
               // 🔴 ធ្វើបច្ចុប្បន្នភាពតារាងភ្លាមៗ ពេលមានការផ្លាស់ប្តូរទិន្នន័យ 🔴
               if (typeof window.filterStudents === 'function') {
                   window.filterStudents();
               }
           }, (error) => {
-              console.error("កំហុសក្នុងការស្តាប់ទិន្នន័យ Firebase:", error);
+              console.warn("កំហុសក្នុងការស្តាប់ទិន្នន័យ Firebase (ប្រើ Cached Data):", error);
+              try {
+                  const cached = JSON.parse(localStorage.getItem('academic_students') || '[]');
+                  if (cached.length > 0) {
+                      window.allStudents = cached;
+                      if (typeof window.filterStudents === 'function') window.filterStudents();
+                  }
+              } catch(e) {}
           });
     } catch (e) {
         console.error("កំហុសក្នុងការហៅ Firebase:", e);
@@ -353,7 +405,7 @@ window.filterStudents = function() {
     const grade = document.getElementById("stuFilterGrade")?.value || "all";
     const room = document.getElementById("stuFilterRoom")?.value || "all";
     const gender = document.getElementById("stuFilterGender")?.value || "all";
-    const status = document.getElementById("stuFilterStatus")?.value || "Active";
+    const status = document.getElementById("stuFilterStatus")?.value || "all";
 
     const currentTeacherId = String(window.AuthState ? window.AuthState.teacherId : localStorage.getItem('auth_teacher_id') || "").trim();
     const currentYear = String(document.getElementById("globalAcademicYear")?.value || localStorage.getItem('selected_academic_year') || "").trim();
@@ -362,27 +414,37 @@ window.filterStudents = function() {
     const scope = typeof window.getAssignedScope === 'function' ? window.getAssignedScope() : {};
 
     // បង្ការកំហុស Error ពេល allStudents ជា null
+    if (!window.allStudents || window.allStudents.length === 0) {
+        try {
+            window.allStudents = JSON.parse(localStorage.getItem('academic_students') || '[]');
+        } catch(e) {
+            window.allStudents = [];
+        }
+    }
     const baseStudents = window.allStudents || [];
 
     window.filteredStudents = baseStudents.filter(s => {
         if (!s || typeof s !== 'object') return false;
 
+        // Year check: match if academic_year matches currentYear, or if student doesn't have an academic_year set
         const sYear = String(s.academic_year || "").trim();
-        if (currentYear && sYear && sYear !== "undefined" && sYear !== currentYear) {
+        if (currentYear && sYear && sYear !== "undefined" && !sYear.includes(currentYear) && !currentYear.includes(sYear)) {
             return false;
         }
 
         const normGrade = normalizeGrade(s.grade);
         const safeRoom = String(s.room || "").trim();
 
-        // ត្រួតពិនិត្យវិសាលភាពទទួលខុសត្រូវ (Scope Enforcement - Chapter 2)
-        // ប្រសិនបើជាគ្រូបង្រៀន (Teacher) ធម្មតា អាចមើលឃើញតែសិស្សក្នុងថ្នាក់ដែលទទួលខុសត្រូវ
+        // ត្រួតពិនិត្យវិសាលភាពទទួលខុសត្រូវ (Scope Enforcement) សម្រាប់គ្រូតាមកម្រិតថ្នាក់
         if (!isSchoolOrSysAdmin && !isReportViewer) {
-            const assignedGrade = normalizeGrade(scope.grade);
-            if (assignedGrade && assignedGrade !== "គ្រប់ថ្នាក់" && normGrade !== assignedGrade) {
-                return false;
+            const rawAssigned = (scope.grade || "").trim();
+            if (rawAssigned && rawAssigned !== "all" && rawAssigned !== "គ្រប់ថ្នាក់") {
+                const assignedGrade = normalizeGrade(rawAssigned);
+                if (assignedGrade && normGrade !== assignedGrade) {
+                    return false;
+                }
             }
-            if (scope.room && scope.room !== "ទូទៅ" && safeRoom && safeRoom !== scope.room.trim()) {
+            if (scope.room && scope.room !== "all" && scope.room !== "គ្រប់បន្ទប់" && scope.room !== "ទូទៅ" && safeRoom && safeRoom !== scope.room.trim()) {
                 return false;
             }
         }
@@ -395,15 +457,28 @@ window.filterStudents = function() {
 
         // Check Filters
         const matchSearch = search === "" || safeName.includes(search) || safeNameEn.includes(search) || safeId.includes(search);
-        const matchGrade = grade === "all" || normGrade === grade;
-        const matchRoom = room === "all" || safeRoom === room || (room === "«ក»" && safeRoom === ""); 
-        const matchGender = gender === "all" || safeGender === gender || (gender === "ប្រុស" && safeGender === "");
+        
+        let matchGrade = true;
+        if (grade !== "all") {
+            const selectedNorm = normalizeGrade(grade);
+            matchGrade = (normGrade === selectedNorm) || (s.grade === grade);
+        }
+
+        let matchRoom = true;
+        if (room !== "all") {
+            matchRoom = safeRoom === room || (room === "«ក»" && safeRoom === "");
+        }
+
+        let matchGender = true;
+        if (gender !== "all") {
+            matchGender = safeGender === gender || (gender === "ប្រុស" && safeGender === "");
+        }
         
         let matchStatus = true;
         if (status === "all") {
             matchStatus = true;
         } else if (status === "Active") {
-            matchStatus = safeStatus === "active" || safeStatus === "កំពុងសិក្សា";
+            matchStatus = safeStatus === "active" || safeStatus === "កំពុងសិក្សា" || safeStatus === "";
         } else if (status === "Transferred") {
             matchStatus = safeStatus === "transferred" || safeStatus === "បានផ្ទេរចេញ" || safeStatus === "ផ្ទេរចេញ";
         } else if (status === "Graduated") {

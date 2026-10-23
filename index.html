@@ -423,6 +423,20 @@
             return;
         }
 
+        // ការពារសិទ្ធិចូលមើលតាមតួនាទី (Admin vs Class Teacher)
+        const isSchoolOrSysAdmin = typeof window.isSchoolAdmin === 'function' ? window.isSchoolAdmin() : false;
+        const adminOnlyViews = ['analytics', 'timetable-homework', 'tracking-book', 'rankings'];
+        if (!isSchoolOrSysAdmin && adminOnlyViews.includes(viewName)) {
+            if (typeof window.showToast === 'function') {
+                window.showToast("⚠️ មុខងារនេះសម្រាប់តែ Admin ប៉ុណ្ណោះ!", true);
+            }
+            viewName = 'dashboard';
+        }
+
+        if (typeof window.applyRoleBasedNavigation === 'function') {
+            window.applyRoleBasedNavigation();
+        }
+
         localStorage.setItem('activeMenu', viewName);
 
         document.querySelectorAll("main[id$='View']").forEach(el => {
@@ -508,6 +522,25 @@
         if (window.innerWidth < 768) {
             window.toggleMobileSidebar(false);
         }
+    };
+
+    // មុខងារកំណត់ការបង្ហាញម៉ឺនុយតាមតួនាទី (Admin vs Class Teacher)
+    window.applyRoleBasedNavigation = function() {
+        const isSchoolOrSysAdmin = typeof window.isSchoolAdmin === 'function' ? window.isSchoolAdmin() : false;
+        
+        // សម្រាប់ Admin: បង្ហាញព័ត៌មានទាំងអស់
+        // សម្រាប់ គ្រូតាមកម្រិតថ្នាក់: បង្ហាញតែ Dashboard, Students, Attendance, Score, Library, Reports and Settings
+        const adminOnlyNavs = ['nav-analytics', 'nav-timetable-homework', 'nav-tracking-book', 'nav-backup', 'nav-rankings'];
+        adminOnlyNavs.forEach(navId => {
+            const el = document.getElementById(navId);
+            if (el) {
+                if (isSchoolOrSysAdmin) {
+                    el.classList.remove('hidden');
+                } else {
+                    el.classList.add('hidden');
+                }
+            }
+        });
     };
 
     // បើក/បិទ Mobile Drawer Sidebar
