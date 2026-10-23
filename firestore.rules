@@ -1,0 +1,35 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // ១. គណនីគ្រូបង្រៀន (Teachers)
+    match /teachers/{teacherId} {
+      allow read, write: if true; // អាចរៀបចំ restricted តាម request.auth ពេលបើក Firebase Auth ពេញលេញ
+    }
+    
+    // ២. ការកំណត់សាលារៀន (School Configuration)
+    match /schools_config/{configId} {
+      allow read, write: if true;
+    }
+    
+    // ៣. បញ្ជីរាយនាមសិស្ស (Students)
+    match /students/{studentId} {
+      allow read, write: if true;
+    }
+    
+    // ៤. បញ្ជីវត្តមានសិស្ស (Attendance)
+    match /attendance/{attendanceId} {
+      allow read, write: if true;
+    }
+    
+    // ៥. បញ្ជីពិន្ទុ និងចំណាត់ថ្នាក់ (Scores)
+    match /scores/{scoreId} {
+      allow read, write: if true;
+    }
+    
+    // ៦. បណ្ណាល័យ និងសៀវភៅពុម្ព (Library Books)
+    match /library_books/{bookId} {
+      allow read, write: if true;
+    }
+  }
+}

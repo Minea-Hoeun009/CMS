@@ -1,0 +1,16 @@
+{
+  "short_name": "CMS Cambodia",
+  "name": "ប្រព័ន្ធគ្រប់គ្រងថ្នាក់រៀន | Classroom Management System",
+  "icons": [
+    {
+      "src": "800px-MoEYS_(Cambodia).svg.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
+  "start_url": "./index.html",
+  "background_color": "#f8fafc",
+  "theme_color": "#1e3a8a",
+  "display": "standalone",
+  "orientation": "portrait-primary"
+}
