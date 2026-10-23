@@ -74,6 +74,13 @@ window.loadReportsView = function() {
                         <div class="w-14 h-14 bg-gradient-to-br from-purple-400 to-indigo-600 text-white rounded-2xl flex items-center justify-center text-2xl shadow-md shadow-purple-500/30 group-hover:scale-110 transition-transform relative z-10"><i class="fa-solid fa-sitemap"></i></div>
                         <div class="relative z-10"><h3 class="font-moul text-[15px] text-slate-800 mb-1.5 group-hover:text-purple-600">រចនាសម្ព័ន្ធថ្នាក់រៀន</h3><p class="text-slate-500 text-[11px] leading-relaxed">តារាងរចនាសម្ព័ន្ធថ្នាក់ និងគណៈកម្មាធិការសាខា។</p></div>
                     </div>
+
+                    <!-- Card 6: នាំចេញ Master Excel -->
+                    <div onclick="window.exportMasterExcel ? window.exportMasterExcel() : alert('Export Master Excel')" class="bg-white/90 backdrop-blur-md rounded-[2rem] p-6 shadow-sm hover:shadow-[0_20px_40px_rgb(16,185,129,0.15)] hover:-translate-y-1.5 transition-all duration-300 cursor-pointer border border-slate-100 group flex flex-col justify-between h-[200px] relative overflow-hidden">
+                        <div class="absolute -right-4 -top-4 w-24 h-24 bg-teal-50 rounded-full group-hover:scale-150 transition-transform duration-500 ease-out pointer-events-none"></div>
+                        <div class="w-14 h-14 bg-gradient-to-br from-teal-400 to-emerald-600 text-white rounded-2xl flex items-center justify-center text-2xl shadow-md shadow-emerald-500/30 group-hover:scale-110 transition-transform relative z-10"><i class="fa-solid fa-file-excel"></i></div>
+                        <div class="relative z-10"><h3 class="font-moul text-[15px] text-slate-800 mb-1.5 group-hover:text-teal-600">Master Excel</h3><p class="text-slate-500 text-[11px] leading-relaxed">នាំចេញឯកសារ Excel ពេញលេញរួមមាន បញ្ជីសិស្ស តារាងពិន្ទុ និងវត្តមាន។</p></div>
+                    </div>
                 </div>
             </div>
 

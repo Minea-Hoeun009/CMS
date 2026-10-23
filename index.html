@@ -243,6 +243,11 @@
           <span class="text-xl w-8 text-center shrink-0 group-hover:scale-110 group-hover:text-blue-400 transition-transform">📊</span>
           <span class="sidebar-text ml-2 whitespace-nowrap">ផ្ទាំងគ្រប់គ្រង</span>
         </button>
+
+        <button onclick="switchView('analytics')" class="w-full flex items-center px-3 py-3 rounded-xl hover:bg-white/10 hover:text-white transition-all text-left group nav-btn" id="nav-analytics">
+          <span class="text-xl w-8 text-center shrink-0 group-hover:scale-110 group-hover:text-indigo-400 transition-transform">📈</span>
+          <span class="sidebar-text ml-2 whitespace-nowrap">វិភាគការសិក្សា</span>
+        </button>
         
         <button onclick="switchView('students')" class="w-full flex items-center px-3 py-3 rounded-xl hover:bg-white/10 hover:text-white transition-all text-left group nav-btn" id="nav-students">
           <span class="text-xl w-8 text-center shrink-0 group-hover:scale-110 group-hover:text-emerald-400 transition-transform">👥</span>
@@ -257,6 +262,11 @@
         <button onclick="switchView('scores')" class="w-full flex items-center px-3 py-3 rounded-xl hover:bg-white/10 hover:text-white transition-all text-left group nav-btn" id="nav-scores">
           <span class="text-xl w-8 text-center shrink-0 group-hover:scale-110 group-hover:text-amber-400 transition-transform">📝</span>
           <span class="sidebar-text ml-2 whitespace-nowrap">បញ្ចូលពិន្ទុ & និទ្ទេស</span>
+        </button>
+
+        <button onclick="switchView('timetable-homework')" class="w-full flex items-center px-3 py-3 rounded-xl hover:bg-white/10 hover:text-white transition-all text-left group nav-btn" id="nav-timetable-homework">
+          <span class="text-xl w-8 text-center shrink-0 group-hover:scale-110 group-hover:text-teal-400 transition-transform">🕒</span>
+          <span class="sidebar-text ml-2 whitespace-nowrap">កាលវិភាគ & កិច្ចការ</span>
         </button>
 
         <div class="sidebar-text pt-3 mt-1 mb-1 border-t border-white/10 mx-3"></div>
@@ -329,14 +339,22 @@
             <button onclick="toggleDarkMode()" title="ប្តូរពណ៌" class="w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center rounded-xl bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-700 dark:text-amber-400 transition-colors outline-none shadow-sm">
               <i id="darkModeIcon" class="fa-solid fa-moon"></i>
             </button>
+
+            <!-- Notification Center Bell Button -->
+            <button id="btnNotificationCenter" onclick="window.openNotificationCenter()" title="មជ្ឈមណ្ឌលដំណឹង & ការជូនដំណឹង" class="relative w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center rounded-xl bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-700 dark:text-slate-200 transition-colors outline-none shadow-sm">
+              <i class="fa-solid fa-bell text-sm"></i>
+              <span id="notifBadge" class="hidden absolute -top-1 -right-1 w-4 h-4 bg-rose-500 text-white text-[9px] font-black rounded-full flex items-center justify-center animate-pulse">0</span>
+            </button>
          </div>
       </header>
 
       <!-- Containers សម្រាប់ផ្ទុក UI ពី JS -->
       <main id="dashboardView" class="flex flex-col p-0 h-full w-full overflow-hidden transition duration-200"><div id="mainContentArea" class="h-full w-full"></div></main> 
+      <main id="analyticsView" class="hidden p-0 transition duration-200 h-full w-full overflow-hidden"><div id="analyticsContainer" class="h-full w-full p-4 md:p-8 overflow-y-auto custom-scrollbar"></div></main>
       <main id="studentsView" class="hidden p-0 h-full w-full overflow-hidden transition duration-200"><div id="studentsContainer" class="h-full w-full p-4 md:p-6 overflow-y-auto custom-scrollbar"></div></main>
       <main id="attendanceView" class="hidden p-0 h-full w-full overflow-hidden transition duration-200"><div id="attendanceContainer" class="h-full w-full"></div></main>
       <main id="scoresView" class="hidden p-0 h-full w-full overflow-hidden transition duration-200"><div id="scores" class="h-full w-full"></div></main>      
+      <main id="timetable-homeworkView" class="hidden p-0 transition duration-200 h-full w-full overflow-hidden"><div id="timetableHomeworkContainer" class="h-full w-full p-4 md:p-8 overflow-y-auto custom-scrollbar"></div></main>
       <main id="rankingsView" class="hidden p-0 transition duration-200 h-full w-full overflow-hidden"><div id="rankingsContainer" class="h-full w-full p-4 md:p-8 overflow-y-auto custom-scrollbar"></div></main>          
       <main id="libraryView" class="hidden p-0 transition duration-200 h-full w-full overflow-hidden"><div id="libraryContainer" class="h-full w-full p-4 md:p-8 overflow-y-auto custom-scrollbar"></div></main>
       <main id="tracking-bookView" class="hidden p-0 transition duration-200 h-full w-full overflow-hidden"><div id="trackingBookContainer" class="h-full w-full p-4 md:p-8 overflow-y-auto custom-scrollbar"></div></main>
@@ -373,9 +391,11 @@
 
         const titleMap = {
             'dashboard': 'ផ្ទាំងគ្រប់គ្រង (Dashboard)',
+            'analytics': 'វិភាគសមត្ថភាពសិក្សាសិស្ស (Analytics)',
             'students': 'បញ្ជីរាយនាមសិស្ស',
             'attendance': 'ស្រង់វត្តមានសិស្ស',
             'scores': 'បញ្ចូលពិន្ទុ និងនិទ្ទេស',
+            'timetable-homework': 'កាលវិភាគបង្រៀន & កិច្ចការផ្ទះ',
             'rankings': 'តារាងចំណាត់ថ្នាក់សិស្ស',
             'library': 'បណ្ណាល័យ និងទ្រព្យសកម្ម',
             'tracking-book': 'សៀវភៅតាមដានការសិក្សា',
@@ -387,9 +407,11 @@
         
         // Dispatch ទៅ Function របស់ Module នីមួយៗ
         if (viewName === 'dashboard' && typeof window.loadDashboard === 'function') window.loadDashboard();
+        if (viewName === 'analytics' && typeof window.loadAnalyticsView === 'function') window.loadAnalyticsView();
         if (viewName === 'students' && typeof window.loadStudentsView === 'function') window.loadStudentsView();
         if (viewName === 'attendance' && typeof window.loadAttendanceView === 'function') window.loadAttendanceView();
         if (viewName === 'scores' && typeof window.loadScoresView === 'function') window.loadScoresView();
+        if (viewName === 'timetable-homework' && typeof window.loadTimetableHomeworkView === 'function') window.loadTimetableHomeworkView();
         if (viewName === 'rankings' && typeof window.loadRankingsView === 'function') window.loadRankingsView();
         if (viewName === 'library' && typeof window.loadLibraryView === 'function') window.loadLibraryView();
         if (viewName === 'tracking-book' && typeof window.loadTrackingBookView === 'function') window.loadTrackingBookView();
@@ -560,7 +582,13 @@
   <script src="js/tracking-book.js"></script>
   <script src="js/reports.js"></script>
 
-  <!-- ៦. Master App Orchestrator (Loads Last to bind everything) -->
+  <!-- ៦. Smart Features (Analytics, Timetable, Notifications, Advanced Reports) -->
+  <script src="js/analytics.js"></script>
+  <script src="js/timetable-homework.js"></script>
+  <script src="js/notifications.js"></script>
+  <script src="js/advanced-reports.js"></script>
+
+  <!-- ៧. Master App Orchestrator (Loads Last to bind everything) -->
   <script src="js/app.js"></script>
   
 </body>
