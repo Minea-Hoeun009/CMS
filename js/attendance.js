@@ -1599,6 +1599,32 @@ window.saveMonthlyAttendance = async function() {
         localStorage.setItem(`att_holidays_${grade}_${month}_${year}`, JSON.stringify(window.monthlyHolidays));
     } catch(e) {}
 
+    // ១. រក្សាទុកក្នុង Firestore Cloud
+    if (window.db) {
+        try {
+            const attDocId = `${academicYearStr}_${grade.replace(/\s+/g, '_')}_${year}_${monthNum}`;
+            window.db.collection("attendance").doc(attDocId).set({
+                academic_year: academicYearStr,
+                grade: grade,
+                year: year,
+                month: month,
+                month_num: monthNum,
+                teacher_id: currentTeacherId,
+                records: monthlyAttendanceData,
+                holidays: window.monthlyHolidays || {},
+                total_recorded: batchPayload.length,
+                last_updated: firebase.firestore.FieldValue.serverTimestamp()
+            }, { merge: true }).catch(console.warn);
+        } catch(fsErr) {
+            console.warn("Firestore attendance save warning:", fsErr);
+        }
+    }
+
+    // ២. កត់ត្រាក្នុង Audit Log
+    if (typeof window.logAudit === 'function') {
+        window.logAudit('SAVE_ATTENDANCE', 'attendance', `បានរក្សាទុកវត្តមានសិស្សថ្នាក់ ${grade} ខែ${month} ឆ្នាំ${year} (កត់ត្រាបាន ${batchPayload.length} វត្តមាន)`);
+    }
+
     try {
         const sInfo = typeof appSettings !== 'undefined' ? appSettings : {};
         if (sInfo.auto_sync && typeof window.apiPost === 'function') {

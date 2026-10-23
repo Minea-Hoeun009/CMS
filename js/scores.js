@@ -477,7 +477,14 @@ window.calculateSectionScore = function(id, suffix, schoolLevel) {
             if (inputEl) {
                 const valStr = inputEl.value.trim();
                 if (valStr !== "" && !isNaN(parseFloat(valStr))) {
-                    const val = parseFloat(valStr);
+                    let val = parseFloat(valStr);
+                    if (val > maxVal) {
+                        val = maxVal;
+                        inputEl.value = maxVal;
+                    } else if (val < 0) {
+                        val = 0;
+                        inputEl.value = 0;
+                    }
                     if (val < maxVal / 2) { inputEl.classList.add("text-rose-600"); inputEl.classList.remove("text-slate-800"); hasFail = true; } 
                     else { inputEl.classList.remove("text-rose-600"); inputEl.classList.add("text-slate-800"); }
                     groupScore += val; groupMax += maxVal; groupHasInput = true;
@@ -755,6 +762,10 @@ window.saveScoresData = async function() {
         window.hasUnsavedChanges = false;
         const badge = document.getElementById("unsavedBadge");
         if (badge) badge.classList.add("hidden");
+
+        if (typeof window.logAudit === 'function') {
+            window.logAudit('SAVE_SCORES', 'score', `បានរក្សាទុកពិន្ទុសិស្សថ្នាក់ ${grade} វគ្គ/ខែ៖ ${type === "annual" ? "ប្រចាំឆ្នាំ" : month} (ចំនួន ${scoresPayload.length} នាក់)`);
+        }
     } catch (error) {
         alert("បរាជ័យក្នុងការរក្សាទុកទៅ Server! សូមពិនិត្យអ៊ីនធឺណិត។");
     } finally {

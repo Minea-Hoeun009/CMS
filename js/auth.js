@@ -194,6 +194,7 @@ window.AppAuth = {
             window.AppState.teacherName = teacherData.name;
 
             if (typeof showToast === 'function') showToast("ចូលប្រព័ន្ធបានជោគជ័យ! ✅");
+            if (typeof window.logAudit === 'function') window.logAudit("LOGIN", "auth", `បានចូលប្រព័ន្ធ: ${teacherData.name} (${teacherData.teacher_id})`);
             this.showWorkspace();
 
         } catch (error) {
@@ -271,6 +272,7 @@ window.AppAuth = {
                 }
             }
 
+            if (typeof window.logAudit === 'function') window.logAudit("REGISTER", "auth", `បានចុះឈ្មោះគណនីគ្រូថ្មី: ${name} (${teacherId})`);
             alert(`🎉 អបអរសាទរ! ចុះឈ្មោះជោគជ័យ។\n\nលេខសម្គាល់គ្រូ (Teacher ID) របស់អ្នកគឺ: ${teacherId}\nឈ្មោះគណនី: ${user}\n\nសូមប្រើប្រាស់ព័ត៌មាននេះដើម្បីចូលគណនី។`);
 
             // ប្តូរមកផ្ទាំង Login វិញ
@@ -294,6 +296,7 @@ window.AppAuth = {
     // ៥. មុខងារចាកចេញពីប្រព័ន្ធ (Logout)
     logout: function() {
         if (!confirm("តើលោកគ្រូ/អ្នកគ្រូពិតជាចង់ចាកចេញពីប្រព័ន្ធមែនទេ?")) return;
+        if (typeof window.logAudit === 'function') window.logAudit("LOGOUT", "auth", "បានចាកចេញពីប្រព័ន្ធ");
         
         // សម្អាតតែ Auth Keys កុំឱ្យបាត់ Settings សាលា
         localStorage.removeItem('auth_teacher_id');

@@ -369,14 +369,18 @@ window.loadSettingsView = function() {
                </h3>
 
                <div class="flex flex-wrap gap-4 items-center font-siemreap">
-                  <button type="button" onclick="window.exportBackupData()" class="px-6 py-3 bg-white border border-rose-200 text-rose-700 rounded-xl text-sm font-bold shadow-sm hover:bg-rose-50 hover:border-rose-300 transition-all flex items-center gap-2">
-                    <i class="fa-solid fa-download"></i> ទាញយកទិន្នន័យ (Backup)
+                  <button type="button" onclick="window.exportFullSystemBackup ? window.exportFullSystemBackup() : window.exportBackupData()" class="px-6 py-3 bg-white border border-rose-200 text-rose-700 rounded-xl text-sm font-bold shadow-sm hover:bg-rose-50 hover:border-rose-300 transition-all flex items-center gap-2">
+                    <i class="fa-solid fa-download"></i> ទាញយកទិន្នន័យទាំងមូល (Full Backup)
                   </button>
                   
                   <label class="px-6 py-3 bg-white border border-teal-200 text-teal-700 rounded-xl text-sm font-bold shadow-sm hover:bg-teal-50 hover:border-teal-300 transition-all flex items-center gap-2 cursor-pointer">
-                    <i class="fa-solid fa-upload"></i> នាំចូលទិន្នន័យ (Restore)
-                    <input type="file" accept=".json" class="hidden" onchange="window.importBackupData(event)">
+                    <i class="fa-solid fa-upload"></i> នាំចូលទិន្នន័យ (Restore Backup)
+                    <input type="file" accept=".json" class="hidden" onchange="window.restoreFullSystemBackup ? window.restoreFullSystemBackup(this) : window.importBackupData(event)">
                   </label>
+
+                  <button type="button" onclick="window.openAuditLogModal ? window.openAuditLogModal() : alert('Audit log viewer')" class="px-6 py-3 bg-indigo-50 border border-indigo-200 text-indigo-700 rounded-xl text-sm font-bold shadow-sm hover:bg-indigo-100 hover:border-indigo-300 transition-all flex items-center gap-2">
+                    <i class="fa-solid fa-clock-rotate-left"></i> មើលកំណត់ហេតុសកម្មភាព (Audit Logs)
+                  </button>
 
                   <div class="w-px h-10 bg-rose-200 mx-2 hidden md:block"></div>
 
@@ -573,6 +577,10 @@ window.handleSaveSettings = async function(event) {
         
         if(typeof showToast === 'function') showToast("✅ រក្សាទុកការកំណត់បានជោគជ័យ!");
         else alert("✅ រក្សាទុកការកំណត់បានជោគជ័យ!");
+
+        if (typeof window.logAudit === 'function') {
+            window.logAudit('UPDATE_SETTINGS', 'settings', `បានកែប្រែការកំណត់សាលារៀន (${payload.school_name || 'សាលា'}) និងគ្រូបង្រៀន (${payload.teacher_name || 'គ្រូ'})`);
+        }
         
     } catch (error) {
         console.error(error);
