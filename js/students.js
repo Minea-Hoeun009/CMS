@@ -357,6 +357,9 @@ window.filterStudents = function() {
 
     const currentTeacherId = String(window.AuthState ? window.AuthState.teacherId : localStorage.getItem('auth_teacher_id') || "").trim();
     const currentYear = String(document.getElementById("globalAcademicYear")?.value || localStorage.getItem('selected_academic_year') || "").trim();
+    const isSchoolOrSysAdmin = typeof window.isSchoolAdmin === 'function' ? window.isSchoolAdmin() : (typeof isCurrentUserAdmin === 'function' && isCurrentUserAdmin());
+    const isReportViewer = typeof window.isReportViewer === 'function' ? window.isReportViewer() : false;
+    const scope = typeof window.getAssignedScope === 'function' ? window.getAssignedScope() : {};
 
     // បង្ការកំហុស Error ពេល allStudents ជា null
     const baseStudents = window.allStudents || [];
@@ -364,19 +367,29 @@ window.filterStudents = function() {
     window.filteredStudents = baseStudents.filter(s => {
         if (!s || typeof s !== 'object') return false;
 
-        const sTeacherId = String(s.teacher_id || "").trim();
         const sYear = String(s.academic_year || "").trim();
-        
-        const isMyStudent = (sTeacherId === "" || sTeacherId === "undefined" || sTeacherId === currentTeacherId) && 
-                            (sYear === "" || sYear === "undefined" || sYear === currentYear);
-        
-        if (!isMyStudent) return false;
+        if (currentYear && sYear && sYear !== "undefined" && sYear !== currentYear) {
+            return false;
+        }
+
+        const normGrade = normalizeGrade(s.grade);
+        const safeRoom = String(s.room || "").trim();
+
+        // ត្រួតពិនិត្យវិសាលភាពទទួលខុសត្រូវ (Scope Enforcement - Chapter 2)
+        // ប្រសិនបើជាគ្រូបង្រៀន (Teacher) ធម្មតា អាចមើលឃើញតែសិស្សក្នុងថ្នាក់ដែលទទួលខុសត្រូវ
+        if (!isSchoolOrSysAdmin && !isReportViewer) {
+            const assignedGrade = normalizeGrade(scope.grade);
+            if (assignedGrade && assignedGrade !== "គ្រប់ថ្នាក់" && normGrade !== assignedGrade) {
+                return false;
+            }
+            if (scope.room && scope.room !== "ទូទៅ" && safeRoom && safeRoom !== scope.room.trim()) {
+                return false;
+            }
+        }
 
         const safeName = String(s.name || "").toLowerCase();
         const safeNameEn = String(s.name_en || s.name_latin || "").toLowerCase();
         const safeId = String(s.id || "").toLowerCase();
-        const normGrade = normalizeGrade(s.grade);
-        const safeRoom = String(s.room || "").trim();
         const safeGender = String(s.gender || "").trim();
         const safeStatus = String(s.status || "Active").trim().toLowerCase();
 
@@ -631,20 +644,37 @@ window.openStudentModal = function(id = null) {
 
 window.saveStudentData = async function(e) {
     e.preventDefault();
-    if (typeof canEditRecords === 'function' && !canEditRecords()) {
+
+    const btn = document.getElementById("btnSaveStudent");
+    const origText = btn.innerHTML;
+
+    const isEdit = document.getElementById("stu_is_edit").value === "1";
+    const studentGrade = normalizeGrade(document.getElementById("stu_grade").value);
+    const studentRoom = document.getElementById("stu_room").value.trim();
+
+    // ត្រួតពិនិត្យសិទ្ធិនៅកម្រិត Backend/Data Guard (Chapter 2)
+    if (window.DataServiceGuard) {
+        try {
+            window.DataServiceGuard.assertCan(
+                isEdit ? 'edit_student' : 'create_student', 
+                { grade: studentGrade, room: studentRoom },
+                `⚠️ សិទ្ធិត្រូវបានបដិសេធ៖ លោកគ្រូអ្នកគ្រូមិនមានសិទ្ធិចុះឈ្មោះ ឬកែប្រែសិស្សក្រៅពីថ្នាក់ទទួលខុសត្រូវ (${studentGrade} ${studentRoom}) ឡើយ!`
+            );
+        } catch(guardErr) {
+            alert(guardErr.message);
+            return;
+        }
+    } else if (typeof canEditRecords === 'function' && !canEditRecords()) {
         alert("🔒 លោកគ្រូអ្នកគ្រូមានត្រឹមសិទ្ធិមើលប៉ុណ្ណោះ (Viewer) មិនអាចកែប្រែទិន្នន័យបានទេ!");
         return;
     }
 
-    const btn = document.getElementById("btnSaveStudent");
-    const origText = btn.innerHTML;
     btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> កំពុងរក្សាទុក...`;
     btn.disabled = true;
 
     const currentTeacherId = window.AuthState ? window.AuthState.teacherId : localStorage.getItem('auth_teacher_id');
     const currentYear = document.getElementById("globalAcademicYear")?.value || localStorage.getItem('selected_academic_year') || "2026-2027";
 
-    const isEdit = document.getElementById("stu_is_edit").value === "1";
     const studentId = document.getElementById("stu_id").value.trim();
 
     // 🟢 STU-02: ផ្ទៀងផ្ទាត់លេខសម្គាល់សិស្ស (Unique Student ID Validation) 🟢
@@ -734,15 +764,29 @@ window.saveStudentData = async function(e) {
 
 // 🟢 STU-04: ការលុបទិន្នន័យ Soft Delete (ផ្អាក/ឈប់រៀន) និង Hard Delete (Admin) 🟢
 window.deleteStudent = function(id) {
-    if (typeof canEditRecords === 'function' && !canEditRecords()) {
+    const stu = (window.allStudents || []).find(s => String(s.id) === String(id));
+    if (!stu) return;
+
+    // ត្រួតពិនិត្យសិទ្ធិនៅកម្រិត Data Guard (Chapter 2)
+    if (window.DataServiceGuard) {
+        try {
+            window.DataServiceGuard.assertCan(
+                'edit_student', 
+                { grade: stu.grade, room: stu.room },
+                "🔒 លោកគ្រូអ្នកគ្រូមានត្រឹមសិទ្ធិមើលប៉ុណ្ណោះ (Viewer) មិនអាចកែប្រែ ឬលុបទិន្នន័យបានទេ!"
+            );
+        } catch(guardErr) {
+            alert(guardErr.message);
+            return;
+        }
+    } else if (typeof canEditRecords === 'function' && !canEditRecords()) {
         alert("🔒 លោកគ្រូអ្នកគ្រូមានត្រឹមសិទ្ធិមើលប៉ុណ្ណោះ មិនអាចលុបទិន្នន័យបានទេ!");
         return;
     }
 
-    const stu = (window.allStudents || []).find(s => String(s.id) === String(id));
-    if (!stu) return;
-
-    const isAdmin = typeof isCurrentUserAdmin === 'function' && isCurrentUserAdmin();
+    const isAdmin = (typeof isSchoolAdmin === 'function' && isSchoolAdmin()) || 
+                    (typeof isSystemAdmin === 'function' && isSystemAdmin()) ||
+                    (typeof isCurrentUserAdmin === 'function' && isCurrentUserAdmin());
     
     // បង្ហាញជម្រើស Soft Delete ដើម្បីការពារប្រវត្តិពិន្ទុ និងវត្តមាន
     const softPrompt = confirm(`⚠️ ការគ្រប់គ្រងស្ថានភាពសិស្ស៖ ${stu.name} (${stu.id})\n\n[ចុច OK] ដើម្បីដាក់ជា «ឈប់រៀន / មិនសកម្ម» (Soft Delete - រក្សាទុកពិន្ទុ និងវត្តមានចាស់ៗទាំងអស់)\n[ចុច Cancel] ដើម្បីបោះបង់ ឬជ្រើសរើសជម្រើសផ្សេងទៀត`);

@@ -58,9 +58,19 @@ window.AuditBackup = {
     },
 
     // =====================================================================
-    // ២. មុខងារបង្កើតឯកសារបម្រុងទុកពេញលេញ (Full System Backup Export)
+    // ២. មុខងារបង្កើតឯកសារបម្រុងទុកពេញលេញ (Full System Backup Export - System Admin)
     // =====================================================================
     exportFullBackup: function() {
+        if (window.DataServiceGuard) {
+            try {
+                window.DataServiceGuard.assertCan('backup_restore', {}, "🔒 មានតែ System Administrator ប៉ុណ្ណោះដែលអាចបង្កើតឯកសារបម្រុងទុកប្រព័ន្ធ (Backup) បាន!");
+            } catch(e) {
+                return alert(e.message);
+            }
+        } else if (typeof isSystemAdmin === 'function' && !isSystemAdmin()) {
+            return alert("🔒 មានតែ System Administrator ប៉ុណ្ណោះដែលអាចបង្កើតឯកសារបម្រុងទុកប្រព័ន្ធបាន!");
+        }
+
         try {
             const currentYear = document.getElementById("globalAcademicYear")?.value || "2026-2027";
             const teacherId = localStorage.getItem('auth_teacher_id') || "TCH-001";
@@ -112,9 +122,21 @@ window.AuditBackup = {
     },
 
     // =====================================================================
-    // ៣. មុខងារទាញទិន្នន័យពីឯកសារបម្រុងទុកមកវិញ (Full System Restore)
+    // ៣. មុខងារទាញទិន្នន័យពីឯកសារបម្រុងទុកមកវិញ (Full System Restore - System Admin)
     // =====================================================================
     restoreFromBackup: function(fileInput) {
+        if (window.DataServiceGuard) {
+            try {
+                window.DataServiceGuard.assertCan('backup_restore', {}, "🔒 មានតែ System Administrator ប៉ុណ្ណោះដែលអាចស្តារទិន្នន័យពីឯកសារបម្រុងទុក (Restore) បាន!");
+            } catch(e) {
+                fileInput.value = "";
+                return alert(e.message);
+            }
+        } else if (typeof isSystemAdmin === 'function' && !isSystemAdmin()) {
+            fileInput.value = "";
+            return alert("🔒 មានតែ System Administrator ប៉ុណ្ណោះដែលអាចស្តារទិន្នន័យពីឯកសារបម្រុងទុកបាន!");
+        }
+
         const file = fileInput.files[0];
         if (!file) return;
 

@@ -699,50 +699,100 @@ window.renderUserAccountsTab = async function() {
     container.innerHTML = `
         <div class="p-12 text-center text-slate-400 font-bold">
             <i class="fa-solid fa-circle-notch fa-spin text-3xl mb-3 text-indigo-500"></i>
-            <div>កំពុងទាញយកបញ្ជីគណនីគ្រូបង្រៀន...</div>
+            <div>កំពុងទាញយកបញ្ជីគណនី និងសិទ្ធិប្រើប្រាស់...</div>
         </div>
     `;
 
     const teachers = typeof window.fetchTeacherAccounts === "function" ? await window.fetchTeacherAccounts() : [];
-    const isAdmin = typeof window.isCurrentUserAdmin === "function" ? window.isCurrentUserAdmin() : false;
+    const isSysAdmin = typeof window.isSystemAdmin === "function" ? window.isSystemAdmin() : false;
+    const isSchAdmin = typeof window.isSchoolAdmin === "function" ? window.isSchoolAdmin() : false;
+    const canManageUsers = isSysAdmin;
     const currentId = localStorage.getItem("auth_teacher_id");
 
-    const totalTeachers = teachers.length;
-    const totalAdmins = teachers.filter(t => t.role === "admin").length;
-    const totalStaff = totalTeachers - totalAdmins;
+    const totalUsers = teachers.length;
+    const totalSysAdmins = teachers.filter(t => (t.roles || [t.role]).includes("system_admin") || t.role === "admin").length;
+    const totalSchAdmins = teachers.filter(t => (t.roles || [t.role]).includes("school_admin")).length;
+    const totalTeachers = teachers.filter(t => (t.roles || [t.role]).includes("teacher")).length;
+    const totalViewers = teachers.filter(t => (t.roles || [t.role]).includes("report_viewer") || t.role === "viewer").length;
 
     container.innerHTML = `
         <div class="space-y-6">
             
-            <!-- Summary KPI Cards -->
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div class="p-5 bg-white border border-slate-200 rounded-2xl shadow-sm flex items-center justify-between">
+            <!-- Summary KPI Cards for Chapter 2 Roles -->
+            <div class="grid grid-cols-2 lg:grid-cols-5 gap-3.5">
+                <div class="p-4 bg-white border border-slate-200 rounded-2xl shadow-sm flex items-center justify-between">
                     <div>
-                        <span class="block text-xs font-bold text-slate-400">គណនីសរុប</span>
-                        <span class="font-black text-2xl font-mono text-slate-800">${totalTeachers}</span>
+                        <span class="block text-[11px] font-bold text-slate-400 uppercase tracking-wider">គណនីសរុប</span>
+                        <span class="font-black text-2xl font-mono text-slate-800">${totalUsers}</span>
                     </div>
-                    <div class="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-xl flex items-center justify-center text-xl shadow-inner">
+                    <div class="w-10 h-10 bg-slate-100 text-slate-600 rounded-xl flex items-center justify-center text-lg">
                         <i class="fa-solid fa-users"></i>
                     </div>
                 </div>
 
-                <div class="p-5 bg-white border border-slate-200 rounded-2xl shadow-sm flex items-center justify-between">
+                <div class="p-4 bg-white border border-rose-100 rounded-2xl shadow-sm flex items-center justify-between">
                     <div>
-                        <span class="block text-xs font-bold text-slate-400">អ្នកគ្រប់គ្រង (Admin)</span>
-                        <span class="font-black text-2xl font-mono text-rose-600">${totalAdmins}</span>
+                        <span class="block text-[11px] font-bold text-rose-500 uppercase tracking-wider">System Admin</span>
+                        <span class="font-black text-2xl font-mono text-rose-600">${totalSysAdmins}</span>
                     </div>
-                    <div class="w-12 h-12 bg-rose-50 text-rose-600 rounded-xl flex items-center justify-center text-xl shadow-inner">
-                        <i class="fa-solid fa-user-shield"></i>
+                    <div class="w-10 h-10 bg-rose-50 text-rose-600 rounded-xl flex items-center justify-center text-lg">
+                        <i class="fa-solid fa-shield-halved"></i>
                     </div>
                 </div>
 
-                <div class="p-5 bg-white border border-slate-200 rounded-2xl shadow-sm flex items-center justify-between">
+                <div class="p-4 bg-white border border-indigo-100 rounded-2xl shadow-sm flex items-center justify-between">
                     <div>
-                        <span class="block text-xs font-bold text-slate-400">គ្រូបង្រៀន (Teachers)</span>
-                        <span class="font-black text-2xl font-mono text-emerald-600">${totalStaff}</span>
+                        <span class="block text-[11px] font-bold text-indigo-500 uppercase tracking-wider">School Admin</span>
+                        <span class="font-black text-2xl font-mono text-indigo-600">${totalSchAdmins}</span>
                     </div>
-                    <div class="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center text-xl shadow-inner">
+                    <div class="w-10 h-10 bg-indigo-50 text-indigo-600 rounded-xl flex items-center justify-center text-lg">
+                        <i class="fa-solid fa-school"></i>
+                    </div>
+                </div>
+
+                <div class="p-4 bg-white border border-emerald-100 rounded-2xl shadow-sm flex items-center justify-between">
+                    <div>
+                        <span class="block text-[11px] font-bold text-emerald-500 uppercase tracking-wider">Teachers</span>
+                        <span class="font-black text-2xl font-mono text-emerald-600">${totalTeachers}</span>
+                    </div>
+                    <div class="w-10 h-10 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center text-lg">
                         <i class="fa-solid fa-chalkboard-user"></i>
+                    </div>
+                </div>
+
+                <div class="p-4 bg-white border border-amber-100 rounded-2xl shadow-sm flex items-center justify-between col-span-2 lg:col-span-1">
+                    <div>
+                        <span class="block text-[11px] font-bold text-amber-500 uppercase tracking-wider">Report Viewers</span>
+                        <span class="font-black text-2xl font-mono text-amber-600">${totalViewers}</span>
+                    </div>
+                    <div class="w-10 h-10 bg-amber-50 text-amber-600 rounded-xl flex items-center justify-center text-lg">
+                        <i class="fa-solid fa-chart-pie"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Chapter 2 Role Matrix Information Card -->
+            <div class="bg-gradient-to-r from-indigo-50 via-blue-50 to-indigo-50 border border-indigo-100 rounded-2xl p-4 md:p-5 text-xs text-indigo-950">
+                <div class="flex items-center gap-2.5 font-bold font-moul text-sm text-indigo-900 mb-2">
+                    <i class="fa-solid fa-book-bookmark text-indigo-600"></i>
+                    <span>ជំពូកទី២៖ តួនាទី និងសិទ្ធិអ្នកប្រើប្រាស់ (Roles & Permissions Matrix)</span>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 mt-3">
+                    <div class="p-3 bg-white/80 rounded-xl border border-rose-200/60 shadow-sm">
+                        <div class="font-bold text-rose-700 flex items-center gap-1.5"><i class="fa-solid fa-shield-halved"></i> System Administrator</div>
+                        <div class="text-[11px] text-slate-600 mt-1">គ្រប់គ្រងគណនី សិទ្ធិ ការកំណត់ប្រព័ន្ធ និងការបម្រុងទុកទិន្នន័យ</div>
+                    </div>
+                    <div class="p-3 bg-white/80 rounded-xl border border-indigo-200/60 shadow-sm">
+                        <div class="font-bold text-indigo-700 flex items-center gap-1.5"><i class="fa-solid fa-school"></i> School Administrator</div>
+                        <div class="text-[11px] text-slate-600 mt-1">គ្រប់គ្រងព័ត៌មានសាលា ឆ្នាំសិក្សា ថ្នាក់ សិស្ស និងរបាយការណ៍ដែលបានអនុញ្ញាត</div>
+                    </div>
+                    <div class="p-3 bg-white/80 rounded-xl border border-emerald-200/60 shadow-sm">
+                        <div class="font-bold text-emerald-700 flex items-center gap-1.5"><i class="fa-solid fa-chalkboard-user"></i> Teacher</div>
+                        <div class="text-[11px] text-slate-600 mt-1">មើលថ្នាក់ដែលទទួលខុសត្រូវ កត់ត្រាវត្តមាន និងបញ្ចូលពិន្ទុតាមសិទ្ធិ</div>
+                    </div>
+                    <div class="p-3 bg-white/80 rounded-xl border border-amber-200/60 shadow-sm">
+                        <div class="font-bold text-amber-700 flex items-center gap-1.5"><i class="fa-solid fa-chart-pie"></i> Report Viewer</div>
+                        <div class="text-[11px] text-slate-600 mt-1">មើលរបាយការណ៍ដែលបានអនុញ្ញាត ដោយមិនអាចកែប្រែទិន្នន័យ</div>
                     </div>
                 </div>
             </div>
@@ -752,18 +802,18 @@ window.renderUserAccountsTab = async function() {
                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-slate-100 pb-4 mb-6">
                     <div>
                         <h3 class="font-bold text-slate-800 text-base flex items-center gap-2.5">
-                            <i class="fa-solid fa-id-badge text-indigo-600"></i> បញ្ជីរាយនាមគ្រូបង្រៀន និងសិទ្ធិប្រើប្រាស់
+                            <i class="fa-solid fa-id-badge text-indigo-600"></i> បញ្ជីរាយនាមគណនី តួនាទី និងសិទ្ធិប្រើប្រាស់
                         </h3>
-                        <p class="text-xs text-slate-400 mt-1">គ្រប់គ្រងគណនីគ្រូ កំណត់សិទ្ធិ (Role) និងចាត់តាំងថ្នាក់រៀន</p>
+                        <p class="text-xs text-slate-400 mt-1">អ្នកប្រើប្រាស់ម្នាក់អាចមានតួនាទីមួយ ឬច្រើន ដោយសិទ្ធិត្រូវបានត្រួតពិនិត្យនៅកម្រិតសេវាទិន្នន័យ</p>
                     </div>
 
-                    ${isAdmin ? `
+                    ${canManageUsers ? `
                         <button onclick="window.openAddTeacherModal()" class="px-4 py-2.5 bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 text-white rounded-xl text-xs font-bold transition shadow-md flex items-center gap-2">
-                            <i class="fa-solid fa-user-plus"></i> បន្ថែមគ្រូថ្មី
+                            <i class="fa-solid fa-user-plus"></i> បន្ថែមគណនីថ្មី
                         </button>
                     ` : `
                         <span class="text-xs text-amber-600 bg-amber-50 px-3 py-1.5 rounded-xl border border-amber-200 font-bold">
-                            <i class="fa-solid fa-lock mr-1"></i> មានតែ Admin ប៉ុណ្ណោះដែលអាចបន្ថែម ឬកែប្រែគណនីអ្នកដទៃ
+                            <i class="fa-solid fa-lock mr-1"></i> មានតែ System Admin ប៉ុណ្ណោះដែលអាចបន្ថែម ឬកែប្រែគណនី និងសិទ្ធិ
                         </span>
                     `}
                 </div>
@@ -775,8 +825,9 @@ window.renderUserAccountsTab = async function() {
                                 <th class="p-3">អត្តលេខ</th>
                                 <th class="p-3">គោត្តនាម និង នាម</th>
                                 <th class="p-3">ឈ្មោះគណនី</th>
-                                <th class="p-3">តួនាទី (Role)</th>
-                                <th class="p-3">ថ្នាក់ទទួលបន្ទុក</th>
+                                <th class="p-3">តួនាទី (Roles)</th>
+                                <th class="p-3">ថ្នាក់ទទួលបន្ទុក (Scope)</th>
+                                <th class="p-3">ស្ថានភាព</th>
                                 <th class="p-3">ទំនាក់ទំនង</th>
                                 <th class="p-3 text-right">សកម្មភាព</th>
                             </tr>
@@ -784,7 +835,17 @@ window.renderUserAccountsTab = async function() {
                         <tbody class="divide-y divide-slate-100">
                             ${teachers.map(t => {
                                 const isSelf = t.teacher_id === currentId;
-                                const isTargetAdmin = t.role === "admin";
+                                const userRoles = window.normalizeRoles(t.roles || t.role, "teacher");
+                                const isLocked = t.status && t.status.toLowerCase() !== "active";
+
+                                const roleBadgesHtml = userRoles.map(r => {
+                                    const def = window.ROLE_DEFINITIONS[r];
+                                    if (def) {
+                                        return `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold ${def.badgeClass}"><i class="fa-solid ${def.icon}"></i> ${def.titleKh}</span>`;
+                                    }
+                                    return `<span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold bg-slate-100 text-slate-600">${r}</span>`;
+                                }).join(" ");
+
                                 return `
                                     <tr class="hover:bg-slate-50/80 transition">
                                         <td class="p-3 font-mono font-bold text-indigo-700">${t.teacher_id}</td>
@@ -793,24 +854,37 @@ window.renderUserAccountsTab = async function() {
                                         </td>
                                         <td class="p-3 font-mono text-slate-500">${t.username}</td>
                                         <td class="p-3">
-                                            <span class="px-2.5 py-1 rounded-lg text-[10px] font-bold ${isTargetAdmin ? 'bg-rose-50 text-rose-700 border border-rose-200' : 'bg-emerald-50 text-emerald-700 border border-emerald-200'}">
-                                                ${isTargetAdmin ? '👑 Admin' : '👨‍🏫 Teacher'}
-                                            </span>
+                                            <div class="flex flex-wrap gap-1">
+                                                ${roleBadgesHtml}
+                                            </div>
                                         </td>
                                         <td class="p-3 font-bold text-slate-700">${t.assigned_grade || 'ថ្នាក់ទី ១'} ${t.assigned_room || ''}</td>
+                                        <td class="p-3">
+                                            ${isLocked ? 
+                                                `<button ${(canManageUsers && !isSelf && t.teacher_id !== 'TCH-ADMIN' && t.teacher_id !== 'TCH-SYSADMIN') ? `onclick="window.toggleUserAccountStatus('${t.teacher_id}', '${t.status || 'inactive'}')"` : 'disabled'} class="px-2 py-0.5 bg-rose-50 text-rose-600 hover:bg-rose-100 border border-rose-200 rounded-md text-[10px] font-bold flex items-center gap-1 transition" title="ចុចដើម្បីបើកដំណើរការឡើងវិញ">
+                                                    <i class="fa-solid fa-lock"></i> <span>ចាក់សោ/ផ្អាក</span>
+                                                </button>` : 
+                                                `<button ${(canManageUsers && !isSelf && t.teacher_id !== 'TCH-ADMIN' && t.teacher_id !== 'TCH-SYSADMIN') ? `onclick="window.toggleUserAccountStatus('${t.teacher_id}', '${t.status || 'active'}')"` : 'disabled'} class="px-2 py-0.5 bg-emerald-50 text-emerald-600 hover:bg-emerald-100 border border-emerald-200 rounded-md text-[10px] font-bold flex items-center gap-1 transition" title="ចុចដើម្បីផ្អាកដំណើរការ">
+                                                    <i class="fa-solid fa-circle-check"></i> <span>សកម្ម</span>
+                                                </button>`
+                                            }
+                                        </td>
                                         <td class="p-3 font-mono text-slate-500">${t.contact || '-'}</td>
                                         <td class="p-3 text-right">
                                             <div class="flex items-center justify-end gap-1.5">
-                                                ${(isAdmin || isSelf) ? `
-                                                    <button onclick="window.openEditTeacherModal('${t.teacher_id}')" title="កែប្រែ" class="w-8 h-8 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-600 flex items-center justify-center transition">
-                                                        <i class="fa-solid fa-pen-to-square"></i>
+                                                ${canManageUsers ? `
+                                                    <button onclick="window.openEditTeacherModal('${t.teacher_id}')" title="កែប្រែសិទ្ធិ & ព័ត៌មាន" class="w-8 h-8 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-600 flex items-center justify-center transition">
+                                                        <i class="fa-solid fa-user-pen"></i>
                                                     </button>
                                                     <button onclick="window.openResetTeacherPasswordModal('${t.teacher_id}', '${t.name}')" title="ប្តូរលេខសម្ងាត់" class="w-8 h-8 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-600 flex items-center justify-center transition">
                                                         <i class="fa-solid fa-key"></i>
                                                     </button>
                                                 ` : ''}
-                                                ${(isAdmin && !isSelf && t.teacher_id !== 'TCH-ADMIN') ? `
-                                                    <button onclick="window.handleDeleteTeacher('${t.teacher_id}', '${t.name}')" title="លុប" class="w-8 h-8 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 flex items-center justify-center transition">
+                                                ${(canManageUsers && !isSelf && t.teacher_id !== 'TCH-ADMIN' && t.teacher_id !== 'TCH-SYSADMIN') ? `
+                                                    <button onclick="window.toggleUserAccountStatus('${t.teacher_id}', '${t.status || 'active'}')" title="${isLocked ? 'បើកដំណើរការឡើងវិញ (Activate)' : 'ផ្អាកដំណើរការ (Deactivate)'}" class="w-8 h-8 rounded-lg ${isLocked ? 'bg-emerald-50 hover:bg-emerald-100 text-emerald-600' : 'bg-slate-100 hover:bg-rose-100 text-slate-500 hover:text-rose-600'} flex items-center justify-center transition">
+                                                        <i class="fa-solid ${isLocked ? 'fa-lock-open' : 'fa-user-lock'}"></i>
+                                                    </button>
+                                                    <button onclick="window.handleDeleteTeacher('${t.teacher_id}', '${t.name}')" title="លុបគណនី" class="w-8 h-8 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 flex items-center justify-center transition">
                                                         <i class="fa-solid fa-trash-can"></i>
                                                     </button>
                                                 ` : ''}
@@ -828,7 +902,7 @@ window.renderUserAccountsTab = async function() {
 };
 
 // =========================================================================
-// ៧. Modals សម្រាប់បន្ថែម/កែប្រែគ្រូ & ប្តូរលេខសម្ងាត់ (Modals Management)
+// ៧. Modals សម្រាប់បន្ថែម/កែប្រែគ្រូ & Multi-role Management (Chapter 2)
 // =========================================================================
 
 window.openAddTeacherModal = function() {
@@ -836,20 +910,20 @@ window.openAddTeacherModal = function() {
     if (!modal) {
         modal = document.createElement("div");
         modal.id = "addTeacherModal";
-        modal.className = "fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 font-siemreap";
+        modal.className = "fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 font-siemreap overflow-y-auto";
         document.body.appendChild(modal);
     }
 
     modal.innerHTML = `
-        <div class="bg-white rounded-3xl w-full max-w-md overflow-hidden shadow-2xl border border-slate-200 animate-scale-up">
+        <div class="bg-white rounded-3xl w-full max-w-lg overflow-hidden shadow-2xl border border-slate-200 animate-scale-up my-auto">
             <div class="p-6 border-b border-slate-100 flex items-center justify-between bg-indigo-50/50">
                 <div class="flex items-center gap-3">
                     <div class="w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center text-lg shadow-md">
                         <i class="fa-solid fa-user-plus"></i>
                     </div>
                     <div>
-                        <h3 class="font-moul text-sm text-slate-800">បន្ថែមគណនីគ្រូថ្មី</h3>
-                        <p class="text-xs text-slate-400 mt-0.5">បង្កើតគណនី និងចាត់តាំងសិទ្ធិប្រើប្រាស់</p>
+                        <h3 class="font-moul text-sm text-slate-800">បន្ថែមគណនីអ្នកប្រើប្រាស់ថ្មី</h3>
+                        <p class="text-xs text-slate-400 mt-0.5">កំណត់តួនាទីមួយ ឬច្រើន (Multi-role) តាមជំពូកទី២</p>
                     </div>
                 </div>
                 <button onclick="document.getElementById('addTeacherModal').classList.add('hidden')" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-400 flex items-center justify-center transition">
@@ -857,29 +931,16 @@ window.openAddTeacherModal = function() {
                 </button>
             </div>
 
-            <form onsubmit="window.handleCreateTeacherSubmit(event)" class="p-6 space-y-4 text-xs">
+            <form onsubmit="window.handleCreateTeacherSubmit(event)" class="p-6 space-y-4 text-xs max-h-[80vh] overflow-y-auto custom-scrollbar">
                 <div>
                     <label class="block font-bold text-slate-700 mb-1">គោត្តនាម និង នាមខ្លួន *</label>
                     <input type="text" id="add_teacher_name" required placeholder="ឧ. ឡុង សុខា" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 font-bold outline-none focus:ring-2 focus:ring-indigo-400">
                 </div>
 
-                <div>
-                    <label class="block font-bold text-slate-700 mb-1">ឈ្មោះគណនី (Username) *</label>
-                    <input type="text" id="add_teacher_user" required placeholder="ឧ. sokha" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 font-bold outline-none focus:ring-2 focus:ring-indigo-400 lowercase">
-                </div>
-
-                <div>
-                    <label class="block font-bold text-slate-700 mb-1">លេខសម្ងាត់ដំបូង *</label>
-                    <input type="password" id="add_teacher_pass" required minlength="6" placeholder="យ៉ាងតិច ៦ តួអក្សរ" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 font-bold outline-none focus:ring-2 focus:ring-indigo-400">
-                </div>
-
                 <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <label class="block font-bold text-slate-700 mb-1">តួនាទី (Role)</label>
-                        <select id="add_teacher_role" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 font-bold outline-none cursor-pointer">
-                            <option value="teacher">👨‍🏫 គ្រូបង្រៀន (Teacher)</option>
-                            <option value="admin">👑 អ្នកគ្រប់គ្រង (Admin)</option>
-                        </select>
+                        <label class="block font-bold text-slate-700 mb-1">ឈ្មោះគណនី (Username) *</label>
+                        <input type="text" id="add_teacher_user" required placeholder="ឧ. sokha" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 font-bold outline-none focus:ring-2 focus:ring-indigo-400 lowercase">
                     </div>
                     <div>
                         <label class="block font-bold text-slate-700 mb-1">លេខទូរស័ព្ទ</label>
@@ -887,10 +948,55 @@ window.openAddTeacherModal = function() {
                     </div>
                 </div>
 
+                <div>
+                    <label class="block font-bold text-slate-700 mb-1">លេខសម្ងាត់ដំបូង *</label>
+                    <input type="password" id="add_teacher_pass" required minlength="6" placeholder="យ៉ាងតិច ៦ តួអក្សរ" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 font-bold outline-none focus:ring-2 focus:ring-indigo-400">
+                </div>
+
+                <!-- Multi-role Selector Section (Chapter 2) -->
+                <div>
+                    <label class="block font-bold text-slate-800 mb-1.5 flex items-center gap-1.5">
+                        <i class="fa-solid fa-user-shield text-indigo-600"></i>
+                        <span>តួនាទី និងសិទ្ធិ (អាចជ្រើសរើសបានលើសពីមួយ) *</span>
+                    </label>
+                    <div class="space-y-2 bg-slate-50 p-3 rounded-2xl border border-slate-200">
+                        <label class="flex items-start gap-2.5 cursor-pointer p-2 rounded-xl hover:bg-white transition border border-transparent hover:border-slate-200">
+                            <input type="checkbox" name="add_roles" value="teacher" checked class="mt-0.5 w-4 h-4 text-emerald-600 rounded">
+                            <div>
+                                <span class="font-bold text-slate-800 text-xs flex items-center gap-1.5"><i class="fa-solid fa-chalkboard-user text-emerald-600"></i> Teacher (គ្រូបង្រៀន)</span>
+                                <span class="block text-[11px] text-slate-400 mt-0.5">មើលថ្នាក់ដែលទទួលខុសត្រូវ កត់ត្រាវត្តមាន និងបញ្ចូលពិន្ទុ</span>
+                            </div>
+                        </label>
+                        <label class="flex items-start gap-2.5 cursor-pointer p-2 rounded-xl hover:bg-white transition border border-transparent hover:border-slate-200">
+                            <input type="checkbox" name="add_roles" value="school_admin" class="mt-0.5 w-4 h-4 text-indigo-600 rounded">
+                            <div>
+                                <span class="font-bold text-slate-800 text-xs flex items-center gap-1.5"><i class="fa-solid fa-school text-indigo-600"></i> School Administrator (អ្នកគ្រប់គ្រងសាលា)</span>
+                                <span class="block text-[11px] text-slate-400 mt-0.5">គ្រប់គ្រងព័ត៌មានសាលា ឆ្នាំសិក្សា ថ្នាក់ សិស្ស និងរបាយការណ៍</span>
+                            </div>
+                        </label>
+                        <label class="flex items-start gap-2.5 cursor-pointer p-2 rounded-xl hover:bg-white transition border border-transparent hover:border-slate-200">
+                            <input type="checkbox" name="add_roles" value="system_admin" class="mt-0.5 w-4 h-4 text-rose-600 rounded">
+                            <div>
+                                <span class="font-bold text-slate-800 text-xs flex items-center gap-1.5"><i class="fa-solid fa-shield-halved text-rose-600"></i> System Administrator (អ្នកគ្រប់គ្រងប្រព័ន្ធ)</span>
+                                <span class="block text-[11px] text-slate-400 mt-0.5">គ្រប់គ្រងគណនី សិទ្ធិ ការកំណត់ប្រព័ន្ធ និងការបម្រុងទុកទិន្នន័យ</span>
+                            </div>
+                        </label>
+                        <label class="flex items-start gap-2.5 cursor-pointer p-2 rounded-xl hover:bg-white transition border border-transparent hover:border-slate-200">
+                            <input type="checkbox" name="add_roles" value="report_viewer" class="mt-0.5 w-4 h-4 text-amber-600 rounded">
+                            <div>
+                                <span class="font-bold text-slate-800 text-xs flex items-center gap-1.5"><i class="fa-solid fa-chart-pie text-amber-600"></i> Report Viewer (អ្នកមើលរបាយការណ៍)</span>
+                                <span class="block text-[11px] text-slate-400 mt-0.5">មើលរបាយការណ៍ដែលបានអនុញ្ញាត ដោយមិនអាចកែប្រែទិន្នន័យ</span>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Scope: Assigned Class & Room -->
                 <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <label class="block font-bold text-slate-700 mb-1">កម្រិតថ្នាក់</label>
+                        <label class="block font-bold text-slate-700 mb-1">ថ្នាក់ទទួលខុសត្រូវ (Grade Scope)</label>
                         <select id="add_teacher_grade" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 font-bold outline-none cursor-pointer">
+                            <option value="គ្រប់ថ្នាក់">គ្រប់ថ្នាក់ (School-wide)</option>
                             <option value="ថ្នាក់ទី ១">ថ្នាក់ទី ១</option>
                             <option value="ថ្នាក់ទី ២">ថ្នាក់ទី ២</option>
                             <option value="ថ្នាក់ទី ៣">ថ្នាក់ទី ៣</option>
@@ -900,9 +1006,18 @@ window.openAddTeacherModal = function() {
                         </select>
                     </div>
                     <div>
-                        <label class="block font-bold text-slate-700 mb-1">បន្ទប់</label>
+                        <label class="block font-bold text-slate-700 mb-1">បន្ទប់ (Room)</label>
                         <input type="text" id="add_teacher_room" value="«ក»" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 font-bold outline-none text-center">
                     </div>
+                </div>
+
+                <!-- Account Status Selection (AUTH-03 & Section 3.3) -->
+                <div>
+                    <label class="block font-bold text-slate-700 mb-1">ស្ថានភាពគណនី (Account Status)</label>
+                    <select id="add_teacher_status" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 font-bold outline-none cursor-pointer">
+                        <option value="active" selected>✅ សកម្ម (Active - អាចចូលប្រើប្រាស់បាន)</option>
+                        <option value="inactive">⏸️ ផ្អាកដំណើរការ (Inactive - ផ្អាកបណ្តោះអាសន្ន)</option>
+                    </select>
                 </div>
 
                 <div class="pt-4 flex gap-3 border-t border-slate-100">
@@ -924,19 +1039,196 @@ window.handleCreateTeacherSubmit = async function(e) {
     btn.disabled = true;
 
     try {
+        const checkedRoles = Array.from(document.querySelectorAll("input[name='add_roles']:checked")).map(el => el.value);
+        if (checkedRoles.length === 0) {
+            throw new Error("សូមជ្រើសរើសតួនាទីយ៉ាងហោចណាស់មួយ!");
+        }
+
         const payload = {
             name: document.getElementById("add_teacher_name").value.trim(),
             username: document.getElementById("add_teacher_user").value.trim(),
             password: document.getElementById("add_teacher_pass").value,
-            role: document.getElementById("add_teacher_role").value,
+            roles: checkedRoles,
+            role: checkedRoles[0],
             contact: document.getElementById("add_teacher_contact").value.trim(),
             assigned_grade: document.getElementById("add_teacher_grade").value,
-            assigned_room: document.getElementById("add_teacher_room").value.trim()
+            assigned_room: document.getElementById("add_teacher_room").value.trim(),
+            status: document.getElementById("add_teacher_status")?.value || "active"
         };
 
         await window.saveTeacherAccount(payload);
         document.getElementById("addTeacherModal").classList.add("hidden");
-        if (typeof showToast === "function") showToast("✅ បង្កើតគណនីគ្រូថ្មីបានជោគជ័យ!");
+        if (typeof showToast === "function") showToast("✅ បង្កើតគណនី និងកំណត់សិទ្ធិបានជោគជ័យ!");
+        window.renderUserAccountsTab();
+
+    } catch (err) {
+        alert("❌ " + err.message);
+    } finally {
+        btn.innerHTML = origText;
+        btn.disabled = false;
+    }
+};
+
+// Modal កែប្រែគណនី & សិទ្ធិ (Edit Teacher Modal - Chapter 2)
+window.openEditTeacherModal = async function(teacherId) {
+    let teachers = [];
+    try {
+        teachers = typeof window.fetchTeacherAccounts === "function" ? await window.fetchTeacherAccounts() : [];
+    } catch(e) {}
+    const t = teachers.find(item => item.teacher_id === teacherId);
+    if (!t) return alert("រកមិនឃើញគណនីនេះទេ!");
+
+    let modal = document.getElementById("editTeacherModal");
+    if (!modal) {
+        modal = document.createElement("div");
+        modal.id = "editTeacherModal";
+        modal.className = "fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 font-siemreap overflow-y-auto";
+        document.body.appendChild(modal);
+    }
+
+    const currentRoles = window.normalizeRoles(t.roles || t.role, "teacher");
+
+    modal.innerHTML = `
+        <div class="bg-white rounded-3xl w-full max-w-lg overflow-hidden shadow-2xl border border-slate-200 animate-scale-up my-auto">
+            <div class="p-6 border-b border-slate-100 flex items-center justify-between bg-indigo-50/50">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center text-lg shadow-md">
+                        <i class="fa-solid fa-user-pen"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-moul text-sm text-slate-800">កែប្រែគណនី និងសិទ្ធិប្រើប្រាស់</h3>
+                        <p class="text-xs text-slate-400 mt-0.5">អត្តលេខ៖ <span class="font-mono font-bold text-indigo-700">${t.teacher_id}</span></p>
+                    </div>
+                </div>
+                <button onclick="document.getElementById('editTeacherModal').classList.add('hidden')" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-400 flex items-center justify-center transition">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <form onsubmit="window.handleEditTeacherSubmit(event, '${t.teacher_id}')" class="p-6 space-y-4 text-xs max-h-[80vh] overflow-y-auto custom-scrollbar">
+                <div>
+                    <label class="block font-bold text-slate-700 mb-1">គោត្តនាម និង នាមខ្លួន *</label>
+                    <input type="text" id="edit_teacher_name" value="${t.name || ''}" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 font-bold outline-none focus:ring-2 focus:ring-indigo-400">
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-bold text-slate-700 mb-1">ឈ្មោះគណនី (Username) *</label>
+                        <input type="text" id="edit_teacher_user" value="${t.username || ''}" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 font-bold outline-none focus:ring-2 focus:ring-indigo-400 lowercase">
+                    </div>
+                    <div>
+                        <label class="block font-bold text-slate-700 mb-1">លេខទូរស័ព្ទ</label>
+                        <input type="text" id="edit_teacher_contact" value="${t.contact || ''}" placeholder="012 345 678" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 font-bold font-mono outline-none">
+                    </div>
+                </div>
+
+                <!-- Multi-role Selector Section (Chapter 2) -->
+                <div>
+                    <label class="block font-bold text-slate-800 mb-1.5 flex items-center gap-1.5">
+                        <i class="fa-solid fa-user-shield text-indigo-600"></i>
+                        <span>កំណត់តួនាទី និងសិទ្ធិ (Multi-role Assignment) *</span>
+                    </label>
+                    <div class="space-y-2 bg-slate-50 p-3 rounded-2xl border border-slate-200">
+                        <label class="flex items-start gap-2.5 cursor-pointer p-2 rounded-xl hover:bg-white transition border border-transparent hover:border-slate-200">
+                            <input type="checkbox" name="edit_roles" value="teacher" ${currentRoles.includes('teacher') ? 'checked' : ''} class="mt-0.5 w-4 h-4 text-emerald-600 rounded">
+                            <div>
+                                <span class="font-bold text-slate-800 text-xs flex items-center gap-1.5"><i class="fa-solid fa-chalkboard-user text-emerald-600"></i> Teacher (គ្រូបង្រៀន)</span>
+                                <span class="block text-[11px] text-slate-400 mt-0.5">មើលថ្នាក់ដែលទទួលខុសត្រូវ កត់ត្រាវត្តមាន និងបញ្ចូលពិន្ទុ</span>
+                            </div>
+                        </label>
+                        <label class="flex items-start gap-2.5 cursor-pointer p-2 rounded-xl hover:bg-white transition border border-transparent hover:border-slate-200">
+                            <input type="checkbox" name="edit_roles" value="school_admin" ${currentRoles.includes('school_admin') ? 'checked' : ''} class="mt-0.5 w-4 h-4 text-indigo-600 rounded">
+                            <div>
+                                <span class="font-bold text-slate-800 text-xs flex items-center gap-1.5"><i class="fa-solid fa-school text-indigo-600"></i> School Administrator (អ្នកគ្រប់គ្រងសាលា)</span>
+                                <span class="block text-[11px] text-slate-400 mt-0.5">គ្រប់គ្រងព័ត៌មានសាលា ឆ្នាំសិក្សា ថ្នាក់ សិស្ស និងរបាយការណ៍</span>
+                            </div>
+                        </label>
+                        <label class="flex items-start gap-2.5 cursor-pointer p-2 rounded-xl hover:bg-white transition border border-transparent hover:border-slate-200">
+                            <input type="checkbox" name="edit_roles" value="system_admin" ${currentRoles.includes('system_admin') ? 'checked' : ''} class="mt-0.5 w-4 h-4 text-rose-600 rounded">
+                            <div>
+                                <span class="font-bold text-slate-800 text-xs flex items-center gap-1.5"><i class="fa-solid fa-shield-halved text-rose-600"></i> System Administrator (អ្នកគ្រប់គ្រងប្រព័ន្ធ)</span>
+                                <span class="block text-[11px] text-slate-400 mt-0.5">គ្រប់គ្រងគណនី សិទ្ធិ ការកំណត់ប្រព័ន្ធ និងការបម្រុងទុកទិន្នន័យ</span>
+                            </div>
+                        </label>
+                        <label class="flex items-start gap-2.5 cursor-pointer p-2 rounded-xl hover:bg-white transition border border-transparent hover:border-slate-200">
+                            <input type="checkbox" name="edit_roles" value="report_viewer" ${currentRoles.includes('report_viewer') ? 'checked' : ''} class="mt-0.5 w-4 h-4 text-amber-600 rounded">
+                            <div>
+                                <span class="font-bold text-slate-800 text-xs flex items-center gap-1.5"><i class="fa-solid fa-chart-pie text-amber-600"></i> Report Viewer (អ្នកមើលរបាយការណ៍)</span>
+                                <span class="block text-[11px] text-slate-400 mt-0.5">មើលរបាយការណ៍ដែលបានអនុញ្ញាត ដោយមិនអាចកែប្រែទិន្នន័យ</span>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Scope: Assigned Class & Room -->
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-bold text-slate-700 mb-1">ថ្នាក់ទទួលខុសត្រូវ (Grade Scope)</label>
+                        <select id="edit_teacher_grade" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 font-bold outline-none cursor-pointer">
+                            <option value="គ្រប់ថ្នាក់" ${t.assigned_grade === 'គ្រប់ថ្នាក់' ? 'selected' : ''}>គ្រប់ថ្នាក់ (School-wide)</option>
+                            <option value="ថ្នាក់ទី ១" ${t.assigned_grade === 'ថ្នាក់ទី ១' ? 'selected' : ''}>ថ្នាក់ទី ១</option>
+                            <option value="ថ្នាក់ទី ២" ${t.assigned_grade === 'ថ្នាក់ទី ២' ? 'selected' : ''}>ថ្នាក់ទី ២</option>
+                            <option value="ថ្នាក់ទី ៣" ${t.assigned_grade === 'ថ្នាក់ទី ៣' ? 'selected' : ''}>ថ្នាក់ទី ៣</option>
+                            <option value="ថ្នាក់ទី ៤" ${t.assigned_grade === 'ថ្នាក់ទី ៤' ? 'selected' : ''}>ថ្នាក់ទី ៤</option>
+                            <option value="ថ្នាក់ទី ៥" ${t.assigned_grade === 'ថ្នាក់ទី ៥' ? 'selected' : ''}>ថ្នាក់ទី ៥</option>
+                            <option value="ថ្នាក់ទី ៦" ${t.assigned_grade === 'ថ្នាក់ទី ៦' ? 'selected' : ''}>ថ្នាក់ទី ៦</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block font-bold text-slate-700 mb-1">បន្ទប់ (Room)</label>
+                        <input type="text" id="edit_teacher_room" value="${t.assigned_room || '«ក»'}" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 font-bold outline-none text-center">
+                    </div>
+                </div>
+
+                <!-- Status Check (Active / Inactive / Locked) -->
+                <div>
+                    <label class="block font-bold text-slate-700 mb-1">ស្ថានភាពគណនី (Account Status)</label>
+                    <select id="edit_teacher_status" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 font-bold outline-none cursor-pointer">
+                        <option value="active" ${(t.status || 'active').toLowerCase() === 'active' ? 'selected' : ''}>✅ សកម្ម (Active - អាចចូលប្រើប្រាស់បាន)</option>
+                        <option value="inactive" ${(t.status || '').toLowerCase() === 'inactive' ? 'selected' : ''}>⏸️ ផ្អាកដំណើរការ (Inactive - ផ្អាកបណ្តោះអាសន្ន)</option>
+                        <option value="locked" ${(t.status || '').toLowerCase() === 'locked' ? 'selected' : ''}>🔒 ចាក់សោ (Locked - មិនអនុញ្ញាតឱ្យចូលប្រើ)</option>
+                    </select>
+                </div>
+
+                <div class="pt-4 flex gap-3 border-t border-slate-100">
+                    <button type="button" onclick="document.getElementById('editTeacherModal').classList.add('hidden')" class="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl font-bold transition">បោះបង់</button>
+                    <button type="submit" id="btnSubmitEditTeacher" class="flex-1 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold transition shadow-md">រក្សាទុកការកែប្រែ</button>
+                </div>
+            </form>
+        </div>
+    `;
+
+    modal.classList.remove("hidden");
+};
+
+window.handleEditTeacherSubmit = async function(e, teacherId) {
+    if (e && e.preventDefault) e.preventDefault();
+    const btn = document.getElementById("btnSubmitEditTeacher");
+    const origText = btn.innerHTML;
+    btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-1"></i> កំពុងរក្សាទុក...`;
+    btn.disabled = true;
+
+    try {
+        const checkedRoles = Array.from(document.querySelectorAll("input[name='edit_roles']:checked")).map(el => el.value);
+        if (checkedRoles.length === 0) {
+            throw new Error("សូមជ្រើសរើសតួនាទីយ៉ាងហោចណាស់មួយ!");
+        }
+
+        const payload = {
+            teacher_id: teacherId,
+            name: document.getElementById("edit_teacher_name").value.trim(),
+            username: document.getElementById("edit_teacher_user").value.trim(),
+            roles: checkedRoles,
+            role: checkedRoles[0],
+            contact: document.getElementById("edit_teacher_contact").value.trim(),
+            assigned_grade: document.getElementById("edit_teacher_grade").value,
+            assigned_room: document.getElementById("edit_teacher_room").value.trim(),
+            status: document.getElementById("edit_teacher_status").value
+        };
+
+        await window.saveTeacherAccount(payload);
+        document.getElementById("editTeacherModal").classList.add("hidden");
+        if (typeof showToast === "function") showToast("✅ បានកែប្រែគណនី និងសិទ្ធិប្រើប្រាស់ជោគជ័យ!");
         window.renderUserAccountsTab();
 
     } catch (err) {

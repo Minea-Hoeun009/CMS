@@ -370,6 +370,17 @@
   <script>
     // មុខងារប្តូរផ្ទាំងការងារ (View Switcher)
     window.switchView = function(viewName) {
+        // 🔒 AUTH-04: រារាំងការចូលប្រើទំព័រការពារដោយគ្មានការផ្ទៀងផ្ទាត់ (Protected Route Guard)
+        const isLoggedIn = (window.AppAuth && window.AppAuth.state && window.AppAuth.state.isLoggedIn) || 
+                           !!localStorage.getItem('auth_teacher_id');
+        if (!isLoggedIn) {
+            console.warn("🔒 មិនទាន់ចូលគណនីទេ! សូមចូលប្រព័ន្ធជាមុនសិន។");
+            if (window.AppAuth && typeof window.AppAuth.showAuthScreen === 'function') {
+                window.AppAuth.showAuthScreen();
+            }
+            return;
+        }
+
         localStorage.setItem('activeMenu', viewName);
 
         document.querySelectorAll("main[id$='View']").forEach(el => {

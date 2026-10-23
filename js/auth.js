@@ -2,14 +2,56 @@
 // ឯកសារ js/auth.js - ប្រព័ន្ធគ្រប់គ្រងសុវត្ថិភាព និងគណនីគ្រូ (Firestore & Local Auth)
 // =========================================================================
 
+// =========================================================================
+// AUTH-05: Web Crypto API Cryptographic Password Hashing (Salted SHA-256)
+// =========================================================================
+window.generateSalt = function() {
+    const array = new Uint8Array(16);
+    (window.crypto || window.msCrypto).getRandomValues(array);
+    return Array.from(array, b => b.toString(16).padStart(2, '0')).join('');
+};
+
+window.hashPassword = async function(password, salt) {
+    if (!salt) salt = window.generateSalt();
+    const encoder = new TextEncoder();
+    const data = encoder.encode(salt + ":" + password);
+    const hashBuffer = await (window.crypto || window.msCrypto).subtle.digest("SHA-256", data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    return `sha256$${salt}$${hashHex}`;
+};
+
+window.verifyPassword = async function(password, storedHashOrPlain) {
+    if (!storedHashOrPlain) return false;
+    // ករណីរក្សាទុកជា salted hash: sha256$salt$hash
+    if (typeof storedHashOrPlain === 'string' && storedHashOrPlain.startsWith('sha256$')) {
+        const parts = storedHashOrPlain.split('$');
+        if (parts.length === 3) {
+            const salt = parts[1];
+            const computed = await window.hashPassword(password, salt);
+            return computed === storedHashOrPlain;
+        }
+    }
+    // ភាពត្រូវគ្នាជាមួយពាក្យសម្ងាត់ចាស់ដែលធ្លាប់ជា Plain Text ក្នុង Firestore
+    return storedHashOrPlain === password;
+};
+
 window.AppAuth = {
     state: {
         isLoggedIn: false,
         teacherId: null,
         name: null,
         username: null,
-        role: "teacher"
+        role: "teacher",
+        roles: ["teacher"],
+        assigned_grade: "ថ្នាក់ទី ១",
+        assigned_room: "«ក»",
+        school_id: "SCH-001",
+        status: "active",
+        permissions_version: 1
     },
+
+    permissionListenerUnsubscribe: null,
 
     // ១. ចាប់ផ្តើមដំណើរការ (Init on load)
     init: function() {
@@ -39,12 +81,92 @@ window.AppAuth = {
         resetTimer();
     },
 
+    // ត្រួតពិនិត្យ និងស្តាប់ការផ្លាស់ប្តូរសិទ្ធិជាបន្ទាន់ (Real-time Permission Invalidation - Chapter 2)
+    startPermissionSyncListener: function(teacherId) {
+        if (!teacherId || !window.db) return;
+        if (typeof this.permissionListenerUnsubscribe === 'function') {
+            this.permissionListenerUnsubscribe();
+            this.permissionListenerUnsubscribe = null;
+        }
+
+        try {
+            this.permissionListenerUnsubscribe = window.db.collection("teachers").doc(teacherId)
+                .onSnapshot(docSnap => {
+                    if (!docSnap.exists) return;
+                    const data = docSnap.data();
+                    if (!data) return;
+
+                    // ១. ពិនិត្យស្ថានភាពគណនី (Inactive/Locked)
+                    if (data.status && data.status.toLowerCase() !== "active") {
+                        alert("⚠️ គណនីរបស់អ្នកត្រូវបានផ្អាក ឬចាក់សោ (Inactive/Locked) ដោយ Administrator! ប្រព័ន្ធនឹងចាកចេញដោយស្វ័យប្រវត្តិ។");
+                        this.logout(true);
+                        return;
+                    }
+
+                    // ២. ពិនិត្យការផ្លាស់ប្តូរសិទ្ធិ (Role / Permissions changes)
+                    const currentRoles = window.getUserRoles();
+                    const incomingRoles = window.normalizeRoles(data.roles || data.role, "teacher");
+                    const currentScope = `${this.state.assigned_grade || ''}_${this.state.assigned_room || ''}`;
+                    const incomingScope = `${data.assigned_grade || ''}_${data.assigned_room || ''}`;
+
+                    const rolesChanged = JSON.stringify(currentRoles.sort()) !== JSON.stringify(incomingRoles.sort());
+                    const scopeChanged = currentScope !== incomingScope;
+
+                    if (rolesChanged || scopeChanged) {
+                        console.log("🔄 [Auth] សិទ្ធិ ឬវិសាលភាពត្រូវបានផ្លាស់ប្តូរនៅលើ Cloud:", { incomingRoles, incomingScope });
+                        
+                        this.state.roles = incomingRoles;
+                        this.state.role = incomingRoles[0] || "teacher";
+                        this.state.assigned_grade = data.assigned_grade || this.state.assigned_grade;
+                        this.state.assigned_room = data.assigned_room || this.state.assigned_room;
+                        this.state.school_id = data.school_id || this.state.school_id;
+
+                        localStorage.setItem('auth_role', this.state.role);
+                        localStorage.setItem('auth_roles', JSON.stringify(this.state.roles));
+                        localStorage.setItem('auth_assigned_grade', this.state.assigned_grade);
+                        localStorage.setItem('auth_assigned_room', this.state.assigned_room);
+
+                        window.AuthState = { 
+                            ...this.state, 
+                            teacherName: this.state.name,
+                            teacher_level: this.state.assigned_grade,
+                            teacher_room: this.state.assigned_room
+                        };
+
+                        if (typeof showToast === 'function') {
+                            showToast("🔔 សិទ្ធិប្រើប្រាស់ ឬថ្នាក់ទទួលខុសត្រូវត្រូវបានធ្វើបច្ចុប្បន្នភាពភ្លាមៗ!", "info");
+                        }
+
+                        // ជូនដំណឹងដល់ Components ផ្សេងៗឱ្យ Render ឡើងវិញ
+                        window.dispatchEvent(new CustomEvent('auth-permissions-updated', { detail: this.state }));
+                    }
+                }, err => {
+                    console.warn("Permission sync listener note:", err.message);
+                });
+        } catch(e) {
+            console.warn("Error starting permission listener:", e);
+        }
+    },
+
     // ២. ត្រួតពិនិត្យ Session ចាស់
     checkSession: function() {
         const savedId = localStorage.getItem('auth_teacher_id');
         const savedName = localStorage.getItem('auth_teacher_name');
         const savedUser = localStorage.getItem('auth_username');
         const savedRole = localStorage.getItem('auth_role') || "teacher";
+        const savedRolesJson = localStorage.getItem('auth_roles');
+        let savedRoles = [];
+        try {
+            savedRoles = savedRolesJson ? JSON.parse(savedRolesJson) : [];
+        } catch(e) {}
+        if (!Array.isArray(savedRoles) || savedRoles.length === 0) {
+            savedRoles = window.normalizeRoles(savedRole, "teacher");
+        }
+
+        const savedGrade = localStorage.getItem('auth_assigned_grade') || "ថ្នាក់ទី ១";
+        const savedRoom = localStorage.getItem('auth_assigned_room') || "«ក»";
+        const savedSchool = localStorage.getItem('auth_school_id') || "SCH-001";
+        const savedStatus = localStorage.getItem('auth_status') || "active";
 
         if (savedId && savedUser) {
             this.state = {
@@ -52,15 +174,26 @@ window.AppAuth = {
                 teacherId: savedId,
                 name: savedName || "លោកគ្រូ អ្នកគ្រូ",
                 username: savedUser,
-                role: savedRole
+                role: savedRole,
+                roles: savedRoles,
+                assigned_grade: savedGrade,
+                assigned_room: savedRoom,
+                school_id: savedSchool,
+                status: savedStatus
             };
-            window.AuthState = { ...this.state, teacherName: this.state.name };
+            window.AuthState = { 
+                ...this.state, 
+                teacherName: this.state.name,
+                teacher_level: savedGrade,
+                teacher_room: savedRoom
+            };
             window.AppState = window.AppState || {};
             window.AppState.isLoggedIn = true;
             window.AppState.teacherId = savedId;
             window.AppState.teacherName = this.state.name;
 
             this.showWorkspace();
+            this.startPermissionSyncListener(savedId);
         } else {
             this.showAuthScreen();
         }
@@ -108,7 +241,7 @@ window.AppAuth = {
         try {
             let teacherData = null;
 
-            // ជំហានទី ១៖ ផ្ទៀងផ្ទាត់ជាមួយ Cloud Firestore (បើមានការតភ្ជាប់)
+            // ជំហានទី ១៖ ផ្ទៀងផ្ទាត់ជាមួយ Cloud Firestore (Cryptographic Verification - AUTH-05)
             if (window.db) {
                 try {
                     // ក. ស្វែងរកតាម username
@@ -117,37 +250,54 @@ window.AppAuth = {
                         .limit(1)
                         .get();
 
+                    let matchedDoc = null;
+                    let matchedDocId = null;
+
                     if (!userSnap.empty) {
-                        const doc = userSnap.docs[0].data();
-                        if (doc.password === pass) {
-                            teacherData = {
-                                teacher_id: doc.teacher_id || userSnap.docs[0].id,
-                                name: doc.name || doc.full_name || user,
-                                username: doc.username,
-                                role: doc.role || "teacher"
-                            };
-                        } else {
-                            throw new Error("លេខសម្ងាត់មិនត្រឹមត្រូវទេ!");
-                        }
+                        matchedDoc = userSnap.docs[0].data();
+                        matchedDocId = userSnap.docs[0].id;
                     } else {
                         // ខ. ស្វែងរកតាម teacher_id
                         const idSnap = await window.db.collection("teachers")
                             .where("teacher_id", "==", user.toUpperCase())
                             .limit(1)
                             .get();
-
                         if (!idSnap.empty) {
-                            const doc = idSnap.docs[0].data();
-                            if (doc.password === pass) {
-                                teacherData = {
-                                    teacher_id: doc.teacher_id,
-                                    name: doc.name || doc.full_name || user,
-                                    username: doc.username,
-                                    role: doc.role || "teacher"
-                                };
-                            } else {
-                                throw new Error("លេខសម្ងាត់មិនត្រឹមត្រូវទេ!");
+                            matchedDoc = idSnap.docs[0].data();
+                            matchedDocId = idSnap.docs[0].id;
+                        }
+                    }
+
+                    if (matchedDoc) {
+                        const storedCredential = matchedDoc.password_hash || matchedDoc.password;
+                        const isPasswordValid = await window.verifyPassword(pass, storedCredential);
+
+                        if (isPasswordValid) {
+                            const normalizedRoles = window.normalizeRoles(matchedDoc.roles || matchedDoc.role, "teacher");
+                            teacherData = {
+                                teacher_id: matchedDoc.teacher_id || matchedDocId,
+                                name: matchedDoc.name || matchedDoc.full_name || user,
+                                username: matchedDoc.username || user.toLowerCase(),
+                                role: normalizedRoles[0] || "teacher",
+                                roles: normalizedRoles,
+                                assigned_grade: matchedDoc.assigned_grade || "ថ្នាក់ទី ១",
+                                assigned_room: matchedDoc.assigned_room || "«ក»",
+                                school_id: matchedDoc.school_id || "SCH-001",
+                                status: matchedDoc.status || "active"
+                            };
+
+                            // ការពារសុវត្ថិភាព (AUTH-05): បម្លែង Plaintext ទៅជា Salted Hash SHA-256 ដោយស្វ័យប្រវត្តិ
+                            const migrationUpdates = {
+                                last_login_at: firebase.firestore.FieldValue.serverTimestamp(),
+                                updated_at: new Date().toISOString()
+                            };
+                            if (storedCredential && !storedCredential.startsWith("sha256$")) {
+                                migrationUpdates.password_hash = await window.hashPassword(pass);
+                                migrationUpdates.password = firebase.firestore.FieldValue.delete();
                             }
+                            window.db.collection("teachers").doc(matchedDocId).update(migrationUpdates).catch(console.warn);
+                        } else {
+                            throw new Error("លេខសម្ងាត់មិនត្រឹមត្រូវទេ!");
                         }
                     }
                 } catch (fsErr) {
@@ -156,30 +306,90 @@ window.AppAuth = {
                 }
             }
 
-            // ជំហានទី ២៖ គណនីលំនាំដើម (Default Demo / First-run provision)
+            // ជំហានទី ២៖ គណនីគំរូតួនាទីទាំង ៤ តាមជំពូកទី២ (Canonical Demo Roles with Salted Hashes - AUTH-05)
             if (!teacherData) {
                 const uLower = user.toLowerCase();
-                const uUpper = user.toUpperCase();
+                const DEMO_ACCOUNTS = [
+                    {
+                        usernames: ["admin", "sysadmin"],
+                        hash: "sha256$a1b2c3d4e5f60718$6f090945bbac63e39704740bcae033f193d9ebccd14b1c8334dc48f9cebf68ef",
+                        data: {
+                            teacher_id: "TCH-SYSADMIN",
+                            name: "អ្នកគ្រប់គ្រងប្រព័ន្ធ (System Administrator)",
+                            username: "admin",
+                            role: "system_admin",
+                            roles: ["system_admin", "school_admin"],
+                            assigned_grade: "គ្រប់ថ្នាក់",
+                            assigned_room: "ទូទៅ",
+                            school_id: "SCH-001",
+                            status: "active"
+                        }
+                    },
+                    {
+                        usernames: ["schooladmin", "principal"],
+                        hash: "sha256$b2c3d4e5f6a10729$dd76a574799fc27b2c45cd74d0d676a6a0bf46d307c26f676f4f94012346c58a",
+                        data: {
+                            teacher_id: "TCH-SCHADMIN",
+                            name: "លោកនាយកសាលា (School Administrator)",
+                            username: "schooladmin",
+                            role: "school_admin",
+                            roles: ["school_admin"],
+                            assigned_grade: "គ្រប់ថ្នាក់",
+                            assigned_room: "ទូទៅ",
+                            school_id: "SCH-001",
+                            status: "active"
+                        }
+                    },
+                    {
+                        usernames: ["teacher", "tch-001"],
+                        hash: "sha256$c3d4e5f6a1b2073a$c7e76bad475902498e3af524dc854d54e5a6131cf6d1b9dfd17c7e0cca0da540",
+                        altHash: "sha256$d4e5f6a1b2c3074b$4b11d66ade252336d09f9598732a9244ab3f2857f771e769a3ee204badcdfb94",
+                        data: {
+                            teacher_id: "TCH-001",
+                            name: "លោកគ្រូ គំរូ (Teacher)",
+                            username: "teacher",
+                            role: "teacher",
+                            roles: ["teacher"],
+                            assigned_grade: "ថ្នាក់ទី ១",
+                            assigned_room: "«ក»",
+                            school_id: "SCH-001",
+                            status: "active"
+                        }
+                    },
+                    {
+                        usernames: ["viewer", "inspector"],
+                        hash: "sha256$e5f6a1b2c3d4075c$0ae1cd10bd20b1cf1c15fba068c3d69d2c0fb4e39ac29720005ac066157c6c4e",
+                        data: {
+                            teacher_id: "TCH-VIEWER",
+                            name: "មន្ត្រីត្រួតពិនិត្យ (Report Viewer)",
+                            username: "viewer",
+                            role: "report_viewer",
+                            roles: ["report_viewer"],
+                            assigned_grade: "គ្រប់ថ្នាក់",
+                            assigned_room: "ទូទៅ",
+                            school_id: "SCH-001",
+                            status: "active"
+                        }
+                    }
+                ];
 
-                if ((uLower === "admin" && pass === "admin123") ||
-                    (uUpper === "TCH-001" && pass === "12345678") ||
-                    (uLower === "teacher" && pass === "teacher123")) {
-                    
-                    const isAdmin = uLower === "admin";
-                    teacherData = {
-                        teacher_id: isAdmin ? "TCH-ADMIN" : "TCH-001",
-                        name: isAdmin ? "លោកនាយកសាលា" : "លោកគ្រូ គំរូ",
-                        username: uLower,
-                        role: isAdmin ? "admin" : "teacher"
-                    };
-
-                    // រក្សាទុកចូល Firestore ដើម្បីប្រើលើកក្រោយ
-                    if (window.db) {
-                        window.db.collection("teachers").doc(teacherData.teacher_id).set({
-                            ...teacherData,
-                            password: pass,
-                            created_at: firebase.firestore.FieldValue.serverTimestamp()
-                        }, { merge: true }).catch(console.warn);
+                for (const demo of DEMO_ACCOUNTS) {
+                    if (demo.usernames.includes(uLower)) {
+                        const isMatchPrimary = await window.verifyPassword(pass, demo.hash);
+                        const isMatchAlt = demo.altHash ? await window.verifyPassword(pass, demo.altHash) : false;
+                        if (isMatchPrimary || isMatchAlt) {
+                            teacherData = { ...demo.data };
+                            if (window.db) {
+                                const demoHash = await window.hashPassword(pass);
+                                window.db.collection("teachers").doc(teacherData.teacher_id).set({
+                                    ...teacherData,
+                                    password_hash: demoHash,
+                                    created_at: firebase.firestore.FieldValue.serverTimestamp(),
+                                    last_login_at: firebase.firestore.FieldValue.serverTimestamp()
+                                }, { merge: true }).catch(console.warn);
+                            }
+                            break;
+                        }
                     }
                 }
             }
@@ -189,7 +399,16 @@ window.AppAuth = {
                 try {
                     const res = await window.apiPost("loginUser", { username: user, password: pass });
                     if (res && res.status === "success" && res.data) {
-                        teacherData = res.data;
+                        const legRoles = window.normalizeRoles(res.data.roles || res.data.role, "teacher");
+                        teacherData = {
+                            ...res.data,
+                            roles: legRoles,
+                            role: legRoles[0] || "teacher",
+                            assigned_grade: res.data.assigned_grade || "ថ្នាក់ទី ១",
+                            assigned_room: res.data.assigned_room || "«ក»",
+                            school_id: res.data.school_id || "SCH-001",
+                            status: res.data.status || "active"
+                        };
                         if (window.db) {
                             window.db.collection("teachers").doc(teacherData.teacher_id).set({
                                 ...teacherData,
@@ -225,28 +444,49 @@ window.AppAuth = {
             localStorage.removeItem('auth_failed_attempts');
             localStorage.removeItem('auth_locked_until');
 
-            // រក្សាទុក Session
+            const normalizedRoles = window.normalizeRoles(teacherData.roles || teacherData.role, "teacher");
+
+            // រក្សាទុក Session ពេញលេញ
             localStorage.setItem('auth_teacher_id', teacherData.teacher_id);
             localStorage.setItem('auth_teacher_name', teacherData.name);
             localStorage.setItem('auth_username', teacherData.username || user);
-            localStorage.setItem('auth_role', teacherData.role || "teacher");
+            localStorage.setItem('auth_role', normalizedRoles[0] || "teacher");
+            localStorage.setItem('auth_roles', JSON.stringify(normalizedRoles));
+            localStorage.setItem('auth_assigned_grade', teacherData.assigned_grade || "ថ្នាក់ទី ១");
+            localStorage.setItem('auth_assigned_room', teacherData.assigned_room || "«ក»");
+            localStorage.setItem('auth_school_id', teacherData.school_id || "SCH-001");
+            localStorage.setItem('auth_status', teacherData.status || "active");
 
             this.state = {
                 isLoggedIn: true,
                 teacherId: teacherData.teacher_id,
                 name: teacherData.name,
                 username: teacherData.username || user,
-                role: teacherData.role || "teacher"
+                role: normalizedRoles[0] || "teacher",
+                roles: normalizedRoles,
+                assigned_grade: teacherData.assigned_grade || "ថ្នាក់ទី ១",
+                assigned_room: teacherData.assigned_room || "«ក»",
+                school_id: teacherData.school_id || "SCH-001",
+                status: teacherData.status || "active"
             };
 
-            window.AuthState = { ...this.state, teacherName: this.state.name };
+            window.AuthState = { 
+                ...this.state, 
+                teacherName: this.state.name,
+                teacher_level: this.state.assigned_grade,
+                teacher_room: this.state.assigned_room
+            };
             window.AppState = window.AppState || {};
             window.AppState.isLoggedIn = true;
             window.AppState.teacherId = teacherData.teacher_id;
             window.AppState.teacherName = teacherData.name;
 
+            this.startPermissionSyncListener(teacherData.teacher_id);
+
             if (typeof showToast === 'function') showToast("ចូលប្រព័ន្ធបានជោគជ័យ! ✅");
-            if (typeof window.logAudit === 'function') window.logAudit("LOGIN", "auth", `បានចូលប្រព័ន្ធ: ${teacherData.name} (${teacherData.teacher_id})`);
+            if (typeof window.logAudit === 'function') {
+                window.logAudit("LOGIN", "auth", `បានចូលប្រព័ន្ធ: ${teacherData.name} (${teacherData.teacher_id}) | Roles: [${normalizedRoles.join(', ')}]`);
+            }
             this.showWorkspace();
 
         } catch (error) {
@@ -299,15 +539,22 @@ window.AppAuth = {
         try {
             const randomSuffix = Math.floor(1000 + Math.random() * 9000);
             const teacherId = `TCH-${randomSuffix}`;
+            const passwordHash = await window.hashPassword(pass);
 
             const teacherDoc = {
                 teacher_id: teacherId,
                 name: name,
                 username: user.toLowerCase(),
-                password: pass,
+                password_hash: passwordHash,
                 contact: contact,
                 role: "teacher",
-                created_at: new Date().toISOString()
+                roles: ["teacher"],
+                assigned_grade: "ថ្នាក់ទី ១",
+                assigned_room: "«ក»",
+                school_id: "SCH-001",
+                status: "active",
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString()
             };
 
             // ១. រក្សាទុកក្នុង Firestore
@@ -346,15 +593,27 @@ window.AppAuth = {
     },
 
     // ៥. មុខងារចាកចេញពីប្រព័ន្ធ (Logout)
-    logout: function() {
-        if (!confirm("តើលោកគ្រូ/អ្នកគ្រូពិតជាចង់ចាកចេញពីប្រព័ន្ធមែនទេ?")) return;
+    logout: function(silent = false) {
+        if (!silent) {
+            if (!confirm("តើលោកគ្រូ/អ្នកគ្រូពិតជាចង់ចាកចេញពីប្រព័ន្ធមែនទេ?")) return;
+        }
         if (typeof window.logAudit === 'function') window.logAudit("LOGOUT", "auth", "បានចាកចេញពីប្រព័ន្ធ");
+
+        if (typeof this.permissionListenerUnsubscribe === 'function') {
+            try { this.permissionListenerUnsubscribe(); } catch(e) {}
+            this.permissionListenerUnsubscribe = null;
+        }
         
         // សម្អាតតែ Auth Keys កុំឱ្យបាត់ Settings សាលា
         localStorage.removeItem('auth_teacher_id');
         localStorage.removeItem('auth_teacher_name');
         localStorage.removeItem('auth_username');
         localStorage.removeItem('auth_role');
+        localStorage.removeItem('auth_roles');
+        localStorage.removeItem('auth_assigned_grade');
+        localStorage.removeItem('auth_assigned_room');
+        localStorage.removeItem('auth_school_id');
+        localStorage.removeItem('auth_status');
         localStorage.removeItem('activeMenu');
 
         location.reload();
@@ -570,14 +829,18 @@ window.handleUpdateAccount = async function(e) {
         const updateData = {
             name: newName,
             username: newUsername.toLowerCase(),
-            last_updated: new Date().toISOString()
+            last_updated: new Date().toISOString(),
+            updated_at: new Date().toISOString()
         };
         if (newPassword && newPassword.length >= 8) {
-            updateData.password = newPassword;
+            updateData.password_hash = await window.hashPassword(newPassword);
         }
 
         // ១. Update លើ Firestore
         if (window.db && teacherId) {
+            if (updateData.password_hash) {
+                updateData.password = firebase.firestore.FieldValue.delete();
+            }
             await window.db.collection("teachers").doc(teacherId).set(updateData, { merge: true });
         }
 
@@ -610,37 +873,233 @@ window.handleUpdateAccount = async function(e) {
 };
 
 // =========================================================================
-// ៨. គ្រប់គ្រងគណនីគ្រូ និងកំណត់សិទ្ធិ (User Roles & Accounts Management - Admin)
+// ៨. គ្រប់គ្រងគណនីគ្រូ និងកំណត់សិទ្ធិ (User Roles & RBAC - Chapter 2)
 // =========================================================================
 
-window.isCurrentUserAdmin = function() {
-    const role = (localStorage.getItem('auth_role') || window.AuthState?.role || window.AppAuth?.state?.role || "").toLowerCase();
-    return role === "admin" || role === "system_admin" || role === "school_admin";
+// កាតាឡុកតួនាទី និងសិទ្ធិផ្លូវការតាមជំពូកទី ២
+window.ROLE_DEFINITIONS = {
+    system_admin: {
+        id: "system_admin",
+        code: "SYS_ADMIN",
+        titleKh: "System Administrator",
+        nameKh: "អ្នកគ្រប់គ្រងប្រព័ន្ធ (System Administrator)",
+        descKh: "គ្រប់គ្រងគណនី សិទ្ធិ ការកំណត់ប្រព័ន្ធ និងការបម្រុងទុក",
+        badgeClass: "bg-rose-50 text-rose-700 border border-rose-200",
+        icon: "fa-shield-halved"
+    },
+    school_admin: {
+        id: "school_admin",
+        code: "SCH_ADMIN",
+        titleKh: "School Administrator",
+        nameKh: "អ្នកគ្រប់គ្រងសាលា (School Administrator)",
+        descKh: "គ្រប់គ្រងព័ត៌មានសាលា ឆ្នាំសិក្សា ថ្នាក់ សិស្ស និងរបាយការណ៍ដែលបានអនុញ្ញាត",
+        badgeClass: "bg-indigo-50 text-indigo-700 border border-indigo-200",
+        icon: "fa-school"
+    },
+    teacher: {
+        id: "teacher",
+        code: "TEACHER",
+        titleKh: "Teacher",
+        nameKh: "គ្រូបង្រៀន (Teacher)",
+        descKh: "មើលថ្នាក់ដែលទទួលខុសត្រូវ កត់ត្រាវត្តមាន និងបញ្ចូលពិន្ទុតាមសិទ្ធិ",
+        badgeClass: "bg-emerald-50 text-emerald-700 border border-emerald-200",
+        icon: "fa-chalkboard-user"
+    },
+    report_viewer: {
+        id: "report_viewer",
+        code: "VIEWER",
+        titleKh: "Report Viewer",
+        nameKh: "អ្នកមើលរបាយការណ៍ (Report Viewer)",
+        descKh: "មើលរបាយការណ៍ដែលបានអនុញ្ញាត ដោយមិនអាចកែប្រែទិន្នន័យ",
+        badgeClass: "bg-amber-50 text-amber-700 border border-amber-200",
+        icon: "fa-chart-pie"
+    }
 };
 
+// មុខងារជំនួយបំលែងតួនាទីជា Array (Multi-role Normalizer)
+window.normalizeRoles = function(rolesInput, fallbackRole = "teacher") {
+    if (Array.isArray(rolesInput) && rolesInput.length > 0) {
+        return rolesInput.map(r => String(r).toLowerCase().trim()).filter(Boolean);
+    }
+    const single = String(rolesInput || fallbackRole || 'teacher').toLowerCase().trim();
+    if (single === 'admin') return ['system_admin', 'school_admin'];
+    if (single === 'sysadmin') return ['system_admin'];
+    if (single === 'schooladmin') return ['school_admin'];
+    if (single === 'viewer') return ['report_viewer'];
+    return [single];
+};
+
+// ទាញយក Roles ទាំងអស់របស់អ្នកប្រើប្រាស់បច្ចុប្បន្ន
+window.getUserRoles = function() {
+    let roles = window.AuthState?.roles || window.AppAuth?.state?.roles;
+    if (Array.isArray(roles) && roles.length > 0) return roles;
+    
+    const storedRolesJson = localStorage.getItem('auth_roles');
+    if (storedRolesJson) {
+        try {
+            const parsed = JSON.parse(storedRolesJson);
+            if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        } catch(e) {}
+    }
+    const singleRole = localStorage.getItem('auth_role') || 'teacher';
+    return window.normalizeRoles(singleRole, 'teacher');
+};
+
+// ពិនិត្យថាតើអ្នកប្រើប្រាស់មានតួនាទីជាក់លាក់ឬទេ
+window.hasRole = function(role) {
+    const roles = window.getUserRoles();
+    const target = String(role).toLowerCase().trim();
+    if (roles.includes("system_admin") && target !== "report_viewer") return true;
+    return roles.includes(target);
+};
+
+// ពិនិត្យថាតើអ្នកប្រើប្រាស់មានតួនាទីណាមួយក្នុងចំណោម Roles បញ្ចូលឬទេ
+window.hasAnyRole = function(rolesArray) {
+    if (!Array.isArray(rolesArray)) return false;
+    return rolesArray.some(r => window.hasRole(r));
+};
+
+// ពិនិត្យជា System Administrator
 window.isSystemAdmin = function() {
-    const role = (localStorage.getItem('auth_role') || window.AuthState?.role || window.AppAuth?.state?.role || "").toLowerCase();
-    return role === "system_admin" || role === "admin";
+    const roles = window.getUserRoles();
+    return roles.includes("system_admin") || roles.includes("admin");
 };
 
+// ពិនិត្យជា School Administrator (System Admin ក៏មានសិទ្ធិដូច School Admin)
 window.isSchoolAdmin = function() {
-    const role = (localStorage.getItem('auth_role') || window.AuthState?.role || window.AppAuth?.state?.role || "").toLowerCase();
-    return role === "school_admin" || role === "system_admin" || role === "admin";
+    const roles = window.getUserRoles();
+    return roles.includes("school_admin") || roles.includes("system_admin") || roles.includes("admin");
 };
 
+// ពិនិត្យជា Teacher
 window.isTeacher = function() {
-    const role = (localStorage.getItem('auth_role') || window.AuthState?.role || window.AppAuth?.state?.role || "teacher").toLowerCase();
-    return role === "teacher";
+    const roles = window.getUserRoles();
+    return roles.includes("teacher");
 };
 
+// ពិនិត្យជា Report Viewer (គ្មានសិទ្ធិកែប្រែទិន្នន័យ)
 window.isReportViewer = function() {
-    const role = (localStorage.getItem('auth_role') || window.AuthState?.role || window.AppAuth?.state?.role || "").toLowerCase();
-    return role === "viewer" || role === "report_viewer";
+    const roles = window.getUserRoles();
+    return roles.includes("report_viewer") || roles.includes("viewer");
 };
 
-window.canEditRecords = function() {
-    return !window.isReportViewer();
+// ភាពត្រូវគ្នាជាមួយ Function ចាស់
+window.isCurrentUserAdmin = function() {
+    return window.isSchoolAdmin() || window.isSystemAdmin();
 };
+
+// ពិនិត្យសិទ្ធិកែប្រែទិន្នន័យទូទៅ
+window.canEditRecords = function() {
+    const roles = window.getUserRoles();
+    if (roles.includes("report_viewer") && roles.length === 1) return false;
+    return window.hasAnyRole(["system_admin", "school_admin", "teacher"]);
+};
+
+// ទទួលព័ត៌មានវិសាលភាពទទួលខុសត្រូវ (Assigned Scope)
+window.getAssignedScope = function() {
+    return {
+        school_id: localStorage.getItem('auth_school_id') || window.AuthState?.school_id || "SCH-001",
+        grade: (localStorage.getItem('auth_assigned_grade') || window.AuthState?.assigned_grade || "").trim(),
+        room: (localStorage.getItem('auth_assigned_room') || window.AuthState?.assigned_room || "").trim()
+    };
+};
+
+// =========================================================================
+// ៩. DataServiceGuard - ត្រួតពិនិត្យសិទ្ធិនៅកម្រិតសេវាទិន្នន័យ (Backend & Data Layer)
+// =========================================================================
+window.DataServiceGuard = {
+    // ត្រួតពិនិត្យសិទ្ធិអនុញ្ញាត
+    can: function(action, context = {}) {
+        const roles = window.getUserRoles();
+        if (roles.includes("system_admin")) return true;
+
+        // បើជា Report Viewer សុទ្ធសាធ មិនអនុញ្ញាតរាល់ Write Actions
+        const isPureViewer = roles.includes("report_viewer") && roles.length === 1;
+
+        switch (action) {
+            case "manage_users":
+            case "manage_roles":
+            case "backup_restore":
+            case "system_maintenance":
+                return roles.includes("system_admin");
+
+            case "manage_school_info":
+            case "manage_academic_year":
+            case "manage_classes":
+            case "manage_all_students":
+                return roles.includes("school_admin");
+
+            case "view_student":
+                if (roles.includes("school_admin") || roles.includes("report_viewer")) return true;
+                if (roles.includes("teacher")) {
+                    return this.isWithinAssignedScope(context.grade, context.room);
+                }
+                return false;
+
+            case "create_student":
+            case "edit_student":
+                if (isPureViewer) return false;
+                if (roles.includes("school_admin")) return true;
+                if (roles.includes("teacher")) {
+                    return this.isWithinAssignedScope(context.grade, context.room);
+                }
+                return false;
+
+            case "delete_student":
+                // មានតែ School Admin ឬ System Admin ប៉ុណ្ណោះដែលអាចលុបសិស្ស
+                if (isPureViewer) return false;
+                return roles.includes("school_admin");
+
+            case "record_attendance":
+            case "enter_scores":
+                if (isPureViewer) return false;
+                if (roles.includes("school_admin")) return true;
+                if (roles.includes("teacher")) {
+                    return this.isWithinAssignedScope(context.grade, context.room);
+                }
+                return false;
+
+            case "view_reports":
+                return true; // គ្រប់តួនាទីអាចមើលរបាយការណ៍ដែលបានអនុញ្ញាត
+
+            default:
+                return false;
+        }
+    },
+
+    // ត្រួតពិនិត្យវិសាលភាពថ្នាក់ទទួលខុសត្រូវ
+    isWithinAssignedScope: function(grade, room) {
+        const roles = window.getUserRoles();
+        if (roles.includes("system_admin") || roles.includes("school_admin")) return true;
+
+        const scope = window.getAssignedScope();
+        if (!scope.grade) return true; // ប្រសិនបើមិនទាន់កំណត់ថ្នាក់
+
+        const normGrade = (typeof normalizeGrade === 'function' ? normalizeGrade(grade) : (grade || "")).trim();
+        const normAssigned = (typeof normalizeGrade === 'function' ? normalizeGrade(scope.grade) : scope.grade).trim();
+
+        if (normGrade && normGrade !== normAssigned) return false;
+        if (room && scope.room && room.trim() !== scope.room.trim()) return false;
+        return true;
+    },
+
+    // Assert សិទ្ធិ បើគ្មានសិទ្ធិ Throw Error និងកត់ត្រា Audit ភ្លាមៗ
+    assertCan: function(action, context = {}, customKhmerMessage = "") {
+        if (!this.can(action, context)) {
+            const defaultMsg = `⚠️ សិទ្ធិត្រូវបានបដិសេធ (Access Denied)៖ អ្នកមិនមានសិទ្ធិអនុវត្តសកម្មភាព "${action}" លើវិសាលភាពនេះឡើយ!`;
+            const finalMsg = customKhmerMessage || defaultMsg;
+            if (typeof window.logAudit === 'function') {
+                window.logAudit('SECURITY_BLOCKED', 'security', `សិទ្ធិត្រូវបានបដិសេធ៖ ${action} | Context: ${JSON.stringify(context)}`);
+            }
+            throw new Error(finalMsg);
+        }
+        return true;
+    }
+};
+
+// =========================================================================
+// ១០. គ្រប់គ្រងគណនីគ្រូ (CRUD Operations & Multi-role Management)
+// =========================================================================
 
 window.fetchTeacherAccounts = async function() {
     let teachers = [];
@@ -652,14 +1111,18 @@ window.fetchTeacherAccounts = async function() {
             if (!snap.empty) {
                 teachers = snap.docs.map(doc => {
                     const data = doc.data();
+                    const roles = window.normalizeRoles(data.roles || data.role, "teacher");
                     return {
                         teacher_id: data.teacher_id || doc.id,
                         name: data.name || data.full_name || "លោកគ្រូ អ្នកគ្រូ",
                         username: data.username || doc.id.toLowerCase(),
-                        role: data.role || "teacher",
+                        role: roles[0] || "teacher",
+                        roles: roles,
                         contact: data.contact || data.phone || "",
                         assigned_grade: data.assigned_grade || data.teacher_level || "ថ្នាក់ទី ១",
                         assigned_room: data.assigned_room || data.teacher_room || "«ក»",
+                        school_id: data.school_id || "SCH-001",
+                        status: data.status || "active",
                         created_at: data.created_at || ""
                     };
                 });
@@ -682,23 +1145,55 @@ window.fetchTeacherAccounts = async function() {
     if (!teachers || teachers.length === 0) {
         teachers = [
             {
-                teacher_id: "TCH-ADMIN",
-                name: "លោកនាយកសាលា (Administrator)",
+                teacher_id: "TCH-SYSADMIN",
+                name: "អ្នកគ្រប់គ្រងប្រព័ន្ធ (System Administrator)",
                 username: "admin",
-                role: "admin",
+                role: "system_admin",
+                roles: ["system_admin", "school_admin"],
                 contact: "012 345 678",
                 assigned_grade: "គ្រប់ថ្នាក់",
                 assigned_room: "ទូទៅ",
+                school_id: "SCH-001",
+                status: "active",
+                created_at: new Date().toISOString()
+            },
+            {
+                teacher_id: "TCH-SCHADMIN",
+                name: "លោកនាយកសាលា (School Administrator)",
+                username: "schooladmin",
+                role: "school_admin",
+                roles: ["school_admin"],
+                contact: "011 223 344",
+                assigned_grade: "គ្រប់ថ្នាក់",
+                assigned_room: "ទូទៅ",
+                school_id: "SCH-001",
+                status: "active",
                 created_at: new Date().toISOString()
             },
             {
                 teacher_id: "TCH-001",
-                name: "លោកគ្រូ គំរូ",
+                name: "លោកគ្រូ គំរូ (Teacher)",
                 username: "teacher",
                 role: "teacher",
+                roles: ["teacher"],
                 contact: "098 765 432",
                 assigned_grade: "ថ្នាក់ទី ១",
                 assigned_room: "«ក»",
+                school_id: "SCH-001",
+                status: "active",
+                created_at: new Date().toISOString()
+            },
+            {
+                teacher_id: "TCH-VIEWER",
+                name: "មន្ត្រីត្រួតពិនិត្យ (Report Viewer)",
+                username: "viewer",
+                role: "report_viewer",
+                roles: ["report_viewer"],
+                contact: "088 999 888",
+                assigned_grade: "គ្រប់ថ្នាក់",
+                assigned_room: "ទូទៅ",
+                school_id: "SCH-001",
+                status: "active",
                 created_at: new Date().toISOString()
             }
         ];
@@ -713,55 +1208,135 @@ window.saveTeacherAccount = async function(teacherObj) {
         throw new Error("សូមបំពេញឈ្មោះ និងឈ្មោះគណនីគ្រូ!");
     }
 
+    // ត្រួតពិនិត្យសិទ្ធិ Backend/Guard៖ មានតែ System Admin ប៉ុណ្ណោះដែលអាចបង្កើត ឬកែប្រែគណនី
+    window.DataServiceGuard.assertCan('manage_users', {}, "🔒 មានតែ System Administrator ប៉ុណ្ណោះដែលអាចបង្កើត ឬកែប្រែគណនី និងសិទ្ធិប្រើប្រាស់!");
+
     const teacherId = teacherObj.teacher_id || `TCH-${Math.floor(1000 + Math.random() * 9000)}`;
+    const normalizedRoles = window.normalizeRoles(teacherObj.roles || teacherObj.role, "teacher");
+
+    // រក្សាទុក Cache ចាស់ដើម្បីផ្ទៀងផ្ទាត់ការផ្លាស់ប្តូរសិទ្ធិ (Audit)
+    let cached = [];
+    try { cached = JSON.parse(localStorage.getItem('cached_teachers_list') || '[]'); } catch(e) {}
+    const existingTeacher = cached.find(t => t.teacher_id === teacherId);
+    const isNew = !existingTeacher;
+
     const docData = {
         teacher_id: teacherId,
         name: teacherObj.name.trim(),
         username: teacherObj.username.toLowerCase().trim(),
-        role: teacherObj.role || "teacher",
+        role: normalizedRoles[0] || "teacher",
+        roles: normalizedRoles,
         contact: (teacherObj.contact || "").trim(),
         assigned_grade: teacherObj.assigned_grade || "ថ្នាក់ទី ១",
         assigned_room: teacherObj.assigned_room || "«ក»",
+        school_id: teacherObj.school_id || "SCH-001",
+        status: teacherObj.status || "active",
+        permissions_version: Date.now(), // សម្រាប់ជំរុញឱ្យ Session របស់គាត់ Refresh ភ្លាមៗ
+        updated_at: new Date().toISOString(),
         last_updated: new Date().toISOString()
     };
 
+    if (isNew) {
+        docData.created_at = new Date().toISOString();
+    }
+
     if (teacherObj.password && teacherObj.password.length >= 6) {
-        docData.password = teacherObj.password;
+        docData.password_hash = await window.hashPassword(teacherObj.password);
     }
 
-    // ១. រក្សាទុកក្នុង Firestore
+    // ១. រក្សាទុកក្នុង Firestore (ធានាមិនផ្ទុក Plaintext Password - AUTH-05)
     if (window.db) {
-        await window.db.collection("teachers").doc(teacherId).set(docData, { merge: true });
+        const firestorePayload = { ...docData };
+        if (firestorePayload.password_hash) {
+            firestorePayload.password = firebase.firestore.FieldValue.delete();
+        }
+        await window.db.collection("teachers").doc(teacherId).set(firestorePayload, { merge: true });
     }
 
-    // ២. Update ក្នុង Local Cache
-    let cached = [];
-    try { cached = JSON.parse(localStorage.getItem('cached_teachers_list') || '[]'); } catch(e) {}
+    // ២. Update ក្នុង Local Cache (មិនផ្ទុក password ឬ password_hash ក្នុង cache បញ្ជី)
+    const sanitizedCacheObj = { ...docData };
+    delete sanitizedCacheObj.password;
+    delete sanitizedCacheObj.password_hash;
+
     const existingIndex = cached.findIndex(t => t.teacher_id === teacherId);
     if (existingIndex >= 0) {
-        cached[existingIndex] = { ...cached[existingIndex], ...docData };
+        cached[existingIndex] = { ...cached[existingIndex], ...sanitizedCacheObj };
     } else {
-        cached.push(docData);
+        cached.push(sanitizedCacheObj);
     }
     localStorage.setItem('cached_teachers_list', JSON.stringify(cached));
 
+    // ៣. កត់ត្រាសវនកម្ម (Audit Log - Requirement 5)
     if (typeof window.logAudit === 'function') {
-        window.logAudit('USER_MANAGEMENT', 'auth', `បានរក្សាទុកគណនីគ្រូ៖ ${docData.name} (${docData.teacher_id}) សិទ្ធិ៖ ${docData.role}`);
+        if (isNew) {
+            window.logAudit('CREATE_USER', 'auth', `បានបង្កើតគណនីថ្មី៖ ${docData.name} (${docData.teacher_id}) | Roles: [${normalizedRoles.join(', ')}] | ថ្នាក់៖ ${docData.assigned_grade} ${docData.assigned_room}`);
+        } else {
+            const oldRoles = existingTeacher.roles || [existingTeacher.role];
+            const rolesChanged = JSON.stringify(oldRoles.sort()) !== JSON.stringify(normalizedRoles.sort());
+            if (rolesChanged) {
+                window.logAudit('CHANGE_ROLES', 'auth', `បានកែប្រែសិទ្ធិសម្រាប់៖ ${docData.name} (${docData.teacher_id}) ពី [${oldRoles.join(', ')}] ទៅ [${normalizedRoles.join(', ')}]`);
+            } else {
+                window.logAudit('UPDATE_USER', 'auth', `បានកែប្រែព័ត៌មានគណនីគ្រូ៖ ${docData.name} (${docData.teacher_id})`);
+            }
+        }
     }
 
     return docData;
 };
 
-window.deleteTeacherAccount = async function(teacherId) {
-    if (!window.isCurrentUserAdmin()) {
-        throw new Error("លោកគ្រូមិនមានសិទ្ធិជា Administrator ដើម្បីលុបគណនីទេ!");
+// បិទ/បើក ឬផ្អាកដំណើរការគណនីគ្រូ (Toggle Account Status - AUTH-03 & Section 3.4)
+window.toggleUserAccountStatus = async function(teacherId, currentStatus) {
+    window.DataServiceGuard.assertCan('manage_users', {}, "🔒 មានតែ System Administrator ប៉ុណ្ណោះដែលអាចផ្អាក ឬបើកដំណើរការគណនី!");
+
+    const currentId = localStorage.getItem('auth_teacher_id');
+    if (teacherId === currentId) {
+        throw new Error("មិនអាចផ្អាក ឬចាក់សោគណនីដែលកំពុងប្រើប្រាស់ផ្ទាល់ខ្លួនបានឡើយ!");
     }
+    if (teacherId === "TCH-ADMIN" || teacherId === "TCH-SYSADMIN") {
+        throw new Error("មិនអាចផ្អាកគណនី System Administrator ចម្បងរបស់ប្រព័ន្ធបានទេ!");
+    }
+
+    const newStatus = (currentStatus || 'active').toLowerCase() === 'active' ? 'inactive' : 'active';
+    const statusLabel = newStatus === 'active' ? 'សកម្ម (Active)' : 'ផ្អាកដំណើរការ (Inactive)';
+
+    if (window.db) {
+        await window.db.collection("teachers").doc(teacherId).update({
+            status: newStatus,
+            permissions_version: Date.now(),
+            updated_at: new Date().toISOString()
+        });
+    }
+
+    let cached = [];
+    try { cached = JSON.parse(localStorage.getItem('cached_teachers_list') || '[]'); } catch(e) {}
+    const idx = cached.findIndex(t => t.teacher_id === teacherId);
+    if (idx >= 0) {
+        cached[idx].status = newStatus;
+        localStorage.setItem('cached_teachers_list', JSON.stringify(cached));
+    }
+
+    if (typeof window.logAudit === 'function') {
+        window.logAudit('TOGGLE_STATUS', 'auth', `បានប្តូរស្ថានភាពគណនី ID: ${teacherId} ទៅជា ${statusLabel}`);
+    }
+
+    if (typeof showToast === 'function') {
+        showToast(`✅ បានប្តូរស្ថានភាពទៅជា ${statusLabel}!`);
+    }
+
+    if (typeof window.renderUserAccountsTab === 'function') {
+        window.renderUserAccountsTab();
+    }
+};
+
+window.deleteTeacherAccount = async function(teacherId) {
+    window.DataServiceGuard.assertCan('manage_users', {}, "🔒 មានតែ System Administrator ប៉ុណ្ណោះដែលអាចលុបគណនីបាន!");
+
     const currentId = localStorage.getItem('auth_teacher_id');
     if (teacherId === currentId) {
         throw new Error("មិនអាចលុបគណនីដែលកំពុងដំណើរការឡើយ!");
     }
-    if (teacherId === "TCH-ADMIN") {
-        throw new Error("មិនអាចលុបគណនី Administrator ចម្បងរបស់ប្រព័ន្ធបានទេ!");
+    if (teacherId === "TCH-ADMIN" || teacherId === "TCH-SYSADMIN") {
+        throw new Error("មិនអាចលុបគណនី System Administrator ចម្បងរបស់ប្រព័ន្ធបានទេ!");
     }
 
     if (window.db) {
@@ -770,31 +1345,37 @@ window.deleteTeacherAccount = async function(teacherId) {
 
     let cached = [];
     try { cached = JSON.parse(localStorage.getItem('cached_teachers_list') || '[]'); } catch(e) {}
+    const deletedUser = cached.find(t => t.teacher_id === teacherId);
     cached = cached.filter(t => t.teacher_id !== teacherId);
     localStorage.setItem('cached_teachers_list', JSON.stringify(cached));
 
+    // កត់ត្រា Audit Log នៃការលុប (Requirement 5)
     if (typeof window.logAudit === 'function') {
-        window.logAudit('DELETE_USER', 'auth', `បានលុបគណនីគ្រូ៖ ${teacherId}`);
+        const uName = deletedUser ? deletedUser.name : "មិនស្គាល់";
+        window.logAudit('DELETE_USER', 'auth', `បានលុបគណនីគ្រូជាអចិន្ត្រៃយ៍៖ ${uName} (ID: ${teacherId})`);
     }
 };
 
 window.resetTeacherPasswordByAdmin = async function(teacherId, newPassword) {
-    if (!window.isCurrentUserAdmin()) {
-        throw new Error("លោកគ្រូមិនមានសិទ្ធិជា Administrator ឡើយ!");
-    }
+    window.DataServiceGuard.assertCan('manage_users', {}, "🔒 មានតែ System Administrator ប៉ុណ្ណោះដែលអាចកំណត់លេខសម្ងាត់ឡើងវិញ!");
+
     if (!newPassword || newPassword.length < 6) {
         throw new Error("លេខសម្ងាត់ថ្មីត្រូវមានយ៉ាងហោចណាស់ ៦ តួអក្សរ!");
     }
 
+    const passwordHash = await window.hashPassword(newPassword);
+
     if (window.db) {
         await window.db.collection("teachers").doc(teacherId).set({
-            password: newPassword,
-            last_password_reset: new Date().toISOString()
+            password_hash: passwordHash,
+            password: firebase.firestore.FieldValue.delete(),
+            last_password_reset: new Date().toISOString(),
+            updated_at: new Date().toISOString()
         }, { merge: true });
     }
 
     if (typeof window.logAudit === 'function') {
-        window.logAudit('RESET_PASSWORD', 'auth', `បានកំណត់លេខសម្ងាត់ឡើងវិញសម្រាប់គ្រូ៖ ${teacherId}`);
+        window.logAudit('RESET_PASSWORD', 'auth', `បានកំណត់លេខសម្ងាត់ឡើងវិញសម្រាប់គ្រូ ID៖ ${teacherId} (Salted SHA-256)`);
     }
 };
 

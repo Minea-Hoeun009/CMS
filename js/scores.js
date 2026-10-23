@@ -700,6 +700,21 @@ window.isCurrentAssessmentLocked = function() {
 
 window.updateAssessmentLockUI = function() {
     const isLocked = window.isCurrentAssessmentLocked();
+
+    // 🔒 ពិនិត្យសិទ្ធិថ្នាក់ទទួលខុសត្រូវ (Section 3.4: គ្រូមិនអាចកែពិន្ទុរបស់ថ្នាក់ផ្សេង ប្រសិនបើគ្មានសិទ្ធិ)
+    const levelStr = document.getElementById("globalLevelSelect")?.value || "";
+    const roomStr = document.getElementById("globalRoomSelect")?.value || "";
+    let isOtherClass = false;
+    if (typeof window.isTeacher === 'function' && window.isTeacher() && !window.isCurrentUserAdmin()) {
+        const myGrade = String(window.AuthState?.assigned_grade || localStorage.getItem('auth_assigned_grade') || "").replace(/\s+/g, '');
+        const myRoom = String(window.AuthState?.assigned_room || localStorage.getItem('auth_assigned_room') || "").replace(/[«»\s]/g, '');
+        const curGradeClean = String(levelStr).replace(/\s+/g, '');
+        const curRoomClean = String(roomStr).replace(/[«»\s]/g, '');
+        if (myGrade && (curGradeClean !== myGrade || (myRoom && curRoomClean !== myRoom))) {
+            isOtherClass = true;
+        }
+    }
+
     const badge = document.getElementById("assessmentLockBadge");
     const lockBtn = document.getElementById("btnToggleAssessmentLock");
     const lockIcon = document.getElementById("lockIcon");
@@ -707,8 +722,13 @@ window.updateAssessmentLockUI = function() {
     const btnSave = document.getElementById("btnSaveScores");
 
     if (badge) {
-        if (isLocked) {
+        if (isOtherClass) {
             badge.classList.remove("hidden");
+            badge.className = "ml-2 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200 shadow-sm";
+            badge.innerHTML = `<i class="fa-solid fa-eye mr-1"></i>សិទ្ធិមើលប៉ុណ្ណោះ (ថ្នាក់ផ្សេង)`;
+        } else if (isLocked) {
+            badge.classList.remove("hidden");
+            badge.className = "ml-2 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-rose-50 text-rose-600 border border-rose-200 shadow-sm";
             badge.innerHTML = `<i class="fa-solid fa-lock mr-1"></i>បានចាក់សោ (Locked)`;
         } else {
             badge.classList.add("hidden");
@@ -727,11 +747,13 @@ window.updateAssessmentLockUI = function() {
         }
     }
 
+    const shouldDisable = isLocked || isOtherClass;
+
     if (btnSave) {
-        if (isLocked) {
+        if (shouldDisable) {
             btnSave.disabled = true;
             btnSave.classList.add("opacity-50", "cursor-not-allowed");
-            btnSave.title = "ពិន្ទុត្រូវបានចាក់សោរួចហើយ មិនអាចកែប្រែបានទេ";
+            btnSave.title = isOtherClass ? "លោកគ្រូ/អ្នកគ្រូមិនមានសិទ្ធិកែប្រែពិន្ទុរបស់ថ្នាក់ផ្សេងឡើយ" : "ពិន្ទុត្រូវបានចាក់សោរួចហើយ មិនអាចកែប្រែបានទេ";
         } else {
             btnSave.disabled = false;
             btnSave.classList.remove("opacity-50", "cursor-not-allowed");
@@ -739,13 +761,13 @@ window.updateAssessmentLockUI = function() {
         }
     }
 
-    // Disable all inputs in the score table if locked
+    // Disable all inputs in the score table if locked or unauthorized class
     const tbody = document.getElementById("scoresTableBody");
     if (tbody) {
         const inputs = tbody.querySelectorAll("input, select");
         inputs.forEach(inp => {
-            inp.disabled = isLocked;
-            if (isLocked) inp.classList.add("bg-slate-100", "cursor-not-allowed");
+            inp.disabled = shouldDisable;
+            if (shouldDisable) inp.classList.add("bg-slate-100", "cursor-not-allowed");
             else inp.classList.remove("bg-slate-100", "cursor-not-allowed");
         });
     }
@@ -812,13 +834,26 @@ window.saveScoresData = async function() {
         return;
     }
 
-    if (btn) { btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> កំពុងបញ្ជូន...`; btn.disabled = true; }
-
     const type = document.getElementById("globalPeriodType")?.value || "monthly";
     const month = document.getElementById("globalPeriodValue")?.value || "";
     const levelStr = document.getElementById("globalLevelSelect")?.value || "";
     const roomStr = document.getElementById("globalRoomSelect")?.value || "";
     const grade = `${levelStr} ${roomStr}`;
+
+    // 🔒 ពិនិត្យសិទ្ធិថ្នាក់ទទួលខុសត្រូវ (Section 3.4: គ្រូមិនអាចកែពិន្ទុរបស់ថ្នាក់ផ្សេង ប្រសិនបើគ្មានសិទ្ធិ)
+    if (typeof window.isTeacher === 'function' && window.isTeacher() && !window.isCurrentUserAdmin()) {
+        const myGrade = String(window.AuthState?.assigned_grade || localStorage.getItem('auth_assigned_grade') || "").replace(/\s+/g, '');
+        const myRoom = String(window.AuthState?.assigned_room || localStorage.getItem('auth_assigned_room') || "").replace(/[«»\s]/g, '');
+        const curGradeClean = String(levelStr).replace(/\s+/g, '');
+        const curRoomClean = String(roomStr).replace(/[«»\s]/g, '');
+
+        if (myGrade && (curGradeClean !== myGrade || (myRoom && curRoomClean !== myRoom))) {
+            alert(`🔒 លោកគ្រូ/អ្នកគ្រូមានសិទ្ធិកែប្រែតែពិន្ទុថ្នាក់ «${window.AuthState?.assigned_grade || myGrade} ${window.AuthState?.assigned_room || myRoom}» ប៉ុណ្ណោះ!\nមិនអាចកែប្រែពិន្ទុរបស់ថ្នាក់ផ្សេងបានឡើយ។`);
+            return;
+        }
+    }
+
+    if (btn) { btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> កំពុងបញ្ជូន...`; btn.disabled = true; }
 
     window.calculateAllScores();
     let scoresPayload = [];

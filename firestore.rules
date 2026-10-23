@@ -1,35 +1,665 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    
-    // ១. គណនីគ្រូបង្រៀន (Teachers)
+
+    // ===============================================================
+    // Assumed Data Model & Specifications (ជំពូកទី២៖ តួនាទី និងសិទ្ធិអ្នកប្រើប្រាស់)
+    // ===============================================================
+    //
+    // Roles supported:
+    // 1. System Administrator: Manage accounts, roles, system configs, backups
+    // 2. School Administrator: Manage school info, academic years, classes, students, reports
+    // 3. Teacher: Manage assigned class, record attendance & scores within scope
+    // 4. Report Viewer: Read-only access to authorized reports, no modifications
+    //
+    // Collection: /teachers/{teacherId}
+    // Document ID: teacherId (e.g. 'TCH-001', 'TCH-ADMIN', or Auth UID)
+    // Fields:
+    //   - teacher_id: string (required, immutable) - ID of teacher
+    //   - name: string (required, 1-100 chars) - Full name in Khmer
+    //   - username: string (required, 2-50 chars) - Login username
+    //   - role: string (optional, in ['system_admin', 'admin', 'school_admin', 'teacher', 'viewer', 'report_viewer'])
+    //   - roles: list of strings (optional, max 10 strings) - Multi-role array
+    //   - contact / phone: string (optional, <= 50 chars) - Contact info
+    //   - assigned_grade: string (optional, <= 50 chars) - Assigned grade (e.g. 'ថ្នាក់ទី ១', 'គ្រប់ថ្នាក់')
+    //   - assigned_room: string (optional, <= 50 chars) - Assigned classroom (e.g. '«ក»', 'ទូទៅ')
+    //   - school_id: string (optional, <= 50 chars) - Associated school identifier
+    //   - status: string (optional, in ['active', 'inactive', 'locked']) - Account state
+    //   - password: string (optional, 6-255 chars) - Password for local fallback
+    //   - created_at: string/timestamp (optional, immutable)
+    //   - last_updated: string/timestamp (optional)
+    //   - profile_avatar: string (optional, <= 600000 chars)
+    //
+    // Collection: /schools_config/{configId}
+    // Document ID: 'academic_structure', 'main_settings', 'assessment_locks', etc.
+    // Fields: School profile, academic structure, classes, system settings
+    //
+    // Collection: /students/{studentId}
+    // Document ID: studentId (e.g. 'STU123456' or numeric string)
+    // Fields:
+    //   - id: string/int (required, immutable) - Student ID
+    //   - name: string (required, 1-100 chars) - Khmer name
+    //   - grade: string (required, <= 50 chars) - Student grade
+    //   - academic_year: string (required, <= 30 chars) - Academic year (e.g. '2026-2027')
+    //   - room: string (optional, <= 50 chars) - Section / room
+    //   - teacher_id: string (optional, <= 50 chars) - Responsible teacher ID
+    //   - school_id: string (optional, <= 50 chars) - School ID
+    //   - gender: string (optional, <= 20 chars)
+    //   - dob: string (optional, <= 30 chars)
+    //   - status: string (optional, <= 30 chars) - 'Active', 'Withdrawn', etc.
+    //   - poor_id, scholarship, disability: bool (optional)
+    //   - photo_url: string (optional, <= 600000 chars)
+    //   - last_updated: string/timestamp (optional)
+    //
+    // Collection: /scores/{scoreId}
+    // Document ID: scoreDocId (e.g. '2026-2027_Grade1_monthly_October')
+    // Fields:
+    //   - grade: string (required, immutable, <= 50 chars)
+    //   - academic_year: string (required, immutable, <= 30 chars)
+    //   - period_type: string (required, immutable, <= 50 chars)
+    //   - month: string (optional, <= 50 chars)
+    //   - scores: list of maps (optional, max 300 entries)
+    //   - school_id: string (optional, <= 50 chars)
+    //   - teacher_id: string (optional, <= 50 chars)
+    //   - last_updated: string/timestamp (optional)
+    //
+    // Collection: /attendance/{attendanceId}
+    // Document ID: attDocId (e.g. '2026-2027_Grade1_2026_10')
+    // Fields:
+    //   - grade: string (required, immutable, <= 50 chars)
+    //   - academic_year: string (required, immutable, <= 30 chars)
+    //   - month: string (required, immutable, <= 50 chars)
+    //   - records: map/list (optional)
+    //   - holidays: map (optional)
+    //   - total_recorded: number (optional, >= 0)
+    //   - school_id: string (optional, <= 50 chars)
+    //   - teacher_id: string (optional, <= 50 chars)
+    //   - last_updated: string/timestamp (optional)
+    //
+    // Collection: /library_books/{bookId}
+    // Document ID: bookId (e.g. 'lib_Grade1')
+    // Fields:
+    //   - grade: string (required, <= 50 chars)
+    //   - data: map/list (optional)
+    //   - subjects: list (optional, max 100 items)
+    //   - school_id: string (optional, <= 50 chars)
+    //   - last_updated: string/timestamp (optional)
+    //
+    // Collection: /audit_logs/{logId} (Append-only)
+    // Document ID: logId (e.g. 'log_1729000000_abcde')
+    // Fields:
+    //   - id: string (optional, <= 100 chars)
+    //   - action: string (required, 1-100 chars)
+    //   - category: string (required, 1-100 chars)
+    //   - details: string (required, <= 2000 chars)
+    //   - teacher_id: string (optional, <= 100 chars)
+    //   - teacher_name: string (optional, <= 100 chars)
+    //   - academic_year: string (optional, <= 30 chars)
+    //   - timestamp: string/timestamp (required)
+    //   - device: string (optional, <= 200 chars)
+    //
+    // Collection: /timetables/{timetableId}
+    // Collection: /homework/{docId}
+    // Collection: /announcements/{docId}
+    //
+    // ===============================================================
+
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function hasRequiredFields(fields) {
+      return request.resource.data.keys().hasAll(fields);
+    }
+
+    function hasOnlyAllowedFields(fields) {
+      return request.resource.data.keys().hasOnly(fields);
+    }
+
+    function areImmutableFieldsUnchanged(fields) {
+      return !request.resource.data.diff(resource.data).affectedKeys().hasAny(fields);
+    }
+
+    function isValidList(targetList, maxSize) {
+      return targetList is list && targetList.size() <= maxSize;
+    }
+
+    function isValidOptionalString(field, minLen, maxLen) {
+      return !(field in request.resource.data) ||
+        (request.resource.data[field] is string &&
+         request.resource.data[field].size() >= minLen &&
+         request.resource.data[field].size() <= maxLen);
+    }
+
+    // Safely extract document fields with empty string defaults
+    function getDocSchoolId(data) {
+      return ('school_id' in data && data.school_id is string) ? data.school_id : '';
+    }
+
+    function getDocRoom(data) {
+      return ('room' in data && data.room is string) ? data.room : '';
+    }
+
+    // -------------------------------------------------------------
+    // RBAC & User State Helpers
+    // -------------------------------------------------------------
+
+    function teacherDocExists() {
+      return isAuthenticated() && exists(/databases/$(database)/documents/teachers/$(request.auth.uid));
+    }
+
+    function getTeacherProfile() {
+      return teacherDocExists()
+        ? get(/databases/$(database)/documents/teachers/$(request.auth.uid)).data
+        : null;
+    }
+
+    // AUTH-03: Immediate access revocation if account status is inactive or locked
+    function isActiveUser() {
+      return isAuthenticated() && (
+        !teacherDocExists() ||
+        !('status' in getTeacherProfile()) ||
+        getTeacherProfile().status == 'active'
+      );
+    }
+
+    // Check custom claims from Firebase Auth token
+    function tokenHasRole(roleName) {
+      return isAuthenticated() && (
+        ('role' in request.auth.token && request.auth.token.role == roleName) ||
+        ('roles' in request.auth.token && request.auth.token.roles is list && roleName in request.auth.token.roles) ||
+        (roleName == 'system_admin' && (
+          ('admin' in request.auth.token && request.auth.token.admin == true) ||
+          ('role' in request.auth.token && request.auth.token.role == 'admin')
+        ))
+      );
+    }
+
+    // Check teacher document role (supporting both array 'roles' and string 'role')
+    function docHasRole(roleName) {
+      return teacherDocExists() && (
+        ('role' in getTeacherProfile() && getTeacherProfile().role == roleName) ||
+        (roleName == 'system_admin' && 'role' in getTeacherProfile() && getTeacherProfile().role == 'admin') ||
+        (roleName == 'report_viewer' && 'role' in getTeacherProfile() && getTeacherProfile().role == 'viewer') ||
+        ('roles' in getTeacherProfile() && getTeacherProfile().roles is list && (
+          roleName in getTeacherProfile().roles ||
+          (roleName == 'system_admin' && 'admin' in getTeacherProfile().roles) ||
+          (roleName == 'report_viewer' && 'viewer' in getTeacherProfile().roles)
+        ))
+      );
+    }
+
+    function hasRole(roleName) {
+      return tokenHasRole(roleName) || docHasRole(roleName);
+    }
+
+    // 1. System Administrator
+    function isSystemAdmin() {
+      return isAuthenticated() && isActiveUser() && (
+        hasRole('system_admin') ||
+        hasRole('admin')
+      );
+    }
+
+    // 2. School Administrator
+    function isSchoolAdmin() {
+      return isSystemAdmin() || (
+        isAuthenticated() && isActiveUser() && hasRole('school_admin')
+      );
+    }
+
+    // 3. Teacher
+    function isTeacher() {
+      return isSchoolAdmin() || (
+        isAuthenticated() && isActiveUser() && hasRole('teacher')
+      );
+    }
+
+    // 4. Report Viewer
+    function isReportViewer() {
+      return isTeacher() || (
+        isAuthenticated() && isActiveUser() && (
+          hasRole('report_viewer') ||
+          hasRole('viewer')
+        )
+      );
+    }
+
+    // -------------------------------------------------------------
+    // Scope Helpers (Isolation by School, Grade, and Room)
+    // -------------------------------------------------------------
+
+    function getCurrentSchoolId() {
+      return teacherDocExists() && ('school_id' in getTeacherProfile())
+        ? getTeacherProfile().school_id
+        : '';
+    }
+
+    function getCurrentAssignedGrade() {
+      return teacherDocExists() && ('assigned_grade' in getTeacherProfile())
+        ? getTeacherProfile().assigned_grade
+        : '';
+    }
+
+    function getCurrentAssignedRoom() {
+      return teacherDocExists() && ('assigned_room' in getTeacherProfile())
+        ? getTeacherProfile().assigned_room
+        : '';
+    }
+
+    function isSameSchool(targetSchoolId) {
+      return getCurrentSchoolId() == '' || targetSchoolId == '' || getCurrentSchoolId() == targetSchoolId;
+    }
+
+    function isGradeInScope(targetGrade) {
+      return getCurrentAssignedGrade() == '' ||
+             getCurrentAssignedGrade() == 'គ្រប់ថ្នាក់' ||
+             getCurrentAssignedGrade() == targetGrade;
+    }
+
+    function isRoomInScope(targetRoom) {
+      return getCurrentAssignedRoom() == '' ||
+             getCurrentAssignedRoom() == 'ទូទៅ' ||
+             getCurrentAssignedRoom() == targetRoom;
+    }
+
+    function isTeacherWriteScoped(targetGrade, targetRoom, targetSchoolId) {
+      return isSchoolAdmin() || (
+        isTeacher() &&
+        isSameSchool(targetSchoolId) &&
+        isGradeInScope(targetGrade) &&
+        (targetRoom == '' || isRoomInScope(targetRoom))
+      );
+    }
+
+    // ===============================================================
+    // Domain Validators (Enforced on both Create and Update)
+    // ===============================================================
+
+    function isValidTeacher(data) {
+      return hasRequiredFields(['name', 'username']) &&
+        hasOnlyAllowedFields([
+          'teacher_id', 'name', 'full_name', 'username', 'password',
+          'role', 'roles', 'contact', 'phone', 'assigned_grade', 'assigned_room',
+          'teacher_level', 'teacher_room', 'school_id', 'status',
+          'created_at', 'last_updated', 'last_password_reset', 'profile_avatar'
+        ]) &&
+        data.name is string && data.name.size() > 0 && data.name.size() <= 100 &&
+        data.username is string && data.username.size() >= 2 && data.username.size() <= 50 &&
+        (!('role' in data) || (data.role is string && data.role in ['system_admin', 'admin', 'school_admin', 'teacher', 'viewer', 'report_viewer'])) &&
+        (!('roles' in data) || isValidList(data.roles, 10)) &&
+        (!('status' in data) || (data.status is string && data.status in ['active', 'inactive', 'locked'])) &&
+        (!('contact' in data) || (data.contact is string && data.contact.size() <= 50)) &&
+        (!('phone' in data) || (data.phone is string && data.phone.size() <= 50)) &&
+        (!('assigned_grade' in data) || (data.assigned_grade is string && data.assigned_grade.size() <= 50)) &&
+        (!('assigned_room' in data) || (data.assigned_room is string && data.assigned_room.size() <= 50)) &&
+        (!('school_id' in data) || (data.school_id is string && data.school_id.size() <= 50)) &&
+        (!('password' in data) || (data.password is string && data.password.size() <= 255)) &&
+        (!('profile_avatar' in data) || (data.profile_avatar is string && data.profile_avatar.size() <= 600000));
+    }
+
+    function isValidStudent(data) {
+      return hasRequiredFields(['id', 'name', 'grade', 'academic_year']) &&
+        hasOnlyAllowedFields([
+          'id', 'teacher_id', 'academic_year', 'school_id', 'name', 'name_en',
+          'gender', 'dob', 'enrollment_date', 'photo_url',
+          'pob_village', 'pob_commune', 'pob_district', 'pob_province',
+          'curr_village', 'curr_commune', 'curr_district', 'curr_province',
+          'father_name', 'father_job', 'mother_name', 'mother_job',
+          'grade', 'room', 'parent_contact', 'status', 'poor_id', 'scholarship',
+          'disability', 'updated_at', 'last_updated', 'fb_id', 'note', 'address'
+        ]) &&
+        ((data.id is string && data.id.size() > 0 && data.id.size() <= 50) || data.id is int) &&
+        data.name is string && data.name.size() > 0 && data.name.size() <= 100 &&
+        data.grade is string && data.grade.size() > 0 && data.grade.size() <= 50 &&
+        data.academic_year is string && data.academic_year.size() > 0 && data.academic_year.size() <= 30 &&
+        (!('room' in data) || (data.room is string && data.room.size() <= 50)) &&
+        (!('teacher_id' in data) || (data.teacher_id is string && data.teacher_id.size() <= 50)) &&
+        (!('school_id' in data) || (data.school_id is string && data.school_id.size() <= 50)) &&
+        (!('gender' in data) || (data.gender is string && data.gender.size() <= 20)) &&
+        (!('dob' in data) || (data.dob is string && data.dob.size() <= 30)) &&
+        (!('status' in data) || (data.status is string && data.status.size() <= 30)) &&
+        (!('poor_id' in data) || data.poor_id is bool) &&
+        (!('scholarship' in data) || data.scholarship is bool) &&
+        (!('disability' in data) || data.disability is bool) &&
+        (!('photo_url' in data) || (data.photo_url is string && data.photo_url.size() <= 600000));
+    }
+
+    function isValidScore(data) {
+      return hasRequiredFields(['grade', 'academic_year', 'period_type']) &&
+        hasOnlyAllowedFields([
+          'grade', 'period_type', 'month', 'academic_year', 'scores',
+          'school_id', 'teacher_id', 'last_updated'
+        ]) &&
+        data.grade is string && data.grade.size() > 0 && data.grade.size() <= 50 &&
+        data.academic_year is string && data.academic_year.size() > 0 && data.academic_year.size() <= 30 &&
+        data.period_type is string && data.period_type.size() > 0 && data.period_type.size() <= 50 &&
+        (!('month' in data) || (data.month is string && data.month.size() <= 50)) &&
+        (!('school_id' in data) || (data.school_id is string && data.school_id.size() <= 50)) &&
+        (!('teacher_id' in data) || (data.teacher_id is string && data.teacher_id.size() <= 50)) &&
+        (!('scores' in data) || isValidList(data.scores, 300));
+    }
+
+    function isValidAttendance(data) {
+      return hasRequiredFields(['grade', 'academic_year', 'month']) &&
+        hasOnlyAllowedFields([
+          'academic_year', 'grade', 'year', 'month', 'month_num',
+          'teacher_id', 'records', 'holidays', 'total_recorded',
+          'school_id', 'last_updated'
+        ]) &&
+        data.grade is string && data.grade.size() > 0 && data.grade.size() <= 50 &&
+        data.academic_year is string && data.academic_year.size() > 0 && data.academic_year.size() <= 30 &&
+        data.month is string && data.month.size() > 0 && data.month.size() <= 50 &&
+        (!('total_recorded' in data) || (data.total_recorded is number && data.total_recorded >= 0)) &&
+        (!('school_id' in data) || (data.school_id is string && data.school_id.size() <= 50)) &&
+        (!('teacher_id' in data) || (data.teacher_id is string && data.teacher_id.size() <= 50));
+    }
+
+    function isValidLibraryBook(data) {
+      return hasRequiredFields(['grade']) &&
+        hasOnlyAllowedFields(['grade', 'data', 'subjects', 'school_id', 'last_updated']) &&
+        data.grade is string && data.grade.size() > 0 && data.grade.size() <= 50 &&
+        (!('school_id' in data) || (data.school_id is string && data.school_id.size() <= 50)) &&
+        (!('subjects' in data) || isValidList(data.subjects, 100));
+    }
+
+    function isValidSchoolConfig(data) {
+      return data is map &&
+        (!('school_name' in data) || (data.school_name is string && data.school_name.size() <= 200)) &&
+        (!('logo_url' in data) || (data.logo_url is string && data.logo_url.size() <= 600000)) &&
+        (!('signature_url' in data) || (data.signature_url is string && data.signature_url.size() <= 600000));
+    }
+
+    function isValidAuditLog(data) {
+      return hasRequiredFields(['action', 'category', 'details', 'timestamp']) &&
+        hasOnlyAllowedFields([
+          'id', 'action', 'category', 'details', 'teacher_id',
+          'teacher_name', 'academic_year', 'timestamp', 'device', 'school_id'
+        ]) &&
+        data.action is string && data.action.size() > 0 && data.action.size() <= 100 &&
+        data.category is string && data.category.size() > 0 && data.category.size() <= 100 &&
+        data.details is string && data.details.size() <= 2000 &&
+        (!('teacher_id' in data) || (data.teacher_id is string && data.teacher_id.size() <= 100)) &&
+        (!('teacher_name' in data) || (data.teacher_name is string && data.teacher_name.size() <= 100)) &&
+        (!('academic_year' in data) || (data.academic_year is string && data.academic_year.size() <= 30)) &&
+        (!('device' in data) || (data.device is string && data.device.size() <= 200)) &&
+        (!('school_id' in data) || (data.school_id is string && data.school_id.size() <= 50));
+    }
+
+    function isValidTimetable(data) {
+      return hasRequiredFields(['grade']) &&
+        hasOnlyAllowedFields(['grade', 'schedule', 'school_id', 'last_updated']) &&
+        data.grade is string && data.grade.size() > 0 && data.grade.size() <= 50 &&
+        (!('school_id' in data) || (data.school_id is string && data.school_id.size() <= 50));
+    }
+
+    function isValidHomework(data) {
+      return hasOnlyAllowedFields(['assignments', 'school_id', 'last_updated']) &&
+        (!('school_id' in data) || (data.school_id is string && data.school_id.size() <= 50)) &&
+        (!('assignments' in data) || isValidList(data.assignments, 200));
+    }
+
+    function isValidAnnouncement(data) {
+      return hasOnlyAllowedFields(['items', 'school_id', 'last_updated']) &&
+        (!('school_id' in data) || (data.school_id is string && data.school_id.size() <= 50)) &&
+        (!('items' in data) || isValidList(data.items, 100));
+    }
+
+    // ===============================================================
+    // Collection Security Rules
+    // ===============================================================
+
+    // -------------------------------------------------------------
+    // 1. គណនីគ្រូបង្រៀន (Teachers)
+    // -------------------------------------------------------------
     match /teachers/{teacherId} {
-      allow read, write: if true; // អាចរៀបចំ restricted តាម request.auth ពេលបើក Firebase Auth ពេញលេញ
+      // System admin can read all; self can read; colleagues in same school can read basic profile
+      allow read: if isAuthenticated() && isActiveUser() && (
+        isSystemAdmin() ||
+        isOwner(teacherId) ||
+        (isTeacher() && isSameSchool(getDocSchoolId(resource.data)))
+      );
+
+      // System admin can create any account; non-admin can only self-register as 'teacher'
+      allow create: if isAuthenticated() && isValidTeacher(request.resource.data) && (
+        isSystemAdmin() || (
+          isOwner(teacherId) &&
+          (!('role' in request.resource.data) || request.resource.data.role == 'teacher') &&
+          (!('roles' in request.resource.data) || request.resource.data.roles == ['teacher']) &&
+          (!('status' in request.resource.data) || request.resource.data.status == 'active')
+        )
+      );
+
+      // System admin can modify any field (roles, status, assignments); self can only update personal info
+      allow update: if isAuthenticated() && isActiveUser() && isValidTeacher(request.resource.data) && (
+        isSystemAdmin() || (
+          isOwner(teacherId) &&
+          areImmutableFieldsUnchanged(['teacher_id', 'created_at']) &&
+          // Non-admin CANNOT escalate roles or status
+          (!('role' in resource.data) || request.resource.data.role == resource.data.role) &&
+          (!('roles' in resource.data) || request.resource.data.roles == resource.data.roles) &&
+          (!('status' in resource.data) || request.resource.data.status == resource.data.status) &&
+          // Non-admin CANNOT change their assigned class or school scope
+          (!('assigned_grade' in resource.data) || request.resource.data.assigned_grade == resource.data.assigned_grade) &&
+          (!('assigned_room' in resource.data) || request.resource.data.assigned_room == resource.data.assigned_room) &&
+          (!('school_id' in resource.data) || request.resource.data.school_id == resource.data.school_id)
+        )
+      );
+
+      // Only System Admin can delete accounts; cannot delete currently logged-in account (prevent lockout)
+      allow delete: if isSystemAdmin() && request.auth.uid != teacherId;
     }
-    
-    // ២. ការកំណត់សាលារៀន (School Configuration)
+
+    // -------------------------------------------------------------
+    // 2. ការកំណត់សាលារៀន (School Configuration)
+    // -------------------------------------------------------------
     match /schools_config/{configId} {
-      allow read, write: if true;
+      // All authenticated and active staff (including report viewers) can read school config
+      allow read: if isAuthenticated() && isActiveUser();
+
+      // Only School Admins and System Admins can create, update, or delete configurations
+      allow create: if isSchoolAdmin() && isValidSchoolConfig(request.resource.data);
+      allow update: if isSchoolAdmin() && isValidSchoolConfig(request.resource.data);
+      allow delete: if isSchoolAdmin();
     }
-    
-    // ៣. បញ្ជីរាយនាមសិស្ស (Students)
+
+    // -------------------------------------------------------------
+    // 3. បញ្ជីរាយនាមសិស្ស (Students)
+    // -------------------------------------------------------------
     match /students/{studentId} {
-      allow read, write: if true;
+      // Admins, teachers, and viewers can read students within school / assigned scope
+      allow read: if isAuthenticated() && isActiveUser() && isReportViewer() && (
+        isSchoolAdmin() ||
+        isSameSchool(getDocSchoolId(resource.data))
+      );
+
+      // Teachers can create/update only students within their assigned grade/room/school scope; Admins can manage any
+      allow create: if isTeacher() && isValidStudent(request.resource.data) && (
+        isSchoolAdmin() ||
+        isTeacherWriteScoped(
+          request.resource.data.grade,
+          getDocRoom(request.resource.data),
+          getDocSchoolId(request.resource.data)
+        )
+      );
+
+      allow update: if isTeacher() && isValidStudent(request.resource.data) &&
+        areImmutableFieldsUnchanged(['id']) && (
+        isSchoolAdmin() || (
+          isTeacherWriteScoped(
+            resource.data.grade,
+            getDocRoom(resource.data),
+            getDocSchoolId(resource.data)
+          ) &&
+          isTeacherWriteScoped(
+            request.resource.data.grade,
+            getDocRoom(request.resource.data),
+            getDocSchoolId(request.resource.data)
+          )
+        )
+      );
+
+      // Deletion is strictly restricted to School Administrators and System Administrators
+      allow delete: if isSchoolAdmin();
     }
-    
-    // ៤. បញ្ជីវត្តមានសិស្ស (Attendance)
+
+    // -------------------------------------------------------------
+    // 4. បញ្ជីវត្តមានសិស្ស (Attendance)
+    // -------------------------------------------------------------
     match /attendance/{attendanceId} {
-      allow read, write: if true;
+      allow read: if isAuthenticated() && isActiveUser() && isReportViewer() && (
+        isSchoolAdmin() ||
+        isSameSchool(getDocSchoolId(resource.data))
+      );
+
+      // Teachers write only for their assigned grade/school; Viewers cannot write
+      allow create: if isTeacher() && isValidAttendance(request.resource.data) && (
+        isSchoolAdmin() ||
+        isTeacherWriteScoped(
+          request.resource.data.grade,
+          '',
+          getDocSchoolId(request.resource.data)
+        )
+      );
+
+      allow update: if isTeacher() && isValidAttendance(request.resource.data) &&
+        areImmutableFieldsUnchanged(['grade', 'academic_year', 'month']) && (
+        isSchoolAdmin() ||
+        isTeacherWriteScoped(
+          resource.data.grade,
+          '',
+          getDocSchoolId(resource.data)
+        )
+      );
+
+      allow delete: if isSchoolAdmin();
     }
-    
-    // ៥. បញ្ជីពិន្ទុ និងចំណាត់ថ្នាក់ (Scores)
+
+    // -------------------------------------------------------------
+    // 5. បញ្ជីពិន្ទុ និងចំណាត់ថ្នាក់ (Scores)
+    // -------------------------------------------------------------
     match /scores/{scoreId} {
-      allow read, write: if true;
+      allow read: if isAuthenticated() && isActiveUser() && isReportViewer() && (
+        isSchoolAdmin() ||
+        isSameSchool(getDocSchoolId(resource.data))
+      );
+
+      // Teachers write only for their assigned grade/school; Viewers cannot write
+      allow create: if isTeacher() && isValidScore(request.resource.data) && (
+        isSchoolAdmin() ||
+        isTeacherWriteScoped(
+          request.resource.data.grade,
+          '',
+          getDocSchoolId(request.resource.data)
+        )
+      );
+
+      allow update: if isTeacher() && isValidScore(request.resource.data) &&
+        areImmutableFieldsUnchanged(['grade', 'academic_year', 'period_type']) && (
+        isSchoolAdmin() ||
+        isTeacherWriteScoped(
+          resource.data.grade,
+          '',
+          getDocSchoolId(resource.data)
+        )
+      );
+
+      allow delete: if isSchoolAdmin();
     }
-    
-    // ៦. បណ្ណាល័យ និងសៀវភៅពុម្ព (Library Books)
+
+    // -------------------------------------------------------------
+    // 6. បណ្ណាល័យ និងសៀវភៅពុម្ព (Library Books)
+    // -------------------------------------------------------------
     match /library_books/{bookId} {
-      allow read, write: if true;
+      allow read: if isAuthenticated() && isActiveUser() && isReportViewer() && (
+        isSchoolAdmin() ||
+        isSameSchool(getDocSchoolId(resource.data))
+      );
+
+      allow create: if isTeacher() && isValidLibraryBook(request.resource.data) && (
+        isSchoolAdmin() ||
+        isSameSchool(getDocSchoolId(request.resource.data))
+      );
+
+      allow update: if isTeacher() && isValidLibraryBook(request.resource.data) &&
+        areImmutableFieldsUnchanged(['grade']) && (
+        isSchoolAdmin() ||
+        isSameSchool(getDocSchoolId(resource.data))
+      );
+
+      allow delete: if isSchoolAdmin();
+    }
+
+    // -------------------------------------------------------------
+    // 7. កំណត់ត្រាសវនកម្ម (Audit Logs - Append-Only)
+    // -------------------------------------------------------------
+    match /audit_logs/{logId} {
+      // Append-only: any authenticated and active user can log actions
+      allow create: if isAuthenticated() && isActiveUser() && isValidAuditLog(request.resource.data);
+
+      // Strictly immutable: NO user can edit or delete audit logs
+      allow update, delete: if false;
+
+      // Only administrators can review audit logs
+      allow read: if isSchoolAdmin();
+    }
+
+    // -------------------------------------------------------------
+    // 8. កាលវិភាគ (Timetables)
+    // -------------------------------------------------------------
+    match /timetables/{timetableId} {
+      allow read: if isAuthenticated() && isActiveUser() && isReportViewer();
+      allow create: if isTeacher() && isValidTimetable(request.resource.data) && (
+        isSchoolAdmin() ||
+        isTeacherWriteScoped(
+          request.resource.data.grade,
+          '',
+          getDocSchoolId(request.resource.data)
+        )
+      );
+      allow update: if isTeacher() && isValidTimetable(request.resource.data) &&
+        areImmutableFieldsUnchanged(['grade']) && (
+        isSchoolAdmin() ||
+        isTeacherWriteScoped(
+          resource.data.grade,
+          '',
+          getDocSchoolId(resource.data)
+        )
+      );
+      allow delete: if isSchoolAdmin();
+    }
+
+    // -------------------------------------------------------------
+    // 9. កិច្ចការផ្ទះ (Homework)
+    // -------------------------------------------------------------
+    match /homework/{docId} {
+      allow read: if isAuthenticated() && isActiveUser() && isReportViewer();
+      allow create, update: if isTeacher() && isValidHomework(request.resource.data);
+      allow delete: if isSchoolAdmin();
+    }
+
+    // -------------------------------------------------------------
+    // 10. សេចក្តីជូនដំណឹង (Announcements)
+    // -------------------------------------------------------------
+    match /announcements/{docId} {
+      allow read: if isAuthenticated() && isActiveUser();
+      allow create, update: if isSchoolAdmin() && isValidAnnouncement(request.resource.data);
+      allow delete: if isSchoolAdmin();
+    }
+
+    // -------------------------------------------------------------
+    // Default Deny Rule for all unmapped paths
+    // -------------------------------------------------------------
+    match /{document=**} {
+      allow read, write: if false;
     }
   }
 }

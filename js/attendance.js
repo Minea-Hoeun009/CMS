@@ -1495,6 +1495,19 @@ window.saveMonthlyAttendance = async function() {
     
     const gradeInfo = window.getTeacherGradeInfo();
     const grade = `${gradeInfo.level} ${gradeInfo.room}`;
+
+    // 🔒 ពិនិត្យសិទ្ធិថ្នាក់ទទួលខុសត្រូវ (Section 3.4: គ្រូមិនអាចកែទិន្នន័យរបស់ថ្នាក់ផ្សេង ប្រសិនបើគ្មានសិទ្ធិ)
+    if (typeof window.isTeacher === 'function' && window.isTeacher() && !window.isCurrentUserAdmin()) {
+        const myGrade = String(window.AuthState?.assigned_grade || localStorage.getItem('auth_assigned_grade') || "").replace(/\s+/g, '');
+        const myRoom = String(window.AuthState?.assigned_room || localStorage.getItem('auth_assigned_room') || "").replace(/[«»\s]/g, '');
+        const curGradeClean = String(gradeInfo.level || "").replace(/\s+/g, '');
+        const curRoomClean = String(gradeInfo.room || "").replace(/[«»\s]/g, '');
+
+        if (myGrade && (curGradeClean !== myGrade || (myRoom && curRoomClean !== myRoom))) {
+            alert(`🔒 លោកគ្រូ/អ្នកគ្រូមានសិទ្ធិកត់ត្រាវត្តមានតែថ្នាក់ «${window.AuthState?.assigned_grade || myGrade} ${window.AuthState?.assigned_room || myRoom}» ប៉ុណ្ណោះ!\nមិនអាចកែប្រែវត្តមានរបស់ថ្នាក់ផ្សេងបានឡើយ។`);
+            return;
+        }
+    }
     
     const currentTeacherId = window.AuthState ? window.AuthState.teacherId : localStorage.getItem('auth_teacher_id');
     const academicYearStr = document.getElementById("globalAcademicYear")?.value || localStorage.getItem('selected_academic_year') || "2026-2027";
@@ -1845,6 +1858,19 @@ window.printOfficialAttendance = function() {
     const month = document.getElementById("attMonthSelect")?.value || "មករា";
     const gradeInfo = window.getTeacherGradeInfo();
     const grade = `${gradeInfo.level} ${gradeInfo.room}`;
+
+    // 🔒 ពិនិត្យសិទ្ធិថ្នាក់ទទួលខុសត្រូវ (Section 3.4: គ្រូមិនអាចកែទិន្នន័យរបស់ថ្នាក់ផ្សេង ប្រសិនបើគ្មានសិទ្ធិ)
+    if (typeof window.isTeacher === 'function' && window.isTeacher() && !window.isCurrentUserAdmin()) {
+        const myGrade = String(window.AuthState?.assigned_grade || localStorage.getItem('auth_assigned_grade') || "").replace(/\s+/g, '');
+        const myRoom = String(window.AuthState?.assigned_room || localStorage.getItem('auth_assigned_room') || "").replace(/[«»\s]/g, '');
+        const curGradeClean = String(gradeInfo.level || "").replace(/\s+/g, '');
+        const curRoomClean = String(gradeInfo.room || "").replace(/[«»\s]/g, '');
+
+        if (myGrade && (curGradeClean !== myGrade || (myRoom && curRoomClean !== myRoom))) {
+            alert(`🔒 លោកគ្រូ/អ្នកគ្រូមានសិទ្ធិកត់ត្រាវត្តមានតែថ្នាក់ «${window.AuthState?.assigned_grade || myGrade} ${window.AuthState?.assigned_room || myRoom}» ប៉ុណ្ណោះ!\nមិនអាចកែប្រែវត្តមានរបស់ថ្នាក់ផ្សេងបានឡើយ។`);
+            return;
+        }
+    }
     
     const sInfo = typeof appSettings !== 'undefined' ? appSettings : {};
     let rawDistrict = sInfo.district || "ស្រុកកៀនស្វាយ";
