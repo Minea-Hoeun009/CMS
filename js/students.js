@@ -209,7 +209,12 @@ window.loadStudentsView = async function() {
                                 <option value="all">ប្រុស និង ស្រី</option><option value="ប្រុស">ប្រុស</option><option value="ស្រី">ស្រី</option>
                             </select>
                             <select id="stuFilterStatus" onchange="if(typeof window.filterStudents === 'function') window.filterStudents();" class="w-full border border-slate-200 rounded-2xl px-4 py-3 text-[13px] font-bold text-slate-700 bg-slate-50 outline-none cursor-pointer focus:bg-white focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400 transition shadow-inner">
-                                <option value="all">គ្រប់ស្ថានភាព</option><option value="Active" selected>កំពុងសិក្សា</option><option value="Dropped">បោះបង់</option>
+                                <option value="all">គ្រប់ស្ថានភាព</option>
+                                <option value="Active" selected>កំពុងសិក្សា (Active)</option>
+                                <option value="Transferred">បានផ្ទេរចេញ (Transferred)</option>
+                                <option value="Graduated">បានបញ្ចប់ការសិក្សា (Graduated)</option>
+                                <option value="Inactive">មិនសកម្ម (Inactive)</option>
+                                <option value="Withdrawn">បានឈប់រៀន (Withdrawn)</option>
                             </select>
                         </div>
                     </div>
@@ -344,7 +349,7 @@ window.saveStudentToFirebase = async function(studentData) {
 // ៣. ចម្រោះ និងបង្ហាញទិន្នន័យសិស្ស (Ultra-Safe Filter)
 // ==========================================
 window.filterStudents = function() {
-    const search = (document.getElementById("stuSearchInput")?.value || "").toLowerCase();
+    const search = (document.getElementById("stuSearchInput")?.value || "").toLowerCase().trim();
     const grade = document.getElementById("stuFilterGrade")?.value || "all";
     const room = document.getElementById("stuFilterRoom")?.value || "all";
     const gender = document.getElementById("stuFilterGender")?.value || "all";
@@ -357,10 +362,8 @@ window.filterStudents = function() {
     const baseStudents = window.allStudents || [];
 
     window.filteredStudents = baseStudents.filter(s => {
-        // ការពារកុំឱ្យ Error បើទិន្នន័យខូច
         if (!s || typeof s !== 'object') return false;
 
-        // 🟢 បន្ធូរបន្ថយ៖ អនុញ្ញាតឱ្យសិស្សចាស់ដែលគ្មាន teacher_id និង academic_year លោតចូល 🟢
         const sTeacherId = String(s.teacher_id || "").trim();
         const sYear = String(s.academic_year || "").trim();
         
@@ -369,21 +372,36 @@ window.filterStudents = function() {
         
         if (!isMyStudent) return false;
 
-        // 🟢 ការពារ Error ពេលតម្លៃជា undefined ឬ null 🟢
         const safeName = String(s.name || "").toLowerCase();
+        const safeNameEn = String(s.name_en || s.name_latin || "").toLowerCase();
         const safeId = String(s.id || "").toLowerCase();
         const normGrade = normalizeGrade(s.grade);
         const safeRoom = String(s.room || "").trim();
         const safeGender = String(s.gender || "").trim();
-        const safeStatus = String(s.status || "Active").trim();
+        const safeStatus = String(s.status || "Active").trim().toLowerCase();
 
         // Check Filters
-        const matchSearch = search === "" || safeName.includes(search) || safeId.includes(search);
+        const matchSearch = search === "" || safeName.includes(search) || safeNameEn.includes(search) || safeId.includes(search);
         const matchGrade = grade === "all" || normGrade === grade;
-        // អនុញ្ញាតឱ្យសិស្សដែលគ្មានបន្ទប់ លោតចូលទៅ "បន្ទប់ក" ជា Default 
         const matchRoom = room === "all" || safeRoom === room || (room === "«ក»" && safeRoom === ""); 
         const matchGender = gender === "all" || safeGender === gender || (gender === "ប្រុស" && safeGender === "");
-        const matchStatus = status === "all" || (status === "Active" ? safeStatus !== "Dropped" : safeStatus === "Dropped");
+        
+        let matchStatus = true;
+        if (status === "all") {
+            matchStatus = true;
+        } else if (status === "Active") {
+            matchStatus = safeStatus === "active" || safeStatus === "កំពុងសិក្សា";
+        } else if (status === "Transferred") {
+            matchStatus = safeStatus === "transferred" || safeStatus === "បានផ្ទេរចេញ" || safeStatus === "ផ្ទេរចេញ";
+        } else if (status === "Graduated") {
+            matchStatus = safeStatus === "graduated" || safeStatus === "បានបញ្ចប់ការសិក្សា" || safeStatus === "បញ្ចប់ការសិក្សា";
+        } else if (status === "Inactive") {
+            matchStatus = safeStatus === "inactive" || safeStatus === "មិនសកម្ម" || safeStatus === "ផ្អាក";
+        } else if (status === "Withdrawn") {
+            matchStatus = safeStatus === "withdrawn" || safeStatus === "dropped" || safeStatus === "បោះបង់" || safeStatus === "ឈប់រៀន";
+        } else {
+            matchStatus = safeStatus === status.toLowerCase();
+        }
 
         return matchSearch && matchGrade && matchRoom && matchGender && matchStatus;
     });
@@ -411,6 +429,7 @@ window.renderStudentsTable = function() {
     }
 
     const bgColors = ['bg-indigo-400', 'bg-emerald-400', 'bg-amber-400', 'bg-rose-400', 'bg-cyan-400', 'bg-purple-400'];
+    const canEdit = typeof canEditRecords === 'function' ? canEditRecords() : true;
 
     let trs = "";
     window.filteredStudents.forEach((stu, index) => {
@@ -428,14 +447,29 @@ window.renderStudentsTable = function() {
 
         let ageHtml = calculateAge(stu.dob) !== "-" ? `<span class="text-slate-400 text-[12px] ml-1 bg-slate-50 px-1.5 py-0.5 rounded border border-slate-100 shadow-sm">${calculateAge(stu.dob)}ឆ្នាំ</span>` : "";
         let addrText = formatAddress(stu.curr_village, stu.curr_commune);
-        let displayGrade = normalizeGrade(stu.grade); 
+        let displayGrade = normalizeGrade(stu.grade);
+
+        let statusTag = "";
+        const sStat = String(stu.status || "Active").toLowerCase();
+        if (sStat === "withdrawn" || sStat === "dropped" || sStat === "បោះបង់") {
+            statusTag = `<span class="bg-rose-50 text-rose-600 px-2 py-0.5 rounded-md text-[10px] font-bold border border-rose-100 ml-1.5">ឈប់រៀន</span>`;
+        } else if (sStat === "transferred" || sStat === "បានផ្ទេរចេញ") {
+            statusTag = `<span class="bg-amber-50 text-amber-600 px-2 py-0.5 rounded-md text-[10px] font-bold border border-amber-100 ml-1.5">ផ្ទេរចេញ</span>`;
+        } else if (sStat === "graduated" || sStat === "បានបញ្ចប់ការសិក្សា") {
+            statusTag = `<span class="bg-indigo-50 text-indigo-600 px-2 py-0.5 rounded-md text-[10px] font-bold border border-indigo-100 ml-1.5">បញ្ចប់</span>`;
+        } else if (sStat === "inactive" || sStat === "មិនសកម្ម") {
+            statusTag = `<span class="bg-slate-100 text-slate-500 px-2 py-0.5 rounded-md text-[10px] font-bold border border-slate-200 ml-1.5">ផ្អាក</span>`;
+        }
 
         trs += `
             <tr class="hover:bg-slate-50/80 transition-colors group font-bold">
                 <td class="p-3 text-center text-slate-400 font-mono text-[12px]">${index + 1}</td>
                 <td class="p-3 text-center">${avatarContent}</td>
                 <td class="p-3 text-indigo-600 font-mono"><span class="bg-indigo-50 px-2.5 py-1.5 rounded-lg border border-indigo-100/50">${stu.id || '-'}</span></td>
-                <td class="p-3 text-slate-800 font-Siemreap text-[14px]">${stu.name || '-'}</td>
+                <td class="p-3 text-slate-800 font-Siemreap text-[14px]">
+                    <div class="flex items-center">${stu.name || '-'}${statusTag}</div>
+                    ${stu.name_en ? `<div class="text-[11px] text-slate-400 font-mono tracking-wider font-normal uppercase">${stu.name_en}</div>` : ''}
+                </td>
                 <td class="p-3 text-center font-Siemreap text-[14px]">${genBadge}</td>
                 <td class="p-3 text-center text-slate-600 font-Siemreap text-[14px] whitespace-nowrap">${formatDate(stu.dob)} ${ageHtml}</td>
                 <td class="p-3 text-center text-slate-700">
@@ -446,8 +480,10 @@ window.renderStudentsTable = function() {
                     <div class="flex items-center justify-center gap-1 opacity-100 lg:opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                         <button onclick="window.openReportCard ? window.openReportCard('${stu.id}') : alert('Report Card')" title="ព្រឹត្តិបត្រពិន្ទុបុគ្គល" class="w-8 h-8 rounded-full bg-slate-100 text-slate-500 hover:text-amber-600 hover:bg-amber-100 transition"><i class="fa-solid fa-file-invoice text-xs"></i></button>
                         <button onclick="window.viewStudentProfile('${stu.id}')" title="ប្រវត្តិរូប" class="w-8 h-8 rounded-full bg-slate-100 text-slate-500 hover:text-indigo-600 hover:bg-indigo-100 transition"><i class="fa-regular fa-eye text-xs"></i></button>
+                        ${canEdit ? `
                         <button onclick="window.openStudentModal('${stu.id}')" title="កែប្រែ" class="w-8 h-8 rounded-full bg-slate-100 text-slate-500 hover:text-emerald-600 hover:bg-emerald-100 transition"><i class="fa-regular fa-pen-to-square text-xs"></i></button>
-                        <button onclick="window.deleteStudent('${stu.id}')" title="លុប" class="w-8 h-8 rounded-full bg-slate-100 text-slate-500 hover:text-rose-600 hover:bg-rose-100 transition"><i class="fa-regular fa-trash-can text-xs"></i></button>
+                        <button onclick="window.deleteStudent('${stu.id}')" title="លុប/ផ្អាក" class="w-8 h-8 rounded-full bg-slate-100 text-slate-500 hover:text-rose-600 hover:bg-rose-100 transition"><i class="fa-regular fa-trash-can text-xs"></i></button>
+                        ` : ''}
                     </div>
                 </td>
             </tr>
@@ -538,8 +574,10 @@ window.openStudentModal = function(id = null) {
             document.getElementById("stu_id").classList.add("bg-slate-100", "text-slate-500", "cursor-not-allowed");
             
             document.getElementById("stu_name").value = stu.name || "";
+            if (document.getElementById("stu_name_en")) document.getElementById("stu_name_en").value = stu.name_en || stu.name_latin || "";
             document.getElementById("stu_gender").value = stu.gender || "ប្រុស";
             document.getElementById("stu_dob").value = stu.dob || ""; 
+            if (document.getElementById("stu_enrollment_date")) document.getElementById("stu_enrollment_date").value = stu.enrollment_date || "";
             
             if (stu.photo_url && stu.photo_url.trim() !== "") {
                 if(previewImg) { previewImg.src = stu.photo_url; previewImg.classList.remove("hidden"); }
@@ -578,6 +616,8 @@ window.openStudentModal = function(id = null) {
         document.getElementById("stu_id").value = "STU" + Math.floor(Math.random() * 900000 + 100000); 
         document.getElementById("stu_id").readOnly = false;
         document.getElementById("stu_id").classList.remove("bg-slate-100", "text-slate-500", "cursor-not-allowed");
+        if (document.getElementById("stu_name_en")) document.getElementById("stu_name_en").value = "";
+        if (document.getElementById("stu_enrollment_date")) document.getElementById("stu_enrollment_date").value = new Date().toISOString().split('T')[0];
         
         // 🟢 កំណត់តម្លៃលំនាំដើមពី Settings 🟢
         document.getElementById("stu_grade").value = defaultGrade;
@@ -591,6 +631,11 @@ window.openStudentModal = function(id = null) {
 
 window.saveStudentData = async function(e) {
     e.preventDefault();
+    if (typeof canEditRecords === 'function' && !canEditRecords()) {
+        alert("🔒 លោកគ្រូអ្នកគ្រូមានត្រឹមសិទ្ធិមើលប៉ុណ្ណោះ (Viewer) មិនអាចកែប្រែទិន្នន័យបានទេ!");
+        return;
+    }
+
     const btn = document.getElementById("btnSaveStudent");
     const origText = btn.innerHTML;
     btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> កំពុងរក្សាទុក...`;
@@ -600,13 +645,31 @@ window.saveStudentData = async function(e) {
     const currentYear = document.getElementById("globalAcademicYear")?.value || localStorage.getItem('selected_academic_year') || "2026-2027";
 
     const isEdit = document.getElementById("stu_is_edit").value === "1";
+    const studentId = document.getElementById("stu_id").value.trim();
+
+    // 🟢 STU-02: ផ្ទៀងផ្ទាត់លេខសម្គាល់សិស្ស (Unique Student ID Validation) 🟢
+    if (!isEdit) {
+        const idExists = (window.allStudents || []).some(s => 
+            String(s.id).trim().toLowerCase() === studentId.toLowerCase() && 
+            String(s.academic_year || currentYear) === String(currentYear)
+        );
+        if (idExists) {
+            alert(`⚠️ អត្តលេខសិស្ស «${studentId}» នេះមានរួចហើយក្នុងប្រព័ន្ធសម្រាប់ឆ្នាំសិក្សា ${currentYear}!\nសូមពិនិត្យ ឬផ្លាស់ប្តូរអត្តលេខថ្មី។`);
+            btn.innerHTML = origText;
+            btn.disabled = false;
+            return;
+        }
+    }
+
     const payload = {
-        id: document.getElementById("stu_id").value.trim(),
+        id: studentId,
         teacher_id: currentTeacherId,       // 🟢 ចងភ្ជាប់ទិន្នន័យ
         academic_year: currentYear,         // 🟢 ចងភ្ជាប់ទិន្នន័យ
         name: document.getElementById("stu_name").value.trim(),
+        name_en: (document.getElementById("stu_name_en")?.value || "").trim().toUpperCase(),
         gender: document.getElementById("stu_gender").value,
         dob: document.getElementById("stu_dob").value, 
+        enrollment_date: document.getElementById("stu_enrollment_date")?.value || "",
         photo_url: document.getElementById("stu_photo_val").value,
         pob_village: document.getElementById("stu_pob_village").value.trim(),
         pob_commune: document.getElementById("stu_pob_commune").value.trim(),
@@ -623,10 +686,11 @@ window.saveStudentData = async function(e) {
         grade: normalizeGrade(document.getElementById("stu_grade").value),
         room: document.getElementById("stu_room").value,
         parent_contact: document.getElementById("stu_contact").value.trim(),
-        status: document.getElementById("stu_status").value,
+        status: document.getElementById("stu_status").value || "Active",
         poor_id: document.getElementById("stu_poor").checked,
         scholarship: document.getElementById("stu_scholar").checked,
-        disability: document.getElementById("stu_disable").checked
+        disability: document.getElementById("stu_disable").checked,
+        updated_at: new Date().toISOString()
     };
 
     setTimeout(() => {
@@ -635,8 +699,6 @@ window.saveStudentData = async function(e) {
             if(idx > -1) window.allStudents[idx] = payload;
             else window.allStudents.push(payload); 
         } else {
-            const exists = window.allStudents.find(s => String(s.id) === payload.id);
-            if (exists) { payload.id = payload.id + "_" + Math.floor(Math.random() * 1000); }
             window.allStudents.unshift(payload);
         }
 
@@ -650,6 +712,14 @@ window.saveStudentData = async function(e) {
         document.getElementById("studentModal").classList.replace("flex", "hidden");
         if(typeof showToast === 'function') showToast("✅ រក្សាទុកព័ត៌មានសិស្សបានជោគជ័យ!");
 
+        if (typeof window.logAudit === 'function') {
+            window.logAudit(
+                isEdit ? 'UPDATE_STUDENT' : 'CREATE_STUDENT', 
+                'student', 
+                `បាន${isEdit ? 'កែប្រែ' : 'ចុះឈ្មោះ'}សិស្ស ${payload.name} (${payload.id}) ថ្នាក់ ${payload.grade} ${payload.room}`
+            );
+        }
+
         btn.innerHTML = origText; btn.disabled = false;
         
         const sInfo = typeof appSettings !== 'undefined' ? appSettings : {};
@@ -659,23 +729,58 @@ window.saveStudentData = async function(e) {
         if (sInfo.auto_sync && typeof window.apiPost === 'function') { 
             window.apiPost("saveStudent", payload).catch(console.error); 
         }
-    }, 500); 
+    }, 300); 
 };
 
+// 🟢 STU-04: ការលុបទិន្នន័យ Soft Delete (ផ្អាក/ឈប់រៀន) និង Hard Delete (Admin) 🟢
 window.deleteStudent = function(id) {
-    if(confirm("⚠️ តើលោកគ្រូអ្នកគ្រូពិតជាចង់លុបសិស្សនេះចេញពីបញ្ជីមែនទេ?")) {
-        window.allStudents = window.allStudents.filter(s => String(s.id) !== String(id));
+    if (typeof canEditRecords === 'function' && !canEditRecords()) {
+        alert("🔒 លោកគ្រូអ្នកគ្រូមានត្រឹមសិទ្ធិមើលប៉ុណ្ណោះ មិនអាចលុបទិន្នន័យបានទេ!");
+        return;
+    }
+
+    const stu = (window.allStudents || []).find(s => String(s.id) === String(id));
+    if (!stu) return;
+
+    const isAdmin = typeof isCurrentUserAdmin === 'function' && isCurrentUserAdmin();
+    
+    // បង្ហាញជម្រើស Soft Delete ដើម្បីការពារប្រវត្តិពិន្ទុ និងវត្តមាន
+    const softPrompt = confirm(`⚠️ ការគ្រប់គ្រងស្ថានភាពសិស្ស៖ ${stu.name} (${stu.id})\n\n[ចុច OK] ដើម្បីដាក់ជា «ឈប់រៀន / មិនសកម្ម» (Soft Delete - រក្សាទុកពិន្ទុ និងវត្តមានចាស់ៗទាំងអស់)\n[ចុច Cancel] ដើម្បីបោះបង់ ឬជ្រើសរើសជម្រើសផ្សេងទៀត`);
+    
+    if (softPrompt) {
+        stu.status = "Withdrawn";
+        stu.updated_at = new Date().toISOString();
         localStorage.setItem('academic_students', JSON.stringify(window.allStudents));
-        window.filterStudents();
-        if(typeof showToast === 'function') showToast("🗑️ បានលុបសិស្សចេញពីបញ្ជីដោយជោគជ័យ!");
         
-        const sInfo = typeof appSettings !== 'undefined' ? appSettings : {};
         if (window.db) {
-             window.db.collection("students").doc(String(id)).delete().catch(console.warn);
-         }
-         if (sInfo.auto_sync && typeof window.apiPost === 'function') {
-             window.apiPost("deleteStudent", { id: id }).catch(e => console.error("Cloud Delete Failed:", e));
-         }
+            window.db.collection("students").doc(String(id)).set({ 
+                status: "Withdrawn", 
+                last_updated: firebase.firestore.FieldValue.serverTimestamp() 
+            }, { merge: true }).catch(console.warn);
+        }
+        if (typeof window.logAudit === 'function') {
+            window.logAudit('SOFT_DELETE_STUDENT', 'student', `បានកំណត់សិស្ស ${stu.name} (${stu.id}) ជាឈប់រៀន (Soft Delete - រក្សាទុកប្រវត្តិ)`);
+        }
+        window.filterStudents();
+        if (typeof showToast === 'function') showToast("📦 បានកែប្រែស្ថានភាពសិស្សទៅជា «ឈប់រៀន» រួចរាល់!");
+        return;
+    }
+
+    if (isAdmin) {
+        const hardPrompt = confirm(`🚨 ការព្រមានកម្រិតខ្ពស់ (Admin Only)៖\nតើលោកគ្រូ/អ្នកគ្រូពិតជាចង់ «លុបទិន្នន័យសិស្ស ${stu.name} ចេញជាអចិន្ត្រៃយ៍» មែនទេ?\nសកម្មភាពនេះមិនអាចត្រឡប់ថយក្រោយបានឡើយ!`);
+        if (hardPrompt) {
+            window.allStudents = window.allStudents.filter(s => String(s.id) !== String(id));
+            localStorage.setItem('academic_students', JSON.stringify(window.allStudents));
+            
+            if (window.db) {
+                window.db.collection("students").doc(String(id)).delete().catch(console.warn);
+            }
+            if (typeof window.logAudit === 'function') {
+                window.logAudit('HARD_DELETE_STUDENT', 'student', `[Admin] បានលុបសិស្ស ${stu.name} (${id}) ចេញជាអចិន្ត្រៃយ៍`);
+            }
+            window.filterStudents();
+            if (typeof showToast === 'function') showToast("🗑️ បានលុបទិន្នន័យសិស្សជាអចិន្ត្រៃយ៍ជោគជ័យ!");
+        }
     }
 };
 
@@ -723,9 +828,9 @@ window.viewStudentProfile = function(id) {
             document.getElementById("profAvatar").innerHTML = `<span class="flex items-center justify-center w-full h-full bg-slate-100 text-slate-400 font-bold">${getAvatarInitial(stu.name)}</span>`;
         }
         
-        document.getElementById("profName").textContent = stu.name || "-";
+        document.getElementById("profName").innerHTML = (stu.name || "-") + (stu.name_en ? `<span class="block text-sm font-normal font-mono text-slate-500 mt-1 tracking-wider uppercase">${stu.name_en}</span>` : "");
         document.getElementById("profId").textContent = "ID: " + (stu.id || "-");
-        document.getElementById("profGender").innerHTML = stu.gender === 'ស្រី' ? '<span class="text-pink-600">ស្រី</span>' : '<span class="text-blue-600">ប្រុស</span>';
+        document.getElementById("profGender").innerHTML = stu.gender === 'ស្រី' ? '<span class="text-pink-600 font-bold">ស្រី</span>' : '<span class="text-blue-600 font-bold">ប្រុស</span>';
         
         let dobStr = formatDate(stu.dob);
         let age = calculateAge(stu.dob);
@@ -748,12 +853,31 @@ window.viewStudentProfile = function(id) {
         let badges = [];
         const statusEl = document.getElementById("profStatusText");
         
-        if (stu.status === "Active") {
-            statusEl.textContent = "កំពុងសិក្សា"; statusEl.className = "text-[13px] md:text-sm font-bold text-emerald-600";
+        const rawStatus = String(stu.status || "Active").trim();
+        if (rawStatus === "Active" || rawStatus === "កំពុងសិក្សា") {
+            statusEl.textContent = "កំពុងសិក្សា (Active)"; 
+            statusEl.className = "text-[13px] md:text-sm font-bold text-emerald-600";
+        } else if (rawStatus === "Transferred" || rawStatus === "ផ្ទេរចេញ") {
+            statusEl.textContent = "បានផ្ទេរចេញ (Transferred)"; 
+            statusEl.className = "text-[13px] md:text-sm font-bold text-amber-600";
+            badges.push(`<span class="bg-amber-50 text-amber-600 px-3 py-1.5 rounded-xl text-[11px] font-bold shadow-sm border border-amber-100"><i class="fa-solid fa-arrow-right-from-bracket mr-1"></i> បានផ្ទេរចេញ</span>`);
+        } else if (rawStatus === "Graduated" || rawStatus === "បញ្ចប់ការសិក្សា") {
+            statusEl.textContent = "បានបញ្ចប់ការសិក្សា (Graduated)"; 
+            statusEl.className = "text-[13px] md:text-sm font-bold text-indigo-600";
+            badges.push(`<span class="bg-indigo-50 text-indigo-600 px-3 py-1.5 rounded-xl text-[11px] font-bold shadow-sm border border-indigo-100"><i class="fa-solid fa-user-graduate mr-1"></i> បញ្ចប់ការសិក្សា</span>`);
+        } else if (rawStatus === "Inactive" || rawStatus === "មិនសកម្ម") {
+            statusEl.textContent = "មិនសកម្ម / ផ្អាក (Inactive)"; 
+            statusEl.className = "text-[13px] md:text-sm font-bold text-slate-500";
+            badges.push(`<span class="bg-slate-100 text-slate-600 px-3 py-1.5 rounded-xl text-[11px] font-bold shadow-sm border border-slate-200"><i class="fa-solid fa-pause mr-1"></i> មិនសកម្ម (ផ្អាក)</span>`);
         } else {
-            statusEl.textContent = "បោះបង់ការសិក្សា"; statusEl.className = "text-[13px] md:text-sm font-bold text-rose-500";
-            badges.push(`<span class="bg-rose-50 text-rose-600 px-3 py-1.5 rounded-xl text-[11px] font-bold shadow-sm border border-rose-100"><i class="fa-solid fa-ban mr-1"></i> បោះបង់ការសិក្សា</span>`);
+            statusEl.textContent = "បានឈប់រៀន (Withdrawn)"; 
+            statusEl.className = "text-[13px] md:text-sm font-bold text-rose-500";
+            badges.push(`<span class="bg-rose-50 text-rose-600 px-3 py-1.5 rounded-xl text-[11px] font-bold shadow-sm border border-rose-100"><i class="fa-solid fa-ban mr-1"></i> បានឈប់រៀន</span>`);
         }
+        
+        if (stu.poor_id) badges.push(`<span class="bg-amber-50 text-amber-600 px-3 py-1.5 rounded-xl text-[11px] font-bold shadow-sm border border-amber-100"><i class="fa-solid fa-star mr-1"></i> ប័ណ្ណក្រីក្រ</span>`);
+        if (stu.scholarship) badges.push(`<span class="bg-indigo-50 text-indigo-600 px-3 py-1.5 rounded-xl text-[11px] font-bold shadow-sm border border-indigo-100"><i class="fa-solid fa-award mr-1"></i> អាហារូបករណ៍</span>`);
+        if (stu.disability) badges.push(`<span class="bg-orange-50 text-orange-600 px-3 py-1.5 rounded-xl text-[11px] font-bold shadow-sm border border-orange-100"><i class="fa-solid fa-wheelchair mr-1"></i> ពិការភាព</span>`);
         
         if (stu.poor_id) badges.push(`<span class="bg-amber-50 text-amber-600 px-3 py-1.5 rounded-xl text-[11px] font-bold shadow-sm border border-amber-100"><i class="fa-solid fa-star mr-1"></i> ប័ណ្ណក្រីក្រ</span>`);
         if (stu.scholarship) badges.push(`<span class="bg-indigo-50 text-indigo-600 px-3 py-1.5 rounded-xl text-[11px] font-bold shadow-sm border border-indigo-100"><i class="fa-solid fa-award mr-1"></i> អាហារូបករណ៍</span>`);
@@ -813,9 +937,11 @@ window.renderStudentModalTemplate = function() {
                                 </div>
 
                                 <div><label class="block text-[11px] font-bold text-slate-400 mb-1.5 uppercase tracking-wider">អត្តលេខសិស្ស (ID) *</label><input type="text" id="stu_id" required class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold font-mono outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 focus:bg-white transition text-indigo-700 shadow-inner"></div>
-                                <div><label class="block text-[11px] font-bold text-slate-400 mb-1.5 uppercase tracking-wider">គោត្តនាម និងនាម *</label><input type="text" id="stu_name" required placeholder="ឧ. ហឿន មីនា" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold font-moul outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 focus:bg-white transition shadow-inner"></div>
+                                <div><label class="block text-[11px] font-bold text-slate-400 mb-1.5 uppercase tracking-wider">គោត្តនាម និងនាម (ខ្មែរ) *</label><input type="text" id="stu_name" required placeholder="ឧ. ហឿន មីនា" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold font-moul outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 focus:bg-white transition shadow-inner"></div>
+                                <div><label class="block text-[11px] font-bold text-slate-400 mb-1.5 uppercase tracking-wider">ឈ្មោះជាអក្សរឡាតាំង (English)</label><input type="text" id="stu_name_en" placeholder="ឧ. HOEUN MINEA" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold font-mono uppercase outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 focus:bg-white transition shadow-inner"></div>
                                 <div><label class="block text-[11px] font-bold text-slate-400 mb-1.5 uppercase tracking-wider">ភេទ *</label><select id="stu_gender" required class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 focus:bg-white transition cursor-pointer shadow-inner"><option value="ប្រុស">ប្រុស</option><option value="ស្រី">ស្រី</option></select></div>
                                 <div><label class="block text-[11px] font-bold text-slate-400 mb-1.5 uppercase tracking-wider">ថ្ងៃខែឆ្នាំកំណើត</label><input type="date" id="stu_dob" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold font-mono outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 focus:bg-white transition cursor-pointer shadow-inner"></div>
+                                <div><label class="block text-[11px] font-bold text-slate-400 mb-1.5 uppercase tracking-wider">ថ្ងៃចូលរៀន</label><input type="date" id="stu_enrollment_date" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold font-mono outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 focus:bg-white transition cursor-pointer shadow-inner"></div>
                             </div>
 
                             <div class="col-span-1 lg:col-span-8 space-y-6">
@@ -852,7 +978,13 @@ window.renderStudentModalTemplate = function() {
                                         <div><label class="block text-[10px] font-bold text-slate-400 mb-1.5 uppercase tracking-wider">ថ្នាក់រៀន</label><select id="stu_grade" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-xs font-bold outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-400 focus:bg-white transition cursor-pointer text-indigo-700 shadow-inner">${gradesOptions}</select></div>
                                         <div><label class="block text-[10px] font-bold text-slate-400 mb-1.5 uppercase tracking-wider">បន្ទប់</label><select id="stu_room" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-xs font-bold outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-400 focus:bg-white transition cursor-pointer text-indigo-700 shadow-inner"><option value="«ក»">«ក»</option><option value="«ខ»">«ខ»</option><option value="«គ»">«គ»</option><option value="«ឃ»">«ឃ»</option></select></div>
                                         <div><label class="block text-[10px] font-bold text-slate-400 mb-1.5 uppercase tracking-wider">លេខទូរស័ព្ទ</label><input type="text" id="stu_contact" placeholder="012 345 678" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-xs font-bold font-mono outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-400 focus:bg-white transition shadow-inner"></div>
-                                        <div><label class="block text-[10px] font-bold text-slate-400 mb-1.5 uppercase tracking-wider">ស្ថានភាព</label><select id="stu_status" class="w-full bg-emerald-50/50 border border-emerald-200 rounded-xl px-4 py-3 text-xs font-bold outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 focus:bg-white transition cursor-pointer shadow-inner text-emerald-700"><option value="Active">កំពុងសិក្សា</option><option value="Dropped">បោះបង់</option></select></div>
+                                        <div><label class="block text-[10px] font-bold text-slate-400 mb-1.5 uppercase tracking-wider">ស្ថានភាព</label><select id="stu_status" class="w-full bg-emerald-50/50 border border-emerald-200 rounded-xl px-4 py-3 text-xs font-bold outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 focus:bg-white transition cursor-pointer shadow-inner text-emerald-700">
+                                            <option value="Active">កំពុងសិក្សា (Active)</option>
+                                            <option value="Transferred">បានផ្ទេរចេញ (Transferred)</option>
+                                            <option value="Graduated">បានបញ្ចប់ការសិក្សា (Graduated)</option>
+                                            <option value="Inactive">មិនសកម្ម / ផ្អាក (Inactive)</option>
+                                            <option value="Withdrawn">បានឈប់រៀន (Withdrawn)</option>
+                                        </select></div>
                                     </div>
                                 </div>
                                 
@@ -1321,12 +1453,24 @@ window.printFullStudentList = function() {
 
 window.downloadStudentTemplate = function() {
     if (typeof XLSX === 'undefined') return alert("សូមភ្ជាប់ Library SheetJS ជាមុនសិន!");
-    const headers = ["ល.រ", "អត្តលេខ", "គោត្តនាម និងនាម", "ភេទ", "ថ្ងៃខែឆ្នាំកំណើត", "ទីកន្លែងកំណើត(ភូមិ)", "ទីកន្លែងកំណើត(ឃុំ)", "ទីកន្លែងកំណើត(ស្រុក)", "ទីកន្លែងកំណើត(ខេត្ត)", "ទីលំនៅ(ភូមិ)", "ទីលំនៅ(ឃុំ)", "ទីលំនៅ(ស្រុក)", "ទីលំនៅ(ខេត្ត)", "ឈ្មោះឪពុក", "មុខរបរឪពុក", "ឈ្មោះម្ដាយ", "មុខរបរម្ដាយ", "ថ្នាក់រៀន", "បន្ទប់", "ទំនាក់ទំនង", "ប័ណ្ណក្រីក្រ", "អាហារូបករណ៍", "ពិការភាព"];
-    const sampleData1 = ["1", "STU10200", "សុខ សាន្ត", "ប្រុស", "20/05/2010", "ព្រែកថ្មី", "ស្អាង", "ស្អាង", "កណ្តាល", "ព្រែកថ្មី", "ស្អាង", "ស្អាង", "កណ្តាល", "សាន សុខ", "កសិករ", "មាស ស្រី", "មេផ្ទះ", "ថ្នាក់ទី ១", "«ក»", "012 345 678", "គ្មាន", "គ្មាន", "គ្មាន"];
+    const headers = [
+        "ល.រ", "អត្តលេខ", "គោត្តនាម និងនាម", "ឈ្មោះជាអក្សរឡាតាំង", "ភេទ", "ថ្ងៃខែឆ្នាំកំណើត", "ថ្ងៃចូលរៀន", 
+        "ទីកន្លែងកំណើត(ភូមិ)", "ទីកន្លែងកំណើត(ឃុំ)", "ទីកន្លែងកំណើត(ស្រុក)", "ទីកន្លែងកំណើត(ខេត្ត)", 
+        "ទីលំនៅ(ភូមិ)", "ទីលំនៅ(ឃុំ)", "ទីលំនៅ(ស្រុក)", "ទីលំនៅ(ខេត្ត)", 
+        "ឈ្មោះឪពុក", "មុខរបរឪពុក", "ឈ្មោះម្ដាយ", "មុខរបរម្ដាយ", 
+        "ថ្នាក់រៀន", "បន្ទប់", "ទំនាក់ទំនង", "ប័ណ្ណក្រីក្រ", "អាហារូបករណ៍", "ពិការភាព", "ស្ថានភាព"
+    ];
+    const sampleData1 = [
+        "1", "STU10200", "សុខ សាន្ត", "SOK SAN", "ប្រុស", "20/05/2010", "01/10/2026", 
+        "ព្រែកថ្មី", "ស្អាង", "ស្អាង", "កណ្តាល", 
+        "ព្រែកថ្មី", "ស្អាង", "ស្អាង", "កណ្តាល", 
+        "សាន សុខ", "កសិករ", "មាស ស្រី", "មេផ្ទះ", 
+        "ថ្នាក់ទី ១", "«ក»", "012 345 678", "គ្មាន", "គ្មាន", "គ្មាន", "កំពុងសិក្សា"
+    ];
     const ws = XLSX.utils.aoa_to_sheet([headers, sampleData1]);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Students");
-    XLSX.writeFile(wb, "Student_Import_Template_Full.xlsx");
+    XLSX.writeFile(wb, "Student_Import_Template_MoEYS.xlsx");
 };
 
 window.importStudentsExcel = function(event) {
@@ -1344,33 +1488,111 @@ window.importStudentsExcel = function(event) {
             const workbook = XLSX.read(data, {type: 'array'});
             const worksheet = workbook.Sheets[workbook.SheetNames[0]];
             const rows = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: "" });
-            let importedCount = 0;
+            
+            if (rows.length <= 1) {
+                alert("⚠️ ឯកសារ Excel គ្មានទិន្នន័យទេ!");
+                return;
+            }
+
+            // ស្វែងរកទីតាំងជួរឈរដោយឆ្លាតវៃតាមរយៈ Headers
+            const headerRow = rows[0].map(h => String(h || '').trim().toLowerCase());
+            const findCol = (keywords, defaultIdx) => {
+                const idx = headerRow.findIndex(h => keywords.some(k => h.includes(k)));
+                return idx > -1 ? idx : defaultIdx;
+            };
+
+            const colId = findCol(["អត្តលេខ", "id", "student_id"], 1);
+            const colNameKh = findCol(["គោត្តនាម", "ឈ្មោះ", "name_kh", "name"], 2);
+            const colNameEn = findCol(["ឡាតាំង", "អង់គ្លេស", "latin", "english", "name_en"], 3);
+            const colGender = findCol(["ភេទ", "gender", "sex"], headerRow[3] && (headerRow[3].includes("ភេទ") || headerRow[3].includes("gender")) ? 3 : 4);
+            const colDob = findCol(["កំណើត", "dob", "birth"], 5);
+            const colEnroll = findCol(["ចូលរៀន", "enroll"], -1);
+            const colPobVil = findCol(["ភូមិ(កំណើត)", "ភូមិកំណើត"], 7);
+            const colPobCom = findCol(["ឃុំ(កំណើត)", "ឃុំកំណើត"], 8);
+            const colPobDis = findCol(["ស្រុក(កំណើត)", "ស្រុកកំណើត"], 9);
+            const colPobPro = findCol(["ខេត្ត(កំណើត)", "ខេត្តកំណើត"], 10);
+            const colCurVil = findCol(["ភូមិ(បច្ចុប្បន្ន)", "ទីលំនៅ(ភូមិ)"], 11);
+            const colCurCom = findCol(["ឃុំ(បច្ចុប្បន្ន)", "ទីលំនៅ(ឃុំ)"], 12);
+            const colCurDis = findCol(["ស្រុក(បច្ចុប្បន្ន)", "ទីលំនៅ(ស្រុក)"], 13);
+            const colCurPro = findCol(["ខេត្ត(បច្ចុប្បន្ន)", "ទីលំនៅ(ខេត្ត)"], 14);
+            const colFather = findCol(["ឪពុក", "father"], 15);
+            const colFJob = findCol(["មុខរបរឪពុក", "father_job"], 16);
+            const colMother = findCol(["ម្ដាយ", "ម្តាយ", "mother"], 17);
+            const colMJob = findCol(["មុខរបរម្ដាយ", "មុខរបរម្តាយ", "mother_job"], 18);
+            const colGrade = findCol(["ថ្នាក់", "grade"], 19);
+            const colRoom = findCol(["បន្ទប់", "room"], 20);
+            const colContact = findCol(["ទូរស័ព្ទ", "ទំនាក់ទំនង", "phone", "contact"], 21);
+            const colStatus = findCol(["ស្ថានភាព", "status"], 25);
+
+            let newAdded = 0;
+            let updatedCount = 0;
             
             for (let r = 1; r < rows.length; r++) {
                 const rowData = rows[r];
-                const name = String(rowData[2]).trim();
+                const name = String(rowData[colNameKh] || "").trim();
                 if (!name || name === "undefined") continue; 
-                const id = String(rowData[1] || `STU${Math.floor(Math.random() * 900000 + 100000)}`).trim();
-                const existingIdx = window.allStudents.findIndex(s => String(s.id) === id);
-                let rawDob = String(rowData[4] || "").trim();
+
+                const id = String(rowData[colId] || `STU${Math.floor(Math.random() * 900000 + 100000)}`).trim();
+                const existingIdx = (window.allStudents || []).findIndex(s => String(s.id).trim() === id);
+
+                let rawDob = String(rowData[colDob] || "").trim();
                 if (rawDob && rawDob.includes('/')) {
                     const p = rawDob.split('/');
                     if (p.length === 3) rawDob = `${p[2]}-${p[1].padStart(2, '0')}-${p[0].padStart(2, '0')}`;
                 }
+
+                let rawEnroll = colEnroll > -1 ? String(rowData[colEnroll] || "").trim() : "";
+                if (rawEnroll && rawEnroll.includes('/')) {
+                    const p = rawEnroll.split('/');
+                    if (p.length === 3) rawEnroll = `${p[2]}-${p[1].padStart(2, '0')}-${p[0].padStart(2, '0')}`;
+                }
+
+                const rawStatus = colStatus > -1 ? String(rowData[colStatus] || "Active").trim() : "Active";
+                let normStatus = "Active";
+                if (rawStatus.includes("ផ្ទេរ") || rawStatus.toLowerCase().includes("transfer")) normStatus = "Transferred";
+                else if (rawStatus.includes("បញ្ចប់") || rawStatus.toLowerCase().includes("graduat")) normStatus = "Graduated";
+                else if (rawStatus.includes("មិនសកម្ម") || rawStatus.toLowerCase().includes("inactive")) normStatus = "Inactive";
+                else if (rawStatus.includes("ឈប់") || rawStatus.includes("បោះបង់") || rawStatus.toLowerCase().includes("drop") || rawStatus.toLowerCase().includes("withdrawn")) normStatus = "Withdrawn";
+
                 const newStu = {
                     id: id, 
-                    teacher_id: currentTeacherId,       // 🟢 ចងភ្ជាប់ទិន្នន័យ
-                    academic_year: currentYear,         // 🟢 ចងភ្ជាប់ទិន្នន័យ
-                    name: name, gender: String(rowData[3] || "ប្រុស").trim(), dob: rawDob, photo_url: "", 
-                    pob_village: String(rowData[5] || "").trim(), pob_commune: String(rowData[6] || "").trim(), pob_district: String(rowData[7] || "").trim(), pob_province: String(rowData[8] || "").trim(),
-                    curr_village: String(rowData[9] || "").trim(), curr_commune: String(rowData[10] || "").trim(), curr_district: String(rowData[11] || "").trim(), curr_province: String(rowData[12] || "").trim(),
-                    father_name: String(rowData[13] || "").trim(), father_job: String(rowData[14] || "").trim(), mother_name: String(rowData[15] || "").trim(), mother_job: String(rowData[16] || "").trim(),
-                    grade: normalizeGrade(String(rowData[17] || "ថ្នាក់ទី ១")), room: String(rowData[18] || "«ក»").trim(), parent_contact: String(rowData[19] || "").trim(),
-                    poor_id: String(rowData[20]).includes("មាន"), scholarship: String(rowData[21]).includes("មាន"), disability: String(rowData[22]).includes("មាន"), status: "Active"
+                    teacher_id: currentTeacherId,
+                    academic_year: currentYear,
+                    name: name,
+                    name_en: colNameEn > -1 ? String(rowData[colNameEn] || "").trim().toUpperCase() : "",
+                    gender: String(rowData[colGender] || "ប្រុស").trim(), 
+                    dob: rawDob, 
+                    enrollment_date: rawEnroll,
+                    photo_url: "", 
+                    pob_village: String(rowData[colPobVil] || "").trim(), 
+                    pob_commune: String(rowData[colPobCom] || "").trim(), 
+                    pob_district: String(rowData[colPobDis] || "").trim(), 
+                    pob_province: String(rowData[colPobPro] || "").trim(),
+                    curr_village: String(rowData[colCurVil] || "").trim(), 
+                    curr_commune: String(rowData[colCurCom] || "").trim(), 
+                    curr_district: String(rowData[colCurDis] || "").trim(), 
+                    curr_province: String(rowData[colCurPro] || "").trim(),
+                    father_name: String(rowData[colFather] || "").trim(), 
+                    father_job: String(rowData[colFJob] || "").trim(), 
+                    mother_name: String(rowData[colMother] || "").trim(), 
+                    mother_job: String(rowData[colMJob] || "").trim(),
+                    grade: normalizeGrade(String(rowData[colGrade] || "ថ្នាក់ទី ១")), 
+                    room: String(rowData[colRoom] || "«ក»").trim(), 
+                    parent_contact: String(rowData[colContact] || "").trim(),
+                    poor_id: JSON.stringify(rowData).includes("ប័ណ្ណក្រីក្រ") || JSON.stringify(rowData).includes("ក្រីក្រ"),
+                    scholarship: JSON.stringify(rowData).includes("អាហារូបករណ៍"),
+                    disability: JSON.stringify(rowData).includes("ពិការ"),
+                    status: normStatus,
+                    updated_at: new Date().toISOString()
                 };
-                if (existingIdx > -1) window.allStudents[existingIdx] = newStu;
-                else window.allStudents.push(newStu);
-                importedCount++;
+
+                if (existingIdx > -1) {
+                    window.allStudents[existingIdx] = Object.assign({}, window.allStudents[existingIdx], newStu);
+                    updatedCount++;
+                } else {
+                    window.allStudents.push(newStu);
+                    newAdded++;
+                }
             }
             
             localStorage.setItem('academic_students', JSON.stringify(window.allStudents));
@@ -1382,62 +1604,70 @@ window.importStudentsExcel = function(event) {
 
             event.target.value = ""; 
             window.filterStudents();
-            if(typeof showToast === 'function') showToast(`📥 នាំចូលសិស្សបានសម្រេច ${importedCount} នាក់!`);
-            else alert(`នាំចូលសិស្សបានសម្រេច ${importedCount} នាក់!`);
+
+            if (typeof window.logAudit === 'function') {
+                window.logAudit('IMPORT_STUDENTS_EXCEL', 'student', `បាននាំចូលសិស្សពី Excel សរុប ${newAdded + updatedCount} នាក់ (ថ្មី: ${newAdded}, ធ្វើបច្ចុប្បន្នភាព: ${updatedCount})`);
+            }
+
+            const summaryMsg = `📥 នាំចូលសិស្សបានជោគជ័យ សរុប៖ ${newAdded + updatedCount} នាក់ (បន្ថែមថ្មី: ${newAdded} នាក់, កែប្រែព័ត៌មាន: ${updatedCount} នាក់)`;
+            if(typeof showToast === 'function') showToast(summaryMsg);
+            else alert(summaryMsg);
         } catch (error) {
-            console.error(error); alert("❌ មានបញ្ហាក្នុងការអានឯកសារ Excel។ សូមប្រាកដថាទម្រង់ឯកសារត្រឹមត្រូវ។");
+            console.error("Excel import error:", error); 
+            alert("❌ មានបញ្ហាក្នុងការអានឯកសារ Excel។ សូមប្រាកដថាទម្រង់ឯកសារត្រឹមត្រូវ។");
         }
     };
     reader.readAsArrayBuffer(file);
 };
 
 window.exportStudentsExcel = function() {
-    if (window.filteredStudents.length === 0) return alert("គ្មានទិន្នន័យសម្រាប់ទាញយកទេ!");
-    let tableHtml = `<table border="1"><tr><th>ល.រ</th><th>អត្តលេខ</th><th>គោត្តនាម និងនាម</th><th>ភេទ</th><th>ថ្ងៃខែឆ្នាំកំណើត</th><th>ទីកន្លែងកំណើត(ភូមិ)</th><th>ទីកន្លែងកំណើត(ឃុំ)</th><th>ទីកន្លែងកំណើត(ស្រុក)</th><th>ទីកន្លែងកំណើត(ខេត្ត)</th><th>ទីលំនៅ(ភូមិ)</th><th>ទីលំនៅ(ឃុំ)</th><th>ទីលំនៅ(ស្រុក)</th><th>ទីលំនៅ(ខេត្ត)</th><th>ឈ្មោះឪពុក</th><th>មុខរបរឪពុក</th><th>ឈ្មោះម្ដាយ</th><th>មុខរបរម្ដាយ</th><th>ថ្នាក់រៀន</th><th>បន្ទប់</th><th>ទំនាក់ទំនង</th><th>ប័ណ្ណក្រីក្រ</th><th>អាហារូបករណ៍</th><th>ពិការភាព</th><th>ស្ថានភាព</th></tr>`;
+    if (!window.filteredStudents || window.filteredStudents.length === 0) return alert("គ្មានទិន្នន័យសម្រាប់ទាញយកទេ!");
+    let tableHtml = `<table border="1"><tr>
+        <th>ល.រ</th><th>អត្តលេខ</th><th>គោត្តនាម និងនាម (ខ្មែរ)</th><th>ឈ្មោះជាអក្សរឡាតាំង</th><th>ភេទ</th>
+        <th>ថ្ងៃខែឆ្នាំកំណើត</th><th>ថ្ងៃចូលរៀន</th>
+        <th>ទីកន្លែងកំណើត(ភូមិ)</th><th>ទីកន្លែងកំណើត(ឃុំ)</th><th>ទីកន្លែងកំណើត(ស្រុក)</th><th>ទីកន្លែងកំណើត(ខេត្ត)</th>
+        <th>ទីលំនៅ(ភូមិ)</th><th>ទីលំនៅ(ឃុំ)</th><th>ទីលំនៅ(ស្រុក)</th><th>ទីលំនៅ(ខេត្ត)</th>
+        <th>ឈ្មោះឪពុក</th><th>មុខរបរឪពុក</th><th>ឈ្មោះម្ដាយ</th><th>មុខរបរម្ដាយ</th>
+        <th>ថ្នាក់រៀន</th><th>បន្ទប់</th><th>ទំនាក់ទំនង</th>
+        <th>ប័ណ្ណក្រីក្រ</th><th>អាហារូបករណ៍</th><th>ពិការភាព</th><th>ស្ថានភាព</th>
+    </tr>`;
+    
     window.filteredStudents.forEach((s, idx) => {
         let dobExport = formatDate(s.dob);
-        tableHtml += `<tr><td>${idx+1}</td><td>${s.id}</td><td>${s.name}</td><td>${s.gender}</td><td>${dobExport}</td><td>${s.pob_village||''}</td><td>${s.pob_commune||''}</td><td>${s.pob_district||''}</td><td>${s.pob_province||''}</td><td>${s.curr_village||''}</td><td>${s.curr_commune||''}</td><td>${s.curr_district||''}</td><td>${s.curr_province||''}</td><td>${s.father_name||''}</td><td>${s.father_job||''}</td><td>${s.mother_name||''}</td><td>${s.mother_job||''}</td><td>${normalizeGrade(s.grade)}</td><td>${s.room}</td><td>${s.parent_contact||''}</td><td>${s.poor_id ? 'មាន' : 'គ្មាន'}</td><td>${s.scholarship ? 'មាន' : 'គ្មាន'}</td><td>${s.disability ? 'មាន' : 'គ្មាន'}</td><td>${s.status==='Active'?'កំពុងសិក្សា':'បោះបង់'}</td></tr>`;
+        let enrollExport = s.enrollment_date ? formatDate(s.enrollment_date) : "";
+        let statusKhmer = "កំពុងសិក្សា";
+        if (s.status === "Transferred") statusKhmer = "បានផ្ទេរចេញ";
+        else if (s.status === "Graduated") statusKhmer = "បានបញ្ចប់ការសិក្សា";
+        else if (s.status === "Inactive") statusKhmer = "មិនសកម្ម (ផ្អាក)";
+        else if (s.status === "Withdrawn" || s.status === "Dropped") statusKhmer = "បានឈប់រៀន";
+
+        tableHtml += `<tr>
+            <td>${idx+1}</td>
+            <td>${s.id}</td>
+            <td>${s.name}</td>
+            <td>${s.name_en || s.name_latin || ''}</td>
+            <td>${s.gender}</td>
+            <td>${dobExport}</td>
+            <td>${enrollExport}</td>
+            <td>${s.pob_village||''}</td><td>${s.pob_commune||''}</td><td>${s.pob_district||''}</td><td>${s.pob_province||''}</td>
+            <td>${s.curr_village||''}</td><td>${s.curr_commune||''}</td><td>${s.curr_district||''}</td><td>${s.curr_province||''}</td>
+            <td>${s.father_name||''}</td><td>${s.father_job||''}</td><td>${s.mother_name||''}</td><td>${s.mother_job||''}</td>
+            <td>${normalizeGrade(s.grade)}</td><td>${s.room}</td><td>${s.parent_contact||''}</td>
+            <td>${s.poor_id ? 'មាន' : 'គ្មាន'}</td>
+            <td>${s.scholarship ? 'មាន' : 'គ្មាន'}</td>
+            <td>${s.disability ? 'មាន' : 'គ្មាន'}</td>
+            <td>${statusKhmer}</td>
+        </tr>`;
     });
     tableHtml += `</table>`;
     const finalHtml = `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="utf-8"></head><body>${tableHtml}</body></html>`;
     const blob = new Blob(['\ufeff', finalHtml], { type: 'application/vnd.ms-excel' });
-    const link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.download = `Student_List_${new Date().toISOString().split('T')[0]}.xls`; link.click();
+    const link = document.createElement("a"); link.href = URL.createObjectURL(blob); 
+    link.download = `Student_List_${new Date().toISOString().split('T')[0]}.xls`; 
+    link.click();
 };
 
-window.filterStudents = function() {
-    const search = (document.getElementById("stuSearchInput")?.value || "").toLowerCase();
-    const grade = document.getElementById("stuFilterGrade")?.value || "all";
-    const room = document.getElementById("stuFilterRoom")?.value || "all";
-    const gender = document.getElementById("stuFilterGender")?.value || "all";
-    const status = document.getElementById("stuFilterStatus")?.value || "Active";
 
-    const baseStudents = window.allStudents || [];
-
-    // 🟢 បង្ហាញសិស្សទាំងអស់ដោយមិនបាច់បែងចែក Teacher ID ពេលនេះទេ ដើម្បីឱ្យទិន្នន័យលោតមកវិញ 🟢
-    window.filteredStudents = baseStudents.filter(s => {
-        if (!s || typeof s !== 'object') return false;
-
-        const safeName = String(s.name || "").toLowerCase();
-        const safeId = String(s.id || "").toLowerCase();
-        const normGrade = normalizeGrade(s.grade);
-        const safeRoom = String(s.room || "").trim();
-        const safeGender = String(s.gender || "").trim();
-        const safeStatus = String(s.status || "Active").trim();
-
-        const matchSearch = search === "" || safeName.includes(search) || safeId.includes(search);
-        const matchGrade = grade === "all" || normGrade === grade;
-        const matchRoom = room === "all" || safeRoom === room || (room === "«ក»" && safeRoom === ""); 
-        const matchGender = gender === "all" || safeGender === gender || (gender === "ប្រុស" && safeGender === "");
-        const matchStatus = status === "all" || (status === "Active" ? safeStatus !== "Dropped" : safeStatus === "Dropped");
-
-        return matchSearch && matchGrade && matchRoom && matchGender && matchStatus;
-    });
-
-    if (document.getElementById("hdrTotal")) document.getElementById("hdrTotal").innerText = baseStudents.length;
-    if (document.getElementById("hdrActive")) document.getElementById("hdrActive").innerText = window.filteredStudents.length;
-
-    window.renderStudentsTable();
-};
 
 // ==========================================
 // មុខងារទាញយកទិន្នន័យទាំងអស់ពី Cloud មកកុំព្យូទ័រវិញ (Manual Fetch All Data)

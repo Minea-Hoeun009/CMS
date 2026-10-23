@@ -14,6 +14,29 @@ window.AppAuth = {
     // ១. ចាប់ផ្តើមដំណើរការ (Init on load)
     init: function() {
         this.checkSession();
+        this.initInactivityTracker();
+    },
+
+    // ត្រួតពិនិត្យរយៈពេលអសកម្ម (AUTH-04: Session Security Inactivity Timeout)
+    initInactivityTracker: function() {
+        let inactivityTimer;
+        const INACTIVITY_LIMIT_MS = 60 * 60 * 1000; // 60 minutes timeout
+
+        const resetTimer = () => {
+            if (!this.state.isLoggedIn) return;
+            clearTimeout(inactivityTimer);
+            inactivityTimer = setTimeout(() => {
+                if (this.state.isLoggedIn) {
+                    alert("⚠️ ការតភ្ជាប់ (Session) ត្រូវបានផុតកំណត់ដោយសារអសកម្មលើសពី ៦០ នាទី! សូមចូលប្រព័ន្ធម្តងទៀត។");
+                    this.logout();
+                }
+            }, INACTIVITY_LIMIT_MS);
+        };
+
+        ['mousemove', 'mousedown', 'keydown', 'touchstart', 'scroll'].forEach(evt => {
+            window.addEventListener(evt, resetTimer, { passive: true });
+        });
+        resetTimer();
     },
 
     // ២. ត្រួតពិនិត្យ Session ចាស់
@@ -70,6 +93,17 @@ window.AppAuth = {
             btn.disabled = true;
         }
         if (errDiv) errDiv.classList.add("hidden");
+
+        // ត្រួតពិនិត្យការចាក់សោគណនីបណ្តោះអាសន្ន (AUTH-05: Rate Limiting)
+        const lockedUntil = parseInt(localStorage.getItem('auth_locked_until') || '0', 10);
+        if (Date.now() < lockedUntil) {
+            const remainingMins = Math.ceil((lockedUntil - Date.now()) / 60000);
+            const lockMsg = `⚠️ ការចូលត្រូវបានចាក់សោបណ្តោះអាសន្នដោយសារបញ្ចូលលេខសម្ងាត់ខុសច្រើនដង! សូមរង់ចាំ ${remainingMins} នាទីទៀត។`;
+            if (btn) { btn.innerHTML = origBtnText; btn.disabled = false; }
+            if (errDiv) { errDiv.textContent = lockMsg; errDiv.classList.remove("hidden"); }
+            else alert(lockMsg);
+            return;
+        }
 
         try {
             let teacherData = null;
@@ -170,8 +204,26 @@ window.AppAuth = {
 
             // ប្រសិនបើនៅតែរកមិនឃើញ
             if (!teacherData) {
-                throw new Error("ឈ្មោះគណនី ឬលេខសម្ងាត់មិនត្រឹមត្រូវទេ! (គណនីសាកល្បង៖ admin / admin123 ឬ TCH-001 / 12345678)");
+                // កត់ត្រាចំនួនលើកដែលបញ្ចូលខុស
+                let failedCount = parseInt(localStorage.getItem('auth_failed_attempts') || '0', 10) + 1;
+                localStorage.setItem('auth_failed_attempts', failedCount.toString());
+
+                if (failedCount >= 5) {
+                    localStorage.setItem('auth_locked_until', (Date.now() + 5 * 60 * 1000).toString());
+                    localStorage.removeItem('auth_failed_attempts');
+                    throw new Error("⚠️ លោកគ្រូបានបញ្ចូលលេខសម្ងាត់ខុស ៥ ដង! ប្រព័ន្ធសូមចាក់សោ ៥ នាទីដើម្បីសុវត្ថិភាព។");
+                }
+                throw new Error(`ឈ្មោះគណនី ឬលេខសម្ងាត់មិនត្រឹមត្រូវទេ! (ព្យាយាមខុសលើកទី ${failedCount}/៥)`);
             }
+
+            // ត្រួតពិនិត្យស្ថានភាពគណនី (AUTH-03: Account Status Active / Inactive / Locked)
+            if (teacherData.status && teacherData.status.toLowerCase() !== "active") {
+                throw new Error("⚠️ គណនីរបស់អ្នកត្រូវបានផ្អាក ឬចាក់សោ (Inactive/Locked)! សូមទាក់ទងអ្នកគ្រប់គ្រងសាលា។");
+            }
+
+            // ជោគជ័យ៖ សម្អាត Failed Attempts
+            localStorage.removeItem('auth_failed_attempts');
+            localStorage.removeItem('auth_locked_until');
 
             // រក្សាទុក Session
             localStorage.setItem('auth_teacher_id', teacherData.teacher_id);
@@ -562,8 +614,32 @@ window.handleUpdateAccount = async function(e) {
 // =========================================================================
 
 window.isCurrentUserAdmin = function() {
-    const role = localStorage.getItem('auth_role') || window.AuthState?.role || window.AppAuth?.state?.role;
-    return role === "admin";
+    const role = (localStorage.getItem('auth_role') || window.AuthState?.role || window.AppAuth?.state?.role || "").toLowerCase();
+    return role === "admin" || role === "system_admin" || role === "school_admin";
+};
+
+window.isSystemAdmin = function() {
+    const role = (localStorage.getItem('auth_role') || window.AuthState?.role || window.AppAuth?.state?.role || "").toLowerCase();
+    return role === "system_admin" || role === "admin";
+};
+
+window.isSchoolAdmin = function() {
+    const role = (localStorage.getItem('auth_role') || window.AuthState?.role || window.AppAuth?.state?.role || "").toLowerCase();
+    return role === "school_admin" || role === "system_admin" || role === "admin";
+};
+
+window.isTeacher = function() {
+    const role = (localStorage.getItem('auth_role') || window.AuthState?.role || window.AppAuth?.state?.role || "teacher").toLowerCase();
+    return role === "teacher";
+};
+
+window.isReportViewer = function() {
+    const role = (localStorage.getItem('auth_role') || window.AuthState?.role || window.AppAuth?.state?.role || "").toLowerCase();
+    return role === "viewer" || role === "report_viewer";
+};
+
+window.canEditRecords = function() {
+    return !window.isReportViewer();
 };
 
 window.fetchTeacherAccounts = async function() {

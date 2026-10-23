@@ -307,144 +307,6 @@ window.loadAttendanceView = async function() {
 };
 
 // =====================================================================
-// ២. ទាញយកទិន្នន័យវត្តមាន (Safe Mode + Fast Load)
-// =====================================================================
-window.fetchMonthlyAttendance = async function(forceRefresh = false) {
-    const tbody = document.getElementById("attendanceTableRows");
-    const btn = document.getElementById("btnSaveAttendance");
-    
-    try {
-        if (btn) {
-            btn.disabled = true;
-            btn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> កំពុងទាញយក...`;
-        }
-        
-        if (tbody) {
-            tbody.innerHTML = `<tr><td colspan="42" class="p-20 text-center text-slate-400 font-bold"><i class="fa-solid fa-circle-notch fa-spin text-4xl mb-4 text-rose-400"></i><br>កំពុងរៀបចំទិន្នន័យ...</td></tr>`;
-        }
-
-        const monthSelect = document.getElementById("attMonthSelect");
-        const yearSelect = document.getElementById("attYearSelect");
-        
-        if (!monthSelect || !yearSelect) {
-            throw new Error("មិនអាចស្វែងរកប្រអប់ជ្រើសរើសខែ ឬឆ្នាំបានទេ។");
-        }
-
-        const month = monthSelect.value;
-        const year = parseInt(yearSelect.value);
-
-        // ទាញសិស្សពី Memory ផ្ទាល់
-        let allStus = [];
-        if (window.allStudents && window.allStudents.length > 0) {
-            allStus = window.allStudents;
-        } else {
-            const ls = localStorage.getItem('academic_students');
-            if (ls && ls !== "undefined") allStus = JSON.parse(ls);
-        }
-
-        attendanceStudents = allStus.filter(s => s && s.status !== "Dropped");
-        attendanceStudents.sort((a, b) => String(a.name || "").trim().localeCompare(String(b.name || "").trim(), "km"));
-
-        let levelVal = "ថ្នាក់ទី 1", roomVal = "«ក»";
-        if (attendanceStudents.length > 0) {
-            levelVal = String(attendanceStudents[0].grade || "ថ្នាក់ទី 1").trim();
-            if (!levelVal.includes("ថ្នាក់ទី")) levelVal = "ថ្នាក់ទី " + levelVal;
-            roomVal = String(attendanceStudents[0].room || "«ក»").trim();
-        }
-        const fullGradeName = `${levelVal} ${roomVal}`;
-
-        // Update UI
-        const titleEl = document.getElementById("lblMonthTitle");
-        if (titleEl) titleEl.textContent = month;
-        const attHeaderGrade = document.getElementById("attHeaderGrade");
-        if (attHeaderGrade) attHeaderGrade.textContent = `${levelVal.replace('ថ្នាក់ទី', '').trim()} ${roomVal}`;
-
-        const monthMap = { "មករា": 1, "កុម្ភៈ": 2, "មីនា": 3, "មេសា": 4, "ឧសភា": 5, "មិថុនា": 6, "កក្កដា": 7, "សីហា": 8, "កញ្ញា": 9, "តុលា": 10, "វិច្ឆិកា": 11, "ធ្នូ": 12 };
-        const monthNum = monthMap[month] || 1;
-        const daysInMonth = new Date(year, monthNum, 0).getDate();
-
-        // 🟢 ហៅមុខងារគូរក្បាលតារាង (ត្រូវប្រាកដថាវាដើរ)
-        if (typeof window.renderCalendarHeaders === 'function') {
-            window.renderCalendarHeaders(year, monthNum, daysInMonth);
-        } else {
-            throw new Error("ប្រព័ន្ធបាត់មុខងារ renderCalendarHeaders (គូរក្បាលតារាង)");
-        }
-
-        try {
-            const savedHolidays = JSON.parse(localStorage.getItem(`att_holidays_${fullGradeName}_${month}_${year}`) || '{}');
-            window.monthlyHolidays = savedHolidays;
-        } catch(e) { window.monthlyHolidays = {}; }
-
-        let attRes = [];
-        try { 
-            const rawAtt = localStorage.getItem('academic_attendance');
-            if (rawAtt) attRes = JSON.parse(rawAtt) || []; 
-        } catch(e) {}
-
-        monthlyAttendanceData = {};
-        try {
-            const cached = JSON.parse(localStorage.getItem(`att_${fullGradeName}_${month}_${year}`) || '{}');
-            monthlyAttendanceData = { ...cached };
-        } catch(e) {}
-
-        if (attRes && attRes.length > 0) {
-            attRes.forEach(r => {
-                if (!r || typeof r !== 'object') return;
-                
-                const rMonth = String(r.month || "").trim();
-                if (rMonth !== month) return;
-
-                const day = typeof parseDayNumber === 'function' ? parseDayNumber(r.date || r.day) : parseInt(r.date || r.day, 10);
-                if (!day || day < 1 || day > daysInMonth) return;
-                
-                const stuId = String(r.student_id || r.studentId || r.id || "").trim();
-
-                if (stuId) {
-                    if (!monthlyAttendanceData[stuId]) monthlyAttendanceData[stuId] = {};
-                    monthlyAttendanceData[stuId][day] = typeof normalizeStatus === 'function' ? normalizeStatus(r.status || r.attendance || r['ស្ថានភាព']) : (r.status || r.attendance || r['ស្ថានភាព']);
-                }
-            });
-        }
-
-        // បញ្ចូលថ្ងៃឈប់សម្រាក
-        Object.keys(window.monthlyHolidays).forEach(dayKey => {
-            const d = parseInt(dayKey, 10);
-            if (d >= 1 && d <= daysInMonth) {
-                attendanceStudents.forEach(s => {
-                    if (!monthlyAttendanceData[s.id]) monthlyAttendanceData[s.id] = {};
-                    if (!monthlyAttendanceData[s.id][d]) {
-                        monthlyAttendanceData[s.id][d] = "៖";
-                    }
-                });
-            }
-        });
-
-        window.monthlyAttendanceData = monthlyAttendanceData;
-        
-        // 🟢 ហៅមុខងារគូរជួរដេកសិស្ស
-        if (typeof window.renderAttendanceRows === 'function') {
-            window.renderAttendanceRows(daysInMonth);
-        } else {
-            throw new Error("ប្រព័ន្ធបាត់មុខងារ renderAttendanceRows (គូរតារាងសិស្ស)");
-        }
-
-    } catch (err) {
-        console.error("កំហុសក្នុងការទាញយកទិន្នន័យវត្តមាន:", err);
-        if (tbody) {
-            tbody.innerHTML = `<tr><td colspan="42" class="p-10 text-center text-rose-600 font-bold bg-rose-50 border border-rose-200">
-                <i class="fa-solid fa-triangle-exclamation text-4xl mb-4"></i><br>
-                បរាជ័យក្នុងការរៀបចំតារាងវត្តមាន៖ ${err.message}
-            </td></tr>`;
-        }
-    } finally {
-        if (btn) {
-            btn.disabled = false;
-            btn.innerHTML = `<i class="fa-solid fa-floppy-disk"></i> រក្សាទុក`;
-        }
-    }
-};
-
-// =====================================================================
 // ២. ទាញយកទិន្នន័យសិស្ស និងវត្តមានប្រចាំខែ (លឿនបំផុត - Fast Load)
 // =====================================================================
 window.fetchMonthlyAttendance = async function(forceRefresh = false) {
@@ -1622,6 +1484,11 @@ window.closeDailyModalAndSave = function() {
 // ៦. រក្សាទុកទិន្នន័យ (Save Batch to API & LocalStorage)
 // =====================================================================
 window.saveMonthlyAttendance = async function() {
+    if (typeof canEditRecords === 'function' && !canEditRecords()) {
+        alert("🔒 លោកគ្រូអ្នកគ្រូមានត្រឹមសិទ្ធិមើលប៉ុណ្ណោះ (Viewer) មិនអាចរក្សាទុកវត្តមានបានទេ!");
+        return;
+    }
+
     const btn = document.getElementById("btnSaveAttendance");
     const month = document.getElementById("attMonthSelect").value;
     const year = document.getElementById("attYearSelect").value;

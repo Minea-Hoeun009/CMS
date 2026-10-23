@@ -676,11 +676,142 @@ window.autoRankStudents = function() {
 };
 
 // ==========================================
-// ០៦. រក្សាទុក & លុបទិន្នន័យ (Save Data)
+// ០៦. ការចាក់សោការកែប្រែពិន្ទុ (SCR-06: Score Assessment Locking)
+// ==========================================
+window.getAssessmentKey = function() {
+    const type = document.getElementById("globalPeriodType")?.value || "monthly";
+    const month = document.getElementById("globalPeriodValue")?.value || "មករា";
+    const levelStr = document.getElementById("globalLevelSelect")?.value || "";
+    const roomStr = document.getElementById("globalRoomSelect")?.value || "";
+    const grade = `${levelStr} ${roomStr}`.trim();
+    const currentYear = document.getElementById("globalAcademicYear")?.value || localStorage.getItem('selected_academic_year') || "2026-2027";
+    return `${currentYear}_${grade}_${type}_${type === "annual" ? "annual" : month}`.replace(/\s+/g, '_');
+};
+
+window.isCurrentAssessmentLocked = function() {
+    try {
+        const locks = JSON.parse(localStorage.getItem('academic_assessment_locks') || '{}');
+        const key = window.getAssessmentKey();
+        return !!locks[key];
+    } catch(e) {
+        return false;
+    }
+};
+
+window.updateAssessmentLockUI = function() {
+    const isLocked = window.isCurrentAssessmentLocked();
+    const badge = document.getElementById("assessmentLockBadge");
+    const lockBtn = document.getElementById("btnToggleAssessmentLock");
+    const lockIcon = document.getElementById("lockIcon");
+    const lockBtnText = document.getElementById("lockBtnText");
+    const btnSave = document.getElementById("btnSaveScores");
+
+    if (badge) {
+        if (isLocked) {
+            badge.classList.remove("hidden");
+            badge.innerHTML = `<i class="fa-solid fa-lock mr-1"></i>បានចាក់សោ (Locked)`;
+        } else {
+            badge.classList.add("hidden");
+        }
+    }
+
+    if (lockBtn) {
+        if (isLocked) {
+            lockBtn.className = "px-3.5 py-2 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shrink-0 shadow-sm";
+            if (lockIcon) lockIcon.className = "fa-solid fa-lock text-rose-600";
+            if (lockBtnText) lockBtnText.textContent = "ដោះសោពិន្ទុ";
+        } else {
+            lockBtn.className = "px-3.5 py-2 bg-slate-100 hover:bg-amber-50 text-slate-700 hover:text-amber-700 border border-slate-200 hover:border-amber-200 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shrink-0 shadow-sm";
+            if (lockIcon) lockIcon.className = "fa-solid fa-lock-open text-slate-500";
+            if (lockBtnText) lockBtnText.textContent = "ចាក់សោ";
+        }
+    }
+
+    if (btnSave) {
+        if (isLocked) {
+            btnSave.disabled = true;
+            btnSave.classList.add("opacity-50", "cursor-not-allowed");
+            btnSave.title = "ពិន្ទុត្រូវបានចាក់សោរួចហើយ មិនអាចកែប្រែបានទេ";
+        } else {
+            btnSave.disabled = false;
+            btnSave.classList.remove("opacity-50", "cursor-not-allowed");
+            btnSave.title = "រក្សាទុកពិន្ទុ";
+        }
+    }
+
+    // Disable all inputs in the score table if locked
+    const tbody = document.getElementById("scoresTableBody");
+    if (tbody) {
+        const inputs = tbody.querySelectorAll("input, select");
+        inputs.forEach(inp => {
+            inp.disabled = isLocked;
+            if (isLocked) inp.classList.add("bg-slate-100", "cursor-not-allowed");
+            else inp.classList.remove("bg-slate-100", "cursor-not-allowed");
+        });
+    }
+};
+
+window.toggleAssessmentLock = function() {
+    const isAdmin = typeof isCurrentUserAdmin === 'function' ? isCurrentUserAdmin() : true;
+    if (!isAdmin) {
+        alert("🔒 មានតែអ្នកគ្រប់គ្រង (Admin) ប៉ុណ្ណោះដែលអាចចាក់សោ ឬដោះសោការកែប្រែពិន្ទុបាន!");
+        return;
+    }
+
+    const key = window.getAssessmentKey();
+    const locks = JSON.parse(localStorage.getItem('academic_assessment_locks') || '{}');
+    const currentlyLocked = !!locks[key];
+
+    const actionText = currentlyLocked ? "«ដោះសោ» ដើម្បីអនុញ្ញាតឱ្យកែប្រែពិន្ទុឡើងវិញ" : "«ចាក់សោ» ដើម្បីការពារមិនឱ្យមានការកែប្រែពិន្ទុ";
+    if (!confirm(`តើលោកគ្រូ/អ្នកគ្រូពិតជាចង់ ${actionText} សម្រាប់វគ្គ/ខែនេះមែនទេ?`)) return;
+
+    if (currentlyLocked) {
+        delete locks[key];
+    } else {
+        locks[key] = {
+            locked_at: new Date().toISOString(),
+            locked_by: window.AuthState ? window.AuthState.teacherName : (localStorage.getItem('auth_teacher_name') || 'Admin')
+        };
+    }
+
+    localStorage.setItem('academic_assessment_locks', JSON.stringify(locks));
+
+    if (window.db) {
+        window.db.collection("schools_config").doc("assessment_locks").set(locks, { merge: true }).catch(console.warn);
+    }
+
+    if (typeof window.logAudit === 'function') {
+        window.logAudit(
+            currentlyLocked ? 'UNLOCK_ASSESSMENT' : 'LOCK_ASSESSMENT',
+            'score',
+            `បាន${currentlyLocked ? 'ដោះសោ' : 'ចាក់សោ'}ការកែប្រែពិន្ទុសម្រាប់កូដ ${key}`
+        );
+    }
+
+    window.updateAssessmentLockUI();
+    if (typeof showToast === 'function') {
+        showToast(currentlyLocked ? "🔓 បានដោះសោការកែប្រែពិន្ទុជោគជ័យ!" : "🔒 បានចាក់សោការកែប្រែពិន្ទុជោគជ័យ!");
+    }
+};
+
+// ==========================================
+// ០៧. រក្សាទុក & លុបទិន្នន័យ (Save Data)
 // ==========================================
 window.saveScoresData = async function() {
     const btn = document.getElementById("btnSaveScores");
     const originalText = btn ? btn.innerHTML : "រក្សាទុក";
+
+    // 🔒 ពិនិត្យការចាក់សោពិន្ទុ (Assessment Lock Check)
+    if (window.isCurrentAssessmentLocked()) {
+        alert("🔒 ពិន្ទុសម្រាប់វគ្គ/ខែនេះត្រូវបានចាក់សោ (Assessment Locked)! សូមទាក់ទង Admin ដើម្បីដោះសោប្រសិនបើត្រូវការកែប្រែ។");
+        return;
+    }
+
+    if (typeof canEditRecords === 'function' && !canEditRecords()) {
+        alert("🔒 លោកគ្រូអ្នកគ្រូមានត្រឹមសិទ្ធិមើលប៉ុណ្ណោះ មិនអាចរក្សាទុកពិន្ទុបានទេ!");
+        return;
+    }
+
     if (btn) { btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> កំពុងបញ្ជូន...`; btn.disabled = true; }
 
     const type = document.getElementById("globalPeriodType")?.value || "monthly";
@@ -986,7 +1117,7 @@ window.loadScoresView = async function() {
                       <button onclick="window.closeScoreModal('modal-entry')" class="w-10 h-10 md:w-12 md:h-12 rounded-full bg-slate-100 hover:bg-rose-100 text-slate-600 hover:text-rose-600 flex items-center justify-center transition-all shadow-inner active:scale-90 shrink-0"><i class="fa-solid fa-arrow-left text-lg"></i></button>
                       <div class="hidden md:flex items-center gap-3 border-r border-slate-200 pr-4">
                           <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 text-white flex items-center justify-center shadow-md"><i class="fa-solid fa-pen-to-square"></i></div>
-                          <div><h2 class="font-moul text-[15px] text-slate-800 leading-tight">បញ្ជីស្រង់ពិន្ទុ</h2><p class="text-[10px] text-slate-500 font-bold tracking-wide">សិស្សសរុប <span id="entryStudentCountLbl" class="text-blue-600 text-xs">...</span> នាក់</p></div>
+                          <div><h2 class="font-moul text-[15px] text-slate-800 leading-tight">បញ្ជីស្រង់ពិន្ទុ</h2><p class="text-[10px] text-slate-500 font-bold tracking-wide">សិស្សសរុប <span id="entryStudentCountLbl" class="text-blue-600 text-xs">...</span> នាក់ <span id="assessmentLockBadge" class="hidden ml-2 px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-50 text-rose-600 border border-rose-200"><i class="fa-solid fa-lock mr-1"></i>បានចាក់សោ</span></p></div>
                       </div>
                       <div class="relative flex-1 md:w-64 md:flex-none">
                           <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
@@ -1010,6 +1141,7 @@ window.loadScoresView = async function() {
                       
                       <button onclick="window.calculateAllScores()" class="px-4 py-2 bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 rounded-xl text-xs font-bold transition flex items-center gap-2 shrink-0 shadow-sm active:scale-95"><i class="fa-solid fa-calculator"></i> គណនា</button>
                       <button onclick="window.autoRankStudents()" class="px-4 py-2 bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 rounded-xl text-xs font-bold transition flex items-center gap-2 shrink-0 shadow-sm active:scale-95"><i class="fa-solid fa-ranking-star"></i> រៀបចំណាត់ថ្នាក់</button>
+                      <button onclick="window.toggleAssessmentLock()" id="btnToggleAssessmentLock" class="px-3.5 py-2 bg-slate-100 hover:bg-amber-50 text-slate-700 hover:text-amber-700 border border-slate-200 hover:border-amber-200 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shrink-0 shadow-sm" title="ចាក់សោ/ដោះសោការកែប្រែពិន្ទុ"><i id="lockIcon" class="fa-solid fa-lock-open text-slate-500"></i> <span id="lockBtnText">ចាក់សោ</span></button>
                       <button onclick="window.saveScoresData()" id="btnSaveScores" class="px-6 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-xl text-xs font-bold shadow-md shadow-blue-500/30 flex items-center gap-2 shrink-0 active:scale-95 border border-blue-500/50 transform hover:-translate-y-0.5 transition-all"><i class="fa-solid fa-floppy-disk text-[14px]"></i> រក្សាទុក</button>
                   </div>
               </div>
@@ -1562,6 +1694,7 @@ window.fetchStudentsForScores = async function() {
         
         setTimeout(() => {
             window.calculateAllScores();
+            if (typeof window.updateAssessmentLockUI === 'function') window.updateAssessmentLockUI();
         }, 50);
 
     } catch (err) {
