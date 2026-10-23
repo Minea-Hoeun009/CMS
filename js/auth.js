@@ -557,6 +557,171 @@ window.handleUpdateAccount = async function(e) {
     }
 };
 
+// =========================================================================
+// ៨. គ្រប់គ្រងគណនីគ្រូ និងកំណត់សិទ្ធិ (User Roles & Accounts Management - Admin)
+// =========================================================================
+
+window.isCurrentUserAdmin = function() {
+    const role = localStorage.getItem('auth_role') || window.AuthState?.role || window.AppAuth?.state?.role;
+    return role === "admin";
+};
+
+window.fetchTeacherAccounts = async function() {
+    let teachers = [];
+
+    // ១. ទាញពី Firestore បើមាន
+    if (window.db) {
+        try {
+            const snap = await window.db.collection("teachers").get();
+            if (!snap.empty) {
+                teachers = snap.docs.map(doc => {
+                    const data = doc.data();
+                    return {
+                        teacher_id: data.teacher_id || doc.id,
+                        name: data.name || data.full_name || "លោកគ្រូ អ្នកគ្រូ",
+                        username: data.username || doc.id.toLowerCase(),
+                        role: data.role || "teacher",
+                        contact: data.contact || data.phone || "",
+                        assigned_grade: data.assigned_grade || data.teacher_level || "ថ្នាក់ទី ១",
+                        assigned_room: data.assigned_room || data.teacher_room || "«ក»",
+                        created_at: data.created_at || ""
+                    };
+                });
+            }
+        } catch (e) {
+            console.warn("Firestore fetchTeacherAccounts error:", e.message);
+        }
+    }
+
+    // ២. ប្រសិនបើគ្មានទិន្នន័យ ឬ Offline សូមផ្តល់ទិន្នន័យគំរូ / Cache
+    if (!teachers || teachers.length === 0) {
+        try {
+            const cached = JSON.parse(localStorage.getItem('cached_teachers_list') || '[]');
+            if (Array.isArray(cached) && cached.length > 0) {
+                teachers = cached;
+            }
+        } catch(e) {}
+    }
+
+    if (!teachers || teachers.length === 0) {
+        teachers = [
+            {
+                teacher_id: "TCH-ADMIN",
+                name: "លោកនាយកសាលា (Administrator)",
+                username: "admin",
+                role: "admin",
+                contact: "012 345 678",
+                assigned_grade: "គ្រប់ថ្នាក់",
+                assigned_room: "ទូទៅ",
+                created_at: new Date().toISOString()
+            },
+            {
+                teacher_id: "TCH-001",
+                name: "លោកគ្រូ គំរូ",
+                username: "teacher",
+                role: "teacher",
+                contact: "098 765 432",
+                assigned_grade: "ថ្នាក់ទី ១",
+                assigned_room: "«ក»",
+                created_at: new Date().toISOString()
+            }
+        ];
+    }
+
+    localStorage.setItem('cached_teachers_list', JSON.stringify(teachers));
+    return teachers;
+};
+
+window.saveTeacherAccount = async function(teacherObj) {
+    if (!teacherObj || !teacherObj.name || !teacherObj.username) {
+        throw new Error("សូមបំពេញឈ្មោះ និងឈ្មោះគណនីគ្រូ!");
+    }
+
+    const teacherId = teacherObj.teacher_id || `TCH-${Math.floor(1000 + Math.random() * 9000)}`;
+    const docData = {
+        teacher_id: teacherId,
+        name: teacherObj.name.trim(),
+        username: teacherObj.username.toLowerCase().trim(),
+        role: teacherObj.role || "teacher",
+        contact: (teacherObj.contact || "").trim(),
+        assigned_grade: teacherObj.assigned_grade || "ថ្នាក់ទី ១",
+        assigned_room: teacherObj.assigned_room || "«ក»",
+        last_updated: new Date().toISOString()
+    };
+
+    if (teacherObj.password && teacherObj.password.length >= 6) {
+        docData.password = teacherObj.password;
+    }
+
+    // ១. រក្សាទុកក្នុង Firestore
+    if (window.db) {
+        await window.db.collection("teachers").doc(teacherId).set(docData, { merge: true });
+    }
+
+    // ២. Update ក្នុង Local Cache
+    let cached = [];
+    try { cached = JSON.parse(localStorage.getItem('cached_teachers_list') || '[]'); } catch(e) {}
+    const existingIndex = cached.findIndex(t => t.teacher_id === teacherId);
+    if (existingIndex >= 0) {
+        cached[existingIndex] = { ...cached[existingIndex], ...docData };
+    } else {
+        cached.push(docData);
+    }
+    localStorage.setItem('cached_teachers_list', JSON.stringify(cached));
+
+    if (typeof window.logAudit === 'function') {
+        window.logAudit('USER_MANAGEMENT', 'auth', `បានរក្សាទុកគណនីគ្រូ៖ ${docData.name} (${docData.teacher_id}) សិទ្ធិ៖ ${docData.role}`);
+    }
+
+    return docData;
+};
+
+window.deleteTeacherAccount = async function(teacherId) {
+    if (!window.isCurrentUserAdmin()) {
+        throw new Error("លោកគ្រូមិនមានសិទ្ធិជា Administrator ដើម្បីលុបគណនីទេ!");
+    }
+    const currentId = localStorage.getItem('auth_teacher_id');
+    if (teacherId === currentId) {
+        throw new Error("មិនអាចលុបគណនីដែលកំពុងដំណើរការឡើយ!");
+    }
+    if (teacherId === "TCH-ADMIN") {
+        throw new Error("មិនអាចលុបគណនី Administrator ចម្បងរបស់ប្រព័ន្ធបានទេ!");
+    }
+
+    if (window.db) {
+        await window.db.collection("teachers").doc(teacherId).delete();
+    }
+
+    let cached = [];
+    try { cached = JSON.parse(localStorage.getItem('cached_teachers_list') || '[]'); } catch(e) {}
+    cached = cached.filter(t => t.teacher_id !== teacherId);
+    localStorage.setItem('cached_teachers_list', JSON.stringify(cached));
+
+    if (typeof window.logAudit === 'function') {
+        window.logAudit('DELETE_USER', 'auth', `បានលុបគណនីគ្រូ៖ ${teacherId}`);
+    }
+};
+
+window.resetTeacherPasswordByAdmin = async function(teacherId, newPassword) {
+    if (!window.isCurrentUserAdmin()) {
+        throw new Error("លោកគ្រូមិនមានសិទ្ធិជា Administrator ឡើយ!");
+    }
+    if (!newPassword || newPassword.length < 6) {
+        throw new Error("លេខសម្ងាត់ថ្មីត្រូវមានយ៉ាងហោចណាស់ ៦ តួអក្សរ!");
+    }
+
+    if (window.db) {
+        await window.db.collection("teachers").doc(teacherId).set({
+            password: newPassword,
+            last_password_reset: new Date().toISOString()
+        }, { merge: true });
+    }
+
+    if (typeof window.logAudit === 'function') {
+        window.logAudit('RESET_PASSWORD', 'auth', `បានកំណត់លេខសម្ងាត់ឡើងវិញសម្រាប់គ្រូ៖ ${teacherId}`);
+    }
+};
+
 // ដំណើរការពិនិត្យ Session ពេល Load ទំព័រ
 document.addEventListener("DOMContentLoaded", () => {
     window.AppAuth.init();
