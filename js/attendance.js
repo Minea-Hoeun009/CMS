@@ -120,7 +120,17 @@ window.loadAttendanceView = async function() {
         const sInfo = typeof appSettings !== 'undefined' ? appSettings : (JSON.parse(localStorage.getItem('school_settings') || '{}'));
         const academicYear = document.getElementById("globalAcademicYear")?.value || localStorage.getItem('selected_academic_year') || sInfo.academic_year || "2026-2027";
         
-        const defaultGrade = sInfo.teacher_level && sInfo.teacher_room ? `${sInfo.teacher_level} ${sInfo.teacher_room}` : "ថ្នាក់រៀនរបស់ខ្ញុំ";
+        const teacherGradeInfo = typeof window.getTeacherGradeInfo === 'function' ? window.getTeacherGradeInfo() : { level: "ថ្នាក់ទី ១", room: "«ក»" };
+        const initialGrade = normalizeGrade(teacherGradeInfo.level || "ថ្នាក់ទី ១");
+        const initialRoom = teacherGradeInfo.room || "«ក»";
+
+        const gradesList = ["ថ្នាក់ទី ១", "ថ្នាក់ទី ២", "ថ្នាក់ទី ៣", "ថ្នាក់ទី ៤", "ថ្នាក់ទី ៥", "ថ្នាក់ទី ៦", "ថ្នាក់ទី ៧", "ថ្នាក់ទី ៨", "ថ្នាក់ទី ៩", "ថ្នាក់ទី ១០", "ថ្នាក់ទី ១១", "ថ្នាក់ទី ១២"];
+        const gradesOptions = gradesList.map(g => `<option value="${g}" ${g === initialGrade ? 'selected' : ''}>${g}</option>`).join('');
+
+        const roomsList = ["«ក»", "«ខ»", "«គ»", "«ឃ»", "«ង»"];
+        const roomsOptions = roomsList.map(r => `<option value="${r}" ${r === initialRoom ? 'selected' : ''}>${r}</option>`).join('');
+
+        const defaultGrade = `${initialGrade} ${initialRoom}`;
         const currentYear = new Date().getFullYear();
         
         const localKhmerMonths = typeof KHMER_MONTHS !== 'undefined' ? KHMER_MONTHS : ["មករា", "កុម្ភៈ", "មីនា", "មេសា", "ឧសភា", "មិថុនា", "កក្កដា", "សីហា", "កញ្ញា", "តុលា", "វិច្ឆិកា", "ធ្នូ"];
@@ -166,7 +176,19 @@ window.loadAttendanceView = async function() {
                     <div class="relative w-full sm:w-auto group">
                       <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-rose-500 transition-colors"><i class="fa-solid fa-magnifying-glass text-[13px]"></i></span>
                       <input type="text" id="attSearch" oninput="if(typeof window.filterAttendanceTable === 'function') window.filterAttendanceTable();" placeholder="ស្វែងរកឈ្មោះសិស្ស..." 
-                             class="pl-10 pr-4 py-2.5 border border-slate-200 rounded-xl text-[13px] font-bold focus:ring-2 focus:ring-rose-500/30 focus:border-rose-400 focus:bg-white outline-none w-full sm:w-56 bg-slate-50 transition shadow-inner font-siemreap">
+                             class="pl-10 pr-4 py-2.5 border border-slate-200 rounded-xl text-[13px] font-bold focus:ring-2 focus:ring-rose-500/30 focus:border-rose-400 focus:bg-white outline-none w-full sm:w-44 bg-slate-50 transition shadow-inner font-siemreap">
+                    </div>
+
+                    <!-- 🟢 ATT-01: ជ្រើសរើសថ្នាក់ និងបន្ទប់ (Interactive Class & Room Selection) 🟢 -->
+                    <div class="flex items-center gap-1.5 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 shadow-inner">
+                      <i class="fa-solid fa-graduation-cap text-rose-500 text-[13px]"></i>
+                      <select id="attGradeSelect" onchange="if(typeof window.fetchMonthlyAttendance === 'function') window.fetchMonthlyAttendance();" class="border-none bg-transparent text-[13px] font-bold text-indigo-700 outline-none cursor-pointer font-siemreap focus:ring-0">
+                        ${gradesOptions}
+                      </select>
+                      <span class="text-slate-300">|</span>
+                      <select id="attRoomSelect" onchange="if(typeof window.fetchMonthlyAttendance === 'function') window.fetchMonthlyAttendance();" class="border-none bg-transparent text-[13px] font-bold text-rose-600 outline-none cursor-pointer font-moul focus:ring-0">
+                        ${roomsOptions}
+                      </select>
                     </div>
                     
                     <div class="flex flex-1 sm:flex-none items-center gap-2 bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 shadow-inner">
@@ -316,6 +338,8 @@ window.fetchMonthlyAttendance = async function(forceRefresh = false) {
         btn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> កំពុងទាញយក...`;
     }
     
+    const gradeSelect = document.getElementById("attGradeSelect");
+    const roomSelect = document.getElementById("attRoomSelect");
     const monthSelect = document.getElementById("attMonthSelect");
     const yearSelect = document.getElementById("attYearSelect");
     
@@ -324,10 +348,17 @@ window.fetchMonthlyAttendance = async function(forceRefresh = false) {
         return;
     }
 
+    const teacherInfo = typeof window.getTeacherGradeInfo === 'function' ? window.getTeacherGradeInfo() : { level: "ថ្នាក់ទី ១", room: "«ក»" };
+    const selectedGrade = gradeSelect ? normalizeGrade(gradeSelect.value) : normalizeGrade(teacherInfo.level);
+    const selectedRoom = roomSelect ? roomSelect.value.trim() : (teacherInfo.room || "«ក»").trim();
+    const fullGradeName = `${selectedGrade} ${selectedRoom}`;
+
     const month = monthSelect.value;
     const year = parseInt(yearSelect.value);
+    const currentAcademicYear = document.getElementById("globalAcademicYear")?.value || localStorage.getItem('selected_academic_year') || "2026-2027";
+    const schoolId = window.AuthState?.school_id || localStorage.getItem('school_id') || 'SCH-001';
 
-    // 🔴 ទាញយកសិស្សពី Memory ផ្ទាល់ (លឿនបំផុត) ជំនួសការទាញពី LocalStorage 🔴
+    // 🔴 ATT-01: ទាញយកតែសិស្សដែលចុះឈ្មោះក្នុងថ្នាក់ និងឆ្នាំសិក្សានេះ 🔴
     let allStus = [];
     if (window.allStudents && window.allStudents.length > 0) {
         allStus = window.allStudents;
@@ -335,29 +366,41 @@ window.fetchMonthlyAttendance = async function(forceRefresh = false) {
         try { allStus = JSON.parse(localStorage.getItem('academic_students')) || []; } catch(e) {}
     }
 
-    // ចម្រោះយកតែសិស្សដែលកំពុងរៀន
-    attendanceStudents = allStus.filter(s => s && typeof s === 'object' && s.status !== "Dropped");
+    attendanceStudents = allStus.filter(s => {
+        if (!s || typeof s !== 'object') return false;
+        
+        // ត្រួតពិនិត្យឆ្នាំសិក្សា
+        const sYear = String(s.academic_year || '').trim();
+        if (sYear && sYear !== 'undefined' && currentAcademicYear && sYear !== currentAcademicYear) {
+            return false;
+        }
+
+        // ត្រួតពិនិត្យថ្នាក់
+        const sGrade = normalizeGrade(s.grade);
+        if (sGrade !== selectedGrade) return false;
+
+        // ត្រួតពិនិត្យបន្ទប់
+        const sRoom = String(s.room || '«ក»').trim();
+        if (sRoom !== selectedRoom && !(selectedRoom === '«ក»' && !s.room)) return false;
+
+        // មិនរាប់សិស្សដែលឈប់រៀន / ផ្អាក / បញ្ចប់
+        const sStat = String(s.status || 'Active').toLowerCase();
+        if (sStat === 'withdrawn' || sStat === 'dropped' || sStat === 'ឈប់រៀន') {
+            return false;
+        }
+
+        return true;
+    });
     
     // តម្រៀបអក្ខរក្រម
     attendanceStudents.sort((a, b) => String(a.name || "").trim().localeCompare(String(b.name || "").trim(), "km"));
-
-    // 🔴 ចាប់យកឈ្មោះថ្នាក់ពីសិស្សទី១ ផ្ទាល់តែម្តង (លឿន និងច្បាស់លាស់) 🔴
-    let levelVal = "ថ្នាក់ទី 1";
-    let roomVal = "«ក»";
-    if (attendanceStudents.length > 0) {
-        const firstStu = attendanceStudents[0];
-        levelVal = String(firstStu.grade || "ថ្នាក់ទី 1").trim();
-        if (!levelVal.includes("ថ្នាក់ទី")) levelVal = "ថ្នាក់ទី " + levelVal;
-        roomVal = String(firstStu.room || "«ក»").trim();
-    }
-    const fullGradeName = `${levelVal} ${roomVal}`;
 
     // Update UI ឈ្មោះខែ និងថ្នាក់
     const titleEl = document.getElementById("lblMonthTitle");
     if(titleEl) titleEl.textContent = month;
 
     const attHeaderGrade = document.getElementById("attHeaderGrade");
-    if (attHeaderGrade) attHeaderGrade.textContent = `${levelVal.replace('ថ្នាក់ទី', '').trim()} ${roomVal}`;
+    if (attHeaderGrade) attHeaderGrade.textContent = `${selectedGrade.replace('ថ្នាក់ទី', '').trim()} ${selectedRoom}`;
 
     // រៀបចំប្រតិទិន
     const monthMap = { "មករា": 1, "កុម្ភៈ": 2, "មីនា": 3, "មេសា": 4, "ឧសភា": 5, "មិថុនា": 6, "កក្កដា": 7, "សីហា": 8, "កញ្ញា": 9, "តុលា": 10, "វិច្ឆិកា": 11, "ធ្នូ": 12 };
@@ -386,6 +429,27 @@ window.fetchMonthlyAttendance = async function(forceRefresh = false) {
             const cached = JSON.parse(localStorage.getItem(`att_${fullGradeName}_${month}_${year}`) || '{}');
             monthlyAttendanceData = { ...cached };
         } catch(e) {}
+
+        // 🟢 ទាញយកទិន្នន័យវត្តមានពី Firestore Cloud (ប្រសិនបើមាន) ដើម្បីធានាទិន្នន័យមិនបាត់បង់ 🟢
+        if (window.db) {
+            try {
+                const gradeKey = selectedGrade.replace(/\s+/g, '_');
+                const roomKey = selectedRoom.replace(/[«»\s]/g, '');
+                const attDocId = `${currentAcademicYear}_${schoolId}_${gradeKey}_${roomKey}_${year}_${monthNum}`;
+                const fsDoc = await window.db.collection("attendance").doc(attDocId).get();
+                if (fsDoc.exists) {
+                    const fsData = fsDoc.data();
+                    if (fsData.records) {
+                        monthlyAttendanceData = { ...monthlyAttendanceData, ...fsData.records };
+                    }
+                    if (fsData.holidays && Object.keys(fsData.holidays).length > 0) {
+                        window.monthlyHolidays = { ...window.monthlyHolidays, ...fsData.holidays };
+                    }
+                }
+            } catch(fsLoadErr) {
+                console.warn("Could not fetch from Firestore, falling back to local cache:", fsLoadErr);
+            }
+        }
 
         if (attRes && attRes.length > 0) {
             attRes.forEach(r => {
@@ -654,21 +718,34 @@ window.calculateStudentAbsence = function(studentId, daysInMonth) {
     const totalAbsent = permission + unexcused + sick;
     if (totEl) totEl.textContent = totalAbsent;
 
-    // គណនាភាគរយវត្តមានសិស្សម្នាក់ៗ (% Attendance)
+    // គណនាភាគរយវត្តមានសិស្សម្នាក់ៗ (% Attendance) - ATT-05
     const year = parseInt(document.getElementById("attYearSelect")?.value || new Date().getFullYear());
     const month = document.getElementById("attMonthSelect")?.value || "មករា";
     const monthMap = { "មករា": 1, "កុម្ភៈ": 2, "មីនា": 3, "មេសា": 4, "ឧសភា": 5, "មិថុនា": 6, "កក្កដា": 7, "សីហា": 8, "កញ្ញា": 9, "តុលា": 10, "វិច្ឆិកា": 11, "ធ្នូ": 12 };
     const monthNum = monthMap[month] || 1;
 
-    let actualSchoolDays = 0;
+    // រកមើលថ្ងៃសិក្សាដែលមានកំណត់ត្រាជាក់ស្តែង (Countable Recorded Days)
+    let maxRecordedDay = 0;
     for (let d = 1; d <= daysInMonth; d++) {
-        const dObj = new Date(year, monthNum - 1, d);
-        if (dObj.getDay() !== 0 && !window.monthlyHolidays[d]) actualSchoolDays++;
+        const hasRecord = (attendanceStudents || []).some(s => {
+            const v = (document.getElementById(`att_${s.id}_${d}`)?.value || monthlyAttendanceData[s.id]?.[d] || "").trim();
+            return v !== "" && v !== "៖";
+        });
+        if (hasRecord) maxRecordedDay = d;
     }
 
-    const penaltyDays = totalAbsent + (late * 0.5);
-    const attendedDays = Math.max(0, actualSchoolDays - penaltyDays);
-    const pct = actualSchoolDays > 0 ? Math.round((attendedDays / actualSchoolDays) * 100) : 100;
+    let countableSchoolDays = 0;
+    const endDay = maxRecordedDay > 0 ? maxRecordedDay : daysInMonth;
+    for (let d = 1; d <= endDay; d++) {
+        const dObj = new Date(year, monthNum - 1, d);
+        if (dObj.getDay() !== 0 && !window.monthlyHolidays[d]) countableSchoolDays++;
+    }
+
+    // រូបមន្តគណនា (ATT-05): Attendance Rate = Present ÷ Countable School Days × 100%
+    // ក្នុងនោះ អវត្តមានឥតច្បាប់ (Penalty = 1), ច្បាប់/ឈឺ (Penalty = 0.5), យឺត (Penalty = 0.25)
+    const penaltyDays = unexcused + (permission * 0.5) + (sick * 0.5) + (late * 0.25);
+    const attendedDays = Math.max(0, countableSchoolDays - penaltyDays);
+    const pct = countableSchoolDays > 0 ? Math.min(100, Math.round((attendedDays / countableSchoolDays) * 100)) : 100;
 
     if (pctEl) {
         pctEl.textContent = pct + "%";
@@ -741,6 +818,8 @@ window.calculateMoEYSSummary = function() {
     let grandPerm = 0;
     let grandUnex = 0; 
     let grandSick = 0; 
+    let grandLate = 0;
+    let maxRecordedDay = 0;
     
     studentRows.forEach(row => {
         if(row.cells.length > 3) {
@@ -748,11 +827,15 @@ window.calculateMoEYSSummary = function() {
             if (gender === "ស" || gender === "ស្រី" || gender === "F") femaleStudents++;
             
             const inputs = row.querySelectorAll("input.att-input");
-            inputs.forEach(input => {
+            inputs.forEach((input, idx) => {
                 const val = input.value.trim().toUpperCase();
+                if (val !== "" && val !== "៖") {
+                    if (idx + 1 > maxRecordedDay) maxRecordedDay = idx + 1;
+                }
                 if (val === "ច្ប" || val === "ច" || val === "C") grandPerm++;
                 if (val === "អច្ប" || val === "អ" || val === "A") grandUnex++;
                 if (val === "ឈ" || val === "S") grandSick++;
+                if (val === "យ" || val === "យឺត" || val === "L") grandLate++;
             });
         }
     });
@@ -777,15 +860,29 @@ window.calculateMoEYSSummary = function() {
     }
     
     const actualSchoolDays = daysInMonth - offDaysCount; 
-    const totalSessionsRequired = actualSchoolDays * totalStudents;
-    const actualAttendedSessions = totalSessionsRequired - totalAbsentSessions;
 
-    let absencePercentage = 0;
-    if (totalSessionsRequired > 0) {
-        absencePercentage = (totalAbsentSessions * 100) / totalSessionsRequired;
+    // 🟢 ATT-05: គណនាតាម Countable Recorded Days ដើម្បីកុំឱ្យថ្ងៃអនាគតដែលមិនទាន់កត់ត្រាធ្លាក់ % 🟢
+    let countableSchoolDays = 0;
+    const evalEndDay = maxRecordedDay > 0 ? maxRecordedDay : daysInMonth;
+    for (let d = 1; d <= evalEndDay; d++) {
+        if (!window.monthlyHolidays[d] && new Date(year, monthNum - 1, d).getDay() !== 0) {
+            countableSchoolDays++;
+        }
     }
 
-    let attendancePercentage = totalSessionsRequired > 0 ? (100 - absencePercentage) : 0;
+    const totalSessionsCountable = countableSchoolDays * totalStudents;
+    const penaltySessions = grandUnex + (grandPerm * 0.5) + (grandSick * 0.5) + (grandLate * 0.25);
+    const actualAttendedSessions = Math.max(0, totalSessionsCountable - penaltySessions);
+
+    let attendancePercentage = totalSessionsCountable > 0 
+        ? Math.min(100, Math.max(0, (actualAttendedSessions * 100) / totalSessionsCountable)) 
+        : 100;
+    let absencePercentage = Math.max(0, 100 - attendancePercentage);
+
+    const classAvgPctCell = document.getElementById("classAvgPctCell");
+    if (classAvgPctCell) {
+        classAvgPctCell.textContent = `${attendancePercentage.toFixed(0)}%`;
+    }
 
     const summaryData = {
         totalStudents,
@@ -1230,12 +1327,13 @@ window.renderDailyModalContent = function() {
     const isHoliday = !!window.monthlyHolidays[targetDay];
     const hInfo = window.monthlyHolidays[targetDay] || {};
 
-    let countPresent = 0, countPerm = 0, countUnex = 0, countSick = 0, countHoliday = 0;
+    let countPresent = 0, countPerm = 0, countUnex = 0, countSick = 0, countLate = 0, countHoliday = 0;
     attendanceStudents.forEach(s => {
         const val = (document.getElementById(`att_${s.id}_${targetDay}`)?.value || monthlyAttendanceData[s.id]?.[targetDay] || "").trim().toUpperCase();
         if (val === "ច" || val === "ច្ប" || val === "C") countPerm++;
         else if (val === "អ" || val === "អច្ប" || val === "A") countUnex++;
         else if (val === "ឈ" || val === "S") countSick++;
+        else if (val === "យ" || val === "យឺត" || val === "L") countLate++;
         else if (val === "៖" || val === ":") countHoliday++;
         else countPresent++;
     });
@@ -1257,6 +1355,7 @@ window.renderDailyModalContent = function() {
         else if (window.dailyModalStatusFilter === "perm") matchStatus = (val === "ច" || val === "ច្ប" || val === "C");
         else if (window.dailyModalStatusFilter === "unex") matchStatus = (val === "អ" || val === "អច្ប" || val === "A");
         else if (window.dailyModalStatusFilter === "sick") matchStatus = (val === "ឈ" || val === "S");
+        else if (window.dailyModalStatusFilter === "late") matchStatus = (val === "យ" || val === "យឺត" || val === "L");
         else if (window.dailyModalStatusFilter === "holiday") matchStatus = (val === "៖" || val === ":");
 
         return matchName && matchStatus;
@@ -1269,6 +1368,7 @@ window.renderDailyModalContent = function() {
         const isPerm = val === "ច" || val === "ច្ប" || val === "C";
         const isUnex = val === "អ" || val === "អច្ប" || val === "A";
         const isSick = val === "ឈ" || val === "S";
+        const isLate = val === "យ" || val === "យឺត" || val === "L";
         const isHolidayStatus = val === "៖" || val === ":";
 
         return `
@@ -1289,6 +1389,10 @@ window.renderDailyModalContent = function() {
                 <button onclick="window.setDailyStatus('${stu.id}', '')" 
                         class="px-3 py-1.5 rounded-lg transition flex items-center gap-1 ${isPresent ? 'bg-emerald-500 text-white shadow-sm' : 'text-slate-500 hover:text-emerald-600 hover:bg-emerald-50'}">
                   <i class="fa-solid fa-check text-[11px]"></i> វត្តមាន
+                </button>
+                <button onclick="window.setDailyStatus('${stu.id}', 'យ')" 
+                        class="px-3 py-1.5 rounded-lg transition flex items-center gap-1 ${isLate ? 'bg-amber-500 text-white shadow-sm' : 'text-slate-500 hover:text-amber-600 hover:bg-amber-50'}">
+                  យឺត
                 </button>
                 <button onclick="window.setDailyStatus('${stu.id}', 'ច្ប')" 
                         class="px-3 py-1.5 rounded-lg transition flex items-center gap-1 ${isPerm ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-500 hover:text-blue-600 hover:bg-blue-50'}">
@@ -1344,8 +1448,10 @@ window.renderDailyModalContent = function() {
                ${isHoliday ? `<span class="ml-1 opacity-80 font-normal">(${hInfo.title || 'ថ្ងៃឈប់សម្រាក'})</span>` : ''}
              </span>
              <div class="h-6 w-px bg-slate-300 hidden md:block mx-1"></div>
-             <div class="flex items-center gap-2 text-[11px] bg-white px-3 py-1.5 rounded-xl border border-slate-200 shadow-sm">
+             <div class="flex items-center gap-2 text-[11px] bg-white px-3 py-1.5 rounded-xl border border-slate-200 shadow-sm flex-wrap">
                  <span class="text-emerald-600 font-bold">វត្តមាន៖ ${window.toKhmerNum(countPresent.toString())}</span>
+                 <span class="text-slate-300">|</span>
+                 <span class="text-amber-600 font-bold">យឺត៖ ${window.toKhmerNum(countLate.toString())}</span>
                  <span class="text-slate-300">|</span>
                  <span class="text-blue-600 font-bold">ច្បាប់៖ ${window.toKhmerNum(countPerm.toString())}</span>
                  <span class="text-slate-300">|</span>
@@ -1373,11 +1479,13 @@ window.renderDailyModalContent = function() {
                     class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-[13px] font-bold outline-none focus:ring-2 focus:ring-rose-500/30 focus:border-rose-400 focus:bg-white transition-all shadow-inner">
           </div>
 
-          <div class="flex items-center bg-slate-50 p-1.5 rounded-xl border border-slate-200 text-[11px] font-bold shadow-inner">
+          <div class="flex items-center bg-slate-50 p-1.5 rounded-xl border border-slate-200 text-[11px] font-bold shadow-inner flex-wrap gap-1">
              <button onclick="window.filterDailyModalStudents(window.dailyModalSearchQuery, 'all')" 
                      class="px-3 py-1.5 rounded-lg transition ${window.dailyModalStatusFilter==='all'?'bg-slate-800 text-white shadow-sm':'text-slate-600 hover:text-slate-800'}">ទាំងអស់</button>
              <button onclick="window.filterDailyModalStudents(window.dailyModalSearchQuery, 'present')" 
                      class="px-3 py-1.5 rounded-lg transition ${window.dailyModalStatusFilter==='present'?'bg-emerald-600 text-white shadow-sm':'text-slate-600 hover:text-emerald-700'}">វត្តមាន</button>
+             <button onclick="window.filterDailyModalStudents(window.dailyModalSearchQuery, 'late')" 
+                     class="px-3 py-1.5 rounded-lg transition ${window.dailyModalStatusFilter==='late'?'bg-amber-500 text-white shadow-sm':'text-slate-600 hover:text-amber-700'}">យឺត</button>
              <button onclick="window.filterDailyModalStudents(window.dailyModalSearchQuery, 'perm')" 
                      class="px-3 py-1.5 rounded-lg transition ${window.dailyModalStatusFilter==='perm'?'bg-blue-600 text-white shadow-sm':'text-slate-600 hover:text-blue-700'}">ច្បាប់</button>
              <button onclick="window.filterDailyModalStudents(window.dailyModalSearchQuery, 'unex')" 
@@ -1493,15 +1601,30 @@ window.saveMonthlyAttendance = async function() {
     const month = document.getElementById("attMonthSelect").value;
     const year = document.getElementById("attYearSelect").value;
     
-    const gradeInfo = window.getTeacherGradeInfo();
-    const grade = `${gradeInfo.level} ${gradeInfo.room}`;
+    const gradeSelect = document.getElementById("attGradeSelect");
+    const roomSelect = document.getElementById("attRoomSelect");
+    const teacherInfo = typeof window.getTeacherGradeInfo === 'function' ? window.getTeacherGradeInfo() : { level: "ថ្នាក់ទី ១", room: "«ក»" };
+    const selectedGrade = gradeSelect ? normalizeGrade(gradeSelect.value) : normalizeGrade(teacherInfo.level);
+    const selectedRoom = roomSelect ? roomSelect.value.trim() : (teacherInfo.room || "«ក»").trim();
+    const grade = `${selectedGrade} ${selectedRoom}`;
 
-    // 🔒 ពិនិត្យសិទ្ធិថ្នាក់ទទួលខុសត្រូវ (Section 3.4: គ្រូមិនអាចកែទិន្នន័យរបស់ថ្នាក់ផ្សេង ប្រសិនបើគ្មានសិទ្ធិ)
-    if (typeof window.isTeacher === 'function' && window.isTeacher() && !window.isCurrentUserAdmin()) {
+    // 🔒 ពិនិត្យសិទ្ធិថ្នាក់ទទួលខុសត្រូវ (RBAC & Scope Check - ATT-03 / ATT-06)
+    if (window.DataServiceGuard) {
+        try {
+            window.DataServiceGuard.assertCan(
+                'record_attendance',
+                { grade: selectedGrade, room: selectedRoom },
+                `🔒 លោកគ្រូ/អ្នកគ្រូមិនមានសិទ្ធិកត់ត្រាវត្តមានសម្រាប់ថ្នាក់ ${grade} ឡើយ!`
+            );
+        } catch(guardErr) {
+            alert(guardErr.message);
+            return;
+        }
+    } else if (typeof window.isTeacher === 'function' && window.isTeacher() && !window.isCurrentUserAdmin()) {
         const myGrade = String(window.AuthState?.assigned_grade || localStorage.getItem('auth_assigned_grade') || "").replace(/\s+/g, '');
         const myRoom = String(window.AuthState?.assigned_room || localStorage.getItem('auth_assigned_room') || "").replace(/[«»\s]/g, '');
-        const curGradeClean = String(gradeInfo.level || "").replace(/\s+/g, '');
-        const curRoomClean = String(gradeInfo.room || "").replace(/[«»\s]/g, '');
+        const curGradeClean = String(selectedGrade || "").replace(/\s+/g, '');
+        const curRoomClean = String(selectedRoom || "").replace(/[«»\s]/g, '');
 
         if (myGrade && (curGradeClean !== myGrade || (myRoom && curRoomClean !== myRoom))) {
             alert(`🔒 លោកគ្រូ/អ្នកគ្រូមានសិទ្ធិកត់ត្រាវត្តមានតែថ្នាក់ «${window.AuthState?.assigned_grade || myGrade} ${window.AuthState?.assigned_room || myRoom}» ប៉ុណ្ណោះ!\nមិនអាចកែប្រែវត្តមានរបស់ថ្នាក់ផ្សេងបានឡើយ។`);
@@ -1511,6 +1634,7 @@ window.saveMonthlyAttendance = async function() {
     
     const currentTeacherId = window.AuthState ? window.AuthState.teacherId : localStorage.getItem('auth_teacher_id');
     const academicYearStr = document.getElementById("globalAcademicYear")?.value || localStorage.getItem('selected_academic_year') || "2026-2027";
+    const schoolId = window.AuthState?.school_id || localStorage.getItem('school_id') || 'SCH-001';
 
     if (btn) {
         btn.disabled = true;
@@ -1531,11 +1655,13 @@ window.saveMonthlyAttendance = async function() {
                 if (val === "ច" || val === "ច្ប" || val === "C") statusText = "ច្បាប់";
                 else if (val === "អ" || val === "អច្ប" || val === "A") statusText = "ឥតច្បាប់";
                 else if (val === "ឈ" || val === "S") statusText = "ឈឺ";
+                else if (val === "យ" || val === "យឺត" || val === "L") statusText = "យឺត";
                 else if (val === "៖" || val === ":") statusText = "ឈប់សម្រាក";
 
                 batchPayload.push({
                     student_id: s.id,
                     teacher_id: currentTeacherId,
+                    school_id: schoolId,
                     academic_year: academicYearStr,
                     student_name: s.name,
                     date: `${year}-${String(monthNum).padStart(2, '0')}-${String(d).padStart(2, '0')}`,
@@ -1553,20 +1679,27 @@ window.saveMonthlyAttendance = async function() {
         localStorage.setItem(`att_holidays_${grade}_${month}_${year}`, JSON.stringify(window.monthlyHolidays));
     } catch(e) {}
 
-    // ១. រក្សាទុកក្នុង Firestore Cloud
+    // ១. រក្សាទុកក្នុង Firestore Cloud (ATT-01 / ATT-03 / ATT-06)
     if (window.db) {
         try {
-            const attDocId = `${academicYearStr}_${grade.replace(/\s+/g, '_')}_${year}_${monthNum}`;
+            const gradeKey = selectedGrade.replace(/\s+/g, '_');
+            const roomKey = selectedRoom.replace(/[«»\s]/g, '');
+            const attDocId = `${academicYearStr}_${schoolId}_${gradeKey}_${roomKey}_${year}_${monthNum}`;
             window.db.collection("attendance").doc(attDocId).set({
+                school_id: schoolId,
                 academic_year: academicYearStr,
-                grade: grade,
+                grade: selectedGrade,
+                room: selectedRoom,
+                full_grade: grade,
                 year: year,
                 month: month,
                 month_num: monthNum,
-                teacher_id: currentTeacherId,
+                recorded_by: currentTeacherId,
+                recorded_by_name: window.AuthState?.teacherName || localStorage.getItem('auth_teacher_name') || 'Admin',
                 records: monthlyAttendanceData,
                 holidays: window.monthlyHolidays || {},
                 total_recorded: batchPayload.length,
+                updated_at: new Date().toISOString(),
                 last_updated: firebase.firestore.FieldValue.serverTimestamp()
             }, { merge: true }).catch(console.warn);
         } catch(fsErr) {
