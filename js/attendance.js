@@ -78,6 +78,7 @@ function normalizeStatus(statusRaw) {
     if (v === "ច្បាប់" || v === "មានច្បាប់" || v === "ច" || v === "ច្ប" || v.toUpperCase() === "C") return "ច្ប";
     if (v === "ឥតច្បាប់" || v === "អត់ច្បាប់" || v === "អ" || v === "អច្ប" || v.toUpperCase() === "A") return "អច្ប";
     if (v === "ឈឺ" || v === "ឈឺមានច្បាប់" || v === "ឈ" || v.toUpperCase() === "S") return "ឈ";
+    if (v === "យឺត" || v === "មកយឺត" || v === "យ" || v.toUpperCase() === "L") return "យ";
     if (v === "ឈប់សម្រាក" || v === "សម្រាក" || v === "៖" || v === ":") return "៖";
     if (v === "វត្តមាន" || v.toUpperCase() === "P" || v === "វ") return "";
     return v;
@@ -151,10 +152,12 @@ window.loadAttendanceView = async function() {
                     <div>
                         <h2 class="text-xl md:text-3xl font-black text-slate-800 font-moul mb-1">បញ្ជីវត្តមានសិស្ស</h2>
                         <div class="flex flex-wrap gap-2 mt-2">
+                            <span class="text-[10px] md:text-xs font-bold bg-emerald-50 text-emerald-700 px-3 py-1 rounded-lg border border-emerald-100 flex items-center gap-1.5"><i class="fa-solid fa-circle text-[6px]"></i> វត្តមាន (វ)</span>
+                            <span class="text-[10px] md:text-xs font-bold bg-amber-50 text-amber-700 px-3 py-1 rounded-lg border border-amber-200 flex items-center gap-1.5"><i class="fa-solid fa-circle text-[6px]"></i> យឺត (យ)</span>
                             <span class="text-[10px] md:text-xs font-bold bg-blue-50 text-blue-700 px-3 py-1 rounded-lg border border-blue-100 flex items-center gap-1.5"><i class="fa-solid fa-circle text-[6px]"></i> ច្បាប់ (ច្ប)</span>
                             <span class="text-[10px] md:text-xs font-bold bg-rose-50 text-rose-700 px-3 py-1 rounded-lg border border-rose-100 flex items-center gap-1.5"><i class="fa-solid fa-circle text-[6px]"></i> អត់ច្បាប់ (អច្ប)</span>
                             <span class="text-[10px] md:text-xs font-bold bg-purple-50 text-purple-700 px-3 py-1 rounded-lg border border-purple-100 flex items-center gap-1.5"><i class="fa-solid fa-circle text-[6px]"></i> ឈឺ (ឈ)</span>
-                            <span class="text-[10px] md:text-xs font-bold bg-amber-50 text-amber-700 px-3 py-1 rounded-lg border border-amber-100 flex items-center gap-1.5"><i class="fa-solid fa-circle text-[6px]"></i> សម្រាក (៖)</span>
+                            <span class="text-[10px] md:text-xs font-bold bg-slate-100 text-slate-700 px-3 py-1 rounded-lg border border-slate-200 flex items-center gap-1.5"><i class="fa-solid fa-circle text-[6px]"></i> សម្រាក (៖)</span>
                         </div>
                     </div>
                 </div>
@@ -184,9 +187,35 @@ window.loadAttendanceView = async function() {
               <!-- កាតស្ថិតិសង្ខេប -->
               <div id="attendanceKpiSummaryContainer" class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4 no-print"></div>
 
+              <!-- ផ្ទាំងជូនដំណឹងពីអវត្តមានញឹកញាប់ (Frequent Absence Alert Banner) -->
+              <div id="attendanceAlertBanner" class="hidden p-4 md:p-5 rounded-2xl bg-rose-50 border border-rose-200 text-rose-900 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-sm no-print">
+                 <div class="flex items-center gap-3.5">
+                    <div class="w-11 h-11 rounded-xl bg-rose-100 text-rose-600 flex items-center justify-center text-xl shrink-0 shadow-inner">
+                      <i class="fa-solid fa-triangle-exclamation"></i>
+                    </div>
+                    <div>
+                       <h4 class="font-bold text-xs md:text-sm font-moul text-rose-800">ការជូនដំណឹងពីសិស្សអវត្តមានញឹកញាប់!</h4>
+                       <p class="text-xs text-rose-700 mt-0.5" id="attAlertText">មានសិស្សអវត្តមានលើសពី ៣ ថ្ងៃក្នុងខែនេះ។</p>
+                    </div>
+                 </div>
+                 <button onclick="window.openFrequentAbsenceModal()" class="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold shadow-md transition flex items-center gap-2 shrink-0">
+                    <i class="fa-solid fa-eye"></i> មើលបញ្ជីសិស្ស
+                 </button>
+              </div>
+
               <!-- របារឧបករណ៍បញ្ជា -->
               <div class="flex flex-wrap items-center justify-between gap-3 shrink-0 no-print bg-white p-4 rounded-[1.5rem] border border-slate-200 shadow-sm">
                 <div class="flex flex-wrap items-center gap-2 w-full md:w-auto">
+                  <!-- View Mode Switcher -->
+                  <div class="flex items-center bg-slate-100 p-1 rounded-2xl border border-slate-200 text-xs font-bold mr-2">
+                     <button onclick="window.setAttendanceViewMode('table')" id="btnAttModeTable" class="px-3.5 py-2 rounded-xl transition flex items-center gap-1.5 bg-white text-slate-800 shadow-sm">
+                        <i class="fa-solid fa-table-cells"></i> តារាងខែ
+                     </button>
+                     <button onclick="window.setAttendanceViewMode('mobile')" id="btnAttModeMobile" class="px-3.5 py-2 rounded-xl transition flex items-center gap-1.5 text-slate-500 hover:text-slate-800">
+                        <i class="fa-solid fa-mobile-screen-button text-rose-500"></i> ទូរសព្ទ (កត់រហ័ស)
+                     </button>
+                  </div>
+
                   <button onclick="if(typeof window.openDailyAttendanceModal === 'function') window.openDailyAttendanceModal();" class="flex-1 md:flex-none px-5 py-2.5 bg-gradient-to-r from-rose-500 to-orange-500 hover:from-rose-600 hover:to-orange-600 text-white rounded-xl text-[13px] font-bold shadow-md shadow-rose-200 transition flex items-center justify-center gap-2 transform hover:-translate-y-0.5">
                     <i class="fa-solid fa-calendar-day"></i> កត់វត្តមាន (Pop-Up)
                   </button>
@@ -241,6 +270,11 @@ window.loadAttendanceView = async function() {
                     </table>
                 </div>
               </div>
+
+              <!-- ផ្ទៃទិដ្ឋភាពទូរសព្ទ / កត់វត្តមានរហ័ស (Mobile Attendance Daily Cards View) -->
+              <div id="attendanceMobileArea" class="hidden bg-white rounded-[2rem] border border-slate-200 shadow-sm relative flex flex-col w-full p-4 md:p-6 space-y-5">
+                 <!-- Populated dynamically by window.renderMobileAttendanceDailyView() -->
+              </div>
             </div> 
           </div> 
 
@@ -260,6 +294,11 @@ window.loadAttendanceView = async function() {
         
         if (typeof window.setupAttExcelLikeNavigation === 'function') {
             window.setupAttExcelLikeNavigation();
+        }
+
+        // Auto-switch to mobile friendly view on small screens
+        if (window.innerWidth < 768 && typeof window.setAttendanceViewMode === 'function') {
+            window.setAttendanceViewMode('mobile');
         }
 
     } catch (error) {
@@ -586,14 +625,16 @@ window.renderCalendarHeaders = function(year, monthNum, daysInMonth) {
     }
 
     khmerDaysHtml += `
-      <th colspan="4" class="border-r border-slate-300 print:border-black bg-blue-100 text-blue-900" style="width: 150px; min-width: 150px; max-width: 150px;">ចំនួនអវត្តមាន</th>
-      <th rowspan="2" class="p-2 bg-slate-50" style="width: 90px; min-width: 90px; max-width: 90px;">ផ្សេងៗ</th>
+      <th colspan="5" class="border-r border-slate-300 print:border-black bg-blue-100 text-blue-900" style="width: 185px; min-width: 185px; max-width: 185px;">ចំនួនអវត្តមាន & យឺត</th>
+      <th rowspan="2" class="border-r border-slate-300 print:border-black bg-emerald-100 text-emerald-900 font-bold" style="width: 60px; min-width: 60px; max-width: 60px;">% វត្តមាន</th>
+      <th rowspan="2" class="p-2 bg-slate-50" style="width: 80px; min-width: 80px; max-width: 80px;">ផ្សេងៗ</th>
     `;
     numDaysHtml += `
       <th class="border-r border-slate-300 print:border-black bg-blue-50 text-blue-800" title="មានច្បាប់ (ច្ប)" style="width: 36px; min-width: 36px; max-width: 36px;">ច្ប</th>
       <th class="border-r border-slate-300 print:border-black bg-rose-50 text-rose-800" title="អត់ច្បាប់ (អច្ប)" style="width: 36px; min-width: 36px; max-width: 36px;">អច្ប</th>
       <th class="border-r border-slate-300 print:border-black bg-purple-50 text-purple-800" title="ឈឺមានច្បាប់ (ឈ)" style="width: 36px; min-width: 36px; max-width: 36px;">ឈ</th>
-      <th class="border-r border-slate-300 print:border-black bg-amber-100 text-amber-900 border-b-2 border-amber-300" style="width: 42px; min-width: 42px; max-width: 42px;">សរុប</th>
+      <th class="border-r border-slate-300 print:border-black bg-amber-50 text-amber-800" title="យឺត (យ)" style="width: 36px; min-width: 36px; max-width: 36px;">យ</th>
+      <th class="border-r border-slate-300 print:border-black bg-amber-100 text-amber-900 border-b-2 border-amber-300" style="width: 41px; min-width: 41px; max-width: 41px;">សរុប</th>
     `;
 
     trKhmer.innerHTML = khmerDaysHtml;
@@ -677,8 +718,10 @@ window.renderAttendanceRows = function(daysInMonth) {
                 <td class="border-r border-slate-200 print:border-black text-center font-mono font-bold text-blue-700 bg-blue-50/50 text-xs" style="width: 36px; min-width: 36px; max-width: 36px;" id="perm_${s.id}">0</td>
                 <td class="border-r border-slate-200 print:border-black text-center font-mono font-bold text-rose-700 bg-rose-50/50 text-xs" style="width: 36px; min-width: 36px; max-width: 36px;" id="unex_${s.id}">0</td>
                 <td class="border-r border-slate-200 print:border-black text-center font-mono font-bold text-purple-700 bg-purple-50/50 text-xs" style="width: 36px; min-width: 36px; max-width: 36px;" id="sick_${s.id}">0</td>
-                <td class="border-r border-slate-200 print:border-black text-center font-mono font-black text-amber-800 bg-amber-100/50 text-xs shadow-[inset_1px_0_0_rgba(0,0,0,0.05)]" style="width: 42px; min-width: 42px; max-width: 42px;" id="tot_${s.id}">0</td>
-                <td class="p-0 bg-white group-hover:bg-slate-50" style="width: 90px; min-width: 90px; max-width: 90px;">
+                <td class="border-r border-slate-200 print:border-black text-center font-mono font-bold text-amber-700 bg-amber-50/50 text-xs" style="width: 36px; min-width: 36px; max-width: 36px;" id="late_${s.id}">0</td>
+                <td class="border-r border-slate-200 print:border-black text-center font-mono font-black text-amber-800 bg-amber-100/50 text-xs shadow-[inset_1px_0_0_rgba(0,0,0,0.05)]" style="width: 41px; min-width: 41px; max-width: 41px;" id="tot_${s.id}">0</td>
+                <td class="border-r border-slate-200 print:border-black text-center font-mono font-bold text-xs" style="width: 60px; min-width: 60px; max-width: 60px;" id="pct_${s.id}">100%</td>
+                <td class="p-0 bg-white group-hover:bg-slate-50" style="width: 80px; min-width: 80px; max-width: 80px;">
                   <input type="text" id="note_${s.id}" class="w-full h-[36px] text-[11px] border-0 bg-transparent px-2 outline-none text-slate-500 focus:bg-white focus:ring-2 focus:ring-inset focus:ring-slate-200 font-Siemreap placeholder:text-slate-300 placeholder:font-normal" placeholder="ចំណាំ...">
                 </td>
               </tr>
@@ -702,7 +745,8 @@ window.getColorClass = function(val) {
     if (v === "ច" || v === "ច្ប" || v === "C") return "text-blue-600 font-black bg-blue-100/80";
     if (v === "អ" || v === "អច្ប" || v === "A") return "text-rose-600 font-black bg-rose-100/80";
     if (v === "ឈ" || v === "S") return "text-purple-600 font-black bg-purple-100/80";
-    if (v === "៖" || v === ":") return "text-amber-600 font-black bg-amber-100/80";
+    if (v === "យ" || v === "យឺត" || v === "L") return "text-amber-600 font-black bg-amber-100/80";
+    if (v === "៖" || v === ":") return "text-amber-800 font-black bg-amber-200/80";
     return "text-slate-800 font-bold";
 };
 
@@ -710,6 +754,7 @@ window.handleAttInput = function(inputEl, studentId, daysInMonth) {
     let cleanVal = inputEl.value.trim();
     if (cleanVal === "ច") cleanVal = "ច្ប";
     else if (cleanVal === "អ") cleanVal = "អច្ប";
+    else if (cleanVal === "យឺត" || cleanVal.toUpperCase() === "L") cleanVal = "យ";
 
     inputEl.className = `att-input w-full h-[36px] text-center text-xs font-bold border-0 outline-none bg-transparent uppercase ${window.getColorClass(cleanVal)} transition-all cursor-text focus:bg-white`;
     
@@ -724,23 +769,49 @@ window.handleAttInput = function(inputEl, studentId, daysInMonth) {
 };
 
 window.calculateStudentAbsence = function(studentId, daysInMonth) {
-    let permission = 0, unexcused = 0, sick = 0;
+    let permission = 0, unexcused = 0, sick = 0, late = 0;
     for (let d = 1; d <= daysInMonth; d++) {
         const val = (document.getElementById(`att_${studentId}_${d}`)?.value || monthlyAttendanceData[studentId]?.[d] || "").trim().toUpperCase();
         if (val === "ច" || val === "ច្ប" || val === "C") permission++;
         else if (val === "អ" || val === "អច្ប" || val === "A") unexcused++;
         else if (val === "ឈ" || val === "S") sick++;
+        else if (val === "យ" || val === "យឺត" || val === "L") late++;
     }
 
     const permEl = document.getElementById(`perm_${studentId}`);
     const unexEl = document.getElementById(`unex_${studentId}`);
     const sickEl = document.getElementById(`sick_${studentId}`);
+    const lateEl = document.getElementById(`late_${studentId}`);
     const totEl = document.getElementById(`tot_${studentId}`);
+    const pctEl = document.getElementById(`pct_${studentId}`);
 
     if (permEl) permEl.textContent = permission;
     if (unexEl) unexEl.textContent = unexcused;
     if (sickEl) sickEl.textContent = sick;
-    if (totEl) totEl.textContent = (permission + unexcused + sick);
+    if (lateEl) lateEl.textContent = late;
+    const totalAbsent = permission + unexcused + sick;
+    if (totEl) totEl.textContent = totalAbsent;
+
+    // គណនាភាគរយវត្តមានសិស្សម្នាក់ៗ (% Attendance)
+    const year = parseInt(document.getElementById("attYearSelect")?.value || new Date().getFullYear());
+    const month = document.getElementById("attMonthSelect")?.value || "មករា";
+    const monthMap = { "មករា": 1, "កុម្ភៈ": 2, "មីនា": 3, "មេសា": 4, "ឧសភា": 5, "មិថុនា": 6, "កក្កដា": 7, "សីហា": 8, "កញ្ញា": 9, "តុលា": 10, "វិច្ឆិកា": 11, "ធ្នូ": 12 };
+    const monthNum = monthMap[month] || 1;
+
+    let actualSchoolDays = 0;
+    for (let d = 1; d <= daysInMonth; d++) {
+        const dObj = new Date(year, monthNum - 1, d);
+        if (dObj.getDay() !== 0 && !window.monthlyHolidays[d]) actualSchoolDays++;
+    }
+
+    const penaltyDays = totalAbsent + (late * 0.5);
+    const attendedDays = Math.max(0, actualSchoolDays - penaltyDays);
+    const pct = actualSchoolDays > 0 ? Math.round((attendedDays / actualSchoolDays) * 100) : 100;
+
+    if (pctEl) {
+        pctEl.textContent = pct + "%";
+        pctEl.className = `border-r border-slate-200 print:border-black text-center font-mono font-bold text-xs ${pct >= 90 ? 'text-emerald-700 bg-emerald-50' : pct >= 80 ? 'text-amber-700 bg-amber-50' : 'text-rose-700 bg-rose-100 font-black'}`;
+    }
 };
 
 window.calculateDailyTotals = function(daysInMonth) {
@@ -748,14 +819,14 @@ window.calculateDailyTotals = function(daysInMonth) {
       <tr class="h-[40px] text-center bg-slate-100 font-siemreap shadow-inner">
         <td colspan="4" class="border-r border-slate-300 print:border-black px-4 text-right font-bold text-slate-700 sticky left-0 z-10 bg-slate-100 text-[11px] uppercase tracking-widest">សរុបអវត្តមានប្រចាំថ្ងៃ</td>`;
     
-    let grandTotalPerm = 0, grandTotalUnex = 0, grandTotalSick = 0;
+    let grandTotalPerm = 0, grandTotalUnex = 0, grandTotalSick = 0, grandTotalLate = 0;
 
     for (let d = 1; d <= 31; d++) {
         if (d <= daysInMonth) {
             let dayAbsentCount = 0;
             attendanceStudents.forEach(s => {
                 const val = (document.getElementById(`att_${s.id}_${d}`)?.value || monthlyAttendanceData[s.id]?.[d] || "").trim().toUpperCase();
-                if (val === "ច" || val === "ច្ប" || val === "អ" || val === "អច្ប" || val === "ឈ" || val === "C" || val === "A" || val === "S") {
+                if (val === "ច" || val === "ច្ប" || val === "អ" || val === "អច្ប" || val === "ឈ" || val === "យ" || val === "យឺត" || val === "C" || val === "A" || val === "S" || val === "L") {
                     dayAbsentCount++;
                 }
             });
@@ -769,6 +840,7 @@ window.calculateDailyTotals = function(daysInMonth) {
         grandTotalPerm += parseInt(document.getElementById(`perm_${s.id}`)?.textContent) || 0;
         grandTotalUnex += parseInt(document.getElementById(`unex_${s.id}`)?.textContent) || 0;
         grandTotalSick += parseInt(document.getElementById(`sick_${s.id}`)?.textContent) || 0;
+        grandTotalLate += parseInt(document.getElementById(`late_${s.id}`)?.textContent) || 0;
     });
 
     const grandTotalAbsence = grandTotalPerm + grandTotalUnex + grandTotalSick;
@@ -777,7 +849,9 @@ window.calculateDailyTotals = function(daysInMonth) {
         <td class="border-r border-slate-300 print:border-black font-mono font-bold text-blue-800 bg-blue-100 text-[11px]">${grandTotalPerm}</td>
         <td class="border-r border-slate-300 print:border-black font-mono font-bold text-rose-800 bg-rose-100 text-[11px]">${grandTotalUnex}</td>
         <td class="border-r border-slate-300 print:border-black font-mono font-bold text-purple-800 bg-purple-100 text-[11px]">${grandTotalSick}</td>
+        <td class="border-r border-slate-300 print:border-black font-mono font-bold text-amber-800 bg-amber-100 text-[11px]">${grandTotalLate}</td>
         <td class="border-r border-slate-300 print:border-black font-mono font-black text-amber-900 bg-amber-200 text-[11px] shadow-[inset_1px_0_0_rgba(0,0,0,0.05)]">${grandTotalAbsence}</td>
+        <td class="border-r border-slate-300 print:border-black text-center font-mono font-bold text-emerald-800 bg-emerald-100 text-[11px]" id="classAvgPctCell">-</td>
         <td class="bg-slate-100"></td>
       </tr>`;
 
@@ -2383,4 +2457,275 @@ window.printAnnualAttendanceReport = function(studentsData, academicYear) {
             console.error("Print Error:", err);
         }
     }, 600);
+};
+
+// =====================================================================
+// ៥. ទិដ្ឋភាពទូរសព្ទ & កត់វត្តមានរហ័ស (Mobile Daily Attendance View)
+// =====================================================================
+window.attendanceViewMode = 'table';
+window.mobileAttendanceSelectedDay = new Date().getDate();
+window.mobileAttendanceSearch = "";
+
+window.setAttendanceViewMode = function(mode) {
+    window.attendanceViewMode = mode;
+    const webArea = document.getElementById("attendanceWebArea");
+    const mobileArea = document.getElementById("attendanceMobileArea");
+    const btnTable = document.getElementById("btnAttModeTable");
+    const btnMobile = document.getElementById("btnAttModeMobile");
+
+    if (mode === 'mobile') {
+        webArea?.classList.add("hidden");
+        mobileArea?.classList.remove("hidden");
+        btnMobile?.classList.add("bg-white", "text-slate-800", "shadow-sm");
+        btnMobile?.classList.remove("text-slate-500");
+        btnTable?.classList.remove("bg-white", "text-slate-800", "shadow-sm");
+        btnTable?.classList.add("text-slate-500");
+        window.renderMobileAttendanceDailyView();
+    } else {
+        webArea?.classList.remove("hidden");
+        mobileArea?.classList.add("hidden");
+        btnTable?.classList.add("bg-white", "text-slate-800", "shadow-sm");
+        btnTable?.classList.remove("text-slate-500");
+        btnMobile?.classList.remove("bg-white", "text-slate-800", "shadow-sm");
+        btnMobile?.classList.add("text-slate-500");
+    }
+};
+
+window.renderMobileAttendanceDailyView = function() {
+    const container = document.getElementById("attendanceMobileArea");
+    if (!container) return;
+
+    const year = parseInt(document.getElementById("attYearSelect")?.value || new Date().getFullYear());
+    const month = document.getElementById("attMonthSelect")?.value || "មករា";
+    const monthMap = { "មករា": 1, "កុម្ភៈ": 2, "មីនា": 3, "មេសា": 4, "ឧសភា": 5, "មិថុនា": 6, "កក្កដា": 7, "សីហា": 8, "កញ្ញា": 9, "តុលា": 10, "វិច្ឆិកា": 11, "ធ្នូ": 12 };
+    const monthNum = monthMap[month] || 1;
+    const daysInMonth = new Date(year, monthNum, 0).getDate();
+
+    if (window.mobileAttendanceSelectedDay > daysInMonth) window.mobileAttendanceSelectedDay = daysInMonth;
+    if (window.mobileAttendanceSelectedDay < 1) window.mobileAttendanceSelectedDay = 1;
+
+    const curDay = window.mobileAttendanceSelectedDay;
+    const dateObj = new Date(year, monthNum - 1, curDay);
+    const dayOfWeek = KHMER_DAYS[dateObj.getDay()];
+    const isSunday = dateObj.getDay() === 0;
+
+    let filtered = attendanceStudents || [];
+    if (window.mobileAttendanceSearch) {
+        const q = window.mobileAttendanceSearch.toLowerCase();
+        filtered = filtered.filter(s => s.name.toLowerCase().includes(q) || String(s.id).includes(q));
+    }
+
+    let presentCount = 0, lateCount = 0, permCount = 0, unexCount = 0, sickCount = 0;
+    attendanceStudents.forEach(s => {
+        const val = (document.getElementById(`att_${s.id}_${curDay}`)?.value || monthlyAttendanceData[s.id]?.[curDay] || "").trim().toUpperCase();
+        if (val === "យ" || val === "យឺត" || val === "L") lateCount++;
+        else if (val === "ច" || val === "ច្ប" || val === "C") permCount++;
+        else if (val === "អ" || val === "អច្ប" || val === "A") unexCount++;
+        else if (val === "ឈ" || val === "S") sickCount++;
+        else presentCount++;
+    });
+
+    container.innerHTML = `
+        <!-- Mobile Header Bar -->
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pb-4 border-b border-slate-100">
+            <div>
+                <h3 class="font-moul text-base text-slate-800 flex items-center gap-2">
+                    <i class="fa-solid fa-mobile-screen-button text-rose-500"></i> កត់វត្តមានរហ័សលើទូរសព្ទ
+                </h3>
+                <p class="text-xs text-slate-400 mt-0.5">ប៉ះលើប៊ូតុងដើម្បីកត់វត្តមានសិស្សម្នាក់ៗយ៉ាងរហ័ស</p>
+            </div>
+
+            <!-- Date Selector with Prev/Next buttons -->
+            <div class="flex items-center gap-2 w-full sm:w-auto justify-between">
+                <button onclick="window.switchMobileAttendanceDay(-1)" class="w-10 h-10 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 flex items-center justify-center transition">
+                    <i class="fa-solid fa-chevron-left"></i>
+                </button>
+                <div class="px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-center min-w-[170px]">
+                    <span class="block text-xs font-bold text-slate-800 ${isSunday ? 'text-rose-600' : ''}">
+                        ${dayOfWeek} ទី ${window.toKhmerNum(curDay.toString())} ខែ${month}
+                    </span>
+                    <span class="block text-[10px] text-slate-400 font-mono">${year}</span>
+                </div>
+                <button onclick="window.switchMobileAttendanceDay(1)" class="w-10 h-10 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 flex items-center justify-center transition">
+                    <i class="fa-solid fa-chevron-right"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Daily Stat Pills -->
+        <div class="grid grid-cols-2 sm:grid-cols-5 gap-2.5 text-center">
+            <div class="p-2.5 bg-emerald-50 rounded-xl border border-emerald-100 text-emerald-700">
+                <span class="block text-[10px] font-bold">វត្តមាន</span>
+                <span class="font-black text-sm font-mono">${presentCount}</span>
+            </div>
+            <div class="p-2.5 bg-amber-50 rounded-xl border border-amber-100 text-amber-700">
+                <span class="block text-[10px] font-bold">យឺត</span>
+                <span class="font-black text-sm font-mono">${lateCount}</span>
+            </div>
+            <div class="p-2.5 bg-blue-50 rounded-xl border border-blue-100 text-blue-700">
+                <span class="block text-[10px] font-bold">ច្បាប់</span>
+                <span class="font-black text-sm font-mono">${permCount}</span>
+            </div>
+            <div class="p-2.5 bg-rose-50 rounded-xl border border-rose-100 text-rose-700">
+                <span class="block text-[10px] font-bold">អត់ច្បាប់</span>
+                <span class="font-black text-sm font-mono">${unexCount}</span>
+            </div>
+            <div class="p-2.5 bg-purple-50 rounded-xl border border-purple-100 text-purple-700">
+                <span class="block text-[10px] font-bold">ឈឺ</span>
+                <span class="font-black text-sm font-mono">${sickCount}</span>
+            </div>
+        </div>
+
+        <!-- Quick Actions & Search -->
+        <div class="flex flex-col sm:flex-row justify-between items-center gap-3">
+            <div class="relative w-full sm:w-72">
+                <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                <input type="text" placeholder="ស្វែងរកឈ្មោះ ឬអត្តលេខ..." value="${window.mobileAttendanceSearch}" oninput="window.mobileAttendanceSearch = this.value; window.renderMobileAttendanceDailyView();" class="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold outline-none focus:ring-2 focus:ring-rose-500">
+            </div>
+
+            <div class="flex items-center gap-2 w-full sm:w-auto">
+                <button onclick="window.markAllMobileDayPresent()" class="flex-1 sm:flex-none px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition shadow-sm flex items-center justify-center gap-1.5">
+                    <i class="fa-solid fa-check-double"></i> វត្តមានទាំងអស់
+                </button>
+                <button onclick="window.saveMonthlyAttendance()" class="flex-1 sm:flex-none px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition shadow-sm flex items-center justify-center gap-1.5">
+                    <i class="fa-solid fa-floppy-disk"></i> រក្សាទុក
+                </button>
+            </div>
+        </div>
+
+        <!-- Student Cards List -->
+        <div class="space-y-3 max-h-[60vh] overflow-y-auto custom-scrollbar pr-1">
+            ${filtered.map((stu, i) => {
+                const val = (document.getElementById(`att_${stu.id}_${curDay}`)?.value || monthlyAttendanceData[stu.id]?.[curDay] || "").trim().toUpperCase();
+                const isPresent = !val || val === "វ";
+                const isLate = val === "យ" || val === "យឺត" || val === "L";
+                const isPerm = val === "ច" || val === "ច្ប" || val === "C";
+                const isUnex = val === "អ" || val === "អច្ប" || val === "A";
+                const isSick = val === "ឈ" || val === "S";
+
+                return `
+                    <div class="p-3.5 bg-slate-50 hover:bg-white border border-slate-200 rounded-2xl transition shadow-sm flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                        <div class="flex items-center gap-3">
+                            <span class="w-8 h-8 rounded-lg bg-slate-200 text-slate-600 flex items-center justify-center font-mono font-bold text-xs shrink-0">${i + 1}</span>
+                            <div>
+                                <h4 class="font-bold text-slate-800 text-xs">${stu.name}</h4>
+                                <span class="text-[10px] text-slate-400 font-mono">ID: ${stu.id} • ${stu.gender || 'ប្រុស'}</span>
+                            </div>
+                        </div>
+
+                        <!-- Tap Buttons -->
+                        <div class="flex flex-wrap items-center gap-1.5 w-full sm:w-auto">
+                            <button onclick="window.setDailyMobileStatus('${stu.id}', '')" class="flex-1 sm:flex-none px-3 py-1.5 rounded-lg text-xs font-bold transition ${isPresent ? 'bg-emerald-600 text-white shadow-sm' : 'bg-white border border-slate-200 text-slate-600 hover:bg-emerald-50'}">
+                                វត្តមាន
+                            </button>
+                            <button onclick="window.setDailyMobileStatus('${stu.id}', 'យ')" class="flex-1 sm:flex-none px-3 py-1.5 rounded-lg text-xs font-bold transition ${isLate ? 'bg-amber-500 text-white shadow-sm' : 'bg-white border border-slate-200 text-slate-600 hover:bg-amber-50'}">
+                                យឺត
+                            </button>
+                            <button onclick="window.setDailyMobileStatus('${stu.id}', 'ច្ប')" class="flex-1 sm:flex-none px-3 py-1.5 rounded-lg text-xs font-bold transition ${isPerm ? 'bg-blue-600 text-white shadow-sm' : 'bg-white border border-slate-200 text-slate-600 hover:bg-blue-50'}">
+                                ច្បាប់
+                            </button>
+                            <button onclick="window.setDailyMobileStatus('${stu.id}', 'អច្ប')" class="flex-1 sm:flex-none px-3 py-1.5 rounded-lg text-xs font-bold transition ${isUnex ? 'bg-rose-600 text-white shadow-sm' : 'bg-white border border-slate-200 text-slate-600 hover:bg-rose-50'}">
+                                អវត្តមាន
+                            </button>
+                            <button onclick="window.setDailyMobileStatus('${stu.id}', 'ឈ')" class="flex-1 sm:flex-none px-3 py-1.5 rounded-lg text-xs font-bold transition ${isSick ? 'bg-purple-600 text-white shadow-sm' : 'bg-white border border-slate-200 text-slate-600 hover:bg-purple-50'}">
+                                ឈឺ
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join("")}
+        </div>
+    `;
+};
+
+window.switchMobileAttendanceDay = function(delta) {
+    window.mobileAttendanceSelectedDay += delta;
+    window.renderMobileAttendanceDailyView();
+};
+
+window.setDailyMobileStatus = function(studentId, statusVal) {
+    const curDay = window.mobileAttendanceSelectedDay;
+    window.currentDailyAttendanceDay = curDay;
+    window.setDailyStatus(studentId, statusVal);
+    window.renderMobileAttendanceDailyView();
+};
+
+window.markAllMobileDayPresent = function() {
+    const curDay = window.mobileAttendanceSelectedDay;
+    window.currentDailyAttendanceDay = curDay;
+    attendanceStudents.forEach(s => {
+        window.setDailyStatus(s.id, '');
+    });
+    window.renderMobileAttendanceDailyView();
+    if (typeof showToast === 'function') showToast(`✅ វត្តមានទាំងអស់ ថ្ងៃទី ${curDay}!`);
+};
+
+// =====================================================================
+// ៦. ផ្ទាំងសិស្សអវត្តមានញឹកញាប់ (Frequent Absence Modal)
+// =====================================================================
+window.openFrequentAbsenceModal = function() {
+    let modal = document.getElementById("frequentAbsenceModal");
+    if (!modal) {
+        modal = document.createElement("div");
+        modal.id = "frequentAbsenceModal";
+        modal.className = "fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 font-siemreap";
+        document.body.appendChild(modal);
+    }
+
+    const list = window.frequentAbsenceList || [];
+    const month = document.getElementById("attMonthSelect")?.value || "មករា";
+
+    modal.innerHTML = `
+        <div class="bg-white rounded-3xl w-full max-w-2xl max-h-[85vh] overflow-hidden shadow-2xl border border-slate-200 flex flex-col animate-scale-up">
+            <div class="p-6 border-b border-slate-100 flex items-center justify-between bg-rose-50/50 shrink-0">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-rose-500 text-white flex items-center justify-center text-lg shadow-md">
+                        <i class="fa-solid fa-triangle-exclamation"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-moul text-base text-slate-800">បញ្ជីសិស្សអវត្តមានញឹកញាប់ (ខែ${month})</h3>
+                        <p class="text-xs text-rose-600 font-bold mt-0.5">សិស្សអវត្តមានលើសពី ៣ ដងក្នុងខែនេះ</p>
+                    </div>
+                </div>
+                <button onclick="document.getElementById('frequentAbsenceModal').classList.add('hidden')" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-400 flex items-center justify-center transition">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <div class="p-6 overflow-y-auto custom-scrollbar flex-1 space-y-3">
+                ${list.length > 0 ? list.map((item, idx) => `
+                    <div class="p-4 bg-slate-50 border border-slate-200 rounded-2xl flex items-center justify-between gap-4">
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <span class="font-bold text-slate-800 text-xs">${idx + 1}. ${item.student.name}</span>
+                                <span class="text-[10px] font-mono text-slate-400">ID: ${item.student.id}</span>
+                            </div>
+                            <div class="flex items-center gap-2 text-[11px] text-slate-500 mt-1">
+                                <span class="text-rose-600 font-bold">អត់ច្បាប់៖ ${item.unex}</span> • 
+                                <span class="text-blue-600 font-bold">ច្បាប់៖ ${item.perm}</span> • 
+                                <span class="text-purple-600 font-bold">ឈឺ៖ ${item.sick}</span> • 
+                                <span class="text-amber-600 font-bold">យឺត៖ ${item.late}</span>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-2">
+                            ${item.student.phone ? `
+                                <a href="tel:${item.student.phone}" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-sm">
+                                    <i class="fa-solid fa-phone"></i> ទាក់ទង
+                                </a>
+                            ` : `<span class="text-[11px] text-slate-400 italic">គ្មានលេខទូរស័ព្ទ</span>`}
+                        </div>
+                    </div>
+                `).join("") : `
+                    <div class="p-8 text-center text-slate-400 font-bold">មិនមានសិស្សអវត្តមានលើសពី ៣ ដងក្នុងខែនេះទេ!</div>
+                `}
+            </div>
+
+            <div class="p-4 bg-slate-50 border-t border-slate-100 flex justify-end">
+                <button onclick="document.getElementById('frequentAbsenceModal').classList.add('hidden')" class="px-5 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-xl text-xs font-bold">បិទ</button>
+            </div>
+        </div>
+    `;
+
+    modal.classList.remove("hidden");
 };
