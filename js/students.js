@@ -494,6 +494,7 @@ window.renderStudentsTable = function() {
                         <button onclick="window.openReportCard ? window.openReportCard('${stu.id}') : alert('Report Card')" title="ព្រឹត្តិបត្រពិន្ទុបុគ្គល" class="w-8 h-8 rounded-full bg-slate-100 text-slate-500 hover:text-amber-600 hover:bg-amber-100 transition"><i class="fa-solid fa-file-invoice text-xs"></i></button>
                         <button onclick="window.viewStudentProfile('${stu.id}')" title="ប្រវត្តិរូប" class="w-8 h-8 rounded-full bg-slate-100 text-slate-500 hover:text-indigo-600 hover:bg-indigo-100 transition"><i class="fa-regular fa-eye text-xs"></i></button>
                         ${canEdit ? `
+                        <button onclick="window.openTransferStudentModal('${stu.id}')" title="ផ្ទេរថ្នាក់ / ប្តូរបន្ទប់រៀន" class="w-8 h-8 rounded-full bg-slate-100 text-slate-500 hover:text-blue-600 hover:bg-blue-100 transition"><i class="fa-solid fa-arrow-right-arrow-left text-xs"></i></button>
                         <button onclick="window.openStudentModal('${stu.id}')" title="កែប្រែ" class="w-8 h-8 rounded-full bg-slate-100 text-slate-500 hover:text-emerald-600 hover:bg-emerald-100 transition"><i class="fa-regular fa-pen-to-square text-xs"></i></button>
                         <button onclick="window.deleteStudent('${stu.id}')" title="លុប/ផ្អាក" class="w-8 h-8 rounded-full bg-slate-100 text-slate-500 hover:text-rose-600 hover:bg-rose-100 transition"><i class="fa-regular fa-trash-can text-xs"></i></button>
                         ` : ''}
@@ -676,8 +677,10 @@ window.saveStudentData = async function(e) {
     const currentYear = document.getElementById("globalAcademicYear")?.value || localStorage.getItem('selected_academic_year') || "2026-2027";
 
     const studentId = document.getElementById("stu_id").value.trim();
+    const studentName = document.getElementById("stu_name").value.trim();
+    const studentDob = document.getElementById("stu_dob").value;
 
-    // 🟢 STU-02: ផ្ទៀងផ្ទាត់លេខសម្គាល់សិស្ស (Unique Student ID Validation) 🟢
+    // 🟢 STU-02 & ACAD-05: ផ្ទៀងផ្ទាត់ការចុះឈ្មោះស្ទួន (Unique Student ID & Duplicate Class Validation) 🟢
     if (!isEdit) {
         const idExists = (window.allStudents || []).some(s => 
             String(s.id).trim().toLowerCase() === studentId.toLowerCase() && 
@@ -689,16 +692,77 @@ window.saveStudentData = async function(e) {
             btn.disabled = false;
             return;
         }
+
+        const dupInClass = (window.allStudents || []).some(s => 
+            String(s.name || '').trim().toLowerCase() === studentName.toLowerCase() &&
+            String(s.dob || '').trim() === studentDob.trim() &&
+            normalizeGrade(s.grade) === studentGrade &&
+            String(s.room || '').trim() === studentRoom &&
+            String(s.academic_year || currentYear) === String(currentYear)
+        );
+        if (dupInClass) {
+            if (!confirm(`⚠️ សិស្សឈ្មោះ «${studentName}» (ថ្ងៃខែឆ្នាំកំណើត: ${studentDob}) ហាក់បីដូចជាមានឈ្មោះក្នុងថ្នាក់ ${studentGrade} ${studentRoom} សម្រាប់ឆ្នាំ ${currentYear} រួចហើយ!\n\nតើលោកគ្រូ/អ្នកគ្រូពិតជាចង់បន្តចុះឈ្មោះស្ទួនទៀតដែរឬទេ?`)) {
+                btn.innerHTML = origText;
+                btn.disabled = false;
+                return;
+            }
+        }
+    }
+
+    const schoolId = window.AuthState?.school_id || localStorage.getItem('school_id') || 'SCH-001';
+    const oldStudent = isEdit ? (window.allStudents || []).find(s => String(s.id) === studentId) : null;
+    
+    // 🟢 ACAD-05: រៀបចំប្រវត្តិការសិក្សា និងការផ្ទេរថ្នាក់ (Enrollment & Transfer History) 🟢
+    let enrollmentHist = [];
+    if (isEdit && oldStudent) {
+        enrollmentHist = Array.isArray(oldStudent.enrollment_history) ? [...oldStudent.enrollment_history] : [{
+            grade: normalizeGrade(oldStudent.grade),
+            room: oldStudent.room || '«ក»',
+            academic_year: oldStudent.academic_year || currentYear,
+            date: oldStudent.enrollment_date || new Date().toISOString().split('T')[0],
+            status: oldStudent.status || 'Active',
+            reason: 'ចុះឈ្មោះចូលរៀនដំបូង',
+            type: 'initial_enrollment',
+            created_at: oldStudent.created_at || new Date().toISOString()
+        }];
+
+        if (normalizeGrade(oldStudent.grade) !== studentGrade || String(oldStudent.room || '').trim() !== studentRoom) {
+            enrollmentHist.push({
+                from_grade: normalizeGrade(oldStudent.grade),
+                from_room: oldStudent.room || '',
+                grade: studentGrade,
+                room: studentRoom,
+                academic_year: currentYear,
+                date: new Date().toISOString().split('T')[0],
+                status: document.getElementById("stu_status").value || "Active",
+                reason: "កែប្រែថ្នាក់/បន្ទប់ក្នុងទម្រង់កែប្រែសិស្ស",
+                type: "edit_transfer",
+                transferred_by: window.AuthState?.teacherName || localStorage.getItem('auth_teacher_name') || 'Admin',
+                created_at: new Date().toISOString()
+            });
+        }
+    } else {
+        enrollmentHist = [{
+            grade: studentGrade,
+            room: studentRoom,
+            academic_year: currentYear,
+            date: document.getElementById("stu_enrollment_date")?.value || new Date().toISOString().split('T')[0],
+            status: document.getElementById("stu_status").value || "Active",
+            reason: "ចុះឈ្មោះចូលរៀនដំបូង",
+            type: "initial_enrollment",
+            created_at: new Date().toISOString()
+        }];
     }
 
     const payload = {
         id: studentId,
+        school_id: schoolId,               // 🟢 Data Isolation (Chapter 4 & 6)
         teacher_id: currentTeacherId,       // 🟢 ចងភ្ជាប់ទិន្នន័យ
         academic_year: currentYear,         // 🟢 ចងភ្ជាប់ទិន្នន័យ
-        name: document.getElementById("stu_name").value.trim(),
+        name: studentName,
         name_en: (document.getElementById("stu_name_en")?.value || "").trim().toUpperCase(),
         gender: document.getElementById("stu_gender").value,
-        dob: document.getElementById("stu_dob").value, 
+        dob: studentDob, 
         enrollment_date: document.getElementById("stu_enrollment_date")?.value || "",
         photo_url: document.getElementById("stu_photo_val").value,
         pob_village: document.getElementById("stu_pob_village").value.trim(),
@@ -713,13 +777,14 @@ window.saveStudentData = async function(e) {
         father_job: document.getElementById("stu_father_job").value.trim(),
         mother_name: document.getElementById("stu_mother_name").value.trim(),
         mother_job: document.getElementById("stu_mother_job").value.trim(),
-        grade: normalizeGrade(document.getElementById("stu_grade").value),
-        room: document.getElementById("stu_room").value,
+        grade: studentGrade,
+        room: studentRoom,
         parent_contact: document.getElementById("stu_contact").value.trim(),
         status: document.getElementById("stu_status").value || "Active",
         poor_id: document.getElementById("stu_poor").checked,
         scholarship: document.getElementById("stu_scholar").checked,
         disability: document.getElementById("stu_disable").checked,
+        enrollment_history: enrollmentHist, // 🟢 ACAD-05
         updated_at: new Date().toISOString()
     };
 
@@ -794,11 +859,24 @@ window.deleteStudent = function(id) {
     if (softPrompt) {
         stu.status = "Withdrawn";
         stu.updated_at = new Date().toISOString();
+        if (!Array.isArray(stu.enrollment_history)) stu.enrollment_history = [];
+        stu.enrollment_history.push({
+            grade: normalizeGrade(stu.grade),
+            room: stu.room,
+            academic_year: stu.academic_year || document.getElementById("globalAcademicYear")?.value || "2026-2027",
+            date: new Date().toISOString().split('T')[0],
+            status: "Withdrawn",
+            reason: "កំណត់ជាសិស្សឈប់រៀន (Soft Delete - រក្សាទុកប្រវត្តិពិន្ទុ និងវត្តមាន)",
+            type: "status_change",
+            created_at: new Date().toISOString()
+        });
         localStorage.setItem('academic_students', JSON.stringify(window.allStudents));
         
         if (window.db) {
             window.db.collection("students").doc(String(id)).set({ 
                 status: "Withdrawn", 
+                enrollment_history: stu.enrollment_history,
+                updated_at: stu.updated_at,
                 last_updated: firebase.firestore.FieldValue.serverTimestamp() 
             }, { merge: true }).catch(console.warn);
         }
@@ -923,11 +1001,51 @@ window.viewStudentProfile = function(id) {
         if (stu.scholarship) badges.push(`<span class="bg-indigo-50 text-indigo-600 px-3 py-1.5 rounded-xl text-[11px] font-bold shadow-sm border border-indigo-100"><i class="fa-solid fa-award mr-1"></i> អាហារូបករណ៍</span>`);
         if (stu.disability) badges.push(`<span class="bg-orange-50 text-orange-600 px-3 py-1.5 rounded-xl text-[11px] font-bold shadow-sm border border-orange-100"><i class="fa-solid fa-wheelchair mr-1"></i> ពិការភាព</span>`);
         
-        if (stu.poor_id) badges.push(`<span class="bg-amber-50 text-amber-600 px-3 py-1.5 rounded-xl text-[11px] font-bold shadow-sm border border-amber-100"><i class="fa-solid fa-star mr-1"></i> ប័ណ្ណក្រីក្រ</span>`);
-        if (stu.scholarship) badges.push(`<span class="bg-indigo-50 text-indigo-600 px-3 py-1.5 rounded-xl text-[11px] font-bold shadow-sm border border-indigo-100"><i class="fa-solid fa-award mr-1"></i> អាហារូបករណ៍</span>`);
-        if (stu.disability) badges.push(`<span class="bg-orange-50 text-orange-600 px-3 py-1.5 rounded-xl text-[11px] font-bold shadow-sm border border-orange-100"><i class="fa-solid fa-wheelchair mr-1"></i> ពិការភាព</span>`);
-        
         document.getElementById("profBadges").innerHTML = badges.join("");
+
+        // 🟢 ACAD-05 & STU-04: បង្ហាញប្រវត្តិការចុះឈ្មោះ និងការផ្ទេរថ្នាក់ (Enrollment & Transfer History Timeline) 🟢
+        const timelineEl = document.getElementById("profEnrollmentTimeline");
+        if (timelineEl) {
+            const histList = Array.isArray(stu.enrollment_history) && stu.enrollment_history.length > 0
+                ? [...stu.enrollment_history].reverse()
+                : [{
+                    grade: normalizeGrade(stu.grade),
+                    room: stu.room || '«ក»',
+                    academic_year: stu.academic_year || document.getElementById("globalAcademicYear")?.value || "2026-2027",
+                    date: stu.enrollment_date || '-',
+                    status: stu.status || 'Active',
+                    reason: 'ចុះឈ្មោះចូលរៀនដំបូង',
+                    type: 'initial_enrollment'
+                }];
+
+            timelineEl.innerHTML = histList.map((h) => {
+                const isInit = h.type === 'initial_enrollment' || !h.from_grade;
+                const badgeColor = isInit ? 'bg-indigo-50 border-indigo-200 text-indigo-700' : 'bg-blue-50 border-blue-200 text-blue-700';
+                const icon = isInit ? 'fa-id-card' : 'fa-arrow-right-arrow-left';
+                const actionTitle = isInit 
+                    ? `ចុះឈ្មោះចូលរៀនដំបូង ថ្នាក់ ${h.grade} ${h.room || ''}`
+                    : `ផ្ទេរពី ${h.from_grade || ''} ${h.from_room || ''} ➡️ ${h.grade} ${h.room || ''}`;
+
+                return `
+                    <div class="flex items-start gap-3 p-3 rounded-2xl bg-white border border-slate-100 shadow-sm">
+                        <div class="w-8 h-8 rounded-xl ${badgeColor} border flex items-center justify-center text-xs shrink-0 mt-0.5">
+                            <i class="fa-solid ${icon}"></i>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <div class="flex flex-wrap items-center justify-between gap-1">
+                                <span class="font-bold text-xs text-slate-800">${actionTitle}</span>
+                                <span class="text-[11px] font-mono text-slate-400 bg-slate-50 px-2 py-0.5 rounded border border-slate-100">${formatDate(h.date)}</span>
+                            </div>
+                            <div class="text-[11px] text-slate-500 mt-1 flex flex-wrap items-center gap-2">
+                                <span>ឆ្នាំសិក្សា៖ <b class="text-slate-700">${h.academic_year || '-'}</b></span>
+                                <span>• ស្ថានភាព៖ <b class="text-emerald-600">${h.status || 'Active'}</b></span>
+                                ${h.reason ? `<span>• មូលហេតុ៖ <span class="italic text-slate-600">${h.reason}</span></span>` : ''}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
         modal.classList.remove("hidden"); 
         modal.classList.add("flex");
     } catch (error) { 
@@ -1143,11 +1261,241 @@ window.renderStudentModalTemplate = function() {
                                 </div>
                             </div>
                         </div>
+
+                        <!-- 🟢 ACAD-05: ប័ណ្ណប្រវត្តិការចុះឈ្មោះ និងការផ្ទេរថ្នាក់ (Enrollment & Transfer History) 🟢 -->
+                        <div id="profEnrollmentHistoryCard" class="bg-slate-50 p-5 md:p-6 rounded-[2rem] border border-slate-100 hover:shadow-md transition duration-300 hover:border-indigo-200 group md:col-span-2">
+                            <h4 class="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-2"><i class="fa-solid fa-timeline text-indigo-500"></i> ប្រវត្តិការចុះឈ្មោះ និងការផ្លាស់ប្តូរថ្នាក់រៀន (Enrollment & Class Transfer History)</h4>
+                            <div id="profEnrollmentTimeline" class="space-y-2.5 max-h-56 overflow-y-auto custom-scrollbar pr-1">
+                                <!-- Populated dynamically by viewStudentProfile -->
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
+
+        <!-- 🟢 ផ្ទាំង Modal ផ្ទេរថ្នាក់ / ប្តូរបន្ទប់រៀន (ACAD-05 / STU-04) 🟢 -->
+        <div id="studentTransferModal" class="fixed inset-0 z-[6500] bg-slate-900/70 backdrop-blur-md hidden items-center justify-center p-4 fade-in font-siemreap overflow-y-auto custom-scrollbar">
+            <div class="bg-white rounded-[2rem] shadow-2xl w-full max-w-lg overflow-hidden border border-slate-100 flex flex-col my-auto transform transition-all">
+                <div class="px-6 py-4 border-b border-slate-100 bg-slate-50/80 flex justify-between items-center">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center text-lg"><i class="fa-solid fa-arrow-right-arrow-left"></i></div>
+                        <div>
+                            <h3 class="font-moul text-base text-slate-800">ផ្ទេរថ្នាក់ / ប្តូរបន្ទប់រៀន</h3>
+                            <p class="text-xs text-slate-500">រក្សាទុកប្រវត្តិពិន្ទុ និងវត្តមានចាស់ដោយស្វ័យប្រវត្តិ</p>
+                        </div>
+                    </div>
+                    <button type="button" onclick="document.getElementById('studentTransferModal').classList.replace('flex','hidden')" class="w-8 h-8 rounded-full bg-slate-200 hover:bg-rose-100 text-slate-600 hover:text-rose-600 flex items-center justify-center transition"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+                <form id="studentTransferForm" onsubmit="window.handleTransferStudentSubmit(event)" class="p-6 space-y-4">
+                    <input type="hidden" id="trans_stu_id" value="">
+                    
+                    <div class="p-4 bg-blue-50/60 rounded-2xl border border-blue-100">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center font-bold text-sm shrink-0" id="trans_avatar">ស</div>
+                            <div class="min-w-0">
+                                <h4 class="font-bold text-slate-800 text-sm truncate" id="trans_stu_name">-</h4>
+                                <p class="text-xs text-slate-500 font-mono" id="trans_stu_id_badge">ID: -</p>
+                            </div>
+                        </div>
+                        <div class="mt-3 pt-3 border-t border-blue-100/60 flex items-center justify-between text-xs font-bold text-slate-600">
+                            <span>ថ្នាក់បច្ចុប្បន្ន៖ <span class="text-blue-600 font-moul" id="trans_cur_class">-</span></span>
+                            <span>ឆ្នាំសិក្សា៖ <span class="text-slate-700" id="trans_cur_year">-</span></span>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1">ថ្នាក់រៀនថ្មី *</label>
+                            <select id="trans_new_grade" class="w-full border border-slate-200 rounded-xl p-2.5 text-xs font-bold outline-none focus:ring-2 focus:ring-blue-500 bg-white" required>
+                                ${gradesOptions}
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1">បន្ទប់រៀនថ្មី *</label>
+                            <select id="trans_new_room" class="w-full border border-slate-200 rounded-xl p-2.5 text-xs font-bold outline-none focus:ring-2 focus:ring-blue-500 bg-white" required>
+                                <option value="«ក»">«ក»</option>
+                                <option value="«ខ»">«ខ»</option>
+                                <option value="«គ»">«គ»</option>
+                                <option value="«ឃ»">«ឃ»</option>
+                                <option value="«ង»">«ង»</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1">កាលបរិច្ឆេទផ្ទេរ *</label>
+                            <input type="date" id="trans_date" class="w-full border border-slate-200 rounded-xl p-2.5 text-xs font-bold outline-none focus:ring-2 focus:ring-blue-500 bg-white" required>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1">ស្ថានភាព</label>
+                            <select id="trans_status" class="w-full border border-slate-200 rounded-xl p-2.5 text-xs font-bold outline-none focus:ring-2 focus:ring-blue-500 bg-white">
+                                <option value="Active">កំពុងសិក្សា (Active)</option>
+                                <option value="Transferred">បានផ្ទេរចេញ (Transferred)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">មូលហេតុនៃការផ្ទេរ / ចំណាំ</label>
+                        <textarea id="trans_reason" rows="2" placeholder="ឧ. ប្តូរបន្ទប់តាមការរៀបចំថ្មី, ប្តូរទីលំនៅ..." class="w-full border border-slate-200 rounded-xl p-2.5 text-xs outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                    </div>
+
+                    <div class="p-3 bg-amber-50 rounded-xl border border-amber-200 text-[11px] text-amber-800 flex items-start gap-2">
+                        <i class="fa-solid fa-circle-info text-amber-600 mt-0.5"></i>
+                        <span>ប្រព័ន្ធនឹងរក្សាទុកកំណត់ត្រាពិន្ទុ និងវត្តមានរបស់សិស្សក្នុងថ្នាក់ចាស់ដោយស្វ័យប្រវត្តិ មិនឱ្យបាត់បង់ទិន្នន័យឡើយ។</span>
+                    </div>
+
+                    <div class="flex justify-end gap-2 pt-2 border-t border-slate-100">
+                        <button type="button" onclick="document.getElementById('studentTransferModal').classList.replace('flex','hidden')" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition">បោះបង់</button>
+                        <button type="submit" id="btnSubmitTransfer" class="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold shadow-md shadow-blue-200 flex items-center gap-1.5 transition"><i class="fa-solid fa-check"></i> បញ្ជាក់ការផ្ទេរ</button>
+                    </div>
+                </form>
+            </div>
+        </div>
     `;
+};
+
+// ==========================================
+// 🟢 ACAD-05 & STU-04: មុខងារផ្ទេរថ្នាក់សិស្ស (Student Class Transfer Handlers) 🟢
+// ==========================================
+window.openTransferStudentModal = function(id) {
+    const stu = (window.allStudents || []).find(s => String(s.id) === String(id));
+    if (!stu) return alert("រកមិនឃើញទិន្នន័យសិស្សឡើយ!");
+
+    const modal = document.getElementById("studentTransferModal");
+    if (!modal) return alert("មិនទាន់មាន Modal ផ្ទេរថ្នាក់ក្នុងប្រព័ន្ធទេ!");
+
+    document.getElementById("trans_stu_id").value = stu.id;
+    document.getElementById("trans_stu_name").textContent = stu.name + (stu.name_en ? ` (${stu.name_en})` : '');
+    document.getElementById("trans_stu_id_badge").textContent = `ID: ${stu.id}`;
+    document.getElementById("trans_avatar").textContent = getAvatarInitial(stu.name);
+    document.getElementById("trans_cur_class").textContent = `${normalizeGrade(stu.grade)} ${stu.room || ''}`;
+    document.getElementById("trans_cur_year").textContent = stu.academic_year || document.getElementById("globalAcademicYear")?.value || "2026-2027";
+
+    document.getElementById("trans_new_grade").value = normalizeGrade(stu.grade);
+    document.getElementById("trans_new_room").value = stu.room || "«ក»";
+    document.getElementById("trans_date").value = new Date().toISOString().split('T')[0];
+    document.getElementById("trans_status").value = stu.status || "Active";
+    document.getElementById("trans_reason").value = "";
+
+    modal.classList.remove("hidden");
+    modal.classList.add("flex");
+};
+
+window.handleTransferStudentSubmit = async function(e) {
+    e.preventDefault();
+    const stuId = document.getElementById("trans_stu_id").value;
+    const stu = (window.allStudents || []).find(s => String(s.id) === String(stuId));
+    if (!stu) return;
+
+    const newGrade = normalizeGrade(document.getElementById("trans_new_grade").value);
+    const newRoom = document.getElementById("trans_new_room").value.trim();
+    const transDate = document.getElementById("trans_date").value;
+    const transStatus = document.getElementById("trans_status").value;
+    const transReason = document.getElementById("trans_reason").value.trim() || "ការផ្ទេរថ្នាក់រៀន";
+
+    if (newGrade === normalizeGrade(stu.grade) && newRoom === (stu.room || '').trim() && transStatus === (stu.status || 'Active')) {
+        alert("⚠️ ថ្នាក់ បន្ទប់ និងស្ថានភាពថ្មីដូចគ្នាទៅនឹងបច្ចុប្បន្ន!");
+        return;
+    }
+
+    // Permission check
+    if (window.DataServiceGuard) {
+        try {
+            window.DataServiceGuard.assertCan(
+                'edit_student', 
+                { grade: stu.grade, room: stu.room },
+                `⚠️ សិទ្ធិត្រូវបានបដិសេធ៖ លោកគ្រូអ្នកគ្រូមិនមានសិទ្ធិផ្ទេរសិស្សចេញពីថ្នាក់ ${stu.grade} ${stu.room} ឡើយ!`
+            );
+        } catch(guardErr) {
+            alert(guardErr.message);
+            return;
+        }
+    } else if (typeof canEditRecords === 'function' && !canEditRecords()) {
+        alert("🔒 លោកគ្រូអ្នកគ្រូមានត្រឹមសិទ្ធិមើលប៉ុណ្ណោះ មិនអាចផ្ទេរសិស្សបានទេ!");
+        return;
+    }
+
+    const btn = document.getElementById("btnSubmitTransfer");
+    const origBtnText = btn.innerHTML;
+    btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> កំពុងដំណើរការ...`;
+    btn.disabled = true;
+
+    try {
+        const curYear = stu.academic_year || document.getElementById("globalAcademicYear")?.value || "2026-2027";
+        
+        // Initialize history if missing
+        if (!Array.isArray(stu.enrollment_history)) {
+            stu.enrollment_history = [{
+                grade: normalizeGrade(stu.grade),
+                room: stu.room || '«ក»',
+                academic_year: curYear,
+                date: stu.enrollment_date || '2026-01-01',
+                status: stu.status || 'Active',
+                reason: 'ចុះឈ្មោះចូលរៀនដំបូង',
+                type: 'initial_enrollment',
+                created_at: stu.created_at || new Date().toISOString()
+            }];
+        }
+
+        const historyEntry = {
+            from_grade: normalizeGrade(stu.grade),
+            from_room: stu.room || '',
+            grade: newGrade,
+            room: newRoom,
+            academic_year: curYear,
+            date: transDate,
+            status: transStatus,
+            reason: transReason,
+            type: 'class_transfer',
+            transferred_by: window.AuthState?.teacherName || localStorage.getItem('auth_teacher_name') || 'Admin',
+            created_at: new Date().toISOString()
+        };
+
+        stu.enrollment_history.push(historyEntry);
+
+        // Update current grade & room & status
+        stu.grade = newGrade;
+        stu.room = newRoom;
+        stu.status = transStatus;
+        stu.updated_at = new Date().toISOString();
+
+        // Save local
+        localStorage.setItem('academic_students', JSON.stringify(window.allStudents));
+
+        // Save to Firebase
+        if (window.db) {
+            await window.db.collection("students").doc(String(stu.id)).set({
+                grade: stu.grade,
+                room: stu.room,
+                status: stu.status,
+                enrollment_history: stu.enrollment_history,
+                updated_at: stu.updated_at,
+                last_updated: firebase.firestore.FieldValue.serverTimestamp()
+            }, { merge: true });
+        }
+
+        if (typeof window.logAudit === 'function') {
+            window.logAudit(
+                'TRANSFER_STUDENT',
+                'student',
+                `បានផ្ទេរសិស្ស ${stu.name} (${stu.id}) ពី ${historyEntry.from_grade} ${historyEntry.from_room} ទៅ ${newGrade} ${newRoom} (មូលហេតុ: ${transReason})`
+            );
+        }
+
+        document.getElementById("studentTransferModal").classList.replace("flex", "hidden");
+        window.filterStudents();
+        if (typeof showToast === 'function') showToast("🔄 បានផ្ទេរថ្នាក់សិស្ស និងកត់ត្រាប្រវត្តិជោគជ័យ!", "success");
+
+    } catch (err) {
+        console.error("Transfer error:", err);
+        alert("មានបញ្ហាក្នុងការផ្ទេរថ្នាក់សិស្ស: " + err.message);
+    } finally {
+        btn.innerHTML = origBtnText;
+        btn.disabled = false;
+    }
 };
 
 
@@ -1598,8 +1946,10 @@ window.importStudentsExcel = function(event) {
                 else if (rawStatus.includes("មិនសកម្ម") || rawStatus.toLowerCase().includes("inactive")) normStatus = "Inactive";
                 else if (rawStatus.includes("ឈប់") || rawStatus.includes("បោះបង់") || rawStatus.toLowerCase().includes("drop") || rawStatus.toLowerCase().includes("withdrawn")) normStatus = "Withdrawn";
 
+                const schoolId = window.AuthState?.school_id || localStorage.getItem('school_id') || 'SCH-001';
                 const newStu = {
                     id: id, 
+                    school_id: schoolId,
                     teacher_id: currentTeacherId,
                     academic_year: currentYear,
                     name: name,
@@ -1631,11 +1981,53 @@ window.importStudentsExcel = function(event) {
                 };
 
                 if (existingIdx > -1) {
-                    window.allStudents[existingIdx] = Object.assign({}, window.allStudents[existingIdx], newStu);
+                    const oldRec = window.allStudents[existingIdx];
+                    let hist = Array.isArray(oldRec.enrollment_history) ? [...oldRec.enrollment_history] : [{
+                        grade: normalizeGrade(oldRec.grade),
+                        room: oldRec.room || '«ក»',
+                        academic_year: oldRec.academic_year || currentYear,
+                        date: oldRec.enrollment_date || new Date().toISOString().split('T')[0],
+                        status: oldRec.status || 'Active',
+                        reason: 'ចុះឈ្មោះចូលរៀនដំបូង',
+                        type: 'initial_enrollment',
+                        created_at: oldRec.created_at || new Date().toISOString()
+                    }];
+
+                    if (normalizeGrade(oldRec.grade) !== newStu.grade || String(oldRec.room || '').trim() !== newStu.room) {
+                        hist.push({
+                            from_grade: normalizeGrade(oldRec.grade),
+                            from_room: oldRec.room || '',
+                            grade: newStu.grade,
+                            room: newStu.room,
+                            academic_year: currentYear,
+                            date: new Date().toISOString().split('T')[0],
+                            status: normStatus,
+                            reason: "កែប្រែថ្នាក់/បន្ទប់តាមរយៈការនាំចូល Excel",
+                            type: "excel_import_transfer",
+                            created_at: new Date().toISOString()
+                        });
+                    }
+                    newStu.enrollment_history = hist;
+                    window.allStudents[existingIdx] = Object.assign({}, oldRec, newStu);
                     updatedCount++;
                 } else {
+                    newStu.enrollment_history = [{
+                        grade: newStu.grade,
+                        room: newStu.room,
+                        academic_year: currentYear,
+                        date: rawEnroll || new Date().toISOString().split('T')[0],
+                        status: normStatus,
+                        reason: "នាំចូលពីឯកសារ Excel",
+                        type: "excel_import",
+                        created_at: new Date().toISOString()
+                    }];
                     window.allStudents.push(newStu);
                     newAdded++;
+                }
+
+                // Sync individual doc to Firestore if connected
+                if (window.db && typeof window.saveStudentToFirebase === 'function') {
+                    window.saveStudentToFirebase(newStu).catch(console.warn);
                 }
             }
             

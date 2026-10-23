@@ -12,41 +12,46 @@ window.loadGlobalSettings = function() {
 };
 window.loadGlobalSettings();
 
-// ២. ទិន្នន័យរចនាសម្ព័ន្ធការសិក្សាលំនាំដើម (Default Academic Structure)
+// ២. ទិន្នន័យរចនាសម្ព័ន្ធការសិក្សាលំនាំដើម (Default Academic Structure - Chapter 5)
 window.defaultAcademicStructure = {
-    academic_years: ["2024-2025", "2025-2026", "2026-2027", "2027-2028"],
+    academic_years: [
+        { year: "2024-2025", start: "2024-10-01", end: "2025-07-31", status: "archived" },
+        { year: "2025-2026", start: "2025-10-01", end: "2026-07-31", status: "archived" },
+        { year: "2026-2027", start: "2026-10-01", end: "2027-07-31", status: "active" },
+        { year: "2027-2028", start: "2027-10-01", end: "2028-07-31", status: "archived" }
+    ],
     active_year: "2026-2027",
     semesters: {
         sem1: { start: "2026-10-01", end: "2027-02-28", name: "ឆមាសទី ១" },
         sem2: { start: "2027-03-01", end: "2027-07-31", name: "ឆមាសទី ២" }
     },
     grades: [
-        { id: "g1", name: "ថ្នាក់ទី ១", rooms: ["«ក»", "«ខ»"], teacher: "TCH-001" },
-        { id: "g2", name: "ថ្នាក់ទី ២", rooms: ["«ក»", "«ខ»"], teacher: "" },
-        { id: "g3", name: "ថ្នាក់ទី ៣", rooms: ["«ក»", "«ខ»"], teacher: "" },
-        { id: "g4", name: "ថ្នាក់ទី ៤", rooms: ["«ក»"], teacher: "" },
-        { id: "g5", name: "ថ្នាក់ទី ៥", rooms: ["«ក»"], teacher: "" },
-        { id: "g6", name: "ថ្នាក់ទី ៦", rooms: ["«ក»"], teacher: "" }
+        { id: "g1", name: "ថ្នាក់ទី ១", rooms: ["«ក»", "«ខ»"], max_capacity: 45, teacher: "TCH-001" },
+        { id: "g2", name: "ថ្នាក់ទី ២", rooms: ["«ក»", "«ខ»"], max_capacity: 45, teacher: "" },
+        { id: "g3", name: "ថ្នាក់ទី ៣", rooms: ["«ក»", "«ខ»"], max_capacity: 45, teacher: "" },
+        { id: "g4", name: "ថ្នាក់ទី ៤", rooms: ["«ក»"], max_capacity: 45, teacher: "" },
+        { id: "g5", name: "ថ្នាក់ទី ៥", rooms: ["«ក»"], max_capacity: 45, teacher: "" },
+        { id: "g6", name: "ថ្នាក់ទី ៦", rooms: ["«ក»"], max_capacity: 45, teacher: "" }
     ],
     primary_subjects: [
-        { key: "khmer", name: "ភាសាខ្មែរ", max: 100, weight: 1, color: "#dbeafe" },
-        { key: "math", name: "គណិតវិទ្យា", max: 100, weight: 1, color: "#ede9fe" },
-        { key: "science", name: "វិទ្យាសាស្ត្រ", max: 50, weight: 1, color: "#dcfce7" },
-        { key: "social", name: "សិក្សាសង្គម", max: 50, weight: 1, color: "#fef9c3" },
-        { key: "pe_art", name: "អប់រំកាយ/សិល្បៈ", max: 50, weight: 1, color: "#ffe4e6" },
-        { key: "foreign", name: "ភាសាបរទេស", max: 50, weight: 1, color: "#e0f2fe" }
+        { key: "khmer", name: "ភាសាខ្មែរ", name_kh: "ភាសាខ្មែរ", name_en: "Khmer Language", max: 100, weight: 1, color: "#dbeafe", teacher_id: "" },
+        { key: "math", name: "គណិតវិទ្យា", name_kh: "គណិតវិទ្យា", name_en: "Mathematics", max: 100, weight: 1, color: "#ede9fe", teacher_id: "" },
+        { key: "science", name: "វិទ្យាសាស្ត្រ", name_kh: "វិទ្យាសាស្ត្រ", name_en: "Science", max: 50, weight: 1, color: "#dcfce7", teacher_id: "" },
+        { key: "social", name: "សិក្សាសង្គម", name_kh: "សិក្សាសង្គម", name_en: "Social Studies", max: 50, weight: 1, color: "#fef9c3", teacher_id: "" },
+        { key: "pe_art", name: "អប់រំកាយ/សិល្បៈ", name_kh: "អប់រំកាយ/សិល្បៈ", name_en: "PE & Arts", max: 50, weight: 1, color: "#ffe4e6", teacher_id: "" },
+        { key: "foreign", name: "ភាសាបរទេស", name_kh: "ភាសាបរទេស", name_en: "Foreign Language", max: 50, weight: 1, color: "#e0f2fe", teacher_id: "" }
     ],
     secondary_subjects: [
-        { key: "khmer", name: "ភាសាខ្មែរ", max: 100, weight: 1, color: "#dbeafe" },
-        { key: "math", name: "គណិតវិទ្យា", max: 100, weight: 1, color: "#ede9fe" },
-        { key: "physics", name: "រូបវិទ្យា", max: 50, weight: 1, color: "#dcfce7" },
-        { key: "chem", name: "គីមីវិទ្យា", max: 50, weight: 1, color: "#ede9fe" },
-        { key: "bio", name: "ជីវវិទ្យា", max: 50, weight: 1, color: "#dcfce7" },
-        { key: "history", name: "ប្រវត្តិវិទ្យា", max: 50, weight: 1, color: "#fef9c3" },
-        { key: "geo", name: "ភូមិវិទ្យា", max: 50, weight: 1, color: "#fef9c3" },
-        { key: "civics", name: "ពលរដ្ឋវិទ្យា", max: 50, weight: 1, color: "#ffe4e6" },
-        { key: "earth", name: "ផែនដីវិទ្យា", max: 50, weight: 1, color: "#e0f2fe" },
-        { key: "english", name: "ភាសាអង់គ្លេស", max: 50, weight: 1, color: "#e0f2fe" }
+        { key: "khmer", name: "ភាសាខ្មែរ", name_kh: "ភាសាខ្មែរ", name_en: "Khmer Literature", max: 100, weight: 1, color: "#dbeafe", teacher_id: "" },
+        { key: "math", name: "គណិតវិទ្យា", name_kh: "គណិតវិទ្យា", name_en: "Mathematics", max: 100, weight: 1, color: "#ede9fe", teacher_id: "" },
+        { key: "physics", name: "រូបវិទ្យា", name_kh: "រូបវិទ្យា", name_en: "Physics", max: 50, weight: 1, color: "#dcfce7", teacher_id: "" },
+        { key: "chem", name: "គីមីវិទ្យា", name_kh: "គីមីវិទ្យា", name_en: "Chemistry", max: 50, weight: 1, color: "#ede9fe", teacher_id: "" },
+        { key: "bio", name: "ជីវវិទ្យា", name_kh: "ជីវវិទ្យា", name_en: "Biology", max: 50, weight: 1, color: "#dcfce7", teacher_id: "" },
+        { key: "history", name: "ប្រវត្តិវិទ្យា", name_kh: "ប្រវត្តិវិទ្យា", name_en: "History", max: 50, weight: 1, color: "#fef9c3", teacher_id: "" },
+        { key: "geo", name: "ភូមិវិទ្យា", name_kh: "ភូមិវិទ្យា", name_en: "Geography", max: 50, weight: 1, color: "#fef9c3", teacher_id: "" },
+        { key: "civics", name: "ពលរដ្ឋវិទ្យា", name_kh: "ពលរដ្ឋវិទ្យា", name_en: "Civics", max: 50, weight: 1, color: "#ffe4e6", teacher_id: "" },
+        { key: "earth", name: "ផែនដីវិទ្យា", name_kh: "ផែនដីវិទ្យា", name_en: "Earth Science", max: 50, weight: 1, color: "#e0f2fe", teacher_id: "" },
+        { key: "english", name: "ភាសាអង់គ្លេស", name_kh: "ភាសាអង់គ្លេស", name_en: "English", max: 50, weight: 1, color: "#e0f2fe", teacher_id: "" }
     ]
 };
 
@@ -61,6 +66,22 @@ window.loadAcademicStructure = function() {
     } else {
         window.academicStructure = window.defaultAcademicStructure;
     }
+
+    // ភាពត្រូវគ្នាជាមួយទិន្នន័យចាស់ (Normalize academic_years array if it contained simple strings)
+    if (window.academicStructure && Array.isArray(window.academicStructure.academic_years)) {
+        const actYear = window.academicStructure.active_year || "2026-2027";
+        window.academicStructure.academic_years = window.academicStructure.academic_years.map(y => {
+            if (typeof y === "object" && y !== null) return y;
+            const isAct = String(y) === String(actYear);
+            return {
+                year: String(y),
+                start: isAct ? (window.academicStructure.semesters?.sem1?.start || "2026-10-01") : "",
+                end: isAct ? (window.academicStructure.semesters?.sem2?.end || "2027-07-31") : "",
+                status: isAct ? "active" : "archived"
+            };
+        });
+    }
+
     return window.academicStructure;
 };
 window.loadAcademicStructure();
@@ -228,13 +249,21 @@ window.loadSettingsView = function() {
                 </div>
             </div>
 
+            <!-- ការជូនដំណឹងសិទ្ធិមើល (Read-only banner for non-admins - SET-04) -->
+            <div id="schoolSettingsPermWarning" class="hidden p-4 bg-amber-50 border border-amber-200 text-amber-900 rounded-2xl text-xs font-bold items-center gap-2.5 shadow-sm">
+                <div class="w-7 h-7 rounded-xl bg-amber-200 text-amber-800 flex items-center justify-center text-sm shrink-0">
+                    <i class="fa-solid fa-lock"></i>
+                </div>
+                <span>លោកគ្រូអ្នកគ្រូមានត្រឹមសិទ្ធិមើលព័ត៌មានសាលារៀន (Read-only)។ មានតែ School Administrator ឬ System Administrator ប៉ុណ្ណោះដែលអាចកែប្រែព័ត៌មានសាលារៀនបាន។</span>
+            </div>
+
             <!-- ទម្រង់កំណត់ព័ត៌មានសាលារៀន (School Form) -->
             <form id="settingsForm" onsubmit="window.handleSaveSettings(event)" class="space-y-6">
                
                <div class="bg-white p-6 md:p-8 rounded-[2rem] shadow-sm border border-slate-200">
                    <h3 class="font-bold text-slate-800 border-b border-slate-100 pb-4 mb-6 text-base md:text-lg flex items-center gap-3">
                        <div class="w-10 h-10 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center shadow-inner"><i class="fa-solid fa-school"></i></div>
-                       ព័ត៌មានទូទៅនៃសាលារៀន (School Information)
+                       ព័ត៌មានទូទៅនៃសាលារៀន (School Profile - SET-01)
                    </h3>
                    
                    <div class="grid grid-cols-1 md:grid-cols-3 gap-5 text-sm">
@@ -280,8 +309,18 @@ window.loadSettingsView = function() {
                       </div>
 
                       <div>
-                         <label class="block text-xs font-bold text-slate-600 mb-2">ទំនាក់ទំនងសាលា (ទូរស័ព្ទ)</label>
-                         <input type="text" id="set_school_contact" placeholder="012 345 678" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-blue-500 focus:bg-white outline-none font-mono text-xs shadow-inner transition">
+                         <label class="block text-xs font-bold text-slate-600 mb-2">លេខទូរស័ព្ទផ្លូវការសាលា</label>
+                         <input type="text" id="set_school_phone" placeholder="012 345 678" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-blue-500 focus:bg-white outline-none font-mono text-xs shadow-inner transition">
+                      </div>
+
+                      <div>
+                         <label class="block text-xs font-bold text-slate-600 mb-2">អ៊ីមែលផ្លូវការសាលា (School Email)</label>
+                         <input type="email" id="set_school_email" placeholder="school@moeys.gov.kh" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-blue-500 focus:bg-white outline-none font-mono text-xs shadow-inner transition">
+                      </div>
+
+                      <div class="col-span-1 md:col-span-2">
+                         <label class="block text-xs font-bold text-slate-600 mb-2">ព័ត៌មានទំនាក់ទំនងបន្ថែម / បណ្តាញសង្គម</label>
+                         <input type="text" id="set_school_contact" placeholder="ឧ. Facebook Page / Telegram Channel" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-blue-500 focus:bg-white outline-none text-xs shadow-inner transition">
                       </div>
 
                       <div>
@@ -329,6 +368,75 @@ window.loadSettingsView = function() {
                              <input type="text" id="prof_village" placeholder="ភូមិ..." class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 font-bold text-slate-800 outline-none focus:ring-2 focus:ring-blue-400">
                           </div>
                        </div>
+                   </div>
+               </div>
+
+               <!-- ការកំណត់ទូទៅនៃប្រព័ន្ធ (General Settings - SET-02) -->
+               <div class="bg-white p-6 md:p-8 rounded-[2rem] shadow-sm border border-slate-200">
+                   <h3 class="font-bold text-slate-800 border-b border-slate-100 pb-4 mb-6 text-base md:text-lg flex items-center gap-3">
+                       <div class="w-10 h-10 bg-indigo-50 text-indigo-600 rounded-xl flex items-center justify-center shadow-inner"><i class="fa-solid fa-sliders"></i></div>
+                       ការកំណត់ទូទៅនៃប្រព័ន្ធ (General Settings - SET-02)
+                   </h3>
+                   
+                   <div class="grid grid-cols-1 md:grid-cols-3 gap-5 text-sm">
+                       <div>
+                           <label class="block text-xs font-bold text-slate-600 mb-2">ភាសាលំនាំដើម (Default Language)</label>
+                           <select id="set_default_language" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-indigo-500 focus:bg-white outline-none font-bold text-xs shadow-inner transition cursor-pointer">
+                               <option value="km" selected>🇰🇭 ភាសាខ្មែរ (Khmer - Standard)</option>
+                               <option value="en">🇬🇧 English (International)</option>
+                           </select>
+                       </div>
+
+                       <div>
+                           <label class="block text-xs font-bold text-slate-600 mb-2">ទម្រង់កាលបរិច្ឆេទ (Date Format)</label>
+                           <select id="set_date_format" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-indigo-500 focus:bg-white outline-none font-mono text-xs shadow-inner transition cursor-pointer font-bold">
+                               <option value="DD/MM/YYYY" selected>DD/MM/YYYY (ឧ. 23/10/2026)</option>
+                               <option value="YYYY-MM-DD">YYYY-MM-DD (ISO 8601)</option>
+                               <option value="D MMMM YYYY">D MMMM YYYY (ខ្មែរផ្លូវការ)</option>
+                           </select>
+                       </div>
+
+                       <div>
+                           <label class="block text-xs font-bold text-slate-600 mb-2">ទម្រង់ម៉ោង (Time Format)</label>
+                           <select id="set_time_format" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-indigo-500 focus:bg-white outline-none font-bold text-xs shadow-inner transition cursor-pointer">
+                               <option value="12h" selected>១២ ម៉ោង (12-hour AM/PM)</option>
+                               <option value="24h">២៤ ម៉ោង (24-hour Military)</option>
+                           </select>
+                       </div>
+
+                       <div>
+                           <label class="block text-xs font-bold text-slate-600 mb-2">តំបន់ពេលវេលា (Timezone)</label>
+                           <input type="text" id="set_timezone" value="Asia/Phnom_Penh" readonly class="w-full bg-slate-100 border border-slate-200 rounded-xl px-4 py-2.5 font-mono text-xs text-slate-600 outline-none cursor-not-allowed">
+                       </div>
+
+                       <div>
+                           <label class="block text-xs font-bold text-slate-600 mb-2">បុព្វបទអត្តលេខសិស្ស (Student ID Prefix)</label>
+                           <input type="text" id="set_student_id_prefix" placeholder="ឧ. STU-" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-indigo-500 focus:bg-white outline-none font-mono font-bold text-xs shadow-inner transition uppercase text-center">
+                       </div>
+
+                       <div>
+                           <label class="block text-xs font-bold text-slate-600 mb-2">លេខសម្គាល់សាលា (School ID)</label>
+                           <input type="text" id="set_school_id" readonly class="w-full bg-slate-100 border border-slate-200 rounded-xl px-4 py-2.5 font-mono font-bold text-xs text-indigo-700 outline-none cursor-not-allowed text-center">
+                       </div>
+                   </div>
+
+                   <!-- Report Headers Options -->
+                   <div class="mt-6 pt-5 border-t border-slate-100 grid grid-cols-1 md:grid-cols-2 gap-4">
+                       <label class="flex items-center gap-3 p-3.5 rounded-2xl bg-slate-50 hover:bg-slate-100/70 border border-slate-200 cursor-pointer transition">
+                           <input type="checkbox" id="set_show_logo_on_reports" checked class="w-4 h-4 text-indigo-600 rounded">
+                           <div>
+                               <span class="block text-xs font-bold text-slate-800">បង្ហាញនិមិត្តសញ្ញាសាលាលើរបាយការណ៍</span>
+                               <span class="block text-[11px] text-slate-400 mt-0.5">ដាក់បញ្ចូល Logo លើក្បាលតារាងពិន្ទុ និងរបាយការណ៍ផ្លូវការ</span>
+                           </div>
+                       </label>
+
+                       <label class="flex items-center gap-3 p-3.5 rounded-2xl bg-slate-50 hover:bg-slate-100/70 border border-slate-200 cursor-pointer transition">
+                           <input type="checkbox" id="set_show_school_header" checked class="w-4 h-4 text-indigo-600 rounded">
+                           <div>
+                               <span class="block text-xs font-bold text-slate-800">បង្ហាញបឋមកថាឈ្មោះសាលាពេញលេញ</span>
+                               <span class="block text-[11px] text-slate-400 mt-0.5">ព្រះរាជាណាចក្រកម្ពុជា និងឈ្មោះក្រសួង/មន្ទីរអប់រំ</span>
+                           </div>
+                       </label>
                    </div>
                </div>
 
@@ -493,7 +601,7 @@ window.loadSettingsView = function() {
 };
 
 // =========================================================================
-// ៥. គ្រប់គ្រងការសិក្សា (Academic Management Tab Renderer)
+// ៥. គ្រប់គ្រងការសិក្សា (Academic Management Tab Renderer - Chapter 5)
 // =========================================================================
 window.renderAcademicManagementTab = function() {
     const container = document.getElementById("tabContent_academic");
@@ -501,63 +609,135 @@ window.renderAcademicManagementTab = function() {
 
     const data = window.academicStructure || window.defaultAcademicStructure;
     const activeYear = data.active_year || "2026-2027";
-    const years = data.academic_years || ["2024-2025", "2025-2026", "2026-2027", "2027-2028"];
+    const rawYears = data.academic_years || ["2024-2025", "2025-2026", "2026-2027", "2027-2028"];
     const grades = data.grades || [];
     const pSubjects = data.primary_subjects || [];
     const sSubjects = data.secondary_subjects || [];
 
+    // Normalize years list (ACAD-01: Supporting Year, Start Date, End Date, Status)
+    const yearsList = rawYears.map(y => {
+        if (typeof y === "object" && y !== null) return y;
+        const isAct = String(y) === String(activeYear);
+        return {
+            year: String(y),
+            start: isAct ? (data.semesters?.sem1?.start || "2026-10-01") : "",
+            end: isAct ? (data.semesters?.sem2?.end || "2027-07-31") : "",
+            status: isAct ? "active" : "archived"
+        };
+    });
+
+    const isSchoolAdmin = typeof window.isSchoolAdmin === "function" ? window.isSchoolAdmin() : true;
+
     container.innerHTML = `
         <div class="space-y-6">
             
-            <!-- ផ្នែកទី ១៖ គ្រប់គ្រងឆ្នាំសិក្សា & ឆមាស -->
+            <!-- ផ្នែកទី ១៖ គ្រប់គ្រងឆ្នាំសិក្សា & ឆមាស (ACAD-01 & ACAD-02) -->
             <div class="bg-white p-6 md:p-8 rounded-[2rem] shadow-sm border border-slate-200">
                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-slate-100 pb-4 mb-6">
                     <div>
                         <h3 class="font-bold text-slate-800 text-base flex items-center gap-2.5">
-                            <i class="fa-solid fa-calendar-check text-indigo-600"></i> ១. គ្រប់គ្រងឆ្នាំសិក្សា និងកាលបរិច្ឆេទឆមាស
+                            <i class="fa-solid fa-calendar-check text-indigo-600"></i> ១. គ្រប់គ្រងឆ្នាំសិក្សា និងកាលបរិច្ឆេទឆមាស (ACAD-01 & ACAD-02)
                         </h3>
-                        <p class="text-xs text-slate-400 mt-1">កំណត់ឆ្នាំសិក្សាសកម្ម និងកាលបរិច្ឆេទចាប់ផ្តើម-បញ្ចប់នៃឆមាសនីមួយៗ</p>
+                        <p class="text-xs text-slate-400 mt-1">បង្កើតឆ្នាំសិក្សា កំណត់ថ្ងៃចាប់ផ្តើម-បញ្ចប់ ជ្រើសឆ្នាំសកម្ម និងកំណត់ឆមាស (ទិន្នន័យចាស់មិនត្រូវលុបទេ)</p>
                     </div>
-                    <div class="flex items-center gap-2 w-full sm:w-auto">
-                        <button onclick="window.openAddAcademicYearModal()" class="px-4 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-xl text-xs font-bold transition flex items-center gap-1.5 border border-indigo-200">
-                            <i class="fa-solid fa-plus"></i> បន្ថែមឆ្នាំសិក្សា
-                        </button>
+                    ${isSchoolAdmin ? `
+                        <div class="flex items-center gap-2 w-full sm:w-auto">
+                            <button onclick="window.openAddAcademicYearModal()" class="px-4 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-xl text-xs font-bold transition flex items-center gap-1.5 border border-indigo-200 shadow-sm">
+                                <i class="fa-solid fa-plus"></i> បន្ថែមឆ្នាំសិក្សាថ្មី
+                            </button>
+                        </div>
+                    ` : ''}
+                </div>
+
+                <!-- Active Year & Semesters Setting -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-5 text-sm p-4 bg-indigo-50/40 rounded-2xl border border-indigo-100/60 mb-6">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-2">ឆ្នាំសិក្សាសកម្មបច្ចុប្បន្ន (Active Academic Year) *</label>
+                        <select id="acad_active_year" onchange="window.handleSelectActiveYear(this.value)" class="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 font-bold text-xs text-indigo-700 outline-none focus:ring-2 focus:ring-indigo-400 cursor-pointer shadow-sm">
+                            ${yearsList.map(yObj => `<option value="${yObj.year}" ${yObj.year === activeYear ? 'selected' : ''}>ឆ្នាំសិក្សា ${window.toKhmerNum ? window.toKhmerNum(yObj.year) : yObj.year} ${yObj.year === activeYear ? '⭐ (សកម្ម)' : ''}</option>`).join("")}
+                        </select>
+                        <span class="block text-[11px] text-slate-400 mt-1.5">អនុញ្ញាតឱ្យមានឆ្នាំសិក្សាសកម្មតែមួយគត់ក្នុងប្រព័ន្ធ</span>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-2">ឆមាសទី ១ (Start & End Date)</label>
+                        <div class="grid grid-cols-2 gap-2">
+                            <input type="date" id="acad_sem1_start" value="${data.semesters?.sem1?.start || '2026-10-01'}" class="w-full bg-white border border-slate-200 rounded-xl px-2.5 py-2 text-xs font-bold outline-none shadow-sm font-mono">
+                            <input type="date" id="acad_sem1_end" value="${data.semesters?.sem1?.end || '2027-02-28'}" class="w-full bg-white border border-slate-200 rounded-xl px-2.5 py-2 text-xs font-bold outline-none shadow-sm font-mono">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-2">ឆមាសទី ២ (Start & End Date)</label>
+                        <div class="grid grid-cols-2 gap-2">
+                            <input type="date" id="acad_sem2_start" value="${data.semesters?.sem2?.start || '2027-03-01'}" class="w-full bg-white border border-slate-200 rounded-xl px-2.5 py-2 text-xs font-bold outline-none shadow-sm font-mono">
+                            <input type="date" id="acad_sem2_end" value="${data.semesters?.sem2?.end || '2027-07-31'}" class="w-full bg-white border border-slate-200 rounded-xl px-2.5 py-2 text-xs font-bold outline-none shadow-sm font-mono">
+                        </div>
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-5 text-sm">
-                    <div>
-                        <label class="block text-xs font-bold text-slate-600 mb-2">ឆ្នាំសិក្សាសកម្ម (Active Academic Year)</label>
-                        <select id="acad_active_year" onchange="window.handleSelectActiveYear(this.value)" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 font-bold text-xs text-indigo-700 outline-none focus:ring-2 focus:ring-indigo-300 cursor-pointer">
-                            ${years.map(y => `<option value="${y}" ${y === activeYear ? 'selected' : ''}>ឆ្នាំសិក្សា ${window.toKhmerNum(y)} ${y === activeYear ? '(សកម្ម)' : ''}</option>`).join("")}
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-600 mb-2">ឆមាសទី ១ (កាលបរិច្ឆេទ)</label>
-                        <div class="grid grid-cols-2 gap-2">
-                            <input type="date" id="acad_sem1_start" value="${data.semesters?.sem1?.start || '2026-10-01'}" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-2 text-xs font-bold outline-none">
-                            <input type="date" id="acad_sem1_end" value="${data.semesters?.sem1?.end || '2027-02-28'}" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-2 text-xs font-bold outline-none">
-                        </div>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-600 mb-2">ឆមាសទី ២ (កាលបរិច្ឆេទ)</label>
-                        <div class="grid grid-cols-2 gap-2">
-                            <input type="date" id="acad_sem2_start" value="${data.semesters?.sem2?.start || '2027-03-01'}" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-2 text-xs font-bold outline-none">
-                            <input type="date" id="acad_sem2_end" value="${data.semesters?.sem2?.end || '2027-07-31'}" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-2 text-xs font-bold outline-none">
-                        </div>
-                    </div>
+                <!-- Academic Years Historical Table -->
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs">
+                        <thead>
+                            <tr class="border-b border-slate-200 text-slate-500 font-bold bg-slate-50/70">
+                                <th class="p-3">ឆ្នាំសិក្សា</th>
+                                <th class="p-3">កាលបរិច្ឆេទចាប់ផ្តើម</th>
+                                <th class="p-3">កាលបរិច្ឆេទបញ្ចប់</th>
+                                <th class="p-3">ស្ថានភាព</th>
+                                <th class="p-3 text-right">សកម្មភាព</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100">
+                            ${yearsList.map(y => {
+                                const isActive = y.year === activeYear || y.status === "active";
+                                return `
+                                    <tr class="hover:bg-slate-50/80 transition">
+                                        <td class="p-3 font-bold text-slate-800 font-mono text-xs">
+                                            ${y.year} ${isActive ? '<span class="text-[10px] text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full ml-1 border border-emerald-200 font-sans">សកម្ម</span>' : ''}
+                                        </td>
+                                        <td class="p-3 font-mono text-slate-600">${y.start || '-'}</td>
+                                        <td class="p-3 font-mono text-slate-600">${y.end || '-'}</td>
+                                        <td class="p-3">
+                                            ${isActive ? 
+                                                '<span class="px-2 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-md text-[10px] font-bold">✅ សកម្ម (Active)</span>' : 
+                                                '<span class="px-2 py-0.5 bg-slate-100 text-slate-500 rounded-md text-[10px] font-bold">📁 បណ្ណសារ (Archived)</span>'
+                                            }
+                                        </td>
+                                        <td class="p-3 text-right">
+                                            <div class="flex items-center justify-end gap-1.5">
+                                                ${!isActive && isSchoolAdmin ? `
+                                                    <button onclick="window.setYearActive('${y.year}')" class="px-2.5 py-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded-lg font-bold transition flex items-center gap-1 border border-emerald-200 text-[11px]" title="ជ្រើសជាឆ្នាំសកម្ម">
+                                                        <i class="fa-solid fa-check"></i> ជ្រើសជាឆ្នាំសកម្ម
+                                                    </button>
+                                                ` : ''}
+                                                ${isSchoolAdmin ? `
+                                                    <button onclick="window.openAddAcademicYearModal('${y.year}')" class="w-8 h-8 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-600 flex items-center justify-center transition" title="កែប្រែកាលបរិច្ឆេទ">
+                                                        <i class="fa-solid fa-pen"></i>
+                                                    </button>
+                                                ` : ''}
+                                            </div>
+                                        </td>
+                                    </tr>
+                                `;
+                            }).join("")}
+                        </tbody>
+                    </table>
                 </div>
             </div>
 
-            <!-- ផ្នែកទី ២៖ គ្រប់គ្រងកម្រិតថ្នាក់ និងបន្ទប់ -->
+            <!-- ផ្នែកទី ២៖ គ្រប់គ្រងកម្រិតថ្នាក់ បន្ទប់ និងគ្រូប្រចាំថ្នាក់ (ACAD-03) -->
             <div class="bg-white p-6 md:p-8 rounded-[2rem] shadow-sm border border-slate-200">
                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-slate-100 pb-4 mb-6">
                     <div>
                         <h3 class="font-bold text-slate-800 text-base flex items-center gap-2.5">
-                            <i class="fa-solid fa-door-open text-teal-600"></i> ២. គ្រប់គ្រងកម្រិតថ្នាក់ បន្ទប់ និងគ្រូបន្ទុកថ្នាក់
+                            <i class="fa-solid fa-door-open text-teal-600"></i> ២. គ្រប់គ្រងកម្រិតថ្នាក់ បន្ទប់ និងគ្រូបន្ទុកថ្នាក់ (ACAD-03)
                         </h3>
-                        <p class="text-xs text-slate-400 mt-1">កំណត់បញ្ជីថ្នាក់រៀន បន្ទប់ («ក», «ខ», «គ»...) និងចាត់តាំងគ្រូទទួលបន្ទុក</p>
+                        <p class="text-xs text-slate-400 mt-1">កំណត់បញ្ជីថ្នាក់រៀន បន្ទប់ («ក», «ខ», «គ»...) សមត្ថភាពសិស្សអតិបរមា និងចាត់តាំងគ្រូទទួលបន្ទុក</p>
                     </div>
+                    ${isSchoolAdmin ? `
+                        <button onclick="window.openAddGradeLevelModal()" class="px-4 py-2 bg-teal-50 hover:bg-teal-100 text-teal-700 rounded-xl text-xs font-bold transition flex items-center gap-1.5 border border-teal-200 shadow-sm">
+                            <i class="fa-solid fa-plus"></i> បន្ថែមកម្រិតថ្នាក់ថ្មី
+                        </button>
+                    ` : ''}
                 </div>
 
                 <div class="overflow-x-auto">
@@ -565,21 +745,29 @@ window.renderAcademicManagementTab = function() {
                         <thead>
                             <tr class="border-b border-slate-200 text-slate-500 font-bold bg-slate-50/70">
                                 <th class="p-3">កម្រិតថ្នាក់</th>
-                                <th class="p-3">បន្ទប់ / កម្រង</th>
-                                <th class="p-3">គ្រូទទួលបន្ទុកថ្នាក់ (Assigned Teacher)</th>
+                                <th class="p-3">បន្ទប់ / ក្រុម</th>
+                                <th class="p-3">សមត្ថភាពសិស្សអតិបរមា</th>
+                                <th class="p-3">គ្រូទទួលបន្ទុកថ្នាក់ (Homeroom Teacher)</th>
                                 <th class="p-3 text-right">សកម្មភាព</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-100">
                             ${grades.map((g, idx) => `
-                                <tr>
+                                <tr class="hover:bg-slate-50/80 transition">
                                     <td class="p-3 font-bold text-slate-800">${g.name}</td>
-                                    <td class="p-3 font-mono font-bold text-indigo-600">${g.rooms.join(", ")}</td>
-                                    <td class="p-3 text-slate-600 font-bold">${g.teacher ? `គ្រូ ID: ${g.teacher}` : '<span class="text-slate-400 italic">មិនទាន់ចាត់តាំង</span>'}</td>
+                                    <td class="p-3 font-mono font-bold text-indigo-600">${Array.isArray(g.rooms) ? g.rooms.join(", ") : (g.rooms || "«ក»")}</td>
+                                    <td class="p-3 font-bold text-slate-600 font-mono">
+                                        ${g.max_capacity ? `${g.max_capacity} នាក់/បន្ទប់` : '៤៥ នាក់/បន្ទប់'}
+                                    </td>
+                                    <td class="p-3 text-slate-600 font-bold">
+                                        ${g.teacher ? `<span class="px-2.5 py-1 bg-indigo-50 text-indigo-700 rounded-lg border border-indigo-100 font-mono">ID: ${g.teacher}</span>` : '<span class="text-slate-400 italic">មិនទាន់ចាត់តាំង</span>'}
+                                    </td>
                                     <td class="p-3 text-right">
-                                        <button onclick="window.openAssignTeacherClassModal('${g.id}')" class="px-3 py-1 bg-teal-50 hover:bg-teal-100 text-teal-700 rounded-lg font-bold transition">
-                                            <i class="fa-solid fa-user-pen"></i> ចាត់តាំងគ្រូ
-                                        </button>
+                                        ${isSchoolAdmin ? `
+                                            <button onclick="window.openAssignTeacherClassModal('${g.id}')" class="px-3 py-1.5 bg-teal-50 hover:bg-teal-100 text-teal-700 rounded-lg font-bold transition flex items-center gap-1 border border-teal-200 ml-auto">
+                                                <i class="fa-solid fa-user-pen"></i> ចាត់តាំង & កែប្រែ
+                                            </button>
+                                        ` : '<span class="text-slate-400">មើលប៉ុណ្ណោះ</span>'}
                                     </td>
                                 </tr>
                             `).join("")}
@@ -588,72 +776,586 @@ window.renderAcademicManagementTab = function() {
                 </div>
             </div>
 
-            <!-- ផ្នែកទី ៣៖ គ្រប់គ្រងមុខវិជ្ជា និងពិន្ទុអតិបរមា (Subjects Config) -->
+            <!-- ផ្នែកទី ៣៖ គ្រប់គ្រងមុខវិជ្ជា និងពិន្ទុអតិបរមា (Subjects Config - ACAD-04) -->
             <div class="bg-white p-6 md:p-8 rounded-[2rem] shadow-sm border border-slate-200">
                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-slate-100 pb-4 mb-6">
                     <div>
                         <h3 class="font-bold text-slate-800 text-base flex items-center gap-2.5">
-                            <i class="fa-solid fa-book-open-reader text-amber-600"></i> ៣. កំណត់មុខវិជ្ជា និងពិន្ទុអតិបរមា (Subjects & Max Scores)
+                            <i class="fa-solid fa-book-open-reader text-amber-600"></i> ៣. កំណត់មុខវិជ្ជា និងពិន្ទុអតិបរមា (Subjects & Max Scores - ACAD-04)
                         </h3>
-                        <p class="text-xs text-slate-400 mt-1">កំណត់មុខវិជ្ជាផ្លូវការ ពិន្ទុអតិបរមា (Max) និងមេគុណ (Weight) សម្រាប់គណនាពិន្ទុ និងចំណាត់ថ្នាក់</p>
+                        <p class="text-xs text-slate-400 mt-1">កំណត់មុខវិជ្ជាផ្លូវការ (ឈ្មោះខ្មែរ/អង់គ្លេស) ពិន្ទុអតិបរមា (Max) មេគុណ (Weight) និងគ្រូទទួលបន្ទុក</p>
                     </div>
-                    <button onclick="window.openAddCustomSubjectModal()" class="px-4 py-2 bg-amber-50 hover:bg-amber-100 text-amber-700 rounded-xl text-xs font-bold transition flex items-center gap-1.5 border border-amber-200">
-                        <i class="fa-solid fa-plus"></i> បន្ថែមមុខវិជ្ជា
-                    </button>
+                    ${isSchoolAdmin ? `
+                        <button onclick="window.openAddCustomSubjectModal('primary')" class="px-4 py-2 bg-amber-50 hover:bg-amber-100 text-amber-700 rounded-xl text-xs font-bold transition flex items-center gap-1.5 border border-amber-200 shadow-sm">
+                            <i class="fa-solid fa-plus"></i> បន្ថែមមុខវិជ្ជាថ្មី
+                        </button>
+                    ` : ''}
                 </div>
 
                 <!-- Tabs: បឋមសិក្សា vs មធ្យមសិក្សា -->
-                <div class="space-y-4">
-                    <h4 class="font-bold text-xs uppercase tracking-wider text-slate-600 flex items-center gap-2">
-                        <span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span> កម្រិតបឋមសិក្សា (Primary School Subjects)
-                    </h4>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-                        ${pSubjects.map(sub => `
-                            <div class="p-3.5 rounded-xl border border-slate-200 bg-slate-50 flex items-center justify-between">
-                                <div class="flex items-center gap-2.5">
-                                    <div class="w-3.5 h-3.5 rounded-full shrink-0" style="background-color: ${sub.color || '#dbeafe'};"></div>
-                                    <div>
-                                        <div class="font-bold text-slate-800 text-xs">${sub.name}</div>
-                                        <div class="text-[10px] text-slate-400 font-mono">Key: ${sub.key} • មេគុណ: ${sub.weight || 1}</div>
+                <div class="space-y-6">
+                    <div>
+                        <h4 class="font-bold text-xs uppercase tracking-wider text-slate-600 flex items-center gap-2 mb-3">
+                            <span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span> កម្រិតបឋមសិក្សា (Primary School Subjects)
+                        </h4>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3.5">
+                            ${pSubjects.map(sub => `
+                                <div class="p-3.5 rounded-2xl border border-slate-200 bg-slate-50/70 hover:bg-white transition shadow-sm flex items-center justify-between group">
+                                    <div class="flex items-center gap-2.5">
+                                        <div class="w-3.5 h-3.5 rounded-full shrink-0" style="background-color: ${sub.color || '#dbeafe'};"></div>
+                                        <div>
+                                            <div class="font-bold text-slate-800 text-xs">${sub.name_kh || sub.name} ${sub.name_en ? `<span class="text-[10px] text-slate-400 font-sans font-normal">(${sub.name_en})</span>` : ''}</div>
+                                            <div class="text-[10px] text-slate-400 font-mono">Key: ${sub.key} • មេគុណ: ${sub.weight || 1} ${sub.teacher_id ? `• គ្រូ: ${sub.teacher_id}` : ''}</div>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <span class="px-2.5 py-1 bg-white border border-slate-200 rounded-lg text-xs font-mono font-bold text-indigo-700 shadow-inner">
+                                            Max: ${sub.max}
+                                        </span>
+                                        ${isSchoolAdmin ? `
+                                            <button onclick="window.openAddCustomSubjectModal('primary', '${sub.key}')" class="opacity-0 group-hover:opacity-100 w-7 h-7 rounded-lg bg-amber-50 text-amber-600 hover:bg-amber-100 flex items-center justify-center transition" title="កែប្រែ">
+                                                <i class="fa-solid fa-pen text-[11px]"></i>
+                                            </button>
+                                        ` : ''}
                                     </div>
                                 </div>
-                                <span class="px-2.5 py-1 bg-white border border-slate-200 rounded-lg text-xs font-mono font-bold text-indigo-700 shadow-inner">
-                                    Max: ${sub.max}
-                                </span>
-                            </div>
-                        `).join("")}
+                            `).join("")}
+                        </div>
                     </div>
 
-                    <h4 class="font-bold text-xs uppercase tracking-wider text-slate-600 flex items-center gap-2 pt-4">
-                        <span class="w-2.5 h-2.5 rounded-full bg-purple-500"></span> កម្រិតមធ្យមសិក្សា (Secondary School Subjects)
-                    </h4>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-                        ${sSubjects.map(sub => `
-                            <div class="p-3.5 rounded-xl border border-slate-200 bg-slate-50 flex items-center justify-between">
-                                <div class="flex items-center gap-2.5">
-                                    <div class="w-3.5 h-3.5 rounded-full shrink-0" style="background-color: ${sub.color || '#ede9fe'};"></div>
-                                    <div>
-                                        <div class="font-bold text-slate-800 text-xs">${sub.name}</div>
-                                        <div class="text-[10px] text-slate-400 font-mono">Key: ${sub.key} • មេគុណ: ${sub.weight || 1}</div>
+                    <div>
+                        <h4 class="font-bold text-xs uppercase tracking-wider text-slate-600 flex items-center gap-2 mb-3 pt-2">
+                            <span class="w-2.5 h-2.5 rounded-full bg-purple-500"></span> កម្រិតមធ្យមសិក្សា (Secondary School Subjects)
+                        </h4>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3.5">
+                            ${sSubjects.map(sub => `
+                                <div class="p-3.5 rounded-2xl border border-slate-200 bg-slate-50/70 hover:bg-white transition shadow-sm flex items-center justify-between group">
+                                    <div class="flex items-center gap-2.5">
+                                        <div class="w-3.5 h-3.5 rounded-full shrink-0" style="background-color: ${sub.color || '#ede9fe'};"></div>
+                                        <div>
+                                            <div class="font-bold text-slate-800 text-xs">${sub.name_kh || sub.name} ${sub.name_en ? `<span class="text-[10px] text-slate-400 font-sans font-normal">(${sub.name_en})</span>` : ''}</div>
+                                            <div class="text-[10px] text-slate-400 font-mono">Key: ${sub.key} • មេគុណ: ${sub.weight || 1} ${sub.teacher_id ? `• គ្រូ: ${sub.teacher_id}` : ''}</div>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <span class="px-2.5 py-1 bg-white border border-slate-200 rounded-lg text-xs font-mono font-bold text-purple-700 shadow-inner">
+                                            Max: ${sub.max}
+                                        </span>
+                                        ${isSchoolAdmin ? `
+                                            <button onclick="window.openAddCustomSubjectModal('secondary', '${sub.key}')" class="opacity-0 group-hover:opacity-100 w-7 h-7 rounded-lg bg-amber-50 text-amber-600 hover:bg-amber-100 flex items-center justify-center transition" title="កែប្រែ">
+                                                <i class="fa-solid fa-pen text-[11px]"></i>
+                                            </button>
+                                        ` : ''}
                                     </div>
                                 </div>
-                                <span class="px-2.5 py-1 bg-white border border-slate-200 rounded-lg text-xs font-mono font-bold text-purple-700 shadow-inner">
-                                    Max: ${sub.max}
-                                </span>
-                            </div>
-                        `).join("")}
+                            `).join("")}
+                        </div>
                     </div>
                 </div>
 
                 <!-- Save Academic Structure Button -->
-                <div class="flex justify-end pt-6 mt-6 border-t border-slate-100">
-                    <button onclick="window.handleSaveAcademicStructure()" class="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition shadow-md flex items-center gap-2">
-                        <i class="fa-solid fa-floppy-disk"></i> រក្សាទុកការកំណត់ការសិក្សា
-                    </button>
-                </div>
+                ${isSchoolAdmin ? `
+                    <div class="flex justify-end pt-6 mt-6 border-t border-slate-100">
+                        <button onclick="window.handleSaveAcademicStructure()" class="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition shadow-md flex items-center gap-2">
+                            <i class="fa-solid fa-floppy-disk"></i> រក្សាទុកកាលបរិច្ឆេទឆមាស
+                        </button>
+                    </div>
+                ` : ''}
             </div>
         </div>
     `;
+};
+
+window.setYearActive = function(yearVal) {
+    if (!yearVal) return;
+    const data = window.academicStructure || window.defaultAcademicStructure;
+    data.active_year = yearVal;
+
+    // Set all other years to archived, selected to active (ACAD-01)
+    if (Array.isArray(data.academic_years)) {
+        data.academic_years = data.academic_years.map(y => {
+            const yStr = typeof y === "object" ? y.year : String(y);
+            const isTarget = yStr === yearVal;
+            if (typeof y === "object") {
+                return { ...y, status: isTarget ? "active" : "archived" };
+            }
+            return { year: yStr, status: isTarget ? "active" : "archived" };
+        });
+    }
+
+    window.saveAcademicStructure(data);
+
+    // Sync global year dropdown
+    const globalYear = document.getElementById("globalAcademicYear");
+    if (globalYear) globalYear.value = yearVal;
+    localStorage.setItem("selected_academic_year", yearVal);
+
+    if (typeof showToast === "function") showToast(`✅ បានជ្រើសរើសឆ្នាំសិក្សា ${window.toKhmerNum ? window.toKhmerNum(yearVal) : yearVal} ជាឆ្នាំសកម្ម!`);
+    window.renderAcademicManagementTab();
+};
+
+window.handleSelectActiveYear = function(yearVal) {
+    window.setYearActive(yearVal);
+};
+
+window.handleSaveAcademicStructure = async function() {
+    const data = window.academicStructure || window.defaultAcademicStructure;
+    const s1Start = document.getElementById("acad_sem1_start")?.value;
+    const s1End = document.getElementById("acad_sem1_end")?.value;
+    const s2Start = document.getElementById("acad_sem2_start")?.value;
+    const s2End = document.getElementById("acad_sem2_end")?.value;
+
+    data.semesters = {
+        sem1: { start: s1Start || "2026-10-01", end: s1End || "2027-02-28", name: "ឆមាសទី ១" },
+        sem2: { start: s2Start || "2027-03-01", end: s2End || "2027-07-31", name: "ឆមាសទី ២" }
+    };
+
+    // Update active year object dates as well
+    if (Array.isArray(data.academic_years)) {
+        const actYear = data.active_year || "2026-2027";
+        const idx = data.academic_years.findIndex(y => (typeof y === 'object' ? y.year : String(y)) === actYear);
+        if (idx >= 0) {
+            const currentObj = typeof data.academic_years[idx] === 'object' ? data.academic_years[idx] : { year: actYear };
+            data.academic_years[idx] = {
+                ...currentObj,
+                start: s1Start || currentObj.start,
+                end: s2End || currentObj.end,
+                status: "active"
+            };
+        }
+    }
+
+    await window.saveAcademicStructure(data);
+    if (typeof showToast === "function") showToast("✅ រក្សាទុកកាលបរិច្ឆេទឆមាសបានជោគជ័យ!");
+    if (typeof window.logAudit === "function") {
+        window.logAudit("ACADEMIC_SETTINGS", "settings", `បានកែប្រែកាលបរិច្ឆេទឆមាស និងរចនាសម្ព័ន្ធការសិក្សា (ACAD-01 & ACAD-02)`);
+    }
+};
+
+// =========================================================================
+// ៥.១. Modals សម្រាប់ Academic Management (ACAD-01, ACAD-03, ACAD-04)
+// =========================================================================
+
+// Modal បន្ថែម/កែប្រែឆ្នាំសិក្សា (ACAD-01)
+window.openAddAcademicYearModal = function(editYear = null) {
+    let modal = document.getElementById("academicYearModal");
+    if (!modal) {
+        modal = document.createElement("div");
+        modal.id = "academicYearModal";
+        modal.className = "fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 font-siemreap overflow-y-auto";
+        document.body.appendChild(modal);
+    }
+
+    const data = window.academicStructure || window.defaultAcademicStructure;
+    const yearsList = data.academic_years || [];
+    const existing = editYear ? yearsList.find(y => (typeof y === 'object' ? y.year : String(y)) === editYear) : null;
+    const yearVal = existing ? (typeof existing === 'object' ? existing.year : existing) : "";
+    const startVal = existing && typeof existing === 'object' ? existing.start : "";
+    const endVal = existing && typeof existing === 'object' ? existing.end : "";
+    const isActive = existing && typeof existing === 'object' ? existing.status === 'active' : (yearVal === data.active_year);
+
+    modal.innerHTML = `
+        <div class="bg-white rounded-3xl w-full max-w-md overflow-hidden shadow-2xl border border-slate-200 animate-scale-up my-auto">
+            <div class="p-6 border-b border-slate-100 flex items-center justify-between bg-indigo-50/50">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center text-lg shadow-md">
+                        <i class="fa-solid fa-calendar-plus"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-moul text-sm text-slate-800">${editYear ? 'កែប្រែឆ្នាំសិក្សា' : 'បន្ថែមឆ្នាំសិក្សាថ្មី'}</h3>
+                        <p class="text-xs text-slate-400 mt-0.5">កំណត់ឆ្នាំ និងកាលបរិច្ឆេទចាប់ផ្តើម-បញ្ចប់</p>
+                    </div>
+                </div>
+                <button onclick="document.getElementById('academicYearModal').classList.add('hidden')" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-400 flex items-center justify-center transition">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <form onsubmit="window.handleSaveAcademicYearSubmit(event, '${editYear || ''}')" class="p-6 space-y-4 text-xs">
+                <div>
+                    <label class="block font-bold text-slate-700 mb-1">ឆ្នាំសិក្សា (Academic Year) *</label>
+                    <input type="text" id="modal_year_name" value="${yearVal}" required placeholder="ឧ. 2027-2028" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 font-bold font-mono outline-none focus:ring-2 focus:ring-indigo-400 text-center">
+                    <span class="block text-[11px] text-slate-400 mt-1">ទម្រង់ណែនាំ៖ YYYY-YYYY (ឧ. 2027-2028)</span>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-bold text-slate-700 mb-1">កាលបរិច្ឆេទចាប់ផ្តើម</label>
+                        <input type="date" id="modal_year_start" value="${startVal || '2027-10-01'}" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 font-bold font-mono outline-none">
+                    </div>
+                    <div>
+                        <label class="block font-bold text-slate-700 mb-1">កាលបរិច្ឆេទបញ្ចប់</label>
+                        <input type="date" id="modal_year_end" value="${endVal || '2028-07-31'}" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 font-bold font-mono outline-none">
+                    </div>
+                </div>
+
+                <label class="flex items-center gap-2.5 p-3 rounded-xl bg-slate-50 hover:bg-slate-100 cursor-pointer transition border border-slate-200">
+                    <input type="checkbox" id="modal_year_is_active" ${isActive ? 'checked' : ''} class="w-4 h-4 text-indigo-600 rounded">
+                    <div>
+                        <span class="font-bold text-slate-800 text-xs">កំណត់ជាឆ្នាំសិក្សាសកម្ម (Active) ឥឡូវនេះ</span>
+                        <span class="block text-[10px] text-slate-400 mt-0.5">ឆ្នាំសិក្សាផ្សេងទៀតនឹងត្រូវបានកំណត់ជាបណ្ណសារ</span>
+                    </div>
+                </label>
+
+                <div class="pt-4 flex gap-3 border-t border-slate-100">
+                    <button type="button" onclick="document.getElementById('academicYearModal').classList.add('hidden')" class="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl font-bold transition">បោះបង់</button>
+                    <button type="submit" class="flex-1 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold transition shadow-md">រក្សាទុក</button>
+                </div>
+            </form>
+        </div>
+    `;
+
+    modal.classList.remove("hidden");
+};
+
+window.handleSaveAcademicYearSubmit = async function(e, editYear) {
+    if (e && e.preventDefault) e.preventDefault();
+    const yearName = document.getElementById("modal_year_name").value.trim();
+    const startDate = document.getElementById("modal_year_start").value;
+    const endDate = document.getElementById("modal_year_end").value;
+    const makeActive = document.getElementById("modal_year_is_active").checked;
+
+    if (!yearName) return alert("សូមបញ្ចូលឈ្មោះឆ្នាំសិក្សា!");
+
+    const data = window.academicStructure || window.defaultAcademicStructure;
+    let list = data.academic_years || [];
+
+    // Normalize
+    list = list.map(y => (typeof y === 'object' ? y : { year: String(y), status: String(y) === data.active_year ? 'active' : 'archived' }));
+
+    const newObj = {
+        year: yearName,
+        start: startDate,
+        end: endDate,
+        status: makeActive ? "active" : "archived"
+    };
+
+    if (editYear) {
+        const idx = list.findIndex(y => y.year === editYear);
+        if (idx >= 0) list[idx] = newObj;
+        else list.push(newObj);
+    } else {
+        const exists = list.some(y => y.year === yearName);
+        if (exists) return alert("ឆ្នាំសិក្សានេះមានរួចហើយ!");
+        list.push(newObj);
+    }
+
+    if (makeActive) {
+        data.active_year = yearName;
+        list.forEach(y => { if (y.year !== yearName) y.status = "archived"; });
+        localStorage.setItem("selected_academic_year", yearName);
+        const globalYear = document.getElementById("globalAcademicYear");
+        if (globalYear) globalYear.value = yearName;
+    }
+
+    data.academic_years = list;
+    await window.saveAcademicStructure(data);
+
+    document.getElementById("academicYearModal").classList.add("hidden");
+    if (typeof showToast === "function") showToast("✅ បានរក្សាទុកឆ្នាំសិក្សាជោគជ័យ!");
+    window.renderAcademicManagementTab();
+};
+
+// Modal ចាត់តាំងគ្រូ និងកែបន្ទប់ថ្នាក់ (ACAD-03)
+window.openAssignTeacherClassModal = async function(gradeId) {
+    const data = window.academicStructure || window.defaultAcademicStructure;
+    const g = (data.grades || []).find(item => item.id === gradeId);
+    if (!g) return alert("រកមិនឃើញកម្រិតថ្នាក់នេះទេ!");
+
+    let teachers = [];
+    try {
+        teachers = typeof window.fetchTeacherAccounts === "function" ? await window.fetchTeacherAccounts() : [];
+    } catch(e) {}
+
+    let modal = document.getElementById("assignTeacherModal");
+    if (!modal) {
+        modal = document.createElement("div");
+        modal.id = "assignTeacherModal";
+        modal.className = "fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 font-siemreap overflow-y-auto";
+        document.body.appendChild(modal);
+    }
+
+    modal.innerHTML = `
+        <div class="bg-white rounded-3xl w-full max-w-md overflow-hidden shadow-2xl border border-slate-200 animate-scale-up my-auto">
+            <div class="p-6 border-b border-slate-100 flex items-center justify-between bg-teal-50/50">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-teal-600 text-white flex items-center justify-center text-lg shadow-md">
+                        <i class="fa-solid fa-chalkboard-user"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-moul text-sm text-slate-800">ចាត់តាំងគ្រូ & កែបន្ទប់</h3>
+                        <p class="text-xs text-slate-400 mt-0.5">${g.name}</p>
+                    </div>
+                </div>
+                <button onclick="document.getElementById('assignTeacherModal').classList.add('hidden')" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-400 flex items-center justify-center transition">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <form onsubmit="window.handleSaveAssignTeacherClassSubmit(event, '${gradeId}')" class="p-6 space-y-4 text-xs">
+                <div>
+                    <label class="block font-bold text-slate-700 mb-1">បន្ទប់រៀន / ក្រុម (Rooms - បំបែកដោយសញ្ញាក្បៀស ,) *</label>
+                    <input type="text" id="modal_grade_rooms" value="${Array.isArray(g.rooms) ? g.rooms.join(", ") : (g.rooms || "«ក»")}" required placeholder="«ក», «ខ», «គ»" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 font-bold outline-none focus:ring-2 focus:ring-teal-400 font-mono">
+                    <span class="block text-[10px] text-slate-400 mt-1">ឧទាហរណ៍៖ «ក», «ខ» ឬ 8A, 8B</span>
+                </div>
+
+                <div>
+                    <label class="block font-bold text-slate-700 mb-1">សមត្ថភាពសិស្សអតិបរមា (Max Student Capacity) *</label>
+                    <input type="number" id="modal_grade_capacity" value="${g.max_capacity || 45}" min="1" max="100" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 font-bold font-mono outline-none focus:ring-2 focus:ring-teal-400 text-center">
+                    <span class="block text-[10px] text-slate-400 mt-1">ចំនួនសិស្សអតិបរមាក្នុងមួយបន្ទប់ (Default: ៤៥ នាក់)</span>
+                </div>
+
+                <div>
+                    <label class="block font-bold text-slate-700 mb-1">គ្រូទទួលបន្ទុកថ្នាក់ (Homeroom Teacher)</label>
+                    <select id="modal_grade_teacher" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 font-bold outline-none cursor-pointer">
+                        <option value="">-- មិនទាន់ចាត់តាំង --</option>
+                        ${teachers.map(t => `<option value="${t.teacher_id}" ${g.teacher === t.teacher_id ? 'selected' : ''}>${t.name} (ID: ${t.teacher_id})</option>`).join("")}
+                    </select>
+                </div>
+
+                <div class="pt-4 flex gap-3 border-t border-slate-100">
+                    <button type="button" onclick="document.getElementById('assignTeacherModal').classList.add('hidden')" class="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl font-bold transition">បោះបង់</button>
+                    <button type="submit" class="flex-1 py-2.5 bg-teal-600 hover:bg-teal-700 text-white rounded-xl font-bold transition shadow-md">រក្សាទុក</button>
+                </div>
+            </form>
+        </div>
+    `;
+
+    modal.classList.remove("hidden");
+};
+
+window.handleSaveAssignTeacherClassSubmit = async function(e, gradeId) {
+    if (e && e.preventDefault) e.preventDefault();
+    const roomsStr = document.getElementById("modal_grade_rooms").value.trim();
+    const capacityVal = parseInt(document.getElementById("modal_grade_capacity").value || "45", 10);
+    const teacherId = document.getElementById("modal_grade_teacher").value;
+
+    const data = window.academicStructure || window.defaultAcademicStructure;
+    const g = (data.grades || []).find(item => item.id === gradeId);
+    if (!g) return;
+
+    g.rooms = roomsStr.split(",").map(r => r.trim()).filter(Boolean);
+    g.max_capacity = capacityVal;
+    g.teacher = teacherId;
+
+    await window.saveAcademicStructure(data);
+    document.getElementById("assignTeacherModal").classList.add("hidden");
+    if (typeof showToast === "function") showToast("✅ បានចាត់តាំងគ្រូ និងកែប្រែព័ត៌មានថ្នាក់ជោគជ័យ!");
+    window.renderAcademicManagementTab();
+};
+
+// Modal បន្ថែមកម្រិតថ្នាក់ថ្មី (ACAD-03)
+window.openAddGradeLevelModal = function() {
+    let modal = document.getElementById("addGradeModal");
+    if (!modal) {
+        modal = document.createElement("div");
+        modal.id = "addGradeModal";
+        modal.className = "fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 font-siemreap overflow-y-auto";
+        document.body.appendChild(modal);
+    }
+
+    modal.innerHTML = `
+        <div class="bg-white rounded-3xl w-full max-w-md overflow-hidden shadow-2xl border border-slate-200 animate-scale-up my-auto">
+            <div class="p-6 border-b border-slate-100 flex items-center justify-between bg-teal-50/50">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-teal-600 text-white flex items-center justify-center text-lg shadow-md">
+                        <i class="fa-solid fa-door-open"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-moul text-sm text-slate-800">បន្ថែមកម្រិតថ្នាក់ថ្មី</h3>
+                        <p class="text-xs text-slate-400 mt-0.5">បង្កើតកម្រិតថ្នាក់ និងបន្ទប់សិក្សា</p>
+                    </div>
+                </div>
+                <button onclick="document.getElementById('addGradeModal').classList.add('hidden')" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-400 flex items-center justify-center transition">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <form onsubmit="window.handleSaveGradeLevelSubmit(event)" class="p-6 space-y-4 text-xs">
+                <div>
+                    <label class="block font-bold text-slate-700 mb-1">ឈ្មោះកម្រិតថ្នាក់ *</label>
+                    <input type="text" id="modal_new_grade_name" required placeholder="ឧ. ថ្នាក់ទី ៧" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 font-bold outline-none focus:ring-2 focus:ring-teal-400">
+                </div>
+
+                <div>
+                    <label class="block font-bold text-slate-700 mb-1">បន្ទប់រៀន (Rooms) *</label>
+                    <input type="text" id="modal_new_grade_rooms" value="«ក», «ខ»" required placeholder="«ក», «ខ»" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 font-bold font-mono outline-none">
+                </div>
+
+                <div>
+                    <label class="block font-bold text-slate-700 mb-1">សមត្ថភាពសិស្សអតិបរមា (Max Capacity)</label>
+                    <input type="number" id="modal_new_grade_capacity" value="45" min="1" max="100" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 font-bold font-mono outline-none text-center">
+                </div>
+
+                <div class="pt-4 flex gap-3 border-t border-slate-100">
+                    <button type="button" onclick="document.getElementById('addGradeModal').classList.add('hidden')" class="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl font-bold transition">បោះបង់</button>
+                    <button type="submit" class="flex-1 py-2.5 bg-teal-600 hover:bg-teal-700 text-white rounded-xl font-bold transition shadow-md">បង្កើតកម្រិតថ្នាក់</button>
+                </div>
+            </form>
+        </div>
+    `;
+
+    modal.classList.remove("hidden");
+};
+
+window.handleSaveGradeLevelSubmit = async function(e) {
+    if (e && e.preventDefault) e.preventDefault();
+    const name = document.getElementById("modal_new_grade_name").value.trim();
+    const rooms = document.getElementById("modal_new_grade_rooms").value.split(",").map(r => r.trim()).filter(Boolean);
+    const capacity = parseInt(document.getElementById("modal_new_grade_capacity").value || "45", 10);
+
+    if (!name) return alert("សូមបញ្ចូលឈ្មោះកម្រិតថ្នាក់!");
+
+    const data = window.academicStructure || window.defaultAcademicStructure;
+    data.grades = data.grades || [];
+
+    const newId = `g_${Date.now()}`;
+    data.grades.push({
+        id: newId,
+        name: name,
+        rooms: rooms.length > 0 ? rooms : ["«ក»"],
+        max_capacity: capacity,
+        teacher: ""
+    });
+
+    await window.saveAcademicStructure(data);
+    document.getElementById("addGradeModal").classList.add("hidden");
+    if (typeof showToast === "function") showToast("✅ បានបន្ថែមកម្រិតថ្នាក់ថ្មីជោគជ័យ!");
+    window.renderAcademicManagementTab();
+};
+
+// Modal បន្ថែម/កែប្រែមុខវិជ្ជា (ACAD-04)
+window.openAddCustomSubjectModal = async function(category = "primary", editKey = null) {
+    const data = window.academicStructure || window.defaultAcademicStructure;
+    const subList = category === "primary" ? (data.primary_subjects || []) : (data.secondary_subjects || []);
+    const existing = editKey ? subList.find(s => s.key === editKey) : null;
+
+    let teachers = [];
+    try {
+        teachers = typeof window.fetchTeacherAccounts === "function" ? await window.fetchTeacherAccounts() : [];
+    } catch(e) {}
+
+    let modal = document.getElementById("subjectModal");
+    if (!modal) {
+        modal = document.createElement("div");
+        modal.id = "subjectModal";
+        modal.className = "fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 font-siemreap overflow-y-auto";
+        document.body.appendChild(modal);
+    }
+
+    modal.innerHTML = `
+        <div class="bg-white rounded-3xl w-full max-w-md overflow-hidden shadow-2xl border border-slate-200 animate-scale-up my-auto">
+            <div class="p-6 border-b border-slate-100 flex items-center justify-between bg-amber-50/50">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-amber-600 text-white flex items-center justify-center text-lg shadow-md">
+                        <i class="fa-solid fa-book-open"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-moul text-sm text-slate-800">${editKey ? 'កែប្រែមុខវិជ្ជា' : 'បន្ថែមមុខវិជ្ជាថ្មី'}</h3>
+                        <p class="text-xs text-slate-400 mt-0.5">${category === 'primary' ? 'កម្រិតបឋមសិក្សា' : 'កម្រិតមធ្យមសិក្សា'}</p>
+                    </div>
+                </div>
+                <button onclick="document.getElementById('subjectModal').classList.add('hidden')" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-400 flex items-center justify-center transition">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <form onsubmit="window.handleSaveCustomSubjectSubmit(event, '${category}', '${editKey || ''}')" class="p-6 space-y-4 text-xs">
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-bold text-slate-700 mb-1">លេខកូដ / Key *</label>
+                        <input type="text" id="modal_sub_key" value="${existing ? existing.key : ''}" ${existing ? 'readonly' : ''} required placeholder="ឧ. math, eng" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 font-bold font-mono outline-none lowercase ${existing ? 'cursor-not-allowed bg-slate-100' : ''}">
+                    </div>
+                    <div>
+                        <label class="block font-bold text-slate-700 mb-1">កម្រិតសិក្សា *</label>
+                        <select id="modal_sub_category" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 font-bold outline-none cursor-pointer">
+                            <option value="primary" ${category === 'primary' ? 'selected' : ''}>បឋមសិក្សា</option>
+                            <option value="secondary" ${category === 'secondary' ? 'selected' : ''}>មធ្យមសិក្សា</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block font-bold text-slate-700 mb-1">ឈ្មោះមុខវិជ្ជាជាភាសាខ្មែរ *</label>
+                    <input type="text" id="modal_sub_name_kh" value="${existing ? (existing.name_kh || existing.name) : ''}" required placeholder="ឧ. គណិតវិទ្យា" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 font-bold outline-none focus:ring-2 focus:ring-amber-400">
+                </div>
+
+                <div>
+                    <label class="block font-bold text-slate-700 mb-1">ឈ្មោះមុខវិជ្ជាជាភាសាអង់គ្លេស</label>
+                    <input type="text" id="modal_sub_name_en" value="${existing ? (existing.name_en || '') : ''}" placeholder="ឧ. Mathematics" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 font-medium outline-none">
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-bold text-slate-700 mb-1">ពិន្ទុអតិបរមា (Max Score) *</label>
+                        <input type="number" id="modal_sub_max" value="${existing ? existing.max : 100}" required min="1" max="1000" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 font-bold font-mono outline-none text-center">
+                    </div>
+                    <div>
+                        <label class="block font-bold text-slate-700 mb-1">មេគុណ (Weight) *</label>
+                        <input type="number" id="modal_sub_weight" value="${existing ? existing.weight : 1}" required min="1" max="10" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 font-bold font-mono outline-none text-center">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block font-bold text-slate-700 mb-1">គ្រូទទួលបន្ទុកមុខវិជ្ជា (Subject Teacher)</label>
+                    <select id="modal_sub_teacher" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 font-bold outline-none cursor-pointer">
+                        <option value="">-- មិនទាន់ចាត់តាំង --</option>
+                        ${teachers.map(t => `<option value="${t.teacher_id}" ${existing && existing.teacher_id === t.teacher_id ? 'selected' : ''}>${t.name} (ID: ${t.teacher_id})</option>`).join("")}
+                    </select>
+                </div>
+
+                <div class="pt-4 flex gap-3 border-t border-slate-100">
+                    <button type="button" onclick="document.getElementById('subjectModal').classList.add('hidden')" class="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl font-bold transition">បោះបង់</button>
+                    <button type="submit" class="flex-1 py-2.5 bg-amber-600 hover:bg-amber-700 text-white rounded-xl font-bold transition shadow-md">រក្សាទុកមុខវិជ្ជា</button>
+                </div>
+            </form>
+        </div>
+    `;
+
+    modal.classList.remove("hidden");
+};
+
+window.handleSaveCustomSubjectSubmit = async function(e, category, editKey) {
+    if (e && e.preventDefault) e.preventDefault();
+    const key = document.getElementById("modal_sub_key").value.trim().toLowerCase();
+    const selCategory = document.getElementById("modal_sub_category").value;
+    const nameKh = document.getElementById("modal_sub_name_kh").value.trim();
+    const nameEn = document.getElementById("modal_sub_name_en").value.trim();
+    const maxScore = parseInt(document.getElementById("modal_sub_max").value || "100", 10);
+    const weightVal = parseInt(document.getElementById("modal_sub_weight").value || "1", 10);
+    const teacherId = document.getElementById("modal_sub_teacher").value;
+
+    if (!key || !nameKh) return alert("សូមបញ្ចូល Key និងឈ្មោះមុខវិជ្ជាជាភាសាខ្មែរ!");
+
+    const data = window.academicStructure || window.defaultAcademicStructure;
+    const targetKey = selCategory === "primary" ? "primary_subjects" : "secondary_subjects";
+    data[targetKey] = data[targetKey] || [];
+
+    const newSubject = {
+        key: key,
+        name: nameKh,
+        name_kh: nameKh,
+        name_en: nameEn,
+        max: maxScore,
+        weight: weightVal,
+        color: selCategory === "primary" ? "#dbeafe" : "#ede9fe",
+        teacher_id: teacherId
+    };
+
+    if (editKey) {
+        const idx = data[targetKey].findIndex(s => s.key === editKey);
+        if (idx >= 0) data[targetKey][idx] = newSubject;
+        else data[targetKey].push(newSubject);
+    } else {
+        const exists = data[targetKey].some(s => s.key === key);
+        if (exists) return alert("Key មុខវិជ្ជានេះមានរួចហើយ!");
+        data[targetKey].push(newSubject);
+    }
+
+    await window.saveAcademicStructure(data);
+    document.getElementById("subjectModal").classList.add("hidden");
+    if (typeof showToast === "function") showToast("✅ បានរក្សាទុកមុខវិជ្ជាជោគជ័យ!");
+    window.renderAcademicManagementTab();
 };
 
 window.handleSelectActiveYear = function(yearVal) {
@@ -1266,22 +1968,41 @@ window.handleDeleteTeacher = function(teacherId, teacherName) {
 };
 
 // =========================================================================
-// ៨. មុខងារជំនួយបំពេញទម្រង់ & Save Settings (Form Helpers)
+// ៨. មុខងារជំនួយបំពេញទម្រង់ & Save Settings (Form Helpers - Chapter 4)
 // =========================================================================
 
 window.fillSettingsForm = function() {
     const s = typeof appSettings !== 'undefined' ? appSettings : {};
     const setVal = (id, val) => { const el = document.getElementById(id); if (el) el.value = val || ""; };
     
+    // SET-01 School Profile Fields
     setVal("set_school_name", s.school_name);
     setVal("set_school_en", s.school_en);
     setVal("set_school_code", s.school_code);
     setVal("set_school_type", s.school_type || "បឋមសិក្សា");
     setVal("set_cluster", s.cluster || s.school_cluster); 
     setVal("set_principal_name", s.principal_name);
-    setVal("set_academic_year", s.academic_year);
-    setVal("set_school_contact", s.school_contact);
+    setVal("set_academic_year", s.academic_year || localStorage.getItem('selected_academic_year') || "2026-2027");
+    setVal("set_school_phone", s.school_phone || s.school_contact || "");
+    setVal("set_school_email", s.school_email || "");
+    setVal("set_school_contact", s.school_contact || "");
     
+    // SET-02 General Settings Fields
+    setVal("set_default_language", s.default_language || "km");
+    setVal("set_date_format", s.date_format || "DD/MM/YYYY");
+    setVal("set_time_format", s.time_format || "12h");
+    setVal("set_timezone", s.timezone || "Asia/Phnom_Penh");
+    setVal("set_student_id_prefix", s.student_id_prefix || "STU-");
+    setVal("set_school_id", s.school_id || localStorage.getItem('auth_school_id') || "SCH-001");
+    
+    if (document.getElementById("set_show_logo_on_reports")) {
+        document.getElementById("set_show_logo_on_reports").checked = s.show_logo_on_reports !== false;
+    }
+    if (document.getElementById("set_show_school_header")) {
+        document.getElementById("set_show_school_header").checked = s.show_school_header !== false;
+    }
+    
+    // Teacher & Location profile
     setVal("prof_teacher_name", s.teacher_name);
     setVal("prof_teacher_phone", s.teacher_phone);
     setVal("prof_teacher_level", s.teacher_level || "ថ្នាក់ទី ១");
@@ -1312,11 +2033,59 @@ window.fillSettingsForm = function() {
         if(icon) icon.classList.add("hidden");
         setVal("val_sig", s.signature_url);
     }
+
+    // SET-04: Data Isolation & RBAC Permission Check
+    const canManageSchool = typeof window.isSchoolAdmin === "function" ? window.isSchoolAdmin() : false;
+    const warnEl = document.getElementById("schoolSettingsPermWarning");
+    const saveBtn = document.getElementById("btnSaveSettings");
+    const form = document.getElementById("settingsForm");
+
+    if (!canManageSchool) {
+        if (warnEl) {
+            warnEl.classList.remove("hidden");
+            warnEl.classList.add("flex");
+        }
+        if (saveBtn) {
+            saveBtn.disabled = true;
+            saveBtn.classList.add("opacity-50", "cursor-not-allowed");
+            saveBtn.title = "🔒 លោកគ្រូអ្នកគ្រូមិនមានសិទ្ធិកែប្រែព័ត៌មានសាលារៀនឡើយ";
+        }
+        if (form) {
+            const inputs = form.querySelectorAll("input:not([type='file']), select, textarea");
+            inputs.forEach(inp => {
+                inp.disabled = true;
+                inp.classList.add("bg-slate-100", "cursor-not-allowed");
+            });
+        }
+    } else {
+        if (warnEl) {
+            warnEl.classList.add("hidden");
+            warnEl.classList.remove("flex");
+        }
+        if (saveBtn) {
+            saveBtn.disabled = false;
+            saveBtn.classList.remove("opacity-50", "cursor-not-allowed");
+        }
+    }
 };
 
 window.processSettingsImage = function(inputEl, previewImgId, hiddenInputId, iconId) {
     const file = inputEl.files[0];
     if (!file) return;
+
+    // SET-03: Validation of image type and file size
+    const allowedTypes = ["image/png", "image/jpeg", "image/jpg", "image/webp"];
+    if (!allowedTypes.includes(file.type.toLowerCase())) {
+        alert("⚠️ ប្រភេទឯកសារមិនត្រឹមត្រូវ! សូមជ្រើសរើសឯកសាររូបភាពប្រភេទ PNG, JPEG ឬ WebP ប៉ុណ្ណោះ។");
+        inputEl.value = "";
+        return;
+    }
+
+    if (file.size > 2 * 1024 * 1024) { // 2MB limit
+        alert("⚠️ ទំហំរូបភាពធំពេក (លើសពី 2MB)! សូមជ្រើសរើសរូបភាពដែលមានទំហំតូចជាង 2MB ដើម្បីដំណើរការបានលឿន។");
+        inputEl.value = "";
+        return;
+    }
 
     const previewImg = document.getElementById(previewImgId);
     const hiddenInput = document.getElementById(hiddenInputId);
@@ -1360,22 +2129,67 @@ window.processSettingsImage = function(inputEl, previewImgId, hiddenInputId, ico
 
 window.handleSaveSettings = async function(event) {
     event.preventDefault();
+
+    // SET-04: DataServiceGuard assert permission
+    if (window.DataServiceGuard) {
+        try {
+            window.DataServiceGuard.assertCan('manage_school_info', {}, "🔒 សិទ្ធិត្រូវបានបដិសេធ៖ មានតែ School Administrator ឬ System Administrator ប៉ុណ្ណោះដែលអាចកែប្រែព័ត៌មានសាលារៀន!");
+        } catch(guardErr) {
+            return alert(guardErr.message);
+        }
+    } else if (typeof window.isSchoolAdmin === 'function' && !window.isSchoolAdmin()) {
+        return alert("🔒 មានតែ School Administrator ឬ System Administrator ប៉ុណ្ណោះដែលអាចកែប្រែព័ត៌មានសាលារៀន!");
+    }
+
+    const schoolName = document.getElementById("set_school_name")?.value.trim() || "";
+    const schoolPhone = document.getElementById("set_school_phone")?.value.trim() || "";
+    const schoolEmail = document.getElementById("set_school_email")?.value.trim() || "";
+
+    // SET-03: Validation
+    if (!schoolName) {
+        return alert("⚠️ សូមបំពេញឈ្មោះសាលារៀនជាភាសាខ្មែរ (School Name)! ព័ត៌មាននេះចាំបាច់ត្រូវមាន។");
+    }
+
+    if (schoolEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(schoolEmail)) {
+        return alert("⚠️ ទម្រង់អ៊ីមែលសាលារៀនមិនត្រឹមត្រូវទេ! (ឧ. school@moeys.gov.kh)");
+    }
+
+    if (schoolPhone && !/^[0-9+\s-]{8,15}$/.test(schoolPhone)) {
+        return alert("⚠️ ទម្រង់លេខទូរស័ព្ទសាលារៀនមិនត្រឹមត្រូវទេ! (ឧ. 012 345 678)");
+    }
+
     const btn = document.getElementById("btnSaveSettings");
-    const origHTML = btn.innerHTML;
-    btn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin text-xl"></i> <span>កំពុងរក្សាទុក...</span>`;
-    btn.disabled = true;
-    btn.classList.add("opacity-90", "cursor-not-allowed");
+    const origHTML = btn ? btn.innerHTML : "រក្សាទុក";
+    if (btn) {
+        btn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin text-xl"></i> <span>កំពុងរក្សាទុក...</span>`;
+        btn.disabled = true;
+        btn.classList.add("opacity-90", "cursor-not-allowed");
+    }
 
     const payload = {
-        school_name: document.getElementById("set_school_name")?.value.trim() || "",
+        // SET-01 School Profile
+        school_id: localStorage.getItem('auth_school_id') || window.AuthState?.school_id || "SCH-001",
+        school_name: schoolName,
         school_en: document.getElementById("set_school_en")?.value.trim() || "",
         school_code: document.getElementById("set_school_code")?.value.trim() || "",
         school_type: document.getElementById("set_school_type")?.value || "បឋមសិក្សា",
         cluster: document.getElementById("set_cluster")?.value.trim() || "", 
         principal_name: document.getElementById("set_principal_name")?.value.trim() || "",
-        academic_year: document.getElementById("set_academic_year")?.value.trim() || "",
+        academic_year: document.getElementById("set_academic_year")?.value.trim() || "2026-2027",
+        school_phone: schoolPhone,
+        school_email: schoolEmail,
         school_contact: document.getElementById("set_school_contact")?.value.trim() || "",
+
+        // SET-02 General Settings
+        default_language: document.getElementById("set_default_language")?.value || "km",
+        date_format: document.getElementById("set_date_format")?.value || "DD/MM/YYYY",
+        time_format: document.getElementById("set_time_format")?.value || "12h",
+        timezone: document.getElementById("set_timezone")?.value || "Asia/Phnom_Penh",
+        student_id_prefix: document.getElementById("set_student_id_prefix")?.value.trim().toUpperCase() || "STU-",
+        show_logo_on_reports: document.getElementById("set_show_logo_on_reports")?.checked !== false,
+        show_school_header: document.getElementById("set_show_school_header")?.checked !== false,
         
+        // Teacher Profile
         teacher_name: document.getElementById("prof_teacher_name")?.value.trim() || "",
         teacher_gender: document.getElementById("prof_teacher_gender")?.value || "ប្រុស",
         teacher_dob: document.getElementById("prof_teacher_dob")?.value || "",
@@ -1407,7 +2221,7 @@ window.handleSaveSettings = async function(event) {
 
         if (typeof window.updateUIWithSettings === "function") window.updateUIWithSettings();
 
-        // រក្សាទុកក្នុង Firestore
+        // រក្សាទុកក្នុង Firestore (Permanent Storage - SET-03)
         if (window.db) {
             try {
                 let fsPayload = { ...payload };
@@ -1428,16 +2242,18 @@ window.handleSaveSettings = async function(event) {
         else alert("✅ រក្សាទុកការកំណត់បានជោគជ័យ!");
 
         if (typeof window.logAudit === 'function') {
-            window.logAudit('UPDATE_SETTINGS', 'settings', `បានកែប្រែការកំណត់សាលារៀន (${payload.school_name || 'សាលា'}) និងគ្រូបង្រៀន (${payload.teacher_name || 'គ្រូ'})`);
+            window.logAudit('UPDATE_SETTINGS', 'settings', `បានកែប្រែការកំណត់សាលារៀន (${payload.school_name || 'សាលា'}) និងព័ត៌មានទូទៅ (SET-01 / SET-02)`);
         }
         
     } catch (error) {
         console.error(error);
-        alert("❌ មានបញ្ហាក្នុងការរក្សាទុកទិន្នន័យ។");
+        alert("❌ មានបញ្ហាក្នុងការរក្សាទុកទិន្នន័យ: " + error.message);
     } finally {
-        btn.innerHTML = origHTML;
-        btn.disabled = false;
-        btn.classList.remove("opacity-90", "cursor-not-allowed");
+        if (btn) {
+            btn.innerHTML = origHTML;
+            btn.disabled = false;
+            btn.classList.remove("opacity-90", "cursor-not-allowed");
+        }
     }
 };
 
