@@ -141,8 +141,17 @@ function doGet(e) {
       });
     }
 
-    // ២. Setup Sheets តាមរយៈ URL
+    // ២. Setup Sheets តាមរយៈ URL (អាចការពារដោយ ADMIN_SETUP_TOKEN ក្នុង Script Properties)
     if (action === 'setupSheets') {
+      const adminToken = params.token || params.key || '';
+      try {
+        const scriptPropToken = PropertiesService.getScriptProperties().getProperty('ADMIN_SETUP_TOKEN');
+        if (scriptPropToken && adminToken !== scriptPropToken) {
+          return createJsonResponse({ status: 'error', message: 'គ្មានសិទ្ធិដំណើរការ setupSheets (Unauthorized)' });
+        }
+      } catch (e) {
+        // ប្រសិនបើគ្មាន ScriptProperties API context (ឧ. unit test) ទុកជាធម្មតា
+      }
       const res = setupDatabaseSheets();
       return createJsonResponse(res);
     }
@@ -212,9 +221,10 @@ function doGet(e) {
     // ៩. Get Teachers
     if (action === 'getTeachers') {
       const teachers = queryTable(SHEETS.TEACHERS, {});
-      // សម្អាត Password Hash ដើម្បីសុវត្ថិភាព
+      // សម្អាត Password, Hash, Salt ដើម្បីសុវត្ថិភាពខ្ពស់បំផុត
       const safeTeachers = teachers.map(t => {
         const copy = { ...t };
+        delete copy.password;
         delete copy.password_hash;
         delete copy.salt;
         return copy;
