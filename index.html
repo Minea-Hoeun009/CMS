@@ -736,37 +736,45 @@
       }
 
       try {
+          let fetchedStudents = false;
           // ១. បើមាន Firestore ទាញពី Firestore
           if (window.db) {
-              const currentYear = document.getElementById("globalAcademicYear")?.value || "2026-2027";
-              const currentTeacherId = localStorage.getItem('auth_teacher_id') || "";
-
-              const stuSnap = await window.db.collection("students")
-                  .where("academic_year", "==", currentYear)
-                  .get();
-
-              if (!stuSnap.empty) {
-                  const stuList = [];
-                  stuSnap.forEach(d => stuList.push({ id: d.id, ...d.data() }));
-                  window.allStudents = stuList;
-                  localStorage.setItem('academic_students', JSON.stringify(stuList));
+              try {
+                  const stuSnap = await window.db.collection("students").get();
+                  if (!stuSnap.empty) {
+                      const stuList = [];
+                      stuSnap.forEach(d => stuList.push({ id: d.id, ...d.data() }));
+                      window.allStudents = stuList;
+                      localStorage.setItem('academic_students', JSON.stringify(stuList));
+                      fetchedStudents = true;
+                  }
+              } catch(fsErr) {
+                  console.warn("Firestore fetch note:", fsErr);
               }
-          } else if (typeof window.apiGet === 'function') {
-              // ២. បើគ្មាន Firestore ទាញតាម Legacy API
-              const res = await window.apiGet("getStudents", { status: "Active" });
-              if (res && res.status === "success" && res.data) {
-                  window.allStudents = res.data;
-                  localStorage.setItem('academic_students', JSON.stringify(res.data));
+          }
+          
+          if (!fetchedStudents && typeof window.apiGet === 'function') {
+              // ២. ទាញតាម Google Apps Script API
+              try {
+                  const res = await window.apiGet("getStudents", { status: "Active" });
+                  if (res && res.status === "success" && res.data) {
+                      window.allStudents = res.data;
+                      localStorage.setItem('academic_students', JSON.stringify(res.data));
+                  }
+              } catch(gasErr) {
+                  console.warn("GAS fetch note:", gasErr);
               }
           }
 
           if (typeof window.showToast === 'function') window.showToast("🔄 ទាញយកទិន្នន័យបានជោគជ័យ!");
 
-          // Refresh UI
+          // Refresh UI ភ្លាមៗគ្រប់ផ្ទាំងទាំងអស់
+          if (typeof window.filterStudents === 'function') window.filterStudents();
+          if (typeof window.updateAllClassDropdowns === 'function') window.updateAllClassDropdowns();
           const activeMenu = localStorage.getItem('activeMenu') || 'dashboard';
-          if (activeMenu === 'students' && typeof window.filterStudents === 'function') window.filterStudents();
           if (activeMenu === 'dashboard' && typeof window.loadDashboard === 'function') window.loadDashboard();
           if (activeMenu === 'scores' && typeof window.fetchStudentsForScores === 'function') window.fetchStudentsForScores();
+          if (activeMenu === 'attendance' && typeof window.fetchMonthlyAttendance === 'function') window.fetchMonthlyAttendance();
 
       } catch (err) {
           console.warn("Fetch data error:", err);

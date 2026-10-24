@@ -3,10 +3,117 @@
 // ==========================================
 
 // 👉 URL របស់ Google Apps Script (Connected & Standardized)
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx1j3jer-iHyQ7NJM-IunMMK8CjKowE_9sW2Vz-fy9ynzTUXnOALlV_ogdxtL7tvEhM/exec";
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyOxLfIniR0LnfOAy2t5qF9oPuOma2u6tcOlNe-YbvAZF3oxqYRJ2xnbUruLup46aP3/exec";
 window.SCRIPT_URL = SCRIPT_URL;
 window.getScriptUrl = function() {
   return SCRIPT_URL;
+};
+
+// ⚡ Dynamic Dropdown Updater: updates all class/room dropdowns in real-time without reloading
+window.updateAllClassDropdowns = function() {
+    let struct = window.academicStructure;
+    if (!struct || !Array.isArray(struct.grades) || struct.grades.length === 0) {
+        try {
+            struct = JSON.parse(localStorage.getItem("academic_structure") || "{}");
+        } catch(e) {}
+    }
+    const gradesList = [];
+    const roomsSet = new Set(["«ក»", "«ខ»", "«គ»", "«ឃ»"]);
+    
+    if (struct && Array.isArray(struct.grades)) {
+        struct.grades.forEach(g => {
+            if (g && g.name) gradesList.push(g.name);
+            if (g && Array.isArray(g.rooms)) g.rooms.forEach(r => roomsSet.add(r));
+        });
+    }
+
+    if (gradesList.length === 0) {
+        for (let i = 1; i <= 12; i++) {
+            const kh = typeof toKhmerNum === 'function' ? toKhmerNum(i) : i;
+            gradesList.push(`ថ្នាក់ទី ${kh}`);
+        }
+    }
+
+    // 1. Update Students filter select #stuFilterGrade
+    const stuGradeSel = document.getElementById("stuFilterGrade");
+    if (stuGradeSel) {
+        const curVal = stuGradeSel.value;
+        let optHtml = `<option value="all">គ្រប់ថ្នាក់ទាំងអស់</option>`;
+        gradesList.forEach(g => {
+            optHtml += `<option value="${g}" ${g === curVal ? 'selected' : ''}>${g}</option>`;
+        });
+        stuGradeSel.innerHTML = optHtml;
+    }
+
+    // 2. Update Student modal select #stu_grade
+    const modalStuGrade = document.getElementById("stu_grade");
+    if (modalStuGrade) {
+        const curVal = modalStuGrade.value;
+        let optHtml = "";
+        gradesList.forEach(g => {
+            optHtml += `<option value="${g}" ${g === curVal ? 'selected' : ''}>${g}</option>`;
+        });
+        modalStuGrade.innerHTML = optHtml;
+    }
+
+    // 3. Update Attendance select #attGradeSelect
+    const attGradeSel = document.getElementById("attGradeSelect");
+    if (attGradeSel) {
+        const curVal = attGradeSel.value;
+        let optHtml = `<option value="all">គ្រប់ថ្នាក់ទាំងអស់ (All Classes)</option>`;
+        gradesList.forEach(g => {
+            optHtml += `<option value="${g}" ${g === curVal ? 'selected' : ''}>${g}</option>`;
+        });
+        attGradeSel.innerHTML = optHtml;
+    }
+
+    // 4. Update Scores select #globalLevelSelect
+    const scoreGradeSel = document.getElementById("globalLevelSelect");
+    if (scoreGradeSel) {
+        const curVal = scoreGradeSel.value;
+        let optHtml = "";
+        gradesList.forEach(g => {
+            optHtml += `<option value="${g}" ${g === curVal ? 'selected' : ''}>${g}</option>`;
+        });
+        scoreGradeSel.innerHTML = optHtml;
+    }
+
+    // 5. Update Timetable & other class selects
+    const otherSelects = document.querySelectorAll("select[id*='Grade'], select[id*='grade'], select[onchange*='handleClassChange']");
+    otherSelects.forEach(sel => {
+        if (sel !== stuGradeSel && sel !== modalStuGrade && sel !== attGradeSel && sel !== scoreGradeSel) {
+            const curVal = sel.value;
+            let optHtml = `<option value="all">គ្រប់ថ្នាក់ទាំងអស់</option>`;
+            gradesList.forEach(g => {
+                optHtml += `<option value="${g}" ${g === curVal ? 'selected' : ''}>${g}</option>`;
+            });
+            sel.innerHTML = optHtml;
+        }
+    });
+};
+
+// ⚡ Global Real-Time Event Dispatcher
+window.notifyDataChanged = function(type, detail = {}) {
+    window.dispatchEvent(new CustomEvent('cms-data-changed', { detail: { type, ...detail } }));
+
+    if (type === 'students' || type === 'student') {
+        if (typeof window.filterStudents === 'function') window.filterStudents();
+        if (typeof window.calculateStudentStats === 'function') window.calculateStudentStats();
+        if (typeof window.fetchStudentsForScores === 'function') window.fetchStudentsForScores();
+    }
+    if (type === 'scores' || type === 'score') {
+        if (typeof window.calculateScoresSummary === 'function') window.calculateScoresSummary();
+    }
+    if (type === 'attendance') {
+        if (typeof window.calculateAllAttendance === 'function') window.calculateAllAttendance();
+    }
+    if (type === 'academic_structure' || type === 'class' || type === 'grade') {
+        if (typeof window.updateAllClassDropdowns === 'function') window.updateAllClassDropdowns();
+        if (typeof window.renderAcademicManagementTab === 'function') window.renderAcademicManagementTab();
+    }
+    if (type === 'settings') {
+        if (typeof window.updateUIWithSettings === 'function') window.updateUIWithSettings();
+    }
 };
 
 // =========================================================
@@ -373,67 +480,53 @@ window.fetchStudentsDataFast = async function() {
  * មុខងារសម្រាប់បញ្ជូនទិន្នន័យ (POST)
  */
 async function apiPost(action, payload = {}) {
-  // 🟢 បញ្ចូលអត្តសញ្ញាណគ្រូ និងឆ្នាំសិក្សា ទៅក្នុងទិន្នន័យរាល់ពេលបញ្ជូន 🟢
   const auth = getAuthCredentials();
   
   const requestBody = {
       action: action,
       teacher_id: auth.teacher_id,
       academic_year: auth.academic_year,
-      // រៀបចំ payload
       data: payload.data ? payload.data : payload
   };
   
-  // បើសិនមាន id ដាច់ដោយឡែក (e.g. សម្រាប់មុខងារ Delete)
   if (payload && payload.id) requestBody.id = payload.id;
   else if (payload && payload.data && payload.data.id) requestBody.id = payload.data.id;
 
-  // ការងារបន្ទាន់ដែលត្រូវបាញ់ទៅ Server ភ្លាមៗ (មិនឆ្លងកាត់ Queue)
-  const instantActions = [
-      "loginUser", 
-      "generateWithAI", 
-      "deleteStudent", 
-      "deleteStaff", 
-      "deleteBook", 
-      "deleteAsset"
-  ];
-  
-  if (instantActions.includes(action)) {
-    try {
-      const currentScriptUrl = window.getScriptUrl();
-      const response = await fetch(currentScriptUrl, {
-        method: "POST",
-        // Google Apps Script ទាមទារ text/plain ដើម្បីកុំឱ្យជាប់ CORS error
-        headers: { "Content-Type": "text/plain;charset=utf-8" },
-        body: JSON.stringify(requestBody)
-      });
-      return await response.json();
-    } catch (error) {
-      console.error(`API POST Instant Error [${action}]:`, error);
-      throw new Error("បញ្ហាតភ្ជាប់បណ្តាញ (Network Error)"); 
+  // ⚡ INSTANT SERVER POST: Send directly to Google Apps Script right away
+  try {
+    const currentScriptUrl = window.getScriptUrl();
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 12000); // 12s timeout
+
+    const response = await fetch(currentScriptUrl, {
+      method: "POST",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify(requestBody),
+      signal: controller.signal
+    });
+    clearTimeout(timeoutId);
+
+    const result = await response.json();
+    return result;
+  } catch (error) {
+    console.warn(`API POST Direct Error [${action}], falling back to resilient sync queue:`, error);
+    
+    // Resilient offline-first queue fallback
+    let syncQueue = JSON.parse(localStorage.getItem('syncQueue') || '[]');
+    syncQueue = syncQueue.filter(item => item.action !== action);
+    syncQueue.push({ 
+        action, 
+        requestBody: requestBody,
+        timestamp: new Date().getTime() 
+    });
+    localStorage.setItem('syncQueue', JSON.stringify(syncQueue));
+    updateSyncBadgeUI(syncQueue.length);
+
+    if (appSettings.auto_sync !== false) {
+        setTimeout(() => { syncDataToServer(true); }, 2000);
     }
+    return { status: "success", message: "បានរក្សាទុកក្នុងម៉ាស៊ីន (Offline Queue - នឹង Sync ពេលមានអ៊ីនធឺណិត)" };
   }
-
-  // សម្រាប់ទិន្នន័យធម្មតា ត្រូវរក្សាទុកក្នុងកុំព្យូទ័រសិន (Offline-First Queue)
-  let syncQueue = JSON.parse(localStorage.getItem('syncQueue') || '[]');
-  
-  // ដកសំណើចាស់ៗដែលស្ទួន (Duplicate) ចេញសិនមុននឹងបន្ថែមសំណើថ្មី
-  syncQueue = syncQueue.filter(item => item.action !== action);
-  syncQueue.push({ 
-      action, 
-      requestBody: requestBody, // រក្សាទុកកញ្ចប់ទិន្នន័យទាំងមូលរួមទាំង teacher_id
-      timestamp: new Date().getTime() 
-  });
-  
-  localStorage.setItem('syncQueue', JSON.stringify(syncQueue));
-  updateSyncBadgeUI(syncQueue.length);
-
-  // ប្រសិនបើកំណត់ Auto Sync = true នោះបាញ់ទៅ Cloud ស្វ័យប្រវត្តិ
-  if (appSettings.auto_sync !== false) {
-      setTimeout(() => { syncDataToServer(true); }, 1500);
-  }
-
-  return { status: "success", message: "បានរក្សាទុកក្នុងម៉ាស៊ីន! (Pending Cloud Sync)" };
 }
 
 /**

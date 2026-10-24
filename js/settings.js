@@ -1265,7 +1265,9 @@ window.handleSaveGradeLevelSubmit = async function(e) {
     // ៤. Re-render Tab ភ្លាមៗដើម្បីឃើញថ្នាក់ថ្មីលើអេក្រង់
     window.renderAcademicManagementTab();
 
-    // ៥. Update Dropdown ថ្នាក់ជាសកល
+    // ៥. Update Dropdown ថ្នាក់ជាសកលគ្រប់ Module ទាំងអស់ភ្លាមៗ
+    if (typeof window.updateAllClassDropdowns === "function") window.updateAllClassDropdowns();
+    if (typeof window.notifyDataChanged === "function") window.notifyDataChanged('academic_structure', data);
     if (typeof window.syncGlobalYearDropdown === "function") window.syncGlobalYearDropdown();
 };
 

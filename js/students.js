@@ -966,32 +966,8 @@ window.saveStudentData = async function(e) {
         }
     }
 
+    // ⚡ ១. INSTANT OPTIMISTIC IN-MEMORY & LOCAL STORAGE UPDATE (0ms Latency)
     let localSaved = false;
-    let cloudSaved = false;
-    let gasSaved = false;
-
-    // ១. រក្សាទុកទៅ Cloud (AWAIT write - P0 Audit Fix)
-    if (window.db && typeof window.saveStudentToFirebase === 'function') {
-        try {
-            await window.saveStudentToFirebase(payload);
-            cloudSaved = true;
-        } catch(fsErr) {
-            console.warn("Firestore saveStudent error:", fsErr);
-        }
-    }
-
-    // ២. រក្សាទុកតាម Google Apps Script API (Sync)
-    const sInfo = typeof appSettings !== 'undefined' ? appSettings : {};
-    if (sInfo.auto_sync && typeof window.apiPost === 'function') {
-        try {
-            const res = await window.apiPost("saveStudent", payload);
-            if (res && res.status === "success") gasSaved = true;
-        } catch(gasErr) {
-            console.warn("GAS saveStudent error:", gasErr);
-        }
-    }
-
-    // ៣. រក្សាទុកក្នុង Master Store & LocalStorage
     try {
         if (isEdit) {
             const idx = window.allStudents.findIndex(s => String(s.id) === payload.id);
@@ -1009,12 +985,40 @@ window.saveStudentData = async function(e) {
         localSaved = true;
     } catch(storageErr) {
         console.warn("Storage quota error on student save:", storageErr);
-        alert("⚠️ មិនអាចរក្សាទុកក្នុង Browser Storage បានទេ (Storage Full)!");
     }
 
-    // ៤. ធ្វើបច្ចុប្បន្នភាព UI និងបិទ Modal
+    // ⚡ ២. UPDATE UI IMMEDIATELY & CLOSE MODAL (Instantaneous Visual Feedback)
     window.filterStudents();
-    document.getElementById("studentModal").classList.replace("flex", "hidden");
+    const modalEl = document.getElementById("studentModal");
+    if (modalEl) modalEl.classList.replace("flex", "hidden");
+    if (typeof showToast === 'function') {
+        showToast(`⚡ បានកត់ត្រាសិស្ស «${payload.name}» ភ្លាមៗ! កំពុង Sync ទៅ Cloud...`, "info");
+    }
+
+    // ៣. CLOUD & GOOGLE SHEET SYNC IN BACKGROUND
+    let cloudSaved = false;
+    let gasSaved = false;
+
+    // Firebase Firestore write
+    if (window.db && typeof window.saveStudentToFirebase === 'function') {
+        try {
+            await window.saveStudentToFirebase(payload);
+            cloudSaved = true;
+        } catch(fsErr) {
+            console.warn("Firestore saveStudent error:", fsErr);
+        }
+    }
+
+    // Google Apps Script API
+    const sInfo = typeof appSettings !== 'undefined' ? appSettings : {};
+    if (sInfo.auto_sync && typeof window.apiPost === 'function') {
+        try {
+            const res = await window.apiPost("saveStudent", payload);
+            if (res && res.status === "success") gasSaved = true;
+        } catch(gasErr) {
+            console.warn("GAS saveStudent error:", gasErr);
+        }
+    }
 
     if (cloudSaved || gasSaved) {
         if (typeof showToast === 'function') showToast("✅ រក្សាទុកព័ត៌មានសិស្សទៅកាន់ Cloud/Server បានជោគជ័យ!");
