@@ -111,18 +111,569 @@ window.saveAcademicStructure = function(structure) {
     return Promise.resolve(structure);
 };
 
+// =========================================================================
+// ៣. ប្រព័ន្ធគ្រប់គ្រងការកំណត់ផ្ទាល់ខ្លួនរបស់គ្រូម្នាក់ៗ (Personal Teacher Workspace & Features)
+// =========================================================================
+
+window.getTeacherPersonalSettings = function(teacherId) {
+    const tId = teacherId || localStorage.getItem('auth_teacher_id') || (window.AppAuth && window.AppAuth.state ? window.AppAuth.state.teacherId : "TCH-001");
+    let saved = null;
+    try {
+        const raw = localStorage.getItem(`teacher_settings_${tId}`);
+        if (raw) saved = JSON.parse(raw);
+    } catch(e) {}
+
+    const currentTId = localStorage.getItem('auth_teacher_id') || (window.AuthState ? window.AuthState.teacherId : null);
+    const isCurrentTeacher = !teacherId || teacherId === currentTId;
+    const s = typeof window.appSettings !== 'undefined' ? window.appSettings : {};
+    const authState = window.AuthState || {};
+
+    return {
+        teacher_id: tId,
+        teacher_name: (saved && saved.teacher_name) || (isCurrentTeacher ? (authState.teacherName || s.teacher_name || localStorage.getItem('auth_teacher_name')) : "") || "",
+        teacher_gender: (saved && saved.teacher_gender) || s.teacher_gender || "ប្រុស",
+        teacher_dob: (saved && saved.teacher_dob) || s.teacher_dob || "",
+        teacher_phone: (saved && saved.teacher_phone) || s.teacher_phone || "",
+        teacher_email: (saved && saved.teacher_email) || (isCurrentTeacher ? (s.teacher_email || localStorage.getItem('auth_email')) : "") || "",
+        telegram_username: (saved && saved.telegram_username) || (isCurrentTeacher ? localStorage.getItem('auth_telegram_username') : "") || "",
+        telegram_id: (saved && saved.telegram_id) || (isCurrentTeacher ? localStorage.getItem('auth_telegram_id') : "") || "",
+        teacher_edu: (saved && saved.teacher_edu) || s.teacher_edu || "",
+        teacher_level: (saved && saved.teacher_level) || (isCurrentTeacher ? (localStorage.getItem('selected_level') || authState.teacher_level || s.teacher_level) : null) || "ថ្នាក់ទី ១",
+        teacher_room: (saved && saved.teacher_room) || (isCurrentTeacher ? (localStorage.getItem('selected_room') || authState.teacher_room || s.teacher_room) : null) || "«ក»",
+        academic_year: (saved && saved.academic_year) || localStorage.getItem('selected_academic_year') || s.academic_year || "2026-2027",
+        features: {
+            attendance: saved?.features?.attendance !== false,
+            scores: saved?.features?.scores !== false,
+            library: saved?.features?.library !== false,
+            timetable: saved?.features?.timetable !== false,
+            tracking_book: saved?.features?.tracking_book !== false,
+            reports: saved?.features?.reports !== false,
+            parent_portal: saved?.features?.parent_portal !== false,
+            auto_sync: saved?.features?.auto_sync !== false
+        },
+        grading_scale: (saved && saved.grading_scale) || "primary",
+        signature_url: (saved && saved.signature_url) || s.signature_url || "",
+        avatar_url: (saved && saved.avatar_url) || s.profile_avatar || ""
+    };
+};
+
+window.loadAndApplyTeacherSettings = function(teacherId) {
+    const personal = window.getTeacherPersonalSettings(teacherId);
+    if (!personal) return null;
+
+    window.appSettings = window.appSettings || {};
+    if (personal.teacher_name) window.appSettings.teacher_name = personal.teacher_name;
+    if (personal.teacher_level) window.appSettings.teacher_level = personal.teacher_level;
+    if (personal.teacher_room) window.appSettings.teacher_room = personal.teacher_room;
+    if (personal.teacher_email) window.appSettings.teacher_email = personal.teacher_email;
+    if (personal.telegram_username) window.appSettings.telegram_username = personal.telegram_username;
+    if (personal.telegram_id) window.appSettings.telegram_id = personal.telegram_id;
+    if (personal.teacher_phone) window.appSettings.teacher_phone = personal.teacher_phone;
+    if (personal.signature_url) window.appSettings.signature_url = personal.signature_url;
+    if (personal.avatar_url) window.appSettings.profile_avatar = personal.avatar_url;
+
+    if (typeof window.setSelectedClass === 'function') {
+        window.setSelectedClass(personal.teacher_level, personal.teacher_room);
+    }
+    if (typeof window.updateAllClassDropdowns === 'function') {
+        window.updateAllClassDropdowns();
+    }
+    if (typeof window.applyTeacherFeatureVisibility === 'function') {
+        window.applyTeacherFeatureVisibility(personal.features);
+    }
+    if (typeof window.updateUIWithSettings === 'function') {
+        window.updateUIWithSettings();
+    }
+    return personal;
+};
+
+window.applyTeacherFeatureVisibility = function(features) {
+    if (!features || typeof features !== 'object') return;
+    const map = {
+        attendance: ['nav-attendance', 'btn-mobile-nav-attendance'],
+        scores: ['nav-scores', 'btn-mobile-nav-scores'],
+        timetable: ['nav-timetable-homework'],
+        timetable_homework: ['nav-timetable-homework'],
+        library: ['nav-library'],
+        reports: ['nav-reports'],
+        students: ['nav-students', 'btn-mobile-nav-students']
+    };
+    Object.keys(map).forEach(key => {
+        const isEnabled = features[key] !== false;
+        (map[key] || []).forEach(id => {
+            const el = document.getElementById(id);
+            if (el) {
+                if (isEnabled) el.classList.remove('hidden');
+                else el.classList.add('hidden');
+            }
+        });
+    });
+};
+
+window.renderPersonalSettingsBadges = function(settings) {
+    const s = settings || window.getTeacherPersonalSettings();
+    const gmailBadge = document.getElementById("badge_gmail_status") || document.getElementById("badgeGoogleConnected");
+    if (gmailBadge) {
+        if (s.teacher_email) {
+            gmailBadge.innerHTML = `<span class="px-3 py-1 bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-full text-xs font-bold flex items-center gap-1.5"><i class="fa-solid fa-circle-check text-emerald-500"></i> Gmail៖ ${s.teacher_email}</span>`;
+        } else {
+            gmailBadge.innerHTML = `<span class="px-3 py-1 bg-amber-50 border border-amber-200 text-amber-700 rounded-full text-xs font-bold flex items-center gap-1.5"><i class="fa-solid fa-circle-exclamation text-amber-500"></i> មិនទាន់ភ្ជាប់ Gmail</span>`;
+        }
+    }
+    const tgBadge = document.getElementById("badge_telegram_status") || document.getElementById("badgeTelegramConnected");
+    if (tgBadge) {
+        if (s.telegram_username || s.telegram_id) {
+            const handle = s.telegram_username ? `@${s.telegram_username}` : `ID: ${s.telegram_id}`;
+            tgBadge.innerHTML = `<span class="px-3 py-1 bg-sky-50 border border-sky-200 text-sky-700 rounded-full text-xs font-bold flex items-center gap-1.5"><i class="fa-brands fa-telegram text-[#229ED9]"></i> Telegram៖ ${handle}</span>`;
+        } else {
+            tgBadge.innerHTML = `<span class="px-3 py-1 bg-amber-50 border border-amber-200 text-amber-700 rounded-full text-xs font-bold flex items-center gap-1.5"><i class="fa-solid fa-circle-exclamation text-amber-500"></i> មិនទាន់ភ្ជាប់ Telegram (auth.telegram.org)</span>`;
+        }
+    }
+};
+
+window.saveTeacherPersonalSettings = async function(teacherId, settings) {
+    const tId = teacherId || localStorage.getItem('auth_teacher_id') || "TCH-001";
+    const existing = window.getTeacherPersonalSettings(tId);
+    const payload = {
+        ...existing,
+        ...settings,
+        teacher_id: tId,
+        features: {
+            ...existing.features,
+            ...(settings.features || {})
+        },
+        last_updated: new Date().toISOString()
+    };
+
+    localStorage.setItem(`teacher_settings_${tId}`, JSON.stringify(payload));
+    if (payload.teacher_name) localStorage.setItem('auth_teacher_name', payload.teacher_name);
+    if (payload.teacher_email) localStorage.setItem('auth_email', payload.teacher_email);
+    if (payload.telegram_username) localStorage.setItem('auth_telegram_username', payload.telegram_username);
+    if (payload.telegram_id) localStorage.setItem('auth_telegram_id', payload.telegram_id);
+    if (payload.teacher_level) localStorage.setItem('auth_teacher_grade', payload.teacher_level);
+    if (payload.teacher_room) localStorage.setItem('auth_teacher_room', payload.teacher_room);
+
+    window.loadAndApplyTeacherSettings(tId);
+
+    if (window.db) {
+        try {
+            await window.db.collection("teachers").doc(tId).set({
+                name: payload.teacher_name,
+                assigned_grade: payload.teacher_level,
+                assigned_room: payload.teacher_room,
+                email: payload.teacher_email,
+                telegram_username: payload.telegram_username,
+                telegram_id: payload.telegram_id,
+                phone: payload.teacher_phone,
+                personal_settings: payload,
+                last_updated: (typeof firebase !== 'undefined' && firebase.firestore?.FieldValue?.serverTimestamp) ? firebase.firestore.FieldValue.serverTimestamp() : new Date().toISOString()
+            }, { merge: true });
+        } catch(e) {
+            console.warn("Firestore teacher settings save notice:", e);
+        }
+    }
+
+    window.renderPersonalSettingsBadges(payload);
+    return payload;
+};
+
+window.handleSavePersonalTeacherSettings = async function(event) {
+    if (event && event.preventDefault) event.preventDefault();
+
+    const tId = localStorage.getItem('auth_teacher_id') || (window.AppAuth && window.AppAuth.state ? window.AppAuth.state.teacherId : "TCH-001");
+    const name = document.getElementById("pers_teacher_name")?.value.trim() || "";
+    const level = document.getElementById("pers_teacher_level")?.value || "ថ្នាក់ទី ១";
+    const room = document.getElementById("pers_teacher_room")?.value || "«ក»";
+    const phone = document.getElementById("pers_teacher_phone")?.value.trim() || "";
+    const email = document.getElementById("pers_teacher_email")?.value.trim() || "";
+    const tgUsername = document.getElementById("pers_telegram_username")?.value.trim().replace(/^@/, '') || "";
+    const tgId = document.getElementById("pers_telegram_id")?.value.trim() || "";
+    const gender = document.getElementById("pers_teacher_gender")?.value || "ប្រុស";
+    const dob = document.getElementById("pers_teacher_dob")?.value || "";
+    const edu = document.getElementById("pers_teacher_edu")?.value.trim() || "";
+    const academicYear = document.getElementById("pers_academic_year")?.value.trim() || "2026-2027";
+    const gradingScale = document.getElementById("pers_grading_scale")?.value || "primary";
+
+    const features = {
+        attendance: document.getElementById("pers_feat_attendance")?.checked !== false,
+        scores: document.getElementById("pers_feat_scores")?.checked !== false,
+        library: document.getElementById("pers_feat_library")?.checked !== false,
+        timetable: document.getElementById("pers_feat_timetable")?.checked !== false,
+        tracking_book: document.getElementById("pers_feat_tracking_book")?.checked !== false,
+        reports: document.getElementById("pers_feat_reports")?.checked !== false,
+        parent_portal: document.getElementById("pers_feat_parent_portal")?.checked !== false,
+        auto_sync: document.getElementById("pers_feat_auto_sync")?.checked !== false
+    };
+
+    const payload = {
+        teacher_id: tId,
+        teacher_name: name || localStorage.getItem('auth_teacher_name') || "លោកគ្រូ អ្នកគ្រូ",
+        teacher_gender: gender,
+        teacher_dob: dob,
+        teacher_phone: phone,
+        teacher_email: email,
+        telegram_username: tgUsername,
+        telegram_id: tgId,
+        teacher_edu: edu,
+        teacher_level: level,
+        teacher_room: room,
+        academic_year: academicYear,
+        grading_scale: gradingScale,
+        features: features,
+        avatar_url: document.getElementById("val_profile_avatar")?.value || "",
+        signature_url: document.getElementById("val_sig")?.value || ""
+    };
+
+    const btn = document.getElementById("btnSavePersonalSettings");
+    const origHtml = btn ? btn.innerHTML : "";
+    if (btn) {
+        btn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> <span>កំពុងរក្សាទុក...</span>`;
+        btn.disabled = true;
+    }
+
+    try {
+        await window.saveTeacherPersonalSettings(tId, payload);
+
+        if (typeof showToast === 'function') {
+            showToast("🎉 បានរក្សាទុកការកំណត់ផ្ទាល់ខ្លួនរបស់លោកគ្រូ/អ្នកគ្រូដោយជោគជ័យ!");
+        } else {
+            alert("✅ បានរក្សាទុកការកំណត់ផ្ទាល់ខ្លួនរបស់លោកគ្រូ/អ្នកគ្រូដោយជោគជ័យ!");
+        }
+
+    } catch(err) {
+        console.error("Save personal settings error:", err);
+        alert("⚠️ បរាជ័យក្នុងការរក្សាទុក: " + err.message);
+    } finally {
+        if (btn) {
+            btn.innerHTML = origHtml || `<i class="fa-solid fa-cloud-arrow-up"></i> <span>រក្សាទុកការកំណត់ផ្ទាល់ខ្លួន</span>`;
+            btn.disabled = false;
+        }
+    }
+};
+
+window.renderPersonalSettingsTab = function() {
+    const container = document.getElementById("tabContent_personal");
+    if (!container) return;
+
+    const tId = localStorage.getItem('auth_teacher_id') || (window.AppAuth?.state?.teacherId) || "TCH-001";
+    const personal = window.getTeacherPersonalSettings(tId);
+    const gradesList = typeof window.getAllGradesList === 'function' ? window.getAllGradesList() : ["ថ្នាក់ទី ១", "ថ្នាក់ទី ២", "ថ្នាក់ទី ៣", "ថ្នាក់ទី ៤", "ថ្នាក់ទី ៥", "ថ្នាក់ទី ៦"];
+    const roomsList = typeof window.getAllRoomsList === 'function' ? window.getAllRoomsList() : ["«ក»", "«ខ»", "«គ»", "«ឃ»"];
+
+    const gradesOpts = gradesList.map(g => `<option value="${g}" ${g === personal.teacher_level ? 'selected' : ''}>${g}</option>`).join('');
+    const roomsOpts = roomsList.map(r => `<option value="${r}" ${r === personal.teacher_room ? 'selected' : ''}>${r}</option>`).join('');
+
+    container.innerHTML = `
+        <!-- Welcome & Quick Status Banner -->
+        <div class="bg-gradient-to-r from-indigo-900 via-purple-900 to-indigo-950 rounded-[2rem] p-6 text-white shadow-lg border border-indigo-700/50 flex flex-col sm:flex-row items-center justify-between gap-5 relative overflow-hidden">
+            <div class="flex items-center gap-4 relative z-10">
+                <div class="w-16 h-16 rounded-2xl bg-white/10 border border-white/20 p-1 flex items-center justify-center shrink-0 shadow-inner">
+                    <img id="pers_avatar_preview" src="${personal.avatar_url || 'https://ui-avatars.com/api/?name=Teacher&background=6366f1&color=fff&size=150'}" class="w-full h-full object-cover rounded-xl bg-indigo-950">
+                </div>
+                <div>
+                    <h3 class="font-moul text-lg text-white">${personal.teacher_name || 'លោកគ្រូ អ្នកគ្រូ'}</h3>
+                    <p class="text-xs text-indigo-200 mt-1 flex flex-wrap items-center gap-2 font-bold">
+                        <span>អត្តលេខគ្រូ៖ <strong class="font-mono text-white">${personal.teacher_id}</strong></span>
+                        <span class="text-white/40">•</span>
+                        <span>ថ្នាក់បង្រៀន៖ <strong class="text-amber-300 font-moul">${personal.teacher_level} ${personal.teacher_room}</strong></span>
+                    </p>
+                </div>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-2 relative z-10 text-xs">
+                <div id="badge_gmail_status"></div>
+                <div id="badge_telegram_status"></div>
+            </div>
+        </div>
+
+        <form id="personalSettingsForm" onsubmit="window.handleSavePersonalTeacherSettings(event)" class="space-y-6">
+            
+            <!-- ផ្នែកទី ១៖ ព័ត៌មានគ្រូ និងថ្នាក់រៀនបន្ទុក (Teacher Profile & My Classroom) -->
+            <div class="bg-white dark:bg-slate-800 p-6 md:p-8 rounded-[2rem] shadow-sm border border-slate-200 dark:border-slate-700 space-y-6">
+                <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-700 pb-4">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400 rounded-xl flex items-center justify-center text-lg shadow-inner">
+                            <i class="fa-solid fa-chalkboard-user"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-moul text-base text-slate-800 dark:text-white">១. ព័ត៌មានគ្រូ និងថ្នាក់រៀនបន្ទុក (My Classroom)</h4>
+                            <p class="text-xs text-slate-500 dark:text-slate-400">កំណត់ឈ្មោះ ថ្នាក់ និងបន្ទប់ដែលលោកគ្រូអ្នកគ្រូទទួលបន្ទុកបង្រៀនផ្ទាល់</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-5 text-xs">
+                    <div>
+                        <label class="block font-bold text-slate-700 dark:text-slate-300 mb-2">ឈ្មោះគ្រូបង្រៀន (Full Name) *</label>
+                        <input type="text" id="pers_teacher_name" required value="${personal.teacher_name || ''}" placeholder="បញ្ចូលឈ្មោះលោកគ្រូ/អ្នកគ្រូ..." class="w-full bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl px-4 py-2.5 font-bold outline-none focus:ring-2 focus:ring-indigo-400 text-slate-800 dark:text-white">
+                    </div>
+
+                    <div>
+                        <label class="block font-bold text-slate-700 dark:text-slate-300 mb-2">ភេទ *</label>
+                        <select id="pers_teacher_gender" class="w-full bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl px-4 py-2.5 font-bold outline-none focus:ring-2 focus:ring-indigo-400 text-slate-800 dark:text-white">
+                            <option value="ប្រុស" ${personal.teacher_gender === 'ប្រុស' ? 'selected' : ''}>ប្រុស</option>
+                            <option value="ស្រី" ${personal.teacher_gender === 'ស្រី' ? 'selected' : ''}>ស្រី</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block font-bold text-slate-700 dark:text-slate-300 mb-2">លេខទូរស័ព្ទ (Phone Number)</label>
+                        <input type="text" id="pers_teacher_phone" value="${personal.teacher_phone || ''}" placeholder="012 345 678" class="w-full bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl px-4 py-2.5 font-mono font-bold outline-none focus:ring-2 focus:ring-indigo-400 text-slate-800 dark:text-white">
+                    </div>
+
+                    <div>
+                        <label class="block font-bold text-indigo-700 dark:text-indigo-400 mb-2">ថ្នាក់ទទួលបន្ទុក (My Grade Level) *</label>
+                        <select id="pers_teacher_level" class="w-full bg-indigo-50/50 dark:bg-slate-700 border-2 border-indigo-200 dark:border-indigo-500/40 rounded-xl px-4 py-2.5 font-bold text-indigo-900 dark:text-indigo-200 outline-none focus:ring-2 focus:ring-indigo-500">
+                            ${gradesOpts}
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block font-bold text-rose-700 dark:text-rose-400 mb-2">បន្ទប់ទទួលបន្ទុក (My Room) *</label>
+                        <select id="pers_teacher_room" class="w-full bg-rose-50/50 dark:bg-slate-700 border-2 border-rose-200 dark:border-rose-500/40 rounded-xl px-4 py-2.5 font-moul text-rose-800 dark:text-rose-200 outline-none focus:ring-2 focus:ring-rose-500">
+                            ${roomsOpts}
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block font-bold text-slate-700 dark:text-slate-300 mb-2">ឆ្នាំសិក្សាបង្រៀន (Academic Year) *</label>
+                        <input type="text" id="pers_academic_year" required value="${personal.academic_year || '2026-2027'}" placeholder="២០២៦-២០២៧" class="w-full bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl px-4 py-2.5 font-bold outline-none focus:ring-2 focus:ring-indigo-400 text-slate-800 dark:text-white text-center">
+                    </div>
+
+                    <div>
+                        <label class="block font-bold text-slate-700 dark:text-slate-300 mb-2">ថ្ងៃខែឆ្នាំកំណើត</label>
+                        <input type="date" id="pers_teacher_dob" value="${personal.teacher_dob || ''}" class="w-full bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl px-4 py-2.5 font-bold outline-none focus:ring-2 focus:ring-indigo-400 text-slate-800 dark:text-white">
+                    </div>
+
+                    <div class="col-span-1 md:col-span-2">
+                        <label class="block font-bold text-slate-700 dark:text-slate-300 mb-2">កម្រិតវប្បធម៌ ឬឯកទេសបង្រៀន</label>
+                        <input type="text" id="pers_teacher_edu" value="${personal.teacher_edu || ''}" placeholder="ឧ. បរិញ្ញាបត្រអប់រំ / គរុកោសល្យបឋមសិក្សា" class="w-full bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl px-4 py-2.5 font-bold outline-none focus:ring-2 focus:ring-indigo-400 text-slate-800 dark:text-white">
+                    </div>
+                </div>
+            </div>
+
+            <!-- ផ្នែកទី ២៖ ភ្ជាប់គណនី Gmail & Telegram (auth.telegram.org) -->
+            <div class="bg-white dark:bg-slate-800 p-6 md:p-8 rounded-[2rem] shadow-sm border border-slate-200 dark:border-slate-700 space-y-6">
+                <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-700 pb-4">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 bg-sky-50 dark:bg-sky-950/50 text-[#229ED9] rounded-xl flex items-center justify-center text-lg shadow-inner">
+                            <i class="fa-solid fa-link"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-moul text-base text-slate-800 dark:text-white">២. ភ្ជាប់គណនី Gmail & Telegram (auth.telegram.org)</h4>
+                            <p class="text-xs text-slate-500 dark:text-slate-400">ភ្ជាប់ជាមួយគណនី Gmail ឬ Telegram ដើម្បីចូលប្រើប្រាស់ និងគ្រប់គ្រងថ្នាក់រៀនដោយផ្ទាល់</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 text-xs">
+                    <!-- Google (Gmail) Link Box -->
+                    <div class="p-5 bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-2xl flex flex-col justify-between gap-4">
+                        <div class="space-y-3">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-2.5">
+                                    <svg class="w-6 h-6 shrink-0" viewBox="0 0 24 24">
+                                        <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                                        <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                                        <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+                                        <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+                                    </svg>
+                                    <h5 class="font-bold text-sm text-slate-800 dark:text-white">គណនី Google (Gmail)</h5>
+                                </div>
+                            </div>
+                            <p class="text-slate-500 dark:text-slate-400 leading-relaxed">
+                                ភ្ជាប់អាសយដ្ឋាន Gmail របស់អ្នក ដើម្បីអនុញ្ញាតឱ្យចូលប្រើប្រាស់ដោយចុចតែម្តង (One-tap Sign-in)។
+                            </p>
+                            <div>
+                                <label class="block font-bold text-slate-600 dark:text-slate-300 mb-1">អាសយដ្ឋាន Gmail បច្ចុប្បន្ន៖</label>
+                                <input type="email" id="pers_teacher_email" value="${personal.teacher_email || ''}" placeholder="teacher@gmail.com" class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-xl px-3.5 py-2 font-mono font-bold text-slate-800 dark:text-white outline-none focus:ring-2 focus:ring-red-400">
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-2 pt-2 border-t border-slate-200 dark:border-slate-600">
+                            <button type="button" onclick="window.linkTeacherGoogleAccount()" class="flex-1 py-2 px-3 bg-red-600 hover:bg-red-700 text-white rounded-xl font-bold flex items-center justify-center gap-1.5 shadow-sm transition">
+                                <i class="fa-brands fa-google"></i> ភ្ជាប់ Gmail ឥឡូវនេះ
+                            </button>
+                            <button type="button" onclick="window.unlinkTeacherGoogleAccount()" class="py-2 px-3 bg-slate-200 hover:bg-slate-300 dark:bg-slate-600 dark:hover:bg-slate-500 text-slate-700 dark:text-slate-200 rounded-xl font-bold transition" title="ផ្តាច់ Gmail">
+                                <i class="fa-solid fa-link-slash"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Telegram (auth.telegram.org) Link Box -->
+                    <div class="p-5 bg-sky-50/60 dark:bg-slate-700/50 border border-sky-100 dark:border-slate-600 rounded-2xl flex flex-col justify-between gap-4">
+                        <div class="space-y-3">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-2.5">
+                                    <div class="w-7 h-7 rounded-lg bg-[#229ED9] text-white flex items-center justify-center text-sm shadow-sm">
+                                        <i class="fa-brands fa-telegram"></i>
+                                    </div>
+                                    <h5 class="font-bold text-sm text-slate-800 dark:text-white">គណនី Telegram (auth.telegram.org)</h5>
+                                </div>
+                            </div>
+                            <p class="text-slate-500 dark:text-slate-400 leading-relaxed">
+                                ភ្ជាប់គណនី Telegram របស់អ្នកតាមរយៈ <strong>auth.telegram.org</strong> ឬបញ្ចូល <strong>@username</strong> សម្រាប់ទទួលការជូនដំណឹង និងចូលប្រើប្រាស់។
+                            </p>
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block font-bold text-slate-600 dark:text-slate-300 mb-1">Telegram Username៖</label>
+                                    <div class="relative">
+                                        <span class="absolute left-3 top-2 text-slate-400 font-bold">@</span>
+                                        <input type="text" id="pers_telegram_username" value="${personal.telegram_username || ''}" placeholder="username" class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-xl pl-7 pr-3 py-2 font-mono font-bold text-slate-800 dark:text-white outline-none focus:ring-2 focus:ring-sky-400">
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block font-bold text-slate-600 dark:text-slate-300 mb-1">Telegram ID (បើមាន)៖</label>
+                                    <input type="text" id="pers_telegram_id" value="${personal.telegram_id || ''}" placeholder="12345678" class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-xl px-3 py-2 font-mono font-bold text-slate-800 dark:text-white outline-none focus:ring-2 focus:ring-sky-400">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-2 pt-2 border-t border-sky-100 dark:border-slate-600">
+                            <button type="button" onclick="window.openTelegramLoginModal('link')" class="flex-1 py-2 px-3 bg-[#229ED9] hover:bg-[#0088cc] text-white rounded-xl font-bold flex items-center justify-center gap-1.5 shadow-sm transition">
+                                <i class="fa-brands fa-telegram"></i> ភ្ជាប់តាម auth.telegram.org
+                            </button>
+                            <button type="button" onclick="window.unlinkTeacherTelegramAccount()" class="py-2 px-3 bg-slate-200 hover:bg-slate-300 dark:bg-slate-600 dark:hover:bg-slate-500 text-slate-700 dark:text-slate-200 rounded-xl font-bold transition" title="ផ្តាច់ Telegram">
+                                <i class="fa-solid fa-link-slash"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ផ្នែកទី ៣៖ ការកំណត់មុខងារផ្សេងៗដោយខ្លួនឯង (Individual Feature Toggles) -->
+            <div class="bg-white dark:bg-slate-800 p-6 md:p-8 rounded-[2rem] shadow-sm border border-slate-200 dark:border-slate-700 space-y-6">
+                <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-700 pb-4">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 rounded-xl flex items-center justify-center text-lg shadow-inner">
+                            <i class="fa-solid fa-toggle-on"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-moul text-base text-slate-800 dark:text-white">៣. បើក ឬបិទមុខងារប្រើប្រាស់សម្រាប់គ្រូផ្ទាល់ខ្លួន (Feature Preferences)</h4>
+                            <p class="text-xs text-slate-500 dark:text-slate-400">ជ្រើសរើសមុខងារដែលលោកគ្រូអ្នកគ្រូចង់បង្ហាញ ឬលាក់នៅលើ Sidebar និង Navigation</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-xs">
+                    <!-- Attendance -->
+                    <label class="p-4 rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-700/30 hover:border-emerald-400 cursor-pointer flex items-start gap-3 transition">
+                        <input type="checkbox" id="pers_feat_attendance" ${personal.features.attendance ? 'checked' : ''} class="w-4 h-4 text-emerald-600 rounded mt-0.5 accent-emerald-600">
+                        <div>
+                            <span class="block font-bold text-slate-800 dark:text-white"><i class="fa-solid fa-clipboard-user text-rose-500 mr-1"></i> កត់វត្តមានសិស្ស</span>
+                            <span class="text-[11px] text-slate-500 dark:text-slate-400">ស្រង់វត្តមានប្រចាំថ្ងៃ និងបូកសរុបប្រចាំខែ</span>
+                        </div>
+                    </label>
+
+                    <!-- Scores -->
+                    <label class="p-4 rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-700/30 hover:border-emerald-400 cursor-pointer flex items-start gap-3 transition">
+                        <input type="checkbox" id="pers_feat_scores" ${personal.features.scores ? 'checked' : ''} class="w-4 h-4 text-emerald-600 rounded mt-0.5 accent-emerald-600">
+                        <div>
+                            <span class="block font-bold text-slate-800 dark:text-white"><i class="fa-solid fa-award text-amber-500 mr-1"></i> បញ្ចូលពិន្ទុ & និទ្ទេស</span>
+                            <span class="text-[11px] text-slate-500 dark:text-slate-400">គណនាចំណាត់ថ្នាក់ និងព្រឹត្តិបត្រពិន្ទុ</span>
+                        </div>
+                    </label>
+
+                    <!-- Timetable -->
+                    <label class="p-4 rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-700/30 hover:border-emerald-400 cursor-pointer flex items-start gap-3 transition">
+                        <input type="checkbox" id="pers_feat_timetable" ${personal.features.timetable ? 'checked' : ''} class="w-4 h-4 text-emerald-600 rounded mt-0.5 accent-emerald-600">
+                        <div>
+                            <span class="block font-bold text-slate-800 dark:text-white"><i class="fa-solid fa-calendar-days text-teal-500 mr-1"></i> កាលវិភាគ & កិច្ចការ</span>
+                            <span class="text-[11px] text-slate-500 dark:text-slate-400">កាលវិភាគបង្រៀន និងកិច្ចការផ្ទះ</span>
+                        </div>
+                    </label>
+
+                    <!-- Library -->
+                    <label class="p-4 rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-700/30 hover:border-emerald-400 cursor-pointer flex items-start gap-3 transition">
+                        <input type="checkbox" id="pers_feat_library" ${personal.features.library ? 'checked' : ''} class="w-4 h-4 text-emerald-600 rounded mt-0.5 accent-emerald-600">
+                        <div>
+                            <span class="block font-bold text-slate-800 dark:text-white"><i class="fa-solid fa-book-bookmark text-fuchsia-500 mr-1"></i> បណ្ណាល័យសៀវភៅ</span>
+                            <span class="text-[11px] text-slate-500 dark:text-slate-400">គ្រប់គ្រងការខ្ចី និងសងសៀវភៅសិក្សាគោល</span>
+                        </div>
+                    </label>
+
+                    <!-- Tracking Book -->
+                    <label class="p-4 rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-700/30 hover:border-emerald-400 cursor-pointer flex items-start gap-3 transition">
+                        <input type="checkbox" id="pers_feat_tracking_book" ${personal.features.tracking_book ? 'checked' : ''} class="w-4 h-4 text-emerald-600 rounded mt-0.5 accent-emerald-600">
+                        <div>
+                            <span class="block font-bold text-slate-800 dark:text-white"><i class="fa-solid fa-book-open-reader text-blue-500 mr-1"></i> សៀវភៅតាមដាន</span>
+                            <span class="text-[11px] text-slate-500 dark:text-slate-400">តាមដានវិន័យ និងកិច្ចការរបស់សិស្ស</span>
+                        </div>
+                    </label>
+
+                    <!-- Reports -->
+                    <label class="p-4 rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-700/30 hover:border-emerald-400 cursor-pointer flex items-start gap-3 transition">
+                        <input type="checkbox" id="pers_feat_reports" ${personal.features.reports ? 'checked' : ''} class="w-4 h-4 text-emerald-600 rounded mt-0.5 accent-emerald-600">
+                        <div>
+                            <span class="block font-bold text-slate-800 dark:text-white"><i class="fa-solid fa-file-invoice text-indigo-500 mr-1"></i> របាយការណ៍ & បោះពុម្ព</span>
+                            <span class="text-[11px] text-slate-500 dark:text-slate-400">របាយការណ៍ ក, ខ, គ, ឃ និងស្ថិតិ</span>
+                        </div>
+                    </label>
+
+                    <!-- Parent Portal -->
+                    <label class="p-4 rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-700/30 hover:border-emerald-400 cursor-pointer flex items-start gap-3 transition">
+                        <input type="checkbox" id="pers_feat_parent_portal" ${personal.features.parent_portal ? 'checked' : ''} class="w-4 h-4 text-emerald-600 rounded mt-0.5 accent-emerald-600">
+                        <div>
+                            <span class="block font-bold text-slate-800 dark:text-white"><i class="fa-solid fa-users-viewfinder text-purple-500 mr-1"></i> ផ្ទាំងមាតាបិតា (Portal)</span>
+                            <span class="text-[11px] text-slate-500 dark:text-slate-400">អនុញ្ញាតឱ្យអាណាព្យាបាលឆែកពិន្ទុ</span>
+                        </div>
+                    </label>
+
+                    <!-- Auto Sync -->
+                    <label class="p-4 rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-700/30 hover:border-emerald-400 cursor-pointer flex items-start gap-3 transition">
+                        <input type="checkbox" id="pers_feat_auto_sync" ${personal.features.auto_sync ? 'checked' : ''} class="w-4 h-4 text-emerald-600 rounded mt-0.5 accent-emerald-600">
+                        <div>
+                            <span class="block font-bold text-slate-800 dark:text-white"><i class="fa-solid fa-cloud-arrow-up text-emerald-500 mr-1"></i> ស្វ័យប្រវត្តិសមកាលកម្ម</span>
+                            <span class="text-[11px] text-slate-500 dark:text-slate-400">Sync ទិន្នន័យស្វ័យប្រវត្តិក្លោដ</span>
+                        </div>
+                    </label>
+                </div>
+            </div>
+
+            <!-- ផ្នែកទី ៤៖ ខ្នាតពិន្ទុ និងការវាយតម្លៃ (Grading Scale) -->
+            <div class="bg-white dark:bg-slate-800 p-6 md:p-8 rounded-[2rem] shadow-sm border border-slate-200 dark:border-slate-700 space-y-4">
+                <div class="flex items-center gap-3 border-b border-slate-100 dark:border-slate-700 pb-3">
+                    <div class="w-10 h-10 bg-amber-50 dark:bg-amber-950/50 text-amber-600 dark:text-amber-400 rounded-xl flex items-center justify-center text-lg shadow-inner">
+                        <i class="fa-solid fa-scale-balanced"></i>
+                    </div>
+                    <div>
+                        <h4 class="font-moul text-base text-slate-800 dark:text-white">៤. ខ្នាតពិន្ទុ និងការវាយតម្លៃលទ្ធផលសិក្សា</h4>
+                        <p class="text-xs text-slate-500 dark:text-slate-400">កំណត់ប្រព័ន្ធដាក់ពិន្ទុសម្រាប់ថ្នាក់រៀនរបស់លោកគ្រូអ្នកគ្រូ</p>
+                    </div>
+                </div>
+
+                <div class="max-w-md text-xs">
+                    <label class="block font-bold text-slate-700 dark:text-slate-300 mb-2">ខ្នាតពិន្ទុវាយតម្លៃ (Grading Standard) *</label>
+                    <select id="pers_grading_scale" class="w-full bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl px-4 py-2.5 font-bold outline-none focus:ring-2 focus:ring-indigo-400 text-slate-800 dark:text-white">
+                        <option value="primary" ${personal.grading_scale === 'primary' ? 'selected' : ''}>បឋមសិក្សា (ពិន្ទុអតិបរមា ១០ | និទ្ទេស ល្អប្រសើរ, ល្អ, ល្អបង្គួរ, មធ្យម, ខ្សោយ)</option>
+                        <option value="secondary" ${personal.grading_scale === 'secondary' ? 'selected' : ''}>អនុវិទ្យាល័យ / វិទ្យាល័យ (ពិន្ទុអតិបរមា ៥០ ឬ ១០០ | និទ្ទេស A, B, C, D, E, F)</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Save Action Bar -->
+            <div class="pt-4 flex justify-end">
+                <button type="submit" id="btnSavePersonalSettings" class="px-8 py-3.5 bg-gradient-to-r from-indigo-600 via-blue-600 to-indigo-700 hover:from-indigo-700 hover:to-blue-800 text-white rounded-2xl font-bold text-sm shadow-xl shadow-indigo-500/25 transition active:scale-95 flex items-center gap-2">
+                    <i class="fa-solid fa-cloud-arrow-up"></i> <span>រក្សាទុកការកំណត់ផ្ទាល់ខ្លួន (Save Workspace)</span>
+                </button>
+            </div>
+        </form>
+    `;
+
+    window.renderPersonalSettingsBadges(personal);
+};
+
 // ៣. Tab State
-window.currentSettingsTab = "school";
+window.currentSettingsTab = "personal";
 
 window.switchSettingsTab = function(tabName) {
     const isSchoolOrSysAdmin = typeof window.isSchoolAdmin === 'function' ? window.isSchoolAdmin() : false;
-    if (!isSchoolOrSysAdmin && (tabName === "users" || tabName === "backup")) {
-        if (typeof window.showToast === 'function') window.showToast("⚠️ មុខងារនេះសម្រាប់តែ Admin ប៉ុណ្ណោះ!", true);
-        tabName = "school";
+    if (!isSchoolOrSysAdmin && (tabName === "users" || tabName === "backup" || tabName === "school")) {
+        tabName = "personal";
     }
 
     window.currentSettingsTab = tabName;
-    const tabs = ["school", "academic", "users", "backup"];
+    const tabs = ["personal", "school", "academic", "users", "backup"];
     
     tabs.forEach(t => {
         const btn = document.getElementById(`tabBtn_${t}`);
@@ -138,7 +689,9 @@ window.switchSettingsTab = function(tabName) {
         }
     });
 
-    if (tabName === "users") {
+    if (tabName === "personal") {
+        window.renderPersonalSettingsTab();
+    } else if (tabName === "users") {
         window.renderUserAccountsTab();
     } else if (tabName === "academic") {
         window.renderAcademicManagementTab();
@@ -180,7 +733,10 @@ window.loadSettingsView = function() {
 
         <!-- Tab Navigation Bar -->
         <div class="bg-slate-100 dark:bg-slate-800 p-1.5 rounded-2xl border border-slate-200 dark:border-slate-700 flex flex-wrap gap-1 shadow-sm">
-            <button id="tabBtn_school" onclick="window.switchSettingsTab('school')" class="flex-1 min-w-[140px] px-4 py-2.5 rounded-xl font-bold text-xs md:text-sm transition flex items-center justify-center gap-2 bg-white text-indigo-700 shadow-sm border border-indigo-200">
+            <button id="tabBtn_personal" onclick="window.switchSettingsTab('personal')" class="flex-1 min-w-[140px] px-4 py-2.5 rounded-xl font-bold text-xs md:text-sm transition flex items-center justify-center gap-2 bg-white text-indigo-700 shadow-sm border border-indigo-200">
+                <i class="fa-solid fa-user-gear"></i> <span>ការកំណត់ផ្ទាល់ខ្លួន (My Workspace)</span>
+            </button>
+            <button id="tabBtn_school" onclick="window.switchSettingsTab('school')" class="${isAdmin ? '' : 'hidden'} flex-1 min-w-[140px] px-4 py-2.5 rounded-xl font-bold text-xs md:text-sm transition flex items-center justify-center gap-2 text-slate-500 hover:text-slate-700">
                 <i class="fa-solid fa-school"></i> <span>ព័ត៌មានសាលារៀន</span>
             </button>
             <button id="tabBtn_academic" onclick="window.switchSettingsTab('academic')" class="flex-1 min-w-[140px] px-4 py-2.5 rounded-xl font-bold text-xs md:text-sm transition flex items-center justify-center gap-2 text-slate-500 hover:text-slate-700">
@@ -195,9 +751,16 @@ window.loadSettingsView = function() {
         </div>
 
         <!-- ============================================================= -->
+        <!-- TAB 0: ការកំណត់ផ្ទាល់ខ្លួន (Teacher Personal Settings & Features)   -->
+        <!-- ============================================================= -->
+        <div id="tabContent_personal" class="space-y-6">
+            <!-- Dynamic Content loaded by renderPersonalSettingsTab() -->
+        </div>
+
+        <!-- ============================================================= -->
         <!-- TAB 1: ព័ត៌មានសាលារៀន (School Settings & Official Info)        -->
         <!-- ============================================================= -->
-        <div id="tabContent_school" class="space-y-6">
+        <div id="tabContent_school" class="space-y-6 hidden">
             
             <!-- ផ្ទាំងប្រវត្តិរូបគ្រូបង្រៀន (Teacher Profile Card) -->
             <div class="w-full bg-white border border-slate-200 rounded-[2rem] shadow-sm overflow-hidden relative">
@@ -615,7 +1178,7 @@ window.loadSettingsView = function() {
     window.fillSettingsForm();
 
     // ធ្វើឱ្យ Settings ដំណើរការភ្លាមៗពេលបើក (Render active tab immediately)
-    const activeTab = window.currentSettingsTab || "school";
+    const activeTab = window.currentSettingsTab || (!isAdmin ? "personal" : "personal");
     window.switchSettingsTab(activeTab);
 };
 
