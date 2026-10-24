@@ -14,6 +14,8 @@ window.handleReportClassChange = function() {
     const room = document.getElementById("reportRoomSelect")?.value;
     if (grade && room) {
         if (typeof window.setSelectedClass === 'function') window.setSelectedClass(grade, room);
+        window.currentReportTargetGrade = grade;
+        window.currentReportTargetRoom = room;
         const sub = document.getElementById("reportDetailSub");
         if (sub) sub.textContent = `ថ្នាក់ ${grade} ${room}`;
         const display = document.getElementById("reportHeaderGradeDisplay");
@@ -242,6 +244,8 @@ window.openReportDetail = function(reportType) {
     const activeClass = typeof window.getCurrentSelectedClass === 'function' ? window.getCurrentSelectedClass() : { level: "ថ្នាក់ទី ៤", room: "«ក»" };
     const curLevel = document.getElementById("reportGradeSelect")?.value || activeClass.level;
     const curRoom = document.getElementById("reportRoomSelect")?.value || activeClass.room;
+    window.currentReportTargetGrade = curLevel;
+    window.currentReportTargetRoom = curRoom;
     const gradeFull = `${curLevel} ${curRoom}`.trim();
 
     const titleEl = document.getElementById("reportDetailTitle");
@@ -282,32 +286,32 @@ window.openReportDetail = function(reportType) {
             }
         } else if (reportType === 'stats') {
             titleEl.textContent = "តារាងស្ថិតិសិស្ស";
-            window.renderStudentStatsReportHTML(paperArea);
+            window.renderStudentStatsReportHTML(paperArea, curLevel, curRoom);
         } else if (reportType === 'attendance') {
             titleEl.textContent = "របាយការណ៍វត្តមានប្រចាំខែ";
             if(typeof window.renderAttendanceReportHTML === 'function') {
-                window.renderAttendanceReportHTML(paperArea);
+                window.renderAttendanceReportHTML(paperArea, curLevel, curRoom);
             } else {
                 paperArea.innerHTML = `<div class="text-center p-12 bg-amber-50/50 rounded-2xl border border-amber-200 text-amber-800 font-siemreap max-w-md mx-auto my-10 shadow-sm animate-fade-in"><i class="fa-solid fa-clock-rotate-left text-3xl mb-3 text-amber-500"></i><h4 class="font-moul text-base mb-1">របាយការណ៍នេះគ្រោងនឹងដាក់ឱ្យប្រើប្រាស់ឆាប់ៗ</h4><p class="text-xs text-amber-600 leading-relaxed">មុខងារនេះស្ថិតក្នុងដំណាក់កាលអភិវឌ្ឍ (In Progress/Planned)។ សូមជ្រើសរើសរបាយការណ៍ស្តង់ដាផ្សេងទៀតជាបណ្តោះអាសន្ន។</p></div>`;
             }
         } else if (reportType === 'students') {
             titleEl.textContent = "បញ្ជីរាយនាមសិស្ស";
             if(typeof window.renderStudentListReportHTML === 'function') {
-                window.renderStudentListReportHTML(paperArea);
+                window.renderStudentListReportHTML(paperArea, curLevel, curRoom);
             } else {
                 paperArea.innerHTML = `<div class="text-center p-12 bg-amber-50/50 rounded-2xl border border-amber-200 text-amber-800 font-siemreap max-w-md mx-auto my-10 shadow-sm animate-fade-in"><i class="fa-solid fa-clock-rotate-left text-3xl mb-3 text-amber-500"></i><h4 class="font-moul text-base mb-1">របាយការណ៍នេះគ្រោងនឹងដាក់ឱ្យប្រើប្រាស់ឆាប់ៗ</h4><p class="text-xs text-amber-600 leading-relaxed">មុខងារនេះស្ថិតក្នុងដំណាក់កាលអភិវឌ្ឍ (In Progress/Planned)។ សូមជ្រើសរើសរបាយការណ៍ស្តង់ដាផ្សេងទៀតជាបណ្តោះអាសន្ន។</p></div>`;
             }
         } else if (reportType === 'scores') {
             titleEl.textContent = "របាយការណ៍លទ្ធផលសិក្សា";
             if(typeof window.renderScoresReportHTML === 'function') {
-                window.renderScoresReportHTML(paperArea);
+                window.renderScoresReportHTML(paperArea, curLevel, curRoom);
             } else {
                 paperArea.innerHTML = `<div class="text-center p-12 bg-amber-50/50 rounded-2xl border border-amber-200 text-amber-800 font-siemreap max-w-md mx-auto my-10 shadow-sm animate-fade-in"><i class="fa-solid fa-clock-rotate-left text-3xl mb-3 text-amber-500"></i><h4 class="font-moul text-base mb-1">របាយការណ៍នេះគ្រោងនឹងដាក់ឱ្យប្រើប្រាស់ឆាប់ៗ</h4><p class="text-xs text-amber-600 leading-relaxed">មុខងារនេះស្ថិតក្នុងដំណាក់កាលអភិវឌ្ឍ (In Progress/Planned)។ សូមជ្រើសរើសរបាយការណ៍ស្តង់ដាផ្សេងទៀតជាបណ្តោះអាសន្ន។</p></div>`;
             }
         } else if (reportType === 'structure') {
             titleEl.textContent = "រចនាសម្ព័ន្ធថ្នាក់រៀន";
             if(typeof window.renderClassStructureHTML === 'function') {
-                window.renderClassStructureHTML(paperArea);
+                window.renderClassStructureHTML(paperArea, curLevel, curRoom);
             } else {
                 paperArea.innerHTML = `<div class="text-center p-12 bg-amber-50/50 rounded-2xl border border-amber-200 text-amber-800 font-siemreap max-w-md mx-auto my-10 shadow-sm animate-fade-in"><i class="fa-solid fa-clock-rotate-left text-3xl mb-3 text-amber-500"></i><h4 class="font-moul text-base mb-1">របាយការណ៍នេះគ្រោងនឹងដាក់ឱ្យប្រើប្រាស់ឆាប់ៗ</h4><p class="text-xs text-amber-600 leading-relaxed">មុខងារនេះស្ថិតក្នុងដំណាក់កាលអភិវឌ្ឍ (In Progress/Planned)។ សូមជ្រើសរើសរបាយការណ៍ស្តង់ដាផ្សេងទៀតជាបណ្តោះអាសន្ន។</p></div>`;
             }
@@ -350,18 +354,25 @@ window.printCurrentReport = function() {
 
 window.updateReportViewSettings = function() {
     const paperArea = document.getElementById("reportPaperArea");
-    if (paperArea) window.renderStudentStatsReportHTML(paperArea);
+    if (paperArea) {
+        const curLevel = document.getElementById("reportGradeSelect")?.value;
+        const curRoom = document.getElementById("reportRoomSelect")?.value;
+        window.renderStudentStatsReportHTML(paperArea, curLevel, curRoom);
+    }
 };
 
 // ==========================================================================
 // ២. មុខងារគូសតារាង A4 ស្ថិតិសិស្ស (ដែលរៀបចំថ្មី)
 // ==========================================================================
-window.renderStudentStatsReportHTML = function(container) {
+window.renderStudentStatsReportHTML = function(container, targetGrade, targetRoom) {
     const sInfo = typeof appSettings !== 'undefined' ? appSettings : {};
     const academicYear = document.getElementById("globalAcademicYear")?.value || sInfo.academic_year || "២០២៦-២០២៧";
+    const activeClass = typeof window.getCurrentSelectedClass === 'function' ? window.getCurrentSelectedClass() : { level: "ថ្នាក់ទី ៤", room: "«ក»" };
+    const curLevel = targetGrade || window.currentReportTargetGrade || document.getElementById("reportGradeSelect")?.value || activeClass.level || sInfo.teacher_level || "ថ្នាក់ទី ៤";
+    const curRoom = targetRoom || window.currentReportTargetRoom || document.getElementById("reportRoomSelect")?.value || activeClass.room || sInfo.teacher_room || "«ក»";
+    const gradeFull = `${curLevel} ${curRoom}`.trim();
     
     // ទាញយកព័ត៌មានពីការកំណត់ (Settings)
-    const gradeFull = (sInfo.teacher_level && sInfo.teacher_room) ? `${sInfo.teacher_level} ${sInfo.teacher_room}`.trim() : "ថ្នាក់ទី ៤ ក";
     const districtName = (sInfo.district || "ស្រុកកៀនស្វាយ").replace('ស្រុក', '').trim(); 
     const provinceName = sInfo.province || "កណ្តាល";
     const schoolName = sInfo.school_name || "សាលាបឋមសិក្សា";
@@ -373,9 +384,12 @@ window.renderStudentStatsReportHTML = function(container) {
     const teacherEducation = sInfo.teacher_edu || "បរិញ្ញាបត្រ"; 
     const teacherExperience = sInfo.teacher_exp || "៥ឆ្នាំ"; 
     
-    // គណនាទិន្នន័យអាយុពីបញ្ជីសិស្ស
-    const allStus = typeof window.getMasterStudents === 'function' ? window.getMasterStudents() : (JSON.parse(localStorage.getItem('academic_students')) || []);
-    let totalStus = 0, femaleStus = 0;
+    // គណនាទិន្នន័យអាយុពីបញ្ជីសិស្សតាមថ្នាក់ដែលបានជ្រើសរើស (Single Source of Truth)
+    const studentsInClass = typeof window.getStudentsForClass === 'function'
+        ? window.getStudentsForClass(curLevel, curRoom, academicYear)
+        : [];
+    let totalStus = studentsInClass.length;
+    let femaleStus = studentsInClass.filter(s => s.gender === 'ស្រី').length;
     
     let ageStats = {
         '6': { t: 0, f: 0 }, '7': { t: 0, f: 0 }, '8': { t: 0, f: 0 }, '9': { t: 0, f: 0 },
@@ -385,23 +399,7 @@ window.renderStudentStatsReportHTML = function(container) {
 
     let refYear = parseInt(academicYear.split('-')[0]) || new Date().getFullYear();
 
-    allStus.forEach(s => {
-        if(s.status === "Dropped" || s.status === "អសកម្ម") return;
-        
-        let cleanLevel = (sInfo.teacher_level || "").replace(/\s+/g, ''); 
-        let cleanRoom = (sInfo.teacher_room || "").replace(/[«»\s]/g, '');
-        let sGrade = String(s.grade || "").replace(/\s+/g, ''); 
-        let sRoom = String(s.room || "").replace(/[«»\s]/g, '');
-        let fullGradeDB = String(s.class_name || s.grade || "").replace(/\s+/g, ''); 
-        let expectedFull = cleanLevel + cleanRoom;
-        
-        let isInClass = (sGrade === cleanLevel && sRoom === cleanRoom) || (fullGradeDB === expectedFull) || (fullGradeDB.includes(cleanLevel) && fullGradeDB.includes(cleanRoom));
-        
-        if(!isInClass) return;
-
-        totalStus++;
-        if (s.gender === 'ស្រី') femaleStus++;
-        
+    studentsInClass.forEach(s => {
         let age = 10; 
         if (s.dob) {
             try {
@@ -763,7 +761,9 @@ window.printStudentStatsReport = function() {
 // ==========================================================================
 // ផ្នែកទី ២៖ បញ្ជីរាយនាមសិស្សលម្អិត & ទូទៅ (A4 Portrait & Landscape)
 // ==========================================================================
-window.renderStudentListReportHTML = function(container) {
+window.renderStudentListReportHTML = function(container, targetGrade, targetRoom) {
+    if (targetGrade) window.currentReportTargetGrade = targetGrade;
+    if (targetRoom) window.currentReportTargetRoom = targetRoom;
     container.innerHTML = `
         <div class="w-full flex flex-col items-center pb-10 font-siemreap animate-fade-in">
             <!-- Controls (Print settings) -->
@@ -824,7 +824,10 @@ window.updateStudentListContent = function() {
 
     const sInfo = typeof appSettings !== 'undefined' ? appSettings : {};
     const academicYear = document.getElementById("globalAcademicYear")?.value || sInfo.academic_year || "២០២៦-២០២៧";
-    const gradeFull = (sInfo.teacher_level && sInfo.teacher_room) ? `${sInfo.teacher_level} ${sInfo.teacher_room}`.trim() : "ថ្នាក់ទី";
+    const activeClass = typeof window.getCurrentSelectedClass === 'function' ? window.getCurrentSelectedClass() : { level: "ថ្នាក់ទី ៤", room: "«ក»" };
+    const curLevel = window.currentReportTargetGrade || document.getElementById("reportGradeSelect")?.value || activeClass.level || sInfo.teacher_level || "ថ្នាក់ទី ៤";
+    const curRoom = window.currentReportTargetRoom || document.getElementById("reportRoomSelect")?.value || activeClass.room || sInfo.teacher_room || "«ក»";
+    const gradeFull = `${curLevel} ${curRoom}`.trim();
     const districtName = (sInfo.district || "ស្រុកកៀនស្វាយ").replace('ស្រុក', '').trim(); 
     const schoolName = sInfo.school_name || "សាលាបឋមសិក្សា";
     const principalName = sInfo.principal_name || ".......................";
@@ -837,18 +840,9 @@ window.updateStudentListContent = function() {
     const solarDateStr = `${locationStr}, ${sDate}`;
     const lunarDateStr = rDates.showLunar !== false ? (rDates.lunarDate || "ថ្ងៃ......................... ខែ............ ឆ្នាំ............ ព.ស.២៥៧...") : "";
 
-    let allStus = typeof window.getMasterStudents === 'function' ? window.getMasterStudents() : (JSON.parse(localStorage.getItem('academic_students')) || []);
-    let cleanLevel = String(sInfo.teacher_level || "").replace(/\s+/g, ''); 
-    let cleanRoom = String(sInfo.teacher_room || "").replace(/[«»\s]/g, '');
-
-    let students = allStus.filter(s => {
-        if (!s || s.status === "Dropped" || s.status === "អសកម្ម") return false;
-        let sGrade = String(s.grade || "").replace(/\s+/g, ''); 
-        let sRoom = String(s.room || "").replace(/[«»\s]/g, '');
-        let fullGradeDB = String(s.class_name || s.grade || "").replace(/\s+/g, ''); 
-        let expectedFull = cleanLevel + cleanRoom;
-        return (sGrade === cleanLevel && sRoom === cleanRoom) || (fullGradeDB === expectedFull) || (fullGradeDB.includes(cleanLevel) && fullGradeDB.includes(cleanRoom));
-    });
+    let students = typeof window.getStudentsForClass === 'function'
+        ? window.getStudentsForClass(curLevel, curRoom, academicYear)
+        : [];
 
     students.sort((a,b) => String(a.name||"").localeCompare(String(b.name||""), 'km'));
 
@@ -1081,22 +1075,17 @@ window.updateStudentListContent = function() {
 // ==========================================================================
 // ផ្នែកទី ៣៖ រចនាសម្ព័ន្ធថ្នាក់រៀន (Class Structure - 5 Groups)
 // ==========================================================================
-window.renderClassStructureHTML = function(container) {
+window.renderClassStructureHTML = function(container, targetGrade, targetRoom) {
     const sInfo = typeof appSettings !== 'undefined' ? appSettings : {};
     const academicYear = document.getElementById("globalAcademicYear")?.value || sInfo.academic_year || "២០២៦-២០២៧";
-    const gradeFull = (sInfo.teacher_level && sInfo.teacher_room) ? `${sInfo.teacher_level} ${sInfo.teacher_room}`.trim() : "ថ្នាក់ទី";
+    const activeClass = typeof window.getCurrentSelectedClass === 'function' ? window.getCurrentSelectedClass() : { level: "ថ្នាក់ទី ៤", room: "«ក»" };
+    const curLevel = targetGrade || window.currentReportTargetGrade || document.getElementById("reportGradeSelect")?.value || activeClass.level || sInfo.teacher_level || "ថ្នាក់ទី ៤";
+    const curRoom = targetRoom || window.currentReportTargetRoom || document.getElementById("reportRoomSelect")?.value || activeClass.room || sInfo.teacher_room || "«ក»";
+    const gradeFull = `${curLevel} ${curRoom}`.trim();
     
-    let allStus = typeof window.getMasterStudents === 'function' ? window.getMasterStudents() : (JSON.parse(localStorage.getItem('academic_students')) || []);
-    let cleanLevel = String(sInfo.teacher_level || "").replace(/\s+/g, ''); 
-    let cleanRoom = String(sInfo.teacher_room || "").replace(/[«»\s]/g, '');
-
-    let students = allStus.filter(s => {
-        if (!s || s.status === "Dropped" || s.status === "អសកម្ម") return false;
-        let sGrade = String(s.grade || "").replace(/\s+/g, ''); 
-        let sRoom = String(s.room || "").replace(/[«»\s]/g, '');
-        let fullGradeDB = String(s.class_name || s.grade || "").replace(/\s+/g, ''); 
-        return (sGrade === cleanLevel && sRoom === cleanRoom) || (fullGradeDB.includes(cleanLevel) && fullGradeDB.includes(cleanRoom));
-    });
+    let students = typeof window.getStudentsForClass === 'function'
+        ? window.getStudentsForClass(curLevel, curRoom, academicYear)
+        : [];
 
     // បែងចែកជា ៥ ក្រុម
     let groups = [[], [], [], [], []];
@@ -1161,7 +1150,9 @@ window.renderClassStructureHTML = function(container) {
 // ==========================================================================
 // ផ្នែកទី ៤៖ របាយការណ៍វត្តមាន (Attendance - Monthly/Semester/Annual)
 // ==========================================================================
-window.renderAttendanceReportHTML = function(container) {
+window.renderAttendanceReportHTML = function(container, targetGrade, targetRoom) {
+    if (targetGrade) window.currentReportTargetGrade = targetGrade;
+    if (targetRoom) window.currentReportTargetRoom = targetRoom;
     container.innerHTML = `
         <div class="w-full flex flex-col items-center max-w-5xl mx-auto font-siemreap animate-fade-in pb-10">
             <!-- Attendance Control Bar -->
@@ -1226,7 +1217,10 @@ window.renderAttendanceContent = function() {
 
     const sInfo = typeof appSettings !== 'undefined' ? appSettings : {};
     const academicYear = document.getElementById("globalAcademicYear")?.value || sInfo.academic_year || "២០២៦-២០២៧";
-    const gradeFull = (sInfo.teacher_level && sInfo.teacher_room) ? `${sInfo.teacher_level} ${sInfo.teacher_room}`.trim() : "ថ្នាក់ទី";
+    const activeClass = typeof window.getCurrentSelectedClass === 'function' ? window.getCurrentSelectedClass() : { level: "ថ្នាក់ទី ៤", room: "«ក»" };
+    const curLevel = window.currentReportTargetGrade || document.getElementById("reportGradeSelect")?.value || activeClass.level || sInfo.teacher_level || "ថ្នាក់ទី ៤";
+    const curRoom = window.currentReportTargetRoom || document.getElementById("reportRoomSelect")?.value || activeClass.room || sInfo.teacher_room || "«ក»";
+    const gradeFull = `${curLevel} ${curRoom}`.trim();
     const districtName = (sInfo.district || "ស្រុកកៀនស្វាយ").replace('ស្រុក', '').trim(); 
     const schoolName = sInfo.school_name || "សាលាបឋមសិក្សា";
     const principalName = sInfo.principal_name || ".......................";
@@ -1239,18 +1233,9 @@ window.renderAttendanceContent = function() {
     const solarDateStr = `${locationStr}, ${sDate}`;
     const lunarDateStr = rDates.showLunar !== false ? (rDates.lunarDate || "ថ្ងៃ......................... ខែ............ ឆ្នាំ............ ព.ស.២៥៧...") : "";
 
-    let allStus = typeof window.getMasterStudents === 'function' ? window.getMasterStudents() : (JSON.parse(localStorage.getItem('academic_students')) || []);
-    let cleanLevel = String(sInfo.teacher_level || "").replace(/\s+/g, ''); 
-    let cleanRoom = String(sInfo.teacher_room || "").replace(/[«»\s]/g, '');
-
-    let students = allStus.filter(s => {
-        if (!s || s.status === "Dropped" || s.status === "អសកម្ម") return false;
-        let sGrade = String(s.grade || "").replace(/\s+/g, ''); 
-        let sRoom = String(s.room || "").replace(/[«»\s]/g, '');
-        let fullGradeDB = String(s.class_name || s.grade || "").replace(/\s+/g, ''); 
-        let expectedFull = cleanLevel + cleanRoom;
-        return (sGrade === cleanLevel && sRoom === cleanRoom) || (fullGradeDB === expectedFull) || (fullGradeDB.includes(cleanLevel) && fullGradeDB.includes(cleanRoom));
-    });
+    let students = typeof window.getStudentsForClass === 'function'
+        ? window.getStudentsForClass(curLevel, curRoom, academicYear)
+        : [];
 
     students.sort((a,b) => String(a.name||"").localeCompare(String(b.name||""), 'km'));
 

@@ -74,16 +74,47 @@ window.removeCustomBookColumn = function() {
 // ==========================================
 // ១. Layout មេនៃកម្មវិធី (Main UI)
 // ==========================================
+window.handleLibClassChange = async function() {
+    const grade = document.getElementById("libGradeSelect")?.value;
+    const room = document.getElementById("libRoomSelect")?.value;
+    if (grade && room) {
+        window.currentGradeLevel = grade;
+        window.currentGradeRoom = room;
+        window.currentGradeFull = `${grade} ${room}`.trim();
+        if (typeof window.setSelectedClass === 'function') {
+            window.setSelectedClass(grade, room);
+        }
+        const sInfo = typeof appSettings !== 'undefined' ? appSettings : {};
+        const academicYear = sInfo.academic_year || "២០២៦-២០២៧";
+        const sub = document.getElementById("libSubTitle");
+        if (sub) {
+            sub.innerHTML = `ថ្នាក់ទី៖ <span class="text-white bg-white/20 px-2 py-0.5 rounded">${window.currentGradeFull}</span> | ឆ្នាំសិក្សា៖ ${toKhmerNum(academicYear)}`;
+        }
+        const docGrade = document.getElementById("libDocGradeDisplay");
+        if (docGrade) {
+            docGrade.textContent = window.currentGradeFull;
+        }
+        window.loadLibSubjects();
+        await window.fetchLibraryData();
+    }
+};
+
 window.loadLibraryView = async function() {
     const container = document.getElementById("libraryView") || document.getElementById("mainContentArea");
     if (!container) return;
 
     const sInfo = typeof appSettings !== 'undefined' ? appSettings : {};
-    const levelStr = sInfo.teacher_level || "ថ្នាក់ទី ១";
-    const roomStr = sInfo.teacher_room || "«ក»";
-    window.currentGradeFull = `${levelStr} ${roomStr}`;
+    const activeClass = typeof window.getCurrentSelectedClass === 'function' ? window.getCurrentSelectedClass() : { level: "ថ្នាក់ទី ១", room: "«ក»" };
+    window.currentGradeLevel = activeClass.level || sInfo.teacher_level || "ថ្នាក់ទី ១";
+    window.currentGradeRoom = activeClass.room || sInfo.teacher_room || "«ក»";
+    window.currentGradeFull = `${window.currentGradeLevel} ${window.currentGradeRoom}`.trim();
     const academicYear = sInfo.academic_year || "២០២៦-២០២៧";
     const schoolName = sInfo.school_name || "សាលាបឋមសិក្សា";
+
+    const gradesList = typeof window.getAllGradesList === 'function' ? window.getAllGradesList() : ["ថ្នាក់ទី ១", "ថ្នាក់ទី ២", "ថ្នាក់ទី ៣", "ថ្នាក់ទី ៤", "ថ្នាក់ទី ៥", "ថ្នាក់ទី ៦"];
+    const roomsList = typeof window.getAllRoomsList === 'function' ? window.getAllRoomsList() : ["«ក»", "«ខ»", "«គ»", "«ឃ»"];
+    const gradesOptions = gradesList.map(g => `<option value="${g}" ${g === window.currentGradeLevel ? 'selected' : ''}>${g}</option>`).join('');
+    const roomsOptions = roomsList.map(r => `<option value="${r}" ${r === window.currentGradeRoom ? 'selected' : ''}>${r}</option>`).join('');
 
     window.loadLibSubjects();
 
@@ -129,6 +160,18 @@ window.loadLibraryView = async function() {
              <!-- Tools & Tabs Selector -->
              <div class="flex flex-wrap items-center justify-start xl:justify-end gap-3 relative z-10 w-full xl:w-auto">
                 
+                <!-- ជម្រើសថ្នាក់ និងបន្ទប់ សម្រាប់បណ្ណាល័យ -->
+                <div class="flex items-center gap-1.5 bg-white/10 border border-white/20 rounded-xl px-3 py-1.5 shadow-inner">
+                    <i class="fa-solid fa-graduation-cap text-indigo-200 text-sm"></i>
+                    <select id="libGradeSelect" onchange="window.handleLibClassChange()" class="border-none bg-transparent text-xs md:text-sm font-bold text-white outline-none cursor-pointer font-siemreap py-0 pr-1 [&>option]:text-slate-900">
+                        ${gradesOptions}
+                    </select>
+                    <span class="text-white/40">|</span>
+                    <select id="libRoomSelect" onchange="window.handleLibClassChange()" class="border-none bg-transparent text-xs md:text-sm font-bold text-amber-300 outline-none cursor-pointer font-moul py-0 pl-1 [&>option]:text-slate-900">
+                        ${roomsOptions}
+                    </select>
+                </div>
+
                 <div class="flex bg-white/10 p-1 rounded-xl w-full sm:w-auto border border-white/20 shadow-inner">
                    <button onclick="window.switchLibTab('borrow')" id="ltab-borrow" class="flex-1 sm:flex-none px-4 py-2 rounded-lg text-[11px] md:text-xs font-bold transition-all bg-white text-indigo-900 shadow-sm flex items-center justify-center gap-1.5 whitespace-nowrap">
                       <i class="fa-solid fa-hand-holding-hand"></i> កត់ត្រាខ្ចី
@@ -159,7 +202,7 @@ window.loadLibraryView = async function() {
              <div class="flex justify-between items-start mb-6 border-b border-slate-100 pb-4">
                 <div class="text-left"><br><br>
                    <p class="text-[12px] font-moul text-slate-800">${schoolName}</p>
-                   <p class="text-[12px] font-bold text-slate-700 mt-1"><span class="text-rose-600 font-moul">${window.currentGradeFull}</span></p>
+                   <p class="text-[12px] font-bold text-slate-700 mt-1"><span id="libDocGradeDisplay" class="text-rose-600 font-moul">${window.currentGradeFull}</span></p>
                 </div>
                 <div class="text-center">
                    <p class="font-moul text-indigo-900 text-[12px]">ព្រះរាជាណាចក្រកម្ពុជា</p>
@@ -254,17 +297,17 @@ window.loadLibraryView = async function() {
 // ==========================================
 window.fetchLibraryData = async function() {
     try {
-        let parts = (window.currentGradeFull || "").split(" ");
-        let levelStr = parts[0] || "ថ្នាក់ទី ១";
-        let roomStr = parts[1] || "«ក»";
-        if (parts.length > 2) {
-            levelStr = `${parts[0]} ${parts[1]}`;
-            roomStr = parts[2];
-        }
+        const activeClass = typeof window.getCurrentSelectedClass === 'function' ? window.getCurrentSelectedClass() : { level: "ថ្នាក់ទី ១", room: "«ក»" };
+        const levelStr = window.currentGradeLevel || activeClass.level || "ថ្នាក់ទី ១";
+        const roomStr = window.currentGradeRoom || activeClass.room || "«ក»";
+        window.currentGradeLevel = levelStr;
+        window.currentGradeRoom = roomStr;
+        window.currentGradeFull = `${levelStr} ${roomStr}`.trim();
 
         // 🟢 Single Source of Truth: ទាញយកសិស្សពី Student Management (គ្រប់គ្រងសិស្ស)
+        const academicYear = document.getElementById("globalAcademicYear")?.value || (window.appSettings && window.appSettings.academic_year) || "2026-2027";
         window.libStudents = typeof window.getStudentsForClass === 'function'
-            ? window.getStudentsForClass(levelStr, roomStr)
+            ? window.getStudentsForClass(levelStr, roomStr, academicYear)
             : [];
 
         window.libStudents.sort((a,b) => String(a.name||"").localeCompare(String(b.name||""), 'km'));

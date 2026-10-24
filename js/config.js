@@ -121,7 +121,7 @@ window.updateAllClassDropdowns = function() {
         scoreGradeSel.innerHTML = optHtml;
     }
 
-    // 5. Update Reports select #reportGradeSelect
+    // 5. Update Reports select #reportGradeSelect and #reportRoomSelect
     const reportGradeSel = document.getElementById("reportGradeSelect");
     if (reportGradeSel) {
         const curVal = reportGradeSel.value;
@@ -131,8 +131,37 @@ window.updateAllClassDropdowns = function() {
         });
         reportGradeSel.innerHTML = optHtml;
     }
+    const reportRoomSel = document.getElementById("reportRoomSelect");
+    if (reportRoomSel) {
+        const curVal = reportRoomSel.value;
+        let optHtml = "";
+        roomsList.forEach(r => {
+            optHtml += `<option value="${r}" ${r === curVal ? 'selected' : ''}>${r}</option>`;
+        });
+        reportRoomSel.innerHTML = optHtml;
+    }
 
-    // 6. Update Tracking Book select #tbLevelSelect
+    // 6. Update Library select #libGradeSelect and #libRoomSelect
+    const libGradeSel = document.getElementById("libGradeSelect");
+    if (libGradeSel) {
+        const curVal = libGradeSel.value;
+        let optHtml = "";
+        gradesList.forEach(g => {
+            optHtml += `<option value="${g}" ${g === curVal ? 'selected' : ''}>${g}</option>`;
+        });
+        libGradeSel.innerHTML = optHtml;
+    }
+    const libRoomSel = document.getElementById("libRoomSelect");
+    if (libRoomSel) {
+        const curVal = libRoomSel.value;
+        let optHtml = "";
+        roomsList.forEach(r => {
+            optHtml += `<option value="${r}" ${r === curVal ? 'selected' : ''}>${r}</option>`;
+        });
+        libRoomSel.innerHTML = optHtml;
+    }
+
+    // 7. Update Tracking Book select #tbLevelSelect
     const tbLevelSel = document.getElementById("tbLevelSelect");
     if (tbLevelSel) {
         const curVal = tbLevelSel.value;
@@ -143,10 +172,10 @@ window.updateAllClassDropdowns = function() {
         tbLevelSel.innerHTML = optHtml;
     }
 
-    // 7. Update Timetable & other class selects
+    // 8. Update Timetable & other class selects
     const otherSelects = document.querySelectorAll("select[id*='Grade'], select[id*='grade'], select[onchange*='handleClassChange']");
     otherSelects.forEach(sel => {
-        if (sel !== stuGradeSel && sel !== modalStuGrade && sel !== attGradeSel && sel !== scoreGradeSel && sel !== reportGradeSel && sel !== tbLevelSel) {
+        if (sel !== stuGradeSel && sel !== modalStuGrade && sel !== attGradeSel && sel !== scoreGradeSel && sel !== reportGradeSel && sel !== reportRoomSel && sel !== libGradeSel && sel !== libRoomSel && sel !== tbLevelSel) {
             const curVal = sel.value;
             let optHtml = `<option value="all">គ្រប់ថ្នាក់ទាំងអស់</option>`;
             gradesList.forEach(g => {
