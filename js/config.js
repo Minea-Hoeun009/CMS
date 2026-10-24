@@ -3,7 +3,7 @@
 // ==========================================
 
 // 👉 URL របស់ Google Apps Script (Connected & Standardized)
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyOxLfIniR0LnfOAy2t5qF9oPuOma2u6tcOlNe-YbvAZF3oxqYRJ2xnbUruLup46aP3/exec";
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby4WV8mIo0Q2YF05Sji3kasWycIGoGRJfWwfsjyMHUHnuol7Rcta1KGznIGh2hcon7W/exec";
 window.SCRIPT_URL = SCRIPT_URL;
 window.getScriptUrl = function() {
   return SCRIPT_URL;
@@ -1303,34 +1303,64 @@ window.syncAllExistingDataToGoogleSheets = async function(btnElement) {
         const teacherName = localStorage.getItem('auth_teacher_name') || "លោកគ្រូ អ្នកគ្រូ";
         const academicYear = document.getElementById("globalAcademicYear")?.value || localStorage.getItem('selected_academic_year') || "2026-2027";
 
-        // ១. Sync Class Information
-        await window.apiPost("saveClass", {
-            class_id: `CLS-${currentClass.level}-${currentClass.room}`,
-            grade: currentClass.level,
-            room: currentClass.room,
-            teacher_id: teacherId,
-            teacher_name: teacherName,
-            academic_year: academicYear
-        });
-
-        // ២. Sync All Students Batch
-        if (students && students.length > 0) {
-            await window.apiPost("saveStudentsBatch", students);
+        // ១. ព្យាយាម Sync ទាំងអស់ក្នុងពេលតែមួយ (Master Bulk Sync)
+        let masterSyncSuccess = false;
+        try {
+            const masterRes = await window.apiPost("syncAll", {
+                class: {
+                    class_id: `CLS-${currentClass.level}-${currentClass.room}`,
+                    grade: currentClass.level,
+                    room: currentClass.room,
+                    teacher_id: teacherId,
+                    teacher_name: teacherName,
+                    academic_year: academicYear
+                },
+                students: students || [],
+                scores: scores || [],
+                attendance: attendance || [],
+                library: library || []
+            });
+            if (masterRes && masterRes.status === "success") {
+                masterSyncSuccess = true;
+            }
+        } catch(e) {
+            console.warn("syncAll note, falling back to batch endpoints:", e);
         }
 
-        // ៣. Sync All Scores Batch
-        if (scores && scores.length > 0) {
-            await window.apiPost("saveScoresBatch", scores);
-        }
+        if (!masterSyncSuccess) {
+            // Fallback ទៅកាន់ Endpoint ដាច់ដោយឡែក
+            try {
+                await window.apiPost("saveClass", {
+                    class_id: `CLS-${currentClass.level}-${currentClass.room}`,
+                    grade: currentClass.level,
+                    room: currentClass.room,
+                    teacher_id: teacherId,
+                    teacher_name: teacherName,
+                    academic_year: academicYear
+                });
+            } catch(e) {
+                console.warn("saveClass notice:", e);
+            }
 
-        // ៤. Sync Attendance Batch
-        if (attendance && attendance.length > 0) {
-            await window.apiPost("saveAttendanceBatch", attendance);
-        }
+            if (students && students.length > 0) {
+                await window.apiPost("saveStudentsBatch", students);
+            }
 
-        // ៥. Sync Library Batch
-        if (library && library.length > 0) {
-            await window.apiPost("saveLibraryBatch", library);
+            if (scores && scores.length > 0) {
+                await window.apiPost("saveScoresBatch", scores);
+            }
+
+            if (attendance && attendance.length > 0) {
+                await window.apiPost("saveAttendanceBatch", attendance);
+            }
+
+            if (library && library.length > 0) {
+                try {
+                    await window.apiPost("saveLibraryBatch", library);
+                } catch(e) {
+                    await window.apiPost("saveLibrary", { data: library });
+                }
+            }
         }
 
         const msg = `✅ បាន Sync ទិន្នន័យដែលមានទាំងអស់ (សិស្ស ${students.length} នាក់) ទៅកាន់ Google Sheet ដោយជោគជ័យ!`;

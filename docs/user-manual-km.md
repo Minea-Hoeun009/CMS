@@ -99,7 +99,7 @@
   - ថ្នាក់ថ្មីនឹងបង្ហាញលើគ្រប់ Dropdowns ទាំងអស់ក្នុងប្រព័ន្ធភ្លាមៗដោយមិនបាច់ Refresh ទំព័រឡើយ!
 - **ការភ្ជាប់ Google Apps Script:**
   - ប្រព័ន្ធបានភ្ជាប់ជាមួយ Web App URL រួចជាស្រេច៖
-    `https://script.google.com/macros/s/AKfycbyOxLfIniR0LnfOAy2t5qF9oPuOma2u6tcOlNe-YbvAZF3oxqYRJ2xnbUruLup46aP3/exec`
+    `https://script.google.com/macros/s/AKfycby4WV8mIo0Q2YF05Sji3kasWycIGoGRJfWwfsjyMHUHnuol7Rcta1KGznIGh2hcon7W/exec`
   - រាល់ពេលកែប្រែទិន្នន័យ ប្រព័ន្ធធ្វើការផ្ញើទៅ Google Sheet ភ្លាមៗ (Direct Instant Sync)។
 
 ---

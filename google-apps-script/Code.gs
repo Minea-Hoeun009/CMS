@@ -1,23 +1,22 @@
 /**
  * =========================================================================
  * ប្រព័ន្ធគ្រប់គ្រងសាលារៀន (School Management System - CMS)
- * Google Apps Script Backend (Standard Relational Edition)
- * Version: 2.0 (Relational Architecture & High-Performance Batch Engine)
+ * Google Apps Script Backend (Standard Relational Edition v3.0)
  * =========================================================================
  * 
  * រចនាសម្ព័ន្ធតារាងស្តង់ដារ (Relational Tables Schema):
- * 1. Students   : [PK: id]          - ព័ត៌មានលម្អិតសិស្ស
- * 2. Teachers   : [PK: teacher_id]  - គណនី និងព័ត៌មានគ្រូបង្រៀន/បុគ្គលិក
- * 3. Classes    : [PK: class_id]    - កម្រិតថ្នាក់ បន្ទប់ និងគ្រូទទួលបន្ទុក
- * 4. Attendance : [PK: record_id]   - កំណត់ត្រាវត្តមានសិស្ស
- * 5. Scores     : [PK: score_id]    - កំណត់ត្រាពិន្ទុ និងចំណាត់ថ្នាក់
+ * 1. Students   : [PK: id]             - ព័ត៌មានលម្អិតសិស្ស
+ * 2. Teachers   : [PK: teacher_id]     - គណនី និងព័ត៌មានគ្រូបង្រៀន/បុគ្គលិក
+ * 3. Classes    : [PK: class_id]       - កម្រិតថ្នាក់ បន្ទប់ និងគ្រូទទួលបន្ទុក
+ * 4. Attendance : [PK: record_id]      - កំណត់ត្រាវត្តមានសិស្ស
+ * 5. Scores     : [PK: score_id]       - កំណត់ត្រាពិន្ទុ និងចំណាត់ថ្នាក់
  * 6. Library    : [PK: transaction_id] - កំណត់ត្រាខ្ចី-សងសៀវភៅ
- * 7. Settings   : [PK: setting_key] - ការកំណត់ទូទៅរបស់សាលារៀន
- * 8. AuditLogs  : [PK: log_id]      - កំណត់ត្រាសកម្មភាពសុវត្ថិភាព
+ * 7. Settings   : [PK: setting_key]    - ការកំណត់ទូទៅរបស់សាលារៀន
+ * 8. AuditLogs  : [PK: log_id]         - កំណត់ត្រាសកម្មភាពសុវត្ថិភាព
  * =========================================================================
  */
 
-// កំណត់ឈ្មោះសន្លឹកកិច្ចការស្តង់ដារ (Sheet Names Configuration)
+// កំណត់ឈ្មោះសន្លឹកកិច្ចការស្តង់ដារ (Standard Sheet Names Configuration)
 const SHEETS = {
   STUDENTS: 'Students',
   TEACHERS: 'Teachers',
@@ -32,9 +31,12 @@ const SHEETS = {
 // កំណត់ក្បាលជួរឈរស្តង់ដារសម្រាប់តារាងនីមួយៗ (Standard Column Definitions)
 const SCHEMAS = {
   [SHEETS.STUDENTS]: [
-    'id', 'name', 'gender', 'dob', 'grade', 'room', 'academic_year', 
-    'teacher_id', 'photo', 'phone', 'parent_name', 'status', 'poor_id', 
-    'scholarship', 'address', 'created_at', 'updated_at'
+    'id', 'name', 'name_en', 'gender', 'dob', 'grade', 'room', 'academic_year', 
+    'teacher_id', 'school_id', 'photo_url', 'photo', 'phone', 'parent_contact', 
+    'parent_name', 'father_name', 'father_job', 'mother_name', 'mother_job', 
+    'status', 'poor_id', 'scholarship', 'disability', 'pob_village', 'pob_commune', 
+    'pob_district', 'pob_province', 'curr_village', 'curr_commune', 'curr_district', 
+    'curr_province', 'address', 'enrollment_date', 'created_at', 'updated_at'
   ],
   [SHEETS.TEACHERS]: [
     'teacher_id', 'username', 'password_hash', 'salt', 'name', 'role', 
@@ -82,7 +84,7 @@ function onOpen() {
 }
 
 /**
- * បង្កើតសន្លឹកកិច្ចការ និងក្បាលតារាងស្តង់ដារដោយស្វ័យប្រវត្តិ
+ * បង្កើតសន្លឹកកិច្ចការ និងក្បាលតារាងស្តង់ដារដោយស្វ័យប្រវត្តិ ព្រមទាំងជួសជុល Header ចាស់ៗ
  */
 function setupDatabaseSheets() {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
@@ -95,8 +97,20 @@ function setupDatabaseSheets() {
       createdSheets.push(sheetName);
     }
     
-    // បង្កើត Headers ប្រសិនបើតារាងនៅទទេ
-    if (sheet.getLastRow() === 0) {
+    // បង្កើត Headers ប្រសិនបើតារាងនៅទទេ ឬ Header ខូច (លេខ 0, 1, 2)
+    const lastRow = sheet.getLastRow();
+    const lastCol = sheet.getLastColumn();
+    let needsHeaderSetup = (lastRow === 0 || lastCol === 0);
+
+    if (!needsHeaderSetup && lastCol > 0) {
+      const existingFirstCol = String(sheet.getRange(1, 1).getValue()).trim();
+      // ប្រសិនបើក្បាលជួរឈរជាលេខ "0" ឬទទេ
+      if (existingFirstCol === '0' || existingFirstCol === '') {
+        needsHeaderSetup = true;
+      }
+    }
+
+    if (needsHeaderSetup) {
       sheet.getRange(1, 1, 1, headers.length).setValues([headers]);
       
       // រចនា Header អោយស្អាត និងច្បាស់
@@ -126,18 +140,17 @@ function setupDatabaseSheets() {
 // ២. API GATEWAY: DOGET (ទាញយកទិន្នន័យ / READ OPERATIONS)
 // =========================================================================
 function doGet(e) {
-  const lock = LockService.getScriptLock();
   try {
     const params = (e && e.parameter) ? e.parameter : {};
     const action = params.action || 'ping';
 
-    // ១. Health Check / Ping
+    // ១. Health Check / Ping (មិនទាមទារ teacher_id ឡើយ)
     if (action === 'ping' || action === 'testConnection') {
       return createJsonResponse({
         status: 'success',
         message: 'Google Apps Script CMS API ដំណើរការប្រក្រតី!',
         timestamp: new Date().toISOString(),
-        version: '2.0-relational'
+        version: '3.0-relational'
       });
     }
 
@@ -156,8 +169,8 @@ function doGet(e) {
       return createJsonResponse(res);
     }
 
-    // ៣. Schema Info
-    if (action === 'getSchemaInfo') {
+    // ៣. Schema Info / Database Summary
+    if (action === 'getSchemaInfo' || action === 'getStats') {
       return createJsonResponse({
         status: 'success',
         data: getDatabaseSummary()
@@ -174,47 +187,59 @@ function doGet(e) {
 
     // ៥. Get Students (ចម្រាញ់តាម Academic Year, Grade, Room, Teacher, Status)
     if (action === 'getStudents') {
-      const students = queryTable(SHEETS.STUDENTS, {
-        academic_year: params.academic_year,
-        grade: params.grade,
-        room: params.room,
-        teacher_id: params.teacher_id,
-        status: params.status
-      });
+      const filter = {};
+      if (params.academic_year && params.academic_year !== 'all') filter.academic_year = params.academic_year;
+      if (params.grade && params.grade !== 'all') filter.grade = params.grade;
+      if (params.room && params.room !== 'all') filter.room = params.room;
+      if (params.status && params.status !== 'all') filter.status = params.status;
+      if (params.teacher_id && params.teacher_id !== 'all' && !params.teacher_id.includes('ADMIN')) {
+        filter.teacher_id = params.teacher_id;
+      }
+      
+      const students = queryTable(SHEETS.STUDENTS, filter);
       return createJsonResponse({ status: 'success', data: students });
     }
 
     // ៦. Get Scores
     if (action === 'getScores') {
-      const scores = queryTable(SHEETS.SCORES, {
-        academic_year: params.academic_year,
-        grade: params.grade,
-        room: params.room,
-        month: params.month,
-        teacher_id: params.teacher_id
-      });
+      const filter = {};
+      if (params.academic_year && params.academic_year !== 'all') filter.academic_year = params.academic_year;
+      if (params.grade && params.grade !== 'all') filter.grade = params.grade;
+      if (params.room && params.room !== 'all') filter.room = params.room;
+      if (params.month && params.month !== 'all') filter.month = params.month;
+      if (params.teacher_id && params.teacher_id !== 'all' && !params.teacher_id.includes('ADMIN')) {
+        filter.teacher_id = params.teacher_id;
+      }
+
+      const scores = queryTable(SHEETS.SCORES, filter);
       return createJsonResponse({ status: 'success', data: scores });
     }
 
     // ៧. Get Attendance
     if (action === 'getAttendance') {
-      const attendance = queryTable(SHEETS.ATTENDANCE, {
-        academic_year: params.academic_year,
-        grade: params.grade,
-        room: params.room,
-        month: params.month,
-        date: params.date,
-        teacher_id: params.teacher_id
-      });
+      const filter = {};
+      if (params.academic_year && params.academic_year !== 'all') filter.academic_year = params.academic_year;
+      if (params.grade && params.grade !== 'all') filter.grade = params.grade;
+      if (params.room && params.room !== 'all') filter.room = params.room;
+      if (params.month && params.month !== 'all') filter.month = params.month;
+      if (params.date && params.date !== 'all') filter.date = params.date;
+      if (params.teacher_id && params.teacher_id !== 'all' && !params.teacher_id.includes('ADMIN')) {
+        filter.teacher_id = params.teacher_id;
+      }
+
+      const attendance = queryTable(SHEETS.ATTENDANCE, filter);
       return createJsonResponse({ status: 'success', data: attendance });
     }
 
     // ៨. Get Library
     if (action === 'getLibrary') {
-      const library = queryTable(SHEETS.LIBRARY, {
-        academic_year: params.academic_year,
-        status: params.status
-      });
+      const filter = {};
+      if (params.academic_year && params.academic_year !== 'all') filter.academic_year = params.academic_year;
+      if (params.status && params.status !== 'all') filter.status = params.status;
+      if (params.grade && params.grade !== 'all') filter.grade = params.grade;
+      if (params.room && params.room !== 'all') filter.room = params.room;
+
+      const library = queryTable(SHEETS.LIBRARY, filter);
       return createJsonResponse({ status: 'success', data: library });
     }
 
@@ -234,9 +259,11 @@ function doGet(e) {
 
     // ១០. Get Classes
     if (action === 'getClasses') {
-      const classes = queryTable(SHEETS.CLASSES, {
-        academic_year: params.academic_year
-      });
+      const filter = {};
+      if (params.academic_year && params.academic_year !== 'all') filter.academic_year = params.academic_year;
+      if (params.teacher_id && params.teacher_id !== 'all') filter.teacher_id = params.teacher_id;
+
+      const classes = queryTable(SHEETS.CLASSES, filter);
       return createJsonResponse({ status: 'success', data: classes });
     }
 
@@ -259,7 +286,7 @@ function doGet(e) {
 function doPost(e) {
   // ប្រើប្រាស់ ScriptLock ដើម្បីការពារការសរសេរជាន់គ្នា (Race Conditions)
   const lock = LockService.getScriptLock();
-  const hasLock = lock.tryLock(15000); // រង់ចាំអតិបរមា 15 វិនាទី
+  const hasLock = lock.tryLock(30000); // រង់ចាំអតិបរមា 30 វិនាទី
   
   if (!hasLock) {
     return createJsonResponse({
@@ -279,7 +306,7 @@ function doPost(e) {
     const action = payload.action;
     const teacherId = payload.teacher_id || '';
     const academicYear = payload.academic_year || '';
-    const data = payload.data || payload;
+    const data = payload.data !== undefined ? payload.data : payload;
 
     // ១. Save Single Student
     if (action === 'saveStudent') {
@@ -334,7 +361,7 @@ function doPost(e) {
     }
 
     // ៤. Save Scores Batch
-    if (action === 'saveScoresBatch') {
+    if (action === 'saveScores' || action === 'saveScoresBatch') {
       const scoresList = Array.isArray(data) ? data : (data.scores || data.data || []);
       if (!Array.isArray(scoresList) || scoresList.length === 0) {
         return createJsonResponse({ status: 'success', message: 'គ្មានទិន្នន័យពិន្ទុត្រូវកត់ត្រា' });
@@ -358,7 +385,7 @@ function doPost(e) {
     }
 
     // ៥. Save Attendance Batch
-    if (action === 'saveAttendanceBatch') {
+    if (action === 'saveAttendance' || action === 'saveAttendanceBatch') {
       const attList = Array.isArray(data) ? data : (data.attendance || data.data || []);
       if (!Array.isArray(attList) || attList.length === 0) {
         return createJsonResponse({ status: 'success', message: 'គ្មានទិន្នន័យវត្តមានត្រូវកត់ត្រា' });
@@ -381,20 +408,101 @@ function doPost(e) {
       });
     }
 
-    // ៦. Save Library
-    if (action === 'saveLibrary') {
+    // ៦. Save Library Batch
+    if (action === 'saveLibrary' || action === 'saveLibraryBatch') {
       const libList = Array.isArray(data) ? data : (data.library || data.data || []);
       if (Array.isArray(libList) && libList.length > 0) {
+        const nowIso = new Date().toISOString();
         libList.forEach(item => {
           if (!item.transaction_id) item.transaction_id = item.id || `TX-${Date.now()}-${Math.floor(Math.random()*1000)}`;
-          item.updated_at = new Date().toISOString();
+          item.updated_at = nowIso;
         });
         upsertRecords(SHEETS.LIBRARY, libList, 'transaction_id');
       }
       return createJsonResponse({ status: 'success', message: 'បានកត់ត្រាទិន្នន័យបណ្ណាល័យជោគជ័យ' });
     }
 
-    // ៧. Save Settings
+    // ៧. Save Class / Classes Batch
+    if (action === 'saveClass' || action === 'saveClassesBatch') {
+      const classList = Array.isArray(data) ? data : [data];
+      if (Array.isArray(classList) && classList.length > 0) {
+        const nowIso = new Date().toISOString();
+        classList.forEach(c => {
+          if (!c.class_id) c.class_id = `CLS-${c.grade || ''}-${c.room || ''}`;
+          c.updated_at = nowIso;
+        });
+        upsertRecords(SHEETS.CLASSES, classList, 'class_id');
+      }
+      return createJsonResponse({ status: 'success', message: 'បានកត់ត្រាព័ត៌មានថ្នាក់រៀនជោគជ័យ' });
+    }
+
+    // ៨. All-in-One Master Sync (syncAll)
+    if (action === 'syncAll' || action === 'syncAllBatch') {
+      const nowIso = new Date().toISOString();
+      const summary = {};
+
+      if (data.class) {
+        const cls = data.class;
+        if (!cls.class_id) cls.class_id = `CLS-${cls.grade || ''}-${cls.room || ''}`;
+        cls.updated_at = nowIso;
+        upsertRecords(SHEETS.CLASSES, [cls], 'class_id');
+        summary.class = 1;
+      }
+
+      const studentsList = data.students || (Array.isArray(data) ? data : []);
+      if (Array.isArray(studentsList) && studentsList.length > 0) {
+        studentsList.forEach(s => {
+          if (teacherId && !s.teacher_id) s.teacher_id = teacherId;
+          if (academicYear && !s.academic_year) s.academic_year = academicYear;
+          s.updated_at = nowIso;
+          if (!s.created_at) s.created_at = nowIso;
+        });
+        upsertRecords(SHEETS.STUDENTS, studentsList, 'id');
+        summary.students = studentsList.length;
+      }
+
+      const scoresList = data.scores || [];
+      if (Array.isArray(scoresList) && scoresList.length > 0) {
+        scoresList.forEach(s => {
+          if (!s.score_id) s.score_id = `${s.student_id}_${s.academic_year || academicYear}_${s.month || ''}_${s.subject || 'TOTAL'}`;
+          if (teacherId && !s.teacher_id) s.teacher_id = teacherId;
+          if (academicYear && !s.academic_year) s.academic_year = academicYear;
+          s.updated_at = nowIso;
+        });
+        upsertRecords(SHEETS.SCORES, scoresList, 'score_id');
+        summary.scores = scoresList.length;
+      }
+
+      const attList = data.attendance || [];
+      if (Array.isArray(attList) && attList.length > 0) {
+        attList.forEach(a => {
+          if (!a.record_id) a.record_id = `${a.student_id}_${a.date}_${a.academic_year || academicYear}`;
+          if (teacherId && !a.teacher_id) a.teacher_id = teacherId;
+          if (academicYear && !a.academic_year) a.academic_year = academicYear;
+          a.updated_at = nowIso;
+        });
+        upsertRecords(SHEETS.ATTENDANCE, attList, 'record_id');
+        summary.attendance = attList.length;
+      }
+
+      const libList = data.library || [];
+      if (Array.isArray(libList) && libList.length > 0) {
+        libList.forEach(item => {
+          if (!item.transaction_id) item.transaction_id = item.id || `TX-${Date.now()}-${Math.floor(Math.random()*1000)}`;
+          item.updated_at = nowIso;
+        });
+        upsertRecords(SHEETS.LIBRARY, libList, 'transaction_id');
+        summary.library = libList.length;
+      }
+
+      return createJsonResponse({
+        status: 'success',
+        message: 'បានធ្វើសមកាលកម្មទិន្នន័យទាំងអស់ទៅកាន់ Google Sheets ជោគជ័យ!',
+        data: summary
+      });
+    }
+
+    // ៩. Save Settings
     if (action === 'saveSettings') {
       const settingsObj = data;
       const settingsRecords = [];
@@ -412,7 +520,7 @@ function doPost(e) {
       return createJsonResponse({ status: 'success', message: 'បានកត់ត្រាការកំណត់សាលារៀនជោគជ័យ' });
     }
 
-    // ៨. User Login (Legacy Auth Support)
+    // ១០. User Login (Legacy Auth Support)
     if (action === 'loginUser') {
       const username = String(payload.username || data.username || '').trim();
       const password = String(payload.password || data.password || '').trim();
@@ -426,7 +534,6 @@ function doPost(e) {
 
       // Check simple or hash
       if (matched.password_hash) {
-        // If hashed in sheets, verify or return teacher record for client hash verify
         return createJsonResponse({
           status: 'success',
           data: {
@@ -444,7 +551,7 @@ function doPost(e) {
       return createJsonResponse({ status: 'success', data: matched });
     }
 
-    // ៩. Register / Update Teacher
+    // ១១. Register / Update Teacher
     if (action === 'registerUser') {
       const teacher = data;
       if (!teacher.teacher_id) teacher.teacher_id = `TCH-${Date.now()}`;
@@ -455,7 +562,7 @@ function doPost(e) {
       return createJsonResponse({ status: 'success', message: 'បានចុះឈ្មោះគ្រូជោគជ័យ', teacher_id: teacher.teacher_id });
     }
 
-    // ១០. Log Audit
+    // ១២. Log Audit
     if (action === 'logAudit') {
       const audit = {
         log_id: `LOG-${Date.now()}`,
@@ -558,23 +665,29 @@ function upsertRecords(sheetName, records, primaryKeyName) {
 
   const sheet = getOrCreateSheet(sheetName);
   const lastRow = sheet.getLastRow();
-  const lastCol = sheet.getLastColumn();
 
   // បើគ្មានទិន្នន័យទាល់តែសោះ
   if (lastRow === 0) {
     setupDatabaseSheets();
   }
 
-  const headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0].map(h => String(h).trim());
-  const pkIndex = headers.indexOf(primaryKeyName);
+  let headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0].map(h => String(h).trim());
+  let pkIndex = headers.indexOf(primaryKeyName);
+  
   if (pkIndex === -1) {
-    throw new Error(`Primary Key [${primaryKeyName}] រកមិនឃើញក្នុងតារាង ${sheetName} ឡើយ`);
+    // បើសិនជា Sheet មាន headers ចាស់ខូច (ឧ. "0", "1") ជួសជុលភ្លាម
+    setupDatabaseSheets();
+    headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0].map(h => String(h).trim());
+    pkIndex = headers.indexOf(primaryKeyName);
+    if (pkIndex === -1) {
+      throw new Error(`Primary Key [${primaryKeyName}] រកមិនឃើញក្នុងតារាង ${sheetName} ឡើយ`);
+    }
   }
 
   // អានទិន្នន័យចាស់មកបង្កើត Index Map
   let existingValues = [];
-  if (lastRow > 1) {
-    existingValues = sheet.getRange(2, 1, lastRow - 1, headers.length).getValues();
+  if (sheet.getLastRow() > 1) {
+    existingValues = sheet.getRange(2, 1, sheet.getLastRow() - 1, headers.length).getValues();
   }
 
   const rowIndexMap = new Map();
@@ -590,9 +703,16 @@ function upsertRecords(sheetName, records, primaryKeyName) {
     const pkVal = String(rec[primaryKeyName] || '').trim();
     if (!pkVal) continue;
 
-    // បង្កើតជួរដេកតាមលំដាប់ Header
+    // បង្កើតជួរដេកតាមលំដាប់ Header ជាមួយ Fallback Aliases
     const rowValues = headers.map(h => {
-      const v = rec[h];
+      let v = rec[h];
+      // Fallback Aliases
+      if ((v === undefined || v === null) && h === 'photo') v = rec['photo_url'];
+      if ((v === undefined || v === null) && h === 'photo_url') v = rec['photo'];
+      if ((v === undefined || v === null) && h === 'phone') v = rec['parent_contact'] || rec['contact'];
+      if ((v === undefined || v === null) && h === 'parent_contact') v = rec['phone'] || rec['contact'];
+      if ((v === undefined || v === null) && h === 'parent_name') v = rec['father_name'] || rec['mother_name'];
+      
       if (v === undefined || v === null) return '';
       if (typeof v === 'object') return JSON.stringify(v);
       return v;
@@ -740,12 +860,11 @@ function showHelpDialog() {
       <p>កូដនេះបម្រើជា API Server សម្រាប់ភ្ជាប់ Google Spreadsheet ជាមួយប្រព័ន្ធ Classroom Management System (CMS)។</p>
       <h4>ជំហានដាក់ឱ្យប្រើប្រាស់ (Deploy as Web App):</h4>
       <ol>
-        <li>ចុចប៊ូតុងពណ៌ខៀវ <b>Deploy</b> (នៅខាងស្តាំលើ) &gt; <b>New deployment</b></li>
-        <li>ជ្រើសរើសប្រភេទ <b>Web app</b></li>
-        <li>កំណត់ <b>Execute as: Me</b></li>
+        <li>ចុចប៊ូតុងពណ៌ខៀវ <b>Deploy</b> (នៅខាងស្តាំលើ) &gt; <b>Manage deployments</b></li>
+        <li>ចុចរូបខ្មៅដៃ <b>Edit</b> (កែប្រែ)</li>
+        <li>នៅត្រង់ Version ជ្រើសរើស <b>New version</b></li>
         <li>កំណត់ <b>Who has access: Anyone</b> (សំខាន់បំផុត ដើម្បីឱ្យ CMS អាចបញ្ជូនទិន្នន័យបាន)</li>
         <li>ចុច <b>Deploy</b> រួច Copy យក <b>Web App URL</b></li>
-        <li>យក URL ទៅបិទភ្ជាប់ក្នុងទំព័រ <b>Settings &gt; Google Sheets &amp; Apps Script</b> ក្នុងប្រព័ន្ធ CMS។</li>
       </ol>
     </div>
   `).setWidth(480).setHeight(360);
