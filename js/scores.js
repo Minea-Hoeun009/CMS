@@ -1289,11 +1289,26 @@ window.loadScoresView = async function() {
     const roomStr = teacherGradeInfo.room || sInfo.teacher_room || "«ក»";
     const gradeFull = `${levelStr} ${roomStr}`;
 
-    const gradesList = ["ថ្នាក់ទី ១", "ថ្នាក់ទី ២", "ថ្នាក់ទី ៣", "ថ្នាក់ទី ៤", "ថ្នាក់ទី ៥", "ថ្នាក់ទី ៦", "ថ្នាក់ទី ៧", "ថ្នាក់ទី ៨", "ថ្នាក់ទី ៩", "ថ្នាក់ទី ១០", "ថ្នាក់ទី ១១", "ថ្នាក់ទី ១២"];
-    const gradesOptions = gradesList.map(g => `<option value="${g}" ${g === levelStr ? 'selected' : ''}>${g}</option>`).join('');
+    const struct = window.academicStructure || window.defaultAcademicStructure || {};
+    const structGrades = Array.isArray(struct.grades) ? struct.grades.map(g => (typeof g === 'object' ? g.name : g)).filter(Boolean) : [];
+    const allGradesSet = new Set(["ថ្នាក់ទី ១", "ថ្នាក់ទី ២", "ថ្នាក់ទី ៣", "ថ្នាក់ទី ៤", "ថ្នាក់ទី ៥", "ថ្នាក់ទី ៦", "ថ្នាក់ទី ៧", "ថ្នាក់ទី ៨", "ថ្នាក់ទី ៩", "ថ្នាក់ទី ១០", "ថ្នាក់ទី ១១", "ថ្នាក់ទី ១២"]);
+    structGrades.forEach(g => allGradesSet.add(g));
+    (window.allStudents || []).forEach(s => {
+        if (s && s.grade && s.grade.trim()) allGradesSet.add(s.grade.trim());
+    });
+    const gradesOptions = [...allGradesSet].map(g => `<option value="${g}" ${g === levelStr ? 'selected' : ''}>${g}</option>`).join('');
 
-    const roomsList = ["«ក»", "«ខ»", "«គ»", "«ឃ»", "«ង»"];
-    const roomsOptions = roomsList.map(r => `<option value="${r}" ${r === roomStr ? 'selected' : ''}>${r}</option>`).join('');
+    const structRooms = [];
+    if (Array.isArray(struct.grades)) {
+        struct.grades.forEach(g => {
+            if (Array.isArray(g.rooms)) g.rooms.forEach(r => structRooms.push(r));
+        });
+    }
+    const roomsSet = new Set(["«ក»", "«ខ»", "«គ»", "«ឃ»", "«ង»", ...structRooms]);
+    (window.allStudents || []).forEach(s => {
+        if (s && s.room && s.room.trim()) roomsSet.add(s.room.trim());
+    });
+    const roomsOptions = [...roomsSet].map(r => `<option value="${r}" ${r === roomStr ? 'selected' : ''}>${r}</option>`).join('');
 
     container.className = "flex flex-col flex-1 w-full h-full bg-slate-50/50 transition duration-300 min-h-0 relative";
     

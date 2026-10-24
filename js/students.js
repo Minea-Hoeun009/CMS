@@ -154,17 +154,41 @@ window.loadStudentsView = async function() {
             if (teacherScope.room) initialSelectedRoom = teacherScope.room;
         }
 
-        let gradesOptions = `<option value="all" ${initialSelectedGrade === 'all' ? 'selected' : ''}>គ្រប់ថ្នាក់ (All Classes)</option>`;
         const toKhNum = typeof window.toKhmerNum === 'function' ? window.toKhmerNum : String;
+        const struct = window.academicStructure || window.defaultAcademicStructure || {};
+        const structGrades = Array.isArray(struct.grades) ? struct.grades.map(g => (typeof g === 'object' ? g.name : g)).filter(Boolean) : [];
+        
+        const allGradesSet = new Set();
         for(let i = 1; i <= 12; i++) {
-            const khGrade = toKhNum(i);
-            const gVal = `ថ្នាក់ទី ${khGrade}`;
-            gradesOptions += `<option value="${gVal}" ${gVal === initialSelectedGrade ? 'selected' : ''}>${gVal}</option>`;
+            allGradesSet.add(`ថ្នាក់ទី ${toKhNum(i)}`);
         }
+        structGrades.forEach(g => allGradesSet.add(g));
+        (window.allStudents || []).forEach(s => {
+            if (s && s.grade && s.grade.trim()) {
+                const norm = normalizeGrade(s.grade);
+                if (norm) allGradesSet.add(norm);
+                else allGradesSet.add(s.grade.trim());
+            }
+        });
 
-        const roomsList = ["«ក»", "«ខ»", "«គ»", "«ឃ»", "«ង»"];
-        let roomsOptions = `<option value="all" ${initialSelectedRoom === 'all' ? 'selected' : ''}>គ្រប់បន្ទប់</option>`;
-        roomsList.forEach(r => {
+        let gradesOptions = `<option value="all" ${initialSelectedGrade === 'all' ? 'selected' : ''}>គ្រប់ថ្នាក់ទាំងអស់ (All Classes)</option>`;
+        allGradesSet.forEach(gVal => {
+            gradesOptions += `<option value="${gVal}" ${gVal === initialSelectedGrade ? 'selected' : ''}>${gVal}</option>`;
+        });
+
+        const structRooms = [];
+        if (Array.isArray(struct.grades)) {
+            struct.grades.forEach(g => {
+                if (Array.isArray(g.rooms)) g.rooms.forEach(r => structRooms.push(r));
+            });
+        }
+        const roomsSet = new Set(["«ក»", "«ខ»", "«គ»", "«ឃ»", "«ង»", ...structRooms]);
+        (window.allStudents || []).forEach(s => {
+            if (s && s.room && s.room.trim()) roomsSet.add(s.room.trim());
+        });
+
+        let roomsOptions = `<option value="all" ${initialSelectedRoom === 'all' ? 'selected' : ''}>គ្រប់បន្ទប់ទាំងអស់ (All Rooms)</option>`;
+        roomsSet.forEach(r => {
             roomsOptions += `<option value="${r}" ${r === initialSelectedRoom ? 'selected' : ''}>បន្ទប់ ${r}</option>`;
         });
 
@@ -436,8 +460,11 @@ window.filterStudents = function() {
 
         // Year check: match if academic_year matches currentYear, or if student doesn't have an academic_year set
         const sYear = String(s.academic_year || "").trim();
-        if (currentYear && sYear && sYear !== "undefined" && !sYear.includes(currentYear) && !currentYear.includes(sYear)) {
-            return false;
+        if (currentYear && currentYear !== "all" && sYear && sYear !== "undefined" && !sYear.includes(currentYear) && !currentYear.includes(sYear)) {
+            // For admin viewing all classes and not explicitly filtering, show all students
+            if (!isSchoolOrSysAdmin || (grade !== "all")) {
+                return false;
+            }
         }
 
         const normGrade = normalizeGrade(s.grade);

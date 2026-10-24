@@ -452,8 +452,9 @@ window.AppAuth = {
             localStorage.setItem('auth_username', teacherData.username || user);
             localStorage.setItem('auth_role', normalizedRoles[0] || "teacher");
             localStorage.setItem('auth_roles', JSON.stringify(normalizedRoles));
-            localStorage.setItem('auth_assigned_grade', teacherData.assigned_grade || "ថ្នាក់ទី ១");
-            localStorage.setItem('auth_assigned_room', teacherData.assigned_room || "«ក»");
+            const isAdminRole = normalizedRoles.some(r => r === 'school_admin' || r === 'system_admin' || r === 'admin');
+            localStorage.setItem('auth_assigned_grade', isAdminRole ? "all" : (teacherData.assigned_grade || "ថ្នាក់ទី ១"));
+            localStorage.setItem('auth_assigned_room', isAdminRole ? "all" : (teacherData.assigned_room || "«ក»"));
             localStorage.setItem('auth_school_id', teacherData.school_id || "SCH-001");
             localStorage.setItem('auth_status', teacherData.status || "active");
 
@@ -1006,6 +1007,14 @@ window.canEditRecords = function() {
 
 // ទទួលព័ត៌មានវិសាលភាពទទួលខុសត្រូវ (Assigned Scope)
 window.getAssignedScope = function() {
+    const isAdmin = typeof window.isSchoolAdmin === 'function' ? window.isSchoolAdmin() : false;
+    if (isAdmin) {
+        return {
+            school_id: localStorage.getItem('auth_school_id') || window.AuthState?.school_id || "SCH-001",
+            grade: "all",
+            room: "all"
+        };
+    }
     return {
         school_id: localStorage.getItem('auth_school_id') || window.AuthState?.school_id || "SCH-001",
         grade: (localStorage.getItem('auth_assigned_grade') || window.AuthState?.assigned_grade || "").trim(),

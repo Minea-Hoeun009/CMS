@@ -20,7 +20,9 @@ window.toKhmerNum = window.toKhmerNum || function(str) {
 };
 
 function normalizeGrade(str) {
-    let s = String(str || "ថ្នាក់ទី ១").trim();
+    if (!str) return "ថ្នាក់ទី ១";
+    let s = String(str).trim();
+    if (s === "all" || s === "គ្រប់ថ្នាក់" || s === "គ្រប់ថ្នាក់ទាំងអស់") return "all";
     const khmerToArabic = {'០':'0', '១':'1', '២':'2', '៣':'3', '៤':'4', '៥':'5', '៦':'6', '៧':'7', '៨':'8', '៩':'9'};
     let arabicStr = s.replace(/[០-៩]/g, match => khmerToArabic[match]);
     let match = arabicStr.match(/[0-9]+/);
@@ -86,6 +88,14 @@ function normalizeStatus(statusRaw) {
 
 // 🟢 អនុគមន៍ថ្មី: ទាញយកថ្នាក់/បន្ទប់ ដោយស្វ័យប្រវត្តិពីបញ្ជីសិស្ស 🟢
 window.getTeacherGradeInfo = function() {
+    const isSchoolOrSysAdmin = typeof window.isSchoolAdmin === 'function' ? window.isSchoolAdmin() : false;
+    if (isSchoolOrSysAdmin) {
+        return {
+            level: "all",
+            room: "all",
+            isAdmin: true
+        };
+    }
     const currentTeacherId = window.AuthState ? window.AuthState.teacherId : localStorage.getItem('auth_teacher_id');
     const currentYearStr = document.getElementById("globalAcademicYear")?.value || localStorage.getItem('selected_academic_year') || "2026-2027";
     
@@ -120,15 +130,46 @@ window.loadAttendanceView = async function() {
         const sInfo = typeof appSettings !== 'undefined' ? appSettings : (JSON.parse(localStorage.getItem('school_settings') || '{}'));
         const academicYear = document.getElementById("globalAcademicYear")?.value || localStorage.getItem('selected_academic_year') || sInfo.academic_year || "2026-2027";
         
+        const isSchoolOrSysAdmin = typeof window.isSchoolAdmin === 'function' ? window.isSchoolAdmin() : false;
         const teacherGradeInfo = typeof window.getTeacherGradeInfo === 'function' ? window.getTeacherGradeInfo() : { level: "ថ្នាក់ទី ១", room: "«ក»" };
-        const initialGrade = normalizeGrade(teacherGradeInfo.level || "ថ្នាក់ទី ១");
-        const initialRoom = teacherGradeInfo.room || "«ក»";
+        const initialGrade = isSchoolOrSysAdmin ? "all" : normalizeGrade(teacherGradeInfo.level || "ថ្នាក់ទី ១");
+        const initialRoom = isSchoolOrSysAdmin ? "all" : (teacherGradeInfo.room || "«ក»");
 
-        const gradesList = ["ថ្នាក់ទី ១", "ថ្នាក់ទី ២", "ថ្នាក់ទី ៣", "ថ្នាក់ទី ៤", "ថ្នាក់ទី ៥", "ថ្នាក់ទី ៦", "ថ្នាក់ទី ៧", "ថ្នាក់ទី ៨", "ថ្នាក់ទី ៩", "ថ្នាក់ទី ១០", "ថ្នាក់ទី ១១", "ថ្នាក់ទី ១២"];
-        const gradesOptions = gradesList.map(g => `<option value="${g}" ${g === initialGrade ? 'selected' : ''}>${g}</option>`).join('');
+        const struct = window.academicStructure || window.defaultAcademicStructure || {};
+        const structGrades = Array.isArray(struct.grades) ? struct.grades.map(g => (typeof g === 'object' ? g.name : g)).filter(Boolean) : [];
+        const allGradesSet = new Set();
+        for(let i = 1; i <= 12; i++) {
+            allGradesSet.add(`ថ្នាក់ទី ${window.toKhmerNum(i)}`);
+        }
+        structGrades.forEach(g => allGradesSet.add(g));
+        (window.allStudents || []).forEach(s => {
+            if (s && s.grade) {
+                const norm = normalizeGrade(s.grade);
+                if (norm) allGradesSet.add(norm);
+                else allGradesSet.add(s.grade.trim());
+            }
+        });
 
-        const roomsList = ["«ក»", "«ខ»", "«គ»", "«ឃ»", "«ង»"];
-        const roomsOptions = roomsList.map(r => `<option value="${r}" ${r === initialRoom ? 'selected' : ''}>${r}</option>`).join('');
+        let gradesOptions = `<option value="all" ${initialGrade === 'all' ? 'selected' : ''}>គ្រប់ថ្នាក់ទាំងអស់ (All Classes)</option>`;
+        allGradesSet.forEach(g => {
+            gradesOptions += `<option value="${g}" ${g === initialGrade ? 'selected' : ''}>${g}</option>`;
+        });
+
+        const structRooms = [];
+        if (Array.isArray(struct.grades)) {
+            struct.grades.forEach(g => {
+                if (Array.isArray(g.rooms)) g.rooms.forEach(r => structRooms.push(r));
+            });
+        }
+        const roomsSet = new Set(["«ក»", "«ខ»", "«គ»", "«ឃ»", "«ង»", ...structRooms]);
+        (window.allStudents || []).forEach(s => {
+            if (s && s.room && s.room.trim()) roomsSet.add(s.room.trim());
+        });
+
+        let roomsOptions = `<option value="all" ${initialRoom === 'all' ? 'selected' : ''}>គ្រប់បន្ទប់ទាំងអស់ (All Rooms)</option>`;
+        roomsSet.forEach(r => {
+            roomsOptions += `<option value="${r}" ${r === initialRoom ? 'selected' : ''}>${r}</option>`;
+        });
 
         const defaultGrade = `${initialGrade} ${initialRoom}`;
         const currentYear = new Date().getFullYear();
@@ -368,7 +409,13 @@ window.fetchMonthlyAttendance = async function(forceRefresh = false) {
     if(titleEl) titleEl.textContent = month;
 
     const attHeaderGrade = document.getElementById("attHeaderGrade");
-    if (attHeaderGrade) attHeaderGrade.textContent = `${selectedGrade.replace('ថ្នាក់ទី', '').trim()} ${selectedRoom}`;
+    if (attHeaderGrade) {
+        if (selectedGrade === 'all') {
+            attHeaderGrade.textContent = selectedRoom === 'all' ? 'គ្រប់ថ្នាក់ទាំងអស់' : `គ្រប់ថ្នាក់ (បន្ទប់ ${selectedRoom})`;
+        } else {
+            attHeaderGrade.textContent = `${selectedGrade.replace('ថ្នាក់ទី', '').trim()} ${selectedRoom}`;
+        }
+    }
 
     // រៀបចំប្រតិទិន
     const monthMap = { "មករា": 1, "កុម្ភៈ": 2, "មីនា": 3, "មេសា": 4, "ឧសភា": 5, "មិថុនា": 6, "កក្កដា": 7, "សីហា": 8, "កញ្ញា": 9, "តុលា": 10, "វិច្ឆិកា": 11, "ធ្នូ": 12 };

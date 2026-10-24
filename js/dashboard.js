@@ -45,8 +45,11 @@ window.loadDashboard = function() {
         const uniqueClasses = new Set(students.map(s => `${s.grade || 'ថ្នាក់ទី ១'} ${s.room || '«ក»'}`.trim()));
         const totalClasses = uniqueClasses.size || 1;
 
+        const isSchoolOrSysAdmin = typeof window.isSchoolAdmin === 'function' ? window.isSchoolAdmin() : false;
         let teacherGradeStr = "មិនទាន់កំណត់ថ្នាក់រៀន";
-        if (students.length > 0) {
+        if (isSchoolOrSysAdmin) {
+            teacherGradeStr = `រដ្ឋបាលសាលារៀន (គ្រប់គ្រងគ្រប់កម្រិតថ្នាក់ - ${totalClasses} ថ្នាក់)`;
+        } else if (students.length > 0) {
             let sGrade = String(students[0].grade || "ថ្នាក់ទី 1").trim();
             if (!sGrade.includes("ថ្នាក់ទី")) sGrade = "ថ្នាក់ទី " + sGrade;
             teacherGradeStr = `${sGrade} ${students[0].room || '«ក»'}`;
@@ -139,7 +142,7 @@ window.loadDashboard = function() {
                                     សួស្តី ${teacherName}! 👋
                                 </h2>
                                 <p class="text-indigo-200 text-sm md:text-base font-bold max-w-2xl leading-relaxed">
-                                    របាយការណ៍សង្ខេបអំពីទិន្នន័យសិស្ស វត្តមានប្រចាំថ្ងៃ និងលទ្ធផលសិក្សាជាក់ស្តែងក្នុងថ្នាក់រៀន
+                                    ${isSchoolOrSysAdmin ? "របាយការណ៍សង្ខេបអំពីទិន្នន័យសិស្ស វត្តមានប្រចាំថ្ងៃ និងលទ្ធផលសិក្សាទូទាំងសាលារៀន" : "របាយការណ៍សង្ខេបអំពីទិន្នន័យសិស្ស វត្តមានប្រចាំថ្ងៃ និងលទ្ធផលសិក្សាជាក់ស្តែងក្នុងថ្នាក់រៀន"}
                                 </p>
                             </div>
                             
@@ -164,7 +167,7 @@ window.loadDashboard = function() {
                                 <div class="w-10 h-10 bg-blue-50 dark:bg-blue-950 text-blue-600 dark:text-blue-400 rounded-xl flex items-center justify-center text-lg"><i class="fa-solid fa-users"></i></div>
                                 <span class="bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 px-2 py-0.5 rounded-lg text-[10px] font-bold">សរុប</span>
                             </div>
-                            <p class="text-slate-400 text-[11px] font-bold uppercase tracking-wider">សិស្សក្នុងបន្ទុក</p>
+                            <p class="text-slate-400 text-[11px] font-bold uppercase tracking-wider">${isSchoolOrSysAdmin ? "សិស្សសរុបទូទាំងសាលា" : "សិស្សក្នុងបន្ទុក"}</p>
                             <p class="text-3xl font-black text-slate-800 dark:text-white mt-1">${totalStudents} <span class="text-xs font-normal text-slate-400">នាក់</span></p>
                         </div>
 
