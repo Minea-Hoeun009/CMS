@@ -936,8 +936,12 @@ window.normalizeRoles = function(rolesInput, fallbackRole = "teacher") {
 
 // ទាញយក Roles ទាំងអស់របស់អ្នកប្រើប្រាស់បច្ចុប្បន្ន
 window.getUserRoles = function() {
-    let roles = window.AuthState?.roles || window.AppAuth?.state?.roles;
-    if (Array.isArray(roles) && roles.length > 0) return roles;
+    if (window.AuthState && Array.isArray(window.AuthState.roles) && window.AuthState.roles.length > 0) {
+        return window.AuthState.roles;
+    }
+    if (window.AppAuth && window.AppAuth.state && window.AppAuth.state.isLoggedIn && Array.isArray(window.AppAuth.state.roles) && window.AppAuth.state.roles.length > 0) {
+        return window.AppAuth.state.roles;
+    }
     
     const storedRolesJson = localStorage.getItem('auth_roles');
     if (storedRolesJson) {

@@ -86,20 +86,29 @@ window.loadAcademicStructure = function() {
 };
 window.loadAcademicStructure();
 
-window.saveAcademicStructure = async function(structure) {
+window.saveAcademicStructure = function(structure) {
     window.academicStructure = structure;
-    localStorage.setItem("academic_structure", JSON.stringify(structure));
+    try {
+        localStorage.setItem("academic_structure", JSON.stringify(structure));
+    } catch(e) {
+        console.warn("localStorage academic_structure write error:", e);
+    }
 
-    if (window.db) {
+    if (window.db && typeof firebase !== 'undefined') {
         try {
-            await window.db.collection("schools_config").doc("academic_structure").set({
-                ...structure,
+            const cleanStructure = JSON.parse(JSON.stringify(structure));
+            window.db.collection("schools_config").doc("academic_structure").set({
+                ...cleanStructure,
                 last_updated: firebase.firestore.FieldValue.serverTimestamp()
-            }, { merge: true });
-        } catch(e) {
-            console.warn("Firestore academic_structure write note:", e.message);
+            }, { merge: true }).catch(e => {
+                console.warn("Firestore academic_structure async write note:", e.message);
+            });
+        } catch(err) {
+            console.warn("Firestore serialize note:", err);
         }
     }
+
+    return Promise.resolve(structure);
 };
 
 // ៣. Tab State
@@ -604,6 +613,10 @@ window.loadSettingsView = function() {
     `;
 
     window.fillSettingsForm();
+
+    // ធ្វើឱ្យ Settings ដំណើរការភ្លាមៗពេលបើក (Render active tab immediately)
+    const activeTab = window.currentSettingsTab || "school";
+    window.switchSettingsTab(activeTab);
 };
 
 // =========================================================================
@@ -951,6 +964,8 @@ window.openAddAcademicYearModal = function(editYear = null) {
         modal.className = "fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 font-siemreap overflow-y-auto";
         document.body.appendChild(modal);
     }
+    modal.classList.remove("hidden");
+    modal.style.display = "flex";
 
     const data = window.academicStructure || window.defaultAcademicStructure;
     const yearsList = data.academic_years || [];
@@ -1057,7 +1072,8 @@ window.handleSaveAcademicYearSubmit = async function(e, editYear) {
     data.academic_years = list;
     await window.saveAcademicStructure(data);
 
-    document.getElementById("academicYearModal").classList.add("hidden");
+    const yModal = document.getElementById("academicYearModal");
+    if (yModal) { yModal.classList.add("hidden"); yModal.style.display = "none"; }
     if (typeof showToast === "function") showToast("✅ បានរក្សាទុកឆ្នាំសិក្សាជោគជ័យ!");
     window.renderAcademicManagementTab();
 };
@@ -1080,6 +1096,8 @@ window.openAssignTeacherClassModal = async function(gradeId) {
         modal.className = "fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 font-siemreap overflow-y-auto";
         document.body.appendChild(modal);
     }
+    modal.classList.remove("hidden");
+    modal.style.display = "flex";
 
     modal.innerHTML = `
         <div class="bg-white rounded-3xl w-full max-w-md overflow-hidden shadow-2xl border border-slate-200 animate-scale-up my-auto">
@@ -1144,10 +1162,12 @@ window.handleSaveAssignTeacherClassSubmit = async function(e, gradeId) {
     g.max_capacity = capacityVal;
     g.teacher = teacherId;
 
-    await window.saveAcademicStructure(data);
-    document.getElementById("assignTeacherModal").classList.add("hidden");
+    window.saveAcademicStructure(data);
+    const m = document.getElementById("assignTeacherModal");
+    if (m) { m.classList.add("hidden"); m.style.display = "none"; }
     if (typeof showToast === "function") showToast("✅ បានចាត់តាំងគ្រូ និងកែប្រែព័ត៌មានថ្នាក់ជោគជ័យ!");
     window.renderAcademicManagementTab();
+    if (typeof window.syncGlobalYearDropdown === "function") window.syncGlobalYearDropdown();
 };
 
 // Modal បន្ថែមកម្រិតថ្នាក់ថ្មី (ACAD-03)
@@ -1172,7 +1192,7 @@ window.openAddGradeLevelModal = function() {
                         <p class="text-xs text-slate-400 mt-0.5">បង្កើតកម្រិតថ្នាក់ និងបន្ទប់សិក្សា</p>
                     </div>
                 </div>
-                <button onclick="document.getElementById('addGradeModal').classList.add('hidden')" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-400 flex items-center justify-center transition">
+                <button type="button" onclick="const m = document.getElementById('addGradeModal'); if(m){ m.classList.add('hidden'); m.style.display='none'; }" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-400 flex items-center justify-center transition">
                     <i class="fa-solid fa-xmark"></i>
                 </button>
             </div>
@@ -1194,7 +1214,7 @@ window.openAddGradeLevelModal = function() {
                 </div>
 
                 <div class="pt-4 flex gap-3 border-t border-slate-100">
-                    <button type="button" onclick="document.getElementById('addGradeModal').classList.add('hidden')" class="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl font-bold transition">បោះបង់</button>
+                    <button type="button" onclick="const m = document.getElementById('addGradeModal'); if(m){ m.classList.add('hidden'); m.style.display='none'; }" class="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl font-bold transition">បោះបង់</button>
                     <button type="submit" class="flex-1 py-2.5 bg-teal-600 hover:bg-teal-700 text-white rounded-xl font-bold transition shadow-md">បង្កើតកម្រិតថ្នាក់</button>
                 </div>
             </form>
@@ -1202,13 +1222,18 @@ window.openAddGradeLevelModal = function() {
     `;
 
     modal.classList.remove("hidden");
+    modal.style.display = "flex";
 };
 
 window.handleSaveGradeLevelSubmit = async function(e) {
     if (e && e.preventDefault) e.preventDefault();
-    const name = document.getElementById("modal_new_grade_name").value.trim();
-    const rooms = document.getElementById("modal_new_grade_rooms").value.split(",").map(r => r.trim()).filter(Boolean);
-    const capacity = parseInt(document.getElementById("modal_new_grade_capacity").value || "45", 10);
+    const nameInput = document.getElementById("modal_new_grade_name");
+    const roomsInput = document.getElementById("modal_new_grade_rooms");
+    const capacityInput = document.getElementById("modal_new_grade_capacity");
+
+    const name = nameInput ? nameInput.value.trim() : "";
+    const rooms = roomsInput ? roomsInput.value.split(",").map(r => r.trim()).filter(Boolean) : ["«ក»"];
+    const capacity = parseInt((capacityInput ? capacityInput.value : "45") || "45", 10);
 
     if (!name) return alert("សូមបញ្ចូលឈ្មោះកម្រិតថ្នាក់!");
 
@@ -1224,10 +1249,24 @@ window.handleSaveGradeLevelSubmit = async function(e) {
         teacher: ""
     });
 
-    await window.saveAcademicStructure(data);
-    document.getElementById("addGradeModal").classList.add("hidden");
+    // ១. រក្សាទុកភ្លាមៗ
+    window.saveAcademicStructure(data);
+
+    // ២. បិទ Modal ភ្លាមៗ
+    const modal = document.getElementById("addGradeModal");
+    if (modal) {
+        modal.classList.add("hidden");
+        modal.style.display = "none";
+    }
+
+    // ៣. បង្ហាញ Toast ជោគជ័យ
     if (typeof showToast === "function") showToast("✅ បានបន្ថែមកម្រិតថ្នាក់ថ្មីជោគជ័យ!");
+
+    // ៤. Re-render Tab ភ្លាមៗដើម្បីឃើញថ្នាក់ថ្មីលើអេក្រង់
     window.renderAcademicManagementTab();
+
+    // ៥. Update Dropdown ថ្នាក់ជាសកល
+    if (typeof window.syncGlobalYearDropdown === "function") window.syncGlobalYearDropdown();
 };
 
 // Modal បន្ថែម/កែប្រែមុខវិជ្ជា (ACAD-04)
@@ -1359,7 +1398,8 @@ window.handleSaveCustomSubjectSubmit = async function(e, category, editKey) {
     }
 
     await window.saveAcademicStructure(data);
-    document.getElementById("subjectModal").classList.add("hidden");
+    const subModal = document.getElementById("subjectModal");
+    if (subModal) { subModal.classList.add("hidden"); subModal.style.display = "none"; }
     if (typeof showToast === "function") showToast("✅ បានរក្សាទុកមុខវិជ្ជាជោគជ័យ!");
     window.renderAcademicManagementTab();
 };
@@ -1765,7 +1805,8 @@ window.handleCreateTeacherSubmit = async function(e) {
         };
 
         await window.saveTeacherAccount(payload);
-        document.getElementById("addTeacherModal").classList.add("hidden");
+        const tModal = document.getElementById("addTeacherModal");
+    if (tModal) { tModal.classList.add("hidden"); tModal.style.display = "none"; }
         if (typeof showToast === "function") showToast("✅ បង្កើតគណនី និងកំណត់សិទ្ធិបានជោគជ័យ!");
         window.renderUserAccountsTab();
 
@@ -1935,7 +1976,8 @@ window.handleEditTeacherSubmit = async function(e, teacherId) {
         };
 
         await window.saveTeacherAccount(payload);
-        document.getElementById("editTeacherModal").classList.add("hidden");
+        const etModal = document.getElementById("editTeacherModal");
+    if (etModal) { etModal.classList.add("hidden"); etModal.style.display = "none"; }
         if (typeof showToast === "function") showToast("✅ បានកែប្រែគណនី និងសិទ្ធិប្រើប្រាស់ជោគជ័យ!");
         window.renderUserAccountsTab();
 
