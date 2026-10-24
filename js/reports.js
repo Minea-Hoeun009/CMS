@@ -9,13 +9,36 @@ window.reportDateSettings = {
     showLunar: localStorage.getItem('rep_show_lunar') !== 'false'
 };
 
+window.handleReportClassChange = function() {
+    const grade = document.getElementById("reportGradeSelect")?.value;
+    const room = document.getElementById("reportRoomSelect")?.value;
+    if (grade && room) {
+        if (typeof window.setSelectedClass === 'function') window.setSelectedClass(grade, room);
+        const sub = document.getElementById("reportDetailSub");
+        if (sub) sub.textContent = `ថ្នាក់ ${grade} ${room}`;
+        const display = document.getElementById("reportHeaderGradeDisplay");
+        if (display) display.textContent = `${grade} ${room}`;
+        if (window.currentActiveReportType && document.getElementById("reportDetailContent") && !document.getElementById("reportDetailContent").classList.contains("hidden")) {
+            window.openReportDetail(window.currentActiveReportType);
+        }
+    }
+};
+
 // ពេលទំព័រដើម Load រួចរាល់
 window.loadReportsView = function() {
     const container = document.getElementById("reportsContainer");
     if (!container) return;
 
     const sInfo = typeof appSettings !== 'undefined' ? appSettings : {};
-    const gradeFull = (sInfo.teacher_level && sInfo.teacher_room) ? `${sInfo.teacher_level} ${sInfo.teacher_room}`.trim() : "ថ្នាក់ទី";
+    const activeClass = typeof window.getCurrentSelectedClass === 'function' ? window.getCurrentSelectedClass() : { level: "ថ្នាក់ទី ៤", room: "«ក»" };
+    const curLevel = activeClass.level;
+    const curRoom = activeClass.room;
+    const gradeFull = `${curLevel} ${curRoom}`.trim();
+
+    const gradesList = typeof window.getAllGradesList === 'function' ? window.getAllGradesList() : ["ថ្នាក់ទី ១", "ថ្នាក់ទី ២", "ថ្នាក់ទី ៣", "ថ្នាក់ទី ៤", "ថ្នាក់ទី ៥", "ថ្នាក់ទី ៦"];
+    const roomsList = typeof window.getAllRoomsList === 'function' ? window.getAllRoomsList() : ["«ក»", "«ខ»", "«គ»", "«ឃ»"];
+    const gradesOptions = gradesList.map(g => `<option value="${g}" ${g === curLevel ? 'selected' : ''}>${g}</option>`).join('');
+    const roomsOptions = roomsList.map(r => `<option value="${r}" ${r === curRoom ? 'selected' : ''}>${r}</option>`).join('');
 
     container.innerHTML = `
         <div class="w-full h-full flex flex-col font-siemreap animate-fade-in relative max-w-[1600px] mx-auto pb-16">
@@ -32,8 +55,22 @@ window.loadReportsView = function() {
                             <h2 class="text-xl md:text-2xl font-moul text-slate-800 tracking-wide drop-shadow-sm">របាយការណ៍រដ្ឋបាលគ្រូ</h2>
                             <div class="flex items-center gap-2 mt-1.5">
                                 <span class="bg-slate-100 text-slate-600 px-2.5 py-1 rounded-md text-xs font-bold flex items-center gap-1.5"><i class="fa-solid fa-chalkboard-user"></i> ថ្នាក់បន្ទុក៖</span>
-                                <strong class="text-purple-700 bg-purple-50 px-3 py-1 rounded-md border border-purple-100 text-sm font-moul shadow-sm">${gradeFull}</strong>
+                                <strong id="reportHeaderGradeDisplay" class="text-purple-700 bg-purple-50 px-3 py-1 rounded-md border border-purple-100 text-sm font-moul shadow-sm">${gradeFull}</strong>
                             </div>
+                        </div>
+                    </div>
+
+                    <!-- ជ្រើសរើសថ្នាក់ និងបន្ទប់ សម្រាប់របាយការណ៍ -->
+                    <div class="flex flex-wrap items-center gap-3">
+                        <div class="flex items-center gap-1.5 bg-slate-50 border border-slate-200 rounded-[1.2rem] px-3 py-2 shadow-inner">
+                            <i class="fa-solid fa-graduation-cap text-purple-600 text-sm"></i>
+                            <select id="reportGradeSelect" onchange="window.handleReportClassChange()" class="border-none bg-transparent text-sm font-bold text-indigo-700 outline-none cursor-pointer font-siemreap py-0 pr-1">
+                                ${gradesOptions}
+                            </select>
+                            <span class="text-slate-300">|</span>
+                            <select id="reportRoomSelect" onchange="window.handleReportClassChange()" class="border-none bg-transparent text-sm font-bold text-rose-600 outline-none cursor-pointer font-moul py-0 pl-1">
+                                ${roomsOptions}
+                            </select>
                         </div>
                     </div>
                 </div>
@@ -195,11 +232,19 @@ window.loadReportsView = function() {
 };
 
 window.openReportDetail = function(reportType) {
+    window.currentActiveReportType = reportType;
     document.getElementById("reportsMainDashboard").classList.add("hidden");
     document.getElementById("reportDetailContent").classList.remove("hidden");
     document.getElementById("reportDetailContent").classList.add("flex");
 
+    const activeClass = typeof window.getCurrentSelectedClass === 'function' ? window.getCurrentSelectedClass() : { level: "ថ្នាក់ទី ៤", room: "«ក»" };
+    const curLevel = document.getElementById("reportGradeSelect")?.value || activeClass.level;
+    const curRoom = document.getElementById("reportRoomSelect")?.value || activeClass.room;
+    const gradeFull = `${curLevel} ${curRoom}`.trim();
+
     const titleEl = document.getElementById("reportDetailTitle");
+    const subEl = document.getElementById("reportDetailSub");
+    if (subEl) subEl.textContent = `ថ្នាក់ ${gradeFull}`;
     const paperArea = document.getElementById("reportPaperArea");
     const extraControls = document.getElementById("reportExtraControls");
 
@@ -209,24 +254,29 @@ window.openReportDetail = function(reportType) {
 
     setTimeout(() => {
         if (reportType === 'report_ka') {
-            titleEl.textContent = "របាយការណ៍ ក (តារាងស្រង់ពិន្ទុ និងការវាយតម្លៃលទ្ធផលសិក្សា)";
+            titleEl.textContent = `របាយការណ៍ ក (តារាងស្រង់ពិន្ទុ និងការវាយតម្លៃលទ្ធផលសិក្សា - ${gradeFull})`;
             if (window.KrouDigital && typeof window.KrouDigital.renderReportKa === 'function') {
-                window.KrouDigital.renderReportKa(paperArea);
+                window.KrouDigital.renderReportKa(paperArea, curLevel, curRoom);
             }
         } else if (reportType === 'report_kha') {
-            titleEl.textContent = "របាយការណ៍ ខ (តារាងកិត្តិយសសិស្សឆ្នើម Top 5)";
+            titleEl.textContent = `របាយការណ៍ ខ (តារាងកិត្តិយសសិស្សឆ្នើម Top 5 - ${gradeFull})`;
             if (window.KrouDigital && typeof window.KrouDigital.renderReportKha === 'function') {
-                window.KrouDigital.renderReportKha(paperArea);
+                window.KrouDigital.renderReportKha(paperArea, curLevel, curRoom);
             }
         } else if (reportType === 'report_ko_kho') {
-            titleEl.textContent = "របាយការណ៍ គ & ឃ (លទ្ធផលប្រចាំឆមាស និងប្រចាំឆ្នាំ)";
+            titleEl.textContent = `របាយការណ៍ គ & ឃ (លទ្ធផលប្រចាំឆមាស និងប្រចាំឆ្នាំ - ${gradeFull})`;
             if (window.KrouDigital && typeof window.KrouDigital.renderReportKoKho === 'function') {
-                window.KrouDigital.renderReportKoKho(paperArea);
+                window.KrouDigital.renderReportKoKho(paperArea, curLevel, curRoom);
             }
         } else if (reportType === 'health') {
-            titleEl.textContent = "របាយការណ៍ និងការតាមដានសុខភាពសិស្ស (BMI, ភ្នែក, វ៉ាក់សាំង)";
+            titleEl.textContent = `របាយការណ៍ និងការតាមដានសុខភាពសិស្ស (BMI, ភ្នែក, វ៉ាក់សាំង - ${gradeFull})`;
             if (window.KrouDigital && typeof window.KrouDigital.renderHealthTracker === 'function') {
-                window.KrouDigital.renderHealthTracker(paperArea);
+                window.KrouDigital.renderHealthTracker(paperArea, curLevel, curRoom);
+            }
+        } else if (reportType === 'certificate') {
+            titleEl.textContent = `ប័ណ្ណសរសើរផ្លូវការ (Honor Praise Certificates - ${gradeFull})`;
+            if (window.KrouDigital && typeof window.KrouDigital.renderCertificateModal === 'function') {
+                window.KrouDigital.renderCertificateModal(null, 1, curLevel);
             }
         } else if (reportType === 'stats') {
             titleEl.textContent = "តារាងស្ថិតិសិស្ស";

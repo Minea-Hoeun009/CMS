@@ -5,14 +5,37 @@
 
 window.KrouDigital = {
 
+    // Helper: បង្កើតជម្រើសកម្រិតថ្នាក់ និងបន្ទប់ សម្រាប់របារបញ្ជា
+    _getClassSelectorHtml: function(curLevel, curRoom, rerenderFnName) {
+        const gradesList = typeof window.getAllGradesList === 'function' ? window.getAllGradesList() : ["ថ្នាក់ទី ១", "ថ្នាក់ទី ២", "ថ្នាក់ទី ៣", "ថ្នាក់ទី ៤", "ថ្នាក់ទី ៥", "ថ្នាក់ទី ៦"];
+        const roomsList = typeof window.getAllRoomsList === 'function' ? window.getAllRoomsList() : ["«ក»", "«ខ»", "«គ»", "«ឃ»"];
+        
+        return `
+            <div class="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-1.5 shadow-sm">
+                <i class="fa-solid fa-graduation-cap text-indigo-600 text-xs"></i>
+                <select onchange="window.setSelectedClass(this.value, '${curRoom}'); window.KrouDigital.${rerenderFnName}(document.getElementById('reportPaperArea'), this.value, '${curRoom}');" class="border-none bg-transparent text-xs font-bold text-indigo-700 dark:text-indigo-300 outline-none cursor-pointer font-siemreap py-0">
+                    ${gradesList.map(g => `<option value="${g}" ${g === curLevel ? 'selected' : ''}>${g}</option>`).join('')}
+                </select>
+                <span class="text-slate-300">|</span>
+                <select onchange="window.setSelectedClass('${curLevel}', this.value); window.KrouDigital.${rerenderFnName}(document.getElementById('reportPaperArea'), '${curLevel}', this.value);" class="border-none bg-transparent text-xs font-bold text-rose-600 dark:text-rose-400 outline-none cursor-pointer font-moul py-0">
+                    ${roomsList.map(r => `<option value="${r}" ${r === curRoom ? 'selected' : ''}>${r}</option>`).join('')}
+                </select>
+            </div>
+        `;
+    },
+
     // =====================================================================
     // ១. របាយការណ៍ ក (Report Ka) - តារាងស្រង់ពិន្ទុ និងនិទ្ទេសប្រចាំខែ/ឆមាស
     // =====================================================================
-    renderReportKa: function(container) {
+    renderReportKa: function(container, targetGrade = null, targetRoom = null) {
         if (!container) return;
         const sInfo = window.appSettings || JSON.parse(localStorage.getItem('school_settings') || '{}');
+        const activeClass = typeof window.getCurrentSelectedClass === 'function' ? window.getCurrentSelectedClass() : { level: "ថ្នាក់ទី ៤", room: "«ក»" };
+        const curLevel = targetGrade || activeClass.level;
+        const curRoom = targetRoom || activeClass.room;
+        const gradeFull = `${curLevel} ${curRoom}`.trim();
+
         const academicYear = document.getElementById("globalAcademicYear")?.value || sInfo.academic_year || "២០២៦-២០២៧";
-        const gradeFull = (sInfo.teacher_level && sInfo.teacher_room) ? `${sInfo.teacher_level} ${sInfo.teacher_room}`.trim() : "ថ្នាក់ទី ៤ ក";
         const schoolName = sInfo.school_name || "សាលាបឋមសិក្សា";
         const teacherName = sInfo.teacher_name || ".......................";
         const principalName = sInfo.principal_name || ".......................";
@@ -21,16 +44,17 @@ window.KrouDigital = {
         const allScores = JSON.parse(localStorage.getItem('academic_scores') || '[]');
         const selectedMonth = localStorage.getItem('selected_assessment_month') || "មករា";
 
-        // ចម្រាញ់សិស្សក្នុងថ្នាក់
-        const classStudents = allStudents.filter(s => {
-            if (s.status === "Dropped" || s.status === "Withdrawn") return false;
-            const sGrade = (s.grade || "").replace(/\s+/g, '');
-            const sRoom = (s.room || "").replace(/[«»\s]/g, '');
-            const tGrade = (sInfo.teacher_level || "").replace(/\s+/g, '');
-            const tRoom = (sInfo.teacher_room || "").replace(/[«»\s]/g, '');
-            if (!tGrade) return true;
-            return sGrade === tGrade && sRoom === tRoom;
-        });
+        // ចម្រាញ់សិស្សក្នុងថ្នាក់ជាក់លាក់ដោយប្រើ Standardized Helper
+        const classStudents = typeof window.getStudentsForClass === 'function'
+            ? window.getStudentsForClass(curLevel, curRoom, academicYear)
+            : allStudents.filter(s => {
+                if (s.status === "Dropped" || s.status === "Withdrawn") return false;
+                const sGrade = (s.grade || "").replace(/\s+/g, '');
+                const sRoom = (s.room || "").replace(/[«»\s]/g, '');
+                const tGrade = curLevel.replace(/\s+/g, '');
+                const tRoom = curRoom.replace(/[«»\s]/g, '');
+                return sGrade === tGrade && sRoom === tRoom;
+            });
 
         const studentsWithScores = classStudents.map((stu, idx) => {
             const sc = allScores.find(item => String(item.student_id) === String(stu.id) && item.month === selectedMonth) || {};
@@ -71,9 +95,28 @@ window.KrouDigital = {
         const failedFemale = femaleCount - passedFemale;
         const passRate = totalCount > 0 ? ((passedCount / totalCount) * 100).toFixed(1) : 0;
 
+        const khmerMonths = ["មករា", "កុម្ភៈ", "មីនា", "មេសា", "ឧសភា", "មិថុនា", "កក្កដា", "សីហា", "កញ្ញា", "តុលា", "វិច្ឆិកា", "ធ្នូ"];
+
         container.innerHTML = `
             <div id="reportKaPrintArea" class="bg-white p-6 md:p-10 w-full shadow-2xl rounded-2xl border border-slate-200 text-slate-800" style="max-width: 297mm; min-height: 210mm; font-family: 'Siemreap', sans-serif;">
                 
+                <!-- របារបញ្ជាជ្រើសរើសថ្នាក់ និងខែ (Toolbar) -->
+                <div class="flex flex-wrap items-center justify-between gap-3 mb-6 pb-4 border-b border-slate-200 no-print">
+                    <div class="flex flex-wrap items-center gap-2">
+                        <span class="text-xs font-bold text-slate-500">ជ្រើសរើសថ្នាក់៖</span>
+                        ${this._getClassSelectorHtml(curLevel, curRoom, 'renderReportKa')}
+                        <span class="text-xs font-bold text-slate-500 ml-2">ខែ៖</span>
+                        <select onchange="localStorage.setItem('selected_assessment_month', this.value); window.KrouDigital.renderReportKa(document.getElementById('reportPaperArea'), '${curLevel}', '${curRoom}');" class="bg-slate-100 border border-slate-200 rounded-xl px-3 py-1.5 text-xs font-bold text-slate-700 outline-none cursor-pointer">
+                            ${khmerMonths.map(m => `<option value="${m}" ${m === selectedMonth ? 'selected' : ''}>${m}</option>`).join('')}
+                        </select>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button onclick="window.print()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shadow transition flex items-center gap-1.5">
+                            <i class="fa-solid fa-print"></i> បោះពុម្ព A4
+                        </button>
+                    </div>
+                </div>
+
                 <!-- Header តាមស្តង់ដារក្រសួង -->
                 <div class="flex justify-between items-start mb-6 text-xs">
                     <div class="text-center">
@@ -91,7 +134,7 @@ window.KrouDigital = {
                 <div class="text-center mb-6">
                     <h3 class="font-moul text-base text-indigo-950">របាយការណ៍ ក</h3>
                     <h4 class="font-moul text-sm text-slate-800 mt-1">តារាងស្រង់ពិន្ទុ និងការវាយតម្លៃលទ្ធផលសិក្សាសិស្សប្រចាំខែ ${selectedMonth}</h4>
-                    <p class="text-xs font-bold text-slate-500 mt-1">ឆ្នាំសិក្សា ${academicYear}</p>
+                    <p class="text-xs font-bold text-slate-500 mt-1">ឆ្នាំសិក្សា ${academicYear} (ថ្នាក់៖ ${gradeFull})</p>
                 </div>
 
                 <!-- តារាងពិន្ទុផ្លូវការ -->
@@ -120,7 +163,7 @@ window.KrouDigital = {
                         </thead>
                         <tbody>
                             ${studentsWithScores.length === 0 ? `
-                                <tr><td colspan="14" class="p-8 text-slate-400 font-bold">គ្មានទិន្នន័យសិស្សក្នុងថ្នាក់នេះឡើយ</td></tr>
+                                <tr><td colspan="14" class="p-8 text-slate-400 font-bold">គ្មានទិន្នន័យសិស្សក្នុងថ្នាក់ ${gradeFull} ឡើយ</td></tr>
                             ` : studentsWithScores.map((stu, i) => `
                                 <tr class="hover:bg-slate-50 ${i % 2 === 1 ? 'bg-slate-50/40' : ''}">
                                     <td class="border border-slate-300 p-1.5 font-mono">${i + 1}</td>
@@ -143,37 +186,43 @@ window.KrouDigital = {
                     </table>
                 </div>
 
-                <!-- ផ្នែកស្ថិតិសង្ខេបខាងក្រោម (Summary Statistics) -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8 text-xs">
-                    <div class="p-3.5 bg-slate-50 rounded-xl border border-slate-200">
-                        <h5 class="font-bold text-slate-800 mb-2">ស្ថិតិរួមប្រចាំថ្នាក់៖</h5>
-                        <ul class="space-y-1 text-slate-600">
-                            <li>• ចំនួនសិស្សសរុប៖ <strong>${totalCount} នាក់</strong> (ស្រី៖ <strong>${femaleCount} នាក់</strong>)</li>
-                            <li>• សិស្សប្រឡងជាប់៖ <strong class="text-emerald-700">${passedCount} នាក់</strong> (ស្រី៖ <strong>${passedFemale} នាក់</strong>)</li>
-                            <li>• សិស្សប្រឡងធ្លាក់៖ <strong class="text-rose-600">${failedCount} នាក់</strong> (ស្រី៖ <strong>${failedFemale} នាក់</strong>)</li>
-                            <li>• អត្រាជាប់មធ្យម៖ <strong class="text-indigo-700 font-mono">${passRate}%</strong></li>
-                        </ul>
+                <!-- ស្ថិតិសង្ខេបលទ្ធផលតាមស្តង់ដារក្រសួង -->
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8 text-xs">
+                    <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl">
+                        <span class="text-slate-500 font-bold block">សិស្សសរុប</span>
+                        <strong class="font-mono text-base text-slate-800">${totalCount} នាក់</strong>
+                        <span class="text-[10px] text-slate-400 block mt-0.5">(ស្រី ${femaleCount} នាក់)</span>
                     </div>
-
-                    <div class="p-3.5 bg-amber-50/60 rounded-xl border border-amber-200/80">
-                        <h5 class="font-bold text-amber-900 mb-2">សិស្សឆ្នើមប្រចាំខែ (Top 3)៖</h5>
-                        <ol class="space-y-1 text-slate-700 font-bold">
-                            ${studentsWithScores.slice(0, 3).map((s, idx) => `
-                                <li>${idx === 0 ? '🥇' : (idx === 1 ? '🥈' : '🥉')} លេខ ${s.rank}: ${s.name} (មធ្យមភាគ៖ <span class="font-mono text-indigo-700">${s.avg.toFixed(2)}</span>, និទ្ទេស ${s.gradeLetter})</li>
-                            `).join("") || "<li>គ្មានទិន្នន័យ</li>"}
-                        </ol>
+                    <div class="p-3 bg-emerald-50 border border-emerald-200 rounded-xl">
+                        <span class="text-emerald-700 font-bold block">សិស្សជាប់ (មធ្យមភាគ ≥ ៥.០)</span>
+                        <strong class="font-mono text-base text-emerald-700">${passedCount} នាក់</strong>
+                        <span class="text-[10px] text-emerald-600 block mt-0.5">(ស្រី ${passedFemale} នាក់)</span>
+                    </div>
+                    <div class="p-3 bg-rose-50 border border-rose-200 rounded-xl">
+                        <span class="text-rose-700 font-bold block">សិស្សធ្លាក់ (មធ្យមភាគ < ៥.០)</span>
+                        <strong class="font-mono text-base text-rose-700">${failedCount} នាក់</strong>
+                        <span class="text-[10px] text-rose-600 block mt-0.5">(ស្រី ${failedFemale} នាក់)</span>
+                    </div>
+                    <div class="p-3 bg-indigo-50 border border-indigo-200 rounded-xl">
+                        <span class="text-indigo-700 font-bold block">អត្រាជាប់សរុប</span>
+                        <strong class="font-mono text-base text-indigo-700">${passRate}%</strong>
+                        <span class="text-[10px] text-indigo-600 block mt-0.5">នៃចំនួនសិស្សក្នុងថ្នាក់</span>
                     </div>
                 </div>
 
-                <!-- ហត្ថលេខាផ្លូវការ -->
-                <div class="grid grid-cols-2 gap-8 text-center text-xs pt-4">
-                    <div>
-                        <p class="font-bold text-slate-700 mb-16">បានឃើញ និងឯកភាព<br>នាយកសាលា</p>
-                        <p class="font-moul text-slate-800">${principalName}</p>
+                <!-- ហត្ថលេខា និងកាលបរិច្ឆេទ -->
+                <div class="flex justify-between items-center text-xs mt-10 pt-4 px-8">
+                    <div class="text-center">
+                        <p class="font-bold">បានឃើញ និងឯកភាព</p>
+                        <p class="font-moul text-slate-800 mt-1">នាយកសាលា</p>
+                        <div class="h-16"></div>
+                        <p class="font-bold text-slate-700">${principalName}</p>
                     </div>
-                    <div>
-                        <p class="font-bold text-slate-700 mb-16">ថ្ងៃទី........ ខែ........ ឆ្នាំ២០....<br>គ្រូបន្ទុកថ្នាក់</p>
-                        <p class="font-moul text-slate-800">${teacherName}</p>
+                    <div class="text-center">
+                        <p class="text-slate-500">ថ្ងៃ..................ខែ.........ឆ្នាំ..........ព.ស.២៥...</p>
+                        <p class="font-bold mt-1">គ្រូបន្ទុកថ្នាក់</p>
+                        <div class="h-16"></div>
+                        <p class="font-bold text-slate-700">${teacherName}</p>
                     </div>
                 </div>
 
@@ -184,11 +233,15 @@ window.KrouDigital = {
     // =====================================================================
     // ២. របាយការណ៍ ខ (Report Kha) - តារាងកិត្តិយសសិស្សឆ្នើម Top 5
     // =====================================================================
-    renderReportKha: function(container) {
+    renderReportKha: function(container, targetGrade = null, targetRoom = null) {
         if (!container) return;
         const sInfo = window.appSettings || JSON.parse(localStorage.getItem('school_settings') || '{}');
+        const activeClass = typeof window.getCurrentSelectedClass === 'function' ? window.getCurrentSelectedClass() : { level: "ថ្នាក់ទី ៤", room: "«ក»" };
+        const curLevel = targetGrade || activeClass.level;
+        const curRoom = targetRoom || activeClass.room;
+        const gradeFull = `${curLevel} ${curRoom}`.trim();
+
         const academicYear = document.getElementById("globalAcademicYear")?.value || sInfo.academic_year || "២០២៦-២០២៧";
-        const gradeFull = (sInfo.teacher_level && sInfo.teacher_room) ? `${sInfo.teacher_level} ${sInfo.teacher_room}`.trim() : "ថ្នាក់ទី ៤ ក";
         const schoolName = sInfo.school_name || "សាលាបឋមសិក្សា";
         const teacherName = sInfo.teacher_name || "គ្រូបន្ទុកថ្នាក់";
         const principalName = sInfo.principal_name || "នាយកសាលា";
@@ -197,24 +250,53 @@ window.KrouDigital = {
         const allStudents = window.allStudents || JSON.parse(localStorage.getItem('academic_students') || '[]');
         const allScores = JSON.parse(localStorage.getItem('academic_scores') || '[]');
 
-        // គណនាពិន្ទុ Top 5
-        const classScores = allStudents.map(stu => {
+        // ចម្រាញ់សិស្សក្នុងថ្នាក់ជាក់លាក់
+        const classStudents = typeof window.getStudentsForClass === 'function'
+            ? window.getStudentsForClass(curLevel, curRoom, academicYear)
+            : allStudents.filter(s => {
+                if (s.status === "Dropped" || s.status === "Withdrawn") return false;
+                const sGrade = (s.grade || "").replace(/\s+/g, '');
+                const sRoom = (s.room || "").replace(/[«»\s]/g, '');
+                return sGrade === curLevel.replace(/\s+/g, '') && sRoom === curRoom.replace(/[«»\s]/g, '');
+            });
+
+        // គណនាពិន្ទុ Top 5 សម្រាប់ថ្នាក់នេះ
+        const classScores = classStudents.map(stu => {
             const sc = allScores.find(item => String(item.student_id) === String(stu.id) && item.month === selectedMonth) || {};
             const avg = parseFloat(sc.average || sc.avg || 0);
             return {
                 ...stu,
                 avg: avg,
                 total: parseFloat(sc.total_score || sc.total || 0),
-                gradeLetter: sc.grade_letter || (avg >= 8 ? 'ល្អ' : 'មធ្យម')
+                gradeLetter: sc.grade_letter || (avg >= 8.5 ? 'A' : (avg >= 8 ? 'B' : (avg >= 7 ? 'C' : 'D')))
             };
         }).filter(s => s.avg > 0);
 
         classScores.sort((a, b) => b.avg - a.avg);
         const top5 = classScores.slice(0, 5);
 
+        const khmerMonths = ["មករា", "កុម្ភៈ", "មីនា", "មេសា", "ឧសភា", "មិថុនា", "កក្កដា", "សីហា", "កញ្ញា", "តុលា", "វិច្ឆិកា", "ធ្នូ"];
+
         container.innerHTML = `
             <div id="reportKhaPrintArea" class="bg-gradient-to-b from-amber-50 via-white to-orange-50/40 p-8 md:p-12 w-full shadow-2xl rounded-2xl border-[10px] border-double border-amber-700 text-slate-900 relative overflow-hidden" style="max-width: 210mm; min-height: 297mm; font-family: 'Siemreap', sans-serif;">
                 
+                <!-- របារបញ្ជាជ្រើសរើសថ្នាក់ (Toolbar) -->
+                <div class="flex flex-wrap items-center justify-between gap-3 mb-6 pb-4 border-b border-amber-200 no-print">
+                    <div class="flex flex-wrap items-center gap-2">
+                        <span class="text-xs font-bold text-amber-900">ជ្រើសរើសថ្នាក់៖</span>
+                        ${this._getClassSelectorHtml(curLevel, curRoom, 'renderReportKha')}
+                        <span class="text-xs font-bold text-amber-900 ml-2">ខែ៖</span>
+                        <select onchange="localStorage.setItem('selected_assessment_month', this.value); window.KrouDigital.renderReportKha(document.getElementById('reportPaperArea'), '${curLevel}', '${curRoom}');" class="bg-amber-100/60 border border-amber-200 rounded-xl px-3 py-1.5 text-xs font-bold text-slate-800 outline-none cursor-pointer">
+                            ${khmerMonths.map(m => `<option value="${m}" ${m === selectedMonth ? 'selected' : ''}>${m}</option>`).join('')}
+                        </select>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button onclick="window.print()" class="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold shadow transition flex items-center gap-1.5">
+                            <i class="fa-solid fa-print"></i> បោះពុម្ព A4
+                        </button>
+                    </div>
+                </div>
+
                 <!-- Border Decoration Icons -->
                 <div class="absolute top-4 left-4 text-amber-600 text-xl">❖</div>
                 <div class="absolute top-4 right-4 text-amber-600 text-xl">❖</div>
@@ -228,89 +310,74 @@ window.KrouDigital = {
                         <p class="font-bold text-slate-700 mt-1">ថ្នាក់បន្ទុក៖ ${gradeFull}</p>
                     </div>
                     <div class="text-center">
-                        <p class="font-moul text-slate-900 text-sm">ព្រះរាជាណាចក្រកម្ពុជា</p>
-                        <p class="font-moul text-slate-800 text-xs mt-1">ជាតិ សាសនា ព្រះមហាក្សត្រ</p>
-                        <div class="text-amber-600 font-bold tracking-widest text-[10px] mt-1">❖ ❖ ❖</div>
+                        <p class="font-moul text-slate-900 text-xs">ព្រះរាជាណាចក្រកម្ពុជា</p>
+                        <p class="font-moul text-slate-800 text-[10px] mt-0.5">ជាតិ សាសនា ព្រះមហាក្សត្រ</p>
                     </div>
                 </div>
 
-                <div class="text-center mb-8">
-                    <h3 class="font-moul text-xl text-amber-950">របាយការណ៍ ខ</h3>
-                    <h4 class="font-moul text-base text-indigo-950 mt-1">តារាងកិត្តិយសសិស្សឆ្នើមប្រចាំខែ ${selectedMonth}</h4>
-                    <p class="text-xs font-bold text-slate-500 mt-1">ឆ្នាំសិក្សា ${academicYear}</p>
+                <!-- Title -->
+                <div class="text-center my-6">
+                    <span class="inline-block px-4 py-1 bg-amber-500 text-white rounded-full font-bold text-[11px] mb-2 shadow-sm tracking-wider uppercase">របាយការណ៍ ខ</span>
+                    <h2 class="font-moul text-xl text-amber-900 drop-shadow-sm">តារាងកិត្តិយសសិស្សពូកែ Top 5</h2>
+                    <p class="text-xs font-bold text-amber-700 mt-1">ប្រចាំខែ ${selectedMonth} ឆ្នាំសិក្សា ${academicYear} (ថ្នាក់៖ ${gradeFull})</p>
                 </div>
 
-                <!-- Top 5 Showcase Grid -->
-                <div class="space-y-6 mb-10">
-                    <!-- Champion Rank 1 -->
-                    ${top5[0] ? `
-                        <div class="p-4 bg-gradient-to-r from-amber-100/90 via-amber-50 to-yellow-100/90 rounded-2xl border-2 border-amber-400 shadow-md flex items-center justify-between gap-4 max-w-lg mx-auto">
-                            <div class="flex items-center gap-4">
-                                <div class="w-14 h-14 rounded-full bg-amber-500 text-white flex items-center justify-center text-2xl font-black shadow-lg border-2 border-white">
-                                    🥇
-                                </div>
-                                <div class="w-16 h-20 rounded-xl overflow-hidden border-2 border-amber-400 shadow-sm bg-white shrink-0">
-                                    <img src="${top5[0].photo || `https://ui-avatars.com/api/?name=${encodeURIComponent(top5[0].name)}&background=random`}" class="w-full h-full object-cover">
-                                </div>
-                                <div>
-                                    <span class="text-[10px] font-bold text-amber-800 uppercase tracking-wider">សិស្សឆ្នើមលេខ ១</span>
-                                    <h4 class="font-moul text-base text-slate-900">${top5[0].name}</h4>
-                                    <p class="text-xs text-slate-600 font-bold">ភេទ៖ ${top5[0].gender || 'ប្រុស'} | អត្តលេខ៖ ${top5[0].id}</p>
-                                </div>
-                            </div>
-                            <div class="text-right pr-2">
-                                <span class="text-[10px] font-bold text-slate-500 block">មធ្យមភាគ</span>
-                                <span class="font-mono text-xl font-black text-amber-700">${top5[0].avg.toFixed(2)}</span>
-                            </div>
+                <!-- Top 5 Cards Grid -->
+                <div class="space-y-3.5 my-8">
+                    ${top5.length === 0 ? `
+                        <div class="p-8 text-center bg-white/60 rounded-2xl border border-amber-200 text-slate-400 font-bold text-xs">
+                            <i class="fa-solid fa-medal text-3xl mb-2 text-amber-300 block"></i>
+                            មិនទាន់មានទិន្នន័យពិន្ទុសម្រាប់ថ្នាក់ ${gradeFull} ក្នុងខែ ${selectedMonth} ឡើយ
                         </div>
-                    ` : '<div class="text-center p-6 text-slate-400 font-bold">មិនទាន់មានទិន្នន័យពិន្ទុ</div>'}
+                    ` : top5.map((stu, idx) => {
+                        const rankColors = [
+                            "from-amber-400 to-yellow-500 text-white shadow-amber-300",
+                            "from-slate-300 to-slate-400 text-white shadow-slate-300",
+                            "from-amber-600 to-amber-700 text-white shadow-amber-400",
+                            "from-blue-500 to-indigo-600 text-white shadow-blue-300",
+                            "from-emerald-500 to-teal-600 text-white shadow-emerald-300"
+                        ];
+                        const medalIcons = ["fa-trophy", "fa-medal", "fa-award", "fa-star", "fa-star"];
 
-                    <!-- Ranks 2 & 3 -->
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-xl mx-auto">
-                        ${top5.slice(1, 3).map((stu, i) => `
-                            <div class="p-3 bg-white/90 rounded-2xl border border-slate-300 shadow-sm flex items-center justify-between gap-3">
-                                <div class="flex items-center gap-3">
-                                    <div class="w-10 h-10 rounded-full ${i === 0 ? 'bg-slate-400' : 'bg-orange-500'} text-white flex items-center justify-center text-base font-black shadow">
-                                        ${i === 0 ? '🥈' : '🥉'}
+                        return `
+                            <div class="flex items-center justify-between p-3.5 bg-white rounded-2xl border border-amber-200/80 shadow-sm hover:shadow-md transition">
+                                <div class="flex items-center gap-4">
+                                    <div class="w-12 h-12 rounded-2xl bg-gradient-to-br ${rankColors[idx]} flex flex-col items-center justify-center font-moul shadow-md shrink-0">
+                                        <i class="fa-solid ${medalIcons[idx]} text-xs"></i>
+                                        <span class="text-sm leading-none mt-0.5">${idx + 1}</span>
+                                    </div>
+                                    <div class="w-12 h-14 rounded-xl overflow-hidden border-2 border-amber-300 shadow-sm bg-slate-100 shrink-0">
+                                        <img src="${stu.photo || `https://ui-avatars.com/api/?name=${encodeURIComponent(stu.name)}&background=fef3c7&color=b45309`}" class="w-full h-full object-cover">
                                     </div>
                                     <div>
-                                        <span class="text-[9px] font-bold text-slate-500">លេខ ${i + 2}</span>
-                                        <h5 class="font-moul text-xs text-slate-900">${stu.name}</h5>
-                                        <p class="text-[10px] text-slate-500">មធ្យម៖ <strong class="font-mono text-indigo-700">${stu.avg.toFixed(2)}</strong></p>
+                                        <h4 class="font-moul text-sm text-slate-900">${stu.name}</h4>
+                                        <p class="text-[11px] text-slate-500 font-bold">ភេទ៖ <span class="${stu.gender === 'ស្រី' || stu.gender === 'F' ? 'text-rose-600 font-bold' : ''}">${stu.gender || 'ប្រុស'}</span> | អត្តលេខ៖ <span class="font-mono">${stu.id}</span></p>
                                     </div>
                                 </div>
-                            </div>
-                        `).join("")}
-                    </div>
 
-                    <!-- Ranks 4 & 5 -->
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-xl mx-auto">
-                        ${top5.slice(3, 5).map((stu, i) => `
-                            <div class="p-3 bg-white/80 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between gap-3">
-                                <div class="flex items-center gap-3">
-                                    <div class="w-9 h-9 rounded-full bg-indigo-500 text-white flex items-center justify-center text-xs font-black shadow">
-                                        ⭐ ${i + 4}
-                                    </div>
-                                    <div>
-                                        <span class="text-[9px] font-bold text-slate-500">លេខ ${i + 4}</span>
-                                        <h5 class="font-moul text-xs text-slate-800">${stu.name}</h5>
-                                        <p class="text-[10px] text-slate-500">មធ្យម៖ <strong class="font-mono text-indigo-700">${stu.avg.toFixed(2)}</strong></p>
-                                    </div>
+                                <div class="text-right">
+                                    <span class="text-[10px] font-bold text-amber-600 block uppercase">មធ្យមភាគ</span>
+                                    <strong class="font-mono text-base text-slate-900 font-bold">${stu.avg.toFixed(2)}</strong>
+                                    <span class="text-[10px] px-2 py-0.5 bg-amber-100 text-amber-800 rounded font-bold block mt-0.5">និទ្ទេស ${stu.gradeLetter}</span>
                                 </div>
                             </div>
-                        `).join("")}
-                    </div>
+                        `;
+                    }).join("")}
                 </div>
 
-                <!-- Signatures -->
-                <div class="grid grid-cols-2 gap-8 text-center text-xs pt-6 border-t border-amber-200/80">
-                    <div>
-                        <p class="font-bold text-slate-700 mb-16">បានឃើញ និងឯកភាព<br>នាយកសាលា</p>
-                        <p class="font-moul text-slate-800">${principalName}</p>
+                <!-- Footer Signatures -->
+                <div class="flex justify-between items-center text-xs mt-12 pt-4 px-6">
+                    <div class="text-center">
+                        <p class="font-bold">បានឃើញ និងអនុម័ត</p>
+                        <p class="font-moul text-amber-950 mt-1">នាយកសាលា</p>
+                        <div class="h-14"></div>
+                        <p class="font-bold text-slate-800">${principalName}</p>
                     </div>
-                    <div>
-                        <p class="font-bold text-slate-700 mb-16">ថ្ងៃទី........ ខែ........ ឆ្នាំ២០....<br>គ្រូបន្ទុកថ្នាក់</p>
-                        <p class="font-moul text-slate-800">${teacherName}</p>
+                    <div class="text-center">
+                        <p class="text-slate-500">ថ្ងៃ..................ខែ.........ឆ្នាំ..........</p>
+                        <p class="font-bold mt-1">គ្រូបន្ទុកថ្នាក់</p>
+                        <div class="h-14"></div>
+                        <p class="font-bold text-slate-800">${teacherName}</p>
                     </div>
                 </div>
 
@@ -319,19 +386,45 @@ window.KrouDigital = {
     },
 
     // =====================================================================
-    // ៣. របាយការណ៍ គ / ឃ (Report Ko / Kho) - លទ្ធផលប្រចាំឆមាស និងប្រចាំឆ្នាំ
+    // ៣. របាយការណ៍ គ & ឃ (Report Ko / Kho) - លទ្ធផលឆមាស និងប្រចាំឆ្នាំ
     // =====================================================================
-    renderReportKoKho: function(container) {
+    renderReportKoKho: function(container, targetGrade = null, targetRoom = null) {
         if (!container) return;
         const sInfo = window.appSettings || JSON.parse(localStorage.getItem('school_settings') || '{}');
+        const activeClass = typeof window.getCurrentSelectedClass === 'function' ? window.getCurrentSelectedClass() : { level: "ថ្នាក់ទី ៤", room: "«ក»" };
+        const curLevel = targetGrade || activeClass.level;
+        const curRoom = targetRoom || activeClass.room;
+        const gradeFull = `${curLevel} ${curRoom}`.trim();
+
         const academicYear = document.getElementById("globalAcademicYear")?.value || sInfo.academic_year || "២០២៦-២០២៧";
-        const gradeFull = (sInfo.teacher_level && sInfo.teacher_room) ? `${sInfo.teacher_level} ${sInfo.teacher_room}`.trim() : "ថ្នាក់ទី ៤ ក";
         const schoolName = sInfo.school_name || "សាលាបឋមសិក្សា";
         const allStudents = window.allStudents || JSON.parse(localStorage.getItem('academic_students') || '[]');
+
+        // ចម្រាញ់សិស្សតាមថ្នាក់
+        const classStudents = typeof window.getStudentsForClass === 'function'
+            ? window.getStudentsForClass(curLevel, curRoom, academicYear)
+            : allStudents.filter(s => {
+                if (s.status === "Dropped" || s.status === "Withdrawn") return false;
+                return (s.grade || "").replace(/\s+/g, '') === curLevel.replace(/\s+/g, '') &&
+                       (s.room || "").replace(/[«»\s]/g, '') === curRoom.replace(/[«»\s]/g, '');
+            });
 
         container.innerHTML = `
             <div id="reportKoKhoPrintArea" class="bg-white p-6 md:p-10 w-full shadow-2xl rounded-2xl border border-slate-200 text-slate-800" style="max-width: 297mm; min-height: 210mm; font-family: 'Siemreap', sans-serif;">
                 
+                <!-- របារបញ្ជាជ្រើសរើសថ្នាក់ (Toolbar) -->
+                <div class="flex flex-wrap items-center justify-between gap-3 mb-6 pb-4 border-b border-slate-200 no-print">
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs font-bold text-slate-500">ជ្រើសរើសថ្នាក់៖</span>
+                        ${this._getClassSelectorHtml(curLevel, curRoom, 'renderReportKoKho')}
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button onclick="window.print()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shadow transition flex items-center gap-1.5">
+                            <i class="fa-solid fa-print"></i> បោះពុម្ព A4
+                        </button>
+                    </div>
+                </div>
+
                 <div class="flex justify-between items-start mb-6 text-xs">
                     <div class="text-center">
                         <p class="font-moul text-slate-900">${schoolName}</p>
@@ -346,6 +439,7 @@ window.KrouDigital = {
                 <div class="text-center mb-6">
                     <h3 class="font-moul text-base text-indigo-950">របាយការណ៍ គ &amp; ឃ</h3>
                     <h4 class="font-moul text-sm text-slate-800 mt-1">សេចក្តីសម្រេចលទ្ធផលសិក្សាប្រចាំឆមាស និងប្រចាំឆ្នាំសិក្សា ${academicYear}</h4>
+                    <p class="text-xs font-bold text-slate-500 mt-1">ថ្នាក់៖ ${gradeFull}</p>
                 </div>
 
                 <div class="overflow-x-auto mb-6">
@@ -364,24 +458,24 @@ window.KrouDigital = {
                             </tr>
                         </thead>
                         <tbody>
-                            ${allStudents.slice(0, 15).map((stu, i) => {
+                            ${classStudents.length === 0 ? `
+                                <tr><td colspan="9" class="p-8 text-slate-400 font-bold">គ្មានសិស្សក្នុងថ្នាក់ ${gradeFull} ឡើយ</td></tr>
+                            ` : classStudents.map((stu, i) => {
                                 const sem1 = (6.0 + (i % 4) * 0.8);
                                 const sem2 = (6.2 + (i % 4) * 0.7);
                                 const annual = ((sem1 + sem2) / 2).toFixed(2);
-                                const isPromoted = annual >= 5.0;
+                                const outcome = parseFloat(annual) >= 5.0 ? "ឡើងថ្នាក់" : "ត្រួតថ្នាក់";
                                 return `
                                     <tr class="hover:bg-slate-50">
-                                        <td class="border border-slate-300 p-2 font-mono">${i + 1}</td>
-                                        <td class="border border-slate-300 p-2 text-left font-bold">${stu.name}</td>
-                                        <td class="border border-slate-300 p-2">${stu.gender || 'ប្រុស'}</td>
-                                        <td class="border border-slate-300 p-2 font-mono">${sem1.toFixed(2)}</td>
-                                        <td class="border border-slate-300 p-2 font-mono">${sem2.toFixed(2)}</td>
-                                        <td class="border border-slate-300 p-2 font-mono font-bold text-indigo-700 bg-amber-50/40">${annual}</td>
-                                        <td class="border border-slate-300 p-2 font-bold">${i + 1}</td>
-                                        <td class="border border-slate-300 p-2 font-bold text-emerald-700">${annual >= 8 ? 'ល្អ' : 'មធ្យម'}</td>
-                                        <td class="border border-slate-300 p-2 font-bold ${isPromoted ? 'text-emerald-700 bg-emerald-50/40' : 'text-rose-600 bg-rose-50/40'}">
-                                            ${isPromoted ? 'ឡើងថ្នាក់' : 'ត្រួតថ្នាក់'}
-                                        </td>
+                                        <td class="border border-slate-300 p-1.5 font-mono">${i + 1}</td>
+                                        <td class="border border-slate-300 p-1.5 text-left font-bold text-slate-900">${stu.name}</td>
+                                        <td class="border border-slate-300 p-1.5 ${stu.gender === 'ស្រី' || stu.gender === 'F' ? 'text-rose-600 font-bold' : ''}">${stu.gender || 'ប្រុស'}</td>
+                                        <td class="border border-slate-300 p-1.5 font-mono">${sem1.toFixed(2)}</td>
+                                        <td class="border border-slate-300 p-1.5 font-mono">${sem2.toFixed(2)}</td>
+                                        <td class="border border-slate-300 p-1.5 font-mono font-bold text-amber-700 bg-amber-50/40">${annual}</td>
+                                        <td class="border border-slate-300 p-1.5 font-bold">${i + 1}</td>
+                                        <td class="border border-slate-300 p-1.5 font-bold text-emerald-600">${parseFloat(annual) >= 8 ? 'ល្អ' : (parseFloat(annual) >= 6.5 ? 'ល្អបង្គួរ' : 'មធ្យម')}</td>
+                                        <td class="border border-slate-300 p-1.5 font-bold ${outcome === 'ឡើងថ្នាក់' ? 'text-emerald-700 bg-emerald-50/40' : 'text-rose-600 bg-rose-50/40'}">${outcome}</td>
                                     </tr>
                                 `;
                             }).join("")}
@@ -389,14 +483,14 @@ window.KrouDigital = {
                     </table>
                 </div>
 
-                <div class="grid grid-cols-2 gap-8 text-center text-xs pt-6">
-                    <div>
-                        <p class="font-bold text-slate-700 mb-16">បានឃើញ និងឯកភាព<br>នាយកសាលា</p>
-                        <p class="font-moul text-slate-800">${sInfo.principal_name || 'នាយកសាលា'}</p>
+                <div class="flex justify-between items-center text-xs mt-10 pt-4 px-8">
+                    <div class="text-center">
+                        <p class="font-bold">បានឃើញ និងអនុម័ត</p>
+                        <p class="font-moul text-slate-800 mt-1">ប្រធានការិយាល័យអប់រំ / នាយក</p>
                     </div>
-                    <div>
-                        <p class="font-bold text-slate-700 mb-16">ថ្ងៃទី........ ខែ........ ឆ្នាំ២០....<br>គ្រូបន្ទុកថ្នាក់</p>
-                        <p class="font-moul text-slate-800">${sInfo.teacher_name || 'គ្រូបង្រៀន'}</p>
+                    <div class="text-center">
+                        <p class="text-slate-500">ថ្ងៃ..................ខែ.........ឆ្នាំ..........</p>
+                        <p class="font-bold mt-1">គ្រូបន្ទុកថ្នាក់</p>
                     </div>
                 </div>
 
@@ -405,13 +499,28 @@ window.KrouDigital = {
     },
 
     // =====================================================================
-    // ៤. របាយការណ៍សុខភាពសិស្ស (Health & Growth Tracker: BMI, ភ្នែក, វ៉ាក់សាំង)
+    // ៤. របាយការណ៍សុខភាពសិស្ស (Health Tracker & BMI Calculator)
     // =====================================================================
-    renderHealthTracker: function(container) {
+    renderHealthTracker: function(container, targetGrade = null, targetRoom = null) {
         if (!container) return;
         const sInfo = window.appSettings || JSON.parse(localStorage.getItem('school_settings') || '{}');
+        const activeClass = typeof window.getCurrentSelectedClass === 'function' ? window.getCurrentSelectedClass() : { level: "ថ្នាក់ទី ៤", room: "«ក»" };
+        const curLevel = targetGrade || activeClass.level;
+        const curRoom = targetRoom || activeClass.room;
+        const gradeFull = `${curLevel} ${curRoom}`.trim();
+
+        const academicYear = document.getElementById("globalAcademicYear")?.value || sInfo.academic_year || "២០២៦-២០២៧";
         const allStudents = window.allStudents || JSON.parse(localStorage.getItem('academic_students') || '[]');
         const healthRecords = JSON.parse(localStorage.getItem('student_health_records') || '{}');
+
+        // ចម្រាញ់សិស្សតាមថ្នាក់
+        const classStudents = typeof window.getStudentsForClass === 'function'
+            ? window.getStudentsForClass(curLevel, curRoom, academicYear)
+            : allStudents.filter(s => {
+                if (s.status === "Dropped" || s.status === "Withdrawn") return false;
+                return (s.grade || "").replace(/\s+/g, '') === curLevel.replace(/\s+/g, '') &&
+                       (s.room || "").replace(/[«»\s]/g, '') === curRoom.replace(/[«»\s]/g, '');
+            });
 
         container.innerHTML = `
             <div id="healthTrackerArea" class="bg-white p-6 md:p-8 w-full shadow-2xl rounded-2xl border border-slate-200 text-slate-800" style="max-width: 297mm; min-height: 210mm; font-family: 'Siemreap', sans-serif;">
@@ -422,10 +531,13 @@ window.KrouDigital = {
                             <i class="fa-solid fa-heart-pulse text-rose-500"></i>
                             <span>របាយការណ៍ និងការតាមដានសុខភាពសិស្ស</span>
                         </h3>
-                        <p class="text-xs text-slate-500 font-bold mt-0.5">គណនា BMI ស្វ័យប្រវត្ត, ការពិនិត្យភ្នែក និងកំណត់ត្រាវ៉ាក់សាំង</p>
+                        <p class="text-xs text-slate-500 font-bold mt-0.5">គណនា BMI ស្វ័យប្រវត្តិ, ការពិនិត្យភ្នែក និងកំណត់ត្រាវ៉ាក់សាំង (ថ្នាក់៖ ${gradeFull})</p>
                     </div>
-                    <div class="flex items-center gap-2">
-                        <button onclick="window.KrouDigital.saveHealthRecords()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow transition flex items-center gap-1.5">
+                    
+                    <div class="flex flex-wrap items-center gap-2">
+                        <span class="text-xs font-bold text-slate-500">ជ្រើសរើសថ្នាក់៖</span>
+                        ${this._getClassSelectorHtml(curLevel, curRoom, 'renderHealthTracker')}
+                        <button onclick="window.KrouDigital.saveHealthRecords()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow transition flex items-center gap-1.5 ml-2">
                             <i class="fa-solid fa-floppy-disk"></i> រក្សាទុក
                         </button>
                         <button onclick="window.print()" class="px-4 py-2 bg-slate-800 hover:bg-slate-900 text-white rounded-xl text-xs font-bold shadow transition flex items-center gap-1.5">
@@ -450,7 +562,9 @@ window.KrouDigital = {
                             </tr>
                         </thead>
                         <tbody>
-                            ${allStudents.map((stu, i) => {
+                            ${classStudents.length === 0 ? `
+                                <tr><td colspan="9" class="p-8 text-slate-400 font-bold">គ្មានសិស្សក្នុងថ្នាក់ ${gradeFull} ឡើយ</td></tr>
+                            ` : classStudents.map((stu, i) => {
                                 const hRec = healthRecords[stu.id] || { height: 135, weight: 30, vision: "ធម្មតា", vaccine: "ពេញលេញ" };
                                 const heightM = hRec.height / 100;
                                 const bmi = (heightM > 0) ? (hRec.weight / (heightM * heightM)).toFixed(1) : 0;
@@ -465,7 +579,7 @@ window.KrouDigital = {
                                     <tr class="hover:bg-slate-50">
                                         <td class="border border-slate-300 p-1.5 font-mono">${i + 1}</td>
                                         <td class="border border-slate-300 p-1.5 text-left font-bold text-slate-900">${stu.name}</td>
-                                        <td class="border border-slate-300 p-1.5">${stu.gender || 'ប្រុស'}</td>
+                                        <td class="border border-slate-300 p-1.5 ${stu.gender === 'ស្រី' || stu.gender === 'F' ? 'text-rose-600 font-bold' : ''}">${stu.gender || 'ប្រុស'}</td>
                                         <td class="border border-slate-300 p-1">
                                             <input type="number" step="0.5" id="h_height_${stu.id}" value="${hRec.height}" onchange="window.KrouDigital.calculateRowBmi('${stu.id}')" class="w-16 p-1 text-center font-mono border rounded outline-none font-bold">
                                         </td>
@@ -521,13 +635,17 @@ window.KrouDigital = {
 
     saveHealthRecords: function() {
         const allStudents = window.allStudents || JSON.parse(localStorage.getItem('academic_students') || '[]');
-        const records = {};
+        const records = JSON.parse(localStorage.getItem('student_health_records') || '{}');
         allStudents.forEach(stu => {
-            const h = parseFloat(document.getElementById(`h_height_${stu.id}`)?.value || 135);
-            const w = parseFloat(document.getElementById(`h_weight_${stu.id}`)?.value || 30);
-            const vision = document.getElementById(`h_vision_${stu.id}`)?.value || "ធម្មតា";
-            const vaccine = document.getElementById(`h_vaccine_${stu.id}`)?.value || "ពេញលេញ";
-            records[stu.id] = { height: h, weight: w, vision, vaccine };
+            const hInput = document.getElementById(`h_height_${stu.id}`);
+            const wInput = document.getElementById(`h_weight_${stu.id}`);
+            if (hInput && wInput) {
+                const h = parseFloat(hInput.value || 135);
+                const w = parseFloat(wInput.value || 30);
+                const vision = document.getElementById(`h_vision_${stu.id}`)?.value || "ធម្មតា";
+                const vaccine = document.getElementById(`h_vaccine_${stu.id}`)?.value || "ពេញលេញ";
+                records[stu.id] = { height: h, weight: w, vision, vaccine };
+            }
         });
         localStorage.setItem('student_health_records', JSON.stringify(records));
         if (typeof showToast === 'function') showToast("✅ បានរក្សាទុកទិន្នន័យសុខភាពសិស្សជោគជ័យ!", "success");
@@ -536,13 +654,26 @@ window.KrouDigital = {
     // =====================================================================
     // ៥. ប័ណ្ណសរសើរ / វិញ្ញាបនបត្រ (Official Honor Praise Certificate Generator)
     // =====================================================================
-    renderCertificateModal: function(studentId = null, rankNum = 1) {
+    renderCertificateModal: function(studentId = null, rankNum = 1, targetGrade = null) {
         const allStudents = window.allStudents || JSON.parse(localStorage.getItem('academic_students') || '[]');
-        const student = allStudents.find(s => String(s.id) === String(studentId)) || allStudents[0] || { name: "សុខ សាន្ត", gender: "ប្រុស", grade: "ថ្នាក់ទី ៤" };
+        const activeClass = typeof window.getCurrentSelectedClass === 'function' ? window.getCurrentSelectedClass() : { level: "ថ្នាក់ទី ៤", room: "«ក»" };
+        const curLevel = targetGrade || activeClass.level;
+
+        // បង្ហាញសិស្សក្នុងថ្នាក់ដែលបានជ្រើសរើសជាអាទិភាព
+        const classStudents = allStudents.filter(s => {
+            if (!curLevel || curLevel === 'all') return true;
+            const norm = typeof window.normalizeGrade === 'function' ? window.normalizeGrade(s.grade) : s.grade;
+            return norm === curLevel;
+        });
+        const selectableStudents = classStudents.length > 0 ? classStudents : allStudents;
+
+        const student = selectableStudents.find(s => String(s.id) === String(studentId)) || selectableStudents[0] || allStudents[0] || { name: "សុខ សាន្ត", gender: "ប្រុស", grade: curLevel };
         const sInfo = window.appSettings || JSON.parse(localStorage.getItem('school_settings') || '{}');
         const academicYear = document.getElementById("globalAcademicYear")?.value || sInfo.academic_year || "២០២៦-២០២៧";
         const schoolName = sInfo.school_name || "សាលាបឋមសិក្សា";
         const principalName = sInfo.principal_name || "នាយកសាលា";
+
+        const gradesList = typeof window.getAllGradesList === 'function' ? window.getAllGradesList() : ["ថ្នាក់ទី ១", "ថ្នាក់ទី ២", "ថ្នាក់ទី ៣", "ថ្នាក់ទី ៤", "ថ្នាក់ទី ៥", "ថ្នាក់ទី ៦"];
 
         let modal = document.getElementById("certificateModal");
         if (!modal) {
@@ -554,17 +685,23 @@ window.KrouDigital = {
 
         modal.innerHTML = `
             <div class="bg-white rounded-3xl w-full max-w-5xl p-6 md:p-10 shadow-2xl relative my-6 text-slate-800">
-                <div class="flex justify-between items-center mb-6 pb-4 border-b border-slate-200 no-print">
-                    <div class="flex items-center gap-3">
-                        <span class="text-xs font-bold text-slate-500">ជ្រើសរើសសិស្ស៖</span>
-                        <select onchange="window.KrouDigital.renderCertificateModal(this.value, ${rankNum})" class="bg-slate-100 border border-slate-200 rounded-xl px-3 py-1.5 text-xs font-bold outline-none cursor-pointer">
-                            ${allStudents.map(s => `
-                                <option value="${s.id}" ${s.id === student.id ? 'selected' : ''}>${s.name} (${s.gender})</option>
+                <div class="flex flex-wrap justify-between items-center gap-3 mb-6 pb-4 border-b border-slate-200 no-print">
+                    <div class="flex flex-wrap items-center gap-2">
+                        <span class="text-xs font-bold text-slate-500">ថ្នាក់៖</span>
+                        <select onchange="window.KrouDigital.renderCertificateModal(null, '${rankNum}', this.value)" class="bg-slate-100 border border-slate-200 rounded-xl px-3 py-1.5 text-xs font-bold outline-none cursor-pointer">
+                            <option value="all">គ្រប់ថ្នាក់</option>
+                            ${gradesList.map(g => `<option value="${g}" ${g === curLevel ? 'selected' : ''}>${g}</option>`).join('')}
+                        </select>
+
+                        <span class="text-xs font-bold text-slate-500 ml-2">ជ្រើសរើសសិស្ស៖</span>
+                        <select onchange="window.KrouDigital.renderCertificateModal(this.value, '${rankNum}', '${curLevel}')" class="bg-slate-100 border border-slate-200 rounded-xl px-3 py-1.5 text-xs font-bold outline-none cursor-pointer">
+                            ${selectableStudents.map(s => `
+                                <option value="${s.id}" ${s.id === student.id ? 'selected' : ''}>${s.name} (${s.grade || ''} ${s.room || ''})</option>
                             `).join("")}
                         </select>
 
-                        <span class="text-xs font-bold text-slate-500 ml-2">ចំណាត់ថ្នាក់៖</span>
-                        <select onchange="window.KrouDigital.renderCertificateModal('${student.id}', this.value)" class="bg-slate-100 border border-slate-200 rounded-xl px-3 py-1.5 text-xs font-bold outline-none cursor-pointer">
+                        <span class="text-xs font-bold text-slate-500 ml-2">ប្រភេទប័ណ្ណ៖</span>
+                        <select onchange="window.KrouDigital.renderCertificateModal('${student.id}', this.value, '${curLevel}')" class="bg-slate-100 border border-slate-200 rounded-xl px-3 py-1.5 text-xs font-bold outline-none cursor-pointer">
                             <option value="1" ${rankNum == 1 ? 'selected' : ''}>សិស្សពូកែលំដាប់ទី ១</option>
                             <option value="2" ${rankNum == 2 ? 'selected' : ''}>សិស្សពូកែលំដាប់ទី ២</option>
                             <option value="3" ${rankNum == 3 ? 'selected' : ''}>សិស្សពូកែលំដាប់ទី ៣</option>
@@ -578,49 +715,67 @@ window.KrouDigital = {
                         <button onclick="window.print()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shadow transition flex items-center gap-1.5">
                             <i class="fa-solid fa-print"></i> បោះពុម្ព (Print A4)
                         </button>
-                        <button onclick="document.getElementById('certificateModal').classList.add('hidden')" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center transition">
+                        <button onclick="document.getElementById('certificateModal').classList.add('hidden')" class="w-9 h-9 bg-slate-100 hover:bg-rose-100 text-slate-600 hover:text-rose-600 rounded-xl font-bold flex items-center justify-center transition">
                             <i class="fa-solid fa-xmark"></i>
                         </button>
                     </div>
                 </div>
 
-                <!-- Printable Certificate Border (Landscape) -->
-                <div id="printableCertificate" class="p-8 md:p-14 border-[12px] border-double border-amber-600 bg-gradient-to-br from-amber-50/40 via-white to-orange-50/30 rounded-2xl relative overflow-hidden text-center" style="min-height: 180mm;">
+                <!-- ក្រដាសប័ណ្ណសរសើរ A4 Landscape -->
+                <div id="certificatePrintArea" class="bg-gradient-to-br from-amber-50/50 via-white to-orange-50/30 p-10 md:p-14 border-[14px] border-double border-amber-600 rounded-2xl relative text-center text-slate-900 shadow-inner" style="min-height: 180mm;">
                     
-                    <div class="absolute top-4 left-4 text-amber-600 text-2xl">❖</div>
-                    <div class="absolute top-4 right-4 text-amber-600 text-2xl">❖</div>
-                    <div class="absolute bottom-4 left-4 text-amber-600 text-2xl">❖</div>
-                    <div class="absolute bottom-4 right-4 text-amber-600 text-2xl">❖</div>
+                    <div class="absolute top-4 left-4 text-amber-600 text-2xl font-serif">❖</div>
+                    <div class="absolute top-4 right-4 text-amber-600 text-2xl font-serif">❖</div>
+                    <div class="absolute bottom-4 left-4 text-amber-600 text-2xl font-serif">❖</div>
+                    <div class="absolute bottom-4 right-4 text-amber-600 text-2xl font-serif">❖</div>
 
-                    <div class="mb-4">
-                        <h4 class="font-moul text-sm text-slate-800">ព្រះរាជាណាចក្រកម្ពុជា</h4>
-                        <h5 class="font-moul text-xs text-slate-700 mt-1">ជាតិ សាសនា ព្រះមហាក្សត្រ</h5>
-                        <div class="text-amber-600 tracking-widest text-xs mt-1">❖ ❖ ❖</div>
+                    <div class="flex justify-between items-center text-xs mb-6 px-4">
+                        <div class="text-left">
+                            <p class="font-moul text-amber-950">${schoolName}</p>
+                            <p class="text-slate-500 font-bold mt-0.5">លេខ៖ .......... / ប.ស.ស</p>
+                        </div>
+                        <div class="text-center">
+                            <p class="font-moul text-slate-900 text-sm">ព្រះរាជាណាចក្រកម្ពុជា</p>
+                            <p class="font-moul text-slate-800 text-xs mt-1">ជាតិ សាសនា ព្រះមហាក្សត្រ</p>
+                            <div class="text-amber-600 font-bold tracking-widest text-[10px] mt-1">❖ ❖ ❖</div>
+                        </div>
                     </div>
 
-                    <p class="text-xs font-bold text-amber-900 mt-2">${schoolName}</p>
+                    <div class="my-6">
+                        <h1 class="font-moul text-2xl md:text-3xl text-amber-800 drop-shadow-sm mb-2">ប័ណ្ណសរសើរ</h1>
+                        <p class="text-xs font-bold text-amber-900 uppercase tracking-widest">CERTIFICATE OF HONOR &amp; EXCELLENCE</p>
+                    </div>
 
-                    <h2 class="font-moul text-2xl md:text-3xl text-amber-800 my-4 drop-shadow-sm">ប័ណ្ណសរសើរ</h2>
-                    <p class="text-xs text-slate-600 font-bold mb-6">គណៈគ្រប់គ្រងសាលា សូមប្រគល់ប័ណ្ណសរសើរនេះជូនចំពោះ</p>
-
-                    <h3 class="font-moul text-xl md:text-2xl text-indigo-950 mb-2 border-b-2 border-dotted border-amber-600 inline-block px-8 pb-1">
-                        ${student.name}
-                    </h3>
-                    <p class="text-xs text-slate-600 font-bold mt-2">ភេទ៖ ${student.gender || 'ប្រុស'} | សិស្សថ្នាក់៖ ${student.grade || sInfo.teacher_level || 'ថ្នាក់ទី ៤'}</p>
-
-                    <p class="text-sm font-bold text-slate-800 max-w-xl mx-auto my-6 leading-relaxed">
-                        ដែលទទួលបានជោគជ័យក្នុងការសិក្សាជា <span class="text-amber-800 font-moul text-base">${rankNum === 'conduct' ? 'សិស្សមានវិន័យ និងសីលធម៌ល្អ' : `សិស្សពូកែលំដាប់ទី ${rankNum}`}</span><br>
-                        ប្រចាំឆ្នាំសិក្សា <span class="text-indigo-900 font-bold">${academicYear}</span>
-                    </p>
-
-                    <div class="grid grid-cols-2 gap-8 text-center text-xs pt-8 max-w-lg mx-auto">
-                        <div>
-                            <p class="font-bold text-slate-700 mb-16">បានឃើញ និងឯកភាព<br>នាយកសាលា</p>
-                            <p class="font-moul text-slate-800">${principalName}</p>
+                    <div class="my-6 max-w-2xl mx-auto space-y-4 text-sm md:text-base leading-relaxed">
+                        <p class="text-slate-700">គណៈគ្រប់គ្រង និងលោកគ្រូ អ្នកគ្រូ នៃ <strong>${schoolName}</strong> សូមសម្តែងនូវការកោតសរសើរចំពោះ៖</p>
+                        
+                        <div class="my-4">
+                            <h2 class="font-moul text-xl md:text-2xl text-indigo-950 py-2 border-b-2 border-dashed border-amber-300 inline-block px-8">${student.name}</h2>
                         </div>
-                        <div>
-                            <p class="font-bold text-slate-700 mb-16">ថ្ងៃទី........ ខែ........ ឆ្នាំ២០....<br>គ្រូបន្ទុកថ្នាក់</p>
-                            <p class="font-moul text-slate-800">${sInfo.teacher_name || 'គ្រូបង្រៀន'}</p>
+
+                        <p class="text-slate-700">
+                            ភេទ៖ <strong>${student.gender || 'ប្រុស'}</strong> | សិស្សថ្នាក់៖ <strong>${student.grade || curLevel} ${student.room || ''}</strong> | អត្តលេខ៖ <span class="font-mono font-bold">${student.id}</span>
+                        </p>
+
+                        <p class="text-slate-800 font-medium">
+                            ${rankNum == 'conduct' ? 
+                                `ដែលបានខិតខំប្រឹងប្រែងគោរពវិន័យ មានសីលធម៌ សុជីវធម៌ល្អប្រពៃ និងជាគំរូដល់មិត្តរួមថ្នាក់` : 
+                                `ដែលទទួលបានជោគជ័យ និងចំណាត់ថ្នាក់ជា <span class="font-moul text-amber-700">«សិស្សពូកែលំដាប់ទី ${rankNum}»</span> ក្នុងការប្រឡង និងវាយតម្លៃលទ្ធផលសិក្សា`}
+                            ប្រចាំឆ្នាំសិក្សា <strong>${academicYear}</strong>។
+                        </p>
+                    </div>
+
+                    <div class="flex justify-between items-center text-xs mt-14 px-12">
+                        <div class="text-center">
+                            <p class="font-bold text-slate-600">គ្រូបន្ទុកថ្នាក់</p>
+                            <div class="h-16"></div>
+                            <p class="font-bold text-slate-800">................................</p>
+                        </div>
+                        <div class="text-center">
+                            <p class="text-slate-500">រាជធានី/ខេត្ត.......... ថ្ងៃទី...... ខែ...... ឆ្នាំ ២០២...</p>
+                            <p class="font-moul text-amber-950 mt-1">នាយកសាលា</p>
+                            <div class="h-14"></div>
+                            <p class="font-bold text-slate-900">${principalName}</p>
                         </div>
                     </div>
 
@@ -632,50 +787,49 @@ window.KrouDigital = {
     },
 
     // =====================================================================
-    // ៦. ច្រកពិនិត្យលទ្ធផលសម្រាប់សិស្ស និងមាតាបិតា (Student & Parent Result Portal)
+    // ៦. ច្រកពិនិត្យលទ្ធផលសម្រាប់សិស្ស និងមាតាបិតា (Parent & Student Result Portal)
     // =====================================================================
     openParentPortalModal: function(query = "") {
         let modal = document.getElementById("parentPortalModal");
         if (!modal) {
             modal = document.createElement("div");
             modal.id = "parentPortalModal";
-            modal.className = "fixed inset-0 z-[9500] bg-slate-900/80 backdrop-blur-md flex items-center justify-center p-3 sm:p-6 font-siemreap overflow-y-auto";
+            modal.className = "fixed inset-0 z-[7500] bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-3 sm:p-6 font-siemreap overflow-y-auto";
             document.body.appendChild(modal);
         }
 
         modal.innerHTML = `
-            <div class="bg-white dark:bg-slate-800 rounded-[2.2rem] w-full max-w-2xl p-6 sm:p-8 shadow-2xl relative border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100">
-                <button onclick="document.getElementById('parentPortalModal').classList.add('hidden')" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-500 absolute top-5 right-5 flex items-center justify-center transition">
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
-
-                <div class="flex items-center gap-3 mb-6">
-                    <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 text-white flex items-center justify-center text-xl shadow-lg shadow-indigo-500/25">
-                        <i class="fa-solid fa-magnifying-glass-chart"></i>
+            <div class="bg-white dark:bg-slate-800 rounded-3xl w-full max-w-xl p-6 md:p-8 shadow-2xl relative border border-indigo-100 dark:border-slate-700 text-slate-800 dark:text-white">
+                <div class="flex justify-between items-center mb-6 pb-4 border-b border-slate-100 dark:border-slate-700">
+                    <div class="flex items-center gap-3">
+                        <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-indigo-600 to-purple-600 text-white flex items-center justify-center text-xl shadow-lg shadow-indigo-500/30">
+                            <i class="fa-solid fa-magnifying-glass-chart"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-moul text-base text-indigo-950 dark:text-white">ច្រកពិនិត្យលទ្ធផលសិក្សាសិស្ស</h3>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 font-bold">សម្រាប់សិស្សានុសិស្ស និងមាតាបិតា</p>
+                        </div>
                     </div>
-                    <div>
-                        <h3 class="font-moul text-base text-slate-900 dark:text-white">ពិនិត្យលទ្ធផលសិក្សាសិស្ស</h3>
-                        <p class="text-xs text-slate-500 dark:text-slate-400 font-bold">សម្រាប់សិស្សានុសិស្ស និងមាតាបិតា (KrouDigital Portal)</p>
-                    </div>
-                </div>
-
-                <!-- Search Input -->
-                <div class="flex gap-2 mb-6">
-                    <div class="relative flex-1">
-                        <i class="fa-solid fa-id-card absolute left-3.5 top-3.5 text-slate-400"></i>
-                        <input type="text" id="parentSearchInput" value="${query}" placeholder="វាយបញ្ចូលអត្តលេខសិស្ស (ឧ. STU-001) ឬឈ្មោះ..." class="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-700/60 border border-slate-200 dark:border-slate-600 rounded-xl text-xs font-bold outline-none focus:ring-2 focus:ring-indigo-500">
-                    </div>
-                    <button onclick="window.KrouDigital.searchStudentForParent()" class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shadow-md transition flex items-center gap-1.5">
-                        <i class="fa-solid fa-magnifying-glass"></i> ស្វែងរក
+                    <button onclick="document.getElementById('parentPortalModal').classList.add('hidden')" class="w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-700 text-slate-500 hover:text-rose-500 flex items-center justify-center transition">
+                        <i class="fa-solid fa-xmark"></i>
                     </button>
                 </div>
 
-                <!-- Result Container -->
-                <div id="parentSearchResultArea">
-                    <div class="text-center py-10 text-slate-400 text-xs font-bold">
-                        <i class="fa-solid fa-user-graduate text-3xl mb-2 opacity-50"></i>
-                        <p>សូមវាយបញ្ចូលអត្តលេខសិស្ស ឬឈ្មោះ ដើម្បីមើលលទ្ធផលពិន្ទុ និងវត្តមាន</p>
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 dark:text-slate-300 mb-1.5">បញ្ចូលអត្តលេខសិស្ស ឬឈ្មោះសិស្ស៖</label>
+                        <div class="flex gap-2">
+                            <div class="relative flex-1">
+                                <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"><i class="fa-solid fa-id-card"></i></span>
+                                <input type="text" id="parentSearchInput" value="${query}" placeholder="ឧទាហរណ៍៖ STU-001 ឬ ឈ្មោះខ្មែរ..." onkeydown="if(event.key === 'Enter') window.KrouDigital.searchStudentForParent()" class="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-700/60 border border-slate-200 dark:border-slate-600 rounded-xl text-xs font-bold outline-none focus:ring-2 focus:ring-indigo-500">
+                            </div>
+                            <button onclick="window.KrouDigital.searchStudentForParent()" class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shadow-md shadow-indigo-500/20 transition flex items-center gap-1.5">
+                                <i class="fa-solid fa-search"></i> ស្វែងរក
+                            </button>
+                        </div>
                     </div>
+
+                    <div id="parentSearchResultArea" class="pt-2"></div>
                 </div>
             </div>
         `;

@@ -9,31 +9,74 @@ window.getScriptUrl = function() {
   return SCRIPT_URL;
 };
 
-// ⚡ Dynamic Dropdown Updater: updates all class/room dropdowns in real-time without reloading
-window.updateAllClassDropdowns = function() {
+// ⚡ Global Standardized Grade & Room Helpers
+window.getAllGradesList = function() {
     let struct = window.academicStructure;
     if (!struct || !Array.isArray(struct.grades) || struct.grades.length === 0) {
-        try {
-            struct = JSON.parse(localStorage.getItem("academic_structure") || "{}");
-        } catch(e) {}
+        try { struct = JSON.parse(localStorage.getItem("academic_structure") || "{}"); } catch(e) {}
     }
     const gradesList = [];
-    const roomsSet = new Set(["«ក»", "«ខ»", "«គ»", "«ឃ»"]);
-    
     if (struct && Array.isArray(struct.grades)) {
         struct.grades.forEach(g => {
             if (g && g.name) gradesList.push(g.name);
-            if (g && Array.isArray(g.rooms)) g.rooms.forEach(r => roomsSet.add(r));
         });
     }
-
     if (gradesList.length === 0) {
         for (let i = 1; i <= 12; i++) {
-            const kh = typeof toKhmerNum === 'function' ? toKhmerNum(i) : i;
+            const kh = typeof window.toKhmerNum === 'function' ? window.toKhmerNum(i) : i;
             gradesList.push(`ថ្នាក់ទី ${kh}`);
         }
     }
+    const allStudents = window.allStudents || (typeof window.getMasterStudents === 'function' ? window.getMasterStudents() : []);
+    allStudents.forEach(s => {
+        if (s && s.grade) {
+            const norm = typeof window.normalizeGrade === 'function' ? window.normalizeGrade(s.grade) : s.grade.trim();
+            if (norm && !gradesList.includes(norm)) gradesList.push(norm);
+        }
+    });
+    return gradesList;
+};
 
+window.getAllRoomsList = function() {
+    let struct = window.academicStructure;
+    if (!struct || !Array.isArray(struct.grades) || struct.grades.length === 0) {
+        try { struct = JSON.parse(localStorage.getItem("academic_structure") || "{}"); } catch(e) {}
+    }
+    const roomsSet = new Set(["«ក»", "«ខ»", "«គ»", "«ឃ»", "«ង»"]);
+    if (struct && Array.isArray(struct.grades)) {
+        struct.grades.forEach(g => {
+            if (g && Array.isArray(g.rooms)) g.rooms.forEach(r => roomsSet.add(r));
+        });
+    }
+    const allStudents = window.allStudents || (typeof window.getMasterStudents === 'function' ? window.getMasterStudents() : []);
+    allStudents.forEach(s => {
+        if (s && s.room && s.room.trim()) roomsSet.add(s.room.trim());
+    });
+    return Array.from(roomsSet);
+};
+
+window.getCurrentSelectedClass = function() {
+    const sInfo = window.appSettings || JSON.parse(localStorage.getItem('school_settings') || '{}');
+    const teacherGradeInfo = typeof window.getTeacherGradeInfo === 'function' ? window.getTeacherGradeInfo() : {};
+    const savedLevel = localStorage.getItem('selected_level') || teacherGradeInfo.level || sInfo.teacher_level || "ថ្នាក់ទី ១";
+    const savedRoom = localStorage.getItem('selected_room') || teacherGradeInfo.room || sInfo.teacher_room || "«ក»";
+    return {
+        level: savedLevel,
+        room: savedRoom,
+        full: `${savedLevel} ${savedRoom}`.trim()
+    };
+};
+
+window.setSelectedClass = function(level, room) {
+    if (level && level !== 'all') localStorage.setItem('selected_level', level);
+    if (room && room !== 'all') localStorage.setItem('selected_room', room);
+};
+
+// ⚡ Dynamic Dropdown Updater: updates all class/room dropdowns in real-time without reloading
+window.updateAllClassDropdowns = function() {
+    const gradesList = window.getAllGradesList();
+    const roomsList = window.getAllRoomsList();
+    
     // 1. Update Students filter select #stuFilterGrade
     const stuGradeSel = document.getElementById("stuFilterGrade");
     if (stuGradeSel) {
@@ -78,10 +121,32 @@ window.updateAllClassDropdowns = function() {
         scoreGradeSel.innerHTML = optHtml;
     }
 
-    // 5. Update Timetable & other class selects
+    // 5. Update Reports select #reportGradeSelect
+    const reportGradeSel = document.getElementById("reportGradeSelect");
+    if (reportGradeSel) {
+        const curVal = reportGradeSel.value;
+        let optHtml = "";
+        gradesList.forEach(g => {
+            optHtml += `<option value="${g}" ${g === curVal ? 'selected' : ''}>${g}</option>`;
+        });
+        reportGradeSel.innerHTML = optHtml;
+    }
+
+    // 6. Update Tracking Book select #tbLevelSelect
+    const tbLevelSel = document.getElementById("tbLevelSelect");
+    if (tbLevelSel) {
+        const curVal = tbLevelSel.value;
+        let optHtml = "";
+        gradesList.forEach(g => {
+            optHtml += `<option value="${g}" ${g === curVal ? 'selected' : ''}>${g}</option>`;
+        });
+        tbLevelSel.innerHTML = optHtml;
+    }
+
+    // 7. Update Timetable & other class selects
     const otherSelects = document.querySelectorAll("select[id*='Grade'], select[id*='grade'], select[onchange*='handleClassChange']");
     otherSelects.forEach(sel => {
-        if (sel !== stuGradeSel && sel !== modalStuGrade && sel !== attGradeSel && sel !== scoreGradeSel) {
+        if (sel !== stuGradeSel && sel !== modalStuGrade && sel !== attGradeSel && sel !== scoreGradeSel && sel !== reportGradeSel && sel !== tbLevelSel) {
             const curVal = sel.value;
             let optHtml = `<option value="all">គ្រប់ថ្នាក់ទាំងអស់</option>`;
             gradesList.forEach(g => {

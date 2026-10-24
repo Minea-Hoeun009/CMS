@@ -39,6 +39,10 @@ window.AnalyticsEngine = {
 
         if (!this.currentGrade) this.currentGrade = defaultGrade;
 
+        const availableClasses = (window.TimetableHomeworkManager && typeof window.TimetableHomeworkManager.getAvailableClasses === 'function')
+            ? window.TimetableHomeworkManager.getAvailableClasses()
+            : (typeof window.getAllGradesList === 'function' ? window.getAllGradesList().map(g => `${g} «ក»`) : ["ថ្នាក់ទី ១ «ក»", "ថ្នាក់ទី ២ «ក»", "ថ្នាក់ទី ៣ «ក»", "ថ្នាក់ទី ៤ «ក»", "ថ្នាក់ទី ៥ «ក»", "ថ្នាក់ទី ៦ «ក»"]);
+
         container.innerHTML = `
             <div class="max-w-[1600px] mx-auto space-y-8 animate-fade-in font-siemreap pb-20">
                 
@@ -55,10 +59,12 @@ window.AnalyticsEngine = {
 
                     <!-- Filter Controls -->
                     <div class="flex flex-wrap items-center gap-3 relative z-10 w-full md:w-auto">
-                        <div class="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl px-4 py-2 flex items-center gap-2">
+                        <div class="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl px-3 py-1.5 flex items-center gap-2">
                             <i class="fa-solid fa-chalkboard-user text-indigo-300 text-xs"></i>
                             <span class="text-xs text-white/80 font-bold">ថ្នាក់៖</span>
-                            <span class="text-xs text-white font-black">${this.currentGrade}</span>
+                            <select id="analyticsGradeSelect" onchange="window.AnalyticsEngine.onGradeChange(this.value)" class="bg-transparent text-white text-xs font-bold outline-none cursor-pointer">
+                                ${availableClasses.map(c => `<option value="${c}" class="text-slate-800" ${c === this.currentGrade ? 'selected' : ''}>${c}</option>`).join('')}
+                            </select>
                         </div>
 
                         <select id="analyticsMonthSelect" onchange="window.AnalyticsEngine.onMonthChange(this.value)" class="bg-white/10 backdrop-blur-md border border-white/20 text-white rounded-2xl px-4 py-2.5 text-xs font-bold outline-none cursor-pointer">
@@ -192,6 +198,11 @@ window.AnalyticsEngine = {
             </div>
         `;
 
+        this.renderAnalyticsData();
+    },
+
+    onGradeChange: function(grade) {
+        this.currentGrade = grade;
         this.renderAnalyticsData();
     },
 

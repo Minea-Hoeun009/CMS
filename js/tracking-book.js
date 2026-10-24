@@ -19,11 +19,10 @@ function openTrackingBookModal() {
               <div class="flex items-center gap-1 bg-white border border-slate-200 rounded-xl px-2 py-1.5 shadow-sm">
                 <span class="text-[10px] font-bold text-slate-500 uppercase ml-1">ថ្នាក់ទី</span>
                 <select id="tbLevelSelect" onchange="updateTbStudentSelect()" class="border-none bg-transparent text-xs font-bold text-slate-700 outline-none cursor-pointer">
-                  <option value="ថ្នាក់ទី ១">ទី ១</option><option value="ថ្នាក់ទី ២" selected>ទី ២</option><option value="ថ្នាក់ទី ៣">ទី ៣</option>
-                  <option value="ថ្នាក់ទី ៤">ទី ៤</option><option value="ថ្នាក់ទី ៥">ទី ៥</option><option value="ថ្នាក់ទី ៦">ទី ៦</option>
+                  ${(typeof window.getAllGradesList === 'function' ? window.getAllGradesList() : ["ថ្នាក់ទី ១", "ថ្នាក់ទី ២", "ថ្នាក់ទី ៣", "ថ្នាក់ទី ៤", "ថ្នាក់ទី ៥", "ថ្នាក់ទី ៦"]).map(g => `<option value="${g}">${g}</option>`).join('')}
                 </select>
                 <select id="tbRoomSelect" onchange="updateTbStudentSelect()" class="border-none bg-transparent text-xs font-bold text-indigo-700 outline-none cursor-pointer">
-                  <option value="«ក»">«ក»</option><option value="«ខ»" selected>«ខ»</option><option value="«គ»">«គ»</option>
+                  ${(typeof window.getAllRoomsList === 'function' ? window.getAllRoomsList() : ["«ក»", "«ខ»", "«គ»", "«ឃ»"]).map(r => `<option value="${r}">${r}</option>`).join('')}
                 </select>
               </div>
 
@@ -84,40 +83,59 @@ function closeTrackingBookModal() {
 }
 
 function updateTbStudentSelect() {
-  const level = document.getElementById("tbLevelSelect").value;
-  const room = document.getElementById("tbRoomSelect").value;
+  const levelSelect = document.getElementById("tbLevelSelect");
+  const roomSelect = document.getElementById("tbRoomSelect");
+  if (!levelSelect || !roomSelect) return;
+
+  const level = levelSelect.value;
+  const room = roomSelect.value;
   const targetGrade = `${level} ${room}`.trim();
   const select = document.getElementById("tbStudentSelect");
-  
-  // ទាញសិស្សពីទិន្នន័យចំណាត់ថ្នាក់ (Rankings Data) ដើម្បីយកពិន្ទុ មធ្យមភាគ និងនិទ្ទេស
-  if (typeof rankingsDataList !== 'undefined' && rankingsDataList.length > 0) {
-    let studentsInGrade = rankingsDataList;
-    if (studentsInGrade.length === 0) {
-      select.innerHTML = `<option value="">-- គ្មានសិស្ស --</option>`;
-      document.getElementById("tbPreviewContainer").innerHTML = `<div class="mt-20 text-slate-500 font-bold">គ្មានសិស្សក្នុងថ្នាក់ ${targetGrade} ទេ!</div>`;
-    } else {
-      select.innerHTML = studentsInGrade.map(s => `<option value="${s.id}">${s.name} (${s.gender})</option>`).join("");
-      renderTrackingBookPreview();
-    }
+  if (!select) return;
+
+  const academicYear = document.getElementById("globalAcademicYear")?.value || "2026-2027";
+  const studentsInGrade = typeof window.getStudentsForClass === 'function'
+      ? window.getStudentsForClass(level, room, academicYear)
+      : (window.allStudents || []).filter(s => {
+          return (s.grade || "").replace(/\s+/g, '') === level.replace(/\s+/g, '') &&
+                 (s.room || "").replace(/[«»\s]/g, '') === room.replace(/[«»\s]/g, '');
+      });
+
+  if (studentsInGrade.length === 0) {
+    select.innerHTML = `<option value="">-- គ្មានសិស្សក្នុងថ្នាក់ ${targetGrade} --</option>`;
+    const prev = document.getElementById("tbPreviewContainer");
+    if (prev) prev.innerHTML = `<div class="mt-20 text-slate-500 font-bold text-center">គ្មានសិស្សក្នុងថ្នាក់ ${targetGrade} ទេ!</div>`;
   } else {
-    select.innerHTML = `<option value="">-- សូមទាញយកទិន្នន័យចំណាត់ថ្នាក់សិន --</option>`;
+    select.innerHTML = studentsInGrade.map(s => `<option value="${s.id}">${s.name} (${s.gender || 'ប្រុស'})</option>`).join("");
+    renderTrackingBookPreview();
   }
 }
 
 // គូររូបរាងសៀវភៅបញ្ចូលទៅក្នុង Pop-up
 function renderTrackingBookPreview() {
-  const studentId = document.getElementById("tbStudentSelect").value;
-  const period = document.getElementById("tbPeriodSelect").value;
+  const studentId = document.getElementById("tbStudentSelect")?.value;
+  const period = document.getElementById("tbPeriodSelect")?.value;
   const container = document.getElementById("tbPreviewContainer");
+  if (!container || !studentId) return;
 
-  if (!studentId) return;
-  const student = rankingsDataList.find(s => String(s.id) === String(studentId));
+  const allStudents = window.allStudents || (typeof window.getMasterStudents === 'function' ? window.getMasterStudents() : []);
+  let student = allStudents.find(s => String(s.id) === String(studentId));
+  if (!student && typeof rankingsDataList !== 'undefined') {
+    student = rankingsDataList.find(s => String(s.id) === String(studentId));
+  }
   if (!student) return;
+
+  let allScores = [];
+  try { allScores = JSON.parse(localStorage.getItem('academic_scores') || '[]'); } catch(e) {}
+  const studentScore = allScores.filter(sc => String(sc.student_id) === String(studentId)).pop() || {};
+  const avgVal = parseFloat(student.avg || studentScore.average || studentScore.avg || 0);
 
   const sInfo = typeof appSettings !== 'undefined' ? appSettings : {};
   const schoolName = sInfo.school_name || "សាលាបឋមសិក្សាគំរូ";
   const academicYear = sInfo.academic_year || "២០២៦-២០២៧";
-  const grade = student.grade || "ថ្នាក់ទី ២ «ខ»";
+  const levelSelect = document.getElementById("tbLevelSelect");
+  const roomSelect = document.getElementById("tbRoomSelect");
+  const grade = student.grade ? `${student.grade} ${student.room || ''}`.trim() : (levelSelect && roomSelect ? `${levelSelect.value} ${roomSelect.value}` : "ថ្នាក់ទី ២ «ខ»");
 
   const khmerNumbers = ['០', '១', '២', '៣', '៤', '៥', '៦', '៧', '៨', '៩'];
   const toKhmerNum = (str) => String(str).split('').map(n => khmerNumbers[n] || n).join('');
