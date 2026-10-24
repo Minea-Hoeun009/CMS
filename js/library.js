@@ -254,23 +254,18 @@ window.loadLibraryView = async function() {
 // ==========================================
 window.fetchLibraryData = async function() {
     try {
-        let allStus = JSON.parse(localStorage.getItem('academic_students')) || [];
-        let cleanLevel = window.currentGradeFull.replace(/ថ្នាក់ទី|«|»|\s+/g, '');
-
-        window.libStudents = allStus.filter(s => {
-            if (s.status === "Dropped") return false;
-            let sGradeStr = String(s.grade || "") + String(s.room || "");
-            let cleanSGrade = sGradeStr.replace(/ថ្នាក់ទី|«|»|\s+/g, '');
-            return cleanSGrade === cleanLevel || cleanSGrade.includes(cleanLevel);
-        });
-
-        if (window.libStudents.length === 0) {
-            window.libStudents = Array.from({length: 15}, (_, i) => ({ 
-                id: "STU-" + String(i + 1).padStart(3, '0'), 
-                name: "សិស្សសាកល្បង " + (i + 1), 
-                gender: i % 2 === 0 ? "ប្រុស" : "ស្រី" 
-            }));
+        let parts = (window.currentGradeFull || "").split(" ");
+        let levelStr = parts[0] || "ថ្នាក់ទី ១";
+        let roomStr = parts[1] || "«ក»";
+        if (parts.length > 2) {
+            levelStr = `${parts[0]} ${parts[1]}`;
+            roomStr = parts[2];
         }
+
+        // 🟢 Single Source of Truth: ទាញយកសិស្សពី Student Management (គ្រប់គ្រងសិស្ស)
+        window.libStudents = typeof window.getStudentsForClass === 'function'
+            ? window.getStudentsForClass(levelStr, roomStr)
+            : [];
 
         window.libStudents.sort((a,b) => String(a.name||"").localeCompare(String(b.name||""), 'km'));
 
@@ -332,6 +327,11 @@ window.renderLibTable = function() {
     const thead = document.getElementById("libTableHead");
     const tbody = document.getElementById("libTableBody");
     if (!thead || !tbody) return;
+
+    if (!window.libStudents || window.libStudents.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="100" class="p-16 text-center text-slate-400 font-bold"><i class="fa-solid fa-user-xmark text-3xl mb-3 text-amber-500"></i><br>មិនទាន់មានទិន្នន័យសិស្សសម្រាប់ ${window.currentGradeFull} នៅឡើយទេ!<br><span class="text-xs font-normal text-slate-400 mt-1">សូមបញ្ចូលឈ្មោះសិស្សនៅក្នុងផ្ទាំង «គ្រប់គ្រងសិស្ស» ជាមុនសិន។</span></td></tr>`;
+        return;
+    }
 
     // 🟢 រៀបចំក្បាលតារាង (Headers) 🟢
     let ths = `

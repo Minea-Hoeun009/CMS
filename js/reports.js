@@ -215,7 +215,7 @@ window.renderStudentStatsReportHTML = function(container) {
     const teacherExperience = sInfo.teacher_exp || "៥ឆ្នាំ"; 
     
     // គណនាទិន្នន័យអាយុពីបញ្ជីសិស្ស
-    const allStus = JSON.parse(localStorage.getItem('academic_students')) || [];
+    const allStus = typeof window.getMasterStudents === 'function' ? window.getMasterStudents() : (JSON.parse(localStorage.getItem('academic_students')) || []);
     let totalStus = 0, femaleStus = 0;
     
     let ageStats = {
@@ -678,7 +678,7 @@ window.updateStudentListContent = function() {
     const solarDateStr = `${locationStr}, ${sDate}`;
     const lunarDateStr = rDates.showLunar !== false ? (rDates.lunarDate || "ថ្ងៃ......................... ខែ............ ឆ្នាំ............ ព.ស.២៥៧...") : "";
 
-    let allStus = JSON.parse(localStorage.getItem('academic_students')) || [];
+    let allStus = typeof window.getMasterStudents === 'function' ? window.getMasterStudents() : (JSON.parse(localStorage.getItem('academic_students')) || []);
     let cleanLevel = String(sInfo.teacher_level || "").replace(/\s+/g, ''); 
     let cleanRoom = String(sInfo.teacher_room || "").replace(/[«»\s]/g, '');
 
@@ -927,7 +927,7 @@ window.renderClassStructureHTML = function(container) {
     const academicYear = document.getElementById("globalAcademicYear")?.value || sInfo.academic_year || "២០២៦-២០២៧";
     const gradeFull = (sInfo.teacher_level && sInfo.teacher_room) ? `${sInfo.teacher_level} ${sInfo.teacher_room}`.trim() : "ថ្នាក់ទី";
     
-    let allStus = JSON.parse(localStorage.getItem('academic_students')) || [];
+    let allStus = typeof window.getMasterStudents === 'function' ? window.getMasterStudents() : (JSON.parse(localStorage.getItem('academic_students')) || []);
     let cleanLevel = String(sInfo.teacher_level || "").replace(/\s+/g, ''); 
     let cleanRoom = String(sInfo.teacher_room || "").replace(/[«»\s]/g, '');
 
@@ -1080,7 +1080,7 @@ window.renderAttendanceContent = function() {
     const solarDateStr = `${locationStr}, ${sDate}`;
     const lunarDateStr = rDates.showLunar !== false ? (rDates.lunarDate || "ថ្ងៃ......................... ខែ............ ឆ្នាំ............ ព.ស.២៥៧...") : "";
 
-    let allStus = JSON.parse(localStorage.getItem('academic_students')) || [];
+    let allStus = typeof window.getMasterStudents === 'function' ? window.getMasterStudents() : (JSON.parse(localStorage.getItem('academic_students')) || []);
     let cleanLevel = String(sInfo.teacher_level || "").replace(/\s+/g, ''); 
     let cleanRoom = String(sInfo.teacher_room || "").replace(/[«»\s]/g, '');
 

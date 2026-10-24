@@ -1875,39 +1875,17 @@ window.fetchStudentsForScores = async function() {
     try {
         tbody.innerHTML = `<tr><td colspan="100" class="p-16 text-center text-slate-400 font-bold"><i class="fa-solid fa-spinner fa-spin text-3xl mb-3 text-blue-500"></i><br>កំពុងរៀបចំតារាងពិន្ទុ...</td></tr>`;
         
-        let allStus = JSON.parse(localStorage.getItem('academic_students')) || [];
-        if ((!allStus || allStus.length === 0) && typeof apiGet === "function") {
-            try { 
-                let stRes = await apiGet("getStudents", { status: "Active" }); 
-                if (stRes && stRes.data && stRes.data.length > 0) allStus = stRes.data;
-            } catch(e) {}
-        }
+        // 🟢 Single Source of Truth: ទាញយកសិស្សពី Student Management (គ្រប់គ្រងសិស្ស)
+        window.scoresStudentList = typeof window.getStudentsForClass === 'function' 
+            ? window.getStudentsForClass(levelStr, roomStr, currentYear)
+            : [];
 
-        let cleanLevel = levelStr.replace(/\s+/g, ''); 
-        let cleanRoom = roomStr.replace(/[«»\s]/g, '');
-
-        window.scoresStudentList = allStus.filter(s => {
-            if (!s || s.status === "Dropped" || s.status === "Withdrawn" || s.status === "អសកម្ម" || s.status === "បោះបង់") return false;
-            if (s.academic_year && s.academic_year !== currentYear) return false;
-            let sGrade = String(s.grade || "").replace(/\s+/g, ''); 
-            let sRoom = String(s.room || "").replace(/[«»\s]/g, '');
-            let fullGradeDB = String(s.class_name || s.grade || "").replace(/\s+/g, ''); 
-            let expectedFull = cleanLevel + cleanRoom;
-            return (sGrade === cleanLevel && sRoom === cleanRoom) || (fullGradeDB === expectedFull) || (fullGradeDB.includes(cleanLevel) && fullGradeDB.includes(cleanRoom));
-        });
-
-        // Demo Data បើអត់សិស្ស
-        if (window.scoresStudentList.length === 0 && allStus.length > 0) window.scoresStudentList = allStus.filter(s => s && s.status !== "Dropped");
         if (window.scoresStudentList.length === 0) {
-            window.scoresStudentList = Array.from({length: 15}, (_, i) => ({ 
-                id: "STU-" + String(i + 1).padStart(3, '0'), 
-                name: i % 2 === 0 ? `សិស្សសាកល្បង ${i+1}` : `យុវតីតេស្ត ${i+1}`, 
-                gender: i % 2 === 0 ? "ប្រុស" : "ស្រី", 
-                grade: levelStr, room: roomStr 
-            }));
+            tbody.innerHTML = `<tr><td colspan="100" class="p-16 text-center text-slate-400 font-bold"><i class="fa-solid fa-user-xmark text-3xl mb-3 text-amber-500"></i><br>មិនទាន់មានទិន្នន័យសិស្សសម្រាប់ ${levelStr} ${roomStr} នៅឡើយទេ!<br><span class="text-xs font-normal text-slate-400 mt-1">សូមបញ្ចូលឈ្មោះសិស្សនៅក្នុងផ្ទាំង «គ្រប់គ្រងសិស្ស» ជាមុនសិន។</span></td></tr>`;
+            const countLbl = document.getElementById("entryStudentCountLbl");
+            if(countLbl) countLbl.textContent = 0;
+            return;
         }
-        
-        window.scoresStudentList.sort((a,b) => String(a.name||"").localeCompare(String(b.name||""), 'km'));
 
         // Update Label
         const countLbl = document.getElementById("entryStudentCountLbl");
@@ -3751,7 +3729,7 @@ window.generateMonthlySheetHTML = function(stu, periodOverride = null) {
 window.generateCoverAndProfileHTML = function(stu) {
     let fullStu = { ...stu };
     try {
-        const allStus = JSON.parse(localStorage.getItem('academic_students')) || window.allStudents || [];
+        const allStus = typeof window.getMasterStudents === 'function' ? window.getMasterStudents() : (window.allStudents || []);
         const found = allStus.find(s => String(s.id).trim() === String(stu.id).trim());
         if (found) fullStu = { ...found, ...stu };
     } catch(e) {}

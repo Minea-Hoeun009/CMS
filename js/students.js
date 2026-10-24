@@ -2,10 +2,14 @@
 // ឯកសារ js/students.js - ប្រព័ន្ធគ្រប់គ្រងទិន្នន័យសិស្ស (Ultra-Safe Dynamic Edition)
 // ==========================================
 
-try {
-    window.allStudents = JSON.parse(localStorage.getItem('academic_students') || '[]');
-} catch(e) {
-    window.allStudents = [];
+if (typeof window.getMasterStudents === 'function') {
+    window.allStudents = window.getMasterStudents();
+} else {
+    try {
+        window.allStudents = JSON.parse(localStorage.getItem('academic_students') || '[]');
+    } catch(e) {
+        window.allStudents = [];
+    }
 }
 window.filteredStudents = [...window.allStudents];
 // ==========================================
@@ -348,8 +352,12 @@ window.fetchStudentsData = function() {
               });
 
               if (stus.length > 0) {
-                  window.allStudents = stus;
-                  localStorage.setItem('academic_students', JSON.stringify(stus));
+                  if (typeof window.setMasterStudents === 'function') {
+                      window.setMasterStudents(stus);
+                  } else {
+                      window.allStudents = stus;
+                      localStorage.setItem('academic_students', JSON.stringify(stus));
+                  }
               }
 
               // 🔴 ធ្វើបច្ចុប្បន្នភាពតារាងភ្លាមៗ ពេលមានការផ្លាស់ប្តូរទិន្នន័យ 🔴
@@ -872,10 +880,13 @@ window.saveStudentData = async function(e) {
             window.allStudents.unshift(payload);
         }
 
-        try { localStorage.setItem('academic_students', JSON.stringify(window.allStudents)); } 
-        catch(ex) {
+        if (typeof window.setMasterStudents === 'function') {
+            window.setMasterStudents(window.allStudents);
+        } else {
+            try { localStorage.setItem('academic_students', JSON.stringify(window.allStudents)); } catch(ex) {
             alert("ទំហំផ្ទុកពេញ! សូមសម្អាតទិន្នន័យ (Clear Cache) ឬកាត់បន្ថយទំហំរូបថត។");
             btn.innerHTML = origText; btn.disabled = false; return;
+            }
         }
 
         window.filterStudents();
@@ -945,7 +956,11 @@ window.deleteStudent = function(id) {
             type: "status_change",
             created_at: new Date().toISOString()
         });
-        localStorage.setItem('academic_students', JSON.stringify(window.allStudents));
+        if (typeof window.setMasterStudents === 'function') {
+            window.setMasterStudents(window.allStudents);
+        } else {
+            localStorage.setItem('academic_students', JSON.stringify(window.allStudents));
+        }
         
         if (window.db) {
             window.db.collection("students").doc(String(id)).set({ 
@@ -967,7 +982,11 @@ window.deleteStudent = function(id) {
         const hardPrompt = confirm(`🚨 ការព្រមានកម្រិតខ្ពស់ (Admin Only)៖\nតើលោកគ្រូ/អ្នកគ្រូពិតជាចង់ «លុបទិន្នន័យសិស្ស ${stu.name} ចេញជាអចិន្ត្រៃយ៍» មែនទេ?\nសកម្មភាពនេះមិនអាចត្រឡប់ថយក្រោយបានឡើយ!`);
         if (hardPrompt) {
             window.allStudents = window.allStudents.filter(s => String(s.id) !== String(id));
-            localStorage.setItem('academic_students', JSON.stringify(window.allStudents));
+            if (typeof window.setMasterStudents === 'function') {
+                window.setMasterStudents(window.allStudents);
+            } else {
+                localStorage.setItem('academic_students', JSON.stringify(window.allStudents));
+            }
             
             if (window.db) {
                 window.db.collection("students").doc(String(id)).delete().catch(console.warn);
@@ -1538,7 +1557,11 @@ window.handleTransferStudentSubmit = async function(e) {
         stu.updated_at = new Date().toISOString();
 
         // Save local
-        localStorage.setItem('academic_students', JSON.stringify(window.allStudents));
+        if (typeof window.setMasterStudents === 'function') {
+            window.setMasterStudents(window.allStudents);
+        } else {
+            localStorage.setItem('academic_students', JSON.stringify(window.allStudents));
+        }
 
         // Save to Firebase
         if (window.db) {
@@ -2106,7 +2129,11 @@ window.importStudentsExcel = function(event) {
                 }
             }
             
-            localStorage.setItem('academic_students', JSON.stringify(window.allStudents));
+            if (typeof window.setMasterStudents === 'function') {
+                window.setMasterStudents(window.allStudents);
+            } else {
+                localStorage.setItem('academic_students', JSON.stringify(window.allStudents));
+            }
             
             const sInfo = typeof appSettings !== 'undefined' ? appSettings : {};
             if (sInfo.auto_sync && typeof window.apiPost === 'function') {
@@ -2206,8 +2233,12 @@ window.fetchAllData = async function(btnEl = null) {
         // ១. ធ្វើបច្ចុប្បន្នភាពបញ្ជីសិស្ស
         if (studentsRes && studentsRes.status === "success") {
             const stuData = studentsRes.data || [];
-            localStorage.setItem('academic_students', JSON.stringify(stuData));
-            if (typeof window.allStudents !== 'undefined') window.allStudents = stuData;
+            if (typeof window.setMasterStudents === 'function') {
+                window.setMasterStudents(stuData);
+            } else {
+                localStorage.setItem('academic_students', JSON.stringify(stuData));
+                if (typeof window.allStudents !== 'undefined') window.allStudents = stuData;
+            }
         }
 
         // ២. ធ្វើបច្ចុប្បន្នភាពបញ្ជីពិន្ទុ

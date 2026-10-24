@@ -23,7 +23,9 @@ window.loadDashboard = function() {
         // ២. ទាញយក និងគណនាទិន្នន័យសិស្ស
         let rawStudents = [];
         try {
-            if (window.allStudents && Array.isArray(window.allStudents) && window.allStudents.length > 0) {
+            if (typeof window.getMasterStudents === 'function') {
+                rawStudents = window.getMasterStudents();
+            } else if (window.allStudents && Array.isArray(window.allStudents) && window.allStudents.length > 0) {
                 rawStudents = window.allStudents;
             } else {
                 const localStus = localStorage.getItem('academic_students');

@@ -90,7 +90,7 @@ window.getTeacherGradeInfo = function() {
     const currentYearStr = document.getElementById("globalAcademicYear")?.value || localStorage.getItem('selected_academic_year') || "2026-2027";
     
     try {
-        const rawStudents = JSON.parse(localStorage.getItem('academic_students')) || [];
+        const rawStudents = typeof window.getMasterStudents === 'function' ? window.getMasterStudents() : (JSON.parse(localStorage.getItem('academic_students')) || []);
         const myStudents = rawStudents.filter(s => String(s.teacher_id) === String(currentTeacherId) && String(s.academic_year) === String(currentYearStr) && s.status !== "Dropped");
         
         if (myStudents.length > 0) {
@@ -358,42 +358,10 @@ window.fetchMonthlyAttendance = async function(forceRefresh = false) {
     const currentAcademicYear = document.getElementById("globalAcademicYear")?.value || localStorage.getItem('selected_academic_year') || "2026-2027";
     const schoolId = window.AuthState?.school_id || localStorage.getItem('school_id') || 'SCH-001';
 
-    // 🔴 ATT-01: ទាញយកតែសិស្សដែលចុះឈ្មោះក្នុងថ្នាក់ និងឆ្នាំសិក្សានេះ 🔴
-    let allStus = [];
-    if (window.allStudents && window.allStudents.length > 0) {
-        allStus = window.allStudents;
-    } else {
-        try { allStus = JSON.parse(localStorage.getItem('academic_students')) || []; } catch(e) {}
-    }
-
-    attendanceStudents = allStus.filter(s => {
-        if (!s || typeof s !== 'object') return false;
-        
-        // ត្រួតពិនិត្យឆ្នាំសិក្សា
-        const sYear = String(s.academic_year || '').trim();
-        if (sYear && sYear !== 'undefined' && currentAcademicYear && sYear !== currentAcademicYear) {
-            return false;
-        }
-
-        // ត្រួតពិនិត្យថ្នាក់
-        const sGrade = normalizeGrade(s.grade);
-        if (sGrade !== selectedGrade) return false;
-
-        // ត្រួតពិនិត្យបន្ទប់
-        const sRoom = String(s.room || '«ក»').trim();
-        if (sRoom !== selectedRoom && !(selectedRoom === '«ក»' && !s.room)) return false;
-
-        // មិនរាប់សិស្សដែលឈប់រៀន / ផ្អាក / បញ្ចប់
-        const sStat = String(s.status || 'Active').toLowerCase();
-        if (sStat === 'withdrawn' || sStat === 'dropped' || sStat === 'ឈប់រៀន') {
-            return false;
-        }
-
-        return true;
-    });
-    
-    // តម្រៀបអក្ខរក្រម
-    attendanceStudents.sort((a, b) => String(a.name || "").trim().localeCompare(String(b.name || "").trim(), "km"));
+    // 🔴 ATT-01 & Single Source of Truth: ទាញយកតែសិស្សដែលចុះឈ្មោះក្នុងថ្នាក់ និងឆ្នាំសិក្សានេះ ពី Master Students 🔴
+    attendanceStudents = typeof window.getStudentsForClass === 'function'
+        ? window.getStudentsForClass(selectedGrade, selectedRoom, currentAcademicYear)
+        : [];
 
     // Update UI ឈ្មោះខែ និងថ្នាក់
     const titleEl = document.getElementById("lblMonthTitle");
@@ -2233,9 +2201,11 @@ window.handlePrintAnnualAction = function() {
     // ទាញយកបញ្ជីសិស្សពិតប្រាកដពីប្រព័ន្ធ
     let currentStudents = window.scoresStudentList || [];
     if (currentStudents.length === 0) {
-        try {
-            currentStudents = JSON.parse(localStorage.getItem('academic_students')) || [];
-        } catch(e) {}
+        if (typeof window.getMasterStudents === 'function') {
+            currentStudents = window.getMasterStudents();
+        } else {
+            try { currentStudents = JSON.parse(localStorage.getItem('academic_students')) || []; } catch(e) {}
+        }
     }
 
     if (currentStudents.length === 0) {

@@ -87,6 +87,23 @@ document.addEventListener("DOMContentLoaded", async () => {
             window.switchView(lastView);
         }
 
+        // ៦. ស្តាប់ Event ពេលទិន្នន័យសិស្សត្រូវបាន Update ក្នុង Master Students (Single Source of Truth)
+        window.addEventListener('masterStudentsUpdated', () => {
+            console.log("📢 Master Students updated across system. Refreshing active view...");
+            const activeMenu = localStorage.getItem('activeMenu') || 'dashboard';
+            if (activeMenu === 'attendance' && typeof window.fetchMonthlyAttendance === 'function') {
+                window.fetchMonthlyAttendance();
+            } else if (activeMenu === 'scores' && typeof window.fetchStudentsForScores === 'function') {
+                window.fetchStudentsForScores();
+            } else if (activeMenu === 'dashboard' && typeof window.loadDashboard === 'function') {
+                window.loadDashboard();
+            } else if (activeMenu === 'library' && typeof window.fetchLibraryData === 'function') {
+                window.fetchLibraryData();
+            } else if (activeMenu === 'students' && typeof window.filterStudents === 'function') {
+                window.filterStudents();
+            }
+        });
+
     } else {
         console.log("🔒 No teacher logged in. Showing login screen.");
         const landingScreen = document.getElementById("landing-screen");

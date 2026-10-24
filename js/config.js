@@ -113,18 +113,114 @@ async function fetchDataFromAPI(action, params, cacheKey) {
 }
 
 
+// =========================================================================
+// 🌟 SINGLE SOURCE OF TRUTH (SSOT) FOR STUDENTS DATA SERVICE
+// ប្រព័ន្ធទាញយក និងគ្រប់គ្រងសិស្សពីប្រភពតែមួយ (Student Management Master)
+// =========================================================================
+
+window.toKhmerNum = window.toKhmerNum || function(str) {
+    if (!str && str !== 0) return "";
+    const khmerNumbers = ['០', '១', '២', '៣', '៤', '៥', '៦', '៧', '៨', '៩'];
+    return String(str).split('').map(n => (n >= '0' && n <= '9') ? khmerNumbers[parseInt(n, 10)] : n).join('');
+};
+
+window.normalizeGrade = function(str) {
+    if (!str) return "";
+    let s = String(str).trim();
+    if (s === "all" || s === "គ្រប់ថ្នាក់") return "";
+    const khmerToArabic = {'០':'0', '១':'1', '២':'2', '៣':'3', '៤':'4', '៥':'5', '៦':'6', '៧':'7', '៨':'8', '៩':'9'};
+    let arabicStr = s.replace(/[០-៩]/g, match => khmerToArabic[match]);
+    let match = arabicStr.match(/[0-9]+/);
+    if (match) return "ថ្នាក់ទី " + window.toKhmerNum(match[0]);
+    return s;
+};
+
+// ១. ទាញយកបញ្ជីសិស្សមេទាំងអស់ (Master Students List) ពី Student Management
+window.getMasterStudents = function() {
+    if (window.allStudents && Array.isArray(window.allStudents) && window.allStudents.length > 0) {
+        return window.allStudents;
+    }
+    try {
+        const cached = JSON.parse(localStorage.getItem('academic_students') || '[]');
+        if (Array.isArray(cached) && cached.length > 0) {
+            window.allStudents = cached;
+            return cached;
+        }
+    } catch(e) {}
+    window.allStudents = window.allStudents || [];
+    return window.allStudents;
+};
+
+// ២. ទាញយកសិស្សតាមថ្នាក់ និងបន្ទប់ សម្រាប់គ្រប់ម៉ូឌុល (Attendance, Scores, Library, Reports)
+window.getStudentsForClass = function(gradeInput, roomInput, academicYearInput) {
+    const allStus = window.getMasterStudents();
+    const targetGrade = window.normalizeGrade(gradeInput);
+    const targetRoomClean = String(roomInput || '«ក»').replace(/[«»\s]/g, '');
+    const currentAcademicYear = academicYearInput || document.getElementById("globalAcademicYear")?.value || localStorage.getItem('selected_academic_year') || "2026-2027";
+
+    const filtered = allStus.filter(s => {
+        if (!s || typeof s !== 'object') return false;
+
+        // បដិសេធសិស្សដែលបានឈប់រៀន ឬផ្អាក
+        const sStat = String(s.status || 'Active').trim().toLowerCase();
+        if (sStat === 'dropped' || sStat === 'withdrawn' || sStat === 'ឈប់រៀន' || sStat === 'បោះបង់' || sStat === 'អសកម្ម' || sStat === 'inactive') {
+            return false;
+        }
+
+        // ពិនិត្យឆ្នាំសិក្សា (បើមានកំណត់ក្នុងសិស្ស)
+        const sYear = String(s.academic_year || '').trim();
+        if (sYear && sYear !== 'undefined' && currentAcademicYear && !sYear.includes(currentAcademicYear) && !currentAcademicYear.includes(sYear)) {
+            return false;
+        }
+
+        // ពិនិត្យកម្រិតថ្នាក់ (Grade/Level)
+        if (targetGrade && targetGrade !== 'all' && targetGrade !== 'គ្រប់ថ្នាក់') {
+            const sGrade = window.normalizeGrade(s.grade);
+            if (sGrade !== targetGrade && String(s.grade || '').trim() !== String(gradeInput || '').trim()) {
+                return false;
+            }
+        }
+
+        // ពិនិត្យបន្ទប់ (Room)
+        if (targetRoomClean && targetRoomClean !== 'all' && targetRoomClean !== 'គ្រប់បន្ទប់') {
+            const sRoomClean = String(s.room || '«ក»').replace(/[«»\s]/g, '');
+            if (sRoomClean !== targetRoomClean) {
+                // បើសិនបន្ទប់ជា «ក» ហើយសិស្សអត់មាន room វាស្មើនឹង «ក»
+                if (!(targetRoomClean === 'ក' && (!s.room || s.room.trim() === ''))) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    });
+
+    // តម្រៀបអក្ខរក្រមតាមឈ្មោះខ្មែរ
+    filtered.sort((a, b) => String(a.name || '').trim().localeCompare(String(b.name || '').trim(), 'km'));
+    return filtered;
+};
+
+// ៣. រក្សាទុក និងផ្សព្វផ្សាយទិន្នន័យសិស្សមេ (Sync Master across App)
+window.setMasterStudents = function(newStudentsList) {
+    if (!Array.isArray(newStudentsList)) return;
+    window.allStudents = newStudentsList;
+    try {
+        localStorage.setItem('academic_students', JSON.stringify(newStudentsList));
+    } catch(e) {}
+    window.dispatchEvent(new CustomEvent('masterStudentsUpdated', { detail: newStudentsList }));
+};
+
 // មុខងារទាញយកទិន្នន័យសិស្សប្រកបដោយល្បឿនលឿន (Cache-First Strategy)
 window.fetchStudentsDataFast = async function() {
-    const currentTeacherId = localStorage.getItem('auth_teacher_id');
-    const currentYear = document.getElementById("globalAcademicYear")?.value || "2026-2027";
-
     // ១. បង្ហាញទិន្នន័យពី LocalStorage ភ្លាមៗ (Instant Display)
     try {
         const rawData = localStorage.getItem('academic_students');
         if (rawData) {
             const parsed = JSON.parse(rawData) || [];
-            window.allStudents = parsed.filter(s => String(s.teacher_id) === String(currentTeacherId) && String(s.academic_year) === String(currentYear));
-            window.filterStudents(); // បង្ហាញលើតារាងភ្លាមៗ មិនបាច់រង់ចាំអុិនធឺណិត
+            window.allStudents = parsed;
+            if (typeof window.filterStudents === 'function') {
+                window.filterStudents();
+            }
         }
     } catch(e) {}
 
@@ -132,9 +228,10 @@ window.fetchStudentsDataFast = async function() {
     if (typeof window.apiGet === 'function') {
         window.apiGet("getStudents").then(res => {
             if (res && res.status === "success" && Array.isArray(res.data)) {
-                localStorage.setItem('academic_students', JSON.stringify(res.data));
-                window.allStudents = res.data.filter(s => String(s.teacher_id) === String(currentTeacherId) && String(s.academic_year) === String(currentYear));
-                window.filterStudents(); // Refresh តារាងម្តងទៀតជាមួយទិន្នន័យស្រស់ៗពី Cloud
+                window.setMasterStudents(res.data);
+                if (typeof window.filterStudents === 'function') {
+                    window.filterStudents();
+                }
             }
         }).catch(err => console.warn("Background fetch skipped:", err));
     }
