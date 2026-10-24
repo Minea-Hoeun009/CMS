@@ -1249,9 +1249,9 @@ window.getAssignedScope = function() {
         };
     }
     return {
-        school_id: localStorage.getItem('auth_school_id') || window.AuthState?.school_id || "SCH-001",
-        grade: (localStorage.getItem('auth_assigned_grade') || window.AuthState?.assigned_grade || "").trim(),
-        room: (localStorage.getItem('auth_assigned_room') || window.AuthState?.assigned_room || "").trim()
+        school_id: localStorage.getItem('auth_school_id') || window.AuthState?.school_id || window.AppAuth?.state?.school_id || "SCH-001",
+        grade: (localStorage.getItem('auth_assigned_grade') || window.AuthState?.assigned_grade || window.AppAuth?.state?.assigned_grade || "").trim(),
+        room: (localStorage.getItem('auth_assigned_room') || window.AuthState?.assigned_room || window.AppAuth?.state?.assigned_room || "").trim()
     };
 };
 

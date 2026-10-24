@@ -1,0 +1,28 @@
+{
+  "name": "classroom-management-system",
+  "version": "2.4.0",
+  "description": "Cambodia Primary & Secondary School and Classroom Management System (CMS)",
+  "private": true,
+  "type": "commonjs",
+  "scripts": {
+    "test": "node --test tests/*.test.js",
+    "test:syntax": "node tests/syntax-check.js",
+    "test:rbac": "node --test tests/rbac.test.js",
+    "test:rules": "node --test tests/rules.test.js",
+    "test:regression": "node --test tests/regression.test.js",
+    "test:backup": "node --test tests/backup.test.js"
+  },
+  "keywords": [
+    "cms",
+    "school-management",
+    "education",
+    "khmer",
+    "firestore",
+    "rbac"
+  ],
+  "author": "Minea Hoeun",
+  "license": "UNLICENSED",
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

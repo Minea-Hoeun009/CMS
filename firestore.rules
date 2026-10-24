@@ -256,7 +256,11 @@ service cloud.firestore {
     }
 
     function isSameSchool(targetSchoolId) {
-      return getCurrentSchoolId() == '' || targetSchoolId == '' || getCurrentSchoolId() == targetSchoolId;
+      return isSystemAdmin() || (
+        getCurrentSchoolId() != '' &&
+        targetSchoolId != '' &&
+        getCurrentSchoolId() == targetSchoolId
+      );
     }
 
     function isGradeInScope(targetGrade) {
