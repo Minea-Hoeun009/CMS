@@ -1276,6 +1276,28 @@ window.viewStudentProfile = function(id) {
     }
 };
 
+window.closeStudentProfileModal = function() {
+    const modal = document.getElementById("studentProfileModal");
+    if (modal) {
+        modal.classList.add("hidden");
+        modal.classList.remove("flex");
+    }
+};
+
+window.printStudentProfileRecord = function() {
+    const name = document.getElementById("profName")?.innerText || "សិស្ស";
+    if (window.CMSPrintManager) {
+        window.CMSPrintManager.print('studentProfilePrintArea', {
+            paperSize: 'A4',
+            orientation: 'portrait',
+            scale: 90,
+            title: `សលាកបត្របុគ្គល_${name}`
+        });
+    } else {
+        window.print();
+    }
+};
+
 // ==========================================
 // ៦. មុខងារបង្កើត UI ទម្រង់ Modal (Render HTML & Profile Modal)
 // ==========================================
@@ -1419,81 +1441,116 @@ window.renderStudentModalTemplate = function() {
             </div>
         </div>
 
-        <!-- 🟢 ផ្ទាំង Modal ប្រវត្តិរូបសិស្ស (Student Profile Modal HTML) 🟢 -->
-        <div id="studentProfileModal" class="fixed inset-0 z-[7000] bg-slate-900/80 backdrop-blur-md hidden items-center justify-center p-4 md:p-6 fade-in font-siemreap overflow-y-auto custom-scrollbar">
-            <div class="bg-white rounded-[2.5rem] shadow-2xl w-full max-w-3xl overflow-hidden border border-slate-100 relative transform transition-all my-auto">
-                <button onclick="document.getElementById('studentProfileModal').classList.replace('flex','hidden')" class="absolute top-5 right-5 w-10 h-10 bg-black/20 hover:bg-black/40 text-white rounded-full flex items-center justify-center transition backdrop-blur-md z-30 shadow-sm hover:scale-105"><i class="fa-solid fa-xmark text-lg"></i></button>
-                <div class="h-32 md:h-44 bg-gradient-to-br from-indigo-600 via-blue-600 to-sky-500 relative overflow-hidden">
-                    <div class="absolute inset-0 bg-black opacity-10"></div>
-                    <div class="absolute -bottom-20 -right-20 w-64 h-64 bg-white/10 rounded-full blur-3xl"></div>
-                    <div class="absolute -top-20 -left-20 w-48 h-48 bg-sky-300/20 rounded-full blur-3xl"></div>
-                </div>
-                <div class="px-6 md:px-10 pb-8 md:pb-10 relative">
-                    <div class="flex flex-col md:flex-row items-center md:items-end gap-5 -mt-16 md:-mt-20 mb-8">
-                        <div id="profAvatar" class="w-32 h-32 md:w-40 md:h-40 bg-white rounded-[2rem] border-[6px] border-white shadow-xl flex items-center justify-center text-5xl font-bold text-indigo-500 overflow-hidden relative z-10 shrink-0 transform rotate-3 hover:rotate-0 transition duration-300"></div>
-                        <div class="text-center md:text-left flex-1 mt-2 md:mt-0 mb-2">
-                            <div class="flex flex-col md:flex-row md:items-center gap-2 md:gap-4 mb-3">
-                                <h3 id="profName" class="text-2xl md:text-3xl font-moul text-slate-800 drop-shadow-sm leading-tight"></h3>
-                                <span id="profId" class="text-xs md:text-sm text-indigo-600 font-bold font-mono bg-indigo-50 px-3 py-1.5 rounded-xl border border-indigo-100 inline-block w-max mx-auto md:mx-0 shadow-sm"></span>
-                            </div>
-                            <div id="profBadges" class="flex justify-center md:justify-start flex-wrap gap-2"></div>
+        <!-- 🟢 ផ្ទាំង Modal សលាកបត្របុគ្គល / ប្រវត្តិរូបសិស្ស (Student Cumulative Record Modal HTML) 🟢 -->
+        <div id="studentProfileModal" class="fixed inset-0 z-[7000] bg-slate-900/80 backdrop-blur-md hidden items-start sm:items-center justify-center p-2 sm:p-4 md:p-6 overflow-y-auto custom-scrollbar" onclick="if(event.target===this) window.closeStudentProfileModal()">
+            <div class="bg-white dark:bg-slate-800 rounded-3xl md:rounded-[2.5rem] shadow-2xl w-full max-w-4xl overflow-hidden border border-slate-100 dark:border-slate-700 flex flex-col my-2 sm:my-auto max-h-[92vh] relative">
+                
+                <!-- Sticky Top Header Bar (Always Visible Close & Print Controls) -->
+                <div class="sticky top-0 z-40 bg-white/95 dark:bg-slate-800/95 backdrop-blur-md px-6 py-3.5 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center shrink-0">
+                    <div class="flex items-center gap-2.5">
+                        <div class="w-8 h-8 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center text-sm shadow-sm"><i class="fa-solid fa-address-card"></i></div>
+                        <div>
+                            <h3 class="font-moul text-sm sm:text-base text-slate-800 dark:text-white">សលាកបត្របុគ្គលសិស្ស</h3>
+                            <p class="text-[10px] text-slate-400 dark:text-slate-400 font-bold hidden sm:block">ប្រវត្តិរូប និងកំណត់ត្រាព័ត៌មានលម្អិតសិស្ស</p>
                         </div>
                     </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-                        <div class="bg-slate-50 p-5 md:p-6 rounded-[2rem] border border-slate-100 hover:shadow-md transition duration-300 hover:border-indigo-200 group">
-                            <h4 class="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-2"><i class="fa-solid fa-graduation-cap text-indigo-400"></i> ព័ត៌មានសិក្សា</h4>
-                            <div class="space-y-4">
-                                <div class="flex items-center gap-4">
-                                    <div class="w-10 h-10 rounded-2xl bg-white text-indigo-600 flex items-center justify-center shadow-sm group-hover:scale-110 transition shrink-0"><i class="fa-solid fa-layer-group"></i></div>
-                                    <div><p class="text-[10px] text-slate-400 font-bold mb-0.5">ថ្នាក់រៀនបច្ចុប្បន្ន</p><p id="profGrade" class="text-[13px] md:text-sm font-bold text-slate-800"></p></div>
+                    <div class="flex items-center gap-2">
+                        <button type="button" onclick="window.printStudentProfileRecord()" class="px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-sm">
+                            <i class="fa-solid fa-print"></i> <span class="hidden sm:inline">ព្រីន (Print)</span>
+                        </button>
+                        <button type="button" onclick="window.closeStudentProfileModal()" class="w-9 h-9 rounded-full bg-slate-100 hover:bg-rose-500 hover:text-white text-slate-600 dark:bg-slate-700 dark:text-slate-200 dark:hover:bg-rose-500 flex items-center justify-center transition shadow-sm font-bold text-base outline-none" title="បិទផ្ទាំងនេះ (Close)">
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Printable Content Area -->
+                <div id="studentProfilePrintArea" class="overflow-y-auto custom-scrollbar flex-1 relative bg-white dark:bg-slate-800">
+                    <div class="h-32 md:h-40 bg-gradient-to-br from-indigo-600 via-blue-600 to-sky-500 relative overflow-hidden">
+                        <div class="absolute inset-0 bg-black opacity-10"></div>
+                        <div class="absolute -bottom-20 -right-20 w-64 h-64 bg-white/10 rounded-full blur-3xl"></div>
+                        <div class="absolute -top-20 -left-20 w-48 h-48 bg-sky-300/20 rounded-full blur-3xl"></div>
+                    </div>
+                    <div class="px-6 md:px-10 pb-8 relative">
+                        <div class="flex flex-col md:flex-row items-center md:items-end gap-5 -mt-16 md:-mt-20 mb-8">
+                            <div id="profAvatar" class="w-32 h-32 md:w-36 md:h-36 bg-white dark:bg-slate-700 rounded-[2rem] border-[6px] border-white dark:border-slate-800 shadow-xl flex items-center justify-center text-5xl font-bold text-indigo-500 overflow-hidden relative z-10 shrink-0 transform rotate-2 hover:rotate-0 transition duration-300"></div>
+                            <div class="text-center md:text-left flex-1 mt-2 md:mt-0 mb-2">
+                                <div class="flex flex-col md:flex-row md:items-center gap-2 md:gap-4 mb-3">
+                                    <h3 id="profName" class="text-2xl md:text-3xl font-moul text-slate-800 dark:text-white drop-shadow-sm leading-tight"></h3>
+                                    <span id="profId" class="text-xs md:text-sm text-indigo-600 dark:text-indigo-300 font-bold font-mono bg-indigo-50 dark:bg-indigo-950/60 px-3 py-1.5 rounded-xl border border-indigo-100 dark:border-indigo-800 inline-block w-max mx-auto md:mx-0 shadow-sm"></span>
                                 </div>
-                                <div class="flex items-center gap-4">
-                                    <div class="w-10 h-10 rounded-2xl bg-white text-emerald-600 flex items-center justify-center shadow-sm group-hover:scale-110 transition shrink-0"><i class="fa-solid fa-calendar-check"></i></div>
-                                    <div><p class="text-[10px] text-slate-400 font-bold mb-0.5">ស្ថានភាពសិក្សា</p><p id="profStatusText" class="text-[13px] md:text-sm font-bold text-emerald-600"></p></div>
-                                </div>
+                                <div id="profBadges" class="flex justify-center md:justify-start flex-wrap gap-2"></div>
                             </div>
                         </div>
-                        <div class="bg-slate-50 p-5 md:p-6 rounded-[2rem] border border-slate-100 hover:shadow-md transition duration-300 hover:border-pink-200 group">
-                            <h4 class="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-2"><i class="fa-solid fa-user text-pink-400"></i> ព័ត៌មានផ្ទាល់ខ្លួន</h4>
-                            <div class="space-y-4">
-                                <div class="flex items-center gap-4">
-                                    <div class="w-10 h-10 rounded-2xl bg-white text-pink-500 flex items-center justify-center shadow-sm group-hover:scale-110 transition shrink-0"><i class="fa-solid fa-venus-mars"></i></div>
-                                    <div><p class="text-[10px] text-slate-400 font-bold mb-0.5">ភេទ</p><p id="profGender" class="text-[13px] md:text-sm font-bold text-slate-800"></p></div>
-                                </div>
-                                <div class="flex items-center gap-4">
-                                    <div class="w-10 h-10 rounded-2xl bg-white text-orange-500 flex items-center justify-center shadow-sm group-hover:scale-110 transition shrink-0"><i class="fa-regular fa-calendar"></i></div>
-                                    <div><p class="text-[10px] text-slate-400 font-bold mb-0.5">ថ្ងៃខែឆ្នាំកំណើត</p><p id="profDob" class="text-[13px] md:text-sm font-bold text-slate-800 font-mono"></p></div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="bg-slate-50 p-5 md:p-6 rounded-[2rem] border border-slate-100 hover:shadow-md transition duration-300 hover:border-amber-200 group md:col-span-2">
-                            <h4 class="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-2"><i class="fa-solid fa-address-book text-amber-400"></i> ទំនាក់ទំនង និងគ្រួសារ</h4>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-5">
-                                <div class="flex items-center gap-4">
-                                    <div class="w-10 h-10 rounded-2xl bg-white text-amber-600 flex items-center justify-center shadow-sm group-hover:scale-110 transition shrink-0"><i class="fa-solid fa-people-roof"></i></div>
-                                    <div class="w-full">
-                                        <p class="text-[10px] text-slate-400 font-bold mb-0.5">ឪពុក / ម្ដាយ</p>
-                                        <p id="profParents" class="text-[13px] md:text-sm font-bold text-slate-800 leading-snug"></p>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+                            <div class="bg-slate-50 dark:bg-slate-700/50 p-5 md:p-6 rounded-[2rem] border border-slate-100 dark:border-slate-600 hover:shadow-md transition duration-300 group">
+                                <h4 class="text-[11px] font-bold text-slate-400 dark:text-slate-300 uppercase tracking-widest mb-4 flex items-center gap-2"><i class="fa-solid fa-graduation-cap text-indigo-500"></i> ព័ត៌មានសិក្សា</h4>
+                                <div class="space-y-4">
+                                    <div class="flex items-center gap-4">
+                                        <div class="w-10 h-10 rounded-2xl bg-white dark:bg-slate-800 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shadow-sm group-hover:scale-110 transition shrink-0"><i class="fa-solid fa-layer-group"></i></div>
+                                        <div><p class="text-[10px] text-slate-400 font-bold mb-0.5">ថ្នាក់រៀនបច្ចុប្បន្ន</p><p id="profGrade" class="text-[13px] md:text-sm font-bold text-slate-800 dark:text-white"></p></div>
+                                    </div>
+                                    <div class="flex items-center gap-4">
+                                        <div class="w-10 h-10 rounded-2xl bg-white dark:bg-slate-800 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shadow-sm group-hover:scale-110 transition shrink-0"><i class="fa-solid fa-calendar-check"></i></div>
+                                        <div><p class="text-[10px] text-slate-400 font-bold mb-0.5">ស្ថានភាពសិក្សា</p><p id="profStatusText" class="text-[13px] md:text-sm font-bold text-emerald-600"></p></div>
                                     </div>
                                 </div>
-                                <div class="flex items-center gap-4">
-                                    <div class="w-10 h-10 rounded-2xl bg-white text-green-600 flex items-center justify-center shadow-sm group-hover:scale-110 transition shrink-0"><i class="fa-solid fa-phone"></i></div>
-                                    <div><p class="text-[10px] text-slate-400 font-bold mb-0.5">លេខទូរស័ព្ទអាណាព្យាបាល</p><p id="profContact" class="text-[13px] md:text-sm font-bold text-slate-800 font-mono"></p></div>
-                                </div>
-                                <div class="flex items-start gap-4 md:col-span-2 mt-2 pt-4 border-t border-slate-200/60">
-                                    <div class="w-10 h-10 rounded-2xl bg-white text-sky-600 flex items-center justify-center shadow-sm shrink-0 group-hover:scale-110 transition"><i class="fa-solid fa-map-location-dot"></i></div>
-                                    <div><p class="text-[10px] text-slate-400 font-bold mb-0.5">ទីលំនៅបច្ចុប្បន្ន</p><p id="profAddress" class="text-[12px] md:text-[13px] font-bold text-slate-700 leading-relaxed"></p></div>
+                            </div>
+                            <div class="bg-slate-50 dark:bg-slate-700/50 p-5 md:p-6 rounded-[2rem] border border-slate-100 dark:border-slate-600 hover:shadow-md transition duration-300 group">
+                                <h4 class="text-[11px] font-bold text-slate-400 dark:text-slate-300 uppercase tracking-widest mb-4 flex items-center gap-2"><i class="fa-solid fa-user text-pink-500"></i> ព័ត៌មានផ្ទាល់ខ្លួន</h4>
+                                <div class="space-y-4">
+                                    <div class="flex items-center gap-4">
+                                        <div class="w-10 h-10 rounded-2xl bg-white dark:bg-slate-800 text-pink-500 flex items-center justify-center shadow-sm group-hover:scale-110 transition shrink-0"><i class="fa-solid fa-venus-mars"></i></div>
+                                        <div><p class="text-[10px] text-slate-400 font-bold mb-0.5">ភេទ</p><p id="profGender" class="text-[13px] md:text-sm font-bold text-slate-800 dark:text-white"></p></div>
+                                    </div>
+                                    <div class="flex items-center gap-4">
+                                        <div class="w-10 h-10 rounded-2xl bg-white dark:bg-slate-800 text-orange-500 flex items-center justify-center shadow-sm group-hover:scale-110 transition shrink-0"><i class="fa-regular fa-calendar"></i></div>
+                                        <div><p class="text-[10px] text-slate-400 font-bold mb-0.5">ថ្ងៃខែឆ្នាំកំណើត</p><p id="profDob" class="text-[13px] md:text-sm font-bold text-slate-800 dark:text-white font-mono"></p></div>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
+                            <div class="bg-slate-50 dark:bg-slate-700/50 p-5 md:p-6 rounded-[2rem] border border-slate-100 dark:border-slate-600 hover:shadow-md transition duration-300 group md:col-span-2">
+                                <h4 class="text-[11px] font-bold text-slate-400 dark:text-slate-300 uppercase tracking-widest mb-4 flex items-center gap-2"><i class="fa-solid fa-address-book text-amber-500"></i> ទំនាក់ទំនង និងគ្រួសារ</h4>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-5">
+                                    <div class="flex items-center gap-4">
+                                        <div class="w-10 h-10 rounded-2xl bg-white dark:bg-slate-800 text-amber-600 flex items-center justify-center shadow-sm group-hover:scale-110 transition shrink-0"><i class="fa-solid fa-people-roof"></i></div>
+                                        <div class="w-full">
+                                            <p class="text-[10px] text-slate-400 font-bold mb-0.5">ឪពុក / ម្ដាយ</p>
+                                            <p id="profParents" class="text-[13px] md:text-sm font-bold text-slate-800 dark:text-white leading-snug"></p>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center gap-4">
+                                        <div class="w-10 h-10 rounded-2xl bg-white dark:bg-slate-800 text-green-600 flex items-center justify-center shadow-sm group-hover:scale-110 transition shrink-0"><i class="fa-solid fa-phone"></i></div>
+                                        <div><p class="text-[10px] text-slate-400 font-bold mb-0.5">លេខទូរស័ព្ទអាណាព្យាបាល</p><p id="profContact" class="text-[13px] md:text-sm font-bold text-slate-800 dark:text-white font-mono"></p></div>
+                                    </div>
+                                    <div class="flex items-start gap-4 md:col-span-2 mt-2 pt-4 border-t border-slate-200/60 dark:border-slate-600">
+                                        <div class="w-10 h-10 rounded-2xl bg-white dark:bg-slate-800 text-sky-600 flex items-center justify-center shadow-sm shrink-0 group-hover:scale-110 transition"><i class="fa-solid fa-map-location-dot"></i></div>
+                                        <div><p class="text-[10px] text-slate-400 font-bold mb-0.5">ទីលំនៅបច្ចុប្បន្ន</p><p id="profAddress" class="text-[12px] md:text-[13px] font-bold text-slate-700 dark:text-slate-200 leading-relaxed"></p></div>
+                                    </div>
+                                </div>
+                            </div>
 
-                        <!-- 🟢 ACAD-05: ប័ណ្ណប្រវត្តិការចុះឈ្មោះ និងការផ្ទេរថ្នាក់ (Enrollment & Transfer History) 🟢 -->
-                        <div id="profEnrollmentHistoryCard" class="bg-slate-50 p-5 md:p-6 rounded-[2rem] border border-slate-100 hover:shadow-md transition duration-300 hover:border-indigo-200 group md:col-span-2">
-                            <h4 class="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-2"><i class="fa-solid fa-timeline text-indigo-500"></i> ប្រវត្តិការចុះឈ្មោះ និងការផ្លាស់ប្តូរថ្នាក់រៀន (Enrollment & Class Transfer History)</h4>
-                            <div id="profEnrollmentTimeline" class="space-y-2.5 max-h-56 overflow-y-auto custom-scrollbar pr-1">
-                                <!-- Populated dynamically by viewStudentProfile -->
+                            <!-- ACAD-05: ប័ណ្ណប្រវត្តិការចុះឈ្មោះ និងការផ្ទេរថ្នាក់ (Enrollment & Transfer History) -->
+                            <div id="profEnrollmentHistoryCard" class="bg-slate-50 dark:bg-slate-700/50 p-5 md:p-6 rounded-[2rem] border border-slate-100 dark:border-slate-600 hover:shadow-md transition duration-300 group md:col-span-2">
+                                <h4 class="text-[11px] font-bold text-slate-400 dark:text-slate-300 uppercase tracking-widest mb-3 flex items-center gap-2"><i class="fa-solid fa-timeline text-indigo-500"></i> ប្រវត្តិការចុះឈ្មោះ និងការផ្លាស់ប្តូរថ្នាក់រៀន (Enrollment & Class Transfer History)</h4>
+                                <div id="profEnrollmentTimeline" class="space-y-2.5 max-h-56 overflow-y-auto custom-scrollbar pr-1">
+                                    <!-- Populated dynamically by viewStudentProfile -->
+                                </div>
                             </div>
                         </div>
+                    </div>
+                </div>
+
+                <!-- Sticky Bottom Footer Bar (Always Reachable Close Button) -->
+                <div class="sticky bottom-0 z-30 bg-slate-50 dark:bg-slate-900 px-6 py-3 border-t border-slate-200 dark:border-slate-700 flex justify-between items-center shrink-0 text-xs font-bold">
+                    <span class="text-slate-400 font-medium">សលាកបត្របុគ្គល (Student Profile)</span>
+                    <div class="flex items-center gap-2">
+                        <button type="button" onclick="window.closeStudentProfileModal()" class="px-4 py-2 bg-slate-200 hover:bg-slate-300 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 rounded-xl transition flex items-center gap-1.5 shadow-sm">
+                            <i class="fa-solid fa-xmark"></i> <span>បិទ (Close)</span>
+                        </button>
+                        <button type="button" onclick="window.printStudentProfileRecord()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl transition flex items-center gap-1.5 shadow-md">
+                            <i class="fa-solid fa-print"></i> <span>បោះពុម្ពសលាកបត្រ</span>
+                        </button>
                     </div>
                 </div>
             </div>

@@ -344,6 +344,47 @@
                                     </div>
                                 </div>
 
+                                <!-- កំណត់ថ្នាក់រៀនទទួលបន្ទុក (Homeroom Classroom Setup) -->
+                                <div class="p-3 bg-emerald-50/60 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-800 rounded-2xl space-y-2">
+                                    <div class="flex items-center gap-2 text-emerald-800 dark:text-emerald-300 font-bold text-xs">
+                                        <i class="fa-solid fa-chalkboard-user"></i>
+                                        <span>កំណត់ថ្នាក់រៀនទទួលបន្ទុក (My Classroom) *</span>
+                                    </div>
+                                    <div class="grid grid-cols-2 gap-2">
+                                        <div>
+                                            <label class="block text-[10px] font-bold text-slate-500 mb-1">កម្រិតថ្នាក់</label>
+                                            <select id="regGrade" class="w-full px-2.5 py-2 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-xs font-bold text-slate-700 dark:text-white outline-none focus:ring-2 focus:ring-emerald-500">
+                                                <option value="ថ្នាក់ទី ១">ថ្នាក់ទី ១</option>
+                                                <option value="ថ្នាក់ទី ២">ថ្នាក់ទី ២</option>
+                                                <option value="ថ្នាក់ទី ៣">ថ្នាក់ទី ៣</option>
+                                                <option value="ថ្នាក់ទី ៤">ថ្នាក់ទី ៤</option>
+                                                <option value="ថ្នាក់ទី ៥">ថ្នាក់ទី ៥</option>
+                                                <option value="ថ្នាក់ទី ៦">ថ្នាក់ទី ៦</option>
+                                                <option value="ថ្នាក់ទី ៧">ថ្នាក់ទី ៧</option>
+                                                <option value="ថ្នាក់ទី ៨">ថ្នាក់ទី ៨</option>
+                                                <option value="ថ្នាក់ទី ៩">ថ្នាក់ទី ៩</option>
+                                                <option value="ថ្នាក់ទី ១០">ថ្នាក់ទី ១០</option>
+                                                <option value="ថ្នាក់ទី ១១">ថ្នាក់ទី ១១</option>
+                                                <option value="ថ្នាក់ទី ១២">ថ្នាក់ទី ១២</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label class="block text-[10px] font-bold text-slate-500 mb-1">បន្ទប់</label>
+                                            <select id="regRoom" class="w-full px-2.5 py-2 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-xs font-bold text-slate-700 dark:text-white outline-none focus:ring-2 focus:ring-emerald-500 font-moul">
+                                                <option value="«ក»">«ក»</option>
+                                                <option value="«ខ»">«ខ»</option>
+                                                <option value="«គ»">«គ»</option>
+                                                <option value="«ឃ»">«ឃ»</option>
+                                                <option value="«ង»">«ង»</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label class="block text-[10px] font-bold text-slate-500 mb-1">ឈ្មោះសាលារៀន</label>
+                                        <input type="text" id="regSchool" placeholder="ឧ. សាលាបឋមសិក្សា..." class="w-full px-2.5 py-1.5 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-xs font-bold text-slate-700 dark:text-white outline-none focus:ring-2 focus:ring-emerald-500">
+                                    </div>
+                                </div>
+
                                 <div>
                                     <label class="block text-[10px] font-bold text-slate-400 mb-1 uppercase tracking-wider">លេខសម្ងាត់ *</label>
                                     <div class="relative group">
@@ -549,7 +590,7 @@
         </div>
       </div>
 
-      <!-- Navigation Area -->
+      <!-- Navigation Area (Streamlined for Homeroom Teachers) -->
       <nav class="flex-1 overflow-y-auto custom-scrollbar p-3 space-y-1.5 text-[13px] font-semibold" aria-label="ការរុករកចម្បង">
         
         <!-- ១. ទិដ្ឋភាពទូទៅ (Overview) -->
@@ -561,11 +602,6 @@
         <button onclick="switchView('dashboard')" class="w-full flex items-center px-3 py-2.5 rounded-xl hover:bg-white/10 hover:text-white transition-all text-left group nav-btn sidebar-btn-active touch-target" id="nav-dashboard" aria-current="page">
           <span class="w-8 h-8 rounded-lg bg-blue-500/20 text-blue-400 flex items-center justify-center shrink-0 text-sm group-hover:scale-110 group-hover:bg-blue-500 group-hover:text-white transition-all shadow-sm"><i class="fa-solid fa-chart-pie"></i></span>
           <span class="sidebar-text ml-3 whitespace-nowrap">ផ្ទាំងគ្រប់គ្រង</span>
-        </button>
-
-        <button onclick="switchView('analytics')" class="w-full flex items-center px-3 py-2.5 rounded-xl hover:bg-white/10 hover:text-white transition-all text-left group nav-btn touch-target" id="nav-analytics">
-          <span class="w-8 h-8 rounded-lg bg-indigo-500/20 text-indigo-400 flex items-center justify-center shrink-0 text-sm group-hover:scale-110 group-hover:bg-indigo-500 group-hover:text-white transition-all shadow-sm"><i class="fa-solid fa-chart-line"></i></span>
-          <span class="sidebar-text ml-3 whitespace-nowrap">វិភាគការសិក្សា</span>
         </button>
         
         <!-- ២. ការសិក្សា & បង្រៀន (Academic) -->
@@ -602,28 +638,23 @@
 
         <button onclick="switchView('library')" class="w-full flex items-center px-3 py-2.5 rounded-xl hover:bg-white/10 hover:text-white transition-all text-left group nav-btn touch-target" id="nav-library">
           <span class="w-8 h-8 rounded-lg bg-fuchsia-500/20 text-fuchsia-400 flex items-center justify-center shrink-0 text-sm group-hover:scale-110 group-hover:bg-fuchsia-500 group-hover:text-white transition-all shadow-sm"><i class="fa-solid fa-book-bookmark"></i></span>
-          <span class="sidebar-text ml-3 whitespace-nowrap">បណ្ណាល័យ & ទ្រព្យ</span>
+          <span class="sidebar-text ml-3 whitespace-nowrap">បណ្ណាល័យថ្នាក់រៀន</span>
         </button>
 
         <button onclick="switchView('reports')" class="w-full flex items-center px-3 py-2.5 rounded-xl hover:bg-white/10 hover:text-white transition-all text-left group nav-btn touch-target" id="nav-reports">
           <span class="w-8 h-8 rounded-lg bg-violet-500/20 text-violet-400 flex items-center justify-center shrink-0 text-sm group-hover:scale-110 group-hover:bg-violet-500 group-hover:text-white transition-all shadow-sm"><i class="fa-solid fa-file-invoice"></i></span>
-          <span class="sidebar-text ml-3 whitespace-nowrap">របាយការណ៍</span>
+          <span class="sidebar-text ml-3 whitespace-nowrap">របាយការណ៍ & បោះពុម្ព</span>
         </button>
 
-        <!-- ៤. ប្រព័ន្ធ & សុវត្ថិភាព (System & Security) -->
+        <!-- ៤. ការកំណត់បន្ទុកថ្នាក់ (Teacher & Classroom Settings) -->
         <div class="sidebar-category-header pt-3">
           <i class="fa-solid fa-sliders text-[11px] text-slate-400"></i>
-          <span>ប្រព័ន្ធ & សុវត្ថិភាព</span>
+          <span>ការកំណត់បន្ទុកថ្នាក់</span>
         </div>
 
         <button onclick="switchView('settings')" class="w-full flex items-center px-3 py-2.5 rounded-xl hover:bg-white/10 hover:text-white transition-all text-left group nav-btn touch-target" id="nav-settings">
           <span class="w-8 h-8 rounded-lg bg-slate-500/20 text-slate-300 flex items-center justify-center shrink-0 text-sm group-hover:scale-110 group-hover:bg-slate-400 group-hover:text-white transition-all shadow-sm"><i class="fa-solid fa-gear"></i></span>
-          <span class="sidebar-text ml-3 whitespace-nowrap">ការកំណត់ (Settings)</span>
-        </button>
-
-        <button onclick="switchView('settings'); setTimeout(() => window.switchSettingsTab && window.switchSettingsTab('backup-audit'), 50);" class="w-full flex items-center px-3 py-2.5 rounded-xl hover:bg-white/10 hover:text-white transition-all text-left group nav-btn touch-target" id="nav-backup">
-          <span class="w-8 h-8 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0 text-sm group-hover:scale-110 group-hover:bg-emerald-500 group-hover:text-white transition-all shadow-sm"><i class="fa-solid fa-shield-halved"></i></span>
-          <span class="sidebar-text ml-3 whitespace-nowrap">Backup & Audit Log</span>
+          <span class="sidebar-text ml-3 whitespace-nowrap">ការកំណត់បន្ទុកថ្នាក់</span>
         </button>
 
       </nav>
@@ -635,8 +666,8 @@
             <i class="fa-solid fa-user-check"></i>
           </div>
           <div class="sidebar-text whitespace-nowrap">
-            <div id="navUserName" class="text-sm font-bold text-white truncate w-28">អ្នកគ្រប់គ្រងប្រព័ន្ធ</div>
-            <div id="navUserId" class="text-[10px] text-amber-300 uppercase tracking-widest font-bold font-mono">ADMIN</div>
+            <div id="navUserName" class="text-sm font-bold text-white truncate w-28">លោកគ្រូ អ្នកគ្រូ</div>
+            <div id="navUserId" class="text-[10px] text-amber-300 uppercase tracking-widest font-bold font-mono">គ្រូបន្ទុកថ្នាក់</div>
           </div>
         </div>
         <button type="button" onclick="handleLogout()" title="ចាកចេញ" class="p-2 text-rose-400 hover:text-white hover:bg-rose-500 rounded-xl transition-colors shrink-0 outline-none"><i class="fa-solid fa-right-from-bracket"></i></button>
@@ -646,51 +677,69 @@
     <!-- Main Content Area -->
     <div class="flex-1 flex flex-col overflow-y-auto relative w-full h-full bg-slate-50 dark:bg-slate-900 transition-colors duration-300">
       
-      <!-- Top Header -->
+      <!-- Top Header (Clean, Responsive & Fast Navigation) -->
       <header class="bg-white px-3 sm:px-6 py-3 border-b border-slate-200 flex flex-col sm:flex-row sm:justify-between items-start sm:items-center gap-3 sticky top-0 z-10 shadow-sm no-print dark:bg-slate-800 dark:border-slate-700">
-         <div class="flex items-center gap-2.5">
-            <button type="button" onclick="window.toggleMobileSidebar(true)" title="បើកម៉ឺនុយ" aria-label="បើកម៉ឺនុយ" aria-controls="appSidebar" aria-expanded="false" class="md:hidden w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-700 flex items-center justify-center text-slate-600 dark:text-slate-200 hover:text-indigo-600 text-base outline-none shadow-sm active:scale-95 transition-all">
+         <div class="flex items-center gap-2">
+            <!-- Mobile Menu Toggle -->
+            <button type="button" onclick="window.toggleMobileSidebar(true)" title="បើកម៉ឺនុយ" aria-label="បើកម៉ឺនុយ" class="md:hidden w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-700 flex items-center justify-center text-slate-600 dark:text-slate-200 hover:text-indigo-600 text-base outline-none shadow-sm active:scale-95 transition-all">
               <i class="fa-solid fa-bars"></i>
             </button>
+            
+            <!-- Universal Back Button (ត្រឡប់ក្រោយ) -->
+            <button id="btnHeaderGoBack" type="button" onclick="window.goBackView()" title="ត្រឡប់ទៅផ្ទាំងមុន" class="hidden px-2.5 sm:px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 dark:bg-slate-700 text-indigo-700 dark:text-indigo-300 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-sm border border-indigo-100 dark:border-slate-600 shrink-0">
+              <i class="fa-solid fa-arrow-left"></i>
+              <span class="hidden sm:inline">ត្រឡប់ក្រោយ</span>
+            </button>
+
+            <!-- Page Title Header -->
             <div class="flex items-center gap-2">
               <span id="pageTitleIcon" class="w-8 h-8 rounded-lg bg-indigo-50 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 flex items-center justify-center text-sm shadow-sm shrink-0">
                 <i class="fa-solid fa-chart-pie"></i>
               </span>
-              <h2 id="pageTitleHeader" class="text-base sm:text-lg font-bold text-slate-800 dark:text-slate-200 font-moul truncate">ផ្ទាំងគ្រប់គ្រង (Dashboard)</h2>
+              <h2 id="pageTitleHeader" class="text-sm sm:text-base md:text-lg font-bold text-slate-800 dark:text-slate-200 font-moul truncate">ផ្ទាំងគ្រប់គ្រង (Dashboard)</h2>
             </div>
          </div>
          
-         <div class="flex flex-wrap items-center gap-2 sm:gap-3 w-full sm:w-auto">
+         <div class="flex flex-wrap items-center gap-2 sm:gap-2.5 w-full sm:w-auto justify-between sm:justify-end">
             
+            <!-- Classroom Switcher Pill -->
+            <button type="button" onclick="window.openManageClassModal()" class="flex items-center gap-1.5 bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-950/60 dark:hover:bg-indigo-900/60 border border-indigo-200 dark:border-indigo-800 text-indigo-700 dark:text-indigo-300 rounded-xl px-2.5 sm:px-3 py-1.5 text-xs font-bold transition shadow-sm" title="ចុចដើម្បីបង្កើត ឬផ្លាស់ប្តូរថ្នាក់រៀន">
+              <i class="fa-solid fa-chalkboard-user text-indigo-600 dark:text-indigo-400"></i>
+              <span class="hidden md:inline text-slate-500 dark:text-slate-400">ថ្នាក់៖</span>
+              <span id="headerActiveClassBadge" class="font-moul text-indigo-900 dark:text-amber-300">ថ្នាក់ទី ១ «ក»</span>
+              <i class="fa-solid fa-chevron-down text-[10px] opacity-60"></i>
+            </button>
+
+            <!-- Quick Add Student Button -->
+            <button type="button" onclick="window.openQuickAddStudentModal()" class="px-2.5 sm:px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-sm transition outline-none" title="បញ្ចូលសិស្សថ្មីទៅក្នុងថ្នាក់">
+              <i class="fa-solid fa-user-plus"></i>
+              <span class="hidden md:inline">+ បញ្ចូលសិស្ស</span>
+            </button>
+
+            <!-- Google Sheet Sync Button -->
+            <button id="btnHeaderSyncSheet" type="button" onclick="window.syncAllExistingDataToGoogleSheets(this)" class="px-2.5 sm:px-3 py-1.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-sm transition outline-none" title="Sync ទិន្នន័យទាំងអស់ទៅ Google Sheet">
+              <i class="fa-solid fa-cloud-arrow-up"></i>
+              <span class="hidden md:inline">Google Sheet Sync</span>
+            </button>
+
             <!-- ជម្រើសឆ្នាំសិក្សា (Academic Year Dropdown) -->
-            <div class="flex items-center gap-1.5 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl px-2 sm:px-3 py-1.5 shadow-sm">
+            <div class="flex items-center gap-1 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl px-2 py-1.5 shadow-sm">
                <i class="fa-solid fa-graduation-cap text-indigo-500 dark:text-indigo-400 text-xs"></i>
                <select id="globalAcademicYear" onchange="window.handleYearChange()" class="bg-transparent text-xs font-bold text-slate-700 dark:text-slate-200 outline-none cursor-pointer font-siemreap">
-                  <option value="all">គ្រប់ឆ្នាំសិក្សាទាំងអស់ (All Years)</option>
+                  <option value="all">គ្រប់ឆ្នាំសិក្សា</option>
                   <option value="2025-2026">២០២៥-២០២៦</option>
-                  <option value="2026-2027" selected>២០២៦-២០២៧ (បច្ចុប្បន្ន)</option>
-                  <option value="2027-2028">២០២៧-២០២៨ (បន្ទាប់)</option>
+                  <option value="2026-2027" selected>២០២៦-២០២៧</option>
+                  <option value="2027-2028">២០២៧-២០២៨</option>
                </select>
             </div>
 
-            <!-- Sync Button -->
-            <button onclick="window.fetchAllData(this)" class="px-3 sm:px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white rounded-xl text-xs font-bold flex items-center gap-2 shadow-sm transition outline-none">
-              <i class="fa-solid fa-arrows-rotate"></i> ទាញទិន្នន័យ
-            </button>
-
-            <!-- Welcome Portal Button -->
-            <button onclick="window.viewWelcomeScreen && window.viewWelcomeScreen()" title="ទំព័រដើមស្វាគមន៍ (Welcome Portal)" class="px-2.5 sm:px-3 py-2 bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-950/50 dark:hover:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300 rounded-xl text-xs font-bold flex items-center gap-1.5 transition outline-none shadow-sm">
-              <i class="fa-solid fa-house-chimney text-xs"></i>
-              <span class="hidden md:inline">ទំព័រស្វាគមន៍</span>
-            </button>
-
             <!-- Dark Mode Toggle -->
-            <button onclick="toggleDarkMode()" title="ប្តូរពណ៌" class="w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center rounded-xl bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-700 dark:text-amber-400 transition-colors outline-none shadow-sm">
+            <button type="button" onclick="toggleDarkMode()" title="ប្តូរពណ៌" class="w-8 h-8 flex items-center justify-center rounded-xl bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-700 dark:text-amber-400 transition-colors outline-none shadow-sm">
               <i id="darkModeIcon" class="fa-solid fa-moon"></i>
             </button>
 
-            <!-- Notification Center Bell Button -->
-            <button id="btnNotificationCenter" onclick="window.openNotificationCenter()" title="មជ្ឈមណ្ឌលដំណឹង & ការជូនដំណឹង" aria-label="មជ្ឈមណ្ឌលដំណឹង" aria-haspopup="dialog" aria-expanded="false" class="relative w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center rounded-xl bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-700 dark:text-slate-200 transition-colors outline-none shadow-sm">
+            <!-- Notification Bell -->
+            <button id="btnNotificationCenter" type="button" onclick="window.openNotificationCenter()" title="មជ្ឈមណ្ឌលដំណឹង" class="relative w-8 h-8 flex items-center justify-center rounded-xl bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-700 dark:text-slate-200 transition-colors outline-none shadow-sm">
               <i class="fa-solid fa-bell text-sm"></i>
               <span id="notifBadge" class="hidden absolute -top-1 -right-1 w-4 h-4 bg-rose-500 text-white text-[9px] font-black rounded-full flex items-center justify-center animate-pulse">0</span>
             </button>
@@ -736,13 +785,149 @@
     </nav>
   </div>
 
+  <!-- 🟢 Modal បង្កើត និងកំណត់ថ្នាក់រៀន (Create & Manage Classroom Modal) 🟢 -->
+  <div id="manageClassModal" class="fixed inset-0 z-[7500] bg-slate-900/80 backdrop-blur-md hidden items-center justify-center p-4 font-siemreap overflow-y-auto" onclick="if(event.target===this) window.closeManageClassModal()">
+    <div class="bg-white dark:bg-slate-800 rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden border border-slate-200 dark:border-slate-700 my-auto transform transition-all">
+      <div class="px-6 py-4 bg-gradient-to-r from-indigo-700 via-indigo-600 to-blue-600 text-white flex justify-between items-center">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-2xl bg-white/10 flex items-center justify-center text-lg shadow-inner"><i class="fa-solid fa-chalkboard-user"></i></div>
+          <div>
+            <h3 class="font-moul text-base text-white">កំណត់ និងបង្កើតថ្នាក់រៀន</h3>
+            <p class="text-xs text-indigo-100">បង្កើតថ្នាក់ថ្មី ឬជ្រើសរើសថ្នាក់ដែលត្រូវគ្រប់គ្រង</p>
+          </div>
+        </div>
+        <button type="button" onclick="window.closeManageClassModal()" class="w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition"><i class="fa-solid fa-xmark text-base"></i></button>
+      </div>
+
+      <form id="formManageClass" onsubmit="window.handleSaveClassroom(event)" class="p-6 space-y-4">
+        <!-- ថ្នាក់សកម្មបច្ចុប្បន្ន -->
+        <div class="p-3.5 bg-indigo-50/70 dark:bg-slate-700/50 rounded-2xl border border-indigo-100 dark:border-slate-600 flex items-center justify-between">
+          <div>
+            <span class="text-[11px] font-bold text-slate-500 dark:text-slate-400">ថ្នាក់រៀនសកម្មបច្ចុប្បន្ន៖</span>
+            <div id="modalCurClassDisplay" class="font-moul text-base text-indigo-700 dark:text-indigo-300 mt-0.5">ថ្នាក់ទី ១ «ក»</div>
+          </div>
+          <span class="px-3 py-1 bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 rounded-full text-xs font-bold font-mono">កំពុងដំណើរការ</span>
+        </div>
+
+        <!-- ជ្រើសរើស ឬ បង្កើតថ្នាក់ថ្មី -->
+        <div>
+          <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">កម្រិតថ្នាក់ (Grade Level) *</label>
+          <div class="grid grid-cols-2 gap-2">
+            <select id="selManageGrade" onchange="window.handleGradeSelectChange(this)" class="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-xs font-bold text-slate-800 dark:text-white outline-none focus:ring-2 focus:ring-indigo-500">
+              <option value="ថ្នាក់ទី ១">ថ្នាក់ទី ១</option>
+              <option value="ថ្នាក់ទី ២">ថ្នាក់ទី ២</option>
+              <option value="ថ្នាក់ទី ៣">ថ្នាក់ទី ៣</option>
+              <option value="ថ្នាក់ទី ៤">ថ្នាក់ទី ៤</option>
+              <option value="ថ្នាក់ទី ៥">ថ្នាក់ទី ៥</option>
+              <option value="ថ្នាក់ទី ៦">ថ្នាក់ទី ៦</option>
+              <option value="ថ្នាក់ទី ៧">ថ្នាក់ទី ៧</option>
+              <option value="ថ្នាក់ទី ៨">ថ្នាក់ទី ៨</option>
+              <option value="ថ្នាក់ទី ៩">ថ្នាក់ទី ៩</option>
+              <option value="ថ្នាក់ទី ១០">ថ្នាក់ទី ១០</option>
+              <option value="ថ្នាក់ទី ១១">ថ្នាក់ទី ១១</option>
+              <option value="ថ្នាក់ទី ១២">ថ្នាក់ទី ១២</option>
+              <option value="__custom__">+ បញ្ចូលកម្រិតថ្នាក់ថ្មី...</option>
+            </select>
+            <input type="text" id="inputCustomGrade" placeholder="វាយឈ្មោះថ្នាក់ថ្មី..." class="hidden px-3 py-2 bg-white dark:bg-slate-700 border border-indigo-300 dark:border-indigo-500 rounded-xl text-xs font-bold text-slate-800 dark:text-white outline-none focus:ring-2 focus:ring-indigo-500">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">បន្ទប់រៀន (Room) *</label>
+          <div class="grid grid-cols-2 gap-2">
+            <select id="selManageRoom" onchange="window.handleRoomSelectChange(this)" class="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-xs font-bold text-slate-800 dark:text-white font-moul outline-none focus:ring-2 focus:ring-indigo-500">
+              <option value="«ក»">«ក»</option>
+              <option value="«ខ»">«ខ»</option>
+              <option value="«គ»">«គ»</option>
+              <option value="«ឃ»">«ឃ»</option>
+              <option value="«ង»">«ង»</option>
+              <option value="__custom__">+ បញ្ចូលបន្ទប់ថ្មី...</option>
+            </select>
+            <input type="text" id="inputCustomRoom" placeholder="ឧ. «ច» ឬ A" class="hidden px-3 py-2 bg-white dark:bg-slate-700 border border-indigo-300 dark:border-indigo-500 rounded-xl text-xs font-bold text-slate-800 dark:text-white outline-none focus:ring-2 focus:ring-indigo-500 font-moul">
+          </div>
+        </div>
+
+        <div class="pt-3 border-t border-slate-100 dark:border-slate-700 flex justify-end gap-2">
+          <button type="button" onclick="window.closeManageClassModal()" class="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl text-xs font-bold transition">បោះបង់</button>
+          <button type="submit" class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shadow-md transition flex items-center gap-2"><i class="fa-solid fa-check"></i> កំណត់ជាថ្នាក់បន្ទុក</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 🟢 Modal បញ្ចូលសិស្សរហ័ស (Quick Add Student Modal) 🟢 -->
+  <div id="quickAddStudentModal" class="fixed inset-0 z-[7500] bg-slate-900/80 backdrop-blur-md hidden items-center justify-center p-4 font-siemreap overflow-y-auto" onclick="if(event.target===this) window.closeQuickAddStudentModal()">
+    <div class="bg-white dark:bg-slate-800 rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden border border-slate-200 dark:border-slate-700 my-auto transform transition-all">
+      <div class="px-6 py-4 bg-gradient-to-r from-emerald-600 to-teal-600 text-white flex justify-between items-center">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-2xl bg-white/10 flex items-center justify-center text-lg shadow-inner"><i class="fa-solid fa-user-plus"></i></div>
+          <div>
+            <h3 class="font-moul text-base text-white">បញ្ចូលសិស្សរហ័ស</h3>
+            <p class="text-xs text-emerald-100">បញ្ចូលសិស្សទៅក្នុងថ្នាក់សកម្មភ្លាមៗ</p>
+          </div>
+        </div>
+        <button type="button" onclick="window.closeQuickAddStudentModal()" class="w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition"><i class="fa-solid fa-xmark text-base"></i></button>
+      </div>
+
+      <form id="formQuickAddStudent" onsubmit="window.handleQuickAddStudentSubmit(event)" class="p-6 space-y-4">
+        <div class="p-3 bg-emerald-50/70 dark:bg-slate-700/50 rounded-2xl border border-emerald-100 dark:border-slate-600 flex items-center justify-between text-xs">
+          <span>ថ្នាក់ទទួលបន្ទុក៖ <strong id="quickAddClassBadge" class="text-emerald-700 dark:text-emerald-300 font-moul">ថ្នាក់ទី ១ «ក»</strong></span>
+          <span class="font-mono text-slate-400" id="quickAddYearBadge">2026-2027</span>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">គោត្តនាម និងនាម (Khmer Name) *</label>
+          <input type="text" id="quickStuName" required placeholder="ឧ. សុខ វិចិត្រ" class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-xs font-bold text-slate-800 dark:text-white outline-none focus:ring-2 focus:ring-emerald-500 font-moul">
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">ភេទ *</label>
+            <select id="quickStuGender" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-xs font-bold text-slate-800 dark:text-white outline-none focus:ring-2 focus:ring-emerald-500">
+              <option value="ប្រុស">ប្រុស</option>
+              <option value="ស្រី">ស្រី</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">ថ្ងៃខែឆ្នាំកំណើត</label>
+            <input type="date" id="quickStuDob" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-xs font-bold text-slate-800 dark:text-white outline-none focus:ring-2 focus:ring-emerald-500">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">លេខទូរស័ព្ទអាណាព្យាបាល</label>
+          <input type="text" id="quickStuPhone" placeholder="012 345 678" class="w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-xs font-bold font-mono text-slate-800 dark:text-white outline-none focus:ring-2 focus:ring-emerald-500">
+        </div>
+
+        <div class="pt-3 border-t border-slate-100 dark:border-slate-700 flex justify-end gap-2">
+          <button type="button" onclick="window.closeQuickAddStudentModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl text-xs font-bold transition">បោះបង់</button>
+          <button type="submit" id="btnQuickAddSave" class="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow-md transition flex items-center gap-1.5"><i class="fa-solid fa-plus"></i> បញ្ចូលសិស្សភ្លាមៗ</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <!-- Global Toast Container -->
   <div id="toast-container" class="fixed bottom-5 right-5 z-[9999] flex flex-col gap-2 pointer-events-none"></div>
 
   <!-- Core UI Interaction Logic -->
   <script>
-    // មុខងារប្តូរផ្ទាំងការងារ (View Switcher)
-    window.switchView = function(viewName) {
+    // ប្រវត្តិរុករកសម្រាប់ប៊ូតុង «ត្រឡប់ក្រោយ» (View History)
+    window.viewHistory = window.viewHistory || [];
+
+    window.goBackView = function() {
+        if (window.viewHistory && window.viewHistory.length > 0) {
+            const prev = window.viewHistory.pop();
+            if (prev && prev !== window.currentActiveView) {
+                window.switchView(prev, false);
+                return;
+            }
+        }
+        window.switchView('dashboard', false);
+    };
+
+    // មុខងារប្តូរផ្ទាំងការងារ (View Switcher with Back Button & History)
+    window.switchView = function(viewName, trackHistory = true) {
         // 🔒 AUTH-04: រារាំងការចូលប្រើទំព័រការពារដោយគ្មានការផ្ទៀងផ្ទាត់ (Protected Route Guard)
         const isLoggedIn = (window.AppAuth && window.AppAuth.state && window.AppAuth.state.isLoggedIn) || 
                            !!localStorage.getItem('auth_teacher_id');
@@ -754,20 +939,32 @@
             return;
         }
 
-        // ការពារសិទ្ធិចូលមើលតាមតួនាទី (Admin vs Class Teacher)
-        const isSchoolOrSysAdmin = typeof window.isSchoolAdmin === 'function' ? window.isSchoolAdmin() : false;
-        const adminOnlyViews = ['analytics', 'timetable-homework', 'rankings'];
         if (viewName === 'tracking-book') {
-            viewName = 'dashboard';
-        } else if (!isSchoolOrSysAdmin && adminOnlyViews.includes(viewName)) {
-            if (typeof window.showToast === 'function') {
-                window.showToast("⚠️ មុខងារនេះសម្រាប់តែ Admin ប៉ុណ្ណោះ!", true);
-            }
             viewName = 'dashboard';
         }
 
-        if (typeof window.applyRoleBasedNavigation === 'function') {
-            window.applyRoleBasedNavigation();
+        // Track navigation history for the Back button
+        if (trackHistory && window.currentActiveView && window.currentActiveView !== viewName) {
+            window.viewHistory = window.viewHistory || [];
+            window.viewHistory.push(window.currentActiveView);
+        }
+        window.currentActiveView = viewName;
+
+        // បង្ហាញ ឬលាក់ប៊ូតុង «ត្រឡប់ក្រោយ» លើ Top Header
+        const backBtn = document.getElementById("btnHeaderGoBack");
+        if (backBtn) {
+            if (viewName !== 'dashboard') {
+                backBtn.classList.remove('hidden');
+            } else {
+                backBtn.classList.add('hidden');
+            }
+        }
+
+        // អាប់ដេត Badge ថ្នាក់រៀនលើ Header
+        if (typeof window.getCurrentSelectedClass === 'function') {
+            const activeCls = window.getCurrentSelectedClass();
+            const badge = document.getElementById("headerActiveClassBadge");
+            if (badge) badge.textContent = `${activeCls.level} ${activeCls.room}`;
         }
 
         localStorage.setItem('activeMenu', viewName);

@@ -651,6 +651,52 @@ window.renderPersonalSettingsTab = function() {
                 </div>
             </div>
 
+            <!-- ផ្នែកទី ៥៖ សមកាលកម្មទិន្នន័យផ្ទាល់ជាមួយ Google Sheets (Google Sheets Live Sync & Storage) -->
+            <div class="bg-gradient-to-br from-emerald-50 to-teal-50/50 dark:from-slate-800 dark:to-slate-850 p-6 md:p-8 rounded-[2rem] shadow-sm border border-emerald-200 dark:border-emerald-800/40 space-y-4">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-emerald-200/60 dark:border-slate-700 pb-4">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 bg-emerald-600 text-white rounded-xl flex items-center justify-center text-lg shadow-sm">
+                            <i class="fa-solid fa-file-excel"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-moul text-base text-slate-800 dark:text-white">៥. សមកាលកម្មទិន្នន័យជាមួយ Google Sheets (Live Sheets Storage)</h4>
+                            <p class="text-xs text-slate-500 dark:text-slate-400">ទិន្នន័យសិស្ស វត្តមាន ពិន្ទុ បណ្ណាល័យ និងថ្នាក់រៀន ត្រូវបានបញ្ជូន និងរក្សាទុកក្នុង Google Sheet ដោយស្វ័យប្រវត្តិ</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 text-xs font-bold rounded-full border border-emerald-300 dark:border-emerald-700">
+                            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                            ភ្ជាប់ស្វ័យប្រវត្តិ
+                        </span>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                    <div class="p-4 bg-white dark:bg-slate-700/60 rounded-xl border border-emerald-100 dark:border-slate-600 space-y-2">
+                        <p class="font-bold text-slate-700 dark:text-slate-200 flex items-center gap-2">
+                            <i class="fa-solid fa-cloud-arrow-up text-emerald-600"></i> សមកាលកម្មទិន្នន័យភ្លាមៗ (Instant Auto-Sync)
+                        </p>
+                        <p class="text-slate-500 dark:text-slate-400 leading-relaxed text-[11px]">
+                            រាល់ពេលបន្ថែមសិស្ស កត់វត្តមាន ឬបញ្ចូលពិន្ទុ ប្រព័ន្ធនឹងរក្សាទុកក្នុងម៉ាស៊ីន និងបញ្ជូនទៅតារាង Google Sheets ដោយផ្ទាល់។
+                        </p>
+                    </div>
+
+                    <div class="p-4 bg-white dark:bg-slate-700/60 rounded-xl border border-emerald-100 dark:border-slate-600 flex flex-col justify-between gap-3">
+                        <div>
+                            <p class="font-bold text-slate-700 dark:text-slate-200 flex items-center gap-2">
+                                <i class="fa-solid fa-arrows-rotate text-emerald-600"></i> ធ្វើបច្ចុប្បន្នភាពទិន្នន័យទាំងអស់ (Manual Full Sync)
+                            </p>
+                            <p class="text-slate-500 dark:text-slate-400 text-[11px]">
+                                ចុចប៊ូតុងនេះដើម្បីបញ្ជូនទិន្នន័យដែលមានទាំងអស់ក្នុងថ្នាក់បច្ចុប្បន្នទៅ Google Sheets ឡើងវិញភ្លាមៗ។
+                            </p>
+                        </div>
+                        <button type="button" onclick="window.syncAllExistingDataToGoogleSheets(this)" class="w-full py-2.5 px-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs flex items-center justify-center gap-2 shadow-sm transition active:scale-95">
+                            <i class="fa-solid fa-arrows-rotate"></i> <span>Sync ទិន្នន័យទាំងអស់ទៅ Google Sheet ឥឡូវនេះ</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
             <!-- Save Action Bar -->
             <div class="pt-4 flex justify-end">
                 <button type="submit" id="btnSavePersonalSettings" class="px-8 py-3.5 bg-gradient-to-r from-indigo-600 via-blue-600 to-indigo-700 hover:from-indigo-700 hover:to-blue-800 text-white rounded-2xl font-bold text-sm shadow-xl shadow-indigo-500/25 transition active:scale-95 flex items-center gap-2">
@@ -668,7 +714,7 @@ window.currentSettingsTab = "personal";
 
 window.switchSettingsTab = function(tabName) {
     const isSchoolOrSysAdmin = typeof window.isSchoolAdmin === 'function' ? window.isSchoolAdmin() : false;
-    if (!isSchoolOrSysAdmin && (tabName === "users" || tabName === "backup" || tabName === "school")) {
+    if (!isSchoolOrSysAdmin && (tabName === "users" || tabName === "backup" || tabName === "school" || tabName === "academic")) {
         tabName = "personal";
     }
 
@@ -739,7 +785,7 @@ window.loadSettingsView = function() {
             <button id="tabBtn_school" onclick="window.switchSettingsTab('school')" class="${isAdmin ? '' : 'hidden'} flex-1 min-w-[140px] px-4 py-2.5 rounded-xl font-bold text-xs md:text-sm transition flex items-center justify-center gap-2 text-slate-500 hover:text-slate-700">
                 <i class="fa-solid fa-school"></i> <span>ព័ត៌មានសាលារៀន</span>
             </button>
-            <button id="tabBtn_academic" onclick="window.switchSettingsTab('academic')" class="flex-1 min-w-[140px] px-4 py-2.5 rounded-xl font-bold text-xs md:text-sm transition flex items-center justify-center gap-2 text-slate-500 hover:text-slate-700">
+            <button id="tabBtn_academic" onclick="window.switchSettingsTab('academic')" class="${isAdmin ? '' : 'hidden'} flex-1 min-w-[140px] px-4 py-2.5 rounded-xl font-bold text-xs md:text-sm transition flex items-center justify-center gap-2 text-slate-500 hover:text-slate-700">
                 <i class="fa-solid fa-graduation-cap"></i> <span>គ្រប់គ្រងការសិក្សា</span>
             </button>
             <button id="tabBtn_users" onclick="window.switchSettingsTab('users')" class="${isAdmin ? '' : 'hidden'} flex-1 min-w-[140px] px-4 py-2.5 rounded-xl font-bold text-xs md:text-sm transition flex items-center justify-center gap-2 text-slate-500 hover:text-slate-700">

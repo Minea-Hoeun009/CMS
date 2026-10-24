@@ -960,6 +960,320 @@ window.printSpecificSheet = function(elementId, orientation = 'landscape') {
     window.CMSPrintManager.print(elementId, { orientation });
 };
 
+// =========================================================================
+// ៥. GOOGLE SHEETS LIVE SYNC & CLASSROOM MANAGEMENT (Teacher Self-Managed)
+// =========================================================================
+
+window.syncAllExistingDataToGoogleSheets = async function(btnElement) {
+    const btn = btnElement || document.getElementById("btnHeaderSyncSheet");
+    const origHtml = btn ? btn.innerHTML : "";
+    if (btn) {
+        btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> <span>កំពុង Sync ទៅ Sheets...</span>`;
+        btn.disabled = true;
+    }
+
+    try {
+        const students = window.getMasterStudents();
+        let scores = [];
+        let attendance = [];
+        let library = [];
+
+        try { scores = JSON.parse(localStorage.getItem('academic_scores') || '[]'); } catch(e) {}
+        try { attendance = JSON.parse(localStorage.getItem('academic_attendance') || '[]'); } catch(e) {}
+        try { library = JSON.parse(localStorage.getItem('academic_library') || '[]'); } catch(e) {}
+
+        const currentClass = window.getCurrentSelectedClass();
+        const teacherId = localStorage.getItem('auth_teacher_id') || "TCH-001";
+        const teacherName = localStorage.getItem('auth_teacher_name') || "លោកគ្រូ អ្នកគ្រូ";
+        const academicYear = document.getElementById("globalAcademicYear")?.value || localStorage.getItem('selected_academic_year') || "2026-2027";
+
+        // ១. Sync Class Information
+        await window.apiPost("saveClass", {
+            class_id: `CLS-${currentClass.level}-${currentClass.room}`,
+            grade: currentClass.level,
+            room: currentClass.room,
+            teacher_id: teacherId,
+            teacher_name: teacherName,
+            academic_year: academicYear
+        });
+
+        // ២. Sync All Students Batch
+        if (students && students.length > 0) {
+            await window.apiPost("saveStudentsBatch", students);
+        }
+
+        // ៣. Sync All Scores Batch
+        if (scores && scores.length > 0) {
+            await window.apiPost("saveScoresBatch", scores);
+        }
+
+        // ៤. Sync Attendance Batch
+        if (attendance && attendance.length > 0) {
+            await window.apiPost("saveAttendanceBatch", attendance);
+        }
+
+        // ៥. Sync Library Batch
+        if (library && library.length > 0) {
+            await window.apiPost("saveLibraryBatch", library);
+        }
+
+        const msg = `✅ បាន Sync ទិន្នន័យដែលមានទាំងអស់ (សិស្ស ${students.length} នាក់) ទៅកាន់ Google Sheet ដោយជោគជ័យ!`;
+        if (typeof showToast === 'function') showToast(msg);
+        else alert(msg);
+
+    } catch (err) {
+        console.error("Full Google Sheet Sync Error:", err);
+        const errMsg = `⚠️ ការបញ្ជូនទៅ Google Sheet មានបញ្ហា: ${err.message || 'សូមពិនិត្យអ៊ីនធឺណិត'}`;
+        if (typeof showToast === 'function') showToast(errMsg, "error");
+        else alert(errMsg);
+    } finally {
+        if (btn) {
+            btn.innerHTML = origHtml || `<i class="fa-solid fa-cloud-arrow-up"></i> <span>Google Sheet Sync</span>`;
+            btn.disabled = false;
+        }
+    }
+};
+
+window.openManageClassModal = function() {
+    const modal = document.getElementById("manageClassModal");
+    if (!modal) return;
+    const cur = window.getCurrentSelectedClass();
+    const display = document.getElementById("modalCurClassDisplay");
+    if (display) display.textContent = `${cur.level} ${cur.room}`;
+
+    const selGrade = document.getElementById("selManageGrade");
+    const selRoom = document.getElementById("selManageRoom");
+    if (selGrade) selGrade.value = cur.level || "ថ្នាក់ទី ១";
+    if (selRoom) selRoom.value = cur.room || "«ក»";
+
+    const customGradeInput = document.getElementById("inputCustomGrade");
+    const customRoomInput = document.getElementById("inputCustomRoom");
+    if (customGradeInput) customGradeInput.classList.add("hidden");
+    if (customRoomInput) customRoomInput.classList.add("hidden");
+
+    modal.classList.remove("hidden");
+    modal.classList.add("flex");
+};
+
+window.closeManageClassModal = function() {
+    const modal = document.getElementById("manageClassModal");
+    if (modal) {
+        modal.classList.add("hidden");
+        modal.classList.remove("flex");
+    }
+};
+
+window.handleGradeSelectChange = function(sel) {
+    const customInput = document.getElementById("inputCustomGrade");
+    if (!customInput) return;
+    if (sel.value === "__custom__") {
+        customInput.classList.remove("hidden");
+        customInput.focus();
+    } else {
+        customInput.classList.add("hidden");
+    }
+};
+
+window.handleRoomSelectChange = function(sel) {
+    const customInput = document.getElementById("inputCustomRoom");
+    if (!customInput) return;
+    if (sel.value === "__custom__") {
+        customInput.classList.remove("hidden");
+        customInput.focus();
+    } else {
+        customInput.classList.add("hidden");
+    }
+};
+
+window.handleSaveClassroom = async function(event) {
+    if (event && event.preventDefault) event.preventDefault();
+    
+    let grade = document.getElementById("selManageGrade")?.value || "ថ្នាក់ទី ១";
+    if (grade === "__custom__") {
+        const val = document.getElementById("inputCustomGrade")?.value.trim();
+        if (val) grade = val;
+        else grade = "ថ្នាក់ទី ១";
+    }
+    
+    let room = document.getElementById("selManageRoom")?.value || "«ក»";
+    if (room === "__custom__") {
+        const val = document.getElementById("inputCustomRoom")?.value.trim();
+        if (val) room = val;
+        else room = "«ក»";
+    }
+
+    // Set selected class across system
+    window.setSelectedClass(grade, room);
+
+    // Persist in Teacher Personal Settings
+    const tId = localStorage.getItem('auth_teacher_id') || "TCH-001";
+    if (typeof window.saveTeacherPersonalSettings === 'function') {
+        window.saveTeacherPersonalSettings(tId, {
+            teacher_level: grade,
+            teacher_room: room
+        }).catch(console.warn);
+    } else {
+        try {
+            const raw = localStorage.getItem(`teacher_settings_${tId}`) || '{}';
+            const parsed = JSON.parse(raw);
+            parsed.teacher_level = grade;
+            parsed.teacher_room = room;
+            localStorage.setItem(`teacher_settings_${tId}`, JSON.stringify(parsed));
+        } catch(e) {}
+    }
+
+    // Update Header Badge
+    const badge = document.getElementById("headerActiveClassBadge");
+    if (badge) badge.textContent = `${grade} ${room}`;
+
+    // Update all dynamic dropdowns
+    if (typeof window.updateAllClassDropdowns === 'function') {
+        window.updateAllClassDropdowns();
+    }
+
+    // Notify all modules
+    window.dispatchEvent(new CustomEvent('masterStudentsUpdated', { detail: window.getMasterStudents() }));
+
+    // Send class info to Google Sheets
+    if (typeof window.apiPost === 'function') {
+        window.apiPost("saveClass", {
+            class_id: `CLS-${grade}-${room}`,
+            grade: grade,
+            room: room,
+            teacher_id: tId,
+            teacher_name: localStorage.getItem('auth_teacher_name') || 'លោកគ្រូ អ្នកគ្រូ',
+            academic_year: document.getElementById("globalAcademicYear")?.value || "2026-2027"
+        }).catch(console.warn);
+    }
+
+    if (typeof showToast === 'function') {
+        showToast(`🎉 បានកំណត់ថ្នាក់រៀន ${grade} ${room} ជាថ្នាក់ទទួលបន្ទុកជោគជ័យ!`);
+    } else {
+        alert(`🎉 បានកំណត់ថ្នាក់រៀន ${grade} ${room} ជាថ្នាក់ទទួលបន្ទុកជោគជ័យ!`);
+    }
+
+    window.closeManageClassModal();
+
+    // Reload current active view to show newly isolated class immediately
+    const curMenu = localStorage.getItem('activeMenu') || 'dashboard';
+    if (typeof window.switchView === 'function') {
+        window.switchView(curMenu, false);
+    }
+};
+
+window.openQuickAddStudentModal = function() {
+    const modal = document.getElementById("quickAddStudentModal");
+    if (!modal) return;
+    const cur = window.getCurrentSelectedClass();
+    const classBadge = document.getElementById("quickAddClassBadge");
+    if (classBadge) classBadge.textContent = `${cur.level} ${cur.room}`;
+
+    const yearBadge = document.getElementById("quickAddYearBadge");
+    const curYear = document.getElementById("globalAcademicYear")?.value || localStorage.getItem('selected_academic_year') || "2026-2027";
+    if (yearBadge) yearBadge.textContent = curYear;
+
+    const nameInput = document.getElementById("quickStuName");
+    const phoneInput = document.getElementById("quickStuPhone");
+    const dobInput = document.getElementById("quickStuDob");
+    if (nameInput) nameInput.value = "";
+    if (phoneInput) phoneInput.value = "";
+    if (dobInput) dobInput.value = "";
+
+    modal.classList.remove("hidden");
+    modal.classList.add("flex");
+    if (nameInput) nameInput.focus();
+};
+
+window.closeQuickAddStudentModal = function() {
+    const modal = document.getElementById("quickAddStudentModal");
+    if (modal) {
+        modal.classList.add("hidden");
+        modal.classList.remove("flex");
+    }
+};
+
+window.handleQuickAddStudentSubmit = async function(event) {
+    if (event && event.preventDefault) event.preventDefault();
+
+    const name = document.getElementById("quickStuName")?.value.trim();
+    if (!name) {
+        alert("សូមបញ្ចូលឈ្មោះសិស្ស!");
+        return;
+    }
+
+    const gender = document.getElementById("quickStuGender")?.value || "ប្រុស";
+    const dob = document.getElementById("quickStuDob")?.value || "";
+    const phone = document.getElementById("quickStuPhone")?.value.trim() || "";
+    const cur = window.getCurrentSelectedClass();
+    const curYear = document.getElementById("globalAcademicYear")?.value || localStorage.getItem('selected_academic_year') || "2026-2027";
+    const teacherId = localStorage.getItem('auth_teacher_id') || "TCH-001";
+
+    const btn = document.getElementById("btnQuickAddSave");
+    const origHtml = btn ? btn.innerHTML : "";
+    if (btn) {
+        btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> កំពុងរក្សាទុក...`;
+        btn.disabled = true;
+    }
+
+    try {
+        const randomNum = Math.floor(1000 + Math.random() * 9000);
+        const stuId = `STU-${randomNum}`;
+
+        const newStudent = {
+            id: stuId,
+            name: name,
+            gender: gender,
+            dob: dob,
+            grade: cur.level,
+            room: cur.room,
+            academic_year: curYear,
+            parent_contact: phone,
+            status: "Active",
+            teacher_id: teacherId,
+            enrollment_date: new Date().toISOString().split('T')[0],
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+        };
+
+        const all = window.getMasterStudents();
+        all.push(newStudent);
+        window.setMasterStudents(all);
+
+        // Save to Google Sheets
+        if (typeof window.apiPost === 'function') {
+            window.apiPost("saveStudent", newStudent).catch(err => console.warn("GAS saveStudent warning:", err));
+        }
+
+        // Save to Firebase
+        if (window.db && typeof window.saveStudentToFirebase === 'function') {
+            window.saveStudentToFirebase(newStudent).catch(err => console.warn("Firestore saveStudent warning:", err));
+        }
+
+        if (typeof showToast === 'function') {
+            showToast(`🎉 បានបញ្ចូលសិស្ស ${name} ទៅក្នុងថ្នាក់ ${cur.level} ${cur.room} ជោគជ័យ!`);
+        } else {
+            alert(`🎉 បានបញ្ចូលសិស្ស ${name} ទៅក្នុងថ្នាក់ ${cur.level} ${cur.room} ជោគជ័យ!`);
+        }
+
+        window.closeQuickAddStudentModal();
+
+        // Refresh currently active view
+        const curMenu = localStorage.getItem('activeMenu') || 'students';
+        if (typeof window.switchView === 'function') {
+            window.switchView(curMenu, false);
+        }
+
+    } catch (err) {
+        console.error("Quick Add Student Error:", err);
+        alert("⚠️ បរាជ័យក្នុងការបញ្ចូលសិស្ស: " + err.message);
+    } finally {
+        if (btn) {
+            btn.innerHTML = origHtml || `<i class="fa-solid fa-plus"></i> បញ្ចូលសិស្សភ្លាមៗ`;
+            btn.disabled = false;
+        }
+    }
+};
+
 
 // =========================================================
 // ៤. ដំណើរការនៅពេលកម្មវិធីចាប់ផ្តើម (Load)

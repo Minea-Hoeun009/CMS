@@ -747,6 +747,10 @@ window.AppAuth = {
             const teacherId = `TCH-${randomSuffix}`;
             const passwordHash = await window.hashPassword(pass);
 
+            const assignedGrade = document.getElementById('regGrade')?.value || "ថ្នាក់ទី ១";
+            const assignedRoom = document.getElementById('regRoom')?.value || "«ក»";
+            const schoolName = document.getElementById('regSchool')?.value.trim() || "សាលារៀនយើង";
+
             const teacherDoc = {
                 teacher_id: teacherId,
                 name: name,
@@ -755,25 +759,60 @@ window.AppAuth = {
                 contact: contact,
                 role: "teacher",
                 roles: ["teacher"],
-                assigned_grade: "ថ្នាក់ទី ១",
-                assigned_room: "«ក»",
+                assigned_grade: assignedGrade,
+                assigned_room: assignedRoom,
                 school_id: "SCH-001",
+                school_name: schoolName,
                 status: "active",
                 created_at: new Date().toISOString(),
                 updated_at: new Date().toISOString()
             };
 
+            // រៀបចំការកំណត់ផ្ទាល់ខ្លួនរបស់គ្រូសម្រាប់ថ្នាក់រៀននេះ (Teacher Workspace Initial Setup)
+            const personalPayload = {
+                teacher_id: teacherId,
+                teacher_name: name,
+                teacher_phone: contact,
+                teacher_level: assignedGrade,
+                teacher_room: assignedRoom,
+                school_name: schoolName,
+                academic_year: "2026-2027",
+                features: {
+                    attendance: true,
+                    scores: true,
+                    library: true,
+                    timetable: true,
+                    reports: true,
+                    parent_portal: true,
+                    auto_sync: true
+                }
+            };
+            localStorage.setItem(`teacher_settings_${teacherId}`, JSON.stringify(personalPayload));
+            localStorage.setItem('selected_level', assignedGrade);
+            localStorage.setItem('selected_room', assignedRoom);
+
             // ១. រក្សាទុកក្នុង Firestore
             if (window.db) {
-                await window.db.collection("teachers").doc(teacherId).set(teacherDoc);
+                await window.db.collection("teachers").doc(teacherId).set({
+                    ...teacherDoc,
+                    personal_settings: personalPayload
+                });
             }
 
-            // ២. រក្សាទុកក្នុង Google Apps Script (Backup)
+            // ២. រក្សាទុកក្នុង Google Sheets / Apps Script (Backup & Standard Relational Tables)
             if (typeof window.apiPost === 'function') {
                 try {
                     await window.apiPost("registerUser", teacherDoc);
+                    await window.apiPost("saveClass", {
+                        class_id: `CLS-${assignedGrade}-${assignedRoom}`,
+                        grade: assignedGrade,
+                        room: assignedRoom,
+                        teacher_id: teacherId,
+                        teacher_name: name,
+                        academic_year: "2026-2027"
+                    });
                 } catch(e) {
-                    console.warn("Legacy register skipped:", e);
+                    console.warn("GAS register/class sync skipped:", e);
                 }
             }
 
