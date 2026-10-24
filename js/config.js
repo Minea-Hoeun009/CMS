@@ -1005,6 +1005,264 @@ window.CMSPrintManager = {
             orientation: orient,
             scale: parseInt(scale, 10)
         });
+    },
+
+    // ៤. មុខងារទាញយកទិន្នន័យបរិបទ និងកាលបរិច្ឆេទស្តង់ដារ (Standard Print Context & Dates)
+    getStandardContext: function(custom = {}) {
+        const sInfo = typeof appSettings !== 'undefined' ? appSettings : {};
+        const districtName = (custom.districtName || sInfo.district || "ស្រុកកៀនស្វាយ").replace('ស្រុក', '').trim();
+        const schoolName = custom.schoolName || sInfo.school_name || "សាលាបឋមសិក្សា.....................";
+        const principalName = custom.principalName || sInfo.principal_name || ".......................";
+        const teacherName = custom.teacherName || (window.AuthState ? window.AuthState.teacherName : null) || localStorage.getItem('auth_teacher_name') || sInfo.teacher_name || ".......................";
+        const academicYear = custom.academicYear || document.getElementById("globalAcademicYear")?.value || localStorage.getItem('selected_academic_year') || sInfo.academic_year || "២០២៦-២០២៧";
+        
+        let grade = custom.grade;
+        if (!grade) {
+            const activeClass = typeof window.getCurrentSelectedClass === 'function' ? window.getCurrentSelectedClass() : null;
+            if (activeClass && activeClass.level) {
+                grade = `${activeClass.level} ${activeClass.room || ''}`.trim();
+            } else if (sInfo.teacher_level) {
+                grade = `${sInfo.teacher_level} ${sInfo.teacher_room || ''}`.trim();
+            } else {
+                grade = "ថ្នាក់ទី";
+            }
+        }
+
+        let loc = custom.location || document.getElementById('global_loc_input')?.value || localStorage.getItem('rc_location') || localStorage.getItem('rep_location') || (districtName ? `ធ្វើនៅស្រុក${districtName}` : "ធ្វើនៅ.........................");
+        let sol = custom.solarDate || document.getElementById('global_sol_input')?.value || localStorage.getItem('rc_solar_date') || localStorage.getItem('rep_solar_date') || "ថ្ងៃទី....... ខែ....... ឆ្នាំ២០....";
+        let lun = custom.lunarDate || document.getElementById('global_lun_input')?.value || localStorage.getItem('rc_lunar_date') || localStorage.getItem('rep_lunar_date') || "ថ្ងៃ......................... ខែ............ ឆ្នាំ............ ព.ស.២៥៧...";
+
+        let isLunarChecked = true;
+        const chkBox = document.getElementById('global_lun_chk');
+        if (chkBox) isLunarChecked = chkBox.checked;
+        else isLunarChecked = (localStorage.getItem('rc_show_lunar') !== 'false' && localStorage.getItem('rep_show_lunar') !== 'false');
+
+        let locationStr = loc.trim().replace(/,+$/, '');
+        let sDate = sol.trim();
+        if (sDate.includes("ថ្ងៃទី")) sDate = sDate.substring(sDate.indexOf("ថ្ងៃទី"));
+
+        const solarDateStr = `${locationStr}, ${sDate}`;
+        const lunarDateStr = isLunarChecked ? lun : "";
+
+        return {
+            districtName,
+            schoolName,
+            principalName,
+            teacherName,
+            academicYear,
+            grade,
+            solarDateStr,
+            lunarDateStr
+        };
+    },
+
+    // ៥. ទម្រង់ក្បាលលិខិតស្តង់ដារ (Standard Letterhead Header)
+    getHeaderHtml: function(ctx) {
+        return `
+            <div class="header-box">
+              <div class="header-left"><br><p>ការិយាល័យអប់រំ យុវជន និងកីឡានៃរដ្ឋបាលស្រុក${ctx.districtName}</p><p>${ctx.schoolName}</p><p>${ctx.grade}</p></div>
+              <div class="header-right"><p>ព្រះរាជាណាចក្រកម្ពុជា</p><p>ជាតិ សាសនា ព្រះមហាក្សត្រ</p><div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin: 4px auto 10px auto; width: 60%;"><div style="height: 1px; flex: 1; background: linear-gradient(to right, transparent, #d97706);"></div><span style="color: #d97706; font-size: 11px;">❖ ❖ ❖</span><div style="height: 1px; flex: 1; background: linear-gradient(to left, transparent, #d97706);"></div></div></div>
+            </div>
+        `;
+    },
+
+    // ៦. ទម្រង់ចំណងជើងឯកសារស្តង់ដារ (Standard Document Title)
+    getTitleHtml: function(titleText, academicYear) {
+        return `
+            <div class="title-box">
+              <h2>${titleText}</h2>
+              <p>ឆ្នាំសិក្សា ៖ ${academicYear}</p>
+            </div>
+        `;
+    },
+
+    // ៧. ទម្រង់ហត្ថលេខា និងកាលបរិច្ឆេទខាងក្រោមស្តង់ដារ (Standard Signatures & Dates)
+    getFooterHtml: function(ctx, customRoleLeft = "នាយកសាលា", customRoleRight = "គ្រូបន្ទុកថ្នាក់", middleColHtml = "") {
+        return `
+            <div class="bottom-sig-container">
+                <div class="sig-box-left"><br><br><p class="font-moul" style="margin-bottom: 5px; font-size: 11pt;">បានឃើញ និងឯកភាព</p><p class="font-moul" style="margin-bottom: 50px; font-size: 11pt;">${customRoleLeft}</p><p class="font-moul" style="font-size: 11pt;">${ctx.principalName}</p></div>
+                ${middleColHtml}
+                <div class="sig-box-right"><p style="margin: 0 0 5px 0; font-size: 11pt;">${ctx.lunarDateStr}</p><p style="margin: 0 0 5px 0; font-size: 11pt;">${ctx.solarDateStr}</p><p class="font-moul" style="margin-bottom: 50px; font-size: 11pt;">${customRoleRight}</p><p class="font-moul" style="font-size: 11pt;">${ctx.teacherName}</p></div>
+            </div>
+        `;
+    },
+
+    // ៨. ផ្ទាំង Universal Print Preview Window ជាមួយ Toolbar សារ៉េក្រដាស និងទំហំ Zoom (ដូចរូបបញ្ជីស្រង់ពិន្ទុ)
+    openUniversalPreview: function(options = {}) {
+        const ctx = this.getStandardContext(options);
+        const titleText = options.title || "ឯកសារបោះពុម្ព";
+        const paperSize = options.paperSize || "A4";
+        const orientation = options.orientation || "landscape";
+        const defaultZoom = options.defaultZoom || 1.0;
+        const extraStyles = options.extraStyles || "";
+        
+        // ពិនិត្យមើលថាតើ Content ខាងក្នុងមាន Header/Footer រួចហើយ ឬត្រូវការចាក់បញ្ចូលស្វ័យប្រវត្តិ
+        let bodyContent = options.contentHtml || "";
+        if (options.autoWrapHeaderFooter !== false && !options.fullHtml) {
+            const headerHtml = options.headerHtml || this.getHeaderHtml(ctx);
+            const titleHtml = options.titleHtml || this.getTitleHtml(titleText, ctx.academicYear);
+            const footerHtml = options.footerHtml || this.getFooterHtml(ctx, options.roleLeft || "នាយកសាលា", options.roleRight || "គ្រូបន្ទុកថ្នាក់", options.middleColHtml || "");
+            bodyContent = `
+                ${headerHtml}
+                ${titleHtml}
+                ${bodyContent}
+                ${footerHtml}
+            `;
+        }
+
+        const isLandscape = orientation === 'landscape';
+        let defaultWidth = isLandscape ? '297mm' : '210mm';
+        if (paperSize === 'A3') defaultWidth = isLandscape ? '420mm' : '297mm';
+        else if (paperSize === 'Legal') defaultWidth = isLandscape ? '14in' : '8.5in';
+        else if (paperSize === 'Letter') defaultWidth = isLandscape ? '11in' : '8.5in';
+
+        const printDocument = `
+          <!DOCTYPE html>
+          <html lang="km">
+          <head>
+            <meta charset="utf-8">
+            <title>${titleText} - ${ctx.grade}</title>
+            <script src="https://cdn.tailwindcss.com"></script>
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+            <style id="dynamic-page-style">
+              @page { size: ${paperSize} ${orientation}; margin: 6mm; }
+            </style>
+            <style>
+              @import url('https://fonts.googleapis.com/css2?family=Moul&family=Siemreap:wght@400;700&display=swap');
+              * { box-sizing: border-box !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; font-family: 'Siemreap', sans-serif; }
+              html, body { margin: 0; padding: 0; background: #f1f5f9; color: #000; min-height: 100vh; }
+              .font-moul { font-family: 'Khmer OS Muol Light', 'Moul', serif !important; font-weight: normal; }
+              
+              /* ផ្ទាំងបញ្ជា (Toolbar) សម្រាប់សារ៉េក្រដាស និងទំហំ Zoom មុនពេលព្រីន */
+              .print-toolbar { position: fixed; top: 0; left: 0; right: 0; z-index: 9999; background: white; padding: 12px 20px; border-bottom: 1px solid #cbd5e1; box-shadow: 0 4px 15px rgba(0,0,0,0.05); display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 20px; }
+              body { padding-top: 70px; } /* ទុកចន្លោះឱ្យ Toolbar */
+              
+              @media print {
+                  .no-print { display: none !important; }
+                  body { background: #fff; padding-top: 0 !important; }
+                  #print-wrapper { margin: 0 !important; box-shadow: none !important; border-radius: 0 !important; width: 100% !important; height: auto !important; padding: 0 !important; }
+              }
+              
+              /* ការកំណត់ប្រអប់ក្រដាស (Print Wrapper) ឱ្យស្គាល់ខ្នាតទំហំថេរ */
+              #print-wrapper { 
+                  padding: 10mm; 
+                  width: ${defaultWidth}; 
+                  min-height: 210mm;
+                  margin: 20px auto; 
+                  background: white; 
+                  box-shadow: 0 10px 30px rgba(0,0,0,0.1); 
+                  border-radius: 8px; 
+                  overflow: hidden;
+              }
+
+              /* Content Scaler សម្រាប់ Zoom អត្ថបទ និងតារាង */
+              #content-scaler {
+                  width: 100%;
+                  transform-origin: top left;
+                  zoom: ${defaultZoom};
+              }
+              
+              .header-box { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; width: 100%; color: #000c58; }
+              .header-left { text-align: left; }
+              .header-left p { margin: 0 0 3px 0; font-size: 11pt; line-height: 1.5; font-family: 'Khmer OS Muol Light', 'Moul', serif; }
+              .header-right { text-align: center; }
+              .header-right p { margin: 0 0 3px 0; font-size: 11pt; line-height: 1.5; font-family: 'Khmer OS Muol Light', 'Moul', serif; }
+              .title-box { text-align: center; margin: 5px 0 10px 0; }
+              .title-box h2 { margin: 0 0 4px 0; font-size: 14pt; color: #000b51; letter-spacing: 0.5px; font-family: 'Khmer OS Muol Light', 'Moul', serif; }
+              .title-box p { margin: 0; font-size: 11pt; color: #ff0000; font-weight: normal; font-family: 'Khmer OS Muol Light', 'Moul', serif; }
+              
+              .bottom-sig-container { display: flex; justify-content: space-between; align-items: flex-start; width: 100%; page-break-inside: avoid; padding: 0 30px; margin-top: 15px; }
+              .sig-box-left { width: 40%; text-align: center; }
+              .sig-box-right { width: 40%; text-align: center; }
+
+              ${extraStyles}
+            </style>
+          </head>
+          <body>
+            <!-- ផ្ទាំងបញ្ជា (Toolbar) -->
+            <div class="no-print print-toolbar font-siemreap">
+                <div class="flex items-center gap-2">
+                    <span class="font-bold text-sm text-slate-700"><i class="fa-solid fa-file text-slate-400"></i> ទំហំក្រដាស៖</span>
+                    <select id="paperSize" onchange="updateSettings()" class="bg-slate-50 border border-slate-300 text-slate-700 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 p-2 outline-none font-bold cursor-pointer">
+                        <option value="A4" ${paperSize === 'A4' ? 'selected' : ''}>A4</option>
+                        <option value="A3" ${paperSize === 'A3' ? 'selected' : ''}>A3</option>
+                        <option value="Legal" ${paperSize === 'Legal' ? 'selected' : ''}>Legal</option>
+                        <option value="Letter" ${paperSize === 'Letter' ? 'selected' : ''}>Letter</option>
+                    </select>
+                </div>
+                <div class="w-px h-6 bg-slate-300"></div>
+                <div class="flex items-center gap-2">
+                    <span class="font-bold text-sm text-slate-700"><i class="fa-solid fa-rotate text-slate-400"></i> ទិសដៅ៖</span>
+                    <select id="paperOrientation" onchange="updateSettings()" class="bg-slate-50 border border-slate-300 text-slate-700 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 p-2 outline-none font-bold cursor-pointer">
+                        <option value="landscape" ${orientation === 'landscape' ? 'selected' : ''}>ផ្តេក (Landscape)</option>
+                        <option value="portrait" ${orientation === 'portrait' ? 'selected' : ''}>បញ្ឈរ (Portrait)</option>
+                    </select>
+                </div>
+                <div class="w-px h-6 bg-slate-300"></div>
+                <div class="flex items-center gap-2">
+                    <span class="font-bold text-sm text-slate-700"><i class="fa-solid fa-magnifying-glass text-slate-400"></i> ទំហំអត្ថបទ (Zoom)៖</span>
+                    <input type="range" id="zoomLevel" min="0.4" max="1.5" step="0.01" value="${defaultZoom}" oninput="updateSettings()" class="w-32 cursor-pointer">
+                    <span id="zoomDisplay" class="font-mono text-sm font-bold text-blue-600 w-12 bg-blue-50 py-1 rounded text-center">${Math.round(defaultZoom * 100)}%</span>
+                </div>
+                <div class="w-px h-6 bg-slate-300"></div>
+                <button onclick="window.print()" class="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-bold shadow-md transition flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+                    ព្រីនឥឡូវនេះ
+                </button>
+            </div>
+
+            <div id="print-wrapper">
+              <div id="content-scaler">
+                ${bodyContent}
+              </div>
+            </div>
+
+            <script>
+                function updateSettings() {
+                    const size = document.getElementById('paperSize').value;
+                    const orientation = document.getElementById('paperOrientation').value;
+                    const zoom = document.getElementById('zoomLevel').value;
+                    
+                    document.getElementById('dynamic-page-style').innerHTML = '@page { size: ' + size + ' ' + orientation + '; margin: 6mm; }';
+                    
+                    let wrapperWidth = "297mm";
+                    if (orientation === 'landscape') {
+                        if (size === 'A4') wrapperWidth = '297mm';
+                        else if (size === 'A3') wrapperWidth = '420mm';
+                        else if (size === 'Legal') wrapperWidth = '14in';
+                        else if (size === 'Letter') wrapperWidth = '11in';
+                    } else {
+                        if (size === 'A4') wrapperWidth = '210mm';
+                        else if (size === 'A3') wrapperWidth = '297mm';
+                        else if (size === 'Legal') wrapperWidth = '8.5in';
+                        else if (size === 'Letter') wrapperWidth = '8.5in';
+                    }
+                    
+                    document.getElementById('print-wrapper').style.width = wrapperWidth;
+                    document.getElementById('content-scaler').style.zoom = zoom;
+                    document.getElementById('zoomDisplay').innerText = Math.round(zoom * 100) + '%';
+                }
+            <\/script>
+          </body>
+          </html>
+        `;
+
+        if (typeof window.open === 'function') {
+            try {
+                const printWin = window.open('', '_blank');
+                if (printWin && printWin.document) {
+                    printWin.document.open();
+                    printWin.document.write(printDocument);
+                    printWin.document.close();
+                    return;
+                }
+            } catch(e) {
+                console.warn("window.open failed, fallback to print:", e);
+            }
+        }
+        
+        // Fallback ប្រសិនបើ Pop-up ត្រូវបានបិទ (Iframe Printing)
+        this.print(document.body, { title: titleText, paperSize, orientation });
     }
 };
 

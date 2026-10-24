@@ -750,6 +750,52 @@ window.printLibraryReport = function() {
         </table>
     `;
 
+    const libContentHtml = `
+        <table class="p-table">
+            <thead>
+                <tr>${thsHtml}</tr>
+            </thead>
+            <tbody>${rowsHtml}</tbody>
+        </table>
+        
+        ${statsHtml}
+    `;
+
+    const libExtraStyles = `
+        .p-table { width: 100%; border-collapse: collapse; margin-bottom: 10px; font-size: 11pt; border: 1.5pt solid #0f172a; table-layout: fixed; }
+        .p-table th { background-color: #dbeafe !important; color: #000269 !important; font-family: 'Khmer OS Muol Light', 'Moul', serif; font-size: 10pt; text-align: center; padding: 6px 2px; border: 1px solid #0f172a; font-weight: normal; }
+        .p-table td { border: 1px solid #94a3b8; padding: 4px; vertical-align: middle; }
+    `;
+
+    if (window.CMSPrintManager && typeof window.CMSPrintManager.openUniversalPreview === 'function') {
+        const middleSignHtml = `
+            <div style="width: 25%; text-align: center;">
+                <p style="margin: 0 0 5px 0; color: transparent;">.</p>
+                <p style="margin: 0 0 5px 0; color: transparent;">.</p>
+                <p class="font-moul" style="margin-bottom: 50px; font-size: 11pt;">ប្រធានបណ្ណាល័យ</p>
+                <p class="font-moul" style="font-size: 11pt;">.......................</p>
+            </div>
+        `;
+        window.CMSPrintManager.openUniversalPreview({
+            title: docTitle,
+            grade: `ថ្នាក់ទី ${window.currentGradeFull.replace('ថ្នាក់ទី ', '')}`,
+            academicYear: toKhNum(academicYear),
+            districtName: districtName.replace('ស្រុក', '').trim(),
+            schoolName: schoolName,
+            principalName: principalName,
+            teacherName: teacherName,
+            roleLeft: "នាយកសាលា",
+            roleRight: "គ្រូប្រចាំថ្នាក់",
+            middleColHtml: middleSignHtml,
+            paperSize: "A4",
+            orientation: "landscape",
+            defaultZoom: 0.95,
+            contentHtml: libContentHtml,
+            extraStyles: libExtraStyles
+        });
+        return;
+    }
+
     // លុបចោលកុងតឺន័រចាស់បើមាន
     let oldContainer = document.getElementById('mobile-print-container-lib');
     if (oldContainer) oldContainer.remove();

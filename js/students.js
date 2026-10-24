@@ -1789,6 +1789,16 @@ window.handleTransferStudentSubmit = async function(e) {
 // 🟢 មុខងារស្នូលសម្រាប់បញ្ជា Print លើទូរស័ព្ទដៃ (ការពារការលោតបាត់ពេលសារ៉េក្រដាស) 🟢
 // ==========================================
 window.executeMobilePrint = function(htmlContent, isLandscape = false) {
+    if (window.CMSPrintManager && typeof window.CMSPrintManager.openUniversalPreview === 'function') {
+        window.CMSPrintManager.openUniversalPreview({
+            title: "បញ្ជីរាយនាមសិស្ស",
+            orientation: isLandscape ? 'landscape' : 'portrait',
+            contentHtml: htmlContent,
+            autoWrapHeaderFooter: false
+        });
+        return;
+    }
+
     let oldPrintArea = document.getElementById('global-mobile-print-area');
     if (oldPrintArea) oldPrintArea.remove();
 
@@ -1828,7 +1838,6 @@ window.executeMobilePrint = function(htmlContent, isLandscape = false) {
 
     setTimeout(() => {
         window.print();
-        // មិនមានការប្រើប្រាស់ setTimeout ដើម្បីលុបចោលទីនេះទេ ការពារកុំឱ្យលោតបាត់ពេលសារ៉េក្រដាស
     }, 800); 
 };
 
@@ -1903,30 +1912,7 @@ window.printStudentList = function() {
         `;
     });
 
-    const contentHtml = `
-        <table style="width: 105%; margin-bottom: 20px; border-collapse: collapse;">
-            <tr>
-                <td style="text-align: left; width: 65%; font-family: 'Khmer OS Muol Light', 'Moul', serif; font-size: 12pt; line-height: 1.6; vertical-align: top;">
-                    <br><br>
-                    ការិយាល័យអប់រំ យុវជន និងកីឡានៃរដ្ឋបាលស្រុក${districtName}
-                    <span style="font-size: 12pt; display: block; margin-top: 8px;">${schoolName}</span>
-                </td>
-                <td style="text-align: center; width: 40%; font-family: 'Khmer OS Muol Light', 'Moul', serif; font-size: 12pt; line-height: 1.5; vertical-align: top;">
-                    ព្រះរាជាណាចក្រកម្ពុជា<br>ជាតិ សាសនា ព្រះមហាក្សត្រ
-                    <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin: 4px auto 10px auto; width: 60%;">
-                        <div style="height: 1px; flex: 1; background: linear-gradient(to right, transparent, #d97706);"></div>
-                        <span style="color: #d97706; font-size: 11px;">❖ ❖ ❖</span>
-                        <div style="height: 1px; flex: 1; background: linear-gradient(to left, transparent, #d97706);"></div>
-                    </div>
-                </td>
-            </tr>
-        </table>
-        
-        <div style="text-align: center; margin: 10px 0 20px 0;">
-            <h2 style="font-family: 'Khmer OS Muol Light', 'Moul', serif; margin: 0 0 8px 0; font-size: 16pt;">បញ្ជីរាយនាមសិស្សានុសិស្ស</h2>
-            <p style="margin: 0; font-size: 12pt; font-weight: bold;">${subTitle} | ឆ្នាំសិក្សា ${typeof window.toKhmerNum === 'function' ? window.toKhmerNum(academicYear) : academicYear}</p>
-        </div>
-        
+    const tableContentHtml = `
         <table style="width: 100%; border-collapse: collapse; font-size: 11pt; border: 1.5px solid #0f172a; margin-bottom: 20px;">
             <thead>
                 <tr>
@@ -1943,33 +1929,32 @@ window.printStudentList = function() {
             <tbody>${rowsHtml}</tbody>
         </table>
         
-        <table style="width: 100%; border-collapse: collapse; border-top: 2px solid #0f172a; margin-bottom: 30px; font-weight: bold;">
+        <table style="width: 100%; border-collapse: collapse; border-top: 2px solid #0f172a; margin-bottom: 20px; font-weight: bold;">
             <tr>
                 <td style="width: 40%; padding: 6px 0;">បញ្ឈប់បញ្ជីត្រឹមលេខរៀងទី <span style="color: #2563eb; margin-left:10px;">${typeof window.toKhmerNum === 'function' ? window.toKhmerNum(total) : total}</span></td>
                 <td style="width: 25%;">សិស្សសរុប៖ <span style="color: #0f172a; margin-left:10px;">${typeof window.toKhmerNum === 'function' ? window.toKhmerNum(total) : total} នាក់</span></td>
                 <td style="width: 20%; text-align: right;">ស្រី៖ <span style="color: #e11d48; margin-left:10px;">${typeof window.toKhmerNum === 'function' ? window.toKhmerNum(female) : female} នាក់</span></td>
             </tr>
         </table>
-        
-        <table style="width: 100%; text-align: center; page-break-inside: avoid;">
-            <tr>
-                <td style="width: 30%"><br>
-                    <p style="margin: 0 0 5px 0; color: transparent;">.</p>
-                    <p style="margin: 0 0 5px 0;">បានឃើញ និងឯកភាព</p>
-                    <p style="font-family: 'Khmer OS Muol Light', 'Moul', serif; font-size: 12pt; margin: 5px 0 70px 0;">នាយកសាលា</p>
-                    <p style="font-family: 'Khmer OS Muol Light', 'Moul', serif; font-size: 12pt; margin: 0;">${principalName}</p>
-                </td>
-                <td style="width: 70%">
-                    <p style="margin: 0 0 5px 0;">${lunarDateStr}</p>
-                    <p style="margin: 0 0 5px 0;">${solarDateStr}</p>
-                    <p style="font-family: 'Khmer OS Muol Light', 'Moul', serif; font-size: 12pt; margin: 5px 0 70px 0;">គ្រូប្រចាំថ្នាក់</p>
-                    <p style="font-family: 'Khmer OS Muol Light', 'Moul', serif; font-size: 12pt; margin: 0;">${teacherName}</p>
-                </td>
-            </tr>
-        </table>
     `;
 
-    window.executeMobilePrint(contentHtml, false);
+    if (window.CMSPrintManager && typeof window.CMSPrintManager.openUniversalPreview === 'function') {
+        window.CMSPrintManager.openUniversalPreview({
+            title: `បញ្ជីរាយនាមសិស្សានុសិស្ស`,
+            grade: subTitle,
+            academicYear: academicYear,
+            districtName: districtName,
+            schoolName: schoolName,
+            principalName: principalName,
+            teacherName: teacherName,
+            paperSize: "A4",
+            orientation: "portrait",
+            defaultZoom: 1.0,
+            contentHtml: tableContentHtml
+        });
+    } else {
+        window.executeMobilePrint(tableContentHtml, false);
+    }
 };
 
 
@@ -2057,30 +2042,7 @@ window.printFullStudentList = function() {
         `;
     });
 
-    const contentHtml = `
-        <table style="width: 100%; margin-bottom: 20px; border-collapse: collapse;">
-            <tr>
-                <td style="text-align: left; width: 65%; font-family: 'Khmer OS Muol Light', 'Moul', serif; font-size: 12pt; line-height: 1.6; vertical-align: top;">
-                    <br><br>
-                    ការិយាល័យអប់រំ យុវជន និងកីឡានៃរដ្ឋបាលស្រុក${districtName}
-                    <span style="font-size: 12pt; display: block; margin-top: 8px;">${schoolName}</span>
-                </td>
-                <td style="text-align: center; width: 35%; font-family: 'Khmer OS Muol Light', 'Moul', serif; font-size: 12pt; line-height: 1.5; vertical-align: top;">
-                    ព្រះរាជាណាចក្រកម្ពុជា<br>ជាតិ សាសនា ព្រះមហាក្សត្រ
-                    <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin: 4px auto 10px auto; width: 60%;">
-                        <div style="height: 1px; flex: 1; background: linear-gradient(to right, transparent, #d97706);"></div>
-                        <span style="color: #d97706; font-size: 11px;">❖ ❖ ❖</span>
-                        <div style="height: 1px; flex: 1; background: linear-gradient(to left, transparent, #d97706);"></div>
-                    </div>
-                </td>
-            </tr>
-        </table>
-        
-        <div style="text-align: center; margin: 5px 0 15px 0;">
-            <h2 style="font-family: 'Khmer OS Muol Light', 'Moul', serif; margin: 0 0 6px 0; font-size: 15pt;">បញ្ជីព័ត៌មានសិស្ស</h2>
-            <p style="margin: 0; font-size: 12pt; font-weight: bold;">${subTitle} | ឆ្នាំសិក្សា ${typeof window.toKhmerNum === 'function' ? window.toKhmerNum(academicYear) : academicYear}</p>
-        </div>
-        
+    const fullTableContentHtml = `
         <table style="width: 100%; border-collapse: collapse; font-size: 10pt; border: 1.5px solid #0f172a; margin-bottom: 15px; table-layout: fixed;">
             <thead>
                 <tr>
@@ -2107,26 +2069,25 @@ window.printFullStudentList = function() {
                 <td style="width: 30%; text-align: right;">ស្រី៖ <span style="color: #e11d48; margin-left: 5px;">${typeof window.toKhmerNum === 'function' ? window.toKhmerNum(female) : female} នាក់</span></td>
             </tr>
         </table>
-        
-        <table style="width: 100%; text-align: center; page-break-inside: avoid;">
-            <tr>
-                <td style="width: 40%; vertical-align: top;">
-                    <p style="margin: 0 0 4px 0; color: transparent;">.</p>
-                    <p style="margin: 0 0 4px 0;">បានឃើញ និងឯកភាព</p>
-                    <p style="font-family: 'Khmer OS Muol Light', 'Moul', serif; font-size: 12pt; margin: 5px 0 60px 0;">នាយកសាលា</p>
-                    <p style="font-family: 'Khmer OS Muol Light', 'Moul', serif; font-size: 12pt; margin: 0;">${principalName}</p>
-                </td>
-                <td style="width: 60%; vertical-align: top;">
-                    <p style="margin: 0 0 4px 0;">${lunarDateStr}</p>
-                    <p style="margin: 0 0 4px 0;">${solarDateStr}</p>
-                    <p style="font-family: 'Khmer OS Muol Light', 'Moul', serif; font-size: 12pt; margin: 5px 0 60px 0;">គ្រូប្រចាំថ្នាក់</p>
-                    <p style="font-family: 'Khmer OS Muol Light', 'Moul', serif; font-size: 12pt; margin: 0;">${teacherName}</p>
-                </td>
-            </tr>
-        </table>
     `;
 
-    window.executeMobilePrint(contentHtml, true);
+    if (window.CMSPrintManager && typeof window.CMSPrintManager.openUniversalPreview === 'function') {
+        window.CMSPrintManager.openUniversalPreview({
+            title: `បញ្ជីព័ត៌មានសិស្ស`,
+            grade: subTitle,
+            academicYear: academicYear,
+            districtName: districtName,
+            schoolName: schoolName,
+            principalName: principalName,
+            teacherName: teacherName,
+            paperSize: "A4",
+            orientation: "landscape",
+            defaultZoom: 0.85,
+            contentHtml: fullTableContentHtml
+        });
+    } else {
+        window.executeMobilePrint(fullTableContentHtml, true);
+    }
 };
 
 window.downloadStudentTemplate = function() {

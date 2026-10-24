@@ -774,7 +774,7 @@ window.printStudentStatsReport = function() {
 
     const clonedPrintArea = printArea.cloneNode(true);
     clonedPrintArea.style.boxShadow = 'none';
-    clonedPrintArea.style.margin = '0';
+    clonedPrintArea.style.margin = '0 auto';
     clonedPrintArea.style.maxWidth = '100%';
     
     // បម្លែង Input contenteditable ទៅជាអក្សរសាមញ្ញដើម្បីបោះពុម្ព
@@ -788,6 +788,18 @@ window.printStudentStatsReport = function() {
             el.style.padding = '0';
         }
     });
+
+    if (window.CMSPrintManager && typeof window.CMSPrintManager.openUniversalPreview === 'function') {
+        window.CMSPrintManager.openUniversalPreview({
+            title: "តារាងស្ថិតិចំនួនសិស្សតាមថ្នាក់",
+            paperSize: "A4",
+            orientation: "portrait",
+            defaultZoom: 1.0,
+            contentHtml: clonedPrintArea.outerHTML,
+            autoWrapHeaderFooter: false
+        });
+        return;
+    }
 
     const printDocument = `
       <!DOCTYPE html>
@@ -1579,6 +1591,18 @@ window.triggerAttendancePrint = function() {
         el.innerText = val;
     });
 
+    if (window.CMSPrintManager && typeof window.CMSPrintManager.openUniversalPreview === 'function') {
+        window.CMSPrintManager.openUniversalPreview({
+            title: "បញ្ជីវត្តមានសិស្ស",
+            paperSize: "A4",
+            orientation: "landscape",
+            defaultZoom: 0.95,
+            contentHtml: clonedPrintArea.outerHTML,
+            autoWrapHeaderFooter: false
+        });
+        return;
+    }
+
     const printDocument = `
       <!DOCTYPE html>
       <html lang="km">
@@ -1702,6 +1726,18 @@ window.printReportArea = function(areaId, orientation = 'portrait') {
     clonedPrintArea.style.margin = '0 auto';
     clonedPrintArea.style.maxWidth = '100%';
     
+    if (window.CMSPrintManager && typeof window.CMSPrintManager.openUniversalPreview === 'function') {
+        window.CMSPrintManager.openUniversalPreview({
+            title: "របាយការណ៍រដ្ឋបាលគ្រូ",
+            paperSize: "A4",
+            orientation: orientation,
+            defaultZoom: orientation === 'landscape' ? 0.95 : 1.0,
+            contentHtml: clonedPrintArea.outerHTML,
+            autoWrapHeaderFooter: false
+        });
+        return;
+    }
+
     const printDocument = `
       <!DOCTYPE html>
       <html lang="km">

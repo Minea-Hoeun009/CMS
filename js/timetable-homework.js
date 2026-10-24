@@ -381,6 +381,96 @@ window.TimetableHomeworkManager = {
         const academicYear = this.currentAcademicYear;
         const data = this.getTimetableData();
 
+        const tableHtml = `
+                <table class="timetable-main-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 14%;">ម៉ោងសិក្សា</th>
+                            ${this.days.map(d => `<th style="width: 14%;" class="font-moul">${d.label}</th>`).join("")}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="session-header">
+                            <td colspan="7">● វេនព្រឹក (MORNING SESSION)</td>
+                        </tr>
+                        ${this.periods.filter(p => p.session === 'morning').map(p => {
+                            return `
+                                <tr>
+                                    <td>
+                                        <b>${p.label.split(' ')[0]} ${p.label.split(' ')[1]}</b><br>
+                                        <small style="color: #64748b;">${p.time}</small>
+                                    </td>
+                                    ${this.days.map(d => {
+                                        const slot = data[`${d.key}_${p.slot}`] || {};
+                                        return `
+                                            <td>
+                                                ${slot.subject ? `
+                                                    <div class="sub-name">${slot.subject}</div>
+                                                    ${slot.teacher_name ? `<div class="teacher-name">គ្រូ៖ ${slot.teacher_name}</div>` : ''}
+                                                    ${slot.room ? `<div style="font-size: 8.5pt; color: #64748b;">បន្ទប់ ${slot.room}</div>` : ''}
+                                                ` : `<span style="color: #cbd5e1;">- ទំនេរ -</span>`}
+                                            </td>
+                                        `;
+                                    }).join("")}
+                                </tr>
+                            `;
+                        }).join("")}
+
+                        <tr class="session-header">
+                            <td colspan="7">● វេនរសៀល (AFTERNOON SESSION)</td>
+                        </tr>
+                        ${this.periods.filter(p => p.session === 'afternoon').map(p => {
+                            return `
+                                <tr>
+                                    <td>
+                                        <b>${p.label.split(' ')[0]} ${p.label.split(' ')[1]}</b><br>
+                                        <small style="color: #64748b;">${p.time}</small>
+                                    </td>
+                                    ${this.days.map(d => {
+                                        const slot = data[`${d.key}_${p.slot}`] || {};
+                                        return `
+                                            <td>
+                                                ${slot.subject ? `
+                                                    <div class="sub-name">${slot.subject}</div>
+                                                    ${slot.teacher_name ? `<div class="teacher-name">គ្រូ៖ ${slot.teacher_name}</div>` : ''}
+                                                    ${slot.room ? `<div style="font-size: 8.5pt; color: #64748b;">បន្ទប់ ${slot.room}</div>` : ''}
+                                                ` : `<span style="color: #cbd5e1;">- ទំនេរ -</span>`}
+                                            </td>
+                                        `;
+                                    }).join("")}
+                                </tr>
+                            `;
+                        }).join("")}
+                    </tbody>
+                </table>
+        `;
+
+        const timetableExtraStyles = `
+            table.timetable-main-table { width: 100%; border-collapse: collapse; margin-top: 5px; margin-bottom: 15px; }
+            .timetable-main-table th, .timetable-main-table td { border: 1px solid #111; padding: 7px 4px; text-align: center; }
+            .timetable-main-table th { background-color: #f1f5f9; font-weight: bold; }
+            .session-header { background-color: #e2e8f0; font-weight: bold; text-align: left; padding-left: 10px; }
+            .sub-name { font-weight: bold; font-size: 10.5pt; color: #1e3a8a; }
+            .teacher-name { font-size: 9pt; color: #475569; margin-top: 2px; }
+        `;
+
+        if (window.CMSPrintManager && typeof window.CMSPrintManager.openUniversalPreview === 'function') {
+            window.CMSPrintManager.openUniversalPreview({
+                title: `កាលវិភាគបង្រៀនប្រចាំសប្តាហ៍`,
+                grade: this.currentGrade,
+                academicYear: academicYear,
+                schoolName: schoolName,
+                principalName: principalName,
+                teacherName: teacherName,
+                paperSize: "A4",
+                orientation: "landscape",
+                defaultZoom: 1.0,
+                contentHtml: tableHtml,
+                extraStyles: timetableExtraStyles
+            });
+            return;
+        }
+
         // បង្កើត HTML សម្រាប់បោះពុម្ព
         let printContent = `
             <!DOCTYPE html>
@@ -541,6 +631,39 @@ window.TimetableHomeworkManager = {
                     <td style="border: 1px solid #cbd5e1; padding: 8px; text-align: center; font-weight: bold; color: #059669;">${hw.maxScore || 10} ពិន្ទុ</td>
                 </tr>
             `).join('');
+        }
+
+        const hwTableHtml = `
+            <table class="hw-main-table" style="width: 100%; border-collapse: collapse; font-size: 9.5pt; margin-bottom: 25px;">
+                <thead>
+                    <tr style="background: #eef2ff; font-weight: bold; color: #1e1b4b;">
+                        <th style="border: 1px solid #cbd5e1; padding: 8px; width: 35px; text-align: center;">ល.រ</th>
+                        <th style="border: 1px solid #cbd5e1; padding: 8px; width: 100px; text-align: center;">មុខវិជ្ជា</th>
+                        <th style="border: 1px solid #cbd5e1; padding: 8px; width: 180px; text-align: left;">ចំណងជើងកិច្ចការ</th>
+                        <th style="border: 1px solid #cbd5e1; padding: 8px; text-align: left;">ការណែនាំលម្អិត</th>
+                        <th style="border: 1px solid #cbd5e1; padding: 8px; width: 90px; text-align: center;">ថ្ងៃផុតកំណត់</th>
+                        <th style="border: 1px solid #cbd5e1; padding: 8px; width: 75px; text-align: center;">ពិន្ទុ</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${rowsHtml}
+                </tbody>
+            </table>
+        `;
+
+        if (window.CMSPrintManager && typeof window.CMSPrintManager.openUniversalPreview === 'function') {
+            window.CMSPrintManager.openUniversalPreview({
+                title: `តារាងកិច្ចការផ្ទះ និងការណែនាំស្វ័យសិក្សា`,
+                grade: gradeStr,
+                schoolName: schoolName,
+                principalName: sInfo.principal_name || '.......................',
+                teacherName: sInfo.teacher_name || '.......................',
+                paperSize: "A4",
+                orientation: "portrait",
+                defaultZoom: 1.0,
+                contentHtml: hwTableHtml
+            });
+            return;
         }
 
         const printContent = `

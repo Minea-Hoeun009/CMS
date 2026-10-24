@@ -2053,99 +2053,7 @@ window.printOfficialAttendance = function() {
     const lunarDateStr = rDates.showLunar !== false ? rDates.lunarDate : "";
     const solarDateStr = window.getFormattedSolarDate();
 
-    const printDocument = `
-      <!DOCTYPE html>
-      <html lang="km">
-      <head>
-        <meta charset="utf-8">
-        <title>បញ្ជីវត្តមានប្រចាំខែ${month} - ${grade}</title>
-        <style>
-          @import url('https://fonts.googleapis.com/css2?family=Moul&family=Siemreap:wght@400;700&display=swap');
-          @page { size: A4 landscape; margin: 8mm 9mm; }
-          * { box-sizing: border-box; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-          body { margin: 0; padding: 0; font-family: 'Siemreap', sans-serif; color: #0f172a; background: #fff; line-height: 1.3; }
-          .font-moul { font-family: 'Moul', serif; font-weight: normal; }
-          
-          /* ផ្នែកក្បាល (Header) */
-          .header-box { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 5px; }
-          .header-left p { margin: 0 0 3px 0; font-size: 11px; font-family: 'Moul', serif; color: #334155; }
-          .header-left .school-name { color: #1e3a8a; font-size: 13px; text-shadow: 0.5px 0.5px 0px #cbd5e1; }
-          .header-left .class-name { color: #be123c; font-size: 11.5px; }
-          .header-right { text-align: center; }
-          .header-right p { margin: 0 0 3px 0; font-size: 12px; font-family: 'Moul', serif; color: #1e3a8a; }
-          .header-right .motto { color: #b91c1c; font-size: 11px; }
-          
-          .title-box { text-align: center; margin: 5px 0 10px 0; }
-          .title-box h2 { margin: 0 0 5px 0; font-size: 16px; color: #be123c; letter-spacing: 1px; }
-          
-          /* របារព័ត៌មានពីលើតារាង */
-          .sub-header-bar { display: flex; justify-content: space-between; font-size: 11px; font-weight: bold; margin-bottom: 6px; padding: 5px 10px; background-color: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 4px; color: #0f172a; }
-          .sub-header-bar .highlight { color: #be123c; font-family: 'Moul', serif; }
-          .sub-header-bar .count { color: #047857; }
-          
-          /* តារាង (Table) */
-          table { width: 100%; border-collapse: collapse; text-align: center; margin-bottom: 10px; table-layout: fixed; border: 1.5px solid #0f172a; }
-          th, td { border: 1px solid #475569; padding: 2px 0px; height: 26px; font-family: 'Khmer OS Bokor', 'Bokor', sans-serif; font-size: 10px; overflow: hidden; white-space: nowrap; }
-          th { background-color: #dbeafe; color: #1e3a8a; font-weight: bold; }
-          tr:nth-child(even) { background-color: #f8fafc; }
-          td:nth-child(3) { text-align: left; padding-left: 5px; font-family: 'Khmer OS Siemreap', 'Siemreap', sans-serif; font-size: 12px; font-weight: bold; color: #0f172a; }
-          
-          /* ផ្នែកសង្ខេបខាងក្រោម (Footer Summary) */
-          .summary-container { background-color: #f0fdf4; border: 1px solid #86efac; border-radius: 5px; padding: 6px 10px; margin-bottom: 8px; }
-          .summary-row-inline { display: flex; justify-content: space-between; font-size: 11px; line-height: 1.8; }
-          .summary-row-inline span { margin-right: 15px; color: #334155; }
-          .summary-row-inline b { font-size: 12px; }
-          .text-green { color: #15803d; }
-          .text-red { color: #be123c; }
-          .text-blue { color: #1d4ed8; }
-          
-          .end-list-note { font-size: 11px; color: #64748b; font-style: italic; margin-left: 5px; }
-
-          /* ផ្នែកហត្ថលេខា (Signatures) */
-          .footer-box { display: flex; justify-content: space-between; align-items: flex-start; font-size: 11px; margin-top: 15px; padding: 0 40px; page-break-inside: avoid; }
-          .footer-col-left { text-align: center; font-family: 'Moul', serif; line-height: 1.6; color: #1e3a8a; }
-          .footer-col-right { text-align: center; line-height: 1.6; color: #334155; }
-          .footer-col-right .role { font-family: 'Moul', serif; margin-top: 5px; color: #1e3a8a; }
-          .signature-name { font-family: 'Moul', serif; font-size: 12px; color: #be123c; }
-        </style>
-      </head>
-      <body>
-        <div class="header-box">
-          <div class="header-left"><br><br>
-            <p>ការិយាល័យអប់រំ យុវជន និងកីឡានៃរដ្ឋបាល ស្រុក${districtName}</p>
-            <p class="school-name">${schoolName}</p>
-            <p class="class-name">${grade}</p>
-          </div>
-          <div class="header-right">
-           <div class="header-right">
-                <p class="font-moul">ព្រះរាជាណាចក្រកម្ពុជា</p>
-                <p class="font-moul">ជាតិ សាសនា ព្រះមហាក្សត្រ</p>
-                
-                <!-- ក្បាច់រចនាប័ទ្ម Tacteing គូរដោយ HTML សុទ្ធ (ធានា ១០០% ដើរលើគ្រប់ទូរស័ព្ទ) -->
-                <div style="display: flex; align-items: center; justify-content: center; margin: 4px auto 12px auto; gap: 3px;">
-                    <!-- បន្ទាត់ឆ្វេង -->
-                    <div style="width: 35px; height: 1.5px; background-color: #9c6705; -webkit-print-color-adjust: exact; print-color-adjust: exact;"></div>
-                    <div style="width: 3.5px; height: 3.5px; background-color: #1e3a8a; border-radius: 50%; -webkit-print-color-adjust: exact; print-color-adjust: exact;"></div>
-                    <div style="width: 12px; height: 1.5px; background-color: #9c6705; -webkit-print-color-adjust: exact; print-color-adjust: exact;"></div>
-                    <div style="width: 3.5px; height: 3.5px; background-color: #1e3a8a; border-radius: 50%; -webkit-print-color-adjust: exact; print-color-adjust: exact;"></div>
-                    
-                    <!-- ក្បាច់កណ្តាល -->
-                    <div style="font-size: 11pt; color: #755000; margin: 0 2px; -webkit-print-color-adjust: exact; print-color-adjust: exact;">❖</div>
-                    
-                    <!-- បន្ទាត់ស្តាំ -->
-                    <div style="width: 3.5px; height: 3.5px; background-color: #1e3a8a; border-radius: 50%; -webkit-print-color-adjust: exact; print-color-adjust: exact;"></div>
-                    <div style="width: 12px; height: 1.5px; background-color: #9c6705; -webkit-print-color-adjust: exact; print-color-adjust: exact;"></div>
-                    <div style="width: 3.5px; height: 3.5px; background-color: #1e3a8a; border-radius: 50%; -webkit-print-color-adjust: exact; print-color-adjust: exact;"></div>
-                    <div style="width: 35px; height: 1.5px; background-color: #9c6705; -webkit-print-color-adjust: exact; print-color-adjust: exact;"></div>
-                </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="title-box">
-          <h2 class="font-moul">បញ្ជីហៅឈ្មោះសិស្ស</h2>
-        </div>
-
+    const bodyContentHtml = `
         <div class="sub-header-bar">
           <div>ផ្នែកអវត្តមានសិស្ស</div>
           <div>ខែ <span class="highlight">${month}</span></div>
@@ -2171,43 +2079,45 @@ window.printOfficialAttendance = function() {
         <div class="end-list-note" style="margin-top: 6px;">
             បញ្ឈប់បញ្ជីក្នុងខែនេះត្រឹម <b class="text-blue" style="font-size: 13px; text-decoration: underline;">${window.toKhmerNum(summary?.actualSchoolDays?.toString() || '0')}</b> ពេល
         </div>
-
-        <div class="footer-box">
-          <div class="footer-col-left">
-            <div>បានឃើញ និងឯកភាព</div>
-            <div>នាយកសាលា</div>
-            <div style="height: 45px;"></div>
-            <div class="signature-name">${principalName}</div>
-          </div>
-          <div class="footer-col-right">
-            ${lunarDateStr ? `<div style="font-size: 10.5px; margin-bottom: 2px;">${lunarDateStr}</div>` : ''}
-            <div>${solarDateStr}</div>
-            <div class="role">គ្រូទទួលបន្ទុកថ្នាក់</div>
-            <div style="height: 40px;"></div>
-            <div class="signature-name">${teacherName}</div>
-          </div>
-        </div>
-      </body>
-      </html>
     `;
 
-    const printWindow = window.open('', '_blank', 'width=1150,height=850');
-    if (!printWindow) {
-        alert("⚠️ ប្រព័ន្ធបានទប់ស្កាត់ផ្ទាំង Pop-up! សូមអនុញ្ញាត Pop-up លើ Browser របស់អ្នកដើម្បីបោះពុម្ព។");
-        return;
-    }
-    printWindow.document.open();
-    printWindow.document.write(printDocument);
-    printWindow.document.close();
+    const extraAttendanceStyles = `
+        .sub-header-bar { display: flex; justify-content: space-between; font-size: 11px; font-weight: bold; margin-bottom: 6px; padding: 5px 10px; background-color: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 4px; color: #0f172a; }
+        .sub-header-bar .highlight { color: #be123c; font-family: 'Khmer OS Muol Light', 'Moul', serif; }
+        .sub-header-bar .count { color: #047857; }
+        table { width: 100%; border-collapse: collapse; text-align: center; margin-bottom: 10px; table-layout: fixed; border: 1.5px solid #0f172a; }
+        th, td { border: 1px solid #475569; padding: 2px 0px; height: 26px; font-family: 'Khmer OS Bokor', 'Bokor', sans-serif; font-size: 10px; overflow: hidden; white-space: nowrap; }
+        th { background-color: #dbeafe; color: #1e3a8a; font-weight: bold; }
+        tr:nth-child(even) { background-color: #f8fafc; }
+        td:nth-child(3) { text-align: left; padding-left: 5px; font-family: 'Khmer OS Siemreap', 'Siemreap', sans-serif; font-size: 12px; font-weight: bold; color: #0f172a; }
+        .summary-container { background-color: #f0fdf4; border: 1px solid #86efac; border-radius: 5px; padding: 6px 10px; margin-bottom: 8px; }
+        .summary-row-inline { display: flex; justify-content: space-between; font-size: 11px; line-height: 1.8; }
+        .summary-row-inline span { margin-right: 15px; color: #334155; }
+        .summary-row-inline b { font-size: 12px; }
+        .text-green { color: #15803d; }
+        .text-red { color: #be123c; }
+        .text-blue { color: #1d4ed8; }
+        .end-list-note { font-size: 11px; color: #64748b; font-style: italic; margin-left: 5px; }
+    `;
 
-    setTimeout(() => {
-        try {
-            printWindow.focus();
-            printWindow.print();
-        } catch(err) {
-            console.error("Print Error:", err);
-        }
-    }, 600);
+    if (window.CMSPrintManager && typeof window.CMSPrintManager.openUniversalPreview === 'function') {
+        window.CMSPrintManager.openUniversalPreview({
+            title: `បញ្ជីហៅឈ្មោះសិស្សប្រចាំខែ${month}`,
+            grade: grade,
+            academicYear: academicYear,
+            districtName: districtName,
+            schoolName: schoolName,
+            principalName: principalName,
+            teacherName: teacherName,
+            paperSize: "A4",
+            orientation: "landscape",
+            defaultZoom: 1.0,
+            contentHtml: bodyContentHtml,
+            extraStyles: extraAttendanceStyles
+        });
+    } else {
+        window.print();
+    }
 };
 
 // =====================================================================
@@ -2366,85 +2276,8 @@ window.printAnnualAttendanceReport = function(studentsData, academicYear) {
         tbodyHtml += rowHtml;
     }
 
-    const printDocument = `
-      <!DOCTYPE html>
-      <html lang="km">
-      <head>
-        <meta charset="utf-8">
-        <title>បញ្ជីអវត្តមានប្រចាំឆ្នាំ ${acYear}</title>
-        <style>
-          @import url('https://fonts.googleapis.com/css2?family=Moul&family=Siemreap:wght@400;700&display=swap');
-          @page { size: A4 landscape; margin: 10mm 12mm; }
-          * { box-sizing: border-box; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-          body { margin: 0; padding: 0; font-family: 'Siemreap', sans-serif; color: #0f172a; background: #fff; line-height: 1.3; }
-          .font-moul { font-family: 'Moul', serif; font-weight: normal; }
-          
-          .header-box { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
-          .header-left p { margin: 0 0 3px 0; font-size: 11px; font-family: 'Moul', serif; color: #334155; }
-          .header-left .school-name { color: #1e3a8a; font-size: 13px; text-shadow: 0.5px 0.5px 0px #cbd5e1; }
-          .header-left .class-name { color: #be123c; font-size: 11.5px; }
-          .header-right { text-align: center; }
-          .header-right p { margin: 0 0 3px 0; font-size: 12px; font-family: 'Moul', serif; color: #1e3a8a; }
-          
-          .title-box { text-align: center; margin-bottom: 15px; }
-          .title-box h2 { margin: 0 0 5px 0; font-size: 16px; font-family: 'Moul', serif; color: #be123c; letter-spacing: 1px; }
-          
-          table { width: 100%; border-collapse: collapse; text-align: center; border: 1.5px solid #0f172a; }
-          th, td { border: 1px solid #475569; padding: 2px; font-size: 10px; overflow: hidden; }
-          th { font-family: 'Siemreap', sans-serif; font-weight: bold; background-color: #f1f5f9; color: #1e3a8a; }
-          tr:nth-child(even) { background-color: #f8fafc; } 
-          
-          .th-main { background-color: #dbeafe; color: #1e3a8a; }
-          .th-months { background-color: #e0e7ff; color: #3730a3; }
-          .th-totals { background-color: #fef3c7; color: #92400e; }
-          .th-perm { background-color: #eff6ff; color: #1d4ed8; font-size: 9px; }
-          .th-unex { background-color: #fff1f2; color: #be123c; font-size: 9px; }
-          
-          .col-no { width: 3%; }
-          .col-id { width: 5%; }
-          .col-name { width: 14%; }
-          .col-gender { width: 3%; }
-          .col-month { width: 2.8%; font-size: 9px; }
-          .col-total { width: 3.5%; }
-          .col-remark { width: 6%; }
-          
-          .text-blue { color: #1d4ed8; }
-          .text-red { color: #be123c; }
-          
-          .summary-footer { font-size: 11px; font-weight: bold; border: 1.5px solid #0f172a; border-top: none; padding: 5px; background-color: #f0fdf4; }
-          .summary-row { display: flex; align-items: center; }
-          .summary-label { width: 25%; padding-left: 10px; border-right: 1px dashed #cbd5e1; color: #15803d; }
-          
-          .footer-box { display: flex; justify-content: space-between; align-items: flex-start; font-size: 11px; margin-top: 20px; padding: 0 40px; page-break-inside: avoid; }
-          .footer-col-left { text-align: center; font-family: 'Moul', serif; line-height: 1.6; color: #1e3a8a; }
-          .footer-col-right { text-align: center; line-height: 1.6; color: #334155; }
-          .footer-col-right .role { font-family: 'Moul', serif; margin-top: 5px; color: #1e3a8a; }
-          .signature-name { font-family: 'Moul', serif; font-size: 12px; color: #be123c; }
-        </style>
-      </head>
-      <body>
-        <div class="header-box">
-          <div class="header-left"><br><br>
-            <p>ការិយាល័យអប់រំ យុវជន និងកីឡានៃរដ្ឋបាល ស្រុក${districtName}</p>
-            <p class="school-name">${schoolName}</p>
-            <p class="class-name">${grade}</p>
-          </div>
-          <div class="header-right">
-            <p>ព្រះរាជាណាចក្រកម្ពុជា</p>
-            <p class="motto">ជាតិ សាសនា ព្រះមហាក្សត្រ</p>
-            <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin: 4px auto 10px auto; width: 60%;">
-                 <div style="height: 1px; flex: 1; background: linear-gradient(to right, transparent, #d97706);"></div>
-                 <span style="color: #d97706; font-size: 11px;">❖ ❖ ❖</span>
-                 <div style="height: 1px; flex: 1; background: linear-gradient(to left, transparent, #d97706);"></div>
-            </div>
-          </div>
-        </div>
-
-        <div class="title-box">
-          <h2>ចំនួនអវត្តមានសិស្សក្នុងឆ្នាំសិក្សា ${window.toKhmerNum(acYear)}</h2>
-        </div>
-
-        <table>
+    const annualBodyHtml = `
+        <table class="annual-table">
           <thead>
             <tr>
               <th rowspan="3" class="col-no th-main">ល.រ<br>លេខរៀង</th>
@@ -2479,43 +2312,50 @@ window.printAnnualAttendanceReport = function(studentsData, academicYear) {
               <div style="flex-grow: 1; text-align: center; color: #64748b; font-size: 10px;">(កន្លែងសម្រាប់បូកភាគរយតាមខែនីមួយៗ)</div>
            </div>
         </div>
-
-        <div class="footer-box">
-          <div class="footer-col-left">
-            <div>បានឃើញ និងឯកភាព</div>
-            <div>នាយកសាលា</div>
-            <div style="height: 60px;"></div>
-            <div class="signature-name">${principalName}</div>
-          </div>
-          <div class="footer-col-right">
-            ${lunarDateStr ? `<div style="font-size: 10.5px; margin-bottom: 2px;">${lunarDateStr}</div>` : ''}
-            <div>${solarDateStr}</div>
-            <div class="role">គ្រូទទួលបន្ទុកថ្នាក់</div>
-            <div style="height: 60px;"></div>
-            <div class="signature-name">${teacherName}</div>
-          </div>
-        </div>
-      </body>
-      </html>
     `;
 
-    const printWindow = window.open('', '_blank', 'width=1150,height=850');
-    if (!printWindow) {
-        alert("⚠️ ប្រព័ន្ធបានទប់ស្កាត់ផ្ទាំង Pop-up! សូមអនុញ្ញាត Pop-up។");
-        return;
-    }
-    printWindow.document.open();
-    printWindow.document.write(printDocument);
-    printWindow.document.close();
+    const extraAnnualStyles = `
+        table.annual-table { width: 100%; border-collapse: collapse; text-align: center; border: 1.5px solid #0f172a; margin-bottom: 10px; }
+        .annual-table th, .annual-table td { border: 1px solid #475569; padding: 2px; font-size: 10px; overflow: hidden; }
+        .annual-table th { font-family: 'Siemreap', sans-serif; font-weight: bold; background-color: #f1f5f9; color: #1e3a8a; }
+        .annual-table tr:nth-child(even) { background-color: #f8fafc; } 
+        .th-main { background-color: #dbeafe; color: #1e3a8a; }
+        .th-months { background-color: #e0e7ff; color: #3730a3; }
+        .th-totals { background-color: #fef3c7; color: #92400e; }
+        .th-perm { background-color: #eff6ff; color: #1d4ed8; font-size: 9px; }
+        .th-unex { background-color: #fff1f2; color: #be123c; font-size: 9px; }
+        .col-no { width: 3%; }
+        .col-id { width: 5%; }
+        .col-name { width: 14%; }
+        .col-gender { width: 3%; }
+        .col-month { width: 2.8%; font-size: 9px; }
+        .col-total { width: 3.5%; }
+        .col-remark { width: 6%; }
+        .text-blue { color: #1d4ed8; }
+        .text-red { color: #be123c; }
+        .summary-footer { font-size: 11px; font-weight: bold; border: 1.5px solid #0f172a; border-top: none; padding: 5px; background-color: #f0fdf4; margin-bottom: 15px; }
+        .summary-row { display: flex; align-items: center; }
+        .summary-label { width: 25%; padding-left: 10px; border-right: 1px dashed #cbd5e1; color: #15803d; }
+    `;
 
-    setTimeout(() => {
-        try {
-            printWindow.focus();
-            printWindow.print();
-        } catch(err) {
-            console.error("Print Error:", err);
-        }
-    }, 600);
+    if (window.CMSPrintManager && typeof window.CMSPrintManager.openUniversalPreview === 'function') {
+        window.CMSPrintManager.openUniversalPreview({
+            title: `ចំនួនអវត្តមានសិស្សក្នុងឆ្នាំសិក្សា ${window.toKhmerNum(acYear)}`,
+            grade: grade,
+            academicYear: acYear,
+            districtName: districtName,
+            schoolName: schoolName,
+            principalName: principalName,
+            teacherName: teacherName,
+            paperSize: "A4",
+            orientation: "landscape",
+            defaultZoom: 0.9,
+            contentHtml: annualBodyHtml,
+            extraStyles: extraAnnualStyles
+        });
+    } else {
+        window.print();
+    }
 };
 
 // =====================================================================

@@ -3017,7 +3017,7 @@ window.printScoreList = function() {
                 <tr><td style="width: 100%;">❖ ${failLabel} <b>${failed}</b> នាក់ (<b>${failPct}%</b>) ស្រី <b>${failedF}</b> នាក់ (<b>${failFPct}%</b>)</td></tr>
             </table>
             <div class="bottom-sig-container">
-                <div class="sig-box-left"><br><br><p class="font-moul" style="margin-bottom: 5px; font-size: 11pt;">បានឃើញ និងឯកភាព</p><p class="font-moul" style="margin-bottom: 50px; font-size: 11pt;">នាយកសាលា</p></div>
+                <div class="sig-box-left"><br><br><p class="font-moul" style="margin-bottom: 5px; font-size: 11pt;">បានឃើញ និងឯកភាព</p><p class="font-moul" style="margin-bottom: 50px; font-size: 11pt;">នាយកសាលា</p><p class="font-moul" style="font-size: 11pt;">${principalName}</p></div>
                 <div class="sig-box-right"><p style="margin: 0 0 5px 0; font-size: 11pt;">${lunarDateStr}</p><p style="margin: 0 0 5px 0; font-size: 11pt;">${solarDateStr}</p><p class="font-moul" style="margin-bottom: 50px; font-size: 11pt;">គ្រូបន្ទុកថ្នាក់</p><p class="font-moul" style="font-size: 11pt;">${teacherName}</p></div>
             </div>
           </div>
@@ -3295,8 +3295,8 @@ window.printRankingTable = function() {
                 <tr><td style="width: 100%;">❖ ${failLabel} <b>${failed}</b> នាក់ (<b>${failPct}%</b>) ស្រី <b>${failedF}</b> នាក់ (<b>${failFPct}%</b>)</td></tr>
             </table>
             <div class="bottom-sig-container">
-                <div class="sig-box"><br><br><p class="font-moul" style="margin: 0 0 5px 0; font-size: 11pt;">បានឃើញ និងឯកភាព</p><p class="font-moul" style="margin: 0 0 60px 0; font-size: 11pt;">នាយកសាលា</p></div>
-                <div class="sig-box" style="width: 100%;"><p style="margin: 0 0 11px 0; font-size: 12pt; font-family: 'Khmer OS Siemreap', sans-serif;">${lunarDateStr}</p><p style="margin: 0 0 5px 0; font-size: 12pt; font-family: 'Khmer OS Siemreap', sans-serif;">${solarDateStr}</p><p class="font-moul" style="margin-bottom: 60px; font-size: 12pt;">គ្រូបន្ទុកថ្នាក់</p><p class="font-moul" style="font-size: 11pt;">${teacherName}</p></div>
+                <div class="sig-box-left"><br><br><p class="font-moul" style="margin-bottom: 5px; font-size: 11pt;">បានឃើញ និងឯកភាព</p><p class="font-moul" style="margin-bottom: 50px; font-size: 11pt;">នាយកសាលា</p><p class="font-moul" style="font-size: 11pt;">${principalName}</p></div>
+                <div class="sig-box-right"><p style="margin: 0 0 5px 0; font-size: 11pt;">${lunarDateStr}</p><p style="margin: 0 0 5px 0; font-size: 11pt;">${solarDateStr}</p><p class="font-moul" style="margin-bottom: 50px; font-size: 11pt;">គ្រូបន្ទុកថ្នាក់</p><p class="font-moul" style="font-size: 11pt;">${teacherName}</p></div>
             </div>
           </div>
         </div>

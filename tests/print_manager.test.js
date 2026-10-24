@@ -134,4 +134,63 @@ describe('CMS Universal Print Manager & Paper Config Tests', () => {
     const iframe = createdElements[createdElements.length - 1];
     assert.ok(iframe.contentWindow.document.written.includes('landscape'));
   });
+
+  test('6. getStandardContext, getHeaderHtml, getTitleHtml, and getFooterHtml render standard document structure', () => {
+    const ctx = context.window.CMSPrintManager.getStandardContext({
+      districtName: 'ស្រុកកៀនស្វាយ',
+      schoolName: 'សាលាបឋមសិក្សា វត្តថ្មី',
+      grade: 'ថ្នាក់ទី ២ "ក"',
+      principalName: 'នាយក សុខ',
+      teacherName: 'ហឿន មិនា',
+      academicYear: '២០២៦-២០២៧'
+    });
+
+    assert.equal(ctx.districtName, 'កៀនស្វាយ');
+    assert.equal(ctx.schoolName, 'សាលាបឋមសិក្សា វត្តថ្មី');
+    assert.equal(ctx.grade, 'ថ្នាក់ទី ២ "ក"');
+
+    const header = context.window.CMSPrintManager.getHeaderHtml(ctx);
+    assert.ok(header.includes('ការិយាល័យអប់រំ យុវជន និងកីឡានៃរដ្ឋបាលស្រុកកៀនស្វាយ'));
+    assert.ok(header.includes('ព្រះរាជាណាចក្រកម្ពុជា'));
+    assert.ok(header.includes('ជាតិ សាសនា ព្រះមហាក្សត្រ'));
+    assert.ok(header.includes('❖ ❖ ❖'));
+
+    const title = context.window.CMSPrintManager.getTitleHtml('បញ្ជីស្រង់ពិន្ទុប្រចាំខែមករា', ctx.academicYear);
+    assert.ok(title.includes('បញ្ជីស្រង់ពិន្ទុប្រចាំខែមករា'));
+    assert.ok(title.includes('ឆ្នាំសិក្សា ៖ ២០២៦-២០២៧'));
+
+    const footer = context.window.CMSPrintManager.getFooterHtml(ctx);
+    assert.ok(footer.includes('បានឃើញ និងឯកភាព'));
+    assert.ok(footer.includes('នាយកសាលា'));
+    assert.ok(footer.includes('គ្រូបន្ទុកថ្នាក់'));
+    assert.ok(footer.includes('ហឿន មិនា'));
+  });
+
+  test('7. openUniversalPreview generates interactive print toolbar and responsive paper wrapper', () => {
+    let openedDoc = '';
+    context.window.open = () => ({
+      document: {
+        open: () => {},
+        write: (html) => { openedDoc += html; },
+        close: () => {}
+      }
+    });
+
+    context.window.CMSPrintManager.openUniversalPreview({
+      title: 'បញ្ជីស្រង់ពិន្ទុប្រចាំខែមករា',
+      grade: 'ថ្នាក់ទី ២ "ក"',
+      contentHtml: '<table class="test-table"><tr><td>ពិន្ទុ</td></tr></table>',
+      paperSize: 'A4',
+      orientation: 'landscape',
+      defaultZoom: 1.0
+    });
+
+    assert.ok(openedDoc.includes('class="no-print print-toolbar font-siemreap"'));
+    assert.ok(openedDoc.includes('id="paperSize"'));
+    assert.ok(openedDoc.includes('id="paperOrientation"'));
+    assert.ok(openedDoc.includes('id="zoomLevel"'));
+    assert.ok(openedDoc.includes('ព្រីនឥឡូវនេះ'));
+    assert.ok(openedDoc.includes('id="print-wrapper"'));
+    assert.ok(openedDoc.includes('id="content-scaler"'));
+  });
 });
