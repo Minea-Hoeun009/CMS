@@ -97,7 +97,7 @@ h6,
    STANDARD PRINT STYLING (ស្តង់ដារបោះពុម្ពទូទាំងប្រព័ន្ធ)
    ========================================== */
 @media print {
-  /* លាក់ធាតុដែលមិនចាំបាច់ពេលបោះពុម្ព */
+  /* ១. លាក់ធាតុ និងផ្ទៃទាំងអស់នៃកម្មវិធីពេលបោះពុម្ព (Hide entire App layout, sidebars, headers, controls) */
   .no-print, 
   nav, 
   aside, 
@@ -106,15 +106,21 @@ h6,
   button, 
   .no-print *,
   #sidebar, 
+  #appSidebar,
+  #mainAppHeader,
   #mobileBottomNav, 
   #landing-screen, 
+  #reportPrintConfigBar,
+  #reportsMainDashboard,
+  #btnHeaderGoBack,
+  #headerActiveClassBadge,
   .toast, 
   .notification-center,
   .modal-backdrop {
     display: none !important;
   }
 
-  /* សម្អាតរឹម និងផ្ទៃខាងក្រោយទំព័រដើម */
+  /* ២. សម្អាតរឹម និងផ្ទៃខាងក្រោយទំព័រដើម (Reset viewport to clean paper) */
   html, body {
     width: 100% !important;
     height: auto !important;
@@ -123,9 +129,45 @@ h6,
     background: white !important;
     color: black !important;
     font-family: 'Siemreap', sans-serif !important;
+    overflow: visible !important;
   }
 
-  /* បង្ខំឱ្យពណ៌ និងរូបភាព Background ចេញច្បាស់គ្រប់ម៉ាស៊ីនព្រីន */
+  #appView, #dashboardView, #mainContentArea, #reportDetailContent {
+    display: block !important;
+    width: 100% !important;
+    height: auto !important;
+    overflow: visible !important;
+    position: static !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border: none !important;
+    background: white !important;
+  }
+
+  /* ៣. បង្ហាញតែផ្ទាំងក្រដាសឯកសារសុទ្ធសាធ ដោយដកស្រមោល និង Border ចេញ */
+  #reportPaperArea, 
+  #reportKaPrintArea, 
+  #reportKhaPrintArea, 
+  #reportKoKhoPrintArea, 
+  #healthTrackerArea, 
+  #certificatePrintArea, 
+  #studentProfilePrintArea, 
+  #printableReportCard,
+  #studentListPrintWrapper,
+  #attendancePrintWrapper,
+  #structurePrintArea,
+  #homeworkPrintArea {
+    box-shadow: none !important;
+    border: none !important;
+    border-radius: 0 !important;
+    margin: 0 auto !important;
+    padding: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    background: white !important;
+  }
+
+  /* ៤. បង្ខំឱ្យពណ៌ និងរូបភាព Background ចេញច្បាស់គ្រប់ម៉ាស៊ីនព្រីន */
   * {
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;

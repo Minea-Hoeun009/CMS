@@ -792,12 +792,14 @@ window.CMSPrintManager = {
         const iframe = document.createElement("iframe");
         iframe.id = "cms_print_frame_helper";
         iframe.style.position = "fixed";
-        iframe.style.right = "0";
-        iframe.style.bottom = "0";
-        iframe.style.width = "0";
-        iframe.style.height = "0";
-        iframe.style.border = "0";
+        iframe.style.top = "0";
+        iframe.style.left = "0";
+        iframe.style.width = "100%";
+        iframe.style.height = "100%";
+        iframe.style.border = "none";
         iframe.style.zIndex = "-9999";
+        iframe.style.opacity = "0.01";
+        iframe.style.pointerEvents = "none";
         document.body.appendChild(iframe);
 
         const clone = target.cloneNode(true);
@@ -820,6 +822,29 @@ window.CMSPrintManager = {
             }
         });
 
+        // សម្អាត Shadow, Border, និង Background របស់ App ឱ្យនៅសល់តែក្រដាសឯកសារសុទ្ធសាធ
+        if (clone.style) {
+            clone.style.boxShadow = "none";
+            clone.style.border = "none";
+            clone.style.borderRadius = "0";
+            clone.style.margin = "0 auto";
+            clone.style.background = "white";
+        }
+        if (clone.firstElementChild && clone.firstElementChild.style) {
+            clone.firstElementChild.style.boxShadow = "none";
+            clone.firstElementChild.style.border = "none";
+            clone.firstElementChild.style.borderRadius = "0";
+        }
+
+        // ចម្លង Stylesheet ទាំងអស់ពី App ដើម្បីឱ្យទម្រង់អក្សរ និងតារាងចេញមកស្អាត ១០០%
+        const parentStyles = (typeof document.querySelectorAll === 'function')
+            ? Array.from(document.querySelectorAll('link[rel="stylesheet"], style'))
+                .map(el => el.outerHTML || '')
+                .join('\n')
+            : '';
+
+        const contentHtml = clone.outerHTML || clone.innerHTML || '';
+
         const doc = iframe.contentWindow.document;
         doc.open();
         doc.write(`
@@ -831,26 +856,14 @@ window.CMSPrintManager = {
                 <link rel="preconnect" href="https://fonts.googleapis.com">
                 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
                 <link href="https://fonts.googleapis.com/css2?family=Moul&family=Siemreap&display=swap" rel="stylesheet">
-                <script src="https://cdn.tailwindcss.com"><\/script>
-                <script>
-                    tailwind.config = {
-                        theme: {
-                            extend: {
-                                fontFamily: {
-                                    siemreap: ['Siemreap', 'sans-serif'],
-                                    moul: ['Moul', 'sans-serif']
-                                }
-                            }
-                        }
-                    }
-                <\/script>
+                ${parentStyles}
                 <style>
                     @page {
                         size: ${paperSize} ${orientation};
                         margin: ${margin};
                     }
                     * {
-                        box-sizing: border-box;
+                        box-sizing: border-box !important;
                         -webkit-print-color-adjust: exact !important;
                         print-color-adjust: exact !important;
                         color-adjust: exact !important;
@@ -895,7 +908,7 @@ window.CMSPrintManager = {
             </head>
             <body>
                 <div class="cms-print-container">
-                    ${clone.innerHTML}
+                    ${contentHtml}
                 </div>
             </body>
             </html>
@@ -903,9 +916,14 @@ window.CMSPrintManager = {
         doc.close();
 
         setTimeout(() => {
-            iframe.contentWindow.focus();
-            iframe.contentWindow.print();
-        }, 600);
+            try {
+                iframe.contentWindow.focus();
+                iframe.contentWindow.print();
+            } catch (err) {
+                console.warn("Iframe print fallback triggered:", err);
+                window.print();
+            }
+        }, 400);
     },
 
     // Toolbar អន្តរកម្មសម្រាប់កំណត់ប្រភេទក្រដាស និងមាត្រដ្ឋាន (ដាក់នៅលើរបារ Title Bar)
