@@ -147,28 +147,28 @@ window.openReportDetail = function(reportType) {
             if(typeof window.renderAttendanceReportHTML === 'function') {
                 window.renderAttendanceReportHTML(paperArea);
             } else {
-                paperArea.innerHTML = `<div class="text-center p-10 text-slate-500">មុខងារនេះកំពុងអភិវឌ្ឍ</div>`;
+                paperArea.innerHTML = `<div class="text-center p-12 bg-amber-50/50 rounded-2xl border border-amber-200 text-amber-800 font-siemreap max-w-md mx-auto my-10 shadow-sm animate-fade-in"><i class="fa-solid fa-clock-rotate-left text-3xl mb-3 text-amber-500"></i><h4 class="font-moul text-base mb-1">របាយការណ៍នេះគ្រោងនឹងដាក់ឱ្យប្រើប្រាស់ឆាប់ៗ</h4><p class="text-xs text-amber-600 leading-relaxed">មុខងារនេះស្ថិតក្នុងដំណាក់កាលអភិវឌ្ឍ (In Progress/Planned)។ សូមជ្រើសរើសរបាយការណ៍ស្តង់ដាផ្សេងទៀតជាបណ្តោះអាសន្ន។</p></div>`;
             }
         } else if (reportType === 'students') {
             titleEl.textContent = "បញ្ជីរាយនាមសិស្ស";
             if(typeof window.renderStudentListReportHTML === 'function') {
                 window.renderStudentListReportHTML(paperArea);
             } else {
-                paperArea.innerHTML = `<div class="text-center p-10 text-slate-500">មុខងារនេះកំពុងអភិវឌ្ឍ</div>`;
+                paperArea.innerHTML = `<div class="text-center p-12 bg-amber-50/50 rounded-2xl border border-amber-200 text-amber-800 font-siemreap max-w-md mx-auto my-10 shadow-sm animate-fade-in"><i class="fa-solid fa-clock-rotate-left text-3xl mb-3 text-amber-500"></i><h4 class="font-moul text-base mb-1">របាយការណ៍នេះគ្រោងនឹងដាក់ឱ្យប្រើប្រាស់ឆាប់ៗ</h4><p class="text-xs text-amber-600 leading-relaxed">មុខងារនេះស្ថិតក្នុងដំណាក់កាលអភិវឌ្ឍ (In Progress/Planned)។ សូមជ្រើសរើសរបាយការណ៍ស្តង់ដាផ្សេងទៀតជាបណ្តោះអាសន្ន។</p></div>`;
             }
         } else if (reportType === 'scores') {
             titleEl.textContent = "របាយការណ៍លទ្ធផលសិក្សា";
             if(typeof window.renderScoresReportHTML === 'function') {
                 window.renderScoresReportHTML(paperArea);
             } else {
-                paperArea.innerHTML = `<div class="text-center p-10 text-slate-500">មុខងារនេះកំពុងអភិវឌ្ឍ</div>`;
+                paperArea.innerHTML = `<div class="text-center p-12 bg-amber-50/50 rounded-2xl border border-amber-200 text-amber-800 font-siemreap max-w-md mx-auto my-10 shadow-sm animate-fade-in"><i class="fa-solid fa-clock-rotate-left text-3xl mb-3 text-amber-500"></i><h4 class="font-moul text-base mb-1">របាយការណ៍នេះគ្រោងនឹងដាក់ឱ្យប្រើប្រាស់ឆាប់ៗ</h4><p class="text-xs text-amber-600 leading-relaxed">មុខងារនេះស្ថិតក្នុងដំណាក់កាលអភិវឌ្ឍ (In Progress/Planned)។ សូមជ្រើសរើសរបាយការណ៍ស្តង់ដាផ្សេងទៀតជាបណ្តោះអាសន្ន។</p></div>`;
             }
         } else if (reportType === 'structure') {
             titleEl.textContent = "រចនាសម្ព័ន្ធថ្នាក់រៀន";
             if(typeof window.renderClassStructureHTML === 'function') {
                 window.renderClassStructureHTML(paperArea);
             } else {
-                paperArea.innerHTML = `<div class="text-center p-10 text-slate-500">មុខងារនេះកំពុងអភិវឌ្ឍ</div>`;
+                paperArea.innerHTML = `<div class="text-center p-12 bg-amber-50/50 rounded-2xl border border-amber-200 text-amber-800 font-siemreap max-w-md mx-auto my-10 shadow-sm animate-fade-in"><i class="fa-solid fa-clock-rotate-left text-3xl mb-3 text-amber-500"></i><h4 class="font-moul text-base mb-1">របាយការណ៍នេះគ្រោងនឹងដាក់ឱ្យប្រើប្រាស់ឆាប់ៗ</h4><p class="text-xs text-amber-600 leading-relaxed">មុខងារនេះស្ថិតក្នុងដំណាក់កាលអភិវឌ្ឍ (In Progress/Planned)។ សូមជ្រើសរើសរបាយការណ៍ស្តង់ដាផ្សេងទៀតជាបណ្តោះអាសន្ន។</p></div>`;
             }
         }
     }, 200);

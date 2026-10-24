@@ -407,26 +407,14 @@ window.fetchStudentsData = function() {
 // មុខងាររក្សាទុកសិស្សទៅកាន់ Firebase
 // ==========================================
 window.saveStudentToFirebase = async function(studentData) {
-    try {
-        // ប្រើអត្តលេខសិស្ស (stu.id) ធ្វើជា Document ID ក្នុង Firebase ដើម្បីងាយស្រួល Update មិនឱ្យស្ទួន
-        const docRef = db.collection("students").doc(String(studentData.id));
-        
-        // set() ជាមួួយ { merge: true } មានន័យថា បើគ្មានវាបង្កើតថ្មី បើមានវាកែប្រែតែចំណុចណាដែលប្តូរ
-        await docRef.set({
-            ...studentData,
-            last_updated: firebase.firestore.FieldValue.serverTimestamp() // កត់ត្រាម៉ោងវិនាទី
-        }, { merge: true });
-
-        console.log("✅ ទិន្នន័យសិស្សត្រូវបានរក្សាទុកទៅ Cloud");
-        if (typeof showToast === 'function') showToast("រក្សាទុកជោគជ័យ!", "success");
-
-        // 🌟 ចំណាំ: លោកគ្រូមិនចាំបាច់ហៅ fetchStudentsData() ឡើងវិញទេ
-        // ព្រោះ onSnapshot ក្នុងជំហានទី៤ វានឹងដឹងថាទិន្នន័យប្តូរ ហើយវាគូរតារាងថ្មីដោយខ្លួនឯងភ្លាមៗ!
-        
-    } catch (error) {
-        console.error("❌ បរាជ័យក្នុងការរក្សាទុក:", error);
-        alert("មានបញ្ហាក្នុងការរក្សាទុកទិន្នន័យទៅ Cloud");
-    }
+    if (!window.db) return false;
+    const docRef = window.db.collection("students").doc(String(studentData.id));
+    await docRef.set({
+        ...studentData,
+        last_updated: firebase.firestore.FieldValue.serverTimestamp()
+    }, { merge: true });
+    console.log("✅ ទិន្នន័យសិស្សត្រូវបានរក្សាទុកទៅ Cloud:", studentData.id);
+    return true;
 };
 
 // ==========================================
@@ -588,17 +576,17 @@ window.renderStudentsTable = function() {
             <tr class="hover:bg-slate-50/80 transition-colors group font-bold">
                 <td class="p-3 text-center text-slate-400 font-mono text-[12px]">${index + 1}</td>
                 <td class="p-3 text-center">${avatarContent}</td>
-                <td class="p-3 text-indigo-600 font-mono"><span class="bg-indigo-50 px-2.5 py-1.5 rounded-lg border border-indigo-100/50">${stu.id || '-'}</span></td>
+                <td class="p-3 text-indigo-600 font-mono"><span class="bg-indigo-50 px-2.5 py-1.5 rounded-lg border border-indigo-100/50">${window.escapeHtml(stu.id) || '-'}</span></td>
                 <td class="p-3 text-slate-800 font-Siemreap text-[14px]">
-                    <div class="flex items-center">${stu.name || '-'}${statusTag}</div>
-                    ${stu.name_en ? `<div class="text-[11px] text-slate-400 font-mono tracking-wider font-normal uppercase">${stu.name_en}</div>` : ''}
+                    <div class="flex items-center">${window.escapeHtml(stu.name) || '-'}${statusTag}</div>
+                    ${stu.name_en ? `<div class="text-[11px] text-slate-400 font-mono tracking-wider font-normal uppercase">${window.escapeHtml(stu.name_en)}</div>` : ''}
                 </td>
                 <td class="p-3 text-center font-Siemreap text-[14px]">${genBadge}</td>
                 <td class="p-3 text-center text-slate-600 font-Siemreap text-[14px] whitespace-nowrap">${formatDate(stu.dob)} ${ageHtml}</td>
                 <td class="p-3 text-center text-slate-700">
-                   <span class="border border-slate-200 px-3 py-1.5 rounded-xl text-[12px] bg-white shadow-sm text-slate-700 whitespace-nowrap">${displayGrade} <span class="text-rose-500 ml-1 font-moul">${stu.room || ''}</span></span> 
+                   <span class="border border-slate-200 px-3 py-1.5 rounded-xl text-[12px] bg-white shadow-sm text-slate-700 whitespace-nowrap">${window.escapeHtml(displayGrade)} <span class="text-rose-500 ml-1 font-moul">${window.escapeHtml(stu.room) || ''}</span></span> 
                 </td>
-                <td class="p-3 text-slate-500 text-[12px]"><i class="fa-solid fa-map-pin text-slate-300 mr-1.5"></i> ${addrText}</td>
+                <td class="p-3 text-slate-500 text-[12px]"><i class="fa-solid fa-map-pin text-slate-300 mr-1.5"></i> ${window.escapeHtml(addrText)}</td>
                 <td class="p-3 text-center no-print">
                     <div class="flex items-center justify-center gap-1 opacity-100 lg:opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                         <button onclick="window.openReportCard ? window.openReportCard('${stu.id}') : alert('Report Card')" title="ព្រឹត្តិបត្រពិន្ទុបុគ្គល" class="w-8 h-8 rounded-full bg-slate-100 text-slate-500 hover:text-amber-600 hover:bg-amber-100 transition"><i class="fa-solid fa-file-invoice text-xs"></i></button>
@@ -898,11 +886,68 @@ window.saveStudentData = async function(e) {
         updated_at: new Date().toISOString()
     };
 
-    setTimeout(() => {
+    // Schema validation using CMSValidator
+    if (window.CMSValidator && typeof window.CMSValidator.validateStudent === 'function') {
+        const vRes = window.CMSValidator.validateStudent(payload, isEdit, window.allStudents);
+        if (!vRes.isValid) {
+            alert("❌ ព័ត៌មានសិស្សមិនត្រឹមត្រូវ:\n\n• " + vRes.errors.join("\n• "));
+            btn.innerHTML = origText;
+            btn.disabled = false;
+            return;
+        }
+    }
+
+    // Backend duplicate verification on Firestore if available
+    if (!isEdit && window.db) {
+        try {
+            const snapDup = await window.db.collection("students")
+                .where("school_id", "==", schoolId)
+                .where("academic_year", "==", currentYear)
+                .where("id", "==", payload.id)
+                .limit(1)
+                .get();
+            if (!snapDup.empty) {
+                alert(`⚠️ អត្តលេខសិស្ស «${payload.id}» នេះមានរួចហើយនៅលើ Cloud សម្រាប់ឆ្នាំសិក្សា ${currentYear}!\nសូមពិនិត្យ ឬផ្លាស់ប្តូរអត្តលេខថ្មី។`);
+                btn.innerHTML = origText;
+                btn.disabled = false;
+                return;
+            }
+        } catch(dupErr) {
+            console.warn("Firestore duplicate check note:", dupErr);
+        }
+    }
+
+    let localSaved = false;
+    let cloudSaved = false;
+    let gasSaved = false;
+
+    // ១. រក្សាទុកទៅ Cloud (AWAIT write - P0 Audit Fix)
+    if (window.db && typeof window.saveStudentToFirebase === 'function') {
+        try {
+            await window.saveStudentToFirebase(payload);
+            cloudSaved = true;
+        } catch(fsErr) {
+            console.warn("Firestore saveStudent error:", fsErr);
+        }
+    }
+
+    // ២. រក្សាទុកតាម Google Apps Script API (Sync)
+    const sInfo = typeof appSettings !== 'undefined' ? appSettings : {};
+    if (sInfo.auto_sync && typeof window.apiPost === 'function') {
+        try {
+            const res = await window.apiPost("saveStudent", payload);
+            if (res && res.status === "success") gasSaved = true;
+        } catch(gasErr) {
+            console.warn("GAS saveStudent error:", gasErr);
+        }
+    }
+
+    // ៣. រក្សាទុកក្នុង Master Store & LocalStorage
+    try {
         if (isEdit) {
             const idx = window.allStudents.findIndex(s => String(s.id) === payload.id);
-            if(idx > -1) window.allStudents[idx] = payload;
-            else window.allStudents.push(payload); 
+            if (idx > -1) window.allStudents[idx] = payload;
+            else window.allStudents.push(payload);
         } else {
             window.allStudents.unshift(payload);
         }
@@ -910,34 +955,36 @@ window.saveStudentData = async function(e) {
         if (typeof window.setMasterStudents === 'function') {
             window.setMasterStudents(window.allStudents);
         } else {
-            try { localStorage.setItem('academic_students', JSON.stringify(window.allStudents)); } catch(ex) {
-            alert("ទំហំផ្ទុកពេញ! សូមសម្អាតទិន្នន័យ (Clear Cache) ឬកាត់បន្ថយទំហំរូបថត។");
-            btn.innerHTML = origText; btn.disabled = false; return;
-            }
+            localStorage.setItem('academic_students', JSON.stringify(window.allStudents));
         }
+        localSaved = true;
+    } catch(storageErr) {
+        console.warn("Storage quota error on student save:", storageErr);
+        alert("⚠️ មិនអាចរក្សាទុកក្នុង Browser Storage បានទេ (Storage Full)!");
+    }
 
-        window.filterStudents();
-        document.getElementById("studentModal").classList.replace("flex", "hidden");
-        if(typeof showToast === 'function') showToast("✅ រក្សាទុកព័ត៌មានសិស្សបានជោគជ័យ!");
+    // ៤. ធ្វើបច្ចុប្បន្នភាព UI និងបិទ Modal
+    window.filterStudents();
+    document.getElementById("studentModal").classList.replace("flex", "hidden");
 
-        if (typeof window.logAudit === 'function') {
-            window.logAudit(
-                isEdit ? 'UPDATE_STUDENT' : 'CREATE_STUDENT', 
-                'student', 
-                `បាន${isEdit ? 'កែប្រែ' : 'ចុះឈ្មោះ'}សិស្ស ${payload.name} (${payload.id}) ថ្នាក់ ${payload.grade} ${payload.room}`
-            );
-        }
+    if (cloudSaved || gasSaved) {
+        if (typeof showToast === 'function') showToast("✅ រក្សាទុកព័ត៌មានសិស្សទៅកាន់ Cloud/Server បានជោគជ័យ!");
+    } else if (localSaved) {
+        if (typeof showToast === 'function') showToast("⚠️ បានរក្សាទុកក្នុងម៉ាស៊ីន (Offline - Pending Sync)! Cloud មិនទាន់ទទួលបានទិន្នន័យនៅឡើយទេ។", "warning");
+    } else {
+        alert("❌ បរាជ័យក្នុងការរក្សាទុកព័ត៌មានសិស្ស!");
+    }
 
-        btn.innerHTML = origText; btn.disabled = false;
-        
-        const sInfo = typeof appSettings !== 'undefined' ? appSettings : {};
-        if (window.db && typeof window.saveStudentToFirebase === 'function') {
-            window.saveStudentToFirebase(payload).catch(console.warn);
-        }
-        if (sInfo.auto_sync && typeof window.apiPost === 'function') { 
-            window.apiPost("saveStudent", payload).catch(console.error); 
-        }
-    }, 300); 
+    if (typeof window.logAudit === 'function' && (cloudSaved || gasSaved || localSaved)) {
+        window.logAudit(
+            isEdit ? 'UPDATE_STUDENT' : 'CREATE_STUDENT', 
+            'student', 
+            `បាន${isEdit ? 'កែប្រែ' : 'ចុះឈ្មោះ'}សិស្ស ${payload.name} (${payload.id}) ថ្នាក់ ${payload.grade} ${payload.room} | Cloud: ${cloudSaved ? 'Yes' : 'No'}`
+        );
+    }
+
+    btn.innerHTML = origText;
+    btn.disabled = false; 
 };
 
 // 🟢 STU-04: ការលុបទិន្នន័យ Soft Delete (ផ្អាក/ឈប់រៀន) និង Hard Delete (Admin) 🟢

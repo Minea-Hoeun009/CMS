@@ -10,6 +10,133 @@ window.getScriptUrl = function() {
 };
 
 // =========================================================
+// ០. Security & Universal Data Validation Guard (CMSValidator & XSS Guard)
+// =========================================================
+window.escapeHtml = function(str) {
+    if (str === null || str === undefined) return '';
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+};
+
+window.CMSValidator = {
+    // ផ្ទៀងផ្ទាត់ទិន្នន័យសិស្ស (Schema & Business Rules)
+    validateStudent: function(data, isEdit, existingList) {
+        if (!existingList) existingList = [];
+        const errors = [];
+        const cleanId = String(data.id || '').trim();
+        const cleanName = String(data.name || '').trim();
+        const cleanDob = String(data.dob || '').trim();
+        const gender = String(data.gender || '').trim();
+        const grade = String(data.grade || '').trim();
+        const room = String(data.room || '').trim();
+        const status = String(data.status || 'Active').trim();
+        const year = String(data.academic_year || '').trim();
+
+        if (!cleanId) errors.push('អត្តលេខសិស្ស (Student ID) មិនអាចទទេបានឡើយ!');
+        if (!cleanName) errors.push('ឈ្មោះសិស្ស មិនអាចទទេបានឡើយ!');
+        
+        // Validation ថ្ងៃកំណើត
+        if (!cleanDob) {
+            errors.push('ថ្ងៃខែឆ្នាំកំណើត ត្រូវតែបញ្ចូល!');
+        } else {
+            const dobDate = new Date(cleanDob);
+            if (isNaN(dobDate.getTime())) {
+                errors.push('ទម្រង់ថ្ងៃខែឆ្នាំកំណើតមិនត្រឹមត្រូវ!');
+            } else if (dobDate > new Date()) {
+                errors.push('ថ្ងៃខែឆ្នាំកំណើតមិនអាចនៅអនាគតបានទេ!');
+            }
+        }
+
+        // Gender allowlist
+        const ALLOWED_GENDERS = ['ប្រុស', 'ស្រី', 'ប', 'ស', 'M', 'F', 'Male', 'Female'];
+        if (gender && !ALLOWED_GENDERS.includes(gender)) {
+            errors.push('ភេទមិនត្រឹមត្រូវ (អនុញ្ញាតតែ ប្រុស ឬ ស្រី)!');
+        }
+
+        // Status allowlist
+        const ALLOWED_STATUSES = ['Active', 'Suspended', 'Dropped', 'Transferred', 'Graduated', 'សកម្ម', 'ឈប់រៀន', 'ផ្អាក', 'ផ្ទេរចេញ', 'បញ្ចប់ការសិក្សា'];
+        if (status && !ALLOWED_STATUSES.includes(status)) {
+            errors.push('ស្ថានភាពសិស្សមិនស្ថិតក្នុងបញ្ជីត្រឹមត្រូវ!');
+        }
+
+        if (!grade) errors.push('ត្រូវតែជ្រើសរើសកម្រិតថ្នាក់!');
+        if (!room) errors.push('ត្រូវតែជ្រើសរើសបន្ទប់រៀន!');
+        if (!year) errors.push('ត្រូវតែមានឆ្នាំសិក្សាច្បាស់លាស់!');
+
+        // Phone validation (Optional, but if present must be Cambodian format 9-10 digits)
+        const phone = String(data.parent_contact || data.contact || '').trim().replace(/[\s-]/g, '');
+        if (phone && !/^(0\d{8,9}|\+855\d{8,9})$/.test(phone)) {
+            errors.push('លេខទូរស័ព្ទអាណាព្យាបាលមិនត្រឹមត្រូវ (ទម្រង់ក្នុងស្រុក ០xx xxx xxx)!');
+        }
+
+        // Uniqueness check against existing list
+        if (!isEdit && cleanId) {
+            const dup = existingList.some(function(s) { 
+                return String(s.id).trim().toLowerCase() === cleanId.toLowerCase() &&
+                       String(s.academic_year || year) === String(year);
+            });
+            if (dup) errors.push('អត្តលេខសិស្ស «' + cleanId + '» នេះមានរួចហើយក្នុងឆ្នាំសិក្សា ' + year + '!');
+        }
+
+        return {
+            isValid: errors.length === 0,
+            errors: errors
+        };
+    },
+
+    // ផ្ទៀងផ្ទាត់ពិន្ទុ (Schema & Business Range)
+    validateScore: function(val, maxScore) {
+        if (maxScore === undefined || maxScore === null) maxScore = 50;
+        if (val === '' || val === null || val === undefined) {
+            return { isValid: true, isMissing: true, numericValue: null, status: 'empty' };
+        }
+        const sVal = String(val).trim();
+        // ករណីសម្គាល់ពិសេស: អវត្តមាន (A / Absent), លើកលែង (E / Exempt)
+        if (['A', 'a', 'អ', 'អវត្តមាន'].includes(sVal)) {
+            return { isValid: true, isMissing: false, numericValue: null, status: 'absent' };
+        }
+        if (['E', 'e', 'ល', 'លើកលែង'].includes(sVal)) {
+            return { isValid: true, isMissing: false, numericValue: null, status: 'exempt' };
+        }
+
+        const num = parseFloat(sVal);
+        if (isNaN(num) || !isFinite(num)) {
+            return { isValid: false, error: 'ពិន្ទុត្រូវតែជាលេខពិតប្រាកដ!', status: 'invalid' };
+        }
+        if (num < 0) {
+            return { isValid: false, error: 'ពិន្ទុមិនអាចតូចជាងសូន្យ (< 0) បានទេ!', status: 'invalid' };
+        }
+        if (num > maxScore) {
+            return { isValid: false, error: 'ពិន្ទុ (' + num + ') មិនអាចធំជាងពិន្ទុអតិបរមា (' + maxScore + ') បានឡើយ!', status: 'invalid' };
+        }
+
+        return { isValid: true, isMissing: false, numericValue: num, status: 'scored' };
+    },
+
+    // ផ្ទៀងផ្ទាត់ស្ថានភាពវត្តមាន
+    validateAttendanceStatus: function(status) {
+        const ALLOWED_ATTENDANCE = [
+            '', '1', '0.5', '0', 
+            'present', 'permission', 'unexcused', 'sick', 'late', 'holiday',
+            'វត្តមាន', 'ច្បាប់', 'ឥតច្បាប់', 'ឈឺ', 'យឺត', 'ឈប់សម្រាក',
+            'ច', 'ច្ប', 'C', 'អ', 'អច្ប', 'A', 'ឈ', 'S', 'យ', 'L', '៖', ':'
+        ];
+        return ALLOWED_ATTENDANCE.includes(String(status).trim());
+    },
+
+    // ផ្ទៀងផ្ទាត់ឆ្នាំសិក្សា
+    validateAcademicYear: function(yearStr) {
+        if (!yearStr) return false;
+        const clean = String(yearStr).trim();
+        return /^[0-9]{4}-[0-9]{4}$/.test(clean) || /^[០-៩]{4}-[០-៩]{4}$/.test(clean);
+    }
+};
+
+// =========================================================
 // ១. ការកំណត់ទូទៅ (Global Settings Data)
 // =========================================================
 let appSettings = {

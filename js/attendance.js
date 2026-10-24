@@ -1688,19 +1688,27 @@ window.saveMonthlyAttendance = async function() {
         }
     });
 
+    let localSaved = false;
     try {
         localStorage.setItem(`att_${grade}_${month}_${year}`, JSON.stringify(monthlyAttendanceData));
         localStorage.setItem('academic_monthly_attendance', JSON.stringify(monthlyAttendanceData));
         localStorage.setItem(`att_holidays_${grade}_${month}_${year}`, JSON.stringify(window.monthlyHolidays));
-    } catch(e) {}
+        localSaved = true;
+    } catch(storageErr) {
+        console.warn("localStorage quota or private mode error:", storageErr);
+        alert("⚠️ មិនអាចរក្សាទុកក្នុង Browser Storage បានទេ (Storage Full ឬ Private Mode)!");
+    }
 
-    // ១. រក្សាទុកក្នុង Firestore Cloud (ATT-01 / ATT-03 / ATT-06)
+    let cloudSaved = false;
+    let gasSaved = false;
+
+    // ១. រក្សាទុកក្នុង Firestore Cloud (AWAIT write & verify - P0 Audit Fix)
     if (window.db) {
         try {
             const gradeKey = selectedGrade.replace(/\s+/g, '_');
             const roomKey = selectedRoom.replace(/[«»\s]/g, '');
             const attDocId = `${academicYearStr}_${schoolId}_${gradeKey}_${roomKey}_${year}_${monthNum}`;
-            window.db.collection("attendance").doc(attDocId).set({
+            await window.db.collection("attendance").doc(attDocId).set({
                 school_id: schoolId,
                 academic_year: academicYearStr,
                 grade: selectedGrade,
@@ -1716,39 +1724,47 @@ window.saveMonthlyAttendance = async function() {
                 total_recorded: batchPayload.length,
                 updated_at: new Date().toISOString(),
                 last_updated: firebase.firestore.FieldValue.serverTimestamp()
-            }, { merge: true }).catch(console.warn);
+            }, { merge: true });
+            cloudSaved = true;
+            console.log("✅ Attendance persisted to Firestore:", attDocId);
         } catch(fsErr) {
-            console.warn("Firestore attendance save warning:", fsErr);
+            console.warn("Firestore attendance save failed:", fsErr);
         }
     }
 
-    // ២. កត់ត្រាក្នុង Audit Log
-    if (typeof window.logAudit === 'function') {
-        window.logAudit('SAVE_ATTENDANCE', 'attendance', `បានរក្សាទុកវត្តមានសិស្សថ្នាក់ ${grade} ខែ${month} ឆ្នាំ${year} (កត់ត្រាបាន ${batchPayload.length} វត្តមាន)`);
-    }
-
-    try {
-        const sInfo = typeof appSettings !== 'undefined' ? appSettings : {};
-        if (sInfo.auto_sync && typeof window.apiPost === 'function') {
+    // ២. រក្សាទុកតាម Google Apps Script API (Sync)
+    const sInfo = typeof appSettings !== 'undefined' ? appSettings : {};
+    if (sInfo.auto_sync && typeof window.apiPost === 'function') {
+        try {
             const res = await window.apiPost("saveAttendanceBatch", { data: batchPayload });
             if (res && res.status === "success") {
-                if (typeof showToast === 'function') showToast("✅ រក្សាទុកវត្តមានទៅ Cloud បានជោគជ័យ!");
-            } else {
-                if (typeof showToast === 'function') showToast("✅ រក្សាទុកទិន្នន័យបានជោគជ័យ!");
+                gasSaved = true;
             }
-        } else {
-            if (typeof showToast === 'function') showToast("✅ រក្សាទុកវត្តមានក្នុងម៉ាស៊ីន (Offline)!");
+        } catch(gasErr) {
+            console.warn("GAS attendance save failed:", gasErr);
         }
-    } catch (err) {
-        if (typeof showToast === 'function') showToast("✅ រក្សាទុកទិន្នន័យបណ្តោះអាសន្ន (Offline)!");
-    } finally {
-        setTimeout(() => {
-            if (btn) {
-                btn.disabled = false;
-                btn.innerHTML = `<i class="fa-solid fa-floppy-disk"></i> រក្សាទុក`;
-            }
-        }, 600);
     }
+
+    // ៣. បង្ហាញស្ថានភាពពិតប្រាកដដល់អ្នកប្រើប្រាស់ (Accurate Status Reporting)
+    if (cloudSaved || gasSaved) {
+        if (typeof showToast === 'function') showToast("✅ រក្សាទុកវត្តមានទៅកាន់ Cloud / Server បានជោគជ័យ!");
+    } else if (localSaved) {
+        if (typeof showToast === 'function') showToast("⚠️ បានរក្សាទុកក្នុងម៉ាស៊ីន (Offline - Pending Sync)! Cloud មិនទាន់ទទួលបានទិន្នន័យនៅឡើយទេ។", "warning");
+    } else {
+        alert("❌ បរាជ័យក្នុងការរក្សាទុកទិន្នន័យវត្តមាន! សូមពិនិត្យបណ្តាញអ៊ីនធឺណិត។");
+    }
+
+    // ៤. កត់ត្រាក្នុង Audit Log
+    if (typeof window.logAudit === 'function' && (cloudSaved || gasSaved || localSaved)) {
+        window.logAudit('SAVE_ATTENDANCE', 'attendance', `បានរក្សាទុកវត្តមានសិស្សថ្នាក់ ${grade} ខែ${month} ឆ្នាំ${year} (កត់ត្រាបាន ${batchPayload.length} វត្តមាន | Cloud: ${cloudSaved ? 'Yes' : 'No'})`);
+    }
+
+    setTimeout(() => {
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = `<i class="fa-solid fa-floppy-disk"></i> រក្សាទុក`;
+        }
+    }, 600);
 };
 
 window.clearAttendance = function() {

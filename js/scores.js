@@ -1119,30 +1119,57 @@ window.saveScoresData = async function() {
             }
         }
 
+        let studentHasInvalidScore = false;
         window.activeSubjectKeys.forEach(key => {
             let inputId = `${key}_${stu.id}`;
             if (type === "annual") inputId = `${key}_s2_${stu.id}`;
             else if (type === "semester") inputId = `${key}_${month.includes("២") ? "s2" : "s1"}_${stu.id}`;
             
-            stuRecord[key] = document.getElementById(inputId)?.value || "";
+            const rawVal = document.getElementById(inputId)?.value || "";
+            // Input Schema Validation (0..maxScore)
+            if (window.CMSValidator && typeof window.CMSValidator.validateScore === 'function') {
+                const maxAllowed = (typeof window.getMaxScoreForSubject === 'function') ? window.getMaxScoreForSubject(key) : 50;
+                const vRes = window.CMSValidator.validateScore(rawVal, maxAllowed);
+                if (!vRes.isValid) {
+                    studentHasInvalidScore = true;
+                    const errInput = document.getElementById(inputId);
+                    if (errInput) {
+                        errInput.classList.add('border-rose-500', 'bg-rose-50');
+                        errInput.focus();
+                    }
+                    throw new Error(`សិស្ស «${stu.name}» (មុខវិជ្ជា ${key}): ${vRes.error}`);
+                }
+            }
+
+            stuRecord[key] = rawVal;
             if (type === "annual") stuRecord[`${key}_s1`] = document.getElementById(`${key}_s1_${stu.id}`)?.value || "";
         });
         scoresPayload.push(stuRecord);
     });
 
     try {
-        let allScores = JSON.parse(localStorage.getItem('academic_scores')) || [];
-        allScores = allScores.filter(s => !(s.period_type === type && s.month === (type === "annual" ? "ប្រចាំឆ្នាំ" : month) && s.grade === grade)); 
-        allScores = [...allScores, ...scoresPayload]; 
-        localStorage.setItem('academic_scores', JSON.stringify(allScores));
+        let localSaved = false;
+        try {
+            let allScores = JSON.parse(localStorage.getItem('academic_scores')) || [];
+            allScores = allScores.filter(s => !(s.period_type === type && s.month === (type === "annual" ? "ប្រចាំឆ្នាំ" : month) && s.grade === grade)); 
+            allScores = [...allScores, ...scoresPayload]; 
+            localStorage.setItem('academic_scores', JSON.stringify(allScores));
+            localSaved = true;
+        } catch(storageErr) {
+            console.warn("Storage quota error on scores:", storageErr);
+            alert("⚠️ មិនអាចរក្សាទុកក្នុង Browser Storage បានទេ (Storage Full)!");
+        }
 
-        // រក្សាទុកក្នុង Firestore (SCR-06)
+        let cloudSaved = false;
+        let gasSaved = false;
+
+        // ១. រក្សាទុកក្នុង Firestore Cloud (AWAIT write & verify - P0 Audit Fix)
         if (window.db && scoresPayload.length > 0) {
             try {
                 const currentYear = document.getElementById("globalAcademicYear")?.value || localStorage.getItem('selected_academic_year') || "2026-2027";
                 const schoolId = window.AuthState?.school_id || localStorage.getItem('school_id') || 'SCH-001';
                 const scoreDocId = `${currentYear}_${schoolId}_${grade.replace(/\s+/g, '_')}_${type}_${type === 'annual' ? 'annual' : month}`.replace(/\s+/g, '_');
-                window.db.collection("scores").doc(scoreDocId).set({
+                await window.db.collection("scores").doc(scoreDocId).set({
                     school_id: schoolId,
                     grade: grade,
                     period_type: type,
@@ -1150,30 +1177,50 @@ window.saveScoresData = async function() {
                     academic_year: currentYear,
                     scores: scoresPayload,
                     total_students: scoresPayload.length,
-                    recorded_by: window.AuthState?.displayName || localStorage.getItem('user_display_name') || 'Teacher',
+                    recorded_by: window.AuthState?.name || localStorage.getItem('auth_teacher_name') || 'Teacher',
                     last_updated: firebase.firestore.FieldValue.serverTimestamp()
-                }, { merge: true }).catch(console.warn);
+                }, { merge: true });
+                cloudSaved = true;
+                console.log("✅ Scores persisted to Firestore:", scoreDocId);
             } catch(fsScoreErr) {
-                console.warn("Firestore scores save warning:", fsScoreErr);
+                console.warn("Firestore scores save failed:", fsScoreErr);
             }
         }
 
+        // ២. រក្សាទុកតាម Google Apps Script API (Sync)
         const sInfo = typeof appSettings !== 'undefined' ? appSettings : {};
         if (sInfo.auto_sync && typeof apiPost === 'function') {
-            await apiPost("saveScoresBatch", { data: scoresPayload });
-            if (typeof showToast === 'function') showToast("✅ រក្សាទុកពិន្ទុទៅកាន់ Server បានជោគជ័យ!");
-        } else {
-            if (typeof showToast === 'function') showToast("⚠️ ទិន្នន័យរក្សាទុកបានត្រឹមក្នុងម៉ាស៊ីន (Offline)!");
+            try {
+                const res = await apiPost("saveScoresBatch", { data: scoresPayload });
+                if (res && res.status === "success") gasSaved = true;
+            } catch(gasErr) {
+                console.warn("GAS scores save failed:", gasErr);
+            }
         }
-        window.hasUnsavedChanges = false;
-        const badge = document.getElementById("unsavedBadge");
-        if (badge) badge.classList.add("hidden");
 
-        if (typeof window.logAudit === 'function') {
-            window.logAudit('SAVE_SCORES', 'score', `បានរក្សាទុកពិន្ទុសិស្សថ្នាក់ ${grade} វគ្គ/ខែ៖ ${type === "annual" ? "ប្រចាំឆ្នាំ" : month} (ចំនួន ${scoresPayload.length} នាក់)`);
+        // ៣. បង្ហាញស្ថានភាពពិតប្រាកដ និងគ្រប់គ្រង Unsaved Badge
+        const badge = document.getElementById("unsavedBadge");
+        if (cloudSaved || gasSaved) {
+            window.hasUnsavedChanges = false;
+            if (badge) badge.classList.add("hidden");
+            if (typeof showToast === 'function') showToast("✅ រក្សាទុកពិន្ទុទៅកាន់ Cloud / Server បានជោគជ័យ!");
+        } else if (localSaved) {
+            window.hasUnsavedChanges = true; // Still pending sync
+            if (badge) {
+                badge.classList.remove("hidden");
+                badge.textContent = "⚠️ រក្សាទុកក្នុងម៉ាស៊ីន (Offline) - មិនទាន់ Sync ទៅ Cloud";
+                badge.className = "px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-700 animate-pulse";
+            }
+            if (typeof showToast === 'function') showToast("⚠️ បានរក្សាទុកក្នុងម៉ាស៊ីន (Offline - Pending Sync)! Cloud មិនទាន់ទទួលបានទិន្នន័យនៅឡើយទេ។", "warning");
+        } else {
+            alert("❌ បរាជ័យក្នុងការរក្សាទុកពិន្ទុ! សូមពិនិត្យបណ្តាញអ៊ីនធឺណិត។");
+        }
+
+        if (typeof window.logAudit === 'function' && (cloudSaved || gasSaved || localSaved)) {
+            window.logAudit('SAVE_SCORES', 'score', `បានរក្សាទុកពិន្ទុសិស្សថ្នាក់ ${grade} វគ្គ/ខែ៖ ${type === "annual" ? "ប្រចាំឆ្នាំ" : month} (ចំនួន ${scoresPayload.length} នាក់ | Cloud: ${cloudSaved ? 'Yes' : 'No'})`);
         }
     } catch (error) {
-        alert("បរាជ័យក្នុងការរក្សាទុកទៅ Server! សូមពិនិត្យអ៊ីនធឺណិត។");
+        alert("❌ " + error.message);
     } finally {
         if(btn) { btn.innerHTML = originalText; btn.disabled = false; }
     }

@@ -2260,16 +2260,31 @@ window.handleSaveSettings = async function(event) {
     };
 
     try {
-        window.appSettings = payload;
-        localStorage.setItem("school_settings", JSON.stringify(window.appSettings));
-        
-        localStorage.setItem('selected_academic_year', payload.academic_year);
-        const globalYearDrop = document.getElementById("globalAcademicYear");
-        if (globalYearDrop) globalYearDrop.value = payload.academic_year;
+        // Validation ឆ្នាំសិក្សា
+        if (window.CMSValidator && typeof window.CMSValidator.validateAcademicYear === 'function') {
+            if (!window.CMSValidator.validateAcademicYear(payload.academic_year)) {
+                alert("⚠️ ទម្រង់ឆ្នាំសិក្សាមិនត្រឹមត្រូវ (ឧ. ២០២៦-២០២៧ ឬ 2026-2027)!");
+                if (btn) { btn.innerHTML = origHTML; btn.disabled = false; btn.classList.remove("opacity-90", "cursor-not-allowed"); }
+                return;
+            }
+        }
 
-        if (typeof window.updateUIWithSettings === "function") window.updateUIWithSettings();
+        let localSaved = false;
+        try {
+            window.appSettings = payload;
+            localStorage.setItem("school_settings", JSON.stringify(window.appSettings));
+            localStorage.setItem('selected_academic_year', payload.academic_year);
+            const globalYearDrop = document.getElementById("globalAcademicYear");
+            if (globalYearDrop) globalYearDrop.value = payload.academic_year;
+            if (typeof window.updateUIWithSettings === "function") window.updateUIWithSettings();
+            localSaved = true;
+        } catch(storageErr) {
+            console.warn("Local storage quota error on settings:", storageErr);
+            alert("⚠️ ទំហំផ្ទុកលើ Browser ពេញ (Storage Full)!");
+        }
 
-        // រក្សាទុកក្នុង Firestore (Permanent Storage - SET-03)
+        let cloudSaved = false;
+        // រក្សាទុកក្នុង Firestore Cloud (AWAIT write & Multi-school Scoped - SET-03 Audit Fix)
         if (window.db) {
             try {
                 let fsPayload = { ...payload };
@@ -2277,20 +2292,38 @@ window.handleSaveSettings = async function(event) {
                 if (fsPayload.signature_url && fsPayload.signature_url.length > 500000) delete fsPayload.signature_url;
                 if (fsPayload.profile_avatar && fsPayload.profile_avatar.length > 500000) delete fsPayload.profile_avatar;
 
-                window.db.collection("schools_config").doc("main_settings").set({
+                const schoolId = payload.school_id || window.AuthState?.school_id || localStorage.getItem('auth_school_id') || 'SCH-001';
+                
+                // រក្សាទុកទាំង main_settings និង schoolId document
+                await window.db.collection("schools_config").doc(schoolId).set({
                     ...fsPayload,
                     last_updated: firebase.firestore.FieldValue.serverTimestamp()
-                }, { merge: true }).catch(console.warn);
+                }, { merge: true });
+
+                await window.db.collection("schools_config").doc("main_settings").set({
+                    ...fsPayload,
+                    last_updated: firebase.firestore.FieldValue.serverTimestamp()
+                }, { merge: true }).catch(() => {});
+
+                cloudSaved = true;
+                console.log("✅ Settings persisted to Firestore for school:", schoolId);
             } catch(fsErr) {
-                console.warn("Firestore settings save warning:", fsErr);
+                console.warn("Firestore settings save failed:", fsErr);
             }
         }
         
-        if(typeof showToast === 'function') showToast("✅ រក្សាទុកការកំណត់បានជោគជ័យ!");
-        else alert("✅ រក្សាទុកការកំណត់បានជោគជ័យ!");
+        if (cloudSaved) {
+            if(typeof showToast === 'function') showToast("✅ រក្សាទុកការកំណត់ទៅកាន់ Cloud បានជោគជ័យ!");
+            else alert("✅ រក្សាទុកការកំណត់ទៅកាន់ Cloud បានជោគជ័យ!");
+        } else if (localSaved) {
+            if(typeof showToast === 'function') showToast("⚠️ បានរក្សាទុកក្នុងម៉ាស៊ីន (Offline - Pending Sync)! Cloud មិនទាន់ទទួលបានទិន្នន័យនៅឡើយទេ។", "warning");
+            else alert("⚠️ បានរក្សាទុកក្នុងម៉ាស៊ីន (Offline - Pending Sync)!");
+        } else {
+            alert("❌ បរាជ័យក្នុងការរក្សាទុកការកំណត់!");
+        }
 
-        if (typeof window.logAudit === 'function') {
-            window.logAudit('UPDATE_SETTINGS', 'settings', `បានកែប្រែការកំណត់សាលារៀន (${payload.school_name || 'សាលា'}) និងព័ត៌មានទូទៅ (SET-01 / SET-02)`);
+        if (typeof window.logAudit === 'function' && (cloudSaved || localSaved)) {
+            window.logAudit('UPDATE_SETTINGS', 'settings', `បានកែប្រែការកំណត់សាលារៀន (${payload.school_name || 'សាលា'}) និងព័ត៌មានទូទៅ (Cloud: ${cloudSaved ? 'Yes' : 'No'})`);
         }
         
     } catch (error) {
