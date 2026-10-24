@@ -3,7 +3,7 @@
 // ==========================================
 
 // 👉 URL របស់ Google Apps Script (Default Fallback & Dynamic Resolver)
-window.DEFAULT_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwSww8UsHFDSwQ3wzECa-FhDf3A4WMstrbI5UTDNga-A8vJ9DUw4laVtWrlMHmijK5p/exec";
+window.DEFAULT_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx1j3jer-iHyQ7NJM-IunMMK8CjKowE_9sW2Vz-fy9ynzTUXnOALlV_ogdxtL7tvEhM/exec";
 
 window.getScriptUrl = function() {
   if (window.appSettings && window.appSettings.script_url && String(window.appSettings.script_url).trim()) {
@@ -401,14 +401,33 @@ window.testGoogleAppsScriptConnection = async function(customUrl) {
     return { ok: false, message: "URL មិនត្រឹមត្រូវ" };
   }
   try {
-    const u = new URL(targetUrl);
-    u.searchParams.append("action", "testConnection");
-    const res = await fetch(u.toString(), { method: 'GET' });
-    const json = await res.json();
-    if (json.status === "success") {
-      return { ok: true, message: json.message || "ការតភ្ជាប់បានជោគជ័យ!", data: json };
+    const auth = (typeof getAuthCredentials === 'function') ? getAuthCredentials() : { teacher_id: "TCH-001", academic_year: "2026-2027" };
+    
+    // សាកល្បង action=testConnection ជាមុន
+    try {
+      const u1 = new URL(targetUrl);
+      u1.searchParams.append("action", "testConnection");
+      u1.searchParams.append("teacher_id", auth.teacher_id);
+      u1.searchParams.append("academic_year", auth.academic_year);
+      const res1 = await fetch(u1.toString(), { method: 'GET' });
+      const json1 = await res1.json();
+      if (json1 && json1.status === "success") {
+        return { ok: true, message: json1.message || "ការតភ្ជាប់បានជោគជ័យ!", data: json1 };
+      }
+    } catch(e1) {}
+
+    // Fallback: សាកល្បង action=getSettings ជាមួយ teacher_id
+    const u2 = new URL(targetUrl);
+    u2.searchParams.append("action", "getSettings");
+    u2.searchParams.append("teacher_id", auth.teacher_id);
+    u2.searchParams.append("academic_year", auth.academic_year);
+    const res2 = await fetch(u2.toString(), { method: 'GET' });
+    const json2 = await res2.json();
+    if (json2 && (json2.status === "success" || json2.data !== undefined)) {
+      return { ok: true, message: "ការតភ្ជាប់ទៅកាន់ Google Apps Script បានជោគជ័យ (Connected)!", data: json2 };
     }
-    return { ok: false, message: json.message || "ការតភ្ជាប់បរាជ័យ" };
+
+    return { ok: false, message: (json2 && json2.message) || "ការតភ្ជាប់បរាជ័យ" };
   } catch (e) {
     return { ok: false, message: "មិនអាចតភ្ជាប់បានទេ: " + e.message };
   }
