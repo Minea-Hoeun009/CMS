@@ -82,194 +82,437 @@
 <body class="bg-slate-50 text-slate-800 antialiased font-siemreap overflow-hidden dark:bg-slate-900 dark:text-slate-200 transition-colors duration-300">
   
     <!-- ========================================== -->
-    <!-- ផ្ទាំងទ្វារធំ (Dynamic Landing Screen) -->
+    <!-- ផ្ទាំងស្វាគមន៍ និងចូលប្រើប្រាស់ (Welcome & Authentication Portal) -->
     <!-- ========================================== -->
-    <div id="landing-screen" class="fixed inset-0 z-[9000] flex items-center justify-center bg-slate-50 dark:bg-slate-900 font-siemreap overflow-y-auto custom-scrollbar">
+    <div id="landing-screen" class="fixed inset-0 z-[9000] bg-gradient-to-br from-slate-50 via-indigo-50/30 to-slate-100 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 font-siemreap overflow-y-auto custom-scrollbar flex flex-col justify-between">
         
-        <!-- ផ្ទៃខាងក្រោយបែបចលនា (Animated Blobs Background) -->
-        <div class="fixed top-[-10%] left-[-10%] w-96 h-96 bg-indigo-400/40 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob"></div>
-        <div class="fixed top-[20%] right-[-10%] w-96 h-96 bg-emerald-400/40 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob" style="animation-delay: 2s;"></div>
-        <div class="fixed bottom-[-20%] left-[20%] w-96 h-96 bg-pink-400/40 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob" style="animation-delay: 4s;"></div>
+        <!-- Animated Blobs Background for Atmosphere -->
+        <div class="fixed top-[-10%] left-[-10%] w-[32rem] h-[32rem] bg-indigo-400/25 dark:bg-indigo-600/15 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob pointer-events-none"></div>
+        <div class="fixed top-[25%] right-[-10%] w-[30rem] h-[30rem] bg-emerald-400/25 dark:bg-emerald-600/15 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob pointer-events-none" style="animation-delay: 2.5s;"></div>
+        <div class="fixed bottom-[-15%] left-[20%] w-[34rem] h-[34rem] bg-purple-400/20 dark:bg-purple-600/15 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob pointer-events-none" style="animation-delay: 5s;"></div>
 
-        <!-- ផ្ទាំងចូលគណនី (Login Box) -->
-        <div id="authLoginBox" class="bg-white/95 dark:bg-slate-800/95 backdrop-blur-xl w-full max-w-md rounded-[2.5rem] shadow-[0_8px_30px_rgb(0,0,0,0.08)] border border-white/50 dark:border-slate-700 p-8 md:p-10 text-center transform transition-all duration-500 relative m-4">
-            
-            <div class="w-20 h-20 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-[1.5rem] flex items-center justify-center mx-auto mb-6 text-white text-3xl shadow-lg shadow-indigo-200 dark:shadow-none transform rotate-3 hover:rotate-0 transition duration-300">
-                <i class="fa-solid fa-graduation-cap"></i>
-            </div>
-            
-            <h2 class="font-moul text-2xl text-slate-800 dark:text-white mb-2 drop-shadow-sm">ប្រព័ន្ធគ្រប់គ្រងសាលា</h2>
-            <p class="text-slate-500 dark:text-slate-400 text-[13px] mb-6 font-bold">សូមស្វាគមន៍! សូមបញ្ចូលគណនីដើម្បីបន្ត</p>
-
-            <!-- ប្រអប់បង្ហាញកំហុស (Error Alert Box) -->
-            <div id="loginError" class="hidden p-3 bg-rose-50 dark:bg-rose-950/50 border border-rose-200 dark:border-rose-800 text-rose-600 dark:text-rose-400 rounded-xl text-xs font-bold text-center mb-4 font-siemreap"></div>
-
-            <form onsubmit="window.handleLogin(event)" class="space-y-4 text-left">
-                <div>
-                    <label class="block text-[11px] font-bold text-slate-400 mb-1.5 uppercase tracking-wider">ឈ្មោះគណនី ឬ លេខសម្គាល់គ្រូ</label>
-                    <div class="relative group">
-                        <i class="fa-regular fa-user absolute left-4 top-3.5 text-slate-400 text-sm group-focus-within:text-indigo-600 transition-colors duration-300"></i>
-                        <input type="text" id="usernameOrPhone" required placeholder="ឧ. admin ឬ TCH-001" class="w-full pl-11 pr-4 py-3 bg-slate-50/50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-2xl text-sm font-bold text-slate-700 dark:text-white outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 focus:bg-white dark:focus:bg-slate-700 transition-all shadow-inner">
+        <!-- 1. Header / Navbar នៃ Welcome Screen -->
+        <header class="relative z-10 w-full border-b border-slate-200/80 dark:border-slate-800/80 bg-white/70 dark:bg-slate-900/70 backdrop-blur-md">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex items-center justify-between gap-4">
+                <!-- Brand & Logo -->
+                <div class="flex items-center gap-3">
+                    <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-indigo-600 to-purple-600 flex items-center justify-center text-white text-xl shadow-lg shadow-indigo-500/25">
+                        <i class="fa-solid fa-graduation-cap"></i>
+                    </div>
+                    <div>
+                        <h1 class="font-moul text-sm sm:text-base text-slate-800 dark:text-white leading-tight">ប្រព័ន្ធគ្រប់គ្រងសាលារៀន</h1>
+                        <p class="text-[11px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider">Classroom Management System • v2.4</p>
                     </div>
                 </div>
+
+                <!-- Center Nav Links (Desktop) -->
+                <nav class="hidden md:flex items-center gap-6 text-xs font-bold text-slate-600 dark:text-slate-300">
+                    <a href="#welcome-hero" class="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors flex items-center gap-1.5"><i class="fa-solid fa-house text-indigo-500"></i> ទំព័រដើម</a>
+                    <a href="#welcome-features" class="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors flex items-center gap-1.5"><i class="fa-solid fa-sparkles text-amber-500"></i> មុខងារសំខាន់ៗ</a>
+                    <a href="#welcome-about" class="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors flex items-center gap-1.5"><i class="fa-solid fa-circle-info text-blue-500"></i> អំពីប្រព័ន្ធ</a>
+                    <button type="button" onclick="window.toggleAuthBox('help')" class="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors flex items-center gap-1.5 outline-none"><i class="fa-solid fa-circle-question text-emerald-500"></i> ជំនួយ & គន្លឹះ</button>
+                </nav>
+
+                <!-- Right Actions -->
+                <div class="flex items-center gap-2 sm:gap-3">
+                    <!-- Banner If Already Logged In -->
+                    <div id="landingLoggedInBanner" class="hidden items-center gap-2 px-3 py-1.5 bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200 dark:border-emerald-800 rounded-xl text-emerald-800 dark:text-emerald-300 text-xs font-bold shadow-sm">
+                        <span>👋 កំពុងចូលប្រើជា: <span id="landingLoggedInUserName" class="underline">Admin</span></span>
+                        <button type="button" onclick="window.AppAuth && window.AppAuth.showWorkspace()" class="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold shadow transition-all">ចូល Workspace</button>
+                    </div>
+
+                    <!-- Quick Admin Login Button -->
+                    <button type="button" onclick="window.quickLoginAsAdmin && window.quickLoginAsAdmin()" class="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white rounded-xl text-xs font-bold shadow-md shadow-amber-500/20 active:scale-95 transition-all">
+                        <i class="fa-solid fa-crown text-amber-200 text-xs"></i>
+                        <span>ចូលជា Admin ភ្លាមៗ</span>
+                    </button>
+
+                    <!-- Dark Mode Toggle -->
+                    <button type="button" onclick="toggleDarkMode()" title="ប្តូរពណ៌ Dark/Light" class="w-9 h-9 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-amber-400 flex items-center justify-center transition-colors outline-none shadow-sm">
+                        <i class="fa-solid fa-moon"></i>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- 2. Main Hero & Interactive Login Section -->
+        <main class="relative z-10 flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12 w-full flex flex-col justify-center">
+            
+            <div id="welcome-hero" class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
                 
-                <div>
-                    <label class="block text-[11px] font-bold text-slate-400 mb-1.5 uppercase tracking-wider">លេខសម្ងាត់</label>
-                    <div class="relative group">
-                        <i class="fa-solid fa-lock absolute left-4 top-3.5 text-slate-400 text-sm group-focus-within:text-indigo-600 transition-colors duration-300"></i>
-                        <input type="password" id="password" required placeholder="••••••••" class="w-full pl-11 pr-11 py-3 bg-slate-50/50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-2xl text-sm font-bold text-slate-700 dark:text-white outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 focus:bg-white dark:focus:bg-slate-700 transition-all shadow-inner">
-                        <button type="button" onclick="window.togglePasswordVisibility('password', 'eyeIconLogin')" class="absolute right-4 top-3.5 text-slate-400 hover:text-indigo-600 transition outline-none"><i id="eyeIconLogin" class="fa-regular fa-eye"></i></button>
+                <!-- Left Hero: Greeting & Platform Highlights (7 Cols on LG) -->
+                <div class="lg:col-span-7 space-y-6 text-left">
+                    
+                    <!-- Pre-title Pill -->
+                    <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-indigo-50/90 dark:bg-indigo-950/70 border border-indigo-200 dark:border-indigo-800 text-indigo-700 dark:text-indigo-300 text-xs font-bold shadow-sm">
+                        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                        <i class="fa-solid fa-school-flag text-indigo-500"></i>
+                        <span>ប្រព័ន្ធគ្រប់គ្រងការអប់រំ និងសាលារៀនឌីជីថលជំនាន់ថ្មី</span>
+                    </div>
+
+                    <!-- Grand Headline -->
+                    <div>
+                        <h2 class="font-moul text-2xl sm:text-3xl lg:text-4xl text-slate-900 dark:text-white leading-[1.35] tracking-wide mb-3">
+                            សូមស្វាគមន៍មកកាន់<br>
+                            <span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 via-blue-600 to-purple-600">ប្រព័ន្ធគ្រប់គ្រងសាលារៀន</span>
+                        </h2>
+                        <p class="text-slate-600 dark:text-slate-300 text-sm sm:text-base leading-relaxed font-siemreap font-medium max-w-2xl">
+                            ដំណោះស្រាយឌីជីថលស្តង់ដារសម្រាប់គ្រឹះស្ថានសិក្សា៖ គ្រប់គ្រងព័ត៌មានសិស្ស ស្រង់វត្តមានប្រចាំថ្ងៃ បញ្ចូលពិន្ទុ & ចំណាត់ថ្នាក់ កាលវិភាគ បណ្ណាល័យ និងរបាយការណ៍ស្វ័យប្រវត្តិតាមស្តង់ដារក្រសួង។ បង្ហាញទិន្នន័យភ្លាមៗ (0ms Latency) និងធ្វើសមកាលកម្មទិន្នន័យដោយផ្ទាល់ជាមួយ Google Sheets & Cloud។
+                        </p>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="flex flex-wrap items-center gap-3 pt-1">
+                        <!-- Quick Admin Button -->
+                        <button type="button" onclick="window.quickLoginAsAdmin && window.quickLoginAsAdmin()" class="px-5 py-3.5 bg-gradient-to-r from-indigo-600 via-blue-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white rounded-2xl text-sm font-bold shadow-xl shadow-indigo-500/25 active:scale-95 transition-all flex items-center gap-2.5">
+                            <i class="fa-solid fa-crown text-amber-300 text-base"></i>
+                            <span>ចូលប្រើប្រាស់ជា Admin ភ្លាមៗ</span>
+                        </button>
+
+                        <!-- Guest Mode Button -->
+                        <button type="button" onclick="window.loginAsGuest && window.loginAsGuest()" class="px-4 py-3.5 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 rounded-2xl text-sm font-bold shadow-sm transition-all flex items-center gap-2">
+                            <i class="fa-solid fa-eye text-emerald-500"></i>
+                            <span>ចូលមើលជាភ្ញៀវ (Guest)</span>
+                        </button>
+
+                        <!-- User Guide Button -->
+                        <button type="button" onclick="window.toggleAuthBox('help')" class="px-4 py-3.5 text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 rounded-2xl text-sm font-bold transition-all flex items-center gap-2">
+                            <i class="fa-solid fa-book-open"></i>
+                            <span>ការណែនាំប្រើប្រាស់</span>
+                        </button>
+                    </div>
+
+                    <!-- 4 Interactive Feature Highlights -->
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2">
+                        <div class="p-3.5 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-2xl border border-slate-200/80 dark:border-slate-700/80 shadow-sm">
+                            <div class="w-8 h-8 rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center text-sm mb-2"><i class="fa-solid fa-user-graduate"></i></div>
+                            <div class="text-xs font-bold text-slate-800 dark:text-white">គ្រប់គ្រងសិស្ស</div>
+                            <div class="text-[11px] text-slate-500 dark:text-slate-400">ជីវប្រវត្តិ & ថ្នាក់រៀន</div>
+                        </div>
+
+                        <div class="p-3.5 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-2xl border border-slate-200/80 dark:border-slate-700/80 shadow-sm">
+                            <div class="w-8 h-8 rounded-xl bg-rose-500/10 text-rose-600 dark:text-rose-400 flex items-center justify-center text-sm mb-2"><i class="fa-solid fa-clipboard-check"></i></div>
+                            <div class="text-xs font-bold text-slate-800 dark:text-white">ស្រង់វត្តមាន</div>
+                            <div class="text-[11px] text-slate-500 dark:text-slate-400">ប្រចាំថ្ងៃ & ខែរហ័ស</div>
+                        </div>
+
+                        <div class="p-3.5 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-2xl border border-slate-200/80 dark:border-slate-700/80 shadow-sm">
+                            <div class="w-8 h-8 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center text-sm mb-2"><i class="fa-solid fa-award"></i></div>
+                            <div class="text-xs font-bold text-slate-800 dark:text-white">ពិន្ទុ & ចំណាត់ថ្នាក់</div>
+                            <div class="text-[11px] text-slate-500 dark:text-slate-400">គណនាមធ្យមភាគ Auto</div>
+                        </div>
+
+                        <div class="p-3.5 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-2xl border border-slate-200/80 dark:border-slate-700/80 shadow-sm">
+                            <div class="w-8 h-8 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center text-sm mb-2"><i class="fa-solid fa-table-cells"></i></div>
+                            <div class="text-xs font-bold text-slate-800 dark:text-white">Google Sheets</div>
+                            <div class="text-[11px] text-slate-500 dark:text-slate-400">Instant Sync 0ms</div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Right Column: Interactive Login / Register Portal (5 Cols on LG) -->
+                <div class="lg:col-span-5 w-full max-w-md mx-auto">
+                    
+                    <div class="welcome-glass-card rounded-[2.2rem] shadow-[0_20px_50px_rgba(0,0,0,0.12)] p-6 sm:p-8 relative">
+                        
+                        <!-- Navigation Segment Tabs -->
+                        <div class="flex items-center justify-around border-b border-slate-200 dark:border-slate-700 pb-3 mb-5 text-xs font-bold">
+                            <button type="button" id="tabAuthLogin" onclick="window.toggleAuthBox('login')" class="pb-2 border-b-2 border-indigo-600 dark:border-indigo-400 text-indigo-600 dark:text-indigo-400 transition-all outline-none flex items-center gap-1.5">
+                                <i class="fa-solid fa-arrow-right-to-bracket"></i>
+                                <span>ចូលប្រព័ន្ធ</span>
+                            </button>
+                            <button type="button" id="tabAuthRegister" onclick="window.toggleAuthBox('register')" class="pb-2 border-b-2 border-transparent text-slate-500 dark:text-slate-400 hover:text-indigo-600 transition-all outline-none flex items-center gap-1.5">
+                                <i class="fa-solid fa-user-plus"></i>
+                                <span>ចុះឈ្មោះថ្មី</span>
+                            </button>
+                            <button type="button" id="tabAuthHelp" onclick="window.toggleAuthBox('help')" class="pb-2 border-b-2 border-transparent text-slate-500 dark:text-slate-400 hover:text-indigo-600 transition-all outline-none flex items-center gap-1.5">
+                                <i class="fa-solid fa-circle-question"></i>
+                                <span>ជំនួយ</span>
+                            </button>
+                        </div>
+
+                        <!-- ផ្ទាំងចូលគណនី (Login Box) -->
+                        <div id="authLoginBox" class="text-left">
+                            
+                            <!-- 1-Click Quick Admin Access Banner -->
+                            <div class="mb-5 p-3.5 bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-950/40 dark:to-orange-950/30 border border-amber-300 dark:border-amber-700 rounded-2xl">
+                                <div class="flex items-center justify-between mb-1.5">
+                                    <span class="text-xs font-bold text-amber-900 dark:text-amber-200 flex items-center gap-1.5">
+                                        <i class="fa-solid fa-crown text-amber-500"></i>
+                                        <span>ចូលជា Administrator ភ្លាមៗ</span>
+                                    </span>
+                                    <span class="text-[10px] bg-amber-200 dark:bg-amber-800 text-amber-900 dark:text-amber-100 px-2 py-0.5 rounded-full font-bold">1-Click</span>
+                                </div>
+                                <p class="text-[11px] text-amber-800/80 dark:text-amber-300/80 mb-2.5">
+                                    បើកសិទ្ធិមើលថ្នាក់ និងគ្រប់គ្រងទិន្នន័យទាំងអស់ដោយមិនបាច់វាយពាក្យសម្ងាត់។
+                                </p>
+                                <button type="button" onclick="window.quickLoginAsAdmin && window.quickLoginAsAdmin()" class="w-full py-2 px-3 bg-amber-500 hover:bg-amber-600 text-white rounded-xl text-xs font-bold shadow-sm flex items-center justify-center gap-2 active:scale-95 transition-all">
+                                    <i class="fa-solid fa-unlock-keyhole"></i>
+                                    <span>ចូលប្រើប្រាស់ជា Admin ភ្លាមៗ (Quick Admin Login)</span>
+                                </button>
+                            </div>
+
+                            <!-- Error Alert Box -->
+                            <div id="loginError" class="hidden p-3 bg-rose-50 dark:bg-rose-950/50 border border-rose-200 dark:border-rose-800 text-rose-600 dark:text-rose-400 rounded-xl text-xs font-bold text-center mb-4"></div>
+
+                            <form onsubmit="window.handleLogin(event)" class="space-y-4">
+                                <div>
+                                    <label class="block text-[11px] font-bold text-slate-500 dark:text-slate-400 mb-1.5 uppercase tracking-wider">ឈ្មោះគណនី ឬ លេខសម្គាល់គ្រូ</label>
+                                    <div class="relative group">
+                                        <i class="fa-regular fa-user absolute left-4 top-3.5 text-slate-400 text-sm group-focus-within:text-indigo-600 transition-colors"></i>
+                                        <input type="text" id="usernameOrPhone" required placeholder="ឧ. admin ឬ TCH-001" class="w-full pl-11 pr-4 py-3 bg-slate-50/70 dark:bg-slate-700/60 border border-slate-200 dark:border-slate-600 rounded-2xl text-sm font-bold text-slate-700 dark:text-white outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 focus:bg-white dark:focus:bg-slate-700 transition-all shadow-inner">
+                                    </div>
+                                </div>
+                                
+                                <div>
+                                    <label class="block text-[11px] font-bold text-slate-500 dark:text-slate-400 mb-1.5 uppercase tracking-wider">លេខសម្ងាត់</label>
+                                    <div class="relative group">
+                                        <i class="fa-solid fa-lock absolute left-4 top-3.5 text-slate-400 text-sm group-focus-within:text-indigo-600 transition-colors"></i>
+                                        <input type="password" id="password" required placeholder="••••••••" class="w-full pl-11 pr-11 py-3 bg-slate-50/70 dark:bg-slate-700/60 border border-slate-200 dark:border-slate-600 rounded-2xl text-sm font-bold text-slate-700 dark:text-white outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 focus:bg-white dark:focus:bg-slate-700 transition-all shadow-inner">
+                                        <button type="button" onclick="window.togglePasswordVisibility('password', 'eyeIconLogin')" class="absolute right-4 top-3.5 text-slate-400 hover:text-indigo-600 transition outline-none"><i id="eyeIconLogin" class="fa-regular fa-eye"></i></button>
+                                    </div>
+                                </div>
+
+                                <button type="submit" id="btnLogin" class="w-full bg-gradient-to-r from-indigo-600 via-blue-600 to-indigo-700 hover:from-indigo-700 hover:to-blue-800 text-white font-bold py-3.5 rounded-2xl transition-all shadow-lg shadow-indigo-500/25 active:scale-95 flex items-center justify-center gap-2 outline-none text-sm">
+                                    <i class="fa-solid fa-right-to-bracket"></i> ចូលប្រព័ន្ធ
+                                </button>
+                            </form>
+
+                            <!-- បន្ទាត់ខណ្ឌ (Divider) -->
+                            <div class="relative my-4 flex items-center justify-center">
+                                <div class="border-t border-slate-200 dark:border-slate-700 w-full"></div>
+                                <span class="bg-white dark:bg-slate-800 px-3 text-[11px] font-bold text-slate-400 uppercase tracking-wider relative">ឬចូលតាមរយៈ</span>
+                            </div>
+
+                            <!-- ប៊ូតុងចូលតាម Google (Gmail) & Telegram -->
+                            <div class="grid grid-cols-2 gap-2.5">
+                                <button type="button" id="btnGoogleLogin" onclick="window.handleGoogleLogin()" class="flex items-center justify-center gap-2 py-2.5 px-3 bg-white dark:bg-slate-700/80 border border-slate-200 dark:border-slate-600 hover:border-red-400 hover:bg-red-50/40 dark:hover:bg-slate-600 rounded-2xl font-bold text-xs text-slate-700 dark:text-white transition-all shadow-sm">
+                                    <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24">
+                                        <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                                        <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                                        <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+                                        <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+                                    </svg>
+                                    <span>Gmail</span>
+                                </button>
+
+                                <button type="button" id="btnTelegramLogin" onclick="window.handleTelegramLogin()" class="flex items-center justify-center gap-2 py-2.5 px-3 bg-white dark:bg-slate-700/80 border border-slate-200 dark:border-slate-600 hover:border-sky-400 hover:bg-sky-50/40 dark:hover:bg-slate-600 rounded-2xl font-bold text-xs text-slate-700 dark:text-white transition-all shadow-sm">
+                                    <i class="fa-brands fa-telegram text-[#229ED9] text-base"></i>
+                                    <span>Telegram</span>
+                                </button>
+                            </div>
+
+                            <p class="text-center text-xs text-slate-500 dark:text-slate-400 mt-4 font-bold">
+                                មិនទាន់មានគណនីមែនទេ? 
+                                <button type="button" onclick="window.toggleAuthBox('register')" class="text-indigo-600 dark:text-indigo-400 hover:underline ml-1 font-bold">
+                                    ចុះឈ្មោះថ្មី
+                                </button>
+                            </p>
+                        </div>
+
+                        <!-- ផ្ទាំងចុះឈ្មោះ (Register Box) -->
+                        <div id="authRegisterBox" class="text-left hidden">
+                            <form onsubmit="window.handleRegister(event)" class="space-y-3">
+                                <div>
+                                    <label class="block text-[10px] font-bold text-slate-400 mb-1 uppercase tracking-wider">ឈ្មោះ និងនាមត្រកូល *</label>
+                                    <div class="relative group">
+                                        <i class="fa-regular fa-id-card absolute left-4 top-3 text-slate-400 text-sm group-focus-within:text-emerald-500 transition-colors"></i>
+                                        <input type="text" id="regFullName" required placeholder="ឧ. សុខ សាន្ត" class="w-full pl-10 pr-4 py-2.5 bg-slate-50/70 dark:bg-slate-700/60 border border-slate-200 dark:border-slate-600 rounded-xl text-sm font-bold text-slate-700 dark:text-white outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-all font-moul">
+                                    </div>
+                                </div>
+                                
+                                <div>
+                                    <label class="block text-[10px] font-bold text-slate-400 mb-1 uppercase tracking-wider">ឈ្មោះគណនី (Username) *</label>
+                                    <div class="relative group">
+                                        <i class="fa-regular fa-user absolute left-4 top-3 text-slate-400 text-sm group-focus-within:text-emerald-500 transition-colors"></i>
+                                        <input type="text" id="regUsername" required placeholder="ឧ. soksan" class="w-full pl-10 pr-4 py-2.5 bg-slate-50/70 dark:bg-slate-700/60 border border-slate-200 dark:border-slate-600 rounded-xl text-sm font-bold text-slate-700 dark:text-white outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-all lowercase">
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label class="block text-[10px] font-bold text-slate-400 mb-1 uppercase tracking-wider">លេខទូរស័ព្ទ ឬ អ៊ីមែល *</label>
+                                    <div class="relative group">
+                                        <i class="fa-solid fa-phone absolute left-4 top-3 text-slate-400 text-sm group-focus-within:text-emerald-500 transition-colors"></i>
+                                        <input type="text" id="regContact" required placeholder="ឧ. 012345678" class="w-full pl-10 pr-4 py-2.5 bg-slate-50/70 dark:bg-slate-700/60 border border-slate-200 dark:border-slate-600 rounded-xl text-sm font-bold text-slate-700 dark:text-white outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-all">
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label class="block text-[10px] font-bold text-slate-400 mb-1 uppercase tracking-wider">លេខសម្ងាត់ *</label>
+                                    <div class="relative group">
+                                        <i class="fa-solid fa-lock absolute left-4 top-3 text-slate-400 text-sm group-focus-within:text-emerald-500 transition-colors"></i>
+                                        <input type="password" id="regPassword" required minlength="8" placeholder="យ៉ាងតិច ៨ តួអក្សរ" class="w-full pl-10 pr-10 py-2.5 bg-slate-50/70 dark:bg-slate-700/60 border border-slate-200 dark:border-slate-600 rounded-xl text-sm font-bold text-slate-700 dark:text-white outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-all" oninput="window.checkPasswordStrength(this.value)">
+                                        <button type="button" onclick="window.togglePasswordVisibility('regPassword', 'eyeIcon1')" class="absolute right-4 top-3 text-slate-400 hover:text-emerald-600 transition outline-none"><i id="eyeIcon1" class="fa-regular fa-eye"></i></button>
+                                    </div>
+                                    <div class="mt-2 flex gap-1 h-1.5 w-full bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
+                                        <div id="strBar1" class="h-full w-1/3 bg-slate-200 dark:bg-slate-600 transition-all"></div>
+                                        <div id="strBar2" class="h-full w-1/3 bg-slate-200 dark:bg-slate-600 transition-all"></div>
+                                        <div id="strBar3" class="h-full w-1/3 bg-slate-200 dark:bg-slate-600 transition-all"></div>
+                                    </div>
+                                    <p id="strText" class="text-[9px] text-slate-400 mt-1 font-bold">កម្រិតសុវត្ថិភាព: មិនទាន់មាន</p>
+                                </div>
+
+                                <div>
+                                    <label class="block text-[10px] font-bold text-slate-400 mb-1 uppercase tracking-wider">បញ្ជាក់លេខសម្ងាត់ *</label>
+                                    <div class="relative group">
+                                        <i class="fa-solid fa-shield-halved absolute left-4 top-3 text-slate-400 text-sm group-focus-within:text-emerald-500 transition-colors"></i>
+                                        <input type="password" id="regConfirmPassword" required minlength="8" placeholder="វាយលេខសម្ងាត់ម្ដងទៀត" class="w-full pl-10 pr-10 py-2.5 bg-slate-50/70 dark:bg-slate-700/60 border border-slate-200 dark:border-slate-600 rounded-xl text-sm font-bold text-slate-700 dark:text-white outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-all">
+                                        <button type="button" onclick="window.togglePasswordVisibility('regConfirmPassword', 'eyeIcon2')" class="absolute right-4 top-3 text-slate-400 hover:text-emerald-600 transition outline-none"><i id="eyeIcon2" class="fa-regular fa-eye"></i></button>
+                                    </div>
+                                </div>
+
+                                <div class="flex items-start gap-2.5 p-2 bg-emerald-50/50 dark:bg-emerald-950/30 rounded-xl border border-emerald-100 dark:border-emerald-900">
+                                    <input type="checkbox" id="regTerms" required class="mt-0.5 border-slate-300 text-emerald-600 rounded focus:ring-emerald-500 cursor-pointer w-4 h-4">
+                                    <label for="regTerms" class="text-[10px] text-slate-600 dark:text-slate-300 leading-relaxed cursor-pointer font-bold">ខ្ញុំយល់ព្រមតាម <span class="text-emerald-600 dark:text-emerald-400">លក្ខខណ្ឌប្រើប្រាស់</span> និងរក្សាការសម្ងាត់ទិន្នន័យ។</label>
+                                </div>
+
+                                <button type="submit" id="btnRegister" class="w-full bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-bold py-3 rounded-2xl transition-all shadow-lg shadow-emerald-500/20 active:scale-95 text-xs flex items-center justify-center gap-2">
+                                    <i class="fa-solid fa-user-plus"></i> បង្កើតគណនីឥឡូវនេះ
+                                </button>
+                            </form>
+
+                            <p class="text-center text-xs text-slate-500 dark:text-slate-400 mt-3 font-bold">
+                                មានគណនីរួចហើយ? 
+                                <button type="button" onclick="window.toggleAuthBox('login')" class="text-emerald-600 dark:text-emerald-400 hover:underline ml-1 font-bold">
+                                    ចូលគណនី
+                                </button>
+                            </p>
+                        </div>
+
+                        <!-- ផ្ទាំងជំនួយ (Help Box) -->
+                        <div id="authHelpBox" class="text-left hidden space-y-3.5">
+                            <div class="flex items-center gap-2.5 p-3 rounded-2xl bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-100 dark:border-indigo-900 text-xs text-indigo-900 dark:text-indigo-200">
+                                <i class="fa-solid fa-crown text-amber-500 text-base shrink-0"></i>
+                                <div>
+                                    <span class="font-bold">ចូលជា Administrator:</span>
+                                    <p class="text-[11px] text-slate-600 dark:text-slate-400">ចុចប៊ូតុង "ចូលប្រើប្រាស់ជា Admin ភ្លាមៗ" ដើម្បីមើលឃើញថ្នាក់ និងរបាយការណ៍ទាំងអស់។</p>
+                                </div>
+                            </div>
+
+                            <div class="flex items-center gap-2.5 p-3 rounded-2xl bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 text-xs text-slate-800 dark:text-slate-200">
+                                <i class="fa-solid fa-chalkboard-user text-blue-500 text-base shrink-0"></i>
+                                <div>
+                                    <span class="font-bold">គណនីគ្រូទទួលបន្ទុក:</span>
+                                    <p class="text-[11px] text-slate-600 dark:text-slate-400">ប្រើឈ្មោះ Username ឬ Teacher ID ដើម្បីស្រង់វត្តមាន និងបញ្ចូលពិន្ទុក្នុងថ្នាក់របស់ខ្លួន។</p>
+                                </div>
+                            </div>
+
+                            <div class="flex items-center gap-2.5 p-3 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-100 dark:border-emerald-900 text-xs text-emerald-900 dark:text-emerald-200">
+                                <i class="fa-solid fa-table text-emerald-600 text-base shrink-0"></i>
+                                <div>
+                                    <span class="font-bold">Google Sheets Sync:</span>
+                                    <p class="text-[11px] text-slate-600 dark:text-slate-400">រាល់ការផ្លាស់ប្តូរត្រូវបានបញ្ជូនទៅ Google Sheets ដោយស្វ័យប្រវត្តិតាម Apps Script API។</p>
+                                </div>
+                            </div>
+
+                            <button type="button" onclick="window.toggleAuthBox('login')" class="w-full py-2.5 bg-slate-200 hover:bg-slate-300 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-700 dark:text-white rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2">
+                                <i class="fa-solid fa-arrow-left"></i>
+                                <span>ត្រឡប់ទៅផ្ទាំងចូលប្រព័ន្ធ</span>
+                            </button>
+                        </div>
+
                     </div>
                 </div>
 
-                <button type="submit" id="btnLogin" class="w-full bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 text-white font-bold py-3.5 rounded-2xl transition-all shadow-xl shadow-indigo-200 dark:shadow-none transform hover:-translate-y-1 mt-6 flex items-center justify-center gap-2 outline-none text-[15px]">
-                    <i class="fa-solid fa-right-to-bracket"></i> ចូលប្រព័ន្ធ
-                </button>
-            </form>
-
-            <!-- ប៊ូតុងចូលជា Admin ភ្លាមៗ (Quick Admin Login) -->
-            <button type="button" onclick="window.quickLoginAsAdmin && window.quickLoginAsAdmin()" class="mt-3 w-full py-2.5 px-4 bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-700 hover:bg-amber-100 dark:hover:bg-amber-900/40 text-amber-800 dark:text-amber-200 rounded-2xl font-bold text-xs flex items-center justify-center gap-2 transition-all shadow-sm active:scale-95">
-                <i class="fa-solid fa-crown text-amber-500"></i>
-                <span>ចូលប្រើប្រាស់ជា Admin ភ្លាមៗ (Quick Admin Login)</span>
-            </button>
-            <!-- បន្ទាត់ខណ្ឌ (Divider) -->
-            <div class="relative my-5 flex items-center justify-center">
-                <div class="border-t border-slate-200 dark:border-slate-700 w-full"></div>
-                <span class="bg-white/95 dark:bg-slate-800/95 px-3 text-[11px] font-bold text-slate-400 uppercase tracking-wider relative font-siemreap">ឬចូលតាមរយៈ</span>
             </div>
 
-            <!-- ប៊ូតុងចូលតាម Google (Gmail) & Telegram -->
-            <div class="grid grid-cols-2 gap-3">
-                <!-- Google / Gmail -->
-                <button type="button" id="btnGoogleLogin" onclick="window.handleGoogleLogin()" class="flex items-center justify-center gap-2 py-3 px-3 bg-white dark:bg-slate-700/80 border border-slate-200 dark:border-slate-600 hover:border-red-400 hover:bg-red-50/40 dark:hover:bg-slate-600 rounded-2xl font-bold text-xs text-slate-700 dark:text-white transition-all shadow-sm hover:shadow group outline-none font-siemreap">
-                    <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24">
-                        <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                        <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                        <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
-                        <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
-                    </svg>
-                    <span>Google (Gmail)</span>
-                </button>
+            <!-- 3. Core Modules Showcase Section (មុខងារសំខាន់ៗទាំង ៦) -->
+            <section id="welcome-features" class="pt-16 pb-8">
+                <div class="text-center max-w-2xl mx-auto mb-8">
+                    <span class="text-xs font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-widest bg-indigo-50 dark:bg-indigo-950/60 px-3 py-1 rounded-full border border-indigo-200 dark:border-indigo-800">✨ មុខងារស្នូលនៃប្រព័ន្ធ</span>
+                    <h3 class="font-moul text-xl sm:text-2xl text-slate-900 dark:text-white mt-2">ដំណោះស្រាយគ្រប់គ្រងគ្រប់ជ្រុងជ្រោយ</h3>
+                    <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 font-siemreap mt-1">រចនាឡើងដើម្បីជួយសម្រួលការងារគ្រូបង្រៀន និងរដ្ឋបាលសាលារៀនឱ្យកាន់តែមានប្រសិទ្ធភាព</p>
+                </div>
 
-                <!-- Telegram -->
-                <button type="button" id="btnTelegramLogin" onclick="window.handleTelegramLogin()" class="flex items-center justify-center gap-2 py-3 px-3 bg-white dark:bg-slate-700/80 border border-slate-200 dark:border-slate-600 hover:border-sky-400 hover:bg-sky-50/40 dark:hover:bg-slate-600 rounded-2xl font-bold text-xs text-slate-700 dark:text-white transition-all shadow-sm hover:shadow group outline-none font-siemreap">
-                    <i class="fa-brands fa-telegram text-[#229ED9] text-base group-hover:scale-110 transition-transform"></i>
-                    <span>Telegram</span>
-                </button>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+                    
+                    <!-- 1. Students -->
+                    <div class="welcome-feature-card p-5 rounded-2xl bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border border-slate-200/80 dark:border-slate-700/80 text-left">
+                        <div class="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center text-lg mb-3">
+                            <i class="fa-solid fa-user-graduate"></i>
+                        </div>
+                        <h4 class="font-bold text-sm text-slate-800 dark:text-white mb-1">១. គ្រប់គ្រងព័ត៌មានសិស្ស (Students)</h4>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+                            ចុះឈ្មោះសិស្ស បែងចែកកម្រិតថ្នាក់ បន្ទប់ រូបថត ព័ត៌មានអាណាព្យាបាល ព្រមទាំងនាំចេញទិន្នន័យជា Excel និង PDF។
+                        </p>
+                    </div>
+
+                    <!-- 2. Attendance -->
+                    <div class="welcome-feature-card p-5 rounded-2xl bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border border-slate-200/80 dark:border-slate-700/80 text-left">
+                        <div class="w-10 h-10 rounded-xl bg-rose-500/10 text-rose-600 dark:text-rose-400 flex items-center justify-center text-lg mb-3">
+                            <i class="fa-solid fa-clipboard-user"></i>
+                        </div>
+                        <h4 class="font-bold text-sm text-slate-800 dark:text-white mb-1">២. វត្តមានឌីជីថល (Attendance)</h4>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+                            ស្រង់វត្តមានប្រចាំថ្ងៃរហ័សទាន់ចិត្ត (វត្តមាន, ច្បាប់, អវត្តមាន, យឺត) និងបូកសរុបអវត្តមានប្រចាំខែដោយស្វ័យប្រវត្តិ។
+                        </p>
+                    </div>
+
+                    <!-- 3. Scores & Ranking -->
+                    <div class="welcome-feature-card p-5 rounded-2xl bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border border-slate-200/80 dark:border-slate-700/80 text-left">
+                        <div class="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center text-lg mb-3">
+                            <i class="fa-solid fa-award"></i>
+                        </div>
+                        <h4 class="font-bold text-sm text-slate-800 dark:text-white mb-1">៣. ពិន្ទុ & ចំណាត់ថ្នាក់ (Scores)</h4>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+                            បញ្ចូលពិន្ទុតាមមុខវិជ្ជា គណនាមធ្យមភាគ ចំណាត់ថ្នាក់ និងនិទ្ទេសស្វ័យប្រវត្តិតាមស្តង់ដារក្រសួងអប់រំ។
+                        </p>
+                    </div>
+
+                    <!-- 4. Timetable & Homework -->
+                    <div class="welcome-feature-card p-5 rounded-2xl bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border border-slate-200/80 dark:border-slate-700/80 text-left">
+                        <div class="w-10 h-10 rounded-xl bg-teal-500/10 text-teal-600 dark:text-teal-400 flex items-center justify-center text-lg mb-3">
+                            <i class="fa-solid fa-calendar-days"></i>
+                        </div>
+                        <h4 class="font-bold text-sm text-slate-800 dark:text-white mb-1">៤. កាលវិភាគ & កិច្ចការផ្ទះ (Timetable)</h4>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+                            រៀបចំកាលវិភាគបង្រៀនប្រចាំសប្តាហ៍ កត់ត្រាកិច្ចការផ្ទះ និងតាមដានការបំពេញការងាររបស់សិស្ស។
+                        </p>
+                    </div>
+
+                    <!-- 5. Library -->
+                    <div class="welcome-feature-card p-5 rounded-2xl bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border border-slate-200/80 dark:border-slate-700/80 text-left">
+                        <div class="w-10 h-10 rounded-xl bg-fuchsia-500/10 text-fuchsia-600 dark:text-fuchsia-400 flex items-center justify-center text-lg mb-3">
+                            <i class="fa-solid fa-book-bookmark"></i>
+                        </div>
+                        <h4 class="font-bold text-sm text-slate-800 dark:text-white mb-1">៥. បណ្ណាល័យសាលា (Library)</h4>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+                            ចុះបញ្ជីសៀវភៅ កត់ត្រាការខ្ចី-សងសៀវភៅរបស់សិស្ស និងតាមដានសៀវភៅដែលហួសកាលកំណត់។
+                        </p>
+                    </div>
+
+                    <!-- 6. Google Sheets & Cloud Sync -->
+                    <div class="welcome-feature-card p-5 rounded-2xl bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border border-slate-200/80 dark:border-slate-700/80 text-left">
+                        <div class="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center text-lg mb-3">
+                            <i class="fa-solid fa-cloud-arrow-up"></i>
+                        </div>
+                        <h4 class="font-bold text-sm text-slate-800 dark:text-white mb-1">៦. Real-time Google Sheets Sync</h4>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+                            តភ្ជាប់ និងបញ្ជូនទិន្នន័យដោយផ្ទាល់ទៅ Google Sheets តាមរយៈ Apps Script ភ្លាមៗ (0ms UI Latency)។
+                        </p>
+                    </div>
+
+                </div>
+            </section>
+
+        </main>
+
+        <!-- 4. Footer នៃ Welcome Screen -->
+        <footer id="welcome-about" class="relative z-10 w-full border-t border-slate-200/80 dark:border-slate-800/80 bg-white/60 dark:bg-slate-900/60 backdrop-blur-md py-4 text-center">
+            <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-slate-500 dark:text-slate-400 font-bold">
+                <div class="flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                    <span>ស្ថានភាពប្រព័ន្ធ: Cloud & Google Sheets Online</span>
+                    <span class="text-slate-300 dark:text-slate-700">•</span>
+                    <span>CMS v2.4.0</span>
+                </div>
+                <div>
+                    <span>រក្សាសិទ្ធិគ្រប់យ៉ាង © ២០២៦ ប្រព័ន្ធគ្រប់គ្រងសាលារៀន និងថ្នាក់រៀនឌីជីថល</span>
+                </div>
             </div>
+        </footer>
 
-
-            <p class="text-center text-[13px] text-slate-500 dark:text-slate-400 mt-6 font-bold">
-                មិនទាន់មានគណនីមែនទេ? 
-                <button onclick="window.toggleAuthBox('register')" class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 transition outline-none ml-1 font-bold underline">
-                    ចុះឈ្មោះថ្មី
-                </button>
-            </p>
-        </div>
-
-        <!-- ផ្ទាំងចុះឈ្មោះ (Register Box) -->
-        <div id="authRegisterBox" class="bg-white/95 dark:bg-slate-800/95 backdrop-blur-xl w-full max-w-md rounded-[2.5rem] shadow-[0_8px_30px_rgb(0,0,0,0.08)] border border-white/50 dark:border-slate-700 p-8 md:p-10 text-center transform transition-all duration-500 relative m-4 hidden">
-            
-            <div class="w-16 h-16 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-[1.2rem] flex items-center justify-center mx-auto mb-4 text-white text-2xl shadow-lg shadow-emerald-200 dark:shadow-none transform -rotate-3 hover:rotate-0 transition duration-300">
-                <i class="fa-solid fa-user-shield"></i>
-            </div>
-            
-            <h2 class="font-moul text-xl text-slate-800 dark:text-white mb-1">បង្កើតគណនីថ្មី</h2>
-            <p class="text-slate-500 dark:text-slate-400 text-[12px] mb-5 font-bold">សុវត្ថិភាពទិន្នន័យជារឿងចម្បងរបស់យើង</p>
-
-            <form onsubmit="window.handleRegister(event)" class="space-y-3.5 text-left">
-                <div>
-                    <label class="block text-[10px] font-bold text-slate-400 mb-1 uppercase tracking-wider">ឈ្មោះ និងនាមត្រកូល *</label>
-                    <div class="relative group">
-                        <i class="fa-regular fa-id-card absolute left-4 top-3 text-slate-400 text-sm group-focus-within:text-emerald-500 transition-colors"></i>
-                        <input type="text" id="regFullName" required placeholder="ឧ. សុខ សាន្ត" class="w-full pl-10 pr-4 py-2.5 bg-slate-50/50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl text-sm font-bold text-slate-700 dark:text-white outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 focus:bg-white dark:focus:bg-slate-700 transition-all shadow-inner font-moul">
-                    </div>
-                </div>
-                
-                <div>
-                    <label class="block text-[10px] font-bold text-slate-400 mb-1 uppercase tracking-wider">ឈ្មោះគណនី (Username) *</label>
-                    <div class="relative group">
-                        <i class="fa-regular fa-user absolute left-4 top-3 text-slate-400 text-sm group-focus-within:text-emerald-500 transition-colors"></i>
-                        <input type="text" id="regUsername" required placeholder="ឧ. soksan" class="w-full pl-10 pr-4 py-2.5 bg-slate-50/50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl text-sm font-bold text-slate-700 dark:text-white outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 focus:bg-white dark:focus:bg-slate-700 transition-all shadow-inner lowercase">
-                    </div>
-                </div>
-
-                <div>
-                    <label class="block text-[10px] font-bold text-slate-400 mb-1 uppercase tracking-wider">លេខទូរស័ព្ទ ឬ អ៊ីមែល *</label>
-                    <div class="relative group">
-                        <i class="fa-solid fa-phone absolute left-4 top-3 text-slate-400 text-sm group-focus-within:text-emerald-500 transition-colors"></i>
-                        <input type="text" id="regContact" required placeholder="ឧ. 012345678" class="w-full pl-10 pr-4 py-2.5 bg-slate-50/50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl text-sm font-bold text-slate-700 dark:text-white outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 focus:bg-white dark:focus:bg-slate-700 transition-all shadow-inner">
-                    </div>
-                </div>
-
-                <div>
-                    <label class="block text-[10px] font-bold text-slate-400 mb-1 uppercase tracking-wider">លេខសម្ងាត់ (Password) *</label>
-                    <div class="relative group">
-                        <i class="fa-solid fa-lock absolute left-4 top-3 text-slate-400 text-sm group-focus-within:text-emerald-500 transition-colors"></i>
-                        <input type="password" id="regPassword" required minlength="8" placeholder="យ៉ាងតិច ៨ តួអក្សរ" class="w-full pl-10 pr-10 py-2.5 bg-slate-50/50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl text-sm font-bold text-slate-700 dark:text-white outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 focus:bg-white dark:focus:bg-slate-700 transition-all shadow-inner" oninput="window.checkPasswordStrength(this.value)">
-                        <button type="button" onclick="window.togglePasswordVisibility('regPassword', 'eyeIcon1')" class="absolute right-4 top-3 text-slate-400 hover:text-emerald-600 transition outline-none"><i id="eyeIcon1" class="fa-regular fa-eye"></i></button>
-                    </div>
-                    <!-- របារសុវត្ថិភាពលេខសម្ងាត់ -->
-                    <div class="mt-2 flex gap-1 h-1.5 w-full bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
-                        <div id="strBar1" class="h-full w-1/3 bg-slate-200 dark:bg-slate-600 transition-all duration-300"></div>
-                        <div id="strBar2" class="h-full w-1/3 bg-slate-200 dark:bg-slate-600 transition-all duration-300"></div>
-                        <div id="strBar3" class="h-full w-1/3 bg-slate-200 dark:bg-slate-600 transition-all duration-300"></div>
-                    </div>
-                    <p id="strText" class="text-[9px] text-slate-400 mt-1 font-bold">កម្រិតសុវត្ថិភាព: មិនទាន់មាន</p>
-                </div>
-
-                <div>
-                    <label class="block text-[10px] font-bold text-slate-400 mb-1 uppercase tracking-wider">បញ្ជាក់លេខសម្ងាត់ *</label>
-                    <div class="relative group">
-                        <i class="fa-solid fa-shield-halved absolute left-4 top-3 text-slate-400 text-sm group-focus-within:text-emerald-500 transition-colors"></i>
-                        <input type="password" id="regConfirmPassword" required minlength="8" placeholder="វាយលេខសម្ងាត់ម្ដងទៀត" class="w-full pl-10 pr-10 py-2.5 bg-slate-50/50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl text-sm font-bold text-slate-700 dark:text-white outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 focus:bg-white dark:focus:bg-slate-700 transition-all shadow-inner">
-                        <button type="button" onclick="window.togglePasswordVisibility('regConfirmPassword', 'eyeIcon2')" class="absolute right-4 top-3 text-slate-400 hover:text-emerald-600 transition outline-none"><i id="eyeIcon2" class="fa-regular fa-eye"></i></button>
-                    </div>
-                </div>
-
-                <div class="flex items-start gap-2.5 mt-2 p-2.5 bg-emerald-50/50 dark:bg-emerald-950/30 rounded-xl border border-emerald-100 dark:border-emerald-900">
-                    <input type="checkbox" id="regTerms" required class="mt-0.5 border-slate-300 text-emerald-600 rounded focus:ring-emerald-500 cursor-pointer w-4 h-4">
-                    <label for="regTerms" class="text-[10px] md:text-[11px] text-slate-600 dark:text-slate-300 leading-relaxed cursor-pointer font-bold">ខ្ញុំយល់ព្រមតាម <span class="text-emerald-600 dark:text-emerald-400">លក្ខខណ្ឌប្រើប្រាស់</span> និងរក្សាការសម្ងាត់ទិន្នន័យសិស្ស។</label>
-                </div>
-
-                <button type="submit" id="btnRegister" class="w-full bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-bold py-3.5 rounded-2xl transition-all shadow-xl shadow-emerald-200 dark:shadow-none transform hover:-translate-y-1 mt-4 flex items-center justify-center gap-2 outline-none text-[14px]">
-                    <i class="fa-solid fa-user-plus"></i> បង្កើតគណនីឥឡូវនេះ
-                </button>
-            </form>
-            <!-- បន្ទាត់ខណ្ឌ (Divider) -->
-            <div class="relative my-5 flex items-center justify-center">
-                <div class="border-t border-slate-200 dark:border-slate-700 w-full"></div>
-                <span class="bg-white/95 dark:bg-slate-800/95 px-3 text-[11px] font-bold text-slate-400 uppercase tracking-wider relative font-siemreap">ឬចូលតាមរយៈ</span>
-            </div>
-
-            <!-- ប៊ូតុងចូលតាម Google (Gmail) & Telegram -->
-            <div class="grid grid-cols-2 gap-3">
-                <!-- Google / Gmail -->
-                <button type="button" id="btnGoogleLogin" onclick="window.handleGoogleLogin()" class="flex items-center justify-center gap-2 py-3 px-3 bg-white dark:bg-slate-700/80 border border-slate-200 dark:border-slate-600 hover:border-red-400 hover:bg-red-50/40 dark:hover:bg-slate-600 rounded-2xl font-bold text-xs text-slate-700 dark:text-white transition-all shadow-sm hover:shadow group outline-none font-siemreap">
-                    <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24">
-                        <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                        <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                        <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
-                        <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
-                    </svg>
-                    <span>Google (Gmail)</span>
-                </button>
-
-                <!-- Telegram -->
-                <button type="button" id="btnTelegramLogin" onclick="window.handleTelegramLogin()" class="flex items-center justify-center gap-2 py-3 px-3 bg-white dark:bg-slate-700/80 border border-slate-200 dark:border-slate-600 hover:border-sky-400 hover:bg-sky-50/40 dark:hover:bg-slate-600 rounded-2xl font-bold text-xs text-slate-700 dark:text-white transition-all shadow-sm hover:shadow group outline-none font-siemreap">
-                    <i class="fa-brands fa-telegram text-[#229ED9] text-base group-hover:scale-110 transition-transform"></i>
-                    <span>Telegram</span>
-                </button>
-            </div>
-
-
-            <p class="text-center text-[12px] text-slate-500 dark:text-slate-400 mt-4 font-bold">
-                មានគណនីរួចហើយ? 
-                <button onclick="window.toggleAuthBox('login')" class="text-emerald-600 dark:text-emerald-400 hover:text-emerald-800 transition outline-none ml-1 font-bold underline">
-                    ចូលគណនី
-                </button>
-            </p>
-        </div>
     </div>
 
   <!-- ========================================== -->
@@ -427,6 +670,12 @@
             <!-- Sync Button -->
             <button onclick="window.fetchAllData(this)" class="px-3 sm:px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white rounded-xl text-xs font-bold flex items-center gap-2 shadow-sm transition outline-none">
               <i class="fa-solid fa-arrows-rotate"></i> ទាញទិន្នន័យ
+            </button>
+
+            <!-- Welcome Portal Button -->
+            <button onclick="window.viewWelcomeScreen && window.viewWelcomeScreen()" title="ទំព័រដើមស្វាគមន៍ (Welcome Portal)" class="px-2.5 sm:px-3 py-2 bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-950/50 dark:hover:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300 rounded-xl text-xs font-bold flex items-center gap-1.5 transition outline-none shadow-sm">
+              <i class="fa-solid fa-house-chimney text-xs"></i>
+              <span class="hidden md:inline">ទំព័រស្វាគមន៍</span>
             </button>
 
             <!-- Dark Mode Toggle -->

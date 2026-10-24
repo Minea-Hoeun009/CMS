@@ -506,3 +506,35 @@ body {
         padding-bottom: max(80px, calc(64px + env(safe-area-inset-bottom))) !important;
     }
 }
+
+/* ========================================================
+   Welcome & Landing Portal Styles
+======================================================== */
+@keyframes blob {
+  0% { transform: translate(0px, 0px) scale(1); }
+  33% { transform: translate(30px, -40px) scale(1.08); }
+  66% { transform: translate(-20px, 20px) scale(0.92); }
+  100% { transform: translate(0px, 0px) scale(1); }
+}
+.animate-blob {
+  animation: blob 9s infinite ease-in-out;
+}
+
+.welcome-glass-card {
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+}
+.dark .welcome-glass-card {
+  background: rgba(30, 41, 59, 0.88);
+  border: 1px solid rgba(51, 65, 85, 0.7);
+}
+
+.welcome-feature-card {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.welcome-feature-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 28px -6px rgba(0, 0, 0, 0.12);
+}

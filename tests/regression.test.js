@@ -132,4 +132,27 @@ describe('Functional Regression Tests (Core Business Logic)', () => {
     assert.equal(ctx.CMSValidator.validateAcademicYear(''), false);
   });
 
+  test('6. Welcome & Authentication Portal contains critical DOM elements and functions', () => {
+    const indexHtml = fs.readFileSync(path.resolve(__dirname, '../index.html'), 'utf8');
+
+    // Welcome Screen container and sections
+    assert.ok(indexHtml.includes('id="landing-screen"'), 'Must have landing-screen element');
+    assert.ok(indexHtml.includes('id="welcome-hero"'), 'Must have welcome-hero section');
+    assert.ok(indexHtml.includes('id="welcome-features"'), 'Must have welcome-features section');
+
+    // Login and Register boxes
+    assert.ok(indexHtml.includes('id="authLoginBox"'), 'Must preserve authLoginBox');
+    assert.ok(indexHtml.includes('id="authRegisterBox"'), 'Must preserve authRegisterBox');
+    assert.ok(indexHtml.includes('id="authHelpBox"'), 'Must have authHelpBox');
+
+    // Authentication inputs and buttons
+    assert.ok(indexHtml.includes('id="usernameOrPhone"'), 'Must preserve usernameOrPhone input');
+    assert.ok(indexHtml.includes('id="password"'), 'Must preserve password input');
+    assert.ok(indexHtml.includes('id="btnLogin"'), 'Must preserve btnLogin');
+    assert.ok(indexHtml.includes('id="btnGoogleLogin"'), 'Must preserve btnGoogleLogin');
+    assert.ok(indexHtml.includes('id="btnTelegramLogin"'), 'Must preserve btnTelegramLogin');
+    assert.ok(indexHtml.includes('quickLoginAsAdmin'), 'Must provide quickLoginAsAdmin');
+    assert.ok(indexHtml.includes('loginAsGuest'), 'Must provide loginAsGuest');
+  });
+
 });

@@ -477,20 +477,9 @@ window.AppAuth = {
         }
 
         // ខ. ពិនិត្យ Saved Session ក្នុង localStorage
-        const savedTeacherId = localStorage.getItem('auth_teacher_id') || 'TCH-SYSADMIN';
+        const savedTeacherId = localStorage.getItem('auth_teacher_id');
         const sessionActive = localStorage.getItem('auth_session_active') === 'true';
-        if (sessionActive || savedTeacherId === 'TCH-SYSADMIN') {
-            // Ensure full admin rights for the session
-            localStorage.setItem('auth_role', 'system_admin');
-            localStorage.setItem('auth_roles', JSON.stringify(['system_admin', 'school_admin']));
-            localStorage.setItem('auth_assigned_grade', 'all');
-            localStorage.setItem('auth_assigned_room', 'all');
-            if (!localStorage.getItem('auth_teacher_id')) {
-                localStorage.setItem('auth_teacher_id', 'TCH-SYSADMIN');
-            }
-            if (!localStorage.getItem('auth_teacher_name') || localStorage.getItem('auth_teacher_name') === 'លោកគ្រូ អ្នកគ្រូ') {
-                localStorage.setItem('auth_teacher_name', 'អ្នកគ្រប់គ្រងប្រព័ន្ធ (Admin)');
-            }
+        if (sessionActive && savedTeacherId) {
             const restored = await this.restoreSessionFromTeacherId(savedTeacherId);
             if (restored) return;
         }
@@ -829,7 +818,7 @@ window.AppAuth = {
         location.reload();
     },
 
-    // ៦. បង្ហាញផ្ទាំង Auth
+    // ៦. បង្ហាញផ្ទាំង Auth / Welcome Screen
     showAuthScreen: function() {
         const appView = document.getElementById("appView");
         const landingScreen = document.getElementById("landing-screen");
@@ -837,7 +826,19 @@ window.AppAuth = {
         if (appView) appView.classList.add("hidden");
         if (landingScreen) {
             landingScreen.classList.remove("hidden");
-            landingScreen.style.display = "flex";
+            landingScreen.style.display = "block";
+
+            // បង្ហាញ Banner ប្រសិនបើអ្នកប្រើប្រាស់បាន Login រួចរាល់
+            const loggedInBanner = document.getElementById("landingLoggedInBanner");
+            if (loggedInBanner) {
+                if (this.state && this.state.isLoggedIn) {
+                    loggedInBanner.classList.remove("hidden");
+                    const nameEl = document.getElementById("landingLoggedInUserName");
+                    if (nameEl) nameEl.textContent = this.state.name || "Administrator";
+                } else {
+                    loggedInBanner.classList.add("hidden");
+                }
+            }
         }
     },
 
@@ -887,17 +888,72 @@ window.AppAuth = {
 // UI Helpers & Global Event Handlers
 // =========================================================================
 
-// ប្តូររវាង Login និង Register Boxes
+// ប្តូររវាង Login, Register និង Help Boxes ក្នុង Welcome Screen
 window.toggleAuthBox = function(type) {
     const loginBox = document.getElementById('authLoginBox');
     const registerBox = document.getElementById('authRegisterBox');
+    const helpBox = document.getElementById('authHelpBox');
+    const tabLogin = document.getElementById('tabAuthLogin');
+    const tabRegister = document.getElementById('tabAuthRegister');
+    const tabHelp = document.getElementById('tabAuthHelp');
+
+    if (loginBox) loginBox.classList.add('hidden');
+    if (registerBox) registerBox.classList.add('hidden');
+    if (helpBox) helpBox.classList.add('hidden');
+
+    const deactiveClass = ['text-slate-500', 'dark:text-slate-400', 'border-transparent'];
+    const activeClass = ['text-indigo-600', 'dark:text-indigo-400', 'border-indigo-600', 'dark:border-indigo-400'];
+
+    [tabLogin, tabRegister, tabHelp].forEach(t => {
+        if (t) {
+            t.classList.remove(...activeClass);
+            t.classList.add(...deactiveClass);
+        }
+    });
 
     if (type === 'register') {
-        if (loginBox) loginBox.classList.add('hidden');
         if (registerBox) registerBox.classList.remove('hidden');
+        if (tabRegister) {
+            tabRegister.classList.remove(...deactiveClass);
+            tabRegister.classList.add(...activeClass);
+        }
+    } else if (type === 'help') {
+        if (helpBox) helpBox.classList.remove('hidden');
+        if (tabHelp) {
+            tabHelp.classList.remove(...deactiveClass);
+            tabHelp.classList.add(...activeClass);
+        }
     } else {
         if (loginBox) loginBox.classList.remove('hidden');
-        if (registerBox) registerBox.classList.add('hidden');
+        if (tabLogin) {
+            tabLogin.classList.remove(...deactiveClass);
+            tabLogin.classList.add(...activeClass);
+        }
+    }
+};
+
+// ចូលទស្សនាប្រព័ន្ធជាភ្ញៀវ (Guest Mode / Read-Only Explore)
+window.loginAsGuest = function() {
+    const guestData = {
+        teacher_id: "TCH-GUEST",
+        name: "ភ្ញៀវកិត្តិយស (Guest)",
+        username: "guest",
+        role: "viewer",
+        roles: ["viewer"],
+        assigned_grade: "all",
+        assigned_room: "all",
+        school_id: "SCH-001",
+        status: "active"
+    };
+    if (window.AppAuth && typeof window.AppAuth.setAuthenticatedSession === 'function') {
+        window.AppAuth.setAuthenticatedSession(guestData, null);
+    }
+};
+
+// បង្ហាញ Welcome Screen សាជាថ្មី
+window.viewWelcomeScreen = function() {
+    if (window.AppAuth && typeof window.AppAuth.showAuthScreen === 'function') {
+        window.AppAuth.showAuthScreen();
     }
 };
 
