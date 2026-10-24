@@ -171,7 +171,7 @@ window.loadStudentsView = async function() {
             }
         });
 
-        let gradesOptions = `<option value="all" ${initialSelectedGrade === 'all' ? 'selected' : ''}>គ្រប់ថ្នាក់ទាំងអស់ (All Classes)</option>`;
+        let gradesOptions = `<option value="all" ${initialSelectedGrade === 'all' ? 'selected' : ''}>គ្រប់ថ្នាក់ទាំងអស់</option>`;
         allGradesSet.forEach(gVal => {
             gradesOptions += `<option value="${gVal}" ${gVal === initialSelectedGrade ? 'selected' : ''}>${gVal}</option>`;
         });
@@ -187,7 +187,7 @@ window.loadStudentsView = async function() {
             if (s && s.room && s.room.trim()) roomsSet.add(s.room.trim());
         });
 
-        let roomsOptions = `<option value="all" ${initialSelectedRoom === 'all' ? 'selected' : ''}>គ្រប់បន្ទប់ទាំងអស់ (All Rooms)</option>`;
+        let roomsOptions = `<option value="all" ${initialSelectedRoom === 'all' ? 'selected' : ''}>គ្រប់បន្ទប់ទាំងអស់</option>`;
         roomsSet.forEach(r => {
             roomsOptions += `<option value="${r}" ${r === initialSelectedRoom ? 'selected' : ''}>បន្ទប់ ${r}</option>`;
         });

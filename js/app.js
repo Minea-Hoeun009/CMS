@@ -3,13 +3,8 @@
 // =====================================================================
 
 document.addEventListener("DOMContentLoaded", async () => {
-    console.log("🚀 App Started! Checking Login State...");
+    console.log("🚀 App Started! Awaiting Firebase Authentication state...");
     
-    // ១. ពិនិត្យមើលថាតើគ្រូបាន Login ឬនៅ?
-    const savedId = localStorage.getItem('auth_teacher_id');
-    const savedName = localStorage.getItem('auth_teacher_name');
-    const savedUser = localStorage.getItem('auth_username');
-
     // Dark Mode Check
     if (localStorage.getItem('theme') === 'dark') {
         document.documentElement.classList.add('dark');
@@ -17,104 +12,72 @@ document.addEventListener("DOMContentLoaded", async () => {
         if (darkIcon) darkIcon.className = 'fa-solid fa-sun';
     }
 
-    if (savedId) {
-        console.log(`✅ Teacher logged in (${savedId}). Preparing workspace...`);
-        
-        // ធានា AppState & AuthState មានទិន្នន័យ
-        window.AppState = window.AppState || {};
-        window.AppState.isLoggedIn = true;
-        window.AppState.teacherId = savedId;
-        window.AppState.teacherName = savedName || "លោកគ្រូ អ្នកគ្រូ";
-        window.AppState.username = savedUser || savedId;
-
-        window.AuthState = window.AuthState || {
-            teacherId: savedId,
-            teacherName: savedName || "លោកគ្រូ អ្នកគ្រូ",
-            username: savedUser || savedId
-        };
-
-        if (window.AppAuth && window.AppAuth.state) {
-            window.AppAuth.state = {
-                isLoggedIn: true,
-                teacherId: savedId,
-                name: savedName || "លោកគ្រូ អ្នកគ្រូ",
-                username: savedUser || savedId
-            };
+    // ស្តាប់ Event ពេលទិន្នន័យសិស្សត្រូវបាន Update ក្នុង Master Students (Single Source of Truth)
+    window.addEventListener('masterStudentsUpdated', () => {
+        console.log("📢 Master Students updated across system. Refreshing active view...");
+        const activeMenu = localStorage.getItem('activeMenu') || 'dashboard';
+        if (activeMenu === 'attendance' && typeof window.fetchMonthlyAttendance === 'function') {
+            window.fetchMonthlyAttendance();
+        } else if (activeMenu === 'scores' && typeof window.fetchStudentsForScores === 'function') {
+            window.fetchStudentsForScores();
+        } else if (activeMenu === 'dashboard' && typeof window.loadDashboard === 'function') {
+            window.loadDashboard();
+        } else if (activeMenu === 'library' && typeof window.fetchLibraryData === 'function') {
+            window.fetchLibraryData();
+        } else if (activeMenu === 'students' && typeof window.filterStudents === 'function') {
+            window.filterStudents();
         }
-
-        // រៀបចំ Workspace
-        const landingScreen = document.getElementById("landing-screen");
-        const appView = document.getElementById("appView");
-        if (landingScreen) {
-            landingScreen.style.display = 'none';
-            landingScreen.classList.add('hidden');
-        }
-        if (appView) {
-            appView.classList.remove('hidden');
-        }
-
-        // Update ឈ្មោះគ្រូនៅលើ Sidebar
-        const nameEl = document.getElementById("navUserName");
-        const idEl = document.getElementById("navUserId");
-        if (nameEl) nameEl.textContent = window.AppState.teacherName;
-        if (idEl) idEl.textContent = window.AppState.teacherId;
-
-        // Restore ឆ្នាំសិក្សាចុងក្រោយ
-        const savedYear = localStorage.getItem('selected_academic_year');
-        if (savedYear) {
-            const yearSelect = document.getElementById("globalAcademicYear");
-            if (yearSelect) yearSelect.value = savedYear;
-        }
-
-        // ២. ទាញយកការកំណត់ (Settings) ពី LocalStorage
-        if (typeof window.loadGlobalSettings === 'function') {
-            window.loadGlobalSettings();
-        }
-
-        // ៣. អាប់ដេត Sidebar System Info (ឈ្មោះសាលា ឡូហ្គោ ឆ្នាំសិក្សា)
-        if (typeof window.updateSidebarSystemInfo === 'function') {
-            window.updateSidebarSystemInfo();
-        }
-
-        // ៤. អនុវត្តសិទ្ធិមើលម៉ឺនុយតាមតួនាទី (Admin vs Class Teacher)
-        if (typeof window.applyRoleBasedNavigation === 'function') {
-            window.applyRoleBasedNavigation();
-        }
-
-        // ៥. ចូលទៅកាន់ផ្ទាំង Dashboard ឬផ្ទាំងចុងក្រោយដែលបានបើក
-        const lastView = localStorage.getItem('activeMenu') || 'dashboard';
-        if (typeof window.switchView === 'function') {
-            window.switchView(lastView);
-        }
-
-        // ៦. ស្តាប់ Event ពេលទិន្នន័យសិស្សត្រូវបាន Update ក្នុង Master Students (Single Source of Truth)
-        window.addEventListener('masterStudentsUpdated', () => {
-            console.log("📢 Master Students updated across system. Refreshing active view...");
-            const activeMenu = localStorage.getItem('activeMenu') || 'dashboard';
-            if (activeMenu === 'attendance' && typeof window.fetchMonthlyAttendance === 'function') {
-                window.fetchMonthlyAttendance();
-            } else if (activeMenu === 'scores' && typeof window.fetchStudentsForScores === 'function') {
-                window.fetchStudentsForScores();
-            } else if (activeMenu === 'dashboard' && typeof window.loadDashboard === 'function') {
-                window.loadDashboard();
-            } else if (activeMenu === 'library' && typeof window.fetchLibraryData === 'function') {
-                window.fetchLibraryData();
-            } else if (activeMenu === 'students' && typeof window.filterStudents === 'function') {
-                window.filterStudents();
-            }
-        });
-
-    } else {
-        console.log("🔒 No teacher logged in. Showing login screen.");
-        const landingScreen = document.getElementById("landing-screen");
-        const appView = document.getElementById("appView");
-        if (appView) appView.classList.add("hidden");
-        if (landingScreen) {
-            landingScreen.classList.remove("hidden");
-            landingScreen.style.display = "flex";
-        }
-    }
+    });
 });
+
+// Setup Workspace (Called ONLY after Firebase Auth cryptographically verifies identity)
+window.setupWorkspace = function() {
+    console.log("✅ Verified Firebase Auth User. Preparing workspace...");
+
+    const landingScreen = document.getElementById("landing-screen");
+    const appView = document.getElementById("appView");
+    if (landingScreen) {
+        landingScreen.style.display = 'none';
+        landingScreen.classList.add('hidden');
+    }
+    if (appView) {
+        appView.classList.remove('hidden');
+    }
+
+    // Update ឈ្មោះគ្រូនៅលើ Sidebar
+    const nameEl = document.getElementById("navUserName");
+    const idEl = document.getElementById("navUserId");
+    if (nameEl) nameEl.textContent = window.AppState.teacherName || window.AuthState?.name || "លោកគ្រូ អ្នកគ្រូ";
+    if (idEl) idEl.textContent = window.AppState.teacherId || window.AuthState?.teacherId || "TCH-000";
+
+    // Restore ឆ្នាំសិក្សាចុងក្រោយ
+    const savedYear = localStorage.getItem('selected_academic_year');
+    if (savedYear) {
+        const yearSelect = document.getElementById("globalAcademicYear");
+        if (yearSelect) yearSelect.value = savedYear;
+    }
+
+    // ទាញយកការកំណត់ (Settings) ពី LocalStorage
+    if (typeof window.loadGlobalSettings === 'function') {
+        window.loadGlobalSettings();
+    }
+
+    // អាប់ដេត Sidebar System Info (ឈ្មោះសាលា ឡូហ្គោ ឆ្នាំសិក្សា)
+    if (typeof window.updateSidebarSystemInfo === 'function') {
+        window.updateSidebarSystemInfo();
+    }
+
+    // អនុវត្តសិទ្ធិមើលម៉ឺនុយតាមតួនាទី (Admin vs Class Teacher)
+    if (typeof window.applyRoleBasedNavigation === 'function') {
+        window.applyRoleBasedNavigation();
+    }
+
+    // ចូលទៅកាន់ផ្ទាំង Dashboard ឬផ្ទាំងចុងក្រោយដែលបានបើក
+    const lastView = localStorage.getItem('activeMenu') || 'dashboard';
+    if (typeof window.switchView === 'function') {
+        window.switchView(lastView);
+    }
+};
 
 // =====================================================================
 // មុខងារសម្រាប់ពេលចុចលើ Menu នីមួយៗ (Sidebar Click Handlers)

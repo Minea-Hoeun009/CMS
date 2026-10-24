@@ -5,6 +5,13 @@
 // =========================================================================
 // AUTH-05: Web Crypto API Cryptographic Password Hashing (Salted SHA-256)
 // =========================================================================
+window.toAuthEmail = function(userInput) {
+    if (!userInput) return "";
+    const trimmed = String(userInput).trim().toLowerCase();
+    if (trimmed.includes('@')) return trimmed;
+    const clean = trimmed.replace(/[^a-z0-9._-]/g, '');
+    return `${clean}@cms.school.local`;
+};
 window.generateSalt = function() {
     const array = new Uint8Array(16);
     (window.crypto || window.msCrypto).getRandomValues(array);
@@ -53,10 +60,170 @@ window.AppAuth = {
 
     permissionListenerUnsubscribe: null,
 
-    // ១. ចាប់ផ្តើមដំណើរការ (Init on load)
+    // ១. ចាប់ផ្តើមដំណើរការ (Init on load with Firebase Auth as Single Source of Truth)
     init: function() {
-        this.checkSession();
         this.initInactivityTracker();
+        this.setupAuthObserver();
+    },
+
+    setupAuthObserver: function() {
+        if (!window.auth) {
+            console.warn("⚠️ Firebase Auth instance មិនទាន់ត្រូវបាន Load ចូលទេ!");
+            this.showAuthScreen();
+            return;
+        }
+
+        window.auth.onAuthStateChanged(async (firebaseUser) => {
+            if (!firebaseUser) {
+                console.log("🔒 [AuthObserver] គ្មាន Firebase Auth Session ទេ។ បង្ហាញផ្ទាំង Login។");
+                this.clearSessionState();
+                this.showAuthScreen();
+                return;
+            }
+
+            console.log("🔑 [AuthObserver] បានផ្ទៀងផ្ទាត់ Firebase Auth Identity ជោគជ័យ:", firebaseUser.uid, firebaseUser.email);
+
+            let teacherData = null;
+            let teacherDocId = null;
+
+            if (window.db) {
+                try {
+                    // ក. ស្វែងរកតាម auth_uid
+                    const snapUid = await window.db.collection("teachers")
+                        .where("auth_uid", "==", firebaseUser.uid)
+                        .limit(1)
+                        .get();
+
+                    if (!snapUid.empty) {
+                        teacherData = snapUid.docs[0].data();
+                        teacherDocId = snapUid.docs[0].id;
+                    } else {
+                        // ខ. ស្វែងរកតាម doc ID
+                        const docDirect = await window.db.collection("teachers").doc(firebaseUser.uid).get();
+                        if (docDirect.exists) {
+                            teacherData = docDirect.data();
+                            teacherDocId = docDirect.id;
+                        } else if (firebaseUser.email) {
+                            // គ. ស្វែងរកតាម username
+                            const uName = firebaseUser.email.split('@')[0];
+                            const snapUname = await window.db.collection("teachers")
+                                .where("username", "==", uName)
+                                .limit(1)
+                                .get();
+                            if (!snapUname.empty) {
+                                teacherData = snapUname.docs[0].data();
+                                teacherDocId = snapUname.docs[0].id;
+                                // ភ្ជាប់ auth_uid និងសម្អាត password fields ចេញពី Firestore
+                                window.db.collection("teachers").doc(teacherDocId).update({
+                                    auth_uid: firebaseUser.uid,
+                                    password: firebase.firestore.FieldValue.delete(),
+                                    password_hash: firebase.firestore.FieldValue.delete(),
+                                    updated_at: new Date().toISOString()
+                                }).catch(console.warn);
+                            }
+                        }
+                    }
+                } catch (err) {
+                    console.warn("Firestore teacher fetch error:", err);
+                }
+            }
+
+            // ប្រសិនបើមិនទាន់មាន Profile ក្នុង Firestore (Root Admin Fallback)
+            if (!teacherData) {
+                const uName = (firebaseUser.email || "").split('@')[0] || "admin";
+                const isAdmin = uName.includes("admin") || uName === "sysadmin";
+                teacherData = {
+                    teacher_id: isAdmin ? "TCH-SYSADMIN" : `TCH-${firebaseUser.uid.slice(0, 6).toUpperCase()}`,
+                    name: firebaseUser.displayName || (isAdmin ? "អ្នកគ្រប់គ្រងប្រព័ន្ធ" : "លោកគ្រូ អ្នកគ្រូ"),
+                    username: uName,
+                    roles: isAdmin ? ["system_admin", "school_admin"] : ["teacher"],
+                    role: isAdmin ? "system_admin" : "teacher",
+                    assigned_grade: isAdmin ? "all" : "ថ្នាក់ទី ១",
+                    assigned_room: isAdmin ? "all" : "«ក»",
+                    school_id: "SCH-001",
+                    status: "active",
+                    auth_uid: firebaseUser.uid
+                };
+                if (window.db) {
+                    window.db.collection("teachers").doc(teacherData.teacher_id).set(teacherData).catch(console.warn);
+                }
+            }
+
+            // ត្រួតពិនិត្យគណនី Inactive / Suspended (P1 Remediation)
+            if (teacherData.status && teacherData.status.toLowerCase() !== "active") {
+                alert("⚠️ គណនីរបស់អ្នកត្រូវបានផ្អាក ឬចាក់សោ (Inactive/Locked) ដោយ Administrator!");
+                await window.auth.signOut();
+                this.clearSessionState();
+                this.showAuthScreen();
+                return;
+            }
+
+            const normalizedRoles = window.normalizeRoles(teacherData.roles || teacherData.role, "teacher");
+            const isAdminRole = normalizedRoles.some(r => r === 'school_admin' || r === 'system_admin' || r === 'admin');
+
+            this.state = {
+                isLoggedIn: true,
+                firebaseUid: firebaseUser.uid,
+                teacherId: teacherData.teacher_id || teacherDocId,
+                name: teacherData.name || teacherData.full_name || "លោកគ្រូ អ្នកគ្រូ",
+                username: teacherData.username || firebaseUser.email.split('@')[0],
+                role: normalizedRoles[0] || "teacher",
+                roles: normalizedRoles,
+                assigned_grade: isAdminRole ? "all" : (teacherData.assigned_grade || "ថ្នាក់ទី ១"),
+                assigned_room: isAdminRole ? "all" : (teacherData.assigned_room || "«ក»"),
+                school_id: teacherData.school_id || "SCH-001",
+                status: teacherData.status || "active"
+            };
+
+            window.AuthState = { 
+                ...this.state, 
+                teacherName: this.state.name,
+                teacher_level: this.state.assigned_grade,
+                teacher_room: this.state.assigned_room
+            };
+            window.AppState = window.AppState || {};
+            window.AppState.isLoggedIn = true;
+            window.AppState.teacherId = this.state.teacherId;
+            window.AppState.teacherName = this.state.name;
+
+            // ស្តាប់ Realtime Permission Changes លើ Teacher Doc
+            this.startPermissionSyncListener(this.state.teacherId);
+
+            // បើក Workspace ដោយសុវត្ថិភាព
+            this.showWorkspace();
+        });
+    },
+
+    clearSessionState: function() {
+        this.state = {
+            isLoggedIn: false,
+            firebaseUid: null,
+            teacherId: null,
+            name: null,
+            username: null,
+            role: "teacher",
+            roles: ["teacher"],
+            assigned_grade: "ថ្នាក់ទី ១",
+            assigned_room: "«ក»",
+            school_id: "SCH-001",
+            status: "active"
+        };
+        window.AuthState = { ...this.state };
+        window.AppState = window.AppState || {};
+        window.AppState.isLoggedIn = false;
+        window.AppState.teacherId = null;
+        window.AppState.teacherName = null;
+
+        localStorage.removeItem('auth_teacher_id');
+        localStorage.removeItem('auth_teacher_name');
+        localStorage.removeItem('auth_username');
+        localStorage.removeItem('auth_role');
+        localStorage.removeItem('auth_roles');
+        localStorage.removeItem('auth_assigned_grade');
+        localStorage.removeItem('auth_assigned_room');
+        localStorage.removeItem('auth_school_id');
+        localStorage.removeItem('auth_status');
+        localStorage.removeItem('activeMenu');
     },
 
     // ត្រួតពិនិត្យរយៈពេលអសកម្ម (AUTH-04: Session Security Inactivity Timeout)
@@ -148,53 +315,9 @@ window.AppAuth = {
         }
     },
 
-    // ២. ត្រួតពិនិត្យ Session ចាស់
+    // ២. ត្រួតពិនិត្យ Session ចាស់ (Deprecated localStorage trust; relies on onAuthStateChanged)
     checkSession: function() {
-        const savedId = localStorage.getItem('auth_teacher_id');
-        const savedName = localStorage.getItem('auth_teacher_name');
-        const savedUser = localStorage.getItem('auth_username');
-        const savedRole = localStorage.getItem('auth_role') || "teacher";
-        const savedRolesJson = localStorage.getItem('auth_roles');
-        let savedRoles = [];
-        try {
-            savedRoles = savedRolesJson ? JSON.parse(savedRolesJson) : [];
-        } catch(e) {}
-        if (!Array.isArray(savedRoles) || savedRoles.length === 0) {
-            savedRoles = window.normalizeRoles(savedRole, "teacher");
-        }
-
-        const savedGrade = localStorage.getItem('auth_assigned_grade') || "ថ្នាក់ទី ១";
-        const savedRoom = localStorage.getItem('auth_assigned_room') || "«ក»";
-        const savedSchool = localStorage.getItem('auth_school_id') || "SCH-001";
-        const savedStatus = localStorage.getItem('auth_status') || "active";
-
-        if (savedId && savedUser) {
-            this.state = {
-                isLoggedIn: true,
-                teacherId: savedId,
-                name: savedName || "លោកគ្រូ អ្នកគ្រូ",
-                username: savedUser,
-                role: savedRole,
-                roles: savedRoles,
-                assigned_grade: savedGrade,
-                assigned_room: savedRoom,
-                school_id: savedSchool,
-                status: savedStatus
-            };
-            window.AuthState = { 
-                ...this.state, 
-                teacherName: this.state.name,
-                teacher_level: savedGrade,
-                teacher_room: savedRoom
-            };
-            window.AppState = window.AppState || {};
-            window.AppState.isLoggedIn = true;
-            window.AppState.teacherId = savedId;
-            window.AppState.teacherName = this.state.name;
-
-            this.showWorkspace();
-            this.startPermissionSyncListener(savedId);
-        } else {
+        if (!window.auth || !window.auth.currentUser) {
             this.showAuthScreen();
         }
     },
@@ -211,284 +334,48 @@ window.AppAuth = {
         const errDiv = document.getElementById("loginError");
 
         if (!user || !pass) {
-            if (errDiv) {
-                errDiv.textContent = "សូមវាយបញ្ចូលឈ្មោះគណនី និងលេខសម្ងាត់!";
-                errDiv.classList.remove("hidden");
-            } else {
-                alert("សូមវាយបញ្ចូលឈ្មោះគណនី និងលេខសម្ងាត់!");
-            }
+            const msg = "សូមវាយបញ្ចូលឈ្មោះគណនី និងលេខសម្ងាត់!";
+            if (errDiv) { errDiv.textContent = msg; errDiv.classList.remove("hidden"); }
+            else alert(msg);
             return;
         }
 
         const origBtnText = btn ? btn.innerHTML : "ចូលប្រព័ន្ធ";
         if (btn) {
-            btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin mr-2"></i> កំពុងផ្ទៀងផ្ទាត់...';
+            btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin mr-2"></i> កំពុងផ្ទៀងផ្ទាត់ Identity...';
             btn.disabled = true;
         }
         if (errDiv) errDiv.classList.add("hidden");
 
-        // ត្រួតពិនិត្យការចាក់សោគណនីបណ្តោះអាសន្ន (AUTH-05: Rate Limiting)
-        const lockedUntil = parseInt(localStorage.getItem('auth_locked_until') || '0', 10);
-        if (Date.now() < lockedUntil) {
-            const remainingMins = Math.ceil((lockedUntil - Date.now()) / 60000);
-            const lockMsg = `⚠️ ការចូលត្រូវបានចាក់សោបណ្តោះអាសន្នដោយសារបញ្ចូលលេខសម្ងាត់ខុសច្រើនដង! សូមរង់ចាំ ${remainingMins} នាទីទៀត។`;
-            if (btn) { btn.innerHTML = origBtnText; btn.disabled = false; }
-            if (errDiv) { errDiv.textContent = lockMsg; errDiv.classList.remove("hidden"); }
-            else alert(lockMsg);
-            return;
-        }
-
         try {
-            let teacherData = null;
+            if (!window.auth) {
+                throw new Error("ប្រព័ន្ធ Firebase Authentication មិនទាន់ត្រូវបានភ្ជាប់ទេ!");
+            }
 
-            // ជំហានទី ១៖ ផ្ទៀងផ្ទាត់ជាមួយ Cloud Firestore (Cryptographic Verification - AUTH-05)
-            if (window.db) {
-                try {
-                    // ក. ស្វែងរកតាម username
-                    const userSnap = await window.db.collection("teachers")
-                        .where("username", "==", user.toLowerCase())
-                        .limit(1)
-                        .get();
+            const email = window.toAuthEmail(user);
+            let userCred = null;
 
-                    let matchedDoc = null;
-                    let matchedDocId = null;
-
-                    if (!userSnap.empty) {
-                        matchedDoc = userSnap.docs[0].data();
-                        matchedDocId = userSnap.docs[0].id;
-                    } else {
-                        // ខ. ស្វែងរកតាម teacher_id
-                        const idSnap = await window.db.collection("teachers")
-                            .where("teacher_id", "==", user.toUpperCase())
-                            .limit(1)
-                            .get();
-                        if (!idSnap.empty) {
-                            matchedDoc = idSnap.docs[0].data();
-                            matchedDocId = idSnap.docs[0].id;
-                        }
+            try {
+                userCred = await window.auth.signInWithEmailAndPassword(email, pass);
+            } catch (authErr) {
+                console.log("Firebase Auth signIn attempt:", authErr.code);
+                // ប្រសិនបើគណនីមិនទាន់មានក្នុង Firebase Auth (ការប្តូរគណនីចាស់ Legacy Migration)
+                if (authErr.code === 'auth/user-not-found' || authErr.code === 'auth/invalid-credential') {
+                    userCred = await window.migrateAndAuthenticateLegacyUser(user, pass, email);
+                    if (!userCred) {
+                        throw new Error("ឈ្មោះគណនី ឬលេខសម្ងាត់មិនត្រឹមត្រូវទេ!");
                     }
-
-                    if (matchedDoc) {
-                        const storedCredential = matchedDoc.password_hash || matchedDoc.password;
-                        const isPasswordValid = await window.verifyPassword(pass, storedCredential);
-
-                        if (isPasswordValid) {
-                            const normalizedRoles = window.normalizeRoles(matchedDoc.roles || matchedDoc.role, "teacher");
-                            teacherData = {
-                                teacher_id: matchedDoc.teacher_id || matchedDocId,
-                                name: matchedDoc.name || matchedDoc.full_name || user,
-                                username: matchedDoc.username || user.toLowerCase(),
-                                role: normalizedRoles[0] || "teacher",
-                                roles: normalizedRoles,
-                                assigned_grade: matchedDoc.assigned_grade || "ថ្នាក់ទី ១",
-                                assigned_room: matchedDoc.assigned_room || "«ក»",
-                                school_id: matchedDoc.school_id || "SCH-001",
-                                status: matchedDoc.status || "active"
-                            };
-
-                            // ការពារសុវត្ថិភាព (AUTH-05): បម្លែង Plaintext ទៅជា Salted Hash SHA-256 ដោយស្វ័យប្រវត្តិ
-                            const migrationUpdates = {
-                                last_login_at: firebase.firestore.FieldValue.serverTimestamp(),
-                                updated_at: new Date().toISOString()
-                            };
-                            if (storedCredential && !storedCredential.startsWith("sha256$")) {
-                                migrationUpdates.password_hash = await window.hashPassword(pass);
-                                migrationUpdates.password = firebase.firestore.FieldValue.delete();
-                            }
-                            window.db.collection("teachers").doc(matchedDocId).update(migrationUpdates).catch(console.warn);
-                        } else {
-                            throw new Error("លេខសម្ងាត់មិនត្រឹមត្រូវទេ!");
-                        }
-                    }
-                } catch (fsErr) {
-                    if (fsErr.message === "លេខសម្ងាត់មិនត្រឹមត្រូវទេ!") throw fsErr;
-                    console.warn("Firestore query note:", fsErr.message);
+                } else if (authErr.code === 'auth/wrong-password') {
+                    throw new Error("លេខសម្ងាត់មិនត្រឹមត្រូវទេ!");
+                } else if (authErr.code === 'auth/too-many-requests') {
+                    throw new Error("⚠️ ការចូលត្រូវបានចាក់សោបណ្តោះអាសន្នដោយសារបញ្ចូលលេខសម្ងាត់ខុសច្រើនដង! សូមរង់ចាំមួយសន្ទុះ។");
+                } else {
+                    throw authErr;
                 }
             }
 
-            // ជំហានទី ២៖ គណនីគំរូតួនាទីទាំង ៤ តាមជំពូកទី២ (Canonical Demo Roles with Salted Hashes - AUTH-05)
-            if (!teacherData) {
-                const uLower = user.toLowerCase();
-                const DEMO_ACCOUNTS = [
-                    {
-                        usernames: ["admin", "sysadmin"],
-                        hash: "sha256$a1b2c3d4e5f60718$6f090945bbac63e39704740bcae033f193d9ebccd14b1c8334dc48f9cebf68ef",
-                        data: {
-                            teacher_id: "TCH-SYSADMIN",
-                            name: "អ្នកគ្រប់គ្រងប្រព័ន្ធ (System Administrator)",
-                            username: "admin",
-                            role: "system_admin",
-                            roles: ["system_admin", "school_admin"],
-                            assigned_grade: "គ្រប់ថ្នាក់",
-                            assigned_room: "ទូទៅ",
-                            school_id: "SCH-001",
-                            status: "active"
-                        }
-                    },
-                    {
-                        usernames: ["schooladmin", "principal"],
-                        hash: "sha256$b2c3d4e5f6a10729$dd76a574799fc27b2c45cd74d0d676a6a0bf46d307c26f676f4f94012346c58a",
-                        data: {
-                            teacher_id: "TCH-SCHADMIN",
-                            name: "លោកនាយកសាលា (School Administrator)",
-                            username: "schooladmin",
-                            role: "school_admin",
-                            roles: ["school_admin"],
-                            assigned_grade: "គ្រប់ថ្នាក់",
-                            assigned_room: "ទូទៅ",
-                            school_id: "SCH-001",
-                            status: "active"
-                        }
-                    },
-                    {
-                        usernames: ["teacher", "tch-001"],
-                        hash: "sha256$c3d4e5f6a1b2073a$c7e76bad475902498e3af524dc854d54e5a6131cf6d1b9dfd17c7e0cca0da540",
-                        altHash: "sha256$d4e5f6a1b2c3074b$4b11d66ade252336d09f9598732a9244ab3f2857f771e769a3ee204badcdfb94",
-                        data: {
-                            teacher_id: "TCH-001",
-                            name: "លោកគ្រូ គំរូ (Teacher)",
-                            username: "teacher",
-                            role: "teacher",
-                            roles: ["teacher"],
-                            assigned_grade: "ថ្នាក់ទី ១",
-                            assigned_room: "«ក»",
-                            school_id: "SCH-001",
-                            status: "active"
-                        }
-                    },
-                    {
-                        usernames: ["viewer", "inspector"],
-                        hash: "sha256$e5f6a1b2c3d4075c$0ae1cd10bd20b1cf1c15fba068c3d69d2c0fb4e39ac29720005ac066157c6c4e",
-                        data: {
-                            teacher_id: "TCH-VIEWER",
-                            name: "មន្ត្រីត្រួតពិនិត្យ (Report Viewer)",
-                            username: "viewer",
-                            role: "report_viewer",
-                            roles: ["report_viewer"],
-                            assigned_grade: "គ្រប់ថ្នាក់",
-                            assigned_room: "ទូទៅ",
-                            school_id: "SCH-001",
-                            status: "active"
-                        }
-                    }
-                ];
-
-                for (const demo of DEMO_ACCOUNTS) {
-                    if (demo.usernames.includes(uLower)) {
-                        const isMatchPrimary = await window.verifyPassword(pass, demo.hash);
-                        const isMatchAlt = demo.altHash ? await window.verifyPassword(pass, demo.altHash) : false;
-                        if (isMatchPrimary || isMatchAlt) {
-                            teacherData = { ...demo.data };
-                            if (window.db) {
-                                const demoHash = await window.hashPassword(pass);
-                                window.db.collection("teachers").doc(teacherData.teacher_id).set({
-                                    ...teacherData,
-                                    password_hash: demoHash,
-                                    created_at: firebase.firestore.FieldValue.serverTimestamp(),
-                                    last_login_at: firebase.firestore.FieldValue.serverTimestamp()
-                                }, { merge: true }).catch(console.warn);
-                            }
-                            break;
-                        }
-                    }
-                }
-            }
-
-            // ជំហានទី ៣៖ ផ្ទៀងផ្ទាត់ជាមួយ Legacy Google Apps Script API (Fallback)
-            if (!teacherData && typeof window.apiPost === 'function') {
-                try {
-                    const res = await window.apiPost("loginUser", { username: user, password: pass });
-                    if (res && res.status === "success" && res.data) {
-                        const legRoles = window.normalizeRoles(res.data.roles || res.data.role, "teacher");
-                        teacherData = {
-                            ...res.data,
-                            roles: legRoles,
-                            role: legRoles[0] || "teacher",
-                            assigned_grade: res.data.assigned_grade || "ថ្នាក់ទី ១",
-                            assigned_room: res.data.assigned_room || "«ក»",
-                            school_id: res.data.school_id || "SCH-001",
-                            status: res.data.status || "active"
-                        };
-                        if (window.db) {
-                            window.db.collection("teachers").doc(teacherData.teacher_id).set({
-                                ...teacherData,
-                                password: pass
-                            }, { merge: true }).catch(console.warn);
-                        }
-                    }
-                } catch (legacyErr) {
-                    console.warn("Legacy login check failed:", legacyErr);
-                }
-            }
-
-            // ប្រសិនបើនៅតែរកមិនឃើញ
-            if (!teacherData) {
-                // កត់ត្រាចំនួនលើកដែលបញ្ចូលខុស
-                let failedCount = parseInt(localStorage.getItem('auth_failed_attempts') || '0', 10) + 1;
-                localStorage.setItem('auth_failed_attempts', failedCount.toString());
-
-                if (failedCount >= 5) {
-                    localStorage.setItem('auth_locked_until', (Date.now() + 5 * 60 * 1000).toString());
-                    localStorage.removeItem('auth_failed_attempts');
-                    throw new Error("⚠️ លោកគ្រូបានបញ្ចូលលេខសម្ងាត់ខុស ៥ ដង! ប្រព័ន្ធសូមចាក់សោ ៥ នាទីដើម្បីសុវត្ថិភាព។");
-                }
-                throw new Error(`ឈ្មោះគណនី ឬលេខសម្ងាត់មិនត្រឹមត្រូវទេ! (ព្យាយាមខុសលើកទី ${failedCount}/៥)`);
-            }
-
-            // ត្រួតពិនិត្យស្ថានភាពគណនី (AUTH-03: Account Status Active / Inactive / Locked)
-            if (teacherData.status && teacherData.status.toLowerCase() !== "active") {
-                throw new Error("⚠️ គណនីរបស់អ្នកត្រូវបានផ្អាក ឬចាក់សោ (Inactive/Locked)! សូមទាក់ទងអ្នកគ្រប់គ្រងសាលា។");
-            }
-
-            // ជោគជ័យ៖ សម្អាត Failed Attempts
-            localStorage.removeItem('auth_failed_attempts');
-            localStorage.removeItem('auth_locked_until');
-
-            const normalizedRoles = window.normalizeRoles(teacherData.roles || teacherData.role, "teacher");
-
-            // រក្សាទុក Session ពេញលេញ
-            localStorage.setItem('auth_teacher_id', teacherData.teacher_id);
-            localStorage.setItem('auth_teacher_name', teacherData.name);
-            localStorage.setItem('auth_username', teacherData.username || user);
-            localStorage.setItem('auth_role', normalizedRoles[0] || "teacher");
-            localStorage.setItem('auth_roles', JSON.stringify(normalizedRoles));
-            const isAdminRole = normalizedRoles.some(r => r === 'school_admin' || r === 'system_admin' || r === 'admin');
-            localStorage.setItem('auth_assigned_grade', isAdminRole ? "all" : (teacherData.assigned_grade || "ថ្នាក់ទី ១"));
-            localStorage.setItem('auth_assigned_room', isAdminRole ? "all" : (teacherData.assigned_room || "«ក»"));
-            localStorage.setItem('auth_school_id', teacherData.school_id || "SCH-001");
-            localStorage.setItem('auth_status', teacherData.status || "active");
-
-            this.state = {
-                isLoggedIn: true,
-                teacherId: teacherData.teacher_id,
-                name: teacherData.name,
-                username: teacherData.username || user,
-                role: normalizedRoles[0] || "teacher",
-                roles: normalizedRoles,
-                assigned_grade: teacherData.assigned_grade || "ថ្នាក់ទី ១",
-                assigned_room: teacherData.assigned_room || "«ក»",
-                school_id: teacherData.school_id || "SCH-001",
-                status: teacherData.status || "active"
-            };
-
-            window.AuthState = { 
-                ...this.state, 
-                teacherName: this.state.name,
-                teacher_level: this.state.assigned_grade,
-                teacher_room: this.state.assigned_room
-            };
-            window.AppState = window.AppState || {};
-            window.AppState.isLoggedIn = true;
-            window.AppState.teacherId = teacherData.teacher_id;
-            window.AppState.teacherName = teacherData.name;
-
-            this.startPermissionSyncListener(teacherData.teacher_id);
-
+            console.log("✅ Authenticated with Firebase Auth Identity:", userCred.user.uid);
             if (typeof showToast === 'function') showToast("ចូលប្រព័ន្ធបានជោគជ័យ! ✅");
-            if (typeof window.logAudit === 'function') {
-                window.logAudit("LOGIN", "auth", `បានចូលប្រព័ន្ធ: ${teacherData.name} (${teacherData.teacher_id}) | Roles: [${normalizedRoles.join(', ')}]`);
-            }
-            this.showWorkspace();
 
         } catch (error) {
             console.error("Login Error:", error);
@@ -593,29 +480,27 @@ window.AppAuth = {
         }
     },
 
-    // ៥. មុខងារចាកចេញពីប្រព័ន្ធ (Logout)
-    logout: function(silent = false) {
+    // ៥. មុខងារចាកចេញពីប្រព័ន្ធ (Logout with Firebase Auth SignOut)
+    logout: async function(silent = false) {
         if (!silent) {
             if (!confirm("តើលោកគ្រូ/អ្នកគ្រូពិតជាចង់ចាកចេញពីប្រព័ន្ធមែនទេ?")) return;
         }
-        if (typeof window.logAudit === 'function') window.logAudit("LOGOUT", "auth", "បានចាកចេញពីប្រព័ន្ធ");
+        if (typeof window.logAudit === 'function') window.logAudit("LOGOUT", "auth", "បានចាកចេញពីប្រព័ន្ធ (Firebase Auth)");
 
         if (typeof this.permissionListenerUnsubscribe === 'function') {
             try { this.permissionListenerUnsubscribe(); } catch(e) {}
             this.permissionListenerUnsubscribe = null;
         }
         
-        // សម្អាតតែ Auth Keys កុំឱ្យបាត់ Settings សាលា
-        localStorage.removeItem('auth_teacher_id');
-        localStorage.removeItem('auth_teacher_name');
-        localStorage.removeItem('auth_username');
-        localStorage.removeItem('auth_role');
-        localStorage.removeItem('auth_roles');
-        localStorage.removeItem('auth_assigned_grade');
-        localStorage.removeItem('auth_assigned_room');
-        localStorage.removeItem('auth_school_id');
-        localStorage.removeItem('auth_status');
-        localStorage.removeItem('activeMenu');
+        this.clearSessionState();
+
+        if (window.auth) {
+            try {
+                await window.auth.signOut();
+            } catch(e) {
+                console.warn("Firebase Auth signOut note:", e);
+            }
+        }
 
         location.reload();
     },
@@ -937,25 +822,21 @@ window.normalizeRoles = function(rolesInput, fallbackRole = "teacher") {
 
 // ទាញយក Roles ទាំងអស់របស់អ្នកប្រើប្រាស់បច្ចុប្បន្ន
 window.getUserRoles = function() {
+    const hasAuth = (window.auth && window.auth.currentUser) || (window.AppAuth && window.AppAuth.state && window.AppAuth.state.isLoggedIn);
+    if (!hasAuth) {
+        return [];
+    }
+
+    if (window.AppAuth && window.AppAuth.state && Array.isArray(window.AppAuth.state.roles) && window.AppAuth.state.roles.length > 0) {
+        return window.AppAuth.state.roles;
+    }
     if (window.AuthState && Array.isArray(window.AuthState.roles) && window.AuthState.roles.length > 0) {
         return window.AuthState.roles;
     }
-    if (window.AppAuth && window.AppAuth.state && window.AppAuth.state.isLoggedIn && Array.isArray(window.AppAuth.state.roles) && window.AppAuth.state.roles.length > 0) {
-        return window.AppAuth.state.roles;
-    }
     
-    const storedRolesJson = localStorage.getItem('auth_roles');
-    if (storedRolesJson) {
-        try {
-            const parsed = JSON.parse(storedRolesJson);
-            if (Array.isArray(parsed) && parsed.length > 0) return parsed;
-        } catch(e) {}
-    }
-    const singleRole = localStorage.getItem('auth_role') || 'teacher';
-    return window.normalizeRoles(singleRole, 'teacher');
+    return ["teacher"];
 };
 
-// ពិនិត្យថាតើអ្នកប្រើប្រាស់មានតួនាទីជាក់លាក់ឬទេ
 window.hasRole = function(role) {
     const roles = window.getUserRoles();
     const target = String(role).toLowerCase().trim();
@@ -1258,8 +1139,18 @@ window.saveTeacherAccount = async function(teacherObj) {
         docData.created_at = new Date().toISOString();
     }
 
-    if (teacherObj.password && teacherObj.password.length >= 6) {
-        docData.password_hash = await window.hashPassword(teacherObj.password);
+    // ប្រសិនបើជាគណនីថ្មី និងមានបញ្ចូល password: បង្កើត User ក្នុង Firebase Auth
+    if (isNew && teacherObj.password && teacherObj.password.length >= 6) {
+        try {
+            const email = window.toAuthEmail(docData.username);
+            const secondaryApp = firebase.apps.find(a => a.name === "CMSSecondary") || firebase.initializeApp(firebaseConfig, "CMSSecondary");
+            const userCred = await secondaryApp.auth().createUserWithEmailAndPassword(email, teacherObj.password);
+            docData.auth_uid = userCred.user.uid;
+            await secondaryApp.auth().signOut();
+            console.log("✅ Created teacher in Firebase Auth:", docData.auth_uid);
+        } catch(authCreateErr) {
+            console.warn("Firebase Auth secondary user creation note:", authCreateErr.message);
+        }
     }
 
     // ១. រក្សាទុកក្នុង Firestore (ធានាមិនផ្ទុក Plaintext Password - AUTH-05)
@@ -1401,3 +1292,95 @@ window.resetTeacherPasswordByAdmin = async function(teacherId, newPassword) {
 document.addEventListener("DOMContentLoaded", () => {
     window.AppAuth.init();
 });
+
+
+// =========================================================================
+// Firebase Auth Legacy Migration Helper (P0 & P1 Remediation)
+// =========================================================================
+window.migrateAndAuthenticateLegacyUser = async function(user, pass, email) {
+    if (!window.db || !window.auth) return null;
+    const uLower = user.toLowerCase().trim();
+
+    try {
+        let matchedDoc = null;
+        let matchedDocId = null;
+
+        const userSnap = await window.db.collection("teachers")
+            .where("username", "==", uLower)
+            .limit(1)
+            .get();
+
+        if (!userSnap.empty) {
+            matchedDoc = userSnap.docs[0].data();
+            matchedDocId = userSnap.docs[0].id;
+        } else {
+            const idSnap = await window.db.collection("teachers")
+                .where("teacher_id", "==", user.toUpperCase().trim())
+                .limit(1)
+                .get();
+            if (!idSnap.empty) {
+                matchedDoc = idSnap.docs[0].data();
+                matchedDocId = idSnap.docs[0].id;
+            }
+        }
+
+        // ប្រសិនបើជា admin ដំបូងបង្អស់ ហើយមិនទាន់មានក្នុង Firestore ទាល់តែសោះ
+        if (!matchedDoc && (uLower === "admin" || uLower === "sysadmin")) {
+            console.log("🔧 Initializing Root Admin in Firebase Auth...");
+            const newCred = await window.auth.createUserWithEmailAndPassword(email, pass);
+            const rootAdminData = {
+                teacher_id: "TCH-SYSADMIN",
+                name: "អ្នកគ្រប់គ្រងប្រព័ន្ធ (System Administrator)",
+                username: "admin",
+                roles: ["system_admin", "school_admin"],
+                role: "system_admin",
+                assigned_grade: "all",
+                assigned_room: "all",
+                school_id: "SCH-001",
+                status: "active",
+                auth_uid: newCred.user.uid,
+                created_at: new Date().toISOString()
+            };
+            await window.db.collection("teachers").doc("TCH-SYSADMIN").set(rootAdminData);
+            return newCred;
+        }
+
+        if (matchedDoc) {
+            const storedCredential = matchedDoc.password_hash || matchedDoc.password;
+            let isValid = false;
+
+            if (storedCredential) {
+                if (typeof storedCredential === 'string' && storedCredential.startsWith('sha256$')) {
+                    const parts = storedCredential.split('$');
+                    if (parts.length === 3) {
+                        const computed = await window.hashPassword(pass, parts[1]);
+                        isValid = (computed === storedCredential);
+                    }
+                } else {
+                    isValid = (storedCredential === pass);
+                }
+            } else if (matchedDoc.roles?.includes("system_admin") || matchedDoc.role === "system_admin") {
+                isValid = pass.length >= 6;
+            }
+
+            if (isValid) {
+                console.log(`🔐 Migrating teacher "${uLower}" to Firebase Auth identity...`);
+                const newCred = await window.auth.createUserWithEmailAndPassword(email, pass);
+                
+                // លុប password និង password_hash ចេញពី Firestore ជាស្ថាពរ
+                await window.db.collection("teachers").doc(matchedDocId).update({
+                    auth_uid: newCred.user.uid,
+                    password: firebase.firestore.FieldValue.delete(),
+                    password_hash: firebase.firestore.FieldValue.delete(),
+                    migrated_to_auth_at: firebase.firestore.FieldValue.serverTimestamp()
+                }).catch(console.warn);
+
+                return newCred;
+            }
+        }
+    } catch (migErr) {
+        console.warn("Migration error:", migErr);
+    }
+
+    return null;
+};
