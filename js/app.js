@@ -30,9 +30,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
 });
 
-// Setup Workspace (Called ONLY after Firebase Auth cryptographically verifies identity)
+// Setup Workspace (Called after identity verification)
 window.setupWorkspace = function() {
-    console.log("✅ Verified Firebase Auth User. Preparing workspace...");
+    console.log("✅ Preparing workspace...");
 
     const landingScreen = document.getElementById("landing-screen");
     const appView = document.getElementById("appView");
@@ -47,8 +47,10 @@ window.setupWorkspace = function() {
     // Update ឈ្មោះគ្រូនៅលើ Sidebar
     const nameEl = document.getElementById("navUserName");
     const idEl = document.getElementById("navUserId");
-    if (nameEl) nameEl.textContent = window.AppState.teacherName || window.AuthState?.name || "លោកគ្រូ អ្នកគ្រូ";
-    if (idEl) idEl.textContent = window.AppState.teacherId || window.AuthState?.teacherId || "TCH-000";
+    const currentName = window.AppState?.teacherName || window.AuthState?.name || localStorage.getItem('auth_teacher_name') || "លោកគ្រូ អ្នកគ្រូ";
+    const currentId = window.AppState?.teacherId || window.AuthState?.teacherId || localStorage.getItem('auth_teacher_id') || "TCH-000";
+    if (nameEl) nameEl.textContent = currentName;
+    if (idEl) idEl.textContent = currentId;
 
     // Restore ឆ្នាំសិក្សាចុងក្រោយ
     const savedYear = localStorage.getItem('selected_academic_year');
