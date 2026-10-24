@@ -94,50 +94,86 @@ h6,
 }
 
 /* ==========================================
-   PRINT ONLY WORKSHEET (ព្រីនតែសន្លឹកការងារសុទ្ធ)
+   STANDARD PRINT STYLING (ស្តង់ដារបោះពុម្ពទូទាំងប្រព័ន្ធ)
    ========================================== */
 @media print {
-  @page {
-    size: A4 portrait; /* ក្រដាស A4 ផ្តេក */
-    margin: 6mm 8mm;    /* រឹមក្រដាសតូចល្មមស្អាត */
+  /* លាក់ធាតុដែលមិនចាំបាច់ពេលបោះពុម្ព */
+  .no-print, 
+  nav, 
+  aside, 
+  header, 
+  footer, 
+  button, 
+  .no-print *,
+  #sidebar, 
+  #mobileBottomNav, 
+  #landing-screen, 
+  .toast, 
+  .notification-center,
+  .modal-backdrop {
+    display: none !important;
   }
 
-  /* លាក់ធាតុទាំងអស់លើគេហទំព័រជាមុន */
-  body * {
-    visibility: hidden !important;
-  }
-
-  /* បង្ហាញតែសន្លឹកការងារណាដែលមាន class "print-active-sheet" និងកូនៗរបស់វា */
-  .print-active-sheet,
-  .print-active-sheet * {
-    visibility: visible !important;
-  }
-
-  /* រុញសន្លឹកការងារមកដាក់លើកំពូលទំព័រ A4 ឱ្យពេញ */
-  .print-active-sheet {
-    position: absolute !important;
-    left: 0 !important;
-    top: 0 !important;
+  /* សម្អាតរឹម និងផ្ទៃខាងក្រោយទំព័រដើម */
+  html, body {
     width: 100% !important;
+    height: auto !important;
     margin: 0 !important;
     padding: 0 !important;
-    border: none !important;
-    box-shadow: none !important;
     background: white !important;
+    color: black !important;
+    font-family: 'Siemreap', sans-serif !important;
   }
 
-  /* លុប Border ប្រអប់វាយលេខ/អក្សរពេលព្រីន */
-  .print-active-sheet input {
-    border: none !important;
-    background: transparent !important;
-  }
-
-  /* បង្ខំឱ្យចេញពណ៌ Background ពណ៌បៃតង និងលឿងលើក្រដាស */
+  /* បង្ខំឱ្យពណ៌ និងរូបភាព Background ចេញច្បាស់គ្រប់ម៉ាស៊ីនព្រីន */
   * {
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
+    color-adjust: exact !important;
+    box-sizing: border-box;
+  }
+
+  /* ការពារកុំឱ្យតារាងដាច់កណ្តាលជួរ (Avoid Page Breaks inside Rows) */
+  table {
+    width: 100% !important;
+    border-collapse: collapse !important;
+    page-break-inside: auto !important;
+  }
+  tr {
+    page-break-inside: avoid !important;
+    page-break-after: auto !important;
+  }
+  thead {
+    display: table-header-group !important;
+  }
+  tfoot {
+    display: table-footer-group !important;
+  }
+
+  /* ដក Border និង Background របស់ប្រអប់ Input ពេល Print */
+  input, select, textarea {
+    border: none !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    -webkit-appearance: none !important;
+    appearance: none !important;
+    color: black !important;
+  }
+
+  /* លុបស្រមោល និងស៊ុមសិប្បនិម្មិតពេលព្រីន */
+  .shadow-xl, .shadow-2xl, .shadow-lg, .shadow-md, .shadow-sm {
+    box-shadow: none !important;
   }
   
+  /* បង្ខំទំព័រថ្មី (Page Break Utilities) */
+  .page-break-always {
+    page-break-before: always !important;
+    break-before: page !important;
+  }
+  .avoid-break {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
 }
 
 /* បន្ថែមនៅខាងក្រោមគេនៃ style.css របស់អ្នក */
@@ -291,28 +327,8 @@ body {
     font-weight: 600;
 }
 
-/* ៦. ការកំណត់សម្រាប់ពេលបោះពុម្ព (Print Settings) */
+/* ៦. ការកំណត់បន្ថែមសម្រាប់ពេលបោះពុម្ព (Print Cleanups) */
 @media print {
-    /* លាក់អ្វីដែលមិនចាំបាច់ពេល Print */
-    .no-print, nav, aside, header, button, .shadow-xl {
-        display: none !important;
-    }
-
-    /* ដក Background ពណ៌ស និង Margin របស់ Browser ចោល */
-    body, html {
-        width: 100% !important;
-        margin: 0 !important;
-        padding: 0 !important;
-        background: transparent !important;
-    }
-
-    /* ធ្វើឱ្យ Background ពណ៌ចេញច្បាស់ពេល Print */
-    * {
-        -webkit-print-color-adjust: exact !important;
-        print-color-adjust: exact !important;
-    }
-
-    /* លុបស៊ុមនិងស្រមោលក្រដាសសិប្បនិម្មិតចេញ */
     #printSeatingTarget, 
     #print-card-target, 
     #top5HonorPrintArea, 
@@ -321,7 +337,23 @@ body {
         margin: 0 !important;
         border: none !important;
     }
+
+    .score-input { 
+        border: none !important; 
+        background: transparent !important; 
+        -moz-appearance: textfield !important; 
+        appearance: none !important; 
+        padding: 0 !important;
+        color: black !important;
+    }
+    
+    .score-input::-webkit-outer-spin-button,
+    .score-input::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
 }
+
 /* បង្កើតអក្សរបញ្ឈរសម្រាប់ក្បាលតារាង */
 .header-vertical {
     writing-mode: vertical-rl;
@@ -332,45 +364,6 @@ body {
     text-align: center;
     vertical-align: middle;
     margin: 0 auto;
-}
-
-/* រចនាបថជំនួយសម្រាប់បោះពុម្ព (Print) */
-@media print {
-    /* លុបពាក្យ size ចេញ ទុកតែ margin ដើម្បីឱ្យ Browser បើកសិទ្ធិឱ្យយើងរើស Landscape/Portrait ដោយខ្លួនឯង */
-    @page { margin: 10mm; } 
-    
-    .no-print { display: none !important; }
-    
-    /* ធ្វើឱ្យ Input box ក្លាយជាអត្ថបទធម្មតា គ្មានស៊ុម គ្មាន Background */
-    .score-input { 
-        border: none !important; 
-        background: transparent !important; 
-        -moz-appearance: textfield !important; 
-        appearance: none !important; 
-        padding: 0 !important;
-        color: black !important;
-    }
-    
-    /* លាក់សញ្ញាព្រួញឡើងចុះរបស់ Input Number ពេល Print */
-    .score-input::-webkit-outer-spin-button,
-    .score-input::-webkit-inner-spin-button {
-        -webkit-appearance: none;
-        margin: 0;
-    }
-
-    
-    /* លាក់សញ្ញាឡើងចុះ (Spin Button) របស់ Input Number */
-    .score-input::-webkit-outer-spin-button,
-    .score-input::-webkit-inner-spin-button {
-        -webkit-appearance: none;
-        margin: 0;
-    }
-
-    /* ធានាថា Background Color ដែលដាក់ inline style ត្រូវបានចេញមកទាំងអស់ */
-    * {
-        -webkit-print-color-adjust: exact !important;
-        print-color-adjust: exact !important;
-    }
 }
 
 /* ========================================================

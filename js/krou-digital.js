@@ -111,9 +111,11 @@ window.KrouDigital = {
                         </select>
                     </div>
                     <div class="flex items-center gap-2">
-                        <button onclick="window.print()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shadow transition flex items-center gap-1.5">
-                            <i class="fa-solid fa-print"></i> បោះពុម្ព A4
-                        </button>
+                        ${window.CMSPrintManager ? window.CMSPrintManager.renderToolbarHtml('reportKaPrintArea', 'landscape', 'A4', 100) : `
+                            <button onclick="window.print()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shadow transition flex items-center gap-1.5">
+                                <i class="fa-solid fa-print"></i> បោះពុម្ព A4
+                            </button>
+                        `}
                     </div>
                 </div>
 
@@ -291,9 +293,11 @@ window.KrouDigital = {
                         </select>
                     </div>
                     <div class="flex items-center gap-2">
-                        <button onclick="window.print()" class="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold shadow transition flex items-center gap-1.5">
-                            <i class="fa-solid fa-print"></i> បោះពុម្ព A4
-                        </button>
+                        ${window.CMSPrintManager ? window.CMSPrintManager.renderToolbarHtml('reportKhaPrintArea', 'portrait', 'A4', 100) : `
+                            <button onclick="window.print()" class="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold shadow transition flex items-center gap-1.5">
+                                <i class="fa-solid fa-print"></i> បោះពុម្ព A4
+                            </button>
+                        `}
                     </div>
                 </div>
 
@@ -419,9 +423,11 @@ window.KrouDigital = {
                         ${this._getClassSelectorHtml(curLevel, curRoom, 'renderReportKoKho')}
                     </div>
                     <div class="flex items-center gap-2">
-                        <button onclick="window.print()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shadow transition flex items-center gap-1.5">
-                            <i class="fa-solid fa-print"></i> បោះពុម្ព A4
-                        </button>
+                        ${window.CMSPrintManager ? window.CMSPrintManager.renderToolbarHtml('reportKoKhoPrintArea', 'landscape', 'A4', 100) : `
+                            <button onclick="window.print()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shadow transition flex items-center gap-1.5">
+                                <i class="fa-solid fa-print"></i> បោះពុម្ព A4
+                            </button>
+                        `}
                     </div>
                 </div>
 
@@ -537,12 +543,14 @@ window.KrouDigital = {
                     <div class="flex flex-wrap items-center gap-2">
                         <span class="text-xs font-bold text-slate-500">ជ្រើសរើសថ្នាក់៖</span>
                         ${this._getClassSelectorHtml(curLevel, curRoom, 'renderHealthTracker')}
-                        <button onclick="window.KrouDigital.saveHealthRecords()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow transition flex items-center gap-1.5 ml-2">
+                        <button onclick="window.KrouDigital.saveHealthRecords()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow transition flex items-center gap-1.5 ml-1">
                             <i class="fa-solid fa-floppy-disk"></i> រក្សាទុក
                         </button>
-                        <button onclick="window.print()" class="px-4 py-2 bg-slate-800 hover:bg-slate-900 text-white rounded-xl text-xs font-bold shadow transition flex items-center gap-1.5">
-                            <i class="fa-solid fa-print"></i> បោះពុម្ព
-                        </button>
+                        ${window.CMSPrintManager ? window.CMSPrintManager.renderToolbarHtml('healthTrackerArea', 'landscape', 'A4', 100) : `
+                            <button onclick="window.print()" class="px-4 py-2 bg-slate-800 hover:bg-slate-900 text-white rounded-xl text-xs font-bold shadow transition flex items-center gap-1.5">
+                                <i class="fa-solid fa-print"></i> បោះពុម្ព
+                            </button>
+                        `}
                     </div>
                 </div>
 
@@ -712,9 +720,11 @@ window.KrouDigital = {
                     </div>
 
                     <div class="flex items-center gap-2">
-                        <button onclick="window.print()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shadow transition flex items-center gap-1.5">
-                            <i class="fa-solid fa-print"></i> បោះពុម្ព (Print A4)
-                        </button>
+                        ${window.CMSPrintManager ? window.CMSPrintManager.renderToolbarHtml('certificatePrintArea', 'landscape', 'A4', 100) : `
+                            <button onclick="window.print()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shadow transition flex items-center gap-1.5">
+                                <i class="fa-solid fa-print"></i> បោះពុម្ព (Print A4)
+                            </button>
+                        `}
                         <button onclick="document.getElementById('certificateModal').classList.add('hidden')" class="w-9 h-9 bg-slate-100 hover:bg-rose-100 text-slate-600 hover:text-rose-600 rounded-xl font-bold flex items-center justify-center transition">
                             <i class="fa-solid fa-xmark"></i>
                         </button>

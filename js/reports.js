@@ -214,9 +214,11 @@ window.loadReportsView = function() {
                     </div>
 
                     <div class="flex items-center gap-2">
-                        <button onclick="window.printCurrentReport()" class="px-5 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-xl text-xs font-bold shadow-md shadow-blue-500/30 transition flex items-center gap-2 active:scale-95 outline-none">
-                            <i class="fa-solid fa-print"></i> បោះពុម្ព
-                        </button>
+                        ${window.CMSPrintManager ? window.CMSPrintManager.renderToolbarHtml('reportPaperArea', 'portrait', 'A4', 100) : `
+                            <button onclick="window.printCurrentReport()" class="px-5 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-xl text-xs font-bold shadow-md shadow-blue-500/30 transition flex items-center gap-2 active:scale-95 outline-none">
+                                <i class="fa-solid fa-print"></i> បោះពុម្ព
+                            </button>
+                        `}
                     </div>
                 </div>
 
@@ -320,9 +322,27 @@ window.closeReportDetail = function() {
 };
 
 window.printCurrentReport = function() {
+    const paperArea = document.getElementById("reportPaperArea");
+    if (!paperArea) {
+        window.print();
+        return;
+    }
     const titleEl = document.getElementById("reportDetailTitle");
-    if (titleEl && titleEl.textContent === "តារាងស្ថិតិសិស្ស") {
-        window.printStudentStatsReport();
+    const isLandscape = window.currentActiveReportType === 'report_ka' || 
+                        window.currentActiveReportType === 'report_ko_kho' || 
+                        window.currentActiveReportType === 'health' || 
+                        window.currentActiveReportType === 'attendance';
+    
+    if (window.CMSPrintManager) {
+        const paper = document.getElementById("print_paper_reportPaperArea")?.value || 'A4';
+        const orient = document.getElementById("print_orient_reportPaperArea")?.value || (isLandscape ? 'landscape' : 'portrait');
+        const scale = document.getElementById("print_scale_reportPaperArea")?.value || 100;
+        window.CMSPrintManager.print(paperArea, {
+            paperSize: paper,
+            orientation: orient,
+            scale: parseInt(scale, 10),
+            title: titleEl ? titleEl.textContent : "របាយការណ៍"
+        });
     } else {
         window.print();
     }

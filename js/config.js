@@ -738,96 +738,197 @@ function updateSyncBadgeUI(count) {
 }
 
 // =========================================================
-// ៣. មុខងារបោះពុម្ព (Print Iframe with Fonts Support)
+// ៣. មុខងារបោះពុម្ពស្តង់ដារកម្រិតខ្ពស់ (Universal CMS Print Manager)
 // =========================================================
-window.printSpecificSheet = function(elementId, orientation = 'landscape') {
-  const target = document.getElementById(elementId);
-  if (!target) {
-    alert("រកមិនឃើញសន្លឹកការងារសម្រាប់បោះពុម្ពទេ!");
-    return;
-  }
+window.CMSPrintManager = {
+    // បោះពុម្ព Element ឬ ID ណាមួយ ជាមួយជម្រើសទំហំក្រដាស ទិសដៅ និងមាត្រដ្ឋាន (Scale)
+    print: function(elementOrId, options = {}) {
+        const target = typeof elementOrId === 'string' ? document.getElementById(elementOrId) : elementOrId;
+        if (!target) {
+            console.error("Print target not found:", elementOrId);
+            if (typeof showToast === 'function') showToast("រកមិនឃើញផ្ទាំងសម្រាប់បោះពុម្ពទេ!", "error");
+            else alert("រកមិនឃើញផ្ទាំងសម្រាប់បោះពុម្ពទេ!");
+            return;
+        }
 
-  let oldIframe = document.getElementById("print_frame_helper");
-  if (oldIframe) oldIframe.remove();
+        const paperSize = options.paperSize || 'A4';
+        const orientation = options.orientation || 'portrait';
+        const scale = options.scale ? parseInt(options.scale, 10) : 100;
+        const margin = options.margin || (paperSize === 'A3' ? '10mm' : '6mm');
+        const title = options.title || document.title || "បោះពុម្ពឯកសារ";
 
-  const iframe = document.createElement("iframe");
-  iframe.id = "print_frame_helper";
-  iframe.style.position = "fixed";
-  iframe.style.right = "0";
-  iframe.style.bottom = "0";
-  iframe.style.width = "0";
-  iframe.style.height = "0";
-  iframe.style.border = "0";
-  document.body.appendChild(iframe);
+        let oldIframe = document.getElementById("cms_print_frame_helper");
+        if (oldIframe) oldIframe.remove();
 
-  const clone = target.cloneNode(true);
-  
-  const origInputs = target.querySelectorAll("input, select, textarea");
-  const cloneInputs = clone.querySelectorAll("input, select, textarea");
-  
-  origInputs.forEach((inp, idx) => {
-    if (cloneInputs[idx]) {
-      const span = document.createElement("span");
-      if (inp.tagName === "SELECT") {
-          span.textContent = inp.options[inp.selectedIndex]?.text || "";
-      } else {
-          span.textContent = inp.value || "";
-      }
-      span.style.cssText = "font-weight:bold; font-family:monospace; display:inline-block; text-align:center;";
-      cloneInputs[idx].parentNode.replaceChild(span, cloneInputs[idx]);
+        const iframe = document.createElement("iframe");
+        iframe.id = "cms_print_frame_helper";
+        iframe.style.position = "fixed";
+        iframe.style.right = "0";
+        iframe.style.bottom = "0";
+        iframe.style.width = "0";
+        iframe.style.height = "0";
+        iframe.style.border = "0";
+        iframe.style.zIndex = "-9999";
+        document.body.appendChild(iframe);
+
+        const clone = target.cloneNode(true);
+        // ដកចេញប៊ូតុង និងផ្ទាំងដែលមិនចាំបាច់ពេល print (.no-print)
+        clone.querySelectorAll(".no-print").forEach(el => el.remove());
+
+        // បម្លែង input, select, textarea ទៅជាអត្ថបទច្បាស់លាស់
+        const origInputs = target.querySelectorAll("input, select, textarea");
+        const cloneInputs = clone.querySelectorAll("input, select, textarea");
+        origInputs.forEach((inp, idx) => {
+            if (cloneInputs[idx]) {
+                const span = document.createElement("span");
+                if (inp.tagName === "SELECT") {
+                    span.textContent = inp.options[inp.selectedIndex]?.text || "";
+                } else {
+                    span.textContent = inp.value || "";
+                }
+                span.style.cssText = "font-weight:bold; display:inline-block; text-align:center; padding: 2px 4px;";
+                cloneInputs[idx].parentNode.replaceChild(span, cloneInputs[idx]);
+            }
+        });
+
+        const doc = iframe.contentWindow.document;
+        doc.open();
+        doc.write(`
+            <!DOCTYPE html>
+            <html lang="km">
+            <head>
+                <meta charset="UTF-8">
+                <title>${title}</title>
+                <link rel="preconnect" href="https://fonts.googleapis.com">
+                <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+                <link href="https://fonts.googleapis.com/css2?family=Moul&family=Siemreap&display=swap" rel="stylesheet">
+                <script src="https://cdn.tailwindcss.com"><\/script>
+                <script>
+                    tailwind.config = {
+                        theme: {
+                            extend: {
+                                fontFamily: {
+                                    siemreap: ['Siemreap', 'sans-serif'],
+                                    moul: ['Moul', 'sans-serif']
+                                }
+                            }
+                        }
+                    }
+                <\/script>
+                <style>
+                    @page {
+                        size: ${paperSize} ${orientation};
+                        margin: ${margin};
+                    }
+                    * {
+                        box-sizing: border-box;
+                        -webkit-print-color-adjust: exact !important;
+                        print-color-adjust: exact !important;
+                        color-adjust: exact !important;
+                    }
+                    html, body {
+                        width: 100% !important;
+                        margin: 0 !important;
+                        padding: 0 !important;
+                        background: white !important;
+                        color: #0f172a !important;
+                        font-family: 'Siemreap', sans-serif !important;
+                    }
+                    .font-moul { font-family: 'Moul', serif !important; }
+                    .font-siemreap { font-family: 'Siemreap', sans-serif !important; }
+                    .no-print { display: none !important; }
+                    table {
+                        width: 100% !important;
+                        border-collapse: collapse !important;
+                        page-break-inside: auto !important;
+                    }
+                    tr {
+                        page-break-inside: avoid !important;
+                        page-break-after: auto !important;
+                    }
+                    thead { display: table-header-group !important; }
+                    tfoot { display: table-footer-group !important; }
+                    
+                    /* Scale / Zoom Support */
+                    .cms-print-container {
+                        width: 100%;
+                        margin: 0 auto;
+                        zoom: ${scale / 100};
+                    }
+                    @supports not (zoom: 1) {
+                        .cms-print-container {
+                            transform: scale(${scale / 100});
+                            transform-origin: top center;
+                            width: ${scale < 100 ? (100 / (scale / 100)) + '%' : '100%'};
+                        }
+                    }
+                </style>
+            </head>
+            <body>
+                <div class="cms-print-container">
+                    ${clone.innerHTML}
+                </div>
+            </body>
+            </html>
+        `);
+        doc.close();
+
+        setTimeout(() => {
+            iframe.contentWindow.focus();
+            iframe.contentWindow.print();
+        }, 600);
+    },
+
+    // Toolbar អន្តរកម្មសម្រាប់កំណត់ប្រភេទក្រដាស និងមាត្រដ្ឋាន
+    renderToolbarHtml: function(targetElementId, defaultOrientation = 'landscape', defaultPaper = 'A4', defaultScale = 100) {
+        return `
+            <div class="flex flex-wrap items-center gap-2 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-1.5 shadow-sm text-xs no-print">
+                <i class="fa-solid fa-sliders text-indigo-600 dark:text-indigo-400"></i>
+                <span class="font-bold text-slate-500">ក្រដាស៖</span>
+                <select id="print_paper_${targetElementId}" class="bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg px-2 py-1 font-bold text-slate-700 dark:text-white outline-none cursor-pointer">
+                    <option value="A4" ${defaultPaper === 'A4' ? 'selected' : ''}>A4</option>
+                    <option value="A3" ${defaultPaper === 'A3' ? 'selected' : ''}>A3 (ទំហំធំ)</option>
+                    <option value="Letter" ${defaultPaper === 'Letter' ? 'selected' : ''}>Letter</option>
+                    <option value="Legal" ${defaultPaper === 'Legal' ? 'selected' : ''}>Legal</option>
+                </select>
+
+                <span class="font-bold text-slate-500 ml-1">ទិស៖</span>
+                <select id="print_orient_${targetElementId}" class="bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg px-2 py-1 font-bold text-indigo-600 dark:text-indigo-400 outline-none cursor-pointer">
+                    <option value="landscape" ${defaultOrientation === 'landscape' ? 'selected' : ''}>ផ្តេក (Landscape)</option>
+                    <option value="portrait" ${defaultOrientation === 'portrait' ? 'selected' : ''}>បញ្ឈរ (Portrait)</option>
+                </select>
+
+                <span class="font-bold text-slate-500 ml-1">មាត្រដ្ឋាន (Scale)៖</span>
+                <select id="print_scale_${targetElementId}" class="bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg px-2 py-1 font-bold text-rose-600 dark:text-rose-400 outline-none cursor-pointer">
+                    <option value="120" ${defaultScale === 120 ? 'selected' : ''}>120%</option>
+                    <option value="110" ${defaultScale === 110 ? 'selected' : ''}>110%</option>
+                    <option value="100" ${defaultScale === 100 ? 'selected' : ''}>100% (ធម្មតា)</option>
+                    <option value="90" ${defaultScale === 90 ? 'selected' : ''}>90% (សន្សំ)</option>
+                    <option value="80" ${defaultScale === 80 ? 'selected' : ''}>80% (សន្សំ)</option>
+                    <option value="75" ${defaultScale === 75 ? 'selected' : ''}>75% (បង្រួម)</option>
+                </select>
+
+                <button onclick="window.CMSPrintManager.executePrintWithToolbar('${targetElementId}')" class="px-4 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-bold shadow flex items-center gap-1.5 ml-2 transition">
+                    <i class="fa-solid fa-print"></i> ព្រីន (Print)
+                </button>
+            </div>
+        `;
+    },
+
+    executePrintWithToolbar: function(targetElementId) {
+        const paper = document.getElementById(`print_paper_${targetElementId}`)?.value || 'A4';
+        const orient = document.getElementById(`print_orient_${targetElementId}`)?.value || 'landscape';
+        const scale = document.getElementById(`print_scale_${targetElementId}`)?.value || 100;
+        this.print(targetElementId, {
+            paperSize: paper,
+            orientation: orient,
+            scale: parseInt(scale, 10)
+        });
     }
-  });
+};
 
-  const doc = iframe.contentWindow.document;
-  doc.open();
-  doc.write(`
-    <!DOCTYPE html>
-    <html lang="km">
-    <head>
-      <meta charset="UTF-8">
-      <title>បោះពុម្ពឯកសារ</title>
-      
-      <link rel="preconnect" href="https://fonts.googleapis.com">
-      <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-      <link href="https://fonts.googleapis.com/css2?family=Moul&family=Siemreap&display=swap" rel="stylesheet">
-      
-      <script src="https://cdn.tailwindcss.com"><\/script>
-      <script>
-        tailwind.config = { theme: { extend: { fontFamily: { siemreap: ['Siemreap', 'sans-serif'], moul: ['Moul', 'sans-serif'] } } } }
-      <\/script>
-
-      <style>
-        @page { 
-          size: A4 ${orientation}; 
-          margin: 8mm; 
-        }
-        
-        @media print {
-          body, html { width: 100% !important; margin: 0 !important; padding: 0 !important; background: white !important; }
-          #${elementId}, .bg-white, .shadow-xl { max-width: 100% !important; width: 100% !important; border: none !important; box-shadow: none !important; padding: 0 !important; }
-        }
-
-        * { box-sizing: border-box; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-        body { color: black !important; font-family: 'Siemreap', sans-serif !important; }
-        .font-moul { font-family: 'Moul', serif !important; font-weight: normal !important;}
-        .font-siemreap { font-family: 'Siemreap', sans-serif !important; font-weight: 500 !important; }
-        .no-print { display: none !important; }
-        table { width: 100%; border-collapse: collapse; }
-        th, td { border: 1px solid black !important; }
-        .border-dashed { border-style: dashed !important; }
-      </style>
-    </head>
-    <body>
-      ${clone.innerHTML}
-    </body>
-    </html>
-  `);
-  doc.close();
-
-  setTimeout(() => {
-    iframe.contentWindow.focus();
-    iframe.contentWindow.print();
-  }, 1500); 
+window.printSpecificSheet = function(elementId, orientation = 'landscape') {
+    window.CMSPrintManager.print(elementId, { orientation });
 };
 
 

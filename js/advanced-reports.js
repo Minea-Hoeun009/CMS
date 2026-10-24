@@ -54,9 +54,11 @@ window.AdvancedReports = {
                     </div>
 
                     <div class="flex items-center gap-2">
-                        <button onclick="window.print()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shadow-md transition flex items-center gap-1.5">
-                            <i class="fa-solid fa-print"></i> បោះពុម្ព (Print)
-                        </button>
+                        ${window.CMSPrintManager ? window.CMSPrintManager.renderToolbarHtml('printableReportCard', 'portrait', 'A4', 100) : `
+                            <button onclick="window.print()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shadow-md transition flex items-center gap-1.5">
+                                <i class="fa-solid fa-print"></i> បោះពុម្ព (Print)
+                            </button>
+                        `}
                         <button onclick="window.AdvancedReports.exportReportCardPDF('${student.name}')" class="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold shadow-md transition flex items-center gap-1.5">
                             <i class="fa-solid fa-file-pdf"></i> ទាញយក PDF
                         </button>
