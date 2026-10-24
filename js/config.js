@@ -2,8 +2,21 @@
 // ឯកសារ js/config.js (Advanced Cloud Sync & Multi-Teacher API)
 // ==========================================
 
-// 👉 URL របស់ Google Apps Script 
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwSww8UsHFDSwQ3wzECa-FhDf3A4WMstrbI5UTDNga-A8vJ9DUw4laVtWrlMHmijK5p/exec";
+// 👉 URL របស់ Google Apps Script (Default Fallback & Dynamic Resolver)
+window.DEFAULT_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwSww8UsHFDSwQ3wzECa-FhDf3A4WMstrbI5UTDNga-A8vJ9DUw4laVtWrlMHmijK5p/exec";
+
+window.getScriptUrl = function() {
+  if (window.appSettings && window.appSettings.script_url && String(window.appSettings.script_url).trim()) {
+    return String(window.appSettings.script_url).trim();
+  }
+  const localUrl = localStorage.getItem('gas_script_url');
+  if (localUrl && String(localUrl).trim()) {
+    return String(localUrl).trim();
+  }
+  return window.DEFAULT_SCRIPT_URL;
+};
+
+var SCRIPT_URL = window.DEFAULT_SCRIPT_URL;
 
 // =========================================================
 // ១. ការកំណត់ទូទៅ (Global Settings Data)
@@ -16,7 +29,8 @@ let appSettings = {
   district: ".......",
   school_logo: "",
   grade_format: "khmer", 
-  auto_sync: true
+  auto_sync: true,
+  script_url: ""
 };
 
 async function fetchSystemSettings() {
@@ -88,7 +102,8 @@ async function apiGet(action, params = {}) {
 
 async function fetchDataFromAPI(action, params, cacheKey) {
   try {
-    const url = new URL(SCRIPT_URL);
+    const currentScriptUrl = window.getScriptUrl();
+    const url = new URL(currentScriptUrl);
     url.searchParams.append("action", action);
     for (const [key, val] of Object.entries(params)) { 
       if (val !== undefined && val !== null) url.searchParams.append(key, val); 
@@ -268,7 +283,8 @@ async function apiPost(action, payload = {}) {
   
   if (instantActions.includes(action)) {
     try {
-      const response = await fetch(SCRIPT_URL, {
+      const currentScriptUrl = window.getScriptUrl();
+      const response = await fetch(currentScriptUrl, {
         method: "POST",
         // Google Apps Script ទាមទារ text/plain ដើម្បីកុំឱ្យជាប់ CORS error
         headers: { "Content-Type": "text/plain;charset=utf-8" },
@@ -327,7 +343,8 @@ async function syncDataToServer(isSilent = false) {
       const task = syncQueue[i];
       
       try {
-          const res = await fetch(SCRIPT_URL, { 
+          const currentScriptUrl = window.getScriptUrl();
+          const res = await fetch(currentScriptUrl, { 
             method: "POST", 
             headers: { "Content-Type": "text/plain;charset=utf-8" },
             body: JSON.stringify(task.requestBody) // បញ្ជូនអ្វីដែលបានចងក្រងទុករួចរាល់
@@ -372,6 +389,44 @@ window.clearLocalCacheWithConfirm = function() {
       });
       if(typeof showToast === 'function') showToast("🧹 បានសម្អាត Cache ដោយជោគជ័យ!");
       setTimeout(() => location.reload(), 1500);
+  }
+};
+
+/**
+ * មុខងារតេស្តការតភ្ជាប់ទៅកាន់ Google Apps Script
+ */
+window.testGoogleAppsScriptConnection = async function(customUrl) {
+  const targetUrl = customUrl || window.getScriptUrl();
+  if (!targetUrl || !targetUrl.startsWith("http")) {
+    return { ok: false, message: "URL មិនត្រឹមត្រូវ" };
+  }
+  try {
+    const u = new URL(targetUrl);
+    u.searchParams.append("action", "testConnection");
+    const res = await fetch(u.toString(), { method: 'GET' });
+    const json = await res.json();
+    if (json.status === "success") {
+      return { ok: true, message: json.message || "ការតភ្ជាប់បានជោគជ័យ!", data: json };
+    }
+    return { ok: false, message: json.message || "ការតភ្ជាប់បរាជ័យ" };
+  } catch (e) {
+    return { ok: false, message: "មិនអាចតភ្ជាប់បានទេ: " + e.message };
+  }
+};
+
+/**
+ * មុខងារបញ្ជាបង្កើតតារាងស្តង់ដារទាំងអស់លើ Google Sheet ពីចម្ងាយ
+ */
+window.setupGoogleAppsScriptSheets = async function(customUrl) {
+  const targetUrl = customUrl || window.getScriptUrl();
+  try {
+    const u = new URL(targetUrl);
+    u.searchParams.append("action", "setupSheets");
+    const res = await fetch(u.toString(), { method: 'GET' });
+    const json = await res.json();
+    return json;
+  } catch (e) {
+    return { status: "error", message: e.message };
   }
 };
 
