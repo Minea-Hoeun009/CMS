@@ -908,13 +908,13 @@ window.CMSPrintManager = {
         }, 600);
     },
 
-    // Toolbar អន្តរកម្មសម្រាប់កំណត់ប្រភេទក្រដាស និងមាត្រដ្ឋាន
+    // Toolbar អន្តរកម្មសម្រាប់កំណត់ប្រភេទក្រដាស និងមាត្រដ្ឋាន (ដាក់នៅលើរបារ Title Bar)
     renderToolbarHtml: function(targetElementId, defaultOrientation = 'landscape', defaultPaper = 'A4', defaultScale = 100) {
         return `
-            <div class="flex flex-wrap items-center gap-2 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-1.5 shadow-sm text-xs no-print">
+            <div class="flex flex-wrap items-center gap-1.5 sm:gap-2 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-2.5 sm:px-3 py-1.5 shadow-sm text-xs no-print">
                 <i class="fa-solid fa-sliders text-indigo-600 dark:text-indigo-400"></i>
                 <span class="font-bold text-slate-500">ក្រដាស៖</span>
-                <select id="print_paper_${targetElementId}" class="bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg px-2 py-1 font-bold text-slate-700 dark:text-white outline-none cursor-pointer">
+                <select id="print_paper_${targetElementId}" onchange="window.CMSPrintManager.applyLivePreview('${targetElementId}')" class="bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg px-2 py-1 font-bold text-slate-700 dark:text-white outline-none cursor-pointer">
                     <option value="A4" ${defaultPaper === 'A4' ? 'selected' : ''}>A4</option>
                     <option value="A3" ${defaultPaper === 'A3' ? 'selected' : ''}>A3 (ទំហំធំ)</option>
                     <option value="Letter" ${defaultPaper === 'Letter' ? 'selected' : ''}>Letter</option>
@@ -922,13 +922,13 @@ window.CMSPrintManager = {
                 </select>
 
                 <span class="font-bold text-slate-500 ml-1">ទិស៖</span>
-                <select id="print_orient_${targetElementId}" class="bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg px-2 py-1 font-bold text-indigo-600 dark:text-indigo-400 outline-none cursor-pointer">
+                <select id="print_orient_${targetElementId}" onchange="window.CMSPrintManager.applyLivePreview('${targetElementId}')" class="bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg px-2 py-1 font-bold text-indigo-600 dark:text-indigo-400 outline-none cursor-pointer">
                     <option value="landscape" ${defaultOrientation === 'landscape' ? 'selected' : ''}>ផ្តេក (Landscape)</option>
                     <option value="portrait" ${defaultOrientation === 'portrait' ? 'selected' : ''}>បញ្ឈរ (Portrait)</option>
                 </select>
 
                 <span class="font-bold text-slate-500 ml-1">មាត្រដ្ឋាន (Scale)៖</span>
-                <select id="print_scale_${targetElementId}" class="bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg px-2 py-1 font-bold text-rose-600 dark:text-rose-400 outline-none cursor-pointer">
+                <select id="print_scale_${targetElementId}" onchange="window.CMSPrintManager.applyLivePreview('${targetElementId}')" class="bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg px-2 py-1 font-bold text-rose-600 dark:text-rose-400 outline-none cursor-pointer">
                     <option value="120" ${defaultScale === 120 ? 'selected' : ''}>120%</option>
                     <option value="110" ${defaultScale === 110 ? 'selected' : ''}>110%</option>
                     <option value="100" ${defaultScale === 100 ? 'selected' : ''}>100% (ធម្មតា)</option>
@@ -937,11 +937,45 @@ window.CMSPrintManager = {
                     <option value="75" ${defaultScale === 75 ? 'selected' : ''}>75% (បង្រួម)</option>
                 </select>
 
-                <button onclick="window.CMSPrintManager.executePrintWithToolbar('${targetElementId}')" class="px-4 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-bold shadow flex items-center gap-1.5 ml-2 transition">
-                    <i class="fa-solid fa-print"></i> ព្រីន (Print)
+                <button onclick="window.CMSPrintManager.executePrintWithToolbar('${targetElementId}')" class="px-4 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-bold shadow flex items-center gap-1.5 ml-1 sm:ml-2 transition active:scale-95">
+                    <i class="fa-solid fa-print"></i> <span>ព្រីន (Print)</span>
                 </button>
             </div>
         `;
+    },
+
+    updateToolbarDefaults: function(targetElementId, defaultOrientation = 'landscape', defaultPaper = 'A4', defaultScale = 100) {
+        const pEl = document.getElementById(`print_paper_${targetElementId}`);
+        const oEl = document.getElementById(`print_orient_${targetElementId}`);
+        const sEl = document.getElementById(`print_scale_${targetElementId}`);
+        if (pEl && defaultPaper) pEl.value = defaultPaper;
+        if (oEl && defaultOrientation) oEl.value = defaultOrientation;
+        if (sEl && defaultScale) sEl.value = String(defaultScale);
+        this.applyLivePreview(targetElementId);
+    },
+
+    applyLivePreview: function(targetElementId) {
+        const target = document.getElementById(targetElementId);
+        if (!target) return;
+        const orient = document.getElementById(`print_orient_${targetElementId}`)?.value || 'landscape';
+        const paper = document.getElementById(`print_paper_${targetElementId}`)?.value || 'A4';
+        const scale = parseInt(document.getElementById(`print_scale_${targetElementId}`)?.value || 100, 10);
+
+        const paperWrapper = target.firstElementChild || target;
+        if (paperWrapper && paperWrapper.style) {
+            const isLandscape = orient === 'landscape';
+            if (paper === 'A4') {
+                paperWrapper.style.maxWidth = isLandscape ? '297mm' : '210mm';
+            } else if (paper === 'A3') {
+                paperWrapper.style.maxWidth = isLandscape ? '420mm' : '297mm';
+            }
+            if (scale && scale !== 100) {
+                target.style.transform = `scale(${scale / 100})`;
+                target.style.transformOrigin = 'top center';
+            } else {
+                target.style.transform = '';
+            }
+        }
     },
 
     executePrintWithToolbar: function(targetElementId) {

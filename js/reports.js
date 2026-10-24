@@ -194,28 +194,23 @@ window.loadReportsView = function() {
 
             <!-- ផ្ទាំងបង្ហាញរបាយការណ៍លម្អិត (Report Detail View) -->
             <div id="reportDetailContent" class="hidden w-full h-full flex-col relative z-20">
-                <!-- របារបញ្ជា (Action Bar) -->
-                <div class="bg-white p-3 md:p-4 rounded-[1.5rem] shadow-md border border-slate-200 mb-5 flex flex-wrap justify-between items-center gap-4 z-50 sticky top-0 no-print">
+                <!-- របារចំណងជើង និងការកំណត់ព្រីន (Title Bar & Print Toolbar) -->
+                <div class="bg-white dark:bg-slate-800 p-3 md:p-4 rounded-[1.5rem] shadow-md border border-slate-200 dark:border-slate-700 mb-5 flex flex-wrap justify-between items-center gap-3 z-50 sticky top-0 no-print">
                     <div class="flex items-center gap-3">
-                        <button onclick="window.closeReportDetail()" class="w-10 h-10 rounded-xl bg-slate-100 hover:bg-rose-100 text-slate-600 hover:text-rose-600 flex items-center justify-center transition-all shadow-inner active:scale-90 shrink-0">
+                        <button onclick="window.closeReportDetail()" class="w-10 h-10 rounded-xl bg-slate-100 hover:bg-rose-100 text-slate-600 hover:text-rose-600 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-rose-600 dark:hover:text-white flex items-center justify-center transition-all shadow-inner active:scale-90 shrink-0" title="ត្រឡប់ក្រោយ">
                             <i class="fa-solid fa-arrow-left text-lg"></i>
                         </button>
                         <div>
-                            <h2 id="reportDetailTitle" class="font-moul text-slate-800 text-[14px]">ចំណងជើងរបាយការណ៍</h2>
-                            <p id="reportDetailSub" class="text-[10px] text-slate-500 font-bold">ថ្នាក់ ${gradeFull}</p>
+                            <h2 id="reportDetailTitle" class="font-moul text-slate-800 dark:text-white text-xs sm:text-sm md:text-base leading-snug">ចំណងជើងរបាយការណ៍</h2>
+                            <p id="reportDetailSub" class="text-[10px] text-slate-500 dark:text-slate-400 font-bold">ថ្នាក់ ${gradeFull}</p>
                         </div>
                     </div>
                     
-                    <!-- ជម្រើសបន្ថែមសម្រាប់តារាងពិន្ទុ/សិស្ស -->
-                    <div id="reportExtraControls" class="flex items-center gap-2 hidden">
-                        <select id="reportSchoolTypeSelect" onchange="window.updateReportViewSettings()" class="bg-slate-50 border border-slate-200 text-slate-700 text-xs rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2 outline-none font-bold">
-                            <option value="សាលាបឋមសិក្សា">បឋមសិក្សា</option>
-                            <option value="អនុវិទ្យាល័យ">អនុវិទ្យាល័យ</option>
-                            <option value="វិទ្យាល័យ">វិទ្យាល័យ</option>
-                        </select>
-                    </div>
+                    <!-- ជម្រើសបន្ថែមសម្រាប់តម្រងរបាយការណ៍ (ខែ / ប្រភេទបញ្ជី / សាលា / រក្សាទុក) -->
+                    <div id="reportExtraControls" class="flex flex-wrap items-center gap-2"></div>
 
-                    <div class="flex items-center gap-2">
+                    <!-- មុខងារកំណត់ប្រភេទក្រដាស និងបោះពុម្ពលើផ្ទាំង Title -->
+                    <div id="reportDetailPrintToolbarArea" class="flex items-center gap-2 shrink-0">
                         ${window.CMSPrintManager ? window.CMSPrintManager.renderToolbarHtml('reportPaperArea', 'portrait', 'A4', 100) : `
                             <button onclick="window.printCurrentReport()" class="px-5 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-xl text-xs font-bold shadow-md shadow-blue-500/30 transition flex items-center gap-2 active:scale-95 outline-none">
                                 <i class="fa-solid fa-print"></i> បោះពុម្ព
@@ -224,7 +219,7 @@ window.loadReportsView = function() {
                     </div>
                 </div>
 
-                <!-- កន្លែងផ្ទុកក្រដាសរបាយការណ៍ (A4 Paper Container) -->
+                <!-- កន្លែងផ្ទុកក្រដាសរបាយការណ៍ (Work Canvas: Pure Result Only) -->
                 <div class="w-full flex-1 overflow-x-auto custom-scrollbar flex justify-center pb-10">
                     <div id="reportPaperArea" class="transition-all relative w-full flex justify-center">
                         <!-- Content goes here -->
@@ -256,26 +251,66 @@ window.openReportDetail = function(reportType) {
 
     paperArea.innerHTML = `<div class="w-full h-full flex flex-col items-center justify-center text-slate-400 py-20"><i class="fa-solid fa-spinner fa-spin text-4xl mb-4 text-indigo-400"></i><p>កំពុងទាញយកទិន្នន័យ...</p></div>`;
     
-    if (extraControls) extraControls.classList.add("hidden");
+    if (extraControls) {
+        extraControls.innerHTML = '';
+        extraControls.classList.add("hidden");
+    }
+
+    const khmerMonths = ["មករា", "កុម្ភៈ", "មីនា", "មេសា", "ឧសភា", "មិថុនា", "កក្កដា", "សីហា", "កញ្ញា", "តុលា", "វិច្ឆិកា", "ធ្នូ"];
+    const curMonth = localStorage.getItem('selected_assessment_month') || "មករា";
 
     setTimeout(() => {
         if (reportType === 'report_ka') {
             titleEl.textContent = `របាយការណ៍ ក (តារាងស្រង់ពិន្ទុ និងការវាយតម្លៃលទ្ធផលសិក្សា - ${gradeFull})`;
+            if (extraControls) {
+                extraControls.classList.remove("hidden");
+                extraControls.innerHTML = `
+                    <div class="flex items-center gap-1.5 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl px-2.5 py-1 text-xs">
+                        <span class="font-bold text-slate-600 dark:text-slate-300">ខែ៖</span>
+                        <select onchange="localStorage.setItem('selected_assessment_month', this.value); if(window.KrouDigital) window.KrouDigital.renderReportKa(document.getElementById('reportPaperArea'), '${curLevel}', '${curRoom}');" class="bg-transparent font-bold text-indigo-600 dark:text-indigo-400 outline-none cursor-pointer">
+                            ${khmerMonths.map(m => `<option value="${m}" ${m === curMonth ? 'selected' : ''}>${m}</option>`).join('')}
+                        </select>
+                    </div>
+                `;
+            }
+            if (window.CMSPrintManager) window.CMSPrintManager.updateToolbarDefaults('reportPaperArea', 'landscape', 'A4', 100);
             if (window.KrouDigital && typeof window.KrouDigital.renderReportKa === 'function') {
                 window.KrouDigital.renderReportKa(paperArea, curLevel, curRoom);
             }
         } else if (reportType === 'report_kha') {
             titleEl.textContent = `របាយការណ៍ ខ (តារាងកិត្តិយសសិស្សឆ្នើម Top 5 - ${gradeFull})`;
+            if (extraControls) {
+                extraControls.classList.remove("hidden");
+                extraControls.innerHTML = `
+                    <div class="flex items-center gap-1.5 bg-amber-50 dark:bg-slate-700 border border-amber-200 dark:border-slate-600 rounded-xl px-2.5 py-1 text-xs">
+                        <span class="font-bold text-amber-900 dark:text-amber-300">ខែ៖</span>
+                        <select onchange="localStorage.setItem('selected_assessment_month', this.value); if(window.KrouDigital) window.KrouDigital.renderReportKha(document.getElementById('reportPaperArea'), '${curLevel}', '${curRoom}');" class="bg-transparent font-bold text-amber-700 dark:text-amber-400 outline-none cursor-pointer">
+                            ${khmerMonths.map(m => `<option value="${m}" ${m === curMonth ? 'selected' : ''}>${m}</option>`).join('')}
+                        </select>
+                    </div>
+                `;
+            }
+            if (window.CMSPrintManager) window.CMSPrintManager.updateToolbarDefaults('reportPaperArea', 'portrait', 'A4', 100);
             if (window.KrouDigital && typeof window.KrouDigital.renderReportKha === 'function') {
                 window.KrouDigital.renderReportKha(paperArea, curLevel, curRoom);
             }
         } else if (reportType === 'report_ko_kho') {
             titleEl.textContent = `របាយការណ៍ គ & ឃ (លទ្ធផលប្រចាំឆមាស និងប្រចាំឆ្នាំ - ${gradeFull})`;
+            if (window.CMSPrintManager) window.CMSPrintManager.updateToolbarDefaults('reportPaperArea', 'landscape', 'A4', 100);
             if (window.KrouDigital && typeof window.KrouDigital.renderReportKoKho === 'function') {
                 window.KrouDigital.renderReportKoKho(paperArea, curLevel, curRoom);
             }
         } else if (reportType === 'health') {
             titleEl.textContent = `របាយការណ៍ និងការតាមដានសុខភាពសិស្ស (BMI, ភ្នែក, វ៉ាក់សាំង - ${gradeFull})`;
+            if (extraControls) {
+                extraControls.classList.remove("hidden");
+                extraControls.innerHTML = `
+                    <button onclick="window.KrouDigital.saveHealthRecords()" class="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow flex items-center gap-1.5 transition active:scale-95">
+                        <i class="fa-solid fa-floppy-disk"></i> <span>រក្សាទុកសុខភាព</span>
+                    </button>
+                `;
+            }
+            if (window.CMSPrintManager) window.CMSPrintManager.updateToolbarDefaults('reportPaperArea', 'landscape', 'A4', 100);
             if (window.KrouDigital && typeof window.KrouDigital.renderHealthTracker === 'function') {
                 window.KrouDigital.renderHealthTracker(paperArea, curLevel, curRoom);
             }
@@ -286,9 +321,27 @@ window.openReportDetail = function(reportType) {
             }
         } else if (reportType === 'stats') {
             titleEl.textContent = "តារាងស្ថិតិសិស្ស";
+            if (window.CMSPrintManager) window.CMSPrintManager.updateToolbarDefaults('reportPaperArea', 'portrait', 'A4', 100);
             window.renderStudentStatsReportHTML(paperArea, curLevel, curRoom);
         } else if (reportType === 'attendance') {
             titleEl.textContent = "របាយការណ៍វត្តមានប្រចាំខែ";
+            if (extraControls) {
+                extraControls.classList.remove("hidden");
+                extraControls.innerHTML = `
+                    <div class="flex items-center gap-1.5 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl px-2.5 py-1 text-xs">
+                        <span class="font-bold text-slate-600 dark:text-slate-300">ប្រភេទ៖</span>
+                        <select id="attReportType" onchange="window.updateAttendanceReportPreview()" class="bg-transparent font-bold text-emerald-700 dark:text-emerald-400 outline-none cursor-pointer">
+                            <option value="monthly">ប្រចាំខែ</option>
+                            <option value="semester">ប្រចាំឆមាស</option>
+                            <option value="annual">ប្រចាំឆ្នាំ</option>
+                        </select>
+                        <span class="font-bold text-slate-400 mx-0.5">|</span>
+                        <span class="font-bold text-slate-600 dark:text-slate-300">ជ្រើសរើស៖</span>
+                        <select id="attReportValue" onchange="window.updateAttendanceReportPreview()" class="bg-transparent font-bold text-slate-700 dark:text-white outline-none cursor-pointer"></select>
+                    </div>
+                `;
+            }
+            if (window.CMSPrintManager) window.CMSPrintManager.updateToolbarDefaults('reportPaperArea', 'landscape', 'A4', 100);
             if(typeof window.renderAttendanceReportHTML === 'function') {
                 window.renderAttendanceReportHTML(paperArea, curLevel, curRoom);
             } else {
@@ -296,6 +349,19 @@ window.openReportDetail = function(reportType) {
             }
         } else if (reportType === 'students') {
             titleEl.textContent = "បញ្ជីរាយនាមសិស្ស";
+            if (extraControls) {
+                extraControls.classList.remove("hidden");
+                extraControls.innerHTML = `
+                    <div class="flex items-center gap-1.5 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl px-2.5 py-1 text-xs">
+                        <span class="font-bold text-slate-600 dark:text-slate-300">ទម្រង់បញ្ជី៖</span>
+                        <select id="stListType" onchange="window.handleStudentListTypeChange()" class="bg-transparent font-bold text-indigo-600 dark:text-indigo-400 outline-none cursor-pointer">
+                            <option value="detailed" selected>បញ្ជីលម្អិត (១១ក្រឡោន)</option>
+                            <option value="simple">បញ្ជីសង្ខេប (ទូទៅ)</option>
+                        </select>
+                    </div>
+                `;
+            }
+            if (window.CMSPrintManager) window.CMSPrintManager.updateToolbarDefaults('reportPaperArea', 'landscape', 'A4', 100);
             if(typeof window.renderStudentListReportHTML === 'function') {
                 window.renderStudentListReportHTML(paperArea, curLevel, curRoom);
             } else {
@@ -303,6 +369,7 @@ window.openReportDetail = function(reportType) {
             }
         } else if (reportType === 'scores') {
             titleEl.textContent = "របាយការណ៍លទ្ធផលសិក្សា";
+            if (window.CMSPrintManager) window.CMSPrintManager.updateToolbarDefaults('reportPaperArea', 'portrait', 'A4', 100);
             if(typeof window.renderScoresReportHTML === 'function') {
                 window.renderScoresReportHTML(paperArea, curLevel, curRoom);
             } else {
@@ -310,13 +377,14 @@ window.openReportDetail = function(reportType) {
             }
         } else if (reportType === 'structure') {
             titleEl.textContent = "រចនាសម្ព័ន្ធថ្នាក់រៀន";
+            if (window.CMSPrintManager) window.CMSPrintManager.updateToolbarDefaults('reportPaperArea', 'portrait', 'A4', 100);
             if(typeof window.renderClassStructureHTML === 'function') {
                 window.renderClassStructureHTML(paperArea, curLevel, curRoom);
             } else {
                 paperArea.innerHTML = `<div class="text-center p-12 bg-amber-50/50 rounded-2xl border border-amber-200 text-amber-800 font-siemreap max-w-md mx-auto my-10 shadow-sm animate-fade-in"><i class="fa-solid fa-clock-rotate-left text-3xl mb-3 text-amber-500"></i><h4 class="font-moul text-base mb-1">របាយការណ៍នេះគ្រោងនឹងដាក់ឱ្យប្រើប្រាស់ឆាប់ៗ</h4><p class="text-xs text-amber-600 leading-relaxed">មុខងារនេះស្ថិតក្នុងដំណាក់កាលអភិវឌ្ឍ (In Progress/Planned)។ សូមជ្រើសរើសរបាយការណ៍ស្តង់ដាផ្សេងទៀតជាបណ្តោះអាសន្ន។</p></div>`;
             }
         }
-    }, 200);
+    }, 150);
 };
 
 window.closeReportDetail = function() {
@@ -766,28 +834,7 @@ window.renderStudentListReportHTML = function(container, targetGrade, targetRoom
     if (targetRoom) window.currentReportTargetRoom = targetRoom;
     container.innerHTML = `
         <div class="w-full flex flex-col items-center pb-10 font-siemreap animate-fade-in">
-            <!-- Controls (Print settings) -->
-            <div class="mb-6 no-print flex flex-wrap items-center justify-center gap-4 bg-white p-4 rounded-2xl shadow-sm border border-slate-200 w-full transition-all max-w-[297mm]" id="studentListControlBox">
-                <div class="flex items-center gap-2">
-                    <span class="font-bold text-slate-600 text-sm">ទម្រង់បញ្ជី៖</span>
-                    <select id="stListType" onchange="window.handleStudentListTypeChange()" class="bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm font-bold text-indigo-700 outline-none cursor-pointer">
-                        <option value="detailed" selected>បញ្ជីព័ត៌មានសិស្ស (លម្អិត១១ក្រឡោន)</option>
-                        <option value="simple">បញ្ជីរាយនាមសិស្ស (ទូទៅ)</option>
-                    </select>
-                </div>
-                <div class="flex items-center gap-2">
-                    <span class="font-bold text-slate-600 text-sm">ក្រដាស៖</span>
-                    <select id="stListOrientation" onchange="window.updateStudentListContent()" class="bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm font-bold text-emerald-700 outline-none cursor-pointer">
-                        <option value="landscape" selected>A4 ផ្ដេក (Landscape)</option>
-                        <option value="portrait">A4 បញ្ឈរ (Portrait)</option>
-                    </select>
-                </div>
-                <button onclick="window.triggerPrintStudentList()" class="ml-auto px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold shadow-md flex items-center gap-2 text-sm transition-all active:scale-95">
-                    <i class="fa-solid fa-print"></i> បោះពុម្ព
-                </button>
-            </div>
-
-            <!-- Print Wrapper -->
+            <!-- Print Wrapper (Pure Result Only) -->
             <div id="studentListPrintWrapper" class="w-full flex flex-col items-center">
                 <!-- Pages generated dynamically -->
             </div>
@@ -797,24 +844,20 @@ window.renderStudentListReportHTML = function(container, targetGrade, targetRoom
 };
 
 window.handleStudentListTypeChange = function() {
-    const listType = document.getElementById("stListType").value;
-    const orientationDropdown = document.getElementById("stListOrientation");
-    
-    if(listType === "detailed") {
-        orientationDropdown.value = "landscape";
-    } else {
-        orientationDropdown.value = "portrait";
+    const listType = document.getElementById("stListType")?.value || "detailed";
+    const orient = listType === "detailed" ? "landscape" : "portrait";
+    if (window.CMSPrintManager) {
+        window.CMSPrintManager.updateToolbarDefaults('reportPaperArea', orient, 'A4', 100);
     }
     window.updateStudentListContent();
 };
 
 window.updateStudentListContent = function() {
     const wrapper = document.getElementById("studentListPrintWrapper");
-    const controlBox = document.getElementById("studentListControlBox");
     if (!wrapper) return;
     
-    const listType = document.getElementById("stListType").value;
-    const orientation = document.getElementById("stListOrientation").value;
+    const listType = document.getElementById("stListType")?.value || "detailed";
+    const orientation = document.getElementById("print_orient_reportPaperArea")?.value || (listType === "detailed" ? "landscape" : "portrait");
     
     if(orientation === "landscape") {
         controlBox.classList.replace("max-w-[210mm]", "max-w-[297mm]");
@@ -1138,10 +1181,6 @@ window.renderClassStructureHTML = function(container, targetGrade, targetRoom) {
                     ${tablesHtml}
                 </div>
             </div>
-            
-            <button onclick="window.printReportArea('structurePrintArea', 'portrait')" class="mt-6 px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold shadow-md no-print flex items-center gap-2">
-                <i class="fa-solid fa-print"></i> បោះពុម្ពរចនាសម្ព័ន្ធ (A4 បញ្ឈរ)
-            </button>
         </div>
     `;
 };
@@ -1155,30 +1194,7 @@ window.renderAttendanceReportHTML = function(container, targetGrade, targetRoom)
     if (targetRoom) window.currentReportTargetRoom = targetRoom;
     container.innerHTML = `
         <div class="w-full flex flex-col items-center max-w-5xl mx-auto font-siemreap animate-fade-in pb-10">
-            <!-- Attendance Control Bar -->
-            <div class="w-full bg-white p-5 rounded-2xl shadow-sm border border-slate-200 mb-6 flex flex-wrap items-center justify-between gap-4">
-                <div class="flex items-center gap-3">
-                    <span class="font-bold text-slate-600 text-sm">ប្រភេទរបាយការណ៍៖</span>
-                    <select id="attReportType" onchange="window.updateAttendanceReportPreview()" class="bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm font-bold text-emerald-700 outline-none cursor-pointer">
-                        <option value="monthly">ប្រចាំខែ</option>
-                        <option value="semester">ប្រចាំឆមាស</option>
-                        <option value="annual">ប្រចាំឆ្នាំ</option>
-                    </select>
-                </div>
-                
-                <div class="flex items-center gap-3" id="attMonthFilterContainer">
-                    <span class="font-bold text-slate-600 text-sm">ជ្រើសរើស៖</span>
-                    <select id="attReportValue" onchange="window.updateAttendanceReportPreview()" class="bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm font-bold outline-none cursor-pointer">
-                        <!-- Options generated by JS -->
-                    </select>
-                </div>
-
-                <button onclick="window.triggerAttendancePrint()" class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-sm font-bold shadow-md transition flex items-center gap-2 active:scale-95">
-                    <i class="fa-solid fa-print"></i> បោះពុម្ព
-                </button>
-            </div>
-
-            <!-- Print Area Preview -->
+            <!-- Print Area Preview (Pure Result Only) -->
             <div id="attendancePrintWrapper" class="w-full flex flex-col items-center">
                 <!-- Content will be injected here -->
             </div>

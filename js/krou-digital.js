@@ -100,25 +100,6 @@ window.KrouDigital = {
         container.innerHTML = `
             <div id="reportKaPrintArea" class="bg-white p-6 md:p-10 w-full shadow-2xl rounded-2xl border border-slate-200 text-slate-800" style="max-width: 297mm; min-height: 210mm; font-family: 'Siemreap', sans-serif;">
                 
-                <!-- របារបញ្ជាជ្រើសរើសថ្នាក់ និងខែ (Toolbar) -->
-                <div class="flex flex-wrap items-center justify-between gap-3 mb-6 pb-4 border-b border-slate-200 no-print">
-                    <div class="flex flex-wrap items-center gap-2">
-                        <span class="text-xs font-bold text-slate-500">ជ្រើសរើសថ្នាក់៖</span>
-                        ${this._getClassSelectorHtml(curLevel, curRoom, 'renderReportKa')}
-                        <span class="text-xs font-bold text-slate-500 ml-2">ខែ៖</span>
-                        <select onchange="localStorage.setItem('selected_assessment_month', this.value); window.KrouDigital.renderReportKa(document.getElementById('reportPaperArea'), '${curLevel}', '${curRoom}');" class="bg-slate-100 border border-slate-200 rounded-xl px-3 py-1.5 text-xs font-bold text-slate-700 outline-none cursor-pointer">
-                            ${khmerMonths.map(m => `<option value="${m}" ${m === selectedMonth ? 'selected' : ''}>${m}</option>`).join('')}
-                        </select>
-                    </div>
-                    <div class="flex items-center gap-2">
-                        ${window.CMSPrintManager ? window.CMSPrintManager.renderToolbarHtml('reportKaPrintArea', 'landscape', 'A4', 100) : `
-                            <button onclick="window.print()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shadow transition flex items-center gap-1.5">
-                                <i class="fa-solid fa-print"></i> បោះពុម្ព A4
-                            </button>
-                        `}
-                    </div>
-                </div>
-
                 <!-- Header តាមស្តង់ដារក្រសួង -->
                 <div class="flex justify-between items-start mb-6 text-xs">
                     <div class="text-center">
@@ -282,25 +263,6 @@ window.KrouDigital = {
         container.innerHTML = `
             <div id="reportKhaPrintArea" class="bg-gradient-to-b from-amber-50 via-white to-orange-50/40 p-8 md:p-12 w-full shadow-2xl rounded-2xl border-[10px] border-double border-amber-700 text-slate-900 relative overflow-hidden" style="max-width: 210mm; min-height: 297mm; font-family: 'Siemreap', sans-serif;">
                 
-                <!-- របារបញ្ជាជ្រើសរើសថ្នាក់ (Toolbar) -->
-                <div class="flex flex-wrap items-center justify-between gap-3 mb-6 pb-4 border-b border-amber-200 no-print">
-                    <div class="flex flex-wrap items-center gap-2">
-                        <span class="text-xs font-bold text-amber-900">ជ្រើសរើសថ្នាក់៖</span>
-                        ${this._getClassSelectorHtml(curLevel, curRoom, 'renderReportKha')}
-                        <span class="text-xs font-bold text-amber-900 ml-2">ខែ៖</span>
-                        <select onchange="localStorage.setItem('selected_assessment_month', this.value); window.KrouDigital.renderReportKha(document.getElementById('reportPaperArea'), '${curLevel}', '${curRoom}');" class="bg-amber-100/60 border border-amber-200 rounded-xl px-3 py-1.5 text-xs font-bold text-slate-800 outline-none cursor-pointer">
-                            ${khmerMonths.map(m => `<option value="${m}" ${m === selectedMonth ? 'selected' : ''}>${m}</option>`).join('')}
-                        </select>
-                    </div>
-                    <div class="flex items-center gap-2">
-                        ${window.CMSPrintManager ? window.CMSPrintManager.renderToolbarHtml('reportKhaPrintArea', 'portrait', 'A4', 100) : `
-                            <button onclick="window.print()" class="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold shadow transition flex items-center gap-1.5">
-                                <i class="fa-solid fa-print"></i> បោះពុម្ព A4
-                            </button>
-                        `}
-                    </div>
-                </div>
-
                 <!-- Border Decoration Icons -->
                 <div class="absolute top-4 left-4 text-amber-600 text-xl">❖</div>
                 <div class="absolute top-4 right-4 text-amber-600 text-xl">❖</div>
@@ -416,21 +378,6 @@ window.KrouDigital = {
         container.innerHTML = `
             <div id="reportKoKhoPrintArea" class="bg-white p-6 md:p-10 w-full shadow-2xl rounded-2xl border border-slate-200 text-slate-800" style="max-width: 297mm; min-height: 210mm; font-family: 'Siemreap', sans-serif;">
                 
-                <!-- របារបញ្ជាជ្រើសរើសថ្នាក់ (Toolbar) -->
-                <div class="flex flex-wrap items-center justify-between gap-3 mb-6 pb-4 border-b border-slate-200 no-print">
-                    <div class="flex items-center gap-2">
-                        <span class="text-xs font-bold text-slate-500">ជ្រើសរើសថ្នាក់៖</span>
-                        ${this._getClassSelectorHtml(curLevel, curRoom, 'renderReportKoKho')}
-                    </div>
-                    <div class="flex items-center gap-2">
-                        ${window.CMSPrintManager ? window.CMSPrintManager.renderToolbarHtml('reportKoKhoPrintArea', 'landscape', 'A4', 100) : `
-                            <button onclick="window.print()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shadow transition flex items-center gap-1.5">
-                                <i class="fa-solid fa-print"></i> បោះពុម្ព A4
-                            </button>
-                        `}
-                    </div>
-                </div>
-
                 <div class="flex justify-between items-start mb-6 text-xs">
                     <div class="text-center">
                         <p class="font-moul text-slate-900">${schoolName}</p>
@@ -531,27 +478,13 @@ window.KrouDigital = {
         container.innerHTML = `
             <div id="healthTrackerArea" class="bg-white p-6 md:p-8 w-full shadow-2xl rounded-2xl border border-slate-200 text-slate-800" style="max-width: 297mm; min-height: 210mm; font-family: 'Siemreap', sans-serif;">
                 
-                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 pb-4 border-b border-slate-200 no-print">
-                    <div>
-                        <h3 class="font-moul text-lg text-slate-800 flex items-center gap-2">
-                            <i class="fa-solid fa-heart-pulse text-rose-500"></i>
-                            <span>របាយការណ៍ និងការតាមដានសុខភាពសិស្ស</span>
-                        </h3>
-                        <p class="text-xs text-slate-500 font-bold mt-0.5">គណនា BMI ស្វ័យប្រវត្តិ, ការពិនិត្យភ្នែក និងកំណត់ត្រាវ៉ាក់សាំង (ថ្នាក់៖ ${gradeFull})</p>
-                    </div>
-                    
-                    <div class="flex flex-wrap items-center gap-2">
-                        <span class="text-xs font-bold text-slate-500">ជ្រើសរើសថ្នាក់៖</span>
-                        ${this._getClassSelectorHtml(curLevel, curRoom, 'renderHealthTracker')}
-                        <button onclick="window.KrouDigital.saveHealthRecords()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow transition flex items-center gap-1.5 ml-1">
-                            <i class="fa-solid fa-floppy-disk"></i> រក្សាទុក
-                        </button>
-                        ${window.CMSPrintManager ? window.CMSPrintManager.renderToolbarHtml('healthTrackerArea', 'landscape', 'A4', 100) : `
-                            <button onclick="window.print()" class="px-4 py-2 bg-slate-800 hover:bg-slate-900 text-white rounded-xl text-xs font-bold shadow transition flex items-center gap-1.5">
-                                <i class="fa-solid fa-print"></i> បោះពុម្ព
-                            </button>
-                        `}
-                    </div>
+                <!-- Document Title Header -->
+                <div class="text-center mb-6">
+                    <h3 class="font-moul text-base text-slate-800 flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-heart-pulse text-rose-500"></i>
+                        <span>របាយការណ៍ និងការតាមដានសុខភាពសិស្ស</span>
+                    </h3>
+                    <p class="text-xs text-slate-500 font-bold mt-1">គណនា BMI ស្វ័យប្រវត្តិ, ការពិនិត្យភ្នែក និងកំណត់ត្រាវ៉ាក់សាំង (ថ្នាក់៖ ${gradeFull} - ${schoolName})</p>
                 </div>
 
                 <div class="overflow-x-auto mb-6">
