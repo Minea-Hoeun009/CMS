@@ -38,49 +38,118 @@ window.loadReportsView = function() {
                     </div>
                 </div>
 
-                <!-- Cards Grid -->
-                <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-5 md:gap-6">
-                    <!-- Card 1: ស្ថិតិសិស្ស -->
-                    <div onclick="window.openReportDetail('stats')" class="bg-white/90 backdrop-blur-md rounded-[2rem] p-6 shadow-sm hover:shadow-[0_20px_40px_rgb(59,130,246,0.15)] hover:-translate-y-1.5 transition-all duration-300 cursor-pointer border border-slate-100 group flex flex-col justify-between h-[200px] relative overflow-hidden">
+                <!-- Cards Grid - រចនាឡើងតាមស្តង់ដារ KrouDigital 4.0 -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 md:gap-6">
+                    
+                    <!-- KrouDigital Card 1: របាយការណ៍ ក -->
+                    <div onclick="window.openReportDetail('report_ka')" class="bg-white/90 backdrop-blur-md rounded-[2rem] p-6 shadow-sm hover:shadow-[0_20px_40px_rgb(79,70,229,0.18)] hover:-translate-y-1.5 transition-all duration-300 cursor-pointer border-2 border-indigo-100 hover:border-indigo-400 group flex flex-col justify-between h-[210px] relative overflow-hidden">
+                        <div class="absolute -right-4 -top-4 w-24 h-24 bg-indigo-50 rounded-full group-hover:scale-150 transition-transform duration-500 ease-out pointer-events-none"></div>
+                        <div class="flex items-center justify-between relative z-10">
+                            <div class="w-14 h-14 bg-gradient-to-br from-indigo-500 to-purple-600 text-white rounded-2xl flex items-center justify-center text-2xl shadow-md shadow-indigo-500/30 group-hover:scale-110 transition-transform"><i class="fa-solid fa-file-lines"></i></div>
+                            <span class="text-[10px] bg-indigo-100 text-indigo-800 font-bold px-2 py-0.5 rounded-full uppercase">KrouDigital 4.0</span>
+                        </div>
+                        <div class="relative z-10">
+                            <h3 class="font-moul text-[15px] text-slate-900 mb-1.5 group-hover:text-indigo-600">របាយការណ៍ ក</h3>
+                            <p class="text-slate-500 text-[11px] leading-relaxed">តារាងស្រង់ពិន្ទុ និងនិទ្ទេសប្រចាំខែ/ឆមាស រួមទាំងស្ថិតិជាប់-ធ្លាក់។</p>
+                        </div>
+                    </div>
+
+                    <!-- KrouDigital Card 2: របាយការណ៍ ខ -->
+                    <div onclick="window.openReportDetail('report_kha')" class="bg-white/90 backdrop-blur-md rounded-[2rem] p-6 shadow-sm hover:shadow-[0_20px_40px_rgb(245,158,11,0.18)] hover:-translate-y-1.5 transition-all duration-300 cursor-pointer border-2 border-amber-100 hover:border-amber-400 group flex flex-col justify-between h-[210px] relative overflow-hidden">
+                        <div class="absolute -right-4 -top-4 w-24 h-24 bg-amber-50 rounded-full group-hover:scale-150 transition-transform duration-500 ease-out pointer-events-none"></div>
+                        <div class="flex items-center justify-between relative z-10">
+                            <div class="w-14 h-14 bg-gradient-to-br from-amber-400 to-orange-500 text-white rounded-2xl flex items-center justify-center text-2xl shadow-md shadow-amber-500/30 group-hover:scale-110 transition-transform"><i class="fa-solid fa-trophy"></i></div>
+                            <span class="text-[10px] bg-amber-100 text-amber-800 font-bold px-2 py-0.5 rounded-full uppercase">Honor Roll</span>
+                        </div>
+                        <div class="relative z-10">
+                            <h3 class="font-moul text-[15px] text-slate-900 mb-1.5 group-hover:text-amber-600">របាយការណ៍ ខ (កិត្តិយស)</h3>
+                            <p class="text-slate-500 text-[11px] leading-relaxed">តារាងកិត្តិយសសិស្សឆ្នើម Top 5 ជាមួយរូបថតសម្រាប់បិទផ្សាយ។</p>
+                        </div>
+                    </div>
+
+                    <!-- KrouDigital Card 3: របាយការណ៍ គ & ឃ -->
+                    <div onclick="window.openReportDetail('report_ko_kho')" class="bg-white/90 backdrop-blur-md rounded-[2rem] p-6 shadow-sm hover:shadow-[0_20px_40px_rgb(16,185,129,0.18)] hover:-translate-y-1.5 transition-all duration-300 cursor-pointer border-2 border-emerald-100 hover:border-emerald-400 group flex flex-col justify-between h-[210px] relative overflow-hidden">
+                        <div class="absolute -right-4 -top-4 w-24 h-24 bg-emerald-50 rounded-full group-hover:scale-150 transition-transform duration-500 ease-out pointer-events-none"></div>
+                        <div class="flex items-center justify-between relative z-10">
+                            <div class="w-14 h-14 bg-gradient-to-br from-emerald-400 to-teal-600 text-white rounded-2xl flex items-center justify-center text-2xl shadow-md shadow-emerald-500/30 group-hover:scale-110 transition-transform"><i class="fa-solid fa-graduation-cap"></i></div>
+                            <span class="text-[10px] bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded-full uppercase">លទ្ធផលប្រចាំឆ្នាំ</span>
+                        </div>
+                        <div class="relative z-10">
+                            <h3 class="font-moul text-[15px] text-slate-900 mb-1.5 group-hover:text-emerald-600">របាយការណ៍ គ &amp; ឃ</h3>
+                            <p class="text-slate-500 text-[11px] leading-relaxed">សេចក្តីសម្រេចលទ្ធផលប្រចាំឆមាស និងប្រចាំឆ្នាំ (ឡើង/ត្រួតថ្នាក់)។</p>
+                        </div>
+                    </div>
+
+                    <!-- KrouDigital Card 4: របាយការណ៍សុខភាព (BMI) -->
+                    <div onclick="window.openReportDetail('health')" class="bg-white/90 backdrop-blur-md rounded-[2rem] p-6 shadow-sm hover:shadow-[0_20px_40px_rgb(244,63,94,0.18)] hover:-translate-y-1.5 transition-all duration-300 cursor-pointer border-2 border-rose-100 hover:border-rose-400 group flex flex-col justify-between h-[210px] relative overflow-hidden">
+                        <div class="absolute -right-4 -top-4 w-24 h-24 bg-rose-50 rounded-full group-hover:scale-150 transition-transform duration-500 ease-out pointer-events-none"></div>
+                        <div class="flex items-center justify-between relative z-10">
+                            <div class="w-14 h-14 bg-gradient-to-br from-rose-500 to-pink-600 text-white rounded-2xl flex items-center justify-center text-2xl shadow-md shadow-rose-500/30 group-hover:scale-110 transition-transform"><i class="fa-solid fa-heart-pulse"></i></div>
+                            <span class="text-[10px] bg-rose-100 text-rose-800 font-bold px-2 py-0.5 rounded-full uppercase">Health &amp; BMI</span>
+                        </div>
+                        <div class="relative z-10">
+                            <h3 class="font-moul text-[15px] text-slate-900 mb-1.5 group-hover:text-rose-600">របាយការណ៍សុខភាព</h3>
+                            <p class="text-slate-500 text-[11px] leading-relaxed">គណនា BMI ស្វ័យប្រវត្ត (កម្ពស់-ទម្ងន់) ការពិនិត្យភ្នែក និងវ៉ាក់សាំង។</p>
+                        </div>
+                    </div>
+
+                    <!-- KrouDigital Card 5: ប័ណ្ណសរសើរ / វិញ្ញាបនបត្រ -->
+                    <div onclick="window.KrouDigital && window.KrouDigital.renderCertificateModal()" class="bg-white/90 backdrop-blur-md rounded-[2rem] p-6 shadow-sm hover:shadow-[0_20px_40px_rgb(217,119,6,0.18)] hover:-translate-y-1.5 transition-all duration-300 cursor-pointer border-2 border-amber-100 hover:border-amber-400 group flex flex-col justify-between h-[210px] relative overflow-hidden">
+                        <div class="absolute -right-4 -top-4 w-24 h-24 bg-amber-50 rounded-full group-hover:scale-150 transition-transform duration-500 ease-out pointer-events-none"></div>
+                        <div class="flex items-center justify-between relative z-10">
+                            <div class="w-14 h-14 bg-gradient-to-br from-amber-500 to-yellow-600 text-white rounded-2xl flex items-center justify-center text-2xl shadow-md shadow-amber-500/30 group-hover:scale-110 transition-transform"><i class="fa-solid fa-certificate"></i></div>
+                            <span class="text-[10px] bg-amber-100 text-amber-800 font-bold px-2 py-0.5 rounded-full uppercase">Print Certificate</span>
+                        </div>
+                        <div class="relative z-10">
+                            <h3 class="font-moul text-[15px] text-slate-900 mb-1.5 group-hover:text-amber-600">ប័ណ្ណសរសើរផ្លូវការ</h3>
+                            <p class="text-slate-500 text-[11px] leading-relaxed">បង្កើតប័ណ្ណសរសើរសិស្សពូកែ និងវិន័យល្អ បោះពុម្ពជាក្រដាស A4។</p>
+                        </div>
+                    </div>
+
+                    <!-- KrouDigital Card 6: សៀវភៅតាមដានការសិក្សា -->
+                    <div onclick="window.openTrackingBookModal ? window.openTrackingBookModal() : alert('Tracking book')" class="bg-white/90 backdrop-blur-md rounded-[2rem] p-6 shadow-sm hover:shadow-[0_20px_40px_rgb(99,102,241,0.18)] hover:-translate-y-1.5 transition-all duration-300 cursor-pointer border border-slate-100 group flex flex-col justify-between h-[210px] relative overflow-hidden">
+                        <div class="absolute -right-4 -top-4 w-24 h-24 bg-indigo-50 rounded-full group-hover:scale-150 transition-transform duration-500 ease-out pointer-events-none"></div>
+                        <div class="w-14 h-14 bg-gradient-to-br from-indigo-500 to-blue-600 text-white rounded-2xl flex items-center justify-center text-2xl shadow-md shadow-indigo-500/30 group-hover:scale-110 transition-transform relative z-10"><i class="fa-solid fa-book-open-reader"></i></div>
+                        <div class="relative z-10">
+                            <h3 class="font-moul text-[15px] text-slate-900 mb-1.5 group-hover:text-indigo-600">សៀវភៅតាមដាន</h3>
+                            <p class="text-slate-500 text-[11px] leading-relaxed">សៀវភៅតាមដានការសិក្សា (មួយសន្លឹកក្នុងសិស្សម្នាក់) ពេញមួយឆ្នាំ។</p>
+                        </div>
+                    </div>
+
+                    <!-- Card 7: ស្ថិតិសិស្ស -->
+                    <div onclick="window.openReportDetail('stats')" class="bg-white/90 backdrop-blur-md rounded-[2rem] p-6 shadow-sm hover:shadow-[0_20px_40px_rgb(59,130,246,0.15)] hover:-translate-y-1.5 transition-all duration-300 cursor-pointer border border-slate-100 group flex flex-col justify-between h-[210px] relative overflow-hidden">
                         <div class="absolute -right-4 -top-4 w-24 h-24 bg-blue-50 rounded-full group-hover:scale-150 transition-transform duration-500 ease-out pointer-events-none"></div>
                         <div class="w-14 h-14 bg-gradient-to-br from-blue-500 to-indigo-600 text-white rounded-2xl flex items-center justify-center text-2xl shadow-md shadow-blue-500/30 group-hover:scale-110 transition-transform relative z-10"><i class="fa-solid fa-chart-pie"></i></div>
                         <div class="relative z-10"><h3 class="font-moul text-[15px] text-slate-800 mb-1.5 group-hover:text-blue-700">តារាងស្ថិតិសិស្ស</h3><p class="text-slate-500 text-[11px] leading-relaxed">របាយការណ៍ចំនួនសិស្សដើមឆ្នាំ/ចុងឆ្នាំ បែងចែកតាមអាយុ និងភេទ។</p></div>
                     </div>
 
-                    <!-- Card 2: វត្តមានប្រចាំខែ -->
-                    <div onclick="window.openReportDetail('attendance')" class="bg-white/90 backdrop-blur-md rounded-[2rem] p-6 shadow-sm hover:shadow-[0_20px_40px_rgb(16,185,129,0.15)] hover:-translate-y-1.5 transition-all duration-300 cursor-pointer border border-slate-100 group flex flex-col justify-between h-[200px] relative overflow-hidden">
+                    <!-- Card 8: វត្តមានប្រចាំខែ -->
+                    <div onclick="window.openReportDetail('attendance')" class="bg-white/90 backdrop-blur-md rounded-[2rem] p-6 shadow-sm hover:shadow-[0_20px_40px_rgb(16,185,129,0.15)] hover:-translate-y-1.5 transition-all duration-300 cursor-pointer border border-slate-100 group flex flex-col justify-between h-[210px] relative overflow-hidden">
                         <div class="absolute -right-4 -top-4 w-24 h-24 bg-emerald-50 rounded-full group-hover:scale-150 transition-transform duration-500 ease-out pointer-events-none"></div>
                         <div class="w-14 h-14 bg-gradient-to-br from-emerald-400 to-teal-600 text-white rounded-2xl flex items-center justify-center text-2xl shadow-md shadow-emerald-500/30 group-hover:scale-110 transition-transform relative z-10"><i class="fa-solid fa-calendar-check"></i></div>
                         <div class="relative z-10"><h3 class="font-moul text-[15px] text-slate-800 mb-1.5 group-hover:text-emerald-600">របាយការណ៍វត្តមាន</h3><p class="text-slate-500 text-[11px] leading-relaxed">សរុបស្ថិតិអវត្តមានសិស្សប្រចាំខែ មានច្បាប់ និងឥតច្បាប់។</p></div>
                     </div>
 
-                    <!-- Card 3: បញ្ជីរាយនាមសិស្ស -->
-                    <div onclick="window.openReportDetail('students')" class="bg-white/90 backdrop-blur-md rounded-[2rem] p-6 shadow-sm hover:shadow-[0_20px_40px_rgb(245,158,11,0.15)] hover:-translate-y-1.5 transition-all duration-300 cursor-pointer border border-slate-100 group flex flex-col justify-between h-[200px] relative overflow-hidden">
-                        <div class="absolute -right-4 -top-4 w-24 h-24 bg-amber-50 rounded-full group-hover:scale-150 transition-transform duration-500 ease-out pointer-events-none"></div>
-                        <div class="w-14 h-14 bg-gradient-to-br from-amber-400 to-orange-500 text-white rounded-2xl flex items-center justify-center text-2xl shadow-md shadow-amber-500/30 group-hover:scale-110 transition-transform relative z-10"><i class="fa-solid fa-clipboard-list"></i></div>
-                        <div class="relative z-10"><h3 class="font-moul text-[15px] text-slate-800 mb-1.5 group-hover:text-amber-600">បញ្ជីរាយនាមសិស្ស</h3><p class="text-slate-500 text-[11px] leading-relaxed">បញ្ជីឈ្មោះសិស្សផ្លូវការ សម្រាប់កត់វត្តមាន ឬស្រង់ពិន្ទុ។</p></div>
-                    </div>
-
-                    <!-- Card 4: របាយការណ៍ពិន្ទុ -->
-                    <div onclick="window.openReportDetail('scores')" class="bg-white/90 backdrop-blur-md rounded-[2rem] p-6 shadow-sm hover:shadow-[0_20px_40px_rgb(244,63,94,0.15)] hover:-translate-y-1.5 transition-all duration-300 cursor-pointer border border-slate-100 group flex flex-col justify-between h-[200px] relative overflow-hidden">
-                        <div class="absolute -right-4 -top-4 w-24 h-24 bg-rose-50 rounded-full group-hover:scale-150 transition-transform duration-500 ease-out pointer-events-none"></div>
-                        <div class="w-14 h-14 bg-gradient-to-br from-rose-400 to-rose-600 text-white rounded-2xl flex items-center justify-center text-2xl shadow-md shadow-rose-500/30 group-hover:scale-110 transition-transform relative z-10"><i class="fa-solid fa-ranking-star"></i></div>
-                        <div class="relative z-10"><h3 class="font-moul text-[15px] text-slate-800 mb-1.5 group-hover:text-rose-600">របាយការណ៍លទ្ធផល</h3><p class="text-slate-500 text-[11px] leading-relaxed">បញ្ជីពិន្ទុ និងចំណាត់ថ្នាក់សិស្សប្រចាំខែ ឬឆមាស។</p></div>
-                    </div>
-
-                    <!-- Card 5: រចនាសម្ព័ន្ធថ្នាក់រៀន -->
-                    <div onclick="window.openReportDetail('structure')" class="bg-white/90 backdrop-blur-md rounded-[2rem] p-6 shadow-sm hover:shadow-[0_20px_40px_rgb(139,92,246,0.15)] hover:-translate-y-1.5 transition-all duration-300 cursor-pointer border border-slate-100 group flex flex-col justify-between h-[200px] relative overflow-hidden">
-                        <div class="absolute -right-4 -top-4 w-24 h-24 bg-purple-50 rounded-full group-hover:scale-150 transition-transform duration-500 ease-out pointer-events-none"></div>
-                        <div class="w-14 h-14 bg-gradient-to-br from-purple-400 to-indigo-600 text-white rounded-2xl flex items-center justify-center text-2xl shadow-md shadow-purple-500/30 group-hover:scale-110 transition-transform relative z-10"><i class="fa-solid fa-sitemap"></i></div>
-                        <div class="relative z-10"><h3 class="font-moul text-[15px] text-slate-800 mb-1.5 group-hover:text-purple-600">រចនាសម្ព័ន្ធថ្នាក់រៀន</h3><p class="text-slate-500 text-[11px] leading-relaxed">តារាងរចនាសម្ព័ន្ធថ្នាក់ និងគណៈកម្មាធិការសាខា។</p></div>
-                    </div>
-
-                    <!-- Card 6: នាំចេញ Master Excel -->
-                    <div onclick="window.exportMasterExcel ? window.exportMasterExcel() : alert('Export Master Excel')" class="bg-white/90 backdrop-blur-md rounded-[2rem] p-6 shadow-sm hover:shadow-[0_20px_40px_rgb(16,185,129,0.15)] hover:-translate-y-1.5 transition-all duration-300 cursor-pointer border border-slate-100 group flex flex-col justify-between h-[200px] relative overflow-hidden">
+                    <!-- Card 9: នាំចេញ Master Excel -->
+                    <div onclick="window.AdvancedReports && window.AdvancedReports.exportMasterExcelWorkbook ? window.AdvancedReports.exportMasterExcelWorkbook() : alert('Export Master Excel')" class="bg-white/90 backdrop-blur-md rounded-[2rem] p-6 shadow-sm hover:shadow-[0_20px_40px_rgb(16,185,129,0.15)] hover:-translate-y-1.5 transition-all duration-300 cursor-pointer border border-slate-100 group flex flex-col justify-between h-[210px] relative overflow-hidden">
                         <div class="absolute -right-4 -top-4 w-24 h-24 bg-teal-50 rounded-full group-hover:scale-150 transition-transform duration-500 ease-out pointer-events-none"></div>
                         <div class="w-14 h-14 bg-gradient-to-br from-teal-400 to-emerald-600 text-white rounded-2xl flex items-center justify-center text-2xl shadow-md shadow-emerald-500/30 group-hover:scale-110 transition-transform relative z-10"><i class="fa-solid fa-file-excel"></i></div>
-                        <div class="relative z-10"><h3 class="font-moul text-[15px] text-slate-800 mb-1.5 group-hover:text-teal-600">Master Excel</h3><p class="text-slate-500 text-[11px] leading-relaxed">នាំចេញឯកសារ Excel ពេញលេញរួមមាន បញ្ជីសិស្ស តារាងពិន្ទុ និងវត្តមាន។</p></div>
+                        <div class="relative z-10"><h3 class="font-moul text-[15px] text-slate-800 mb-1.5 group-hover:text-teal-600">Master Excel</h3><p class="text-slate-500 text-[11px] leading-relaxed">នាំចេញឯកសារ Excel ច្រើន Sheet រួមមាន បញ្ជីសិស្ស និងពិន្ទុ។</p></div>
                     </div>
+
+                    <!-- Card 10: ច្រកពិនិត្យលទ្ធផលមាតាបិតា -->
+                    <div onclick="window.KrouDigital && window.KrouDigital.openParentPortalModal()" class="bg-white/90 backdrop-blur-md rounded-[2rem] p-6 shadow-sm hover:shadow-[0_20px_40px_rgb(14,165,233,0.18)] hover:-translate-y-1.5 transition-all duration-300 cursor-pointer border-2 border-sky-100 hover:border-sky-400 group flex flex-col justify-between h-[210px] relative overflow-hidden">
+                        <div class="absolute -right-4 -top-4 w-24 h-24 bg-sky-50 rounded-full group-hover:scale-150 transition-transform duration-500 ease-out pointer-events-none"></div>
+                        <div class="flex items-center justify-between relative z-10">
+                            <div class="w-14 h-14 bg-gradient-to-br from-sky-400 to-blue-600 text-white rounded-2xl flex items-center justify-center text-2xl shadow-md shadow-sky-500/30 group-hover:scale-110 transition-transform"><i class="fa-solid fa-magnifying-glass-chart"></i></div>
+                            <span class="text-[10px] bg-sky-100 text-sky-800 font-bold px-2 py-0.5 rounded-full uppercase">Parent Portal</span>
+                        </div>
+                        <div class="relative z-10">
+                            <h3 class="font-moul text-[15px] text-slate-900 mb-1.5 group-hover:text-sky-600">ច្រកមាតាបិតា &amp; សិស្ស</h3>
+                            <p class="text-slate-500 text-[11px] leading-relaxed">ស្វែងរកពិន្ទុ និងទាញយកព្រឹត្តិបត្រពិន្ទុសម្រាប់មាតាបិតា។</p>
+                        </div>
+                    </div>
+
                 </div>
             </div>
 
@@ -139,7 +208,27 @@ window.openReportDetail = function(reportType) {
     if (extraControls) extraControls.classList.add("hidden");
 
     setTimeout(() => {
-        if (reportType === 'stats') {
+        if (reportType === 'report_ka') {
+            titleEl.textContent = "របាយការណ៍ ក (តារាងស្រង់ពិន្ទុ និងការវាយតម្លៃលទ្ធផលសិក្សា)";
+            if (window.KrouDigital && typeof window.KrouDigital.renderReportKa === 'function') {
+                window.KrouDigital.renderReportKa(paperArea);
+            }
+        } else if (reportType === 'report_kha') {
+            titleEl.textContent = "របាយការណ៍ ខ (តារាងកិត្តិយសសិស្សឆ្នើម Top 5)";
+            if (window.KrouDigital && typeof window.KrouDigital.renderReportKha === 'function') {
+                window.KrouDigital.renderReportKha(paperArea);
+            }
+        } else if (reportType === 'report_ko_kho') {
+            titleEl.textContent = "របាយការណ៍ គ & ឃ (លទ្ធផលប្រចាំឆមាស និងប្រចាំឆ្នាំ)";
+            if (window.KrouDigital && typeof window.KrouDigital.renderReportKoKho === 'function') {
+                window.KrouDigital.renderReportKoKho(paperArea);
+            }
+        } else if (reportType === 'health') {
+            titleEl.textContent = "របាយការណ៍ និងការតាមដានសុខភាពសិស្ស (BMI, ភ្នែក, វ៉ាក់សាំង)";
+            if (window.KrouDigital && typeof window.KrouDigital.renderHealthTracker === 'function') {
+                window.KrouDigital.renderHealthTracker(paperArea);
+            }
+        } else if (reportType === 'stats') {
             titleEl.textContent = "តារាងស្ថិតិសិស្ស";
             window.renderStudentStatsReportHTML(paperArea);
         } else if (reportType === 'attendance') {
