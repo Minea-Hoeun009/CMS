@@ -459,3 +459,50 @@ body {
     background-color: rgba(255, 255, 255, 0.2) !important;
     color: #ffffff !important;
 }
+
+
+/* ========================================================
+   Phase 3 UX/UI Standardization Additions
+======================================================== */
+
+/* Accessible Focus States (A11y) */
+:focus-visible {
+    outline: 2px solid #6366f1 !important;
+    outline-offset: 2px !important;
+}
+
+/* Minimum Accessible Touch Target for Mobile Elements */
+.touch-target {
+    min-height: 44px;
+    min-width: 44px;
+}
+
+/* Reduced Motion Preference (A11y) */
+@media (prefers-reduced-motion: reduce) {
+    *, ::before, ::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+
+/* Sidebar Category Headers */
+.sidebar-category-header {
+    font-size: 10px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #64748b;
+    padding: 12px 14px 4px 14px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* Responsive Modal Bottom Padding to avoid Mobile Nav Clashing */
+@media (max-width: 767px) {
+    .modal-scroll-container {
+        padding-bottom: max(80px, calc(64px + env(safe-area-inset-bottom))) !important;
+    }
+}

@@ -250,6 +250,12 @@ window.loadStudentsView = async function() {
                     </div>
 
                     <div class="bg-white p-5 rounded-[2rem] border border-slate-200 shadow-sm mb-6 shrink-0 no-print relative z-20">
+                        <div class="flex items-center justify-between mb-3 px-1">
+                            <span class="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5"><i class="fa-solid fa-filter text-indigo-500"></i> តម្រងស្វែងរកសិស្ស</span>
+                            <button type="button" onclick="if(typeof window.resetStudentFilters === 'function') window.resetStudentFilters();" title="សម្អាតតម្រងទាំងអស់" class="text-xs font-bold text-indigo-600 hover:text-indigo-800 bg-indigo-50 hover:bg-indigo-100 px-3 py-1.5 rounded-xl transition inline-flex items-center gap-1.5">
+                                <i class="fa-solid fa-arrow-rotate-left text-[11px]"></i> សម្អាតតម្រង
+                            </button>
+                        </div>
                         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3">
                             <!-- ស្វែងរក -->
                             <div class="relative col-span-1 sm:col-span-2 lg:col-span-2 group">
@@ -420,6 +426,20 @@ window.saveStudentToFirebase = async function(studentData) {
 // ==========================================
 // ៣. ចម្រោះ និងបង្ហាញទិន្នន័យសិស្ស (Ultra-Safe Filter)
 // ==========================================
+window.resetStudentFilters = function() {
+    const sInput = document.getElementById("stuSearchInput");
+    const sGrade = document.getElementById("stuFilterGrade");
+    const sRoom = document.getElementById("stuFilterRoom");
+    const sGen = document.getElementById("stuFilterGender");
+    const sStat = document.getElementById("stuFilterStatus");
+    if (sInput) sInput.value = "";
+    if (sGrade) sGrade.value = "all";
+    if (sRoom) sRoom.value = "all";
+    if (sGen) sGen.value = "all";
+    if (sStat) sStat.value = "Active";
+    if (typeof window.filterStudents === 'function') window.filterStudents();
+};
+
 window.filterStudents = function() {
     const search = (document.getElementById("stuSearchInput")?.value || "").toLowerCase().trim();
     const grade = document.getElementById("stuFilterGrade")?.value || "all";
@@ -528,11 +548,22 @@ window.renderStudentsTable = function() {
     if(!tbody) return;
 
     if (window.filteredStudents.length === 0) {
-        tbody.innerHTML = `
+        const hasBaseData = (window.allStudents && window.allStudents.length > 0);
+        tbody.innerHTML = hasBaseData ? `
+            <tr>
+                <td colspan="9" class="p-16 text-center">
+                    <div class="inline-flex items-center justify-center w-16 h-16 bg-amber-50 text-amber-500 rounded-full text-3xl mb-3 shadow-inner"><i class="fa-solid fa-filter-circle-xmark"></i></div>
+                    <h3 class="text-slate-700 font-bold text-base">រកមិនឃើញសិស្សតាមលក្ខខណ្ឌចម្រោះនេះទេ!</h3>
+                    <p class="text-slate-400 text-xs mt-1">សូមសាកល្បងផ្លាស់ប្តូរពាក្យគន្លឹះ ឬសម្អាតតម្រងស្វែងរកឡើងវិញ</p>
+                    <button type="button" onclick="if(typeof window.resetStudentFilters === 'function') window.resetStudentFilters();" class="mt-4 px-4 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-600 rounded-xl text-xs font-bold transition inline-flex items-center gap-2 shadow-sm">
+                        <i class="fa-solid fa-arrow-rotate-left"></i> សម្អាតតម្រងទាំងអស់
+                    </button>
+                </td>
+            </tr>` : `
             <tr>
                 <td colspan="9" class="p-24 text-center">
-                    <div class="inline-flex items-center justify-center w-20 h-20 bg-slate-50 rounded-full text-slate-300 text-4xl mb-4"><i class="fa-solid fa-folder-open"></i></div>
-                    <h3 class="text-slate-500 font-bold text-lg">មិនមានទិន្នន័យសិស្សទេ!</h3>
+                    <div class="inline-flex items-center justify-center w-20 h-20 bg-slate-50 rounded-full text-slate-300 text-4xl mb-4 shadow-inner"><i class="fa-solid fa-folder-open"></i></div>
+                    <h3 class="text-slate-500 font-bold text-lg">មិនទាន់មានទិន្នន័យសិស្សនៅឡើយទេ!</h3>
                     <p class="text-slate-400 text-sm mt-1">សូមចុចប៊ូតុង "ចុះឈ្មោះថ្មី" ឬ "នាំចូលពី Excel" ឬចុច "ទាញទិន្នន័យថ្មី (Sync)"</p>
                 </td>
             </tr>`;
@@ -650,6 +681,8 @@ window.clearStudentForm = function() {
     if (confirm("តើលោកគ្រូអ្នកគ្រូពិតជាចង់សម្អាតទិន្នន័យដែលកំពុងវាយបញ្ចូលនេះមែនទេ?")) {
         document.getElementById("studentForm").reset();
         document.getElementById("stu_photo_val").value = "";
+    const stuBanner = document.getElementById("stuModalErrorBanner");
+    if (stuBanner) { stuBanner.classList.add("hidden"); stuBanner.innerHTML = ""; }
         const previewImg = document.getElementById("stu_photo_preview");
         if(previewImg) { previewImg.src = ""; previewImg.classList.add("hidden"); }
         const iconPlaceholder = document.getElementById("stu_photo_icon_placeholder");
@@ -887,10 +920,26 @@ window.saveStudentData = async function(e) {
     };
 
     // Schema validation using CMSValidator
+    const stuBanner = document.getElementById("stuModalErrorBanner");
+    if (stuBanner) { stuBanner.classList.add("hidden"); stuBanner.innerHTML = ""; }
+
     if (window.CMSValidator && typeof window.CMSValidator.validateStudent === 'function') {
         const vRes = window.CMSValidator.validateStudent(payload, isEdit, window.allStudents);
         if (!vRes.isValid) {
-            alert("❌ ព័ត៌មានសិស្សមិនត្រឹមត្រូវ:\n\n• " + vRes.errors.join("\n• "));
+            if (stuBanner) {
+                stuBanner.innerHTML = `
+                    <div class="flex items-center gap-2 font-bold mb-1.5 text-sm text-rose-800">
+                        <i class="fa-solid fa-triangle-exclamation text-base"></i> សូមពិនិត្យ និងបំពេញព័ត៌មានដែលខ្វះ៖
+                    </div>
+                    <ul class="list-disc list-inside space-y-0.5 text-xs text-rose-700 pl-1 font-semibold">
+                        ${vRes.errors.map(err => `<li>${window.escapeHtml ? window.escapeHtml(err) : err}</li>`).join('')}
+                    </ul>
+                `;
+                stuBanner.classList.remove("hidden");
+                stuBanner.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            } else {
+                alert("❌ ព័ត៌មានសិស្សមិនត្រឹមត្រូវ:\n\n• " + vRes.errors.join("\n• "));
+            }
             btn.innerHTML = origText;
             btn.disabled = false;
             return;
@@ -1014,7 +1063,8 @@ window.deleteStudent = function(id) {
                     (typeof isCurrentUserAdmin === 'function' && isCurrentUserAdmin());
     
     // បង្ហាញជម្រើស Soft Delete ដើម្បីការពារប្រវត្តិពិន្ទុ និងវត្តមាន
-    const softPrompt = confirm(`⚠️ ការគ្រប់គ្រងស្ថានភាពសិស្ស៖ ${stu.name} (${stu.id})\n\n[ចុច OK] ដើម្បីដាក់ជា «ឈប់រៀន / មិនសកម្ម» (Soft Delete - រក្សាទុកពិន្ទុ និងវត្តមានចាស់ៗទាំងអស់)\n[ចុច Cancel] ដើម្បីបោះបង់ ឬជ្រើសរើសជម្រើសផ្សេងទៀត`);
+    const gradeRoomStr = [normalizeGrade(stu.grade), stu.room].filter(Boolean).join(" ");
+    const softPrompt = confirm(`⚠️ បញ្ជាក់ការផ្អាក/ដកឈ្មោះសិស្ស៖\n\n• ឈ្មោះ៖ ${stu.name}\n• អត្តលេខ៖ ${stu.id}\n• ថ្នាក់៖ ${gradeRoomStr || 'មិនទាន់កំណត់'}\n\n[ចុច OK] ដើម្បីកំណត់ជា «ឈប់រៀន / ផ្អាក» (រក្សាទុកប្រវត្តិពិន្ទុ និងវត្តមានទាំងអស់)\n[ចុច Cancel] ដើម្បីបោះបង់`);
     
     if (softPrompt) {
         stu.status = "Withdrawn";
@@ -1053,7 +1103,7 @@ window.deleteStudent = function(id) {
     }
 
     if (isAdmin) {
-        const hardPrompt = confirm(`🚨 ការព្រមានកម្រិតខ្ពស់ (Admin Only)៖\nតើលោកគ្រូ/អ្នកគ្រូពិតជាចង់ «លុបទិន្នន័យសិស្ស ${stu.name} ចេញជាអចិន្ត្រៃយ៍» មែនទេ?\nសកម្មភាពនេះមិនអាចត្រឡប់ថយក្រោយបានឡើយ!`);
+        const hardPrompt = confirm(`🚨 ការព្រមានកម្រិតខ្ពស់ (Admin Only)៖\n\nតើលោកគ្រូ/អ្នកគ្រូពិតជាចង់លុបទិន្នន័យសិស្ស៖\n• ឈ្មោះ៖ ${stu.name}\n• អត្តលេខ៖ ${stu.id}\n\nចេញពីប្រព័ន្ធជាអចិន្ត្រៃយ៍មែនទេ?\n⚠️ សកម្មភាពនេះមិនអាចត្រឡប់ថយក្រោយបានឡើយ!`);
         if (hardPrompt) {
             window.allStudents = window.allStudents.filter(s => String(s.id) !== String(id));
             if (typeof window.setMasterStudents === 'function') {
@@ -1249,6 +1299,9 @@ window.renderStudentModalTemplate = function() {
                     <form id="studentForm" onsubmit="window.saveStudentData(event)">
                         <input type="hidden" id="stu_is_edit" value="0">
                         <input type="hidden" id="stu_photo_val" value="">
+                        
+                        <!-- Inline Validation Error Banner (P0 UX/UI) -->
+                        <div id="stuModalErrorBanner" class="hidden mb-6 p-4 bg-rose-50 border border-rose-200 rounded-2xl text-rose-700 text-xs shadow-sm"></div>
                         
                         <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-6">
                             <div class="col-span-1 lg:col-span-4 space-y-5 bg-white p-6 md:p-8 rounded-[2rem] border border-slate-200 shadow-sm relative overflow-hidden group hover:border-indigo-300 transition duration-300">
