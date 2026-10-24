@@ -242,4 +242,25 @@ describe('Teacher Personal Workspace & Authentication Preferences Tests', () => 
     assert.equal(html.includes('id="loginGrade"'), true);
     assert.equal(html.includes('id="loginRoom"'), true);
   });
+
+  test('8. Modern KruHub Login UI & Google / Telegram auth handlers verification', () => {
+    const html = fs.readFileSync(path.resolve(__dirname, '../index.html'), 'utf8');
+
+    // 1. KruHub style Login buttons & elements
+    assert.equal(html.includes('id="btnGoogleLogin"'), true);
+    assert.equal(html.includes('បន្តជាមួយ Google (Gmail)'), true);
+    assert.equal(html.includes('id="btnTelegramLogin"'), true);
+    assert.equal(html.includes('ចូលតាមរយៈ Telegram'), true);
+    assert.equal(html.includes('ចូលជា Administrator ភ្លាមៗ (Quick Admin Login)'), false); // Removed old admin banner
+
+    // 2. Auth handlers presence in auth.js
+    const authCode = fs.readFileSync(path.resolve(__dirname, '../js/auth.js'), 'utf8');
+    assert.equal(authCode.includes('window.handleGoogleLogin ='), true);
+    assert.equal(authCode.includes('window.openGoogleLoginModal ='), true);
+    assert.equal(authCode.includes('window.handleTelegramLogin ='), true);
+    assert.equal(authCode.includes('window.openTelegramLoginModal ='), true);
+    assert.equal(authCode.includes('window.handleTelegramAuthSubmit ='), true);
+    assert.equal(authCode.includes('window.linkTeacherGoogleAccount ='), true);
+    assert.equal(authCode.includes('window.auth.getRedirectResult'), true);
+  });
 });

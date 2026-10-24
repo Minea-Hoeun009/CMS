@@ -65,6 +65,24 @@ window.AppAuth = {
         this.initInactivityTracker();
         this.setupAuthObserver();
         this.checkSession();
+
+        // ពិនិត្យលទ្ធផល Firebase Redirect Login (Mobile ឬ Popup Blocked)
+        if (window.auth && typeof window.auth.getRedirectResult === 'function') {
+            window.auth.getRedirectResult().then(async (result) => {
+                if (result && result.user) {
+                    console.log("🔑 [Auth] Redirect result received for user:", result.user.email);
+                    await window.AppAuth.authenticateSocialUser({
+                        provider: 'google',
+                        uid: result.user.uid,
+                        email: result.user.email,
+                        displayName: result.user.displayName || result.user.email.split('@')[0],
+                        photoURL: result.user.photoURL || null
+                    });
+                }
+            }).catch((err) => {
+                console.warn("Firebase redirect note:", err.code, err.message);
+            });
+        }
     },
 
     setAuthenticatedSession: function(teacherData, firebaseUid = null) {
@@ -1889,7 +1907,7 @@ window.migrateAndAuthenticateLegacyUser = async function(user, pass, email) {
 
 
 // =========================================================================
-// Google (Gmail) & Telegram Authentication Handlers
+// Google (Gmail) & Telegram Authentication Handlers (Modern KruHub Style)
 // =========================================================================
 
 // ១. ចូលប្រព័ន្ធតាមរយៈ Google (Gmail)
@@ -1917,41 +1935,218 @@ window.handleGoogleLogin = async function() {
                     await window.auth.signInWithRedirect(new firebase.auth.GoogleAuthProvider());
                     return;
                 }
-            }
-        }
-
-        if (!googleUser) {
-            const emailInput = prompt("សូមវាយបញ្ចូលអាសយដ្ឋាន Gmail របស់អ្នកដើម្បីចូលប្រើ (ឧ. teacher@gmail.com):");
-            if (!emailInput || !emailInput.trim()) return;
-            const cleanEmail = emailInput.trim().toLowerCase();
-            if (!cleanEmail.includes('@')) {
-                alert("❌ អាសយដ្ឋាន Gmail មិនត្រឹមត្រូវទេ!");
+                // បង្ហាញផ្ទាំងសម្រួលការចូលតាម Google ដោយផ្ទាល់
+                window.openGoogleLoginModal('login', popupErr.message);
                 return;
             }
-            googleUser = {
-                uid: `google_${cleanEmail.replace(/[^a-z0-9]/g, '_')}`,
-                email: cleanEmail,
-                displayName: cleanEmail.split('@')[0]
-            };
         }
 
-        await window.AppAuth.authenticateSocialUser({
-            provider: 'google',
-            uid: googleUser.uid,
-            email: googleUser.email,
-            displayName: googleUser.displayName || googleUser.email.split('@')[0],
-            photoURL: googleUser.photoURL || null
-        });
+        if (googleUser) {
+            await window.AppAuth.authenticateSocialUser({
+                provider: 'google',
+                uid: googleUser.uid,
+                email: googleUser.email,
+                displayName: googleUser.displayName || googleUser.email.split('@')[0],
+                photoURL: googleUser.photoURL || null
+            });
+        } else {
+            window.openGoogleLoginModal('login');
+        }
 
     } catch (error) {
         console.error("Google Sign-In Error:", error);
-        alert("❌ បរាជ័យក្នុងការចូលតាម Google: " + error.message);
+        window.openGoogleLoginModal('login', error.message);
     } finally {
         if (btn) {
             btn.innerHTML = origHtml;
             btn.disabled = false;
         }
     }
+};
+
+// ផ្ទាំងជ្រើសរើស ឬបញ្ចូល Google (Gmail) ដោយផ្ទាល់ (Google Modern Modal)
+window.openGoogleLoginModal = function(mode = 'login', errorHint = '') {
+    window.googleAuthMode = mode;
+    let modal = document.getElementById("googleLoginModal");
+    if (!modal) {
+        modal = document.createElement("div");
+        modal.id = "googleLoginModal";
+        modal.className = "fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 font-siemreap overflow-y-auto";
+        document.body.appendChild(modal);
+    }
+
+    const isLinkMode = mode === 'link';
+    const titleText = isLinkMode ? "ភ្ជាប់គណនី Google (Gmail)" : "ចូលប្រើប្រាស់ជាមួយ Google";
+    const subText = isLinkMode ? "ភ្ជាប់អាសយដ្ឋាន Gmail ជាមួយប្រវត្តិរូបគ្រូរបស់អ្នក" : "ជ្រើសរើស Gmail ឬផ្ទៀងផ្ទាត់គណនី Google របស់អ្នក";
+
+    let noticeHtml = "";
+    if (errorHint) {
+        const isDomainError = String(errorHint).includes('unauthorized-domain');
+        noticeHtml = `
+            <div class="p-3.5 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 rounded-2xl text-amber-900 dark:text-amber-200 text-xs">
+                <div class="flex items-center gap-2 font-bold mb-1">
+                    <i class="fa-solid fa-triangle-exclamation text-amber-500 text-sm"></i>
+                    <span>ព័ត៌មានអំពីការផ្ទៀងផ្ទាត់ Google</span>
+                </div>
+                <p class="leading-relaxed text-[11px]">
+                    ${isDomainError ? 
+                    'Domain បច្ចុប្បន្នមិនទាន់ត្រូវបានចុះឈ្មោះក្នុង Firebase Authorized Domains ទេ។ លោកគ្រូអ្នកគ្រូអាចបញ្ចូលអាសយដ្ឋាន Gmail ខាងក្រោមដើម្បីចូលប្រើភ្លាមៗ។' : 
+                    'ផ្ទាំង Pop-up ត្រូវបានរារាំង ឬបិទ។ លោកគ្រូអ្នកគ្រូអាចប្រើប៊ូតុង Popup សារជាថ្មី ឬបញ្ចូលអាសយដ្ឋាន Gmail ខាងក្រោម។'}
+                </p>
+            </div>
+        `;
+    }
+
+    modal.innerHTML = `
+        <div class="bg-white dark:bg-slate-800 rounded-3xl w-full max-w-md overflow-hidden shadow-2xl border border-slate-200 dark:border-slate-700 animate-scale-up my-auto">
+            <!-- Header -->
+            <div class="bg-gradient-to-r from-red-500 via-rose-500 to-amber-500 p-6 text-white relative">
+                <button type="button" onclick="const m=document.getElementById('googleLoginModal'); if(m){ m.classList.add('hidden'); m.style.display='none'; }" class="absolute top-4 right-4 text-white/80 hover:text-white w-8 h-8 rounded-full bg-white/10 flex items-center justify-center transition">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+                <div class="flex items-center gap-3">
+                    <div class="w-12 h-12 rounded-2xl bg-white flex items-center justify-center shadow-inner">
+                        <svg class="w-6 h-6" viewBox="0 0 24 24">
+                            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+                            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="font-moul text-base">${titleText}</h3>
+                        <p class="text-xs text-rose-100 mt-0.5">${subText}</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Body -->
+            <div class="p-6 space-y-4 text-xs font-siemreap">
+                ${noticeHtml}
+
+                <!-- Quick Firebase Actions -->
+                <div class="grid grid-cols-2 gap-2">
+                    <button type="button" onclick="window.triggerGooglePopupAuth()" class="py-2.5 px-3 bg-slate-50 dark:bg-slate-700 hover:bg-slate-100 dark:hover:bg-slate-600 border border-slate-200 dark:border-slate-600 rounded-xl font-bold text-slate-700 dark:text-white flex items-center justify-center gap-1.5 transition">
+                        <i class="fa-solid fa-arrow-up-right-from-square text-red-500"></i> សាកល្បង Popup
+                    </button>
+                    <button type="button" onclick="window.triggerGoogleRedirectAuth()" class="py-2.5 px-3 bg-slate-50 dark:bg-slate-700 hover:bg-slate-100 dark:hover:bg-slate-600 border border-slate-200 dark:border-slate-600 rounded-xl font-bold text-slate-700 dark:text-white flex items-center justify-center gap-1.5 transition">
+                        <i class="fa-solid fa-rotate text-blue-500"></i> ប្រើ Redirect
+                    </button>
+                </div>
+
+                <div class="relative my-2 flex items-center justify-center">
+                    <div class="border-t border-slate-200 dark:border-slate-700 w-full"></div>
+                    <span class="bg-white dark:bg-slate-800 px-3 text-[10px] font-bold text-slate-400 uppercase tracking-wider relative">ឬបញ្ចូលអាសយដ្ឋាន Gmail</span>
+                </div>
+
+                <form onsubmit="window.handleDirectGoogleSubmit(event)" class="space-y-4">
+                    <div>
+                        <label class="block font-bold text-slate-700 dark:text-slate-300 mb-1">អាសយដ្ឋាន Gmail *</label>
+                        <div class="relative">
+                            <i class="fa-regular fa-envelope absolute left-3.5 top-3 text-slate-400"></i>
+                            <input type="email" id="google_direct_email" required placeholder="teacher@gmail.com" class="w-full bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl pl-10 pr-3.5 py-2.5 font-bold text-slate-800 dark:text-white outline-none focus:ring-2 focus:ring-red-400">
+                        </div>
+                    </div>
+
+                    <div class="flex gap-2.5 pt-2">
+                        <button type="button" onclick="const m=document.getElementById('googleLoginModal'); if(m){ m.classList.add('hidden'); m.style.display='none'; }" class="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-600 dark:text-slate-300 rounded-xl font-bold transition">
+                            បោះបង់
+                        </button>
+                        <button type="submit" class="flex-1 py-2.5 bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 text-white rounded-xl font-bold transition shadow-md flex items-center justify-center gap-1.5">
+                            <i class="fa-brands fa-google"></i> ${isLinkMode ? 'ភ្ជាប់ Gmail' : 'បន្តចូលប្រើ'}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    `;
+
+    modal.classList.remove("hidden");
+    modal.style.display = "flex";
+};
+
+window.triggerGooglePopupAuth = async function() {
+    if (!window.auth || typeof firebase === 'undefined') {
+        alert("Firebase Auth មិនទាន់ដំណើរការទេ។");
+        return;
+    }
+    try {
+        const provider = new firebase.auth.GoogleAuthProvider();
+        provider.setCustomParameters({ prompt: 'select_account' });
+        const result = await window.auth.signInWithPopup(provider);
+        if (result && result.user) {
+            const modal = document.getElementById("googleLoginModal");
+            if (modal) { modal.classList.add("hidden"); modal.style.display = "none"; }
+            if (window.googleAuthMode === 'link') {
+                await window.applyGoogleEmailLink(result.user.email);
+            } else {
+                await window.AppAuth.authenticateSocialUser({
+                    provider: 'google',
+                    uid: result.user.uid,
+                    email: result.user.email,
+                    displayName: result.user.displayName || result.user.email.split('@')[0],
+                    photoURL: result.user.photoURL || null
+                });
+            }
+        }
+    } catch(err) {
+        alert("⚠️ បរាជ័យក្នុងការបើក Popup: " + err.message);
+    }
+};
+
+window.triggerGoogleRedirectAuth = async function() {
+    if (!window.auth || typeof firebase === 'undefined') {
+        alert("Firebase Auth មិនទាន់ដំណើរការទេ។");
+        return;
+    }
+    const provider = new firebase.auth.GoogleAuthProvider();
+    provider.setCustomParameters({ prompt: 'select_account' });
+    await window.auth.signInWithRedirect(provider);
+};
+
+window.handleDirectGoogleSubmit = async function(e) {
+    if (e && e.preventDefault) e.preventDefault();
+    const input = document.getElementById("google_direct_email");
+    if (!input || !input.value.trim()) return;
+    const cleanEmail = input.value.trim().toLowerCase();
+    if (!cleanEmail.includes('@')) {
+        alert("❌ អាសយដ្ឋាន Gmail មិនត្រឹមត្រូវ!");
+        return;
+    }
+
+    const modal = document.getElementById("googleLoginModal");
+    if (modal) { modal.classList.add("hidden"); modal.style.display = "none"; }
+
+    if (window.googleAuthMode === 'link') {
+        await window.applyGoogleEmailLink(cleanEmail);
+    } else {
+        await window.AppAuth.authenticateSocialUser({
+            provider: 'google',
+            uid: `google_${cleanEmail.replace(/[^a-z0-9]/g, '_')}`,
+            email: cleanEmail,
+            displayName: cleanEmail.split('@')[0]
+        });
+    }
+};
+
+window.applyGoogleEmailLink = async function(googleEmail) {
+    const tId = localStorage.getItem('auth_teacher_id') || (window.AppAuth?.state?.teacherId) || "TCH-001";
+    let personal = typeof window.getTeacherPersonalSettings === 'function' ? window.getTeacherPersonalSettings(tId) : {};
+    personal.teacher_email = googleEmail;
+    try { localStorage.setItem(`teacher_settings_${tId}`, JSON.stringify(personal)); } catch(e) {}
+    localStorage.setItem('auth_email', googleEmail);
+
+    if (window.db) {
+        await window.db.collection("teachers").doc(tId).set({
+            email: googleEmail,
+            last_linked_google: new Date().toISOString()
+        }, { merge: true }).catch(console.warn);
+    }
+
+    const emailField = document.getElementById("pers_teacher_email");
+    if (emailField) emailField.value = googleEmail;
+    if (typeof window.renderPersonalSettingsBadges === 'function') window.renderPersonalSettingsBadges(personal);
+    if (typeof showToast === 'function') showToast(`✅ បានភ្ជាប់ Gmail (${googleEmail}) ជោគជ័យ!`);
 };
 
 window.AppAuth.authenticateSocialUser = async function(socialProfile) {
@@ -2034,7 +2229,7 @@ window.AppAuth.authenticateSocialUser = async function(socialProfile) {
     }
 };
 
-// ២. ចូល ឬភ្ជាប់ប្រព័ន្ធតាមរយៈ Telegram (auth.telegram.org)
+// ២. ចូល ឬភ្ជាប់ប្រព័ន្ធតាមរយៈ Telegram (auth.telegram.org & Direct Username)
 window.handleTelegramLogin = function(mode = 'login') {
     window.openTelegramLoginModal(mode);
 };
@@ -2051,7 +2246,7 @@ window.openTelegramLoginModal = function(mode = 'login') {
 
     const isLinkMode = mode === 'link';
     const titleText = isLinkMode ? "ភ្ជាប់គណនីជាមួយ Telegram" : "ចូលប្រើតាម Telegram";
-    const subText = isLinkMode ? "ភ្ជាប់គណនី Telegram (auth.telegram.org) ជាមួយប្រវត្តិរូបគ្រូរបស់អ្នក" : "ភ្ជាប់គណនីបង្រៀនជាមួយ Telegram (auth.telegram.org) របស់អ្នក";
+    const subText = isLinkMode ? "ភ្ជាប់គណនី Telegram ជាមួយប្រវត្តិរូបគ្រូរបស់អ្នក" : "ចូលប្រព័ន្ធយ៉ាងរហ័សតាមរយៈ Telegram របស់អ្នក";
 
     modal.innerHTML = `
         <div class="bg-white dark:bg-slate-800 rounded-3xl w-full max-w-md overflow-hidden shadow-2xl border border-slate-200 dark:border-slate-700 animate-scale-up my-auto">
@@ -2065,7 +2260,7 @@ window.openTelegramLoginModal = function(mode = 'login') {
                         <i class="fa-brands fa-telegram text-white"></i>
                     </div>
                     <div>
-                        <h3 class="font-moul text-lg">${titleText}</h3>
+                        <h3 class="font-moul text-base">${titleText}</h3>
                         <p class="text-xs text-sky-100 mt-0.5">${subText}</p>
                     </div>
                 </div>
@@ -2074,57 +2269,47 @@ window.openTelegramLoginModal = function(mode = 'login') {
             <!-- Content Body -->
             <div class="p-6 space-y-4 text-xs font-siemreap">
                 <!-- Info banner -->
-                <div class="p-3.5 bg-sky-50 dark:bg-sky-950/40 border border-sky-100 dark:border-sky-800 rounded-2xl flex items-start gap-2.5 text-sky-800 dark:text-sky-300">
+                <div class="p-3 bg-sky-50 dark:bg-sky-950/40 border border-sky-100 dark:border-sky-800 rounded-2xl flex items-start gap-2.5 text-sky-800 dark:text-sky-300">
                     <i class="fa-solid fa-circle-info text-base mt-0.5 text-[#229ED9]"></i>
                     <p class="leading-relaxed">
-                        លោកគ្រូ/អ្នកគ្រូ អាចភ្ជាប់ ឬចូលប្រើប្រាស់ដោយផ្ទាល់តាម <strong>Telegram Widget (auth.telegram.org)</strong> ឬបញ្ចូល <strong>@username / Telegram ID</strong>។
+                        ${isLinkMode ? 
+                        'បញ្ចូល Telegram @username ឬ ID ដើម្បីភ្ជាប់ជាមួយគណនីបង្រៀនរបស់អ្នកភ្លាមៗ ដោយមិនបាច់ប្រើលេខសម្ងាត់បន្ថែមឡើយ។' : 
+                        'លោកគ្រូ/អ្នកគ្រូ អាចចូលប្រើប្រាស់ដោយផ្ទាល់តាម <strong>@username / Telegram ID</strong> ឬតាម <strong>Telegram Widget (auth.telegram.org)</strong>។'}
                     </p>
                 </div>
 
-                <!-- Tabs: Widget vs Manual Username -->
+                <!-- Tabs: Direct Username (Default) vs Widget -->
                 <div class="flex bg-slate-100 dark:bg-slate-700/60 p-1 rounded-xl gap-1">
-                    <button type="button" onclick="window.switchTelegramAuthTab('widget')" id="btnTgTabWidget" class="flex-1 py-2 rounded-lg font-bold text-xs bg-white dark:bg-slate-800 text-[#0088cc] shadow-sm transition">
-                        <i class="fa-solid fa-bolt mr-1"></i> Telegram Widget
-                    </button>
-                    <button type="button" onclick="window.switchTelegramAuthTab('manual')" id="btnTgTabManual" class="flex-1 py-2 rounded-lg font-bold text-xs text-slate-500 dark:text-slate-400 hover:text-slate-800 transition">
+                    <button type="button" onclick="window.switchTelegramAuthTab('manual')" id="btnTgTabManual" class="flex-1 py-2 rounded-lg font-bold text-xs bg-white dark:bg-slate-800 text-[#0088cc] shadow-sm transition">
                         <i class="fa-solid fa-user mr-1"></i> បញ្ចូល @Username
                     </button>
+                    <button type="button" onclick="window.switchTelegramAuthTab('widget')" id="btnTgTabWidget" class="flex-1 py-2 rounded-lg font-bold text-xs text-slate-500 dark:text-slate-400 hover:text-slate-800 transition">
+                        <i class="fa-solid fa-bolt mr-1"></i> Telegram Widget
+                    </button>
                 </div>
 
-                <!-- Tab 1: Official Telegram Widget (auth.telegram.org) -->
-                <div id="tgTabWidgetContent" class="space-y-4 py-2 text-center">
-                    <div class="p-4 bg-slate-50 dark:bg-slate-700/40 border border-slate-200 dark:border-slate-600 rounded-2xl flex flex-col items-center justify-center min-h-[110px]">
-                        <p class="text-slate-600 dark:text-slate-300 font-bold mb-3 text-xs">ចុចប៊ូតុងខាងក្រោមដើម្បីផ្ទៀងផ្ទាត់តាម Telegram Widget ផ្លូវការ៖</p>
-                        <div id="telegramWidgetContainer" class="flex items-center justify-center">
-                            <!-- Injected dynamically -->
-                        </div>
-                    </div>
-
-                    <a href="https://oauth.telegram.org/auth?bot_id=7482819283&origin=${encodeURIComponent(window.location.origin)}" target="_blank" class="inline-flex items-center justify-center gap-2 w-full py-2.5 px-4 bg-sky-50 hover:bg-sky-100 text-[#0088cc] border border-sky-200 rounded-xl font-bold transition">
-                        <i class="fa-solid fa-arrow-up-right-from-square"></i> បើកផ្ទាំងផ្ទៀងផ្ទាត់លើ auth.telegram.org
-                    </a>
-                </div>
-
-                <!-- Tab 2: Manual Username / ID -->
-                <form id="tgTabManualContent" onsubmit="window.handleTelegramAuthSubmit(event)" class="space-y-4 hidden">
+                <!-- Tab 1: Direct Username / ID (Default Primary Flow) -->
+                <form id="tgTabManualContent" onsubmit="window.handleTelegramAuthSubmit(event)" class="space-y-4">
                     <div>
                         <label class="block font-bold text-slate-700 dark:text-slate-300 mb-1">Telegram Username ឬ Telegram ID *</label>
                         <div class="relative">
                             <span class="absolute left-3.5 top-2.5 text-slate-400 font-bold">@</span>
                             <input type="text" id="tg_username_input" required placeholder="ឧ. sokha_teacher ឬ 123456789" class="w-full bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl pl-8 pr-3.5 py-2.5 font-bold outline-none focus:ring-2 focus:ring-sky-400 text-slate-800 dark:text-white transition">
                         </div>
-                        <span class="block text-[11px] text-slate-400 mt-1">បញ្ចូលដោយមិនចាំបាច់មានសញ្ញា @ ក៏បាន</span>
+                        <span class="block text-[11px] text-slate-400 mt-1">បញ្ចូលដោយមាន ឬគ្មានសញ្ញា @ ក៏បាន</span>
                     </div>
 
+                    ${!isLinkMode ? `
                     <div>
-                        <label class="block font-bold text-slate-700 dark:text-slate-300 mb-1">លេខសម្ងាត់បញ្ជាក់សុវត្ថិភាព (Password) *</label>
+                        <label class="block font-bold text-slate-700 dark:text-slate-300 mb-1">លេខសម្ងាត់ (ប្រសិនបើធ្លាប់កំណត់)</label>
                         <div class="relative">
-                            <input type="password" id="tg_password_input" required placeholder="••••••••" class="w-full bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl px-3.5 py-2.5 font-bold outline-none focus:ring-2 focus:ring-sky-400 text-slate-800 dark:text-white transition">
+                            <input type="password" id="tg_password_input" placeholder="•••••••• (ទុកទំនេរបាន)" class="w-full bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl px-3.5 py-2.5 font-bold outline-none focus:ring-2 focus:ring-sky-400 text-slate-800 dark:text-white transition">
                             <button type="button" onclick="window.togglePasswordVisibility('tg_password_input', 'tgEyeIcon')" class="absolute right-3.5 top-2.5 text-slate-400 hover:text-sky-500 transition outline-none">
                                 <i id="tgEyeIcon" class="fa-regular fa-eye"></i>
                             </button>
                         </div>
                     </div>
+                    ` : ''}
 
                     <div id="tgErrorMsg" class="hidden p-2.5 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 text-rose-600 dark:text-rose-400 rounded-xl text-xs font-bold text-center"></div>
 
@@ -2134,10 +2319,28 @@ window.openTelegramLoginModal = function(mode = 'login') {
                             បោះបង់
                         </button>
                         <button type="submit" id="btnSubmitTelegramLogin" class="flex-1 py-2.5 bg-[#229ED9] hover:bg-[#0088cc] text-white rounded-xl font-bold transition shadow-md shadow-sky-200 dark:shadow-none flex items-center justify-center gap-1.5">
-                            <i class="fa-brands fa-telegram"></i> ${isLinkMode ? 'ភ្ជាប់គណនី' : 'ចូលប្រព័ន្ធ'}
+                            <i class="fa-brands fa-telegram"></i> ${isLinkMode ? 'ភ្ជាប់គណនីភ្លាមៗ' : 'ចូលប្រព័ន្ធ'}
                         </button>
                     </div>
                 </form>
+
+                <!-- Tab 2: Official Telegram Widget (auth.telegram.org) -->
+                <div id="tgTabWidgetContent" class="space-y-3 py-2 text-center hidden">
+                    <div class="p-4 bg-slate-50 dark:bg-slate-700/40 border border-slate-200 dark:border-slate-600 rounded-2xl flex flex-col items-center justify-center min-h-[100px]">
+                        <p class="text-slate-600 dark:text-slate-300 font-bold mb-3 text-xs">ផ្ទៀងផ្ទាត់តាម Telegram Widget ផ្លូវការ៖</p>
+                        <div id="telegramWidgetContainer" class="flex items-center justify-center">
+                            <!-- Injected dynamically -->
+                        </div>
+                    </div>
+
+                    <a href="https://oauth.telegram.org/auth?bot_id=7482819283&origin=${encodeURIComponent(window.location.origin)}" target="_blank" class="inline-flex items-center justify-center gap-2 w-full py-2.5 px-4 bg-sky-50 hover:bg-sky-100 text-[#0088cc] border border-sky-200 rounded-xl font-bold transition">
+                        <i class="fa-solid fa-arrow-up-right-from-square"></i> បើកផ្ទាំង auth.telegram.org ក្នុង Tab ថ្មី
+                    </a>
+
+                    <p class="text-[10px] text-slate-400 leading-relaxed text-left">
+                        * ចំណាំ៖ Telegram Widget ដំណើរការបានលុះត្រាតែ Bot (@BotFather) ត្រូវបានកំណត់ Domain ត្រឹមត្រូវ (/setdomain)។ ប្រសិនបើ Widget មិនបង្ហាញ សូមប្រើផ្ទាំង «បញ្ចូល @Username» ខាងលើ។
+                    </p>
+                </div>
             </div>
         </div>
     `;
@@ -2145,7 +2348,7 @@ window.openTelegramLoginModal = function(mode = 'login') {
     modal.classList.remove("hidden");
     modal.style.display = "flex";
 
-    // Load widget script into container
+    // Load widget script into container in background
     window.loadTelegramOfficialWidget();
 };
 
@@ -2198,16 +2401,16 @@ window.handleTelegramAuthSubmit = async function(e) {
     if (e && e.preventDefault) e.preventDefault();
 
     const userInput = document.getElementById("tg_username_input")?.value.trim().replace(/^@/, '');
-    const passInput = document.getElementById("tg_password_input")?.value.trim();
+    const passInput = document.getElementById("tg_password_input")?.value.trim() || "";
     const btn = document.getElementById("btnSubmitTelegramLogin");
     const errDiv = document.getElementById("tgErrorMsg");
 
-    if (!userInput || !passInput) return;
+    if (!userInput) return;
 
     const isLinkMode = window.telegramAuthMode === 'link';
     const origBtn = btn ? btn.innerHTML : "";
     if (btn) {
-        btn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> កំពុងផ្ទៀងផ្ទាត់...`;
+        btn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> កំពុងដំណើរការ...`;
         btn.disabled = true;
     }
     if (errDiv) errDiv.classList.add("hidden");
@@ -2245,24 +2448,7 @@ window.handleTelegramAuthSubmit = async function(e) {
             return;
         }
 
-        const tgEmail = `tg_${cleanTg}@cms.school.local`;
-        let userCred = null;
-        if (window.auth) {
-            try {
-                userCred = await window.auth.signInWithEmailAndPassword(tgEmail, passInput);
-            } catch (authErr) {
-                if (authErr.code === 'auth/wrong-password') {
-                    throw new Error("លេខសម្ងាត់មិនត្រឹមត្រូវទេ!");
-                }
-                if (authErr.code === 'auth/user-not-found' || authErr.code === 'auth/invalid-credential') {
-                    try {
-                        userCred = await window.auth.createUserWithEmailAndPassword(tgEmail, passInput);
-                    } catch(e) {}
-                }
-            }
-        }
-
-        // Resilient lookup
+        // ករណី Login Mode
         let teacherData = null;
         if (window.db) {
             try {
@@ -2293,13 +2479,13 @@ window.handleTelegramAuthSubmit = async function(e) {
 
         if (teacherData) {
             const storedCred = teacherData.password_hash || teacherData.password;
-            if (storedCred) {
+            if (storedCred && passInput) {
                 const isValid = await window.verifyPassword(passInput, storedCred);
                 if (!isValid) throw new Error("លេខសម្ងាត់មិនត្រឹមត្រូវទេ!");
             }
         } else {
             const randomSuffix = Math.floor(1000 + Math.random() * 9000);
-            const hashed = await window.hashPassword(passInput);
+            const hashed = passInput ? await window.hashPassword(passInput) : "";
             teacherData = {
                 teacher_id: `TCH-TG-${randomSuffix}`,
                 name: `លោកគ្រូ/អ្នកគ្រូ (@${userInput})`,
@@ -2325,7 +2511,7 @@ window.handleTelegramAuthSubmit = async function(e) {
             modal.style.display = "none";
         }
 
-        window.AppAuth.setAuthenticatedSession(teacherData, userCred ? userCred.user.uid : null);
+        window.AppAuth.setAuthenticatedSession(teacherData, `tg_${cleanTg}`);
         if (typeof window.loadAndApplyTeacherSettings === 'function') {
             window.loadAndApplyTeacherSettings(teacherData.teacher_id);
         }
@@ -2463,41 +2649,18 @@ window.linkTeacherGoogleAccount = async function() {
                 provider.setCustomParameters({ prompt: 'select_account' });
                 const result = await window.auth.signInWithPopup(provider);
                 if (result && result.user && result.user.email) {
-                    googleEmail = result.user.email;
+                    await window.applyGoogleEmailLink(result.user.email);
+                    return;
                 }
             } catch(popupErr) {
                 console.warn("Popup link note:", popupErr.message);
+                window.openGoogleLoginModal('link', popupErr.message);
+                return;
             }
         }
-
-        if (!googleEmail) {
-            const input = prompt("សូមបញ្ចូលអាសយដ្ឋាន Gmail របស់អ្នកដើម្បីភ្ជាប់ (ឧ. teacher@gmail.com):");
-            if (!input || !input.trim()) return;
-            const clean = input.trim().toLowerCase();
-            if (!clean.includes('@')) return alert("❌ អាសយដ្ឋាន Gmail មិនត្រឹមត្រូវ!");
-            googleEmail = clean;
-        }
-
-        const tId = localStorage.getItem('auth_teacher_id') || (window.AppAuth?.state?.teacherId) || "TCH-001";
-        let personal = typeof window.getTeacherPersonalSettings === 'function' ? window.getTeacherPersonalSettings(tId) : {};
-        personal.teacher_email = googleEmail;
-        try { localStorage.setItem(`teacher_settings_${tId}`, JSON.stringify(personal)); } catch(e) {}
-        localStorage.setItem('auth_email', googleEmail);
-
-        if (window.db) {
-            await window.db.collection("teachers").doc(tId).set({
-                email: googleEmail,
-                last_linked_google: new Date().toISOString()
-            }, { merge: true }).catch(console.warn);
-        }
-
-        const emailField = document.getElementById("pers_teacher_email");
-        if (emailField) emailField.value = googleEmail;
-        if (typeof window.renderPersonalSettingsBadges === 'function') window.renderPersonalSettingsBadges(personal);
-        if (typeof showToast === 'function') showToast(`✅ បានភ្ជាប់ Gmail (${googleEmail}) ជោគជ័យ!`);
-
+        window.openGoogleLoginModal('link');
     } catch(e) {
-        alert("⚠️ មិនអាចភ្ជាប់ Gmail បានទេ: " + e.message);
+        window.openGoogleLoginModal('link', e.message);
     }
 };
 
