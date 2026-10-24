@@ -2,21 +2,12 @@
 // ឯកសារ js/config.js (Advanced Cloud Sync & Multi-Teacher API)
 // ==========================================
 
-// 👉 URL របស់ Google Apps Script (Default Fallback & Dynamic Resolver)
-window.DEFAULT_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx1j3jer-iHyQ7NJM-IunMMK8CjKowE_9sW2Vz-fy9ynzTUXnOALlV_ogdxtL7tvEhM/exec";
-
+// 👉 URL របស់ Google Apps Script (Connected & Standardized)
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx1j3jer-iHyQ7NJM-IunMMK8CjKowE_9sW2Vz-fy9ynzTUXnOALlV_ogdxtL7tvEhM/exec";
+window.SCRIPT_URL = SCRIPT_URL;
 window.getScriptUrl = function() {
-  if (window.appSettings && window.appSettings.script_url && String(window.appSettings.script_url).trim()) {
-    return String(window.appSettings.script_url).trim();
-  }
-  const localUrl = localStorage.getItem('gas_script_url');
-  if (localUrl && String(localUrl).trim()) {
-    return String(localUrl).trim();
-  }
-  return window.DEFAULT_SCRIPT_URL;
+  return SCRIPT_URL;
 };
-
-var SCRIPT_URL = window.DEFAULT_SCRIPT_URL;
 
 // =========================================================
 // ១. ការកំណត់ទូទៅ (Global Settings Data)
@@ -29,8 +20,7 @@ let appSettings = {
   district: ".......",
   school_logo: "",
   grade_format: "khmer", 
-  auto_sync: true,
-  script_url: ""
+  auto_sync: true
 };
 
 async function fetchSystemSettings() {

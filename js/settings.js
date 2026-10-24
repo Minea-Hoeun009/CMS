@@ -502,59 +502,7 @@ window.loadSettingsView = function() {
                    </label>
                </div>
 
-               <!-- ការតភ្ជាប់ Google Sheets & Google Apps Script (GAS Relational Database) -->
-                <div class="bg-white p-6 rounded-[2rem] shadow-sm border border-slate-200 space-y-4">
-                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-3">
-                        <div>
-                            <h4 class="font-bold text-slate-800 text-sm flex items-center gap-2">
-                                <i class="fa-solid fa-file-excel text-emerald-600"></i> ការតភ្ជាប់ Google Sheets & Google Apps Script
-                            </h4>
-                            <p class="text-xs text-slate-400 mt-0.5">បម្រើជា Cloud Database & Backup ជាមួយសៀវភៅបញ្ជី Google Spreadsheet ស្តង់ដារ</p>
-                        </div>
-                        <div class="flex items-center gap-2 shrink-0">
-                            <button type="button" onclick="window.testGASConnectionUI()" id="btnTestGAS" class="px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-bold text-xs rounded-xl transition flex items-center gap-1.5 shadow-sm">
-                                <i class="fa-solid fa-plug"></i> <span>តេស្តការភ្ជាប់</span>
-                            </button>
-                            <button type="button" onclick="window.setupGASSheetsUI()" id="btnSetupGAS" class="px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold text-xs rounded-xl transition flex items-center gap-1.5 shadow-sm">
-                                <i class="fa-solid fa-table-cells"></i> <span>បង្កើតតារាងស្តង់ដារ</span>
-                            </button>
-                        </div>
-                    </div>
-
-                    <div class="space-y-2">
-                        <label class="block text-xs font-bold text-slate-600">
-                            Google Apps Script Web App URL
-                            <span class="text-slate-400 font-normal ml-1">(Deployment URL ដែលមាន /exec)</span>
-                        </label>
-                        <div class="flex gap-2">
-                            <input type="url" id="set_script_url" placeholder="https://script.google.com/macros/s/.../exec" class="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs font-mono text-slate-800 outline-none focus:ring-2 focus:ring-emerald-400 focus:bg-white transition">
-                        </div>
-                        <div id="gas_status_msg" class="hidden text-xs font-bold px-3 py-2 rounded-xl"></div>
-                    </div>
-
-                    <!-- ព័ត៌មានអំពីតារាងទិន្នន័យស្តង់ដារទាំង ៨ -->
-                    <div class="bg-slate-50 rounded-xl p-3 border border-slate-100 text-[11px] text-slate-600 space-y-2">
-                        <div class="font-bold text-slate-700 flex items-center justify-between">
-                            <span><i class="fa-solid fa-database text-indigo-500 mr-1"></i> រចនាសម្ព័ន្ធតារាងស្តង់ដារ (Relational Tables Schema):</span>
-                            <span class="text-emerald-600 font-bold">8 Tables (Connected via PK &amp; FK)</span>
-                        </div>
-                        <div class="flex flex-wrap gap-1.5">
-                            <span class="px-2 py-0.5 bg-white border border-slate-200 rounded-md font-mono text-slate-700">Students (id)</span>
-                            <span class="px-2 py-0.5 bg-white border border-slate-200 rounded-md font-mono text-slate-700">Teachers (teacher_id)</span>
-                            <span class="px-2 py-0.5 bg-white border border-slate-200 rounded-md font-mono text-slate-700">Classes (class_id)</span>
-                            <span class="px-2 py-0.5 bg-white border border-slate-200 rounded-md font-mono text-slate-700">Attendance (record_id)</span>
-                            <span class="px-2 py-0.5 bg-white border border-slate-200 rounded-md font-mono text-slate-700">Scores (score_id)</span>
-                            <span class="px-2 py-0.5 bg-white border border-slate-200 rounded-md font-mono text-slate-700">Library (transaction_id)</span>
-                            <span class="px-2 py-0.5 bg-white border border-slate-200 rounded-md font-mono text-slate-700">Settings (setting_key)</span>
-                            <span class="px-2 py-0.5 bg-white border border-slate-200 rounded-md font-mono text-slate-700">AuditLogs (log_id)</span>
-                        </div>
-                        <p class="text-[10px] text-slate-400 pt-1">
-                            * ឯកសារកូដ និងការណែនាំលម្អិតមាននៅក្នុងថតឯកសារ <code class="bg-white px-1 py-0.5 rounded border border-slate-200 font-mono">google-apps-script/Code.gs</code> ក្នុងគម្រោង។
-                        </p>
-                    </div>
-                </div>
-
-                <!-- Save Button -->
+               <!-- Save Button -->
                <div class="flex justify-end pt-2">
                   <button type="submit" id="btnSaveSettings" class="bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 text-white px-8 py-3.5 rounded-2xl font-black shadow-lg shadow-indigo-200 transition transform hover:-translate-y-0.5 flex items-center gap-2 text-sm">
                      <i class="fa-solid fa-floppy-disk"></i> <span>រក្សាទុកព័ត៌មានសាលារៀន</span>
@@ -2076,7 +2024,6 @@ window.fillSettingsForm = function() {
     setVal("prof_village", s.village);
 
     if(document.getElementById("set_auto_sync")) document.getElementById("set_auto_sync").checked = s.auto_sync !== false;
-    setVal("set_script_url", s.script_url || localStorage.getItem('gas_script_url') || "");
     
     if (s.logo_url) {
         const preview = document.getElementById("preview_logo");
@@ -2267,16 +2214,12 @@ window.handleSaveSettings = async function(event) {
         
         profile_avatar: document.getElementById("val_profile_avatar") ? document.getElementById("val_profile_avatar").value : "",
         logo_url: document.getElementById("val_logo") ? document.getElementById("val_logo").value : "",
-        signature_url: document.getElementById("val_sig") ? document.getElementById("val_sig").value : "",
-        script_url: document.getElementById("set_script_url") ? document.getElementById("set_script_url").value.trim() : (window.appSettings.script_url || "")
+        signature_url: document.getElementById("val_sig") ? document.getElementById("val_sig").value : ""
     };
 
     try {
         window.appSettings = payload;
         localStorage.setItem("school_settings", JSON.stringify(window.appSettings));
-        if (payload.script_url) {
-            localStorage.setItem('gas_script_url', payload.script_url);
-        }
         
         localStorage.setItem('selected_academic_year', payload.academic_year);
         const globalYearDrop = document.getElementById("globalAcademicYear");
@@ -2480,85 +2423,3 @@ window.syncGlobalYearDropdown = function() {
 };
 
 document.addEventListener("DOMContentLoaded", () => { setTimeout(() => window.syncGlobalYearDropdown(), 300); });
-
-
-// =========================================================
-// មុខងារគ្រប់គ្រង Google Apps Script Connection UI
-// =========================================================
-window.testGASConnectionUI = async function() {
-    const input = document.getElementById("set_script_url");
-    const msgEl = document.getElementById("gas_status_msg");
-    const btn = document.getElementById("btnTestGAS");
-    const targetUrl = (input && input.value.trim()) || (window.getScriptUrl && window.getScriptUrl());
-    
-    if (!targetUrl) {
-        alert("សូមបញ្ចូល Google Apps Script Web App URL ជាមុនសិន!");
-        return;
-    }
-
-    const origHtml = btn ? btn.innerHTML : "";
-    if (btn) { btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> កំពុងតេស្ត...`; btn.disabled = true; }
-    if (msgEl) {
-        msgEl.className = "text-xs font-bold px-3 py-2 rounded-xl bg-blue-50 text-blue-700 border border-blue-200 block";
-        msgEl.textContent = "កំពុងតេស្តការភ្ជាប់ទៅកាន់ Google Apps Script...";
-    }
-
-    try {
-        const res = await window.testGoogleAppsScriptConnection(targetUrl);
-        if (res.ok) {
-            if (msgEl) {
-                msgEl.className = "text-xs font-bold px-3 py-2 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200 block";
-                msgEl.textContent = "✅ " + (res.message || "ការតភ្ជាប់ទៅកាន់ Google Apps Script & Sheets បានជោគជ័យ ១០០%!");
-            }
-            if (typeof showToast === 'function') showToast("✅ តភ្ជាប់ Google Apps Script ជោគជ័យ!");
-        } else {
-            if (msgEl) {
-                msgEl.className = "text-xs font-bold px-3 py-2 rounded-xl bg-red-50 text-red-700 border border-red-200 block";
-                msgEl.textContent = "❌ " + (res.message || "បរាជ័យក្នុងការតភ្ជាប់។ សូមពិនិត្យ Web App URL និងសិទ្ធិ Who has access: Anyone");
-            }
-        }
-    } catch (e) {
-        if (msgEl) {
-            msgEl.className = "text-xs font-bold px-3 py-2 rounded-xl bg-red-50 text-red-700 border border-red-200 block";
-            msgEl.textContent = "❌ កំហុសបណ្តាញ: " + e.message;
-        }
-    } finally {
-        if (btn) { btn.innerHTML = origHtml; btn.disabled = false; }
-    }
-};
-
-window.setupGASSheetsUI = async function() {
-    const input = document.getElementById("set_script_url");
-    const targetUrl = (input && input.value.trim()) || (window.getScriptUrl && window.getScriptUrl());
-    const btn = document.getElementById("btnSetupGAS");
-    const msgEl = document.getElementById("gas_status_msg");
-
-    if (!targetUrl) {
-        alert("សូមបញ្ចូល Google Apps Script Web App URL ជាមុនសិន!");
-        return;
-    }
-
-    if (!confirm("តើលោកគ្រូ/អ្នកគ្រូពិតជាចង់បង្កើតតារាងស្តង់ដារទាំង ៨ (Students, Teachers, Attendance, Scores, Library, Settings, Classes, AuditLogs) នៅក្នុង Google Sheet នេះមែនទេ?")) {
-        return;
-    }
-
-    const origHtml = btn ? btn.innerHTML : "";
-    if (btn) { btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> កំពុងរៀបចំ...`; btn.disabled = true; }
-
-    try {
-        const res = await window.setupGoogleAppsScriptSheets(targetUrl);
-        if (res && res.status === "success") {
-            if (msgEl) {
-                msgEl.className = "text-xs font-bold px-3 py-2 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200 block";
-                msgEl.textContent = "🎉 បានបង្កើត/រៀបចំតារាងស្តង់ដារទាំងអស់លើ Google Sheet ជោគជ័យ!";
-            }
-            if (typeof showToast === 'function') showToast("🎉 បានបង្កើតតារាងស្តង់ដារជោគជ័យ!");
-        } else {
-            alert("❌ បរាជ័យក្នុងការបង្កើតតារាង: " + (res.message || "Unknown error"));
-        }
-    } catch (e) {
-        alert("❌ បរាជ័យ: " + e.message);
-    } finally {
-        if (btn) { btn.innerHTML = origHtml; btn.disabled = false; }
-    }
-};
