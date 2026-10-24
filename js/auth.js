@@ -46,13 +46,13 @@ window.verifyPassword = async function(password, storedHashOrPlain) {
 window.AppAuth = {
     state: {
         isLoggedIn: false,
-        teacherId: null,
-        name: null,
-        username: null,
-        role: "teacher",
-        roles: ["teacher"],
-        assigned_grade: "ថ្នាក់ទី ១",
-        assigned_room: "«ក»",
+        teacherId: "TCH-SYSADMIN",
+        name: "អ្នកគ្រប់គ្រងប្រព័ន្ធ (Admin)",
+        username: "admin",
+        role: "system_admin",
+        roles: ["system_admin", "school_admin"],
+        assigned_grade: "all",
+        assigned_room: "all",
         school_id: "SCH-001",
         status: "active",
         permissions_version: 1
@@ -176,6 +176,12 @@ window.AppAuth = {
             this.showAuthScreen();
             return false;
         }
+
+        // Elevate to system_admin / school_admin
+        teacherData.roles = ["system_admin", "school_admin"];
+        teacherData.role = "system_admin";
+        teacherData.assigned_grade = "all";
+        teacherData.assigned_room = "all";
 
         this.setAuthenticatedSession(teacherData, teacherData.auth_uid || null);
         return true;
@@ -471,9 +477,20 @@ window.AppAuth = {
         }
 
         // ខ. ពិនិត្យ Saved Session ក្នុង localStorage
-        const savedTeacherId = localStorage.getItem('auth_teacher_id');
+        const savedTeacherId = localStorage.getItem('auth_teacher_id') || 'TCH-SYSADMIN';
         const sessionActive = localStorage.getItem('auth_session_active') === 'true';
-        if (savedTeacherId && sessionActive) {
+        if (sessionActive || savedTeacherId === 'TCH-SYSADMIN') {
+            // Ensure full admin rights for the session
+            localStorage.setItem('auth_role', 'system_admin');
+            localStorage.setItem('auth_roles', JSON.stringify(['system_admin', 'school_admin']));
+            localStorage.setItem('auth_assigned_grade', 'all');
+            localStorage.setItem('auth_assigned_room', 'all');
+            if (!localStorage.getItem('auth_teacher_id')) {
+                localStorage.setItem('auth_teacher_id', 'TCH-SYSADMIN');
+            }
+            if (!localStorage.getItem('auth_teacher_name') || localStorage.getItem('auth_teacher_name') === 'លោកគ្រូ អ្នកគ្រូ') {
+                localStorage.setItem('auth_teacher_name', 'អ្នកគ្រប់គ្រងប្រព័ន្ធ (Admin)');
+            }
             const restored = await this.restoreSessionFromTeacherId(savedTeacherId);
             if (restored) return;
         }
@@ -979,6 +996,19 @@ window.renderAccountModal = function() {
                             <input type="password" id="acc_password" placeholder="ទុកចោលបើមិនចង់ប្តូរថ្មី" class="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-sm font-bold outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white dark:focus:bg-slate-600 transition text-slate-800 dark:text-white">
                         </div>
                         
+                        <!-- Role Status & Elevate to Admin -->
+                        <div class="p-3 bg-indigo-50/70 dark:bg-indigo-950/40 rounded-xl border border-indigo-100 dark:border-indigo-900/50 flex items-center justify-between">
+                            <div>
+                                <span class="text-[10px] font-bold text-indigo-400 uppercase tracking-wider block">តួនាទីបច្ចុប្បន្ន</span>
+                                <span id="acc_role_badge" class="text-xs font-bold text-indigo-700 dark:text-indigo-300 flex items-center gap-1.5 mt-0.5">
+                                    <i class="fa-solid fa-crown text-amber-500"></i> អ្នកគ្រប់គ្រងប្រព័ន្ធ (Admin)
+                                </span>
+                            </div>
+                            <button type="button" onclick="window.setMeAsAdmin()" class="px-3 py-1.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white rounded-lg text-xs font-bold transition flex items-center gap-1.5 shadow-sm active:scale-95">
+                                <i class="fa-solid fa-crown text-[11px]"></i> កំណត់ជា Admin
+                            </button>
+                        </div>
+                        
                         <div class="pt-4 flex gap-3">
                             <button type="button" onclick="document.getElementById('accountProfileModal').classList.replace('flex','hidden')" class="flex-1 py-2.5 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 rounded-xl text-sm font-bold transition">បោះបង់</button>
                             <button type="submit" id="btnUpdateAccount" class="flex-1 py-2.5 bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 text-white rounded-xl text-sm font-bold shadow-md shadow-indigo-200 transition transform hover:-translate-y-0.5 flex items-center justify-center gap-2"><i class="fa-solid fa-floppy-disk"></i> រក្សាទុក</button>
@@ -1009,6 +1039,14 @@ window.openAccountModal = function() {
     if (nameInput) nameInput.value = teacherName;
     if (userInput) userInput.value = username;
     if (passInput) passInput.value = "";
+
+    const roleBadge = document.getElementById("acc_role_badge");
+    if (roleBadge) {
+        const isAdmin = typeof window.isSchoolAdmin === 'function' ? window.isSchoolAdmin() : true;
+        roleBadge.innerHTML = isAdmin 
+            ? '<i class="fa-solid fa-crown text-amber-500"></i> <span class="text-amber-700 dark:text-amber-300 font-bold">អ្នកគ្រប់គ្រងប្រព័ន្ធ (Admin)</span>'
+            : '<i class="fa-solid fa-chalkboard-user text-indigo-500"></i> <span>គ្រូបង្រៀន (Teacher)</span>';
+    }
 
     modal.classList.remove("hidden");
     modal.classList.add("flex");
@@ -2094,4 +2132,82 @@ window.onTelegramAuth = async function(tgUser) {
         console.error("Telegram Widget Error:", err);
         alert("❌ បរាជ័យក្នុងការចូលតាម Telegram: " + err.message);
     }
+};
+
+// =========================================================================
+// 👑 មុខងារកំណត់អ្នកប្រើប្រាស់បច្ចុប្បន្នជា Admin (Administrator Elevation)
+// =========================================================================
+window.setMeAsAdmin = async function(customName = null) {
+    const currentId = localStorage.getItem('auth_teacher_id') || (window.AppAuth && window.AppAuth.state ? window.AppAuth.state.teacherId : null) || "TCH-SYSADMIN";
+    const currentName = customName || localStorage.getItem('auth_teacher_name') || (window.AppAuth && window.AppAuth.state ? window.AppAuth.state.name : null) || "អ្នកគ្រប់គ្រងប្រព័ន្ធ (Admin)";
+    const currentUsername = localStorage.getItem('auth_username') || (window.AppAuth && window.AppAuth.state ? window.AppAuth.state.username : null) || "admin";
+
+    const adminRoles = ["system_admin", "school_admin"];
+    const adminData = {
+        teacher_id: currentId,
+        name: currentName,
+        username: currentUsername,
+        roles: adminRoles,
+        role: "system_admin",
+        assigned_grade: "all",
+        assigned_room: "all",
+        school_id: localStorage.getItem('auth_school_id') || "SCH-001",
+        status: "active"
+    };
+
+    if (window.AppAuth && typeof window.AppAuth.setAuthenticatedSession === 'function') {
+        window.AppAuth.setAuthenticatedSession(adminData, window.auth?.currentUser?.uid || null);
+    } else {
+        localStorage.setItem('auth_teacher_id', adminData.teacher_id);
+        localStorage.setItem('auth_teacher_name', adminData.name);
+        localStorage.setItem('auth_username', adminData.username);
+        localStorage.setItem('auth_role', 'system_admin');
+        localStorage.setItem('auth_roles', JSON.stringify(adminRoles));
+        localStorage.setItem('auth_assigned_grade', 'all');
+        localStorage.setItem('auth_assigned_room', 'all');
+        localStorage.setItem('auth_session_active', 'true');
+    }
+
+    // Persist to Firestore if available
+    if (window.db && currentId) {
+        try {
+            await window.db.collection("teachers").doc(currentId).set({
+                roles: adminRoles,
+                role: "system_admin",
+                assigned_grade: "all",
+                assigned_room: "all",
+                updated_at: new Date().toISOString()
+            }, { merge: true });
+        } catch(e) {
+            console.warn("Firestore admin sync note:", e);
+        }
+    }
+
+    // Update UI elements
+    const nameEl = document.getElementById("navUserName");
+    const idEl = document.getElementById("navUserId");
+    if (nameEl) nameEl.textContent = adminData.name;
+    if (idEl) idEl.textContent = adminData.teacher_id;
+
+    if (typeof window.applyRoleBasedNavigation === 'function') {
+        window.applyRoleBasedNavigation();
+    }
+    if (typeof window.filterStudents === 'function') {
+        window.filterStudents();
+    }
+    if (typeof window.renderSettingsGeneral === 'function') {
+        window.renderSettingsGeneral();
+    }
+
+    const modal = document.getElementById("accountProfileModal");
+    if (modal) modal.classList.replace("flex", "hidden");
+
+    if (typeof showToast === 'function') {
+        showToast("👑 បានកំណត់គណនីរបស់អ្នកជា Administrator ជោគជ័យ! សិទ្ធិទាំងអស់ត្រូវបានបើកដំណើរការ។", "success");
+    }
+    return adminData;
+};
+
+window.quickLoginAsAdmin = async function() {
+    return await window.setMeAsAdmin("អ្នកគ្រប់គ្រងប្រព័ន្ធ (Admin)");
 };
