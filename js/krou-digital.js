@@ -737,8 +737,15 @@ window.KrouDigital = {
         if (!modal) {
             modal = document.createElement("div");
             modal.id = "parentPortalModal";
-            modal.className = "fixed inset-0 z-[7500] bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-3 sm:p-6 font-siemreap overflow-y-auto";
+            modal.className = "fixed inset-0 z-[99999] bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-3 sm:p-6 font-siemreap overflow-y-auto";
+            modal.onclick = function(e) {
+                if (e.target === modal) {
+                    modal.classList.add('hidden');
+                }
+            };
             document.body.appendChild(modal);
+        } else {
+            modal.className = "fixed inset-0 z-[99999] bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-3 sm:p-6 font-siemreap overflow-y-auto";
         }
 
         modal.innerHTML = `

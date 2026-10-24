@@ -1971,8 +1971,16 @@ window.openGoogleLoginModal = function(mode = 'login', errorHint = '') {
     if (!modal) {
         modal = document.createElement("div");
         modal.id = "googleLoginModal";
-        modal.className = "fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 font-siemreap overflow-y-auto";
+        modal.className = "fixed inset-0 z-[99999] bg-slate-950/75 backdrop-blur-md flex items-center justify-center p-4 font-siemreap overflow-y-auto";
+        modal.onclick = function(e) {
+            if (e.target === modal) {
+                modal.classList.add('hidden');
+                modal.style.display = 'none';
+            }
+        };
         document.body.appendChild(modal);
+    } else {
+        modal.className = "fixed inset-0 z-[99999] bg-slate-950/75 backdrop-blur-md flex items-center justify-center p-4 font-siemreap overflow-y-auto";
     }
 
     const isLinkMode = mode === 'link';
@@ -1998,10 +2006,10 @@ window.openGoogleLoginModal = function(mode = 'login', errorHint = '') {
     }
 
     modal.innerHTML = `
-        <div class="bg-white dark:bg-slate-800 rounded-3xl w-full max-w-md overflow-hidden shadow-2xl border border-slate-200 dark:border-slate-700 animate-scale-up my-auto">
+        <div class="bg-white dark:bg-slate-800 rounded-3xl w-full max-w-md overflow-hidden shadow-[0_25px_60px_-15px_rgba(0,0,0,0.5)] border border-slate-200 dark:border-slate-700 animate-scale-up my-auto relative z-10" onclick="event.stopPropagation()">
             <!-- Header -->
             <div class="bg-gradient-to-r from-red-500 via-rose-500 to-amber-500 p-6 text-white relative">
-                <button type="button" onclick="const m=document.getElementById('googleLoginModal'); if(m){ m.classList.add('hidden'); m.style.display='none'; }" class="absolute top-4 right-4 text-white/80 hover:text-white w-8 h-8 rounded-full bg-white/10 flex items-center justify-center transition">
+                <button type="button" onclick="const m=document.getElementById('googleLoginModal'); if(m){ m.classList.add('hidden'); m.style.display='none'; }" class="absolute top-4 right-4 text-white/90 hover:text-white w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition shadow-sm">
                     <i class="fa-solid fa-xmark text-lg"></i>
                 </button>
                 <div class="flex items-center gap-3">
@@ -2240,8 +2248,16 @@ window.openTelegramLoginModal = function(mode = 'login') {
     if (!modal) {
         modal = document.createElement("div");
         modal.id = "telegramLoginModal";
-        modal.className = "fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 font-siemreap overflow-y-auto";
+        modal.className = "fixed inset-0 z-[99999] bg-slate-950/75 backdrop-blur-md flex items-center justify-center p-4 font-siemreap overflow-y-auto";
+        modal.onclick = function(e) {
+            if (e.target === modal) {
+                modal.classList.add('hidden');
+                modal.style.display = 'none';
+            }
+        };
         document.body.appendChild(modal);
+    } else {
+        modal.className = "fixed inset-0 z-[99999] bg-slate-950/75 backdrop-blur-md flex items-center justify-center p-4 font-siemreap overflow-y-auto";
     }
 
     const isLinkMode = mode === 'link';
@@ -2249,7 +2265,7 @@ window.openTelegramLoginModal = function(mode = 'login') {
     const subText = isLinkMode ? "ភ្ជាប់គណនី Telegram ជាមួយប្រវត្តិរូបគ្រូរបស់អ្នក" : "ចូលប្រព័ន្ធយ៉ាងរហ័សតាមរយៈ Telegram របស់អ្នក";
 
     modal.innerHTML = `
-        <div class="bg-white dark:bg-slate-800 rounded-3xl w-full max-w-md overflow-hidden shadow-2xl border border-slate-200 dark:border-slate-700 animate-scale-up my-auto">
+        <div class="bg-white dark:bg-slate-800 rounded-3xl w-full max-w-md overflow-hidden shadow-[0_25px_60px_-15px_rgba(0,0,0,0.5)] border border-slate-200 dark:border-slate-700 animate-scale-up my-auto relative z-10" onclick="event.stopPropagation()">
             <!-- Header -->
             <div class="bg-gradient-to-r from-[#229ED9] via-[#0088cc] to-[#179cde] p-6 text-white relative">
                 <button type="button" onclick="const m=document.getElementById('telegramLoginModal'); if(m){ m.classList.add('hidden'); m.style.display='none'; }" class="absolute top-4 right-4 text-white/80 hover:text-white w-8 h-8 rounded-full bg-white/10 flex items-center justify-center transition">
