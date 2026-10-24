@@ -3,13 +3,13 @@
 // =========================================================================
 
 const firebaseConfig = {
-  apiKey: "AIzaSyBOOAEgvGBAFw3eSvZU7Ebuejp1EA3XfCY",
-  authDomain: "classroom-management-ed280.firebaseapp.com",
-  projectId: "classroom-management-ed280",
-  storageBucket: "classroom-management-ed280.firebasestorage.app",
-  messagingSenderId: "414827617127",
-  appId: "1:414827617127:web:c8ece6c5ca739176a76dc2",
-  measurementId: "G-P56EXEQV00"
+  apiKey: "AIzaSyBSb1n01ZsFWJWk3P9HzMkHgiPYm1VY714",
+  authDomain: "cms-v01.firebaseapp.com",
+  projectId: "cms-v01",
+  storageBucket: "cms-v01.firebasestorage.app",
+  messagingSenderId: "306883664792",
+  appId: "1:306883664792:web:9681cc2610b235577169ed",
+  measurementId: "G-N0FRVY8KSD"
 };
 
 // ១. ចាប់ផ្តើមដំណើរការ Firebase (តែមួយដងគត់)
@@ -47,4 +47,8 @@ if (db) {
     });
 }
 
-console.log("✅ Firebase Config Initialized: Connected to projectId 'classroom-management-ed280'");
+// ៤. ចាប់ផ្តើម Analytics (ប្រសិនបើ Browser គាំទ្រ)
+const analytics = typeof firebase !== 'undefined' && firebase.analytics ? firebase.analytics() : null;
+window.analytics = analytics;
+
+console.log("✅ Firebase Config Initialized: Connected to projectId 'cms-v01'");
