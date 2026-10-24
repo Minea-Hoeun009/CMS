@@ -80,7 +80,7 @@ window.loadReportsView = function() {
                 <!-- Cards Grid - រចនាឡើងតាមស្តង់ដារ KrouDigital 4.0 -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 md:gap-6">
                     
-                    <!-- KrouDigital Card 1: របាយការណ៍ ក -->
+                    <!-- KrouDigital Card 1: តារាងស្រង់ពិន្ទុ និងការវាយតម្លៃលទ្ធផលសិក្សា -->
                     <div onclick="window.openReportDetail('report_ka')" class="bg-white/90 backdrop-blur-md rounded-[2rem] p-6 shadow-sm hover:shadow-[0_20px_40px_rgb(79,70,229,0.18)] hover:-translate-y-1.5 transition-all duration-300 cursor-pointer border-2 border-indigo-100 hover:border-indigo-400 group flex flex-col justify-between h-[210px] relative overflow-hidden">
                         <div class="absolute -right-4 -top-4 w-24 h-24 bg-indigo-50 rounded-full group-hover:scale-150 transition-transform duration-500 ease-out pointer-events-none"></div>
                         <div class="flex items-center justify-between relative z-10">
@@ -88,12 +88,12 @@ window.loadReportsView = function() {
                             <span class="text-[10px] bg-indigo-100 text-indigo-800 font-bold px-2 py-0.5 rounded-full uppercase">KrouDigital 4.0</span>
                         </div>
                         <div class="relative z-10">
-                            <h3 class="font-moul text-[15px] text-slate-900 mb-1.5 group-hover:text-indigo-600">របាយការណ៍ ក</h3>
-                            <p class="text-slate-500 text-[11px] leading-relaxed">តារាងស្រង់ពិន្ទុ និងនិទ្ទេសប្រចាំខែ/ឆមាស រួមទាំងស្ថិតិជាប់-ធ្លាក់។</p>
+                            <h3 class="font-moul text-[15px] text-slate-900 mb-1.5 group-hover:text-indigo-600">តារាងស្រង់ពិន្ទុ និងការវាយតម្លៃលទ្ធផល</h3>
+                            <p class="text-slate-500 text-[11px] leading-relaxed">តារាងស្រង់ពិន្ទុ មធ្យមភាគ ចំណាត់ថ្នាក់ និងនិទ្ទេសប្រចាំខែ/ឆមាស។</p>
                         </div>
                     </div>
 
-                    <!-- KrouDigital Card 2: របាយការណ៍ ខ -->
+                    <!-- KrouDigital Card 2: តារាងកិត្តិយសសិស្សឆ្នើម Top 5 -->
                     <div onclick="window.openReportDetail('report_kha')" class="bg-white/90 backdrop-blur-md rounded-[2rem] p-6 shadow-sm hover:shadow-[0_20px_40px_rgb(245,158,11,0.18)] hover:-translate-y-1.5 transition-all duration-300 cursor-pointer border-2 border-amber-100 hover:border-amber-400 group flex flex-col justify-between h-[210px] relative overflow-hidden">
                         <div class="absolute -right-4 -top-4 w-24 h-24 bg-amber-50 rounded-full group-hover:scale-150 transition-transform duration-500 ease-out pointer-events-none"></div>
                         <div class="flex items-center justify-between relative z-10">
@@ -101,12 +101,12 @@ window.loadReportsView = function() {
                             <span class="text-[10px] bg-amber-100 text-amber-800 font-bold px-2 py-0.5 rounded-full uppercase">Honor Roll</span>
                         </div>
                         <div class="relative z-10">
-                            <h3 class="font-moul text-[15px] text-slate-900 mb-1.5 group-hover:text-amber-600">របាយការណ៍ ខ (កិត្តិយស)</h3>
+                            <h3 class="font-moul text-[15px] text-slate-900 mb-1.5 group-hover:text-amber-600">តារាងកិត្តិយសសិស្សឆ្នើម (Top 5)</h3>
                             <p class="text-slate-500 text-[11px] leading-relaxed">តារាងកិត្តិយសសិស្សឆ្នើម Top 5 ជាមួយរូបថតសម្រាប់បិទផ្សាយ។</p>
                         </div>
                     </div>
 
-                    <!-- KrouDigital Card 3: របាយការណ៍ គ & ឃ -->
+                    <!-- KrouDigital Card 3: លទ្ធផលសិក្សាប្រចាំឆមាស និងប្រចាំឆ្នាំ -->
                     <div onclick="window.openReportDetail('report_ko_kho')" class="bg-white/90 backdrop-blur-md rounded-[2rem] p-6 shadow-sm hover:shadow-[0_20px_40px_rgb(16,185,129,0.18)] hover:-translate-y-1.5 transition-all duration-300 cursor-pointer border-2 border-emerald-100 hover:border-emerald-400 group flex flex-col justify-between h-[210px] relative overflow-hidden">
                         <div class="absolute -right-4 -top-4 w-24 h-24 bg-emerald-50 rounded-full group-hover:scale-150 transition-transform duration-500 ease-out pointer-events-none"></div>
                         <div class="flex items-center justify-between relative z-10">
@@ -114,7 +114,7 @@ window.loadReportsView = function() {
                             <span class="text-[10px] bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded-full uppercase">លទ្ធផលប្រចាំឆ្នាំ</span>
                         </div>
                         <div class="relative z-10">
-                            <h3 class="font-moul text-[15px] text-slate-900 mb-1.5 group-hover:text-emerald-600">របាយការណ៍ គ &amp; ឃ</h3>
+                            <h3 class="font-moul text-[15px] text-slate-900 mb-1.5 group-hover:text-emerald-600">លទ្ធផលសិក្សាប្រចាំឆមាស និងប្រចាំឆ្នាំ</h3>
                             <p class="text-slate-500 text-[11px] leading-relaxed">សេចក្តីសម្រេចលទ្ធផលប្រចាំឆមាស និងប្រចាំឆ្នាំ (ឡើង/ត្រួតថ្នាក់)។</p>
                         </div>
                     </div>
@@ -193,24 +193,32 @@ window.loadReportsView = function() {
             </div>
 
             <!-- ផ្ទាំងបង្ហាញរបាយការណ៍លម្អិត (Report Detail View) -->
-            <div id="reportDetailContent" class="hidden w-full h-full flex-col relative z-20">
-                <!-- របារចំណងជើង និងការកំណត់ព្រីន (Title Bar & Print Toolbar) -->
-                <div class="bg-white dark:bg-slate-800 p-3 md:p-4 rounded-[1.5rem] shadow-md border border-slate-200 dark:border-slate-700 mb-5 flex flex-wrap justify-between items-center gap-3 z-50 sticky top-0 no-print">
+            <div id="reportDetailContent" class="hidden w-full h-full flex-col relative z-20 space-y-3">
+                <!-- ផ្នែកទី ១៖ របារចំណងជើងរបាយការណ៍ (Section 1: Report Title Header Bar) -->
+                <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 flex flex-wrap justify-between items-center gap-3 z-40 sticky top-0 no-print">
                     <div class="flex items-center gap-3">
-                        <button onclick="window.closeReportDetail()" class="w-10 h-10 rounded-xl bg-slate-100 hover:bg-rose-100 text-slate-600 hover:text-rose-600 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-rose-600 dark:hover:text-white flex items-center justify-center transition-all shadow-inner active:scale-90 shrink-0" title="ត្រឡប់ក្រោយ">
+                        <button onclick="window.closeReportDetail()" class="w-10 h-10 rounded-xl bg-slate-100 hover:bg-rose-100 text-slate-600 hover:text-rose-600 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-rose-600 dark:hover:text-white flex items-center justify-center transition-all shadow-inner active:scale-90 shrink-0" title="ត្រឡប់ក្រោយ (Back)">
                             <i class="fa-solid fa-arrow-left text-lg"></i>
                         </button>
                         <div>
-                            <h2 id="reportDetailTitle" class="font-moul text-slate-800 dark:text-white text-xs sm:text-sm md:text-base leading-snug">ចំណងជើងរបាយការណ៍</h2>
-                            <p id="reportDetailSub" class="text-[10px] text-slate-500 dark:text-slate-400 font-bold">ថ្នាក់ ${gradeFull}</p>
+                            <h2 id="reportDetailTitle" class="font-moul text-slate-800 dark:text-white text-sm sm:text-base md:text-lg leading-snug">ចំណងជើងរបាយការណ៍</h2>
+                            <p id="reportDetailSub" class="text-xs text-indigo-600 dark:text-indigo-400 font-bold mt-0.5">ថ្នាក់ ${gradeFull}</p>
                         </div>
                     </div>
-                    
-                    <!-- ជម្រើសបន្ថែមសម្រាប់តម្រងរបាយការណ៍ (ខែ / ប្រភេទបញ្ជី / សាលា / រក្សាទុក) -->
+                    <div class="flex items-center gap-2">
+                        <span class="px-3 py-1 bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 rounded-full text-xs font-bold border border-indigo-200 dark:border-indigo-800 flex items-center gap-1.5 shadow-sm">
+                            <i class="fa-solid fa-file-lines"></i> <span>ឯកសាររដ្ឋបាល</span>
+                        </span>
+                    </div>
+                </div>
+
+                <!-- ផ្នែកទី ២៖ របារកំណត់ប្រភេទក្រដាស និងការបោះពុម្ព (Section 2: Paper Settings & Print Toolbar Under Title) -->
+                <div id="reportPrintConfigBar" class="bg-gradient-to-r from-slate-50 via-white to-slate-50 dark:from-slate-800 dark:via-slate-850 dark:to-slate-800 p-3 sm:p-4 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 flex flex-wrap justify-between items-center gap-3 z-30 no-print">
+                    <!-- ផ្នែកខាងឆ្វេង៖ តម្រងទិន្នន័យ (Filters: ខែ / ទម្រង់បញ្ជី / រក្សាទុក) -->
                     <div id="reportExtraControls" class="flex flex-wrap items-center gap-2"></div>
 
-                    <!-- មុខងារកំណត់ប្រភេទក្រដាស និងបោះពុម្ពលើផ្ទាំង Title -->
-                    <div id="reportDetailPrintToolbarArea" class="flex items-center gap-2 shrink-0">
+                    <!-- ផ្នែកខាងស្តាំ៖ ការកំណត់ប្រភេទក្រដាស ទិសដៅ មាត្រដ្ឋាន និងប៊ូតុងព្រីន -->
+                    <div id="reportDetailPrintToolbarArea" class="flex flex-wrap items-center gap-2">
                         ${window.CMSPrintManager ? window.CMSPrintManager.renderToolbarHtml('reportPaperArea', 'portrait', 'A4', 100) : `
                             <button onclick="window.printCurrentReport()" class="px-5 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-xl text-xs font-bold shadow-md shadow-blue-500/30 transition flex items-center gap-2 active:scale-95 outline-none">
                                 <i class="fa-solid fa-print"></i> បោះពុម្ព
@@ -219,9 +227,9 @@ window.loadReportsView = function() {
                     </div>
                 </div>
 
-                <!-- កន្លែងផ្ទុកក្រដាសរបាយការណ៍ (Work Canvas: Pure Result Only) -->
-                <div class="w-full flex-1 overflow-x-auto custom-scrollbar flex justify-center pb-10">
-                    <div id="reportPaperArea" class="transition-all relative w-full flex justify-center">
+                <!-- ផ្នែកទី ៣៖ ផ្ទាំងការងារក្រដាសរបាយការណ៍ (Section 3: Realistic Paper Canvas) -->
+                <div class="w-full flex-1 overflow-x-auto custom-scrollbar flex justify-center pb-16 pt-2">
+                    <div id="reportPaperArea" class="transition-all relative flex justify-center items-start">
                         <!-- Content goes here -->
                     </div>
                 </div>
@@ -261,7 +269,7 @@ window.openReportDetail = function(reportType) {
 
     setTimeout(() => {
         if (reportType === 'report_ka') {
-            titleEl.textContent = `របាយការណ៍ ក (តារាងស្រង់ពិន្ទុ និងការវាយតម្លៃលទ្ធផលសិក្សា - ${gradeFull})`;
+            titleEl.textContent = `តារាងស្រង់ពិន្ទុ និងការវាយតម្លៃលទ្ធផលសិក្សា (${gradeFull})`;
             if (extraControls) {
                 extraControls.classList.remove("hidden");
                 extraControls.innerHTML = `
@@ -278,7 +286,7 @@ window.openReportDetail = function(reportType) {
                 window.KrouDigital.renderReportKa(paperArea, curLevel, curRoom);
             }
         } else if (reportType === 'report_kha') {
-            titleEl.textContent = `របាយការណ៍ ខ (តារាងកិត្តិយសសិស្សឆ្នើម Top 5 - ${gradeFull})`;
+            titleEl.textContent = `តារាងកិត្តិយសសិស្សឆ្នើម Top 5 (${gradeFull})`;
             if (extraControls) {
                 extraControls.classList.remove("hidden");
                 extraControls.innerHTML = `
@@ -295,7 +303,7 @@ window.openReportDetail = function(reportType) {
                 window.KrouDigital.renderReportKha(paperArea, curLevel, curRoom);
             }
         } else if (reportType === 'report_ko_kho') {
-            titleEl.textContent = `របាយការណ៍ គ & ឃ (លទ្ធផលប្រចាំឆមាស និងប្រចាំឆ្នាំ - ${gradeFull})`;
+            titleEl.textContent = `លទ្ធផលសិក្សាប្រចាំឆមាស និងប្រចាំឆ្នាំ (${gradeFull})`;
             if (window.CMSPrintManager) window.CMSPrintManager.updateToolbarDefaults('reportPaperArea', 'landscape', 'A4', 100);
             if (window.KrouDigital && typeof window.KrouDigital.renderReportKoKho === 'function') {
                 window.KrouDigital.renderReportKoKho(paperArea, curLevel, curRoom);

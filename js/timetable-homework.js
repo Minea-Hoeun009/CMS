@@ -519,6 +519,112 @@ window.TimetableHomeworkManager = {
     },
 
     /**
+     * បោះពុម្ពតារាងកិច្ចការផ្ទះជាទម្រង់ក្រដាស A4 ផ្លូវការ
+     */
+    printHomeworkSheet: function() {
+        const list = this.getHomeworkList();
+        const sInfo = typeof window.appSettings !== 'undefined' ? window.appSettings : {};
+        const schoolName = sInfo.school_name || "សាលាបឋមសិក្សា";
+        const gradeStr = this.currentGrade || "ថ្នាក់រៀន";
+
+        let rowsHtml = "";
+        if (!list || list.length === 0) {
+            rowsHtml = `<tr><td colspan="6" style="border: 1px solid #cbd5e1; padding: 25px; text-align: center; color: #94a3b8; font-weight: bold;">មិនទាន់មានកិច្ចការផ្ទះសម្រាប់ថ្នាក់ ${gradeStr} ឡើយ</td></tr>`;
+        } else {
+            rowsHtml = list.map((hw, idx) => `
+                <tr style="background: ${idx % 2 === 1 ? '#f8fafc' : '#ffffff'};">
+                    <td style="border: 1px solid #cbd5e1; padding: 8px; text-align: center; font-weight: bold;">${idx + 1}</td>
+                    <td style="border: 1px solid #cbd5e1; padding: 8px; text-align: center; font-weight: bold; color: #4338ca;">${hw.subject || '-'}</td>
+                    <td style="border: 1px solid #cbd5e1; padding: 8px; text-align: left; font-weight: bold; color: #1e293b;">${hw.title || '-'}</td>
+                    <td style="border: 1px solid #cbd5e1; padding: 8px; text-align: left; color: #475569; font-size: 9.5pt;">${hw.desc || '-'}</td>
+                    <td style="border: 1px solid #cbd5e1; padding: 8px; text-align: center; font-family: monospace; font-weight: bold; color: #e11d48;">${hw.dueDate || '-'}</td>
+                    <td style="border: 1px solid #cbd5e1; padding: 8px; text-align: center; font-weight: bold; color: #059669;">${hw.maxScore || 10} ពិន្ទុ</td>
+                </tr>
+            `).join('');
+        }
+
+        const printContent = `
+            <div id="homeworkPrintArea" style="max-width: 210mm; min-height: 297mm; margin: 0 auto; padding: 15mm 12mm; background: white; font-family: 'Siemreap', sans-serif; color: #1e293b;">
+                <!-- Header -->
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px;">
+                    <div style="text-align: center;">
+                        <p style="font-family: 'Moul', serif; font-size: 10.5pt; margin: 0; color: #0f172a;">${sInfo.province || "រាជធានីភ្នំពេញ"}</p>
+                        <p style="font-family: 'Moul', serif; font-size: 10.5pt; margin: 4px 0 0 0; color: #1e293b;">${schoolName}</p>
+                        <p style="font-weight: bold; font-size: 9.5pt; margin: 4px 0 0 0; color: #4338ca;">ថ្នាក់បន្ទុក៖ ${gradeStr}</p>
+                    </div>
+                    <div style="text-align: center;">
+                        <p style="font-family: 'Moul', serif; font-size: 11pt; margin: 0; color: #0f172a;">ព្រះរាជាណាចក្រកម្ពុជា</p>
+                        <p style="font-family: 'Moul', serif; font-size: 9.5pt; margin: 4px 0 0 0; color: #1e293b;">ជាតិ សាសនា ព្រះមហាក្សត្រ</p>
+                        <div style="color: #d97706; font-size: 8pt; letter-spacing: 4px; margin-top: 3px;">❖ ❖ ❖</div>
+                    </div>
+                </div>
+
+                <!-- Title -->
+                <div style="text-align: center; margin-bottom: 20px;">
+                    <h2 style="font-family: 'Moul', serif; font-size: 13pt; margin: 0; color: #1e1b4b;">តារាងកិច្ចការផ្ទះ និងការណែនាំស្វ័យសិក្សា</h2>
+                    <p style="font-size: 9.5pt; font-weight: bold; color: #64748b; margin: 5px 0 0 0;">ឆ្នាំសិក្សា ${this.currentAcademicYear || '២០២៦-២០២៧'} (ថ្នាក់៖ ${gradeStr})</p>
+                </div>
+
+                <!-- Table -->
+                <table style="width: 100%; border-collapse: collapse; font-size: 9.5pt; margin-bottom: 25px;">
+                    <thead>
+                        <tr style="background: #eef2ff; font-weight: bold; color: #1e1b4b;">
+                            <th style="border: 1px solid #cbd5e1; padding: 8px; width: 35px; text-align: center;">ល.រ</th>
+                            <th style="border: 1px solid #cbd5e1; padding: 8px; width: 100px; text-align: center;">មុខវិជ្ជា</th>
+                            <th style="border: 1px solid #cbd5e1; padding: 8px; text-align: left; width: 180px;">ចំណងជើងកិច្ចការ</th>
+                            <th style="border: 1px solid #cbd5e1; padding: 8px; text-align: left;">ការណែនាំលម្អិត</th>
+                            <th style="border: 1px solid #cbd5e1; padding: 8px; width: 90px; text-align: center;">ថ្ងៃផុតកំណត់</th>
+                            <th style="border: 1px solid #cbd5e1; padding: 8px; width: 75px; text-align: center;">ពិន្ទុ</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${rowsHtml}
+                    </tbody>
+                </table>
+
+                <!-- Signatures -->
+                <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-top: 35px; font-size: 9.5pt;">
+                    <div style="text-align: center;">
+                        <p style="font-family: 'Moul', serif; margin-bottom: 50px;">បានឃើញ និងឯកភាព</p>
+                        <p style="font-family: 'Moul', serif; margin: 0;">នាយកសាលា</p>
+                    </div>
+                    <div style="text-align: center;">
+                        <p style="margin: 0; color: #64748b;">ថ្ងៃទី.......... ខែ.......... ឆ្នាំ២០២....</p>
+                        <p style="font-family: 'Moul', serif; margin-top: 5px; margin-bottom: 50px;">គ្រូបន្ទុកថ្នាក់</p>
+                        <p style="font-weight: bold; margin: 0;">${sInfo.teacher_name || '.......................'}</p>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        if (window.CMSPrintManager) {
+            let container = document.getElementById("tempHomeworkPrintContainer");
+            if (!container) {
+                container = document.createElement("div");
+                container.id = "tempHomeworkPrintContainer";
+                container.style.display = "none";
+                document.body.appendChild(container);
+            }
+            container.innerHTML = printContent;
+            window.CMSPrintManager.print('homeworkPrintArea', {
+                paperSize: 'A4',
+                orientation: 'portrait',
+                scale: 100,
+                title: `កិច្ចការផ្ទះ_${gradeStr}`
+            });
+        } else {
+            const printWin = window.open('', '_blank');
+            if (printWin) {
+                printWin.document.open();
+                printWin.document.write(`<html><head><title>កិច្ចការផ្ទះ</title></head><body>${printContent}</body></html>`);
+                printWin.document.close();
+                printWin.focus();
+                printWin.print();
+            }
+        }
+    },
+
+    /**
      * Render View ទាំងមូល
      */
     renderView: function() {
@@ -686,9 +792,15 @@ window.TimetableHomeworkManager = {
                                 </h3>
                                 <p class="text-xs text-slate-400 mt-1">ដាក់កិច្ចការ និងតាមដានការប្រគល់របស់សិស្សក្នុងថ្នាក់</p>
                             </div>
-                            <button onclick="window.TimetableHomeworkManager.openNewHomeworkModal()" class="px-5 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white rounded-2xl text-xs font-bold shadow-md transition flex items-center gap-2">
-                                <i class="fa-solid fa-plus"></i> បង្កើតកិច្ចការផ្ទះថ្មី
-                            </button>
+                            <div class="flex items-center gap-2">
+                                <button onclick="window.TimetableHomeworkManager.printHomeworkSheet()" class="px-4 py-2.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-300 rounded-2xl text-xs font-bold transition flex items-center gap-2 shadow-sm" title="បោះពុម្ពតារាងកិច្ចការផ្ទះជាក្រដាស A4">
+                                    <i class="fa-solid fa-print"></i>
+                                    <span>ព្រីនកិច្ចការ (A4)</span>
+                                </button>
+                                <button onclick="window.TimetableHomeworkManager.openNewHomeworkModal()" class="px-5 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white rounded-2xl text-xs font-bold shadow-md transition flex items-center gap-2">
+                                    <i class="fa-solid fa-plus"></i> បង្កើតកិច្ចការផ្ទះថ្មី
+                                </button>
+                            </div>
                         </div>
 
                         <!-- Homework Cards Grid -->

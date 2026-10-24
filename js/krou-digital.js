@@ -115,9 +115,9 @@ window.KrouDigital = {
                 </div>
 
                 <div class="text-center mb-6">
-                    <h3 class="font-moul text-base text-indigo-950">របាយការណ៍ ក</h3>
-                    <h4 class="font-moul text-sm text-slate-800 mt-1">តារាងស្រង់ពិន្ទុ និងការវាយតម្លៃលទ្ធផលសិក្សាសិស្សប្រចាំខែ ${selectedMonth}</h4>
-                    <p class="text-xs font-bold text-slate-500 mt-1">ឆ្នាំសិក្សា ${academicYear} (ថ្នាក់៖ ${gradeFull})</p>
+                    <h3 class="font-moul text-base text-indigo-950">តារាងស្រង់ពិន្ទុ និងការវាយតម្លៃលទ្ធផលសិក្សាសិស្ស</h3>
+                    <h4 class="font-moul text-sm text-slate-800 mt-1">ប្រចាំខែ ${selectedMonth} ឆ្នាំសិក្សា ${academicYear}</h4>
+                    <p class="text-xs font-bold text-slate-500 mt-1">ថ្នាក់៖ ${gradeFull}</p>
                 </div>
 
                 <!-- តារាងពិន្ទុផ្លូវការ -->
@@ -283,8 +283,8 @@ window.KrouDigital = {
 
                 <!-- Title -->
                 <div class="text-center my-6">
-                    <span class="inline-block px-4 py-1 bg-amber-500 text-white rounded-full font-bold text-[11px] mb-2 shadow-sm tracking-wider uppercase">របាយការណ៍ ខ</span>
-                    <h2 class="font-moul text-xl text-amber-900 drop-shadow-sm">តារាងកិត្តិយសសិស្សពូកែ Top 5</h2>
+                    <span class="inline-block px-4 py-1 bg-amber-500 text-white rounded-full font-bold text-[11px] mb-2 shadow-sm tracking-wider uppercase">តារាងកិត្តិយស</span>
+                    <h2 class="font-moul text-xl text-amber-900 drop-shadow-sm">តារាងកិត្តិយសសិស្សឆ្នើម Top 5</h2>
                     <p class="text-xs font-bold text-amber-700 mt-1">ប្រចាំខែ ${selectedMonth} ឆ្នាំសិក្សា ${academicYear} (ថ្នាក់៖ ${gradeFull})</p>
                 </div>
 
@@ -390,8 +390,8 @@ window.KrouDigital = {
                 </div>
 
                 <div class="text-center mb-6">
-                    <h3 class="font-moul text-base text-indigo-950">របាយការណ៍ គ &amp; ឃ</h3>
-                    <h4 class="font-moul text-sm text-slate-800 mt-1">សេចក្តីសម្រេចលទ្ធផលសិក្សាប្រចាំឆមាស និងប្រចាំឆ្នាំសិក្សា ${academicYear}</h4>
+                    <h3 class="font-moul text-base text-indigo-950">សេចក្តីសម្រេចលទ្ធផលសិក្សាប្រចាំឆមាស និងប្រចាំឆ្នាំ</h3>
+                    <h4 class="font-moul text-sm text-slate-800 mt-1">ឆ្នាំសិក្សា ${academicYear}</h4>
                     <p class="text-xs font-bold text-slate-500 mt-1">ថ្នាក់៖ ${gradeFull}</p>
                 </div>
 
