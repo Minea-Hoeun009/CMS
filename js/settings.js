@@ -713,13 +713,16 @@ window.renderPersonalSettingsTab = function() {
 window.currentSettingsTab = "personal";
 
 window.switchSettingsTab = function(tabName) {
+    if (tabName === "users" || tabName === "academic") {
+        tabName = "personal";
+    }
     const isSchoolOrSysAdmin = typeof window.isSchoolAdmin === 'function' ? window.isSchoolAdmin() : false;
-    if (!isSchoolOrSysAdmin && (tabName === "users" || tabName === "backup" || tabName === "school" || tabName === "academic")) {
+    if (!isSchoolOrSysAdmin && (tabName === "backup" || tabName === "school")) {
         tabName = "personal";
     }
 
     window.currentSettingsTab = tabName;
-    const tabs = ["personal", "school", "academic", "users", "backup"];
+    const tabs = ["personal", "school", "backup"];
     
     tabs.forEach(t => {
         const btn = document.getElementById(`tabBtn_${t}`);
@@ -737,10 +740,6 @@ window.switchSettingsTab = function(tabName) {
 
     if (tabName === "personal") {
         window.renderPersonalSettingsTab();
-    } else if (tabName === "users") {
-        window.renderUserAccountsTab();
-    } else if (tabName === "academic") {
-        window.renderAcademicManagementTab();
     }
 };
 
@@ -784,12 +783,6 @@ window.loadSettingsView = function() {
             </button>
             <button id="tabBtn_school" onclick="window.switchSettingsTab('school')" class="${isAdmin ? '' : 'hidden'} flex-1 min-w-[140px] px-4 py-2.5 rounded-xl font-bold text-xs md:text-sm transition flex items-center justify-center gap-2 text-slate-500 hover:text-slate-700">
                 <i class="fa-solid fa-school"></i> <span>ព័ត៌មានសាលារៀន</span>
-            </button>
-            <button id="tabBtn_academic" onclick="window.switchSettingsTab('academic')" class="${isAdmin ? '' : 'hidden'} flex-1 min-w-[140px] px-4 py-2.5 rounded-xl font-bold text-xs md:text-sm transition flex items-center justify-center gap-2 text-slate-500 hover:text-slate-700">
-                <i class="fa-solid fa-graduation-cap"></i> <span>គ្រប់គ្រងការសិក្សា</span>
-            </button>
-            <button id="tabBtn_users" onclick="window.switchSettingsTab('users')" class="${isAdmin ? '' : 'hidden'} flex-1 min-w-[140px] px-4 py-2.5 rounded-xl font-bold text-xs md:text-sm transition flex items-center justify-center gap-2 text-slate-500 hover:text-slate-700">
-                <i class="fa-solid fa-users-gear"></i> <span>គណនី & សិទ្ធិ</span>
             </button>
             <button id="tabBtn_backup" onclick="window.switchSettingsTab('backup')" class="${isAdmin ? '' : 'hidden'} flex-1 min-w-[140px] px-4 py-2.5 rounded-xl font-bold text-xs md:text-sm transition flex items-center justify-center gap-2 text-slate-500 hover:text-slate-700">
                 <i class="fa-solid fa-shield-halved"></i> <span>បម្រុងទុក & Audit</span>
@@ -1127,20 +1120,6 @@ window.loadSettingsView = function() {
                   </button>
                </div>
             </form>
-        </div>
-
-        <!-- ============================================================= -->
-        <!-- TAB 2: ការគ្រប់គ្រងការសិក្សា (Academic Management)             -->
-        <!-- ============================================================= -->
-        <div id="tabContent_academic" class="space-y-6 hidden">
-            <!-- Dynamic Content loaded by renderAcademicManagementTab() -->
-        </div>
-
-        <!-- ============================================================= -->
-        <!-- TAB 3: គ្រប់គ្រងគណនី & សិទ្ធិ (User Accounts & Roles Manager)  -->
-        <!-- ============================================================= -->
-        <div id="tabContent_users" class="space-y-6 hidden">
-            <!-- Dynamic Content loaded by renderUserAccountsTab() -->
         </div>
 
         <!-- ============================================================= -->

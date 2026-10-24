@@ -16,16 +16,22 @@ window.getAllGradesList = function() {
         try { struct = JSON.parse(localStorage.getItem("academic_structure") || "{}"); } catch(e) {}
     }
     const gradesList = [];
+    
+    // ថ្នាក់ដែលគ្រូបានបង្កើត ឬទទួលបន្ទុក (Teacher's own created/assigned classroom)
+    const teacherGrade = localStorage.getItem('selected_level') || (window.AuthState && window.AuthState.assigned_grade) || (window.appSettings && window.appSettings.teacher_level);
+    if (teacherGrade && teacherGrade !== 'all' && !gradesList.includes(teacherGrade)) {
+        gradesList.push(teacherGrade);
+    }
+
     if (struct && Array.isArray(struct.grades)) {
         struct.grades.forEach(g => {
-            if (g && g.name) gradesList.push(g.name);
+            if (g && g.name && !gradesList.includes(g.name)) gradesList.push(g.name);
         });
     }
-    if (gradesList.length === 0) {
-        for (let i = 1; i <= 12; i++) {
-            const kh = typeof window.toKhmerNum === 'function' ? window.toKhmerNum(i) : i;
-            gradesList.push(`ថ្នាក់ទី ${kh}`);
-        }
+    for (let i = 1; i <= 12; i++) {
+        const kh = typeof window.toKhmerNum === 'function' ? window.toKhmerNum(i) : i;
+        const gName = `ថ្នាក់ទី ${kh}`;
+        if (!gradesList.includes(gName)) gradesList.push(gName);
     }
     const allStudents = window.allStudents || (typeof window.getMasterStudents === 'function' ? window.getMasterStudents() : []);
     allStudents.forEach(s => {

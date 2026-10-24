@@ -73,16 +73,44 @@ window.AppAuth = {
         const normalizedRoles = window.normalizeRoles(teacherData.roles || teacherData.role, "teacher");
         const isAdminRole = normalizedRoles.some(r => r === 'school_admin' || r === 'system_admin' || r === 'admin');
 
+        // កំណត់ថ្នាក់ទទួលបន្ទុកតាមការបង្កើត ឬជ្រើសរើសរបស់គ្រូម្នាក់ៗ
+        const tId = teacherData.teacher_id || teacherData.id || "TCH-001";
+        let teacherGrade = teacherData.assigned_grade;
+        let teacherRoom = teacherData.assigned_room;
+
+        const loginGradeEl = document.getElementById('loginGrade');
+        const loginRoomEl = document.getElementById('loginRoom');
+        if (loginGradeEl && loginGradeEl.value) teacherGrade = loginGradeEl.value;
+        if (loginRoomEl && loginRoomEl.value) teacherRoom = loginRoomEl.value;
+
+        if (!teacherGrade || teacherGrade === 'all') {
+            try {
+                const raw = localStorage.getItem(`teacher_settings_${tId}`);
+                if (raw) {
+                    const parsed = JSON.parse(raw);
+                    if (parsed.teacher_level) teacherGrade = parsed.teacher_level;
+                    if (parsed.teacher_room) teacherRoom = parsed.teacher_room;
+                }
+            } catch(e) {}
+        }
+
+        if (!teacherGrade || (teacherGrade === 'all' && !isAdminRole)) {
+            teacherGrade = localStorage.getItem('selected_level') || "ថ្នាក់ទី ១";
+        }
+        if (!teacherRoom || (teacherRoom === 'all' && !isAdminRole)) {
+            teacherRoom = localStorage.getItem('selected_room') || "«ក»";
+        }
+
         this.state = {
             isLoggedIn: true,
             firebaseUid: firebaseUid || teacherData.auth_uid || null,
-            teacherId: teacherData.teacher_id || teacherData.id || "TCH-001",
+            teacherId: tId,
             name: teacherData.name || teacherData.full_name || "លោកគ្រូ អ្នកគ្រូ",
             username: teacherData.username || "teacher",
             role: normalizedRoles[0] || "teacher",
             roles: normalizedRoles,
-            assigned_grade: isAdminRole ? "all" : (teacherData.assigned_grade || "ថ្នាក់ទី ១"),
-            assigned_room: isAdminRole ? "all" : (teacherData.assigned_room || "«ក»"),
+            assigned_grade: (isAdminRole && !loginGradeEl) ? "all" : teacherGrade,
+            assigned_room: (isAdminRole && !loginRoomEl) ? "all" : teacherRoom,
             school_id: teacherData.school_id || "SCH-001",
             status: teacherData.status || "active"
         };
@@ -97,6 +125,17 @@ window.AppAuth = {
         window.AppState.isLoggedIn = true;
         window.AppState.teacherId = this.state.teacherId;
         window.AppState.teacherName = this.state.name;
+
+        // អនុវត្តថ្នាក់រៀនរបស់គ្រូទៅកាន់ប្រព័ន្ធទាំងមូល
+        const activeGrade = (this.state.assigned_grade && this.state.assigned_grade !== 'all') ? this.state.assigned_grade : (teacherGrade || "ថ្នាក់ទី ១");
+        const activeRoom = (this.state.assigned_room && this.state.assigned_room !== 'all') ? this.state.assigned_room : (teacherRoom || "«ក»");
+        if (typeof window.setSelectedClass === 'function') {
+            window.setSelectedClass(activeGrade, activeRoom);
+        }
+        localStorage.setItem('selected_level', activeGrade);
+        localStorage.setItem('selected_room', activeRoom);
+        localStorage.setItem('auth_teacher_grade', activeGrade);
+        localStorage.setItem('auth_teacher_room', activeRoom);
 
         // រក្សាទុកក្នុង localStorage ធានាការតភ្ជាប់មិនដាច់ពេល Refresh
         localStorage.setItem('auth_teacher_id', this.state.teacherId);
@@ -883,6 +922,14 @@ window.AppAuth = {
                     loggedInBanner.classList.add("hidden");
                 }
             }
+
+            // ផ្ទុកថ្នាក់ដែលបានកំណត់ចុងក្រោយទៅកាន់ Form Login (Teacher Classroom Selection)
+            const savedLevel = localStorage.getItem('selected_level') || localStorage.getItem('auth_teacher_grade');
+            const savedRoom = localStorage.getItem('selected_room') || localStorage.getItem('auth_teacher_room');
+            const lGrade = document.getElementById('loginGrade');
+            const lRoom = document.getElementById('loginRoom');
+            if (lGrade && savedLevel) lGrade.value = savedLevel;
+            if (lRoom && savedRoom) lRoom.value = savedRoom;
         }
     },
 

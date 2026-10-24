@@ -218,4 +218,28 @@ describe('Teacher Personal Workspace & Authentication Preferences Tests', () => 
     assert.equal(contentPersonal.classList.contains('hidden'), false);
     assert.equal(contentSchool.classList.contains('hidden'), true);
   });
+
+  test('6. Settings UI excludes academic & user management and safely redirects to personal', () => {
+    const { context } = createTeacherWorkspaceContext();
+    
+    // When switching to academic or users, it falls back to personal
+    context.switchSettingsTab('academic');
+    assert.equal(context.currentSettingsTab, 'personal');
+
+    context.switchSettingsTab('users');
+    assert.equal(context.currentSettingsTab, 'personal');
+  });
+
+  test('7. index.html header removes classroom switcher and add-student buttons, login form includes classroom inputs', () => {
+    const html = fs.readFileSync(path.resolve(__dirname, '../index.html'), 'utf8');
+
+    // Header checks
+    assert.equal(html.includes('onclick="window.openManageClassModal()"'), false);
+    assert.equal(html.includes('onclick="window.openQuickAddStudentModal()"'), false);
+    assert.equal(html.includes('id="headerActiveClassBadge"'), true); // safely preserved as hidden
+
+    // Login form checks
+    assert.equal(html.includes('id="loginGrade"'), true);
+    assert.equal(html.includes('id="loginRoom"'), true);
+  });
 });
