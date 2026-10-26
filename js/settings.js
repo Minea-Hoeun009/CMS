@@ -223,11 +223,56 @@ window.renderPersonalSettingsBadges = function(settings) {
     const tgBadge = document.getElementById("badge_telegram_status") || document.getElementById("badgeTelegramConnected");
     if (tgBadge) {
         if (s.telegram_username || s.telegram_id) {
-            const handle = s.telegram_username ? `@${s.telegram_username}` : `ID: ${s.telegram_id}`;
+            const handle = s.telegram_username ? `@${s.telegram_username.replace(/^@/, '')}` : `ID: ${s.telegram_id}`;
             tgBadge.innerHTML = `<span class="px-3 py-1 bg-sky-50 border border-sky-200 text-sky-700 rounded-full text-xs font-bold flex items-center gap-1.5"><i class="fa-brands fa-telegram text-[#229ED9]"></i> Telegram៖ ${handle}</span>`;
         } else {
-            tgBadge.innerHTML = `<span class="px-3 py-1 bg-amber-50 border border-amber-200 text-amber-700 rounded-full text-xs font-bold flex items-center gap-1.5"><i class="fa-solid fa-circle-exclamation text-amber-500"></i> មិនទាន់ភ្ជាប់ Telegram (auth.telegram.org)</span>`;
+            tgBadge.innerHTML = `<span class="px-3 py-1 bg-amber-50 border border-amber-200 text-amber-700 rounded-full text-xs font-bold flex items-center gap-1.5"><i class="fa-solid fa-circle-exclamation text-amber-500"></i> មិនទាន់ភ្ជាប់ Telegram</span>`;
         }
+    }
+};
+
+window.linkTeacherTelegramDirectly = async function() {
+    const tId = localStorage.getItem('auth_teacher_id') || (window.AppAuth && window.AppAuth.state ? window.AppAuth.state.teacherId : "TCH-001");
+    let tgInput = document.getElementById("pers_telegram_username")?.value.trim().replace(/^@/, '') || "";
+    const tgIdInput = document.getElementById("pers_telegram_id")?.value.trim() || "";
+
+    if (!tgInput && !tgIdInput) {
+        if (typeof window.openTelegramLoginModal === 'function') {
+            window.openTelegramLoginModal('link');
+        } else {
+            alert("សូមបញ្ចូល Telegram @username ឬ Telegram ID ជាមុនសិន!");
+        }
+        return;
+    }
+
+    let personal = typeof window.getTeacherPersonalSettings === 'function' ? window.getTeacherPersonalSettings(tId) : {};
+    personal.telegram_username = tgInput;
+    personal.telegram_id = tgIdInput;
+
+    try { localStorage.setItem(`teacher_settings_${tId}`, JSON.stringify(personal)); } catch(e) {}
+    if (tgInput) localStorage.setItem('auth_telegram_username', tgInput);
+    if (tgIdInput) localStorage.setItem('auth_telegram_id', tgIdInput);
+
+    if (window.db) {
+        try {
+            await window.db.collection("teachers").doc(tId).set({
+                telegram_username: tgInput,
+                telegram_id: tgIdInput,
+                last_linked_telegram: new Date().toISOString()
+            }, { merge: true });
+        } catch(e) {
+            console.warn("Firestore telegram link note:", e);
+        }
+    }
+
+    if (typeof window.renderPersonalSettingsBadges === 'function') {
+        window.renderPersonalSettingsBadges(personal);
+    }
+
+    if (typeof showToast === 'function') {
+        showToast(`✅ បានភ្ជាប់គណនី Telegram (@${tgInput || tgIdInput}) ជោគជ័យ!`);
+    } else {
+        alert(`✅ បានភ្ជាប់គណនី Telegram (@${tgInput || tgIdInput}) ជោគជ័យ!`);
     }
 };
 
@@ -739,7 +784,7 @@ window.renderPersonalSettingsTab = function() {
                         </div>
                     </div>
 
-                    <!-- Telegram (auth.telegram.org) Link Box -->
+                    <!-- Telegram Link Box -->
                     <div class="p-5 bg-sky-50/60 dark:bg-slate-700/50 border border-sky-100 dark:border-slate-600 rounded-2xl flex flex-col justify-between gap-4">
                         <div class="space-y-3">
                             <div class="flex items-center justify-between">
@@ -747,11 +792,11 @@ window.renderPersonalSettingsTab = function() {
                                     <div class="w-7 h-7 rounded-lg bg-[#229ED9] text-white flex items-center justify-center text-sm shadow-sm">
                                         <i class="fa-brands fa-telegram"></i>
                                     </div>
-                                    <h5 class="font-bold text-sm text-slate-800 dark:text-white">គណនី Telegram (auth.telegram.org)</h5>
+                                    <h5 class="font-bold text-sm text-slate-800 dark:text-white">គណនី Telegram</h5>
                                 </div>
                             </div>
                             <p class="text-slate-500 dark:text-slate-400 leading-relaxed">
-                                ភ្ជាប់គណនី Telegram របស់អ្នកតាមរយៈ <strong>auth.telegram.org</strong> ឬបញ្ចូល <strong>@username</strong> សម្រាប់ទទួលការជូនដំណឹង និងចូលប្រើប្រាស់។
+                                ភ្ជាប់គណនី Telegram របស់អ្នកតាមរយៈ <strong>@username</strong> ឬ Telegram ID សម្រាប់ទទួលការជូនដំណឹង និងចូលប្រើប្រាស់។
                             </p>
                             <div class="grid grid-cols-2 gap-3">
                                 <div>
@@ -769,8 +814,8 @@ window.renderPersonalSettingsTab = function() {
                         </div>
 
                         <div class="flex items-center gap-2 pt-2 border-t border-sky-100 dark:border-slate-600">
-                            <button type="button" onclick="window.openTelegramLoginModal('link')" class="flex-1 py-2 px-3 bg-[#229ED9] hover:bg-[#0088cc] text-white rounded-xl font-bold flex items-center justify-center gap-1.5 shadow-sm transition">
-                                <i class="fa-brands fa-telegram"></i> ភ្ជាប់តាម auth.telegram.org
+                            <button type="button" onclick="window.linkTeacherTelegramDirectly()" class="flex-1 py-2 px-3 bg-[#229ED9] hover:bg-[#0088cc] text-white rounded-xl font-bold flex items-center justify-center gap-1.5 shadow-sm transition">
+                                <i class="fa-brands fa-telegram"></i> ភ្ជាប់ Telegram ភ្លាមៗ
                             </button>
                             <button type="button" onclick="window.unlinkTeacherTelegramAccount()" class="py-2 px-3 bg-slate-200 hover:bg-slate-300 dark:bg-slate-600 dark:hover:bg-slate-500 text-slate-700 dark:text-slate-200 rounded-xl font-bold transition" title="ផ្តាច់ Telegram">
                                 <i class="fa-solid fa-link-slash"></i>

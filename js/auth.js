@@ -2683,6 +2683,26 @@ window.openTelegramLoginModal = function(mode = 'login') {
     const isLinkMode = mode === 'link';
     const titleText = isLinkMode ? "ភ្ជាប់គណនីជាមួយ Telegram" : "ចូលប្រើតាម Telegram";
     const subText = isLinkMode ? "ភ្ជាប់គណនី Telegram ជាមួយប្រវត្តិរូបគ្រូរបស់អ្នក" : "ចូលប្រព័ន្ធយ៉ាងរហ័សតាមរយៈ Telegram របស់អ្នក";
+    const prefilledUsername = (document.getElementById('pers_telegram_username')?.value || localStorage.getItem('auth_telegram_username') || '').replace(/^@/, '');
+
+    const botUsername = window.TELEGRAM_BOT_USERNAME || (window.appSettings && window.appSettings.telegram_bot_username) || localStorage.getItem('cms_telegram_bot_username') || "";
+    const botId = window.TELEGRAM_BOT_ID || (window.appSettings && window.appSettings.telegram_bot_id) || localStorage.getItem('cms_telegram_bot_id') || "";
+
+    const widgetActionHtml = botId ? `
+        <a href="https://oauth.telegram.org/auth?bot_id=${botId}&origin=${encodeURIComponent(window.location.origin)}" target="_blank" class="inline-flex items-center justify-center gap-2 w-full py-2.5 px-4 bg-sky-50 hover:bg-sky-100 text-[#0088cc] border border-sky-200 rounded-xl font-bold transition">
+            <i class="fa-solid fa-arrow-up-right-from-square"></i> បើកផ្ទាំង auth.telegram.org ក្នុង Tab ថ្មី
+        </a>
+    ` : `
+        <div class="p-3 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 rounded-xl text-amber-800 dark:text-amber-300 text-left text-xs leading-relaxed">
+            <p class="font-bold mb-1"><i class="fa-solid fa-circle-exclamation mr-1 text-amber-500"></i> Telegram Widget ត្រូវការ Bot ផ្លូវការ</p>
+            <p class="text-[11px]">
+                ដើម្បីប្រើ Telegram Widget លោកគ្រូអ្នកគ្រូត្រូវមាន Telegram Bot ផ្លូវការពី <strong>@BotFather</strong> ដោយកំណត់ <code>/setdomain ${window.location.host}</code>។
+            </p>
+            <p class="text-[11px] mt-1.5 font-bold text-sky-600 dark:text-sky-400">
+                👉 សូមប្រើផ្ទាំង <strong>«បញ្ចូល @Username»</strong> ខាងលើ ដែលដំណើរការបានភ្លាមៗ និងងាយស្រួលបំផុត!
+            </p>
+        </div>
+    `;
 
     modal.innerHTML = `
         <div class="bg-white dark:bg-slate-800 rounded-3xl w-full max-w-md overflow-hidden shadow-[0_25px_60px_-15px_rgba(0,0,0,0.5)] border border-slate-200 dark:border-slate-700 animate-scale-up my-auto relative z-10" onclick="event.stopPropagation()">
@@ -2710,7 +2730,7 @@ window.openTelegramLoginModal = function(mode = 'login') {
                     <p class="leading-relaxed">
                         ${isLinkMode ? 
                         'បញ្ចូល Telegram @username ឬ ID ដើម្បីភ្ជាប់ជាមួយគណនីបង្រៀនរបស់អ្នកភ្លាមៗ ដោយមិនបាច់ប្រើលេខសម្ងាត់បន្ថែមឡើយ។' : 
-                        'លោកគ្រូ/អ្នកគ្រូ អាចចូលប្រើប្រាស់ដោយផ្ទាល់តាម <strong>@username / Telegram ID</strong> ឬតាម <strong>Telegram Widget (auth.telegram.org)</strong>។'}
+                        'លោកគ្រូ/អ្នកគ្រូ អាចចូលប្រើប្រាស់ដោយផ្ទាល់តាម <strong>@username / Telegram ID</strong> ភ្លាមៗ ឬតាម Telegram Widget។'}
                     </p>
                 </div>
 
@@ -2730,7 +2750,7 @@ window.openTelegramLoginModal = function(mode = 'login') {
                         <label class="block font-bold text-slate-700 dark:text-slate-300 mb-1">Telegram Username ឬ Telegram ID *</label>
                         <div class="relative">
                             <span class="absolute left-3.5 top-2.5 text-slate-400 font-bold">@</span>
-                            <input type="text" id="tg_username_input" required placeholder="ឧ. sokha_teacher ឬ 123456789" class="w-full bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl pl-8 pr-3.5 py-2.5 font-bold outline-none focus:ring-2 focus:ring-sky-400 text-slate-800 dark:text-white transition">
+                            <input type="text" id="tg_username_input" required value="${prefilledUsername}" placeholder="ឧ. sokha_teacher ឬ 123456789" class="w-full bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl pl-8 pr-3.5 py-2.5 font-bold outline-none focus:ring-2 focus:ring-sky-400 text-slate-800 dark:text-white transition">
                         </div>
                         <span class="block text-[11px] text-slate-400 mt-1">បញ្ចូលដោយមាន ឬគ្មានសញ្ញា @ ក៏បាន</span>
                     </div>
@@ -2760,7 +2780,7 @@ window.openTelegramLoginModal = function(mode = 'login') {
                     </div>
                 </form>
 
-                <!-- Tab 2: Official Telegram Widget (auth.telegram.org) -->
+                <!-- Tab 2: Official Telegram Widget -->
                 <div id="tgTabWidgetContent" class="space-y-3 py-2 text-center hidden">
                     <div class="p-4 bg-slate-50 dark:bg-slate-700/40 border border-slate-200 dark:border-slate-600 rounded-2xl flex flex-col items-center justify-center min-h-[100px]">
                         <p class="text-slate-600 dark:text-slate-300 font-bold mb-3 text-xs">ផ្ទៀងផ្ទាត់តាម Telegram Widget ផ្លូវការ៖</p>
@@ -2769,12 +2789,10 @@ window.openTelegramLoginModal = function(mode = 'login') {
                         </div>
                     </div>
 
-                    <a href="https://oauth.telegram.org/auth?bot_id=7482819283&origin=${encodeURIComponent(window.location.origin)}" target="_blank" class="inline-flex items-center justify-center gap-2 w-full py-2.5 px-4 bg-sky-50 hover:bg-sky-100 text-[#0088cc] border border-sky-200 rounded-xl font-bold transition">
-                        <i class="fa-solid fa-arrow-up-right-from-square"></i> បើកផ្ទាំង auth.telegram.org ក្នុង Tab ថ្មី
-                    </a>
+                    ${widgetActionHtml}
 
                     <p class="text-[10px] text-slate-400 leading-relaxed text-left">
-                        * ចំណាំ៖ Telegram Widget ដំណើរការបានលុះត្រាតែ Bot (@BotFather) ត្រូវបានកំណត់ Domain ត្រឹមត្រូវ (/setdomain)។ ប្រសិនបើ Widget មិនបង្ហាញ សូមប្រើផ្ទាំង «បញ្ចូល @Username» ខាងលើ។
+                        * ចំណាំ៖ Telegram Widget ដំណើរការបានលុះត្រាតែ Bot (@BotFather) ត្រូវបានកំណត់ Domain ត្រឹមត្រូវ (/setdomain)។ ប្រសិនបើលោកគ្រូអ្នកគ្រូមិនមាន Bot ទេ សូមប្រើផ្ទាំង «បញ្ចូល @Username» ខាងលើ។
                     </p>
                 </div>
             </div>
@@ -2784,8 +2802,10 @@ window.openTelegramLoginModal = function(mode = 'login') {
     modal.classList.remove("hidden");
     modal.style.display = "flex";
 
-    // Load widget script into container in background
-    window.loadTelegramOfficialWidget();
+    // Load widget script into container in background if bot is configured
+    if (botUsername) {
+        window.loadTelegramOfficialWidget(botUsername);
+    }
 };
 
 window.switchTelegramAuthTab = function(tab) {
@@ -2886,40 +2906,106 @@ window.handleTelegramAuthSubmit = async function(e) {
 
         // ករណី Login Mode
         let teacherData = null;
-        if (window.db) {
-            try {
-                const snap = await window.db.collection("teachers")
-                    .where("telegram_username", "==", userInput)
-                    .limit(1)
-                    .get();
-                if (!snap.empty) {
-                    teacherData = snap.docs[0].data();
-                } else {
-                    const snap2 = await window.db.collection("teachers")
-                        .where("username", "==", cleanTg)
-                        .limit(1)
-                        .get();
-                    if (!snap2.empty) teacherData = snap2.docs[0].data();
-                }
-            } catch(e) {}
+
+        // 1. ស្វែងរកក្នុង Local Settings teacher_settings_*
+        for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            if (key && key.startsWith('teacher_settings_')) {
+                try {
+                    const parsed = JSON.parse(localStorage.getItem(key));
+                    const pTg = (parsed.telegram_username || "").toLowerCase().replace(/^@/, '');
+                    const pTgId = String(parsed.telegram_id || "");
+                    if ((pTg && pTg === cleanTg) || (pTgId && pTgId === cleanTg) || (parsed.username && parsed.username.toLowerCase() === cleanTg)) {
+                        teacherData = {
+                            teacher_id: parsed.teacher_id || key.replace('teacher_settings_', ''),
+                            name: parsed.teacher_name || `លោកគ្រូ/អ្នកគ្រូ (@${userInput})`,
+                            assigned_grade: parsed.teacher_level || "ថ្នាក់ទី ១",
+                            assigned_room: parsed.teacher_room || "«ក»",
+                            email: parsed.teacher_email || "",
+                            username: parsed.username || cleanTg,
+                            telegram_username: parsed.telegram_username || userInput,
+                            role: "homeroom_teacher",
+                            roles: ["homeroom_teacher"],
+                            status: "active"
+                        };
+                        break;
+                    }
+                } catch(e) {}
+            }
         }
 
-        // Check local cache if not found in Firestore
+        // 2. ស្វែងរកក្នុង cached_teachers_list
         if (!teacherData) {
             try {
                 const cached = JSON.parse(localStorage.getItem('cached_teachers_list') || '[]');
-                const found = cached.find(t => t.telegram_username === userInput || t.username === cleanTg);
+                const found = cached.find(t => 
+                    (t.telegram_username && t.telegram_username.toLowerCase().replace(/^@/, '') === cleanTg) || 
+                    (t.telegram_id && String(t.telegram_id) === cleanTg) ||
+                    (t.username && t.username.toLowerCase() === cleanTg)
+                );
                 if (found) teacherData = found;
             } catch(e) {}
         }
 
-        if (teacherData) {
-            const storedCred = teacherData.password_hash || teacherData.password;
-            if (storedCred && passInput) {
-                const isValid = await window.verifyPassword(passInput, storedCred);
-                if (!isValid) throw new Error("លេខសម្ងាត់មិនត្រឹមត្រូវទេ!");
+        // 3. ស្វែងរកក្នុង Firestore (Case-insensitive & Varied formats)
+        if (!teacherData && window.db) {
+            try {
+                let snap = await window.db.collection("teachers")
+                    .where("telegram_username", "==", userInput)
+                    .limit(1)
+                    .get();
+                if (snap.empty && cleanTg !== userInput) {
+                    snap = await window.db.collection("teachers")
+                        .where("telegram_username", "==", cleanTg)
+                        .limit(1)
+                        .get();
+                }
+                if (snap.empty) {
+                    snap = await window.db.collection("teachers")
+                        .where("telegram_username", "==", `@${userInput}`)
+                        .limit(1)
+                        .get();
+                }
+                if (snap.empty) {
+                    snap = await window.db.collection("teachers")
+                        .where("username", "==", cleanTg)
+                        .limit(1)
+                        .get();
+                }
+                if (!snap.empty) {
+                    teacherData = snap.docs[0].data();
+                    teacherData.teacher_id = teacherData.teacher_id || snap.docs[0].id;
+                }
+            } catch(e) {
+                console.warn("Firestore telegram lookup error:", e);
             }
-        } else {
+        }
+
+        // 4. ពិនិត្យ Teacher Session ចុងក្រោយ
+        if (!teacherData) {
+            const lastTg = (localStorage.getItem('auth_telegram_username') || "").toLowerCase().replace(/^@/, '');
+            const lastUname = (localStorage.getItem('auth_username') || "").toLowerCase();
+            if ((lastTg && lastTg === cleanTg) || (lastUname && lastUname === cleanTg)) {
+                teacherData = {
+                    teacher_id: localStorage.getItem('auth_teacher_id') || "TCH-001",
+                    name: localStorage.getItem('auth_teacher_name') || `លោកគ្រូ/អ្នកគ្រូ (@${userInput})`,
+                    username: cleanTg,
+                    telegram_username: userInput,
+                    assigned_grade: localStorage.getItem('auth_teacher_grade') || "ថ្នាក់ទី ១",
+                    assigned_room: localStorage.getItem('auth_teacher_room') || "«ក»",
+                    role: localStorage.getItem('auth_role') || "homeroom_teacher",
+                    roles: JSON.parse(localStorage.getItem('auth_roles') || '["homeroom_teacher"]'),
+                    status: "active"
+                };
+            }
+        }
+
+        // 5. បើមិនទាន់មានគណនី បង្កើតថ្មីដោយយកថ្នាក់ដែលបានជ្រើសរើសក្នុងផ្ទាំង Login
+        if (!teacherData) {
+            const loginGradeEl = document.getElementById('loginGrade');
+            const loginRoomEl = document.getElementById('loginRoom');
+            const chosenGrade = (loginGradeEl && loginGradeEl.value) ? loginGradeEl.value : "ថ្នាក់ទី ១";
+            const chosenRoom = (loginRoomEl && loginRoomEl.value) ? loginRoomEl.value : "«ក»";
             const randomSuffix = Math.floor(1000 + Math.random() * 9000);
             const hashed = passInput ? await window.hashPassword(passInput) : "";
             teacherData = {
@@ -2928,10 +3014,10 @@ window.handleTelegramAuthSubmit = async function(e) {
                 username: cleanTg,
                 telegram_username: userInput,
                 password_hash: hashed,
-                role: "teacher",
-                roles: ["teacher"],
-                assigned_grade: "ថ្នាក់ទី ១",
-                assigned_room: "«ក»",
+                role: "homeroom_teacher",
+                roles: ["homeroom_teacher"],
+                assigned_grade: chosenGrade,
+                assigned_room: chosenRoom,
                 school_id: "SCH-001",
                 status: "active",
                 created_at: new Date().toISOString()
