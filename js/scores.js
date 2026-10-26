@@ -4454,159 +4454,923 @@ let isDragging = false;
 let startX, startY, initialX, initialY;
 
 window.initCanvaEngine = function() {
-    let toolbar = document.getElementById('canva-toolbar');
+    // 🎨 Canva Studio 5.0 Universal Styles & Toolbar Engine
+    let styleTag = document.getElementById('canva-studio-styles');
+    if (!styleTag) {
+        styleTag = document.createElement('style');
+        styleTag.id = 'canva-studio-styles';
+        styleTag.innerHTML = `
+            /* 🟣 Canva Selection Box 🟣 */
+            .canva-selected-active {
+                position: relative !important;
+                outline: 2px solid #8b5cf6 !important;
+                outline-offset: 3px !important;
+                border-radius: 4px !important;
+            }
+            .canva-selected-active.canva-locked {
+                outline-color: #f59e0b !important;
+            }
+
+            .canva-corner-handle {
+                position: absolute;
+                width: 9px;
+                height: 9px;
+                background: #ffffff;
+                border: 2px solid #8b5cf6;
+                border-radius: 50%;
+                z-index: 1000;
+                box-shadow: 0 1px 3px rgba(0,0,0,0.25);
+                pointer-events: auto;
+            }
+            .canva-corner-tl { top: -6px; left: -6px; cursor: nwse-resize; }
+            .canva-corner-tr { top: -6px; right: -6px; cursor: nesw-resize; }
+            .canva-corner-bl { bottom: -6px; left: -6px; cursor: nesw-resize; }
+            .canva-corner-br { bottom: -6px; right: -6px; cursor: nwse-resize; }
+
+            .canva-side-pill {
+                position: absolute;
+                width: 6px;
+                height: 14px;
+                background: #ffffff;
+                border: 2px solid #8b5cf6;
+                border-radius: 4px;
+                z-index: 1000;
+                pointer-events: auto;
+            }
+            .canva-side-l { top: calc(50% - 7px); left: -5px; cursor: ew-resize; }
+            .canva-side-r { top: calc(50% - 7px); right: -5px; cursor: ew-resize; }
+
+            /* Right side action handles */
+            .canva-side-actions {
+                position: absolute;
+                right: -36px;
+                top: 50%;
+                transform: translateY(-50%);
+                display: flex;
+                flex-direction: column;
+                gap: 4px;
+                z-index: 1100;
+                pointer-events: auto;
+            }
+            .canva-action-btn {
+                width: 26px;
+                height: 26px;
+                background: #ffffff;
+                border: 1px solid #cbd5e1;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 11px;
+                color: #475569;
+                box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+                cursor: grab;
+                transition: all 0.15s ease;
+            }
+            .canva-action-btn:hover {
+                background: #8b5cf6;
+                color: #ffffff;
+                border-color: #8b5cf6;
+                transform: scale(1.1);
+            }
+            .canva-action-btn:active {
+                cursor: grabbing;
+            }
+
+            /* Floating mini action bar */
+            .canva-mini-bar {
+                position: absolute;
+                bottom: -46px;
+                left: 50%;
+                transform: translateX(-50%);
+                background: #ffffff;
+                border: 1px solid #e2e8f0;
+                border-radius: 12px;
+                padding: 3px 6px;
+                display: flex;
+                align-items: center;
+                gap: 2px;
+                box-shadow: 0 6px 20px rgba(0,0,0,0.14);
+                z-index: 1200;
+                white-space: nowrap;
+                pointer-events: auto;
+            }
+            .canva-mini-btn {
+                width: 28px;
+                height: 28px;
+                border-radius: 8px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: #475569;
+                font-size: 12px;
+                background: transparent;
+                border: none;
+                cursor: pointer;
+                transition: all 0.15s;
+            }
+            .canva-mini-btn:hover {
+                background: #f1f5f9;
+                color: #7c3aed;
+            }
+
+            /* 🎛️ Canva Top Contextual Toolbar (matching screenshot 1:1) 🎛️ */
+            #canva-text-toolbar {
+                position: fixed;
+                top: 72px;
+                left: 50%;
+                transform: translateX(-50%);
+                background: #ffffff;
+                border: 1px solid #cbd5e1;
+                border-radius: 18px;
+                padding: 4px 10px;
+                display: flex;
+                align-items: center;
+                gap: 4px;
+                box-shadow: 0 10px 35px rgba(0,0,0,0.22);
+                z-index: 99999;
+                font-family: 'Siemreap', sans-serif;
+                color: #1e293b;
+                animation: canvaToolbarSlideDown 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+            }
+            @keyframes canvaToolbarSlideDown {
+                from { opacity: 0; transform: translate(-50%, -10px); }
+                to { opacity: 1; transform: translate(-50%, 0); }
+            }
+
+            .canva-tb-select {
+                padding: 4px 10px;
+                background: #f8fafc;
+                border: 1px solid #cbd5e1;
+                border-radius: 10px;
+                font-size: 12px;
+                font-weight: 700;
+                color: #1e293b;
+                outline: none;
+                cursor: pointer;
+                max-width: 160px;
+                transition: border-color 0.15s;
+            }
+            .canva-tb-select:hover {
+                border-color: #8b5cf6;
+            }
+
+            .canva-tb-btn {
+                min-width: 28px;
+                height: 28px;
+                padding: 0 7px;
+                border-radius: 8px;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 12px;
+                font-weight: 700;
+                color: #475569;
+                background: transparent;
+                border: none;
+                cursor: pointer;
+                transition: all 0.15s;
+                position: relative;
+            }
+            .canva-tb-btn:hover {
+                background: #f1f5f9;
+                color: #7c3aed;
+            }
+            .canva-tb-btn.active {
+                background: #ede9fe;
+                color: #7c3aed;
+            }
+
+            .canva-tb-size-input {
+                width: 44px;
+                height: 26px;
+                text-align: center;
+                font-size: 12px;
+                font-weight: 700;
+                border: 1px solid #cbd5e1;
+                border-radius: 8px;
+                outline: none;
+                background: #f8fafc;
+                color: #1e293b;
+            }
+
+            .canva-tb-pill-btn {
+                padding: 4px 10px;
+                border-radius: 10px;
+                font-size: 11px;
+                font-weight: 700;
+                background: #f8fafc;
+                border: 1px solid #cbd5e1;
+                color: #475569;
+                cursor: pointer;
+                transition: all 0.15s;
+            }
+            .canva-tb-pill-btn:hover, .canva-tb-pill-btn.active {
+                background: #ede9fe;
+                color: #7c3aed;
+                border-color: #c4b5fd;
+            }
+
+            .canva-tb-divider {
+                width: 1px;
+                height: 18px;
+                background: #e2e8f0;
+                margin: 0 3px;
+            }
+
+            /* Sub-menus for Effects, Position, Spacing */
+            .canva-popover-menu {
+                position: absolute;
+                top: 42px;
+                background: #ffffff;
+                border: 1px solid #e2e8f0;
+                border-radius: 14px;
+                box-shadow: 0 10px 30px rgba(0,0,0,0.18);
+                padding: 8px;
+                display: flex;
+                flex-direction: column;
+                gap: 4px;
+                z-index: 100000;
+                min-width: 160px;
+            }
+            .canva-popover-item {
+                padding: 5px 10px;
+                border-radius: 8px;
+                font-size: 11px;
+                font-weight: 600;
+                text-align: left;
+                color: #334155;
+                background: transparent;
+                border: none;
+                cursor: pointer;
+                transition: all 0.15s;
+                display: flex;
+                align-items: center;
+                gap: 6px;
+            }
+            .canva-popover-item:hover {
+                background: #f1f5f9;
+                color: #7c3aed;
+            }
+
+            /* Print overrides: Hide ALL Canva UI elements cleanly */
+            @media print {
+                #canva-text-toolbar, .canva-selected-active::after, .canva-corner-handle, .canva-side-pill, .canva-side-actions, .canva-mini-bar, .canva-popover-menu {
+                    display: none !important;
+                }
+                .canva-selected-active {
+                    outline: none !important;
+                    box-shadow: none !important;
+                }
+                .canva-el {
+                    cursor: default !important;
+                }
+            }
+        `;
+        document.head.appendChild(styleTag);
+    }
+
+    // Create Top Contextual Toolbar (matching user screenshot 1:1)
+    let toolbar = document.getElementById('canva-text-toolbar');
     if (!toolbar) {
         toolbar = document.createElement('div');
-        toolbar.id = 'canva-toolbar';
-        toolbar.className = 'fixed z-[9999] hidden bg-slate-900/95 text-white rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.3)] p-1.5 flex flex-wrap items-center gap-1 border border-slate-700 backdrop-blur-md transition-opacity animate-fade-in no-print';
+        toolbar.id = 'canva-text-toolbar';
+        toolbar.className = 'no-print hidden';
         toolbar.innerHTML = `
-          <button onclick="window.changeFontSize(1)" class="w-8 h-8 flex justify-center items-center rounded-xl hover:bg-slate-700 transition tooltip" title="ពង្រីកអក្សរ"><i class="fa-solid fa-plus text-sm"></i></button>
-          <button onclick="window.changeFontSize(-1)" class="w-8 h-8 flex justify-center items-center rounded-xl hover:bg-slate-700 transition tooltip" title="បង្រួមអក្សរ"><i class="fa-solid fa-minus text-sm"></i></button>
-          <div class="w-px h-6 bg-slate-700 mx-1"></div>
-          <div class="relative flex items-center justify-center w-8 h-8 rounded-xl hover:bg-slate-700 transition overflow-hidden tooltip" title="ពណ៌អក្សរ">
-             <input type="color" id="canvaTextColor" onchange="window.changeTextColor(this.value)" class="absolute -top-2 -left-2 w-16 h-16 cursor-pointer border-0 p-0 opacity-0">
-             <div id="colorIndicator" class="w-5 h-5 rounded-full border-2 border-white pointer-events-none" style="background-color: #000;"></div>
-          </div>
-          <div class="w-px h-6 bg-slate-700 mx-1"></div>
-          <button onclick="window.deleteActiveElement()" class="w-8 h-8 flex justify-center items-center rounded-xl hover:bg-rose-500/80 text-rose-300 hover:text-white transition tooltip" title="លុប"><i class="fa-solid fa-trash-can text-sm"></i></button>
+            <!-- 1. Font Family Dropdown -->
+            <select id="canva-font-select" onchange="window.CanvaEngine.setFontFamily(this.value)" class="canva-tb-select" title="ពុម្ពអក្សរ (Font Family)">
+                <option value="font-moul">Khmer OS Muol Light</option>
+                <option value="font-siemreap">Siemreap (ស្តង់ដារ)</option>
+                <option value="font-battambang">Battambang</option>
+                <option value="'Kantumruy Pro', sans-serif">Kantumruy Pro</option>
+                <option value="'DM Sans', sans-serif">DM Sans</option>
+                <option value="'Cinzel', serif">Cinzel (Royal)</option>
+                <option value="'Inter', sans-serif">Inter</option>
+            </select>
+
+            <div class="canva-tb-divider"></div>
+
+            <!-- 2. Font Size Stepper: [ - ] [ 48.3 ] [ + ] -->
+            <button onclick="window.CanvaEngine.adjustFontSize(-2)" class="canva-tb-btn" title="បង្រួមអក្សរ (-)">−</button>
+            <input type="text" id="canva-size-input" onchange="window.CanvaEngine.setFontSize(this.value)" onkeydown="if(event.key==='Enter') window.CanvaEngine.setFontSize(this.value)" class="canva-tb-size-input" value="24" title="ទំហំអក្សរ (Font Size)">
+            <button onclick="window.CanvaEngine.adjustFontSize(2)" class="canva-tb-btn" title="ពង្រីកអក្សរ (+)">+</button>
+
+            <div class="canva-tb-divider"></div>
+
+            <!-- 3. Text Color [ A ] with underline bar -->
+            <div class="relative flex items-center justify-center">
+                <button onclick="document.getElementById('canva-color-picker-input').click()" class="canva-tb-btn flex-col gap-0" title="ពណ៌អក្សរ (Text Color)">
+                    <span class="font-bold text-xs">A</span>
+                    <span id="canva-color-bar" class="w-4 h-1 rounded-sm bg-red-600"></span>
+                </button>
+                <input type="color" id="canva-color-picker-input" onchange="window.CanvaEngine.setTextColor(this.value)" class="absolute inset-0 opacity-0 w-full h-full cursor-pointer pointer-events-auto">
+            </div>
+
+            <!-- 4. Bold [ B ] -->
+            <button id="canva-btn-bold" onclick="window.CanvaEngine.toggleBold()" class="canva-tb-btn font-bold" title="អក្សរដិត (Bold)">B</button>
+
+            <!-- 5. Italic [ I ] -->
+            <button id="canva-btn-italic" onclick="window.CanvaEngine.toggleItalic()" class="canva-tb-btn italic" title="អក្សរទ្រេត (Italic)">I</button>
+
+            <!-- 6. Underline [ U ] -->
+            <button id="canva-btn-underline" onclick="window.CanvaEngine.toggleUnderline()" class="canva-tb-btn underline" title="គូសបន្ទាត់ពីក្រោម (Underline)">U</button>
+
+            <!-- 7. Strikethrough [ S̶ ] -->
+            <button id="canva-btn-strike" onclick="window.CanvaEngine.toggleStrikethrough()" class="canva-tb-btn line-through" title="គូសឆូតកណ្តាល (Strikethrough)">S</button>
+
+            <!-- 8. Case [ aA ] -->
+            <button id="canva-btn-case" onclick="window.CanvaEngine.toggleCase()" class="canva-tb-btn" title="ប្តូរអក្សរធំ/តូច (Uppercase/Lowercase)">aA</button>
+
+            <div class="canva-tb-divider"></div>
+
+            <!-- 9. Alignment [ ≡ ] -->
+            <button id="canva-btn-align" onclick="window.CanvaEngine.cycleAlignment()" class="canva-tb-btn" title="តម្រឹមអក្សរ (Alignment)"><i class="fa-solid fa-align-center"></i></button>
+
+            <!-- 10. List [ ⁝≡ ] -->
+            <button id="canva-btn-list" onclick="window.CanvaEngine.toggleList()" class="canva-tb-btn" title="បញ្ជីចំណុច (Bullet List)"><i class="fa-solid fa-list-ul text-[11px]"></i></button>
+
+            <!-- 11. Spacing [ ↕↔ ] -->
+            <div class="relative">
+                <button onclick="window.CanvaEngine.toggleSpacingMenu()" class="canva-tb-btn" title="គម្លាតអក្សរ និងជួរដេក (Letter & Line Spacing)"><i class="fa-solid fa-arrows-left-right-to-line text-[11px]"></i></button>
+                <div id="canva-spacing-popover" class="canva-popover-menu hidden" style="left: -40px;">
+                    <div class="p-1 space-y-2">
+                        <div>
+                            <div class="flex justify-between text-[10px] text-slate-500 font-bold mb-0.5"><span>គម្លាតតួអក្សរ (Letter)</span><span id="canva-letter-sp-val">0px</span></div>
+                            <input type="range" min="-2" max="15" value="0" oninput="window.CanvaEngine.setLetterSpacing(this.value)" class="w-full accent-purple-600">
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-[10px] text-slate-500 font-bold mb-0.5"><span>គម្លាតជួរដេក (Line)</span><span id="canva-line-h-val">1.2</span></div>
+                            <input type="range" min="0.8" max="2.5" step="0.1" value="1.2" oninput="window.CanvaEngine.setLineHeight(this.value)" class="w-full accent-purple-600">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="canva-tb-divider"></div>
+
+            <!-- 12. Effects [ Effects ] -->
+            <div class="relative">
+                <button id="canva-btn-effects" onclick="window.CanvaEngine.toggleEffectsMenu()" class="canva-tb-pill-btn" title="បែបផែនអក្សរ (Text Effects)">Effects</button>
+                <div id="canva-effects-popover" class="canva-popover-menu hidden" style="left: 0;">
+                    <button onclick="window.CanvaEngine.setEffect('none')" class="canva-popover-item">🚫 ធម្មតា (None)</button>
+                    <button onclick="window.CanvaEngine.setEffect('shadow')" class="canva-popover-item">🌫️ ស្រមោល (Drop Shadow)</button>
+                    <button onclick="window.CanvaEngine.setEffect('glow')" class="canva-popover-item">✨ ភ្លឺចែងចាំង (Glow / Outline)</button>
+                    <button onclick="window.CanvaEngine.setEffect('neon')" class="canva-popover-item">⚡ នីអុង (Neon Pink)</button>
+                    <button onclick="window.CanvaEngine.setEffect('gold')" class="canva-popover-item">👑 ពណ៌មាស 3D (Gold Metallic)</button>
+                </div>
+            </div>
+
+            <!-- 13. Position [ Position ] -->
+            <div class="relative">
+                <button id="canva-btn-position" onclick="window.CanvaEngine.togglePositionMenu()" class="canva-tb-pill-btn" title="តម្រៀបទីតាំង (Position)">Position</button>
+                <div id="canva-position-popover" class="canva-popover-menu hidden" style="right: 0;">
+                    <button onclick="window.CanvaEngine.alignPosition('center')" class="canva-popover-item"><i class="fa-solid fa-align-center"></i> ដាក់កណ្តាល (Center)</button>
+                    <button onclick="window.CanvaEngine.bringForward()" class="canva-popover-item"><i class="fa-solid fa-bring-forward"></i> ឡើងលើមួយកម្រិត (Forward)</button>
+                    <button onclick="window.CanvaEngine.sendBackward()" class="canva-popover-item"><i class="fa-solid fa-send-backward"></i> ចុះក្រោមមួយកម្រិត (Backward)</button>
+                    <button onclick="window.CanvaEngine.resetPosition()" class="canva-popover-item text-amber-600"><i class="fa-solid fa-rotate-left"></i> Reset ទីតាំងដើម</button>
+                </div>
+            </div>
+
+            <!-- 14. Format Painter [ 🖌️ ] -->
+            <button onclick="window.CanvaEngine.copyFormat()" class="canva-tb-btn" title="ចម្លងម៉ូដអក្សរ (Format Painter)"><i class="fa-solid fa-paintbrush text-xs"></i></button>
+
+            <!-- Close Toolbar Button -->
+            <button onclick="window.CanvaEngine.deselect()" class="w-6 h-6 rounded-lg bg-slate-100 hover:bg-rose-100 text-slate-400 hover:text-rose-600 flex items-center justify-center font-bold text-xs ml-1" title="បិទ Toolbar">×</button>
         `;
         document.body.appendChild(toolbar);
     }
 
-    document.removeEventListener('mousedown', dragStart);
-    document.removeEventListener('mousemove', drag);
-    document.removeEventListener('mouseup', dragEnd);
-    document.removeEventListener('click', showToolbarOnClick);
+    // Attach Document Click Handler for Canva Element Selection
+    document.removeEventListener('mousedown', window.CanvaEngine.handleMouseDown);
+    document.removeEventListener('mousemove', window.CanvaEngine.handleMouseMove);
+    document.removeEventListener('mouseup', window.CanvaEngine.handleMouseUp);
+    document.removeEventListener('click', window.CanvaEngine.handleClick);
 
-    document.addEventListener('mousedown', dragStart);
-    document.addEventListener('mousemove', drag);
-    document.addEventListener('mouseup', dragEnd);
-    document.addEventListener('click', showToolbarOnClick);
+    document.addEventListener('mousedown', window.CanvaEngine.handleMouseDown);
+    document.addEventListener('mousemove', window.CanvaEngine.handleMouseMove);
+    document.addEventListener('mouseup', window.CanvaEngine.handleMouseUp);
+    document.addEventListener('click', window.CanvaEngine.handleClick);
 };
 
-function dragStart(e) {
-    if (e.target.tagName.toLowerCase() === 'input' || (e.target.contentEditable === 'true' && document.activeElement === e.target)) return;
-    if (e.target.closest('.canva-el')) {
-        isDragging = true;
-        activeEl = e.target.closest('.canva-el');
-        let currentTransform = activeEl.style.transform;
-        initialX = 0; initialY = 0;
-        if (currentTransform && currentTransform.includes("translate")) {
-            const match = currentTransform.match(/translate\(([^p]+)px,\s*([^p]+)px\)/);
-            if (match) { initialX = parseFloat(match[1]); initialY = parseFloat(match[2]); }
+// 🎯 Canva Engine Object Definition 🎯
+window.CanvaEngine = {
+    activeEl: null,
+    isDragging: false,
+    isResizing: false,
+    startX: 0,
+    startY: 0,
+    initialX: 0,
+    initialY: 0,
+    initialFontSize: 24,
+    copiedFormat: null,
+
+    selectElement: function(el) {
+        if (!el) return;
+        this.deselect();
+        this.activeEl = el;
+        el.classList.add('canva-selected-active');
+
+        // Append 4 Corner Resizer handles
+        const tl = document.createElement('div'); tl.className = 'canva-corner-handle canva-corner-tl no-print';
+        const tr = document.createElement('div'); tr.className = 'canva-corner-handle canva-corner-tr no-print';
+        const bl = document.createElement('div'); bl.className = 'canva-corner-handle canva-corner-bl no-print';
+        const br = document.createElement('div'); br.className = 'canva-corner-handle canva-corner-br no-print';
+        br.title = 'ទាញពង្រីក/បង្រួម (Drag Resize)';
+        el.appendChild(tl); el.appendChild(tr); el.appendChild(bl); el.appendChild(br);
+
+        // Append Side Pill handles
+        const sl = document.createElement('div'); sl.className = 'canva-side-pill canva-side-l no-print';
+        const sr = document.createElement('div'); sr.className = 'canva-side-pill canva-side-r no-print';
+        el.appendChild(sl); el.appendChild(sr);
+
+        // Append Right Side Action buttons: Rotate & Move
+        const actions = document.createElement('div');
+        actions.className = 'canva-side-actions no-print';
+        actions.innerHTML = `
+            <div class="canva-action-btn canva-handle-rotate" onclick="window.CanvaEngine.toggleRotate(event)" title="បង្វិល (Rotate)"><i class="fa-solid fa-rotate text-[10px]"></i></div>
+            <div class="canva-action-btn canva-handle-move" title="អូសទីតាំង (Move)"><i class="fa-solid fa-up-down-left-right text-[10px]"></i></div>
+        `;
+        el.appendChild(actions);
+
+        // Append Floating Mini Bar: [ 💬 ] [ 🔒 ] [ 📋 ] [ 🗑️ ] [ ··· ]
+        const miniBar = document.createElement('div');
+        miniBar.className = 'canva-mini-bar no-print';
+        miniBar.innerHTML = `
+            <button onclick="window.CanvaEngine.showTip(event)" class="canva-mini-btn" title="ព័ត៌មានជំនួយ"><i class="fa-regular fa-comment-dots"></i></button>
+            <button onclick="window.CanvaEngine.toggleLock(event)" class="canva-mini-btn" title="ចាក់សោរទីតាំង (Lock)"><i class="fa-solid fa-lock text-[11px]"></i></button>
+            <button onclick="window.CanvaEngine.duplicateActive(event)" class="canva-mini-btn" title="ចម្លងបន្ថែម (Duplicate)"><i class="fa-regular fa-clone text-[11px]"></i></button>
+            <button onclick="window.CanvaEngine.deleteActive(event)" class="canva-mini-btn text-rose-500 hover:text-rose-600" title="លុបចេញ (Delete)"><i class="fa-regular fa-trash-can text-[11px]"></i></button>
+            <button onclick="window.CanvaEngine.toggleMoreMenu(event)" class="canva-mini-btn" title="ជម្រើសបន្ថែម">···</button>
+        `;
+        el.appendChild(miniBar);
+
+        // Sync values to Top Toolbar
+        this.syncToolbar();
+
+        // Show Toolbar
+        const tb = document.getElementById('canva-text-toolbar');
+        if (tb) tb.classList.remove('hidden');
+    },
+
+    deselect: function() {
+        if (this.activeEl) {
+            this.activeEl.classList.remove('canva-selected-active');
+            this.activeEl.querySelectorAll('.canva-corner-handle, .canva-side-pill, .canva-side-actions, .canva-mini-bar').forEach(n => n.remove());
+            this.activeEl = null;
         }
-        startX = e.clientX; startY = e.clientY;
-        activeEl.style.cursor = 'grabbing';
-        activeEl.style.zIndex = '100';
-    }
-}
+        const tb = document.getElementById('canva-text-toolbar');
+        if (tb) tb.classList.add('hidden');
+        this.hidePopovers();
+    },
 
-function drag(e) {
-    if (isDragging && activeEl) {
-        e.preventDefault(); 
-        const scale = window.honorBoardScale || 1;
-        const dx = (e.clientX - startX) / scale;
-        const dy = (e.clientY - startY) / scale;
-        activeEl.style.transform = `translate(${initialX + dx}px, ${initialY + dy}px)`;
-        const toolbar = document.getElementById('canva-toolbar');
-        if (toolbar && !toolbar.classList.contains('hidden')) updateToolbarPosition();
-    }
-}
+    syncToolbar: function() {
+        if (!this.activeEl) return;
+        const target = this.activeEl.querySelector('[contenteditable="true"]') || this.activeEl;
+        const style = window.getComputedStyle(target);
 
-function dragEnd(e) {
-    isDragging = false;
-    if (activeEl) {
-        activeEl.style.cursor = 'grab';
-        activeEl.style.zIndex = '10';
-    }
-}
+        // Font size
+        const fSize = Math.round(parseFloat(style.fontSize)) || 24;
+        const sizeInput = document.getElementById('canva-size-input');
+        if (sizeInput) sizeInput.value = fSize;
 
-function showToolbarOnClick(e) {
-    const toolbar = document.getElementById('canva-toolbar');
-    if (!toolbar) return;
+        // Color
+        const color = style.color;
+        const colorBar = document.getElementById('canva-color-bar');
+        if (colorBar) colorBar.style.backgroundColor = color;
 
-    const clickedEl = e.target.closest('.canva-el');
-    if (clickedEl && !isDragging) {
-        activeEl = clickedEl;
-        toolbar.classList.remove('hidden');
-        updateToolbarPosition();
+        // Bold
+        const btnBold = document.getElementById('canva-btn-bold');
+        if (btnBold) {
+            const isBold = (style.fontWeight === 'bold' || parseInt(style.fontWeight, 10) >= 600);
+            btnBold.classList.toggle('active', isBold);
+        }
+
+        // Italic
+        const btnItalic = document.getElementById('canva-btn-italic');
+        if (btnItalic) btnItalic.classList.toggle('active', style.fontStyle === 'italic');
+
+        // Underline
+        const btnU = document.getElementById('canva-btn-underline');
+        if (btnU) btnU.classList.toggle('active', style.textDecorationLine.includes('underline'));
+
+        // Strike
+        const btnS = document.getElementById('canva-btn-strike');
+        if (btnS) btnS.classList.toggle('active', style.textDecorationLine.includes('line-through'));
+
+        // Case
+        const btnCase = document.getElementById('canva-btn-case');
+        if (btnCase) btnCase.classList.toggle('active', style.textTransform === 'uppercase');
+    },
+
+    getTargetText: function() {
+        if (!this.activeEl) return null;
+        return this.activeEl.querySelector('[contenteditable="true"]') || this.activeEl;
+    },
+
+    setFontFamily: function(font) {
+        const target = this.getTargetText();
+        if (!target) return;
+        target.classList.remove('font-moul', 'font-siemreap', 'font-battambang');
+        if (font.startsWith('font-')) {
+            target.classList.add(font);
+            target.style.fontFamily = '';
+        } else {
+            target.style.fontFamily = font;
+        }
+    },
+
+    setFontSize: function(val) {
+        const target = this.getTargetText();
+        if (!target) return;
+        const size = Math.max(10, Math.min(120, parseInt(val, 10) || 24));
+        target.style.fontSize = size + 'px';
+        const input = document.getElementById('canva-size-input');
+        if (input) input.value = size;
+    },
+
+    adjustFontSize: function(delta) {
+        const target = this.getTargetText();
+        if (!target) return;
+        const cur = parseFloat(window.getComputedStyle(target).fontSize) || 24;
+        this.setFontSize(cur + delta);
+    },
+
+    setTextColor: function(colorHex) {
+        const target = this.getTargetText();
+        if (!target) return;
+        target.style.color = colorHex;
+        target.style.webkitTextFillColor = colorHex;
+        const colorBar = document.getElementById('canva-color-bar');
+        if (colorBar) colorBar.style.backgroundColor = colorHex;
+    },
+
+    toggleBold: function() {
+        const target = this.getTargetText();
+        if (!target) return;
+        const isBold = (target.style.fontWeight === 'bold' || window.getComputedStyle(target).fontWeight === 'bold' || parseInt(window.getComputedStyle(target).fontWeight, 10) >= 600);
+        target.style.fontWeight = isBold ? 'normal' : 'bold';
+        this.syncToolbar();
+    },
+
+    toggleItalic: function() {
+        const target = this.getTargetText();
+        if (!target) return;
+        const isItalic = (target.style.fontStyle === 'italic' || window.getComputedStyle(target).fontStyle === 'italic');
+        target.style.fontStyle = isItalic ? 'normal' : 'italic';
+        this.syncToolbar();
+    },
+
+    toggleUnderline: function() {
+        const target = this.getTargetText();
+        if (!target) return;
+        const cur = window.getComputedStyle(target).textDecorationLine || '';
+        target.style.textDecoration = cur.includes('underline') ? 'none' : 'underline';
+        this.syncToolbar();
+    },
+
+    toggleStrikethrough: function() {
+        const target = this.getTargetText();
+        if (!target) return;
+        const cur = window.getComputedStyle(target).textDecorationLine || '';
+        target.style.textDecoration = cur.includes('line-through') ? 'none' : 'line-through';
+        this.syncToolbar();
+    },
+
+    toggleCase: function() {
+        const target = this.getTargetText();
+        if (!target) return;
+        const cur = window.getComputedStyle(target).textTransform;
+        target.style.textTransform = (cur === 'uppercase') ? 'none' : 'uppercase';
+        this.syncToolbar();
+    },
+
+    cycleAlignment: function() {
+        const target = this.getTargetText();
+        if (!target) return;
+        const cur = window.getComputedStyle(target).textAlign;
+        const alignments = ['center', 'left', 'right', 'justify'];
+        const next = alignments[(alignments.indexOf(cur) + 1) % alignments.length] || 'center';
+        target.style.textAlign = next;
+        if (this.activeEl) this.activeEl.style.textAlign = next;
+        const icon = document.querySelector('#canva-btn-align i');
+        if (icon) icon.className = `fa-solid fa-align-${next === 'justify' ? 'justify' : next}`;
+    },
+
+    toggleList: function() {
+        const target = this.getTargetText();
+        if (!target) return;
+        document.execCommand('insertUnorderedList', false, null);
+    },
+
+    setLetterSpacing: function(val) {
+        const target = this.getTargetText();
+        if (!target) return;
+        target.style.letterSpacing = val + 'px';
+        const lbl = document.getElementById('canva-letter-sp-val');
+        if (lbl) lbl.textContent = val + 'px';
+    },
+
+    setLineHeight: function(val) {
+        const target = this.getTargetText();
+        if (!target) return;
+        target.style.lineHeight = val;
+        const lbl = document.getElementById('canva-line-h-val');
+        if (lbl) lbl.textContent = val;
+    },
+
+    setEffect: function(effectName) {
+        const target = this.getTargetText();
+        if (!target) return;
+        if (effectName === 'shadow') {
+            target.style.textShadow = '2px 3px 6px rgba(0,0,0,0.35)';
+        } else if (effectName === 'glow') {
+            target.style.textShadow = '0 0 10px rgba(245, 158, 11, 0.6), 0 0 20px rgba(245, 158, 11, 0.4)';
+        } else if (effectName === 'neon') {
+            target.style.textShadow = '0 0 5px #fff, 0 0 12px #ec4899, 0 0 25px #ec4899';
+        } else if (effectName === 'gold') {
+            target.style.textShadow = '1px 1px 0 #b45309, 2px 2px 0 #92400e, 3px 3px 6px rgba(0,0,0,0.4)';
+        } else {
+            target.style.textShadow = 'none';
+        }
+        this.hidePopovers();
+    },
+
+    alignPosition: function(pos) {
+        if (!this.activeEl) return;
+        if (pos === 'center') {
+            this.activeEl.style.left = '50%';
+            this.activeEl.style.transform = 'translate(-50%, 0)';
+        }
+        this.hidePopovers();
+    },
+
+    bringForward: function() {
+        if (!this.activeEl) return;
+        const curZ = parseInt(window.getComputedStyle(this.activeEl).zIndex, 10) || 10;
+        this.activeEl.style.zIndex = curZ + 10;
+        this.hidePopovers();
+    },
+
+    sendBackward: function() {
+        if (!this.activeEl) return;
+        const curZ = parseInt(window.getComputedStyle(this.activeEl).zIndex, 10) || 10;
+        this.activeEl.style.zIndex = Math.max(1, curZ - 10);
+        this.hidePopovers();
+    },
+
+    resetPosition: function() {
+        if (!this.activeEl) return;
+        this.activeEl.style.transform = 'translate(0px, 0px)';
+        this.activeEl.style.left = '';
+        this.activeEl.style.top = '';
+        this.hidePopovers();
+    },
+
+    copyFormat: function() {
+        const target = this.getTargetText();
+        if (!target) return;
+        const style = window.getComputedStyle(target);
+        this.copiedFormat = {
+            fontSize: style.fontSize,
+            fontFamily: style.fontFamily,
+            color: style.color,
+            fontWeight: style.fontWeight,
+            fontStyle: style.fontStyle,
+            textDecoration: style.textDecoration
+        };
+        if (typeof window.showToast === 'function') {
+            window.showToast("📋 បានចម្លង Style អត្ថបទ! ចុចលើអត្ថបទផ្សេងដើម្បីបិទភ្ជាប់ (Paste Format)", "info");
+        }
+    },
+
+    pasteFormat: function(el) {
+        if (!this.copiedFormat || !el) return;
+        const target = el.querySelector('[contenteditable="true"]') || el;
+        target.style.fontSize = this.copiedFormat.fontSize;
+        target.style.fontFamily = this.copiedFormat.fontFamily;
+        target.style.color = this.copiedFormat.color;
+        target.style.fontWeight = this.copiedFormat.fontWeight;
+        target.style.fontStyle = this.copiedFormat.fontStyle;
+        target.style.textDecoration = this.copiedFormat.textDecoration;
+        this.copiedFormat = null;
+    },
+
+    toggleLock: function(e) {
+        if (e) e.stopPropagation();
+        if (!this.activeEl) return;
+        const isLocked = this.activeEl.classList.toggle('canva-locked');
+        const icon = this.activeEl.querySelector('.canva-mini-bar i.fa-lock, .canva-mini-bar i.fa-lock-open');
+        if (icon) icon.className = isLocked ? 'fa-solid fa-lock text-amber-500 text-[11px]' : 'fa-solid fa-lock-open text-[11px]';
+        if (typeof window.showToast === 'function') {
+            window.showToast(isLocked ? "🔒 បានចាក់សោរទីតាំង (Locked)" : "🔓 បានដោះសោរទីតាំង (Unlocked)", "info");
+        }
+    },
+
+    duplicateActive: function(e) {
+        if (e) e.stopPropagation();
+        if (!this.activeEl) return;
+        const clone = this.activeEl.cloneNode(true);
+        clone.querySelectorAll('.canva-corner-handle, .canva-side-pill, .canva-side-actions, .canva-mini-bar').forEach(n => n.remove());
+        clone.classList.remove('canva-selected-active', 'canva-locked');
         
-        const colorPicker = document.getElementById('canvaTextColor');
-        const colorInd = document.getElementById('colorIndicator');
-        if(colorPicker && colorInd) {
-            const textTarget = activeEl.querySelector('[contenteditable="true"]') || activeEl;
-            const rgb = window.getComputedStyle(textTarget).color;
-            const hex = rgbToHex(rgb) || '#000000';
-            colorPicker.value = hex;
-            colorInd.style.backgroundColor = hex;
+        const parent = this.activeEl.parentElement;
+        if (parent) {
+            parent.appendChild(clone);
+            const currentTransform = clone.style.transform;
+            let curX = 20, curY = 20;
+            if (currentTransform && currentTransform.includes("translate")) {
+                const match = currentTransform.match(/translate\(([^p]+)px,\s*([^p]+)px\)/);
+                if (match) { curX = parseFloat(match[1]) + 20; curY = parseFloat(match[2]) + 20; }
+            }
+            clone.style.transform = `translate(${curX}px, ${curY}px)`;
+            this.selectElement(clone);
         }
-    } else if (!e.target.closest('#canva-toolbar') && !isDragging) {
-        window.closeCanvaToolbar();
-    }
-}
+    },
 
-function updateToolbarPosition() {
-    const toolbar = document.getElementById('canva-toolbar');
-    if (toolbar && activeEl) {
-        const rect = activeEl.getBoundingClientRect();
-        toolbar.style.top = `${rect.top - 60}px`;
-        toolbar.style.left = `${rect.left + (rect.width / 2) - (toolbar.offsetWidth / 2)}px`;
+    deleteActive: function(e) {
+        if (e) e.stopPropagation();
+        if (!this.activeEl) return;
+        const elToDelete = this.activeEl;
+        this.deselect();
+        elToDelete.remove();
+    },
+
+    showTip: function(e) {
+        if (e) e.stopPropagation();
+        if (typeof window.showToast === 'function') {
+            window.showToast("💡 គន្លឹះ៖ លោកគ្រូអាចចុចអូសកណ្តាលដើម្បីប្តូរទីតាំង ឬទាញជ្រុងខាងក្រោមដើម្បីពង្រីក/បង្រួម!", "info");
+        }
+    },
+
+    toggleRotate: function(e) {
+        if (e) e.stopPropagation();
+        if (!this.activeEl) return;
+        const curRotate = this.activeEl.getAttribute('data-rotate') || '0';
+        const nextRotate = (parseInt(curRotate, 10) + 5) % 360;
+        this.activeEl.setAttribute('data-rotate', nextRotate);
+        const curTransform = this.activeEl.style.transform.replace(/rotate\([^)]+\)/g, '').trim();
+        this.activeEl.style.transform = `${curTransform} rotate(${nextRotate}deg)`.trim();
+    },
+
+    toggleMoreMenu: function(e) {
+        if (e) e.stopPropagation();
+        this.togglePositionMenu();
+    },
+
+    toggleEffectsMenu: function() {
+        const pop = document.getElementById('canva-effects-popover');
+        if (pop) pop.classList.toggle('hidden');
+    },
+
+    togglePositionMenu: function() {
+        const pop = document.getElementById('canva-position-popover');
+        if (pop) pop.classList.toggle('hidden');
+    },
+
+    toggleSpacingMenu: function() {
+        const pop = document.getElementById('canva-spacing-popover');
+        if (pop) pop.classList.toggle('hidden');
+    },
+
+    hidePopovers: function() {
+        ['canva-effects-popover', 'canva-position-popover', 'canva-spacing-popover'].forEach(id => {
+            const p = document.getElementById(id);
+            if (p) p.classList.add('hidden');
+        });
+    },
+
+    // 🖱️ Event Handling: Click, Drag, Corner Resize 🖱️
+    handleClick: function(e) {
+        if (e.target.closest('#canva-text-toolbar') || e.target.closest('.canva-mini-bar') || e.target.closest('.canva-side-actions')) {
+            return;
+        }
+
+        const canvaEl = e.target.closest('.canva-el') || (e.target.closest('#top5HonorPrintArea, #certificatePrintArea') && e.target.closest('[contenteditable="true"]')?.parentElement);
+        if (canvaEl && !window.CanvaEngine.isDragging) {
+            if (window.CanvaEngine.copiedFormat) {
+                window.CanvaEngine.pasteFormat(canvaEl);
+            }
+            window.CanvaEngine.selectElement(canvaEl);
+        } else if (!e.target.closest('.canva-corner-handle') && !e.target.closest('.canva-side-pill') && !window.CanvaEngine.isDragging) {
+            window.CanvaEngine.deselect();
+        }
+    },
+
+    handleMouseDown: function(e) {
+        const target = e.target;
+        if (target.closest('#canva-text-toolbar') || target.closest('.canva-mini-bar')) return;
+
+        // Check if resizing via bottom-right corner
+        if (target.classList.contains('canva-corner-br') || target.classList.contains('canva-corner-handle')) {
+            window.CanvaEngine.isResizing = true;
+            window.CanvaEngine.startX = e.clientX;
+            window.CanvaEngine.startY = e.clientY;
+            const textTarget = window.CanvaEngine.getTargetText();
+            window.CanvaEngine.initialFontSize = textTarget ? (parseFloat(window.getComputedStyle(textTarget).fontSize) || 24) : 24;
+            e.preventDefault();
+            return;
+        }
+
+        // Check if dragging via move handle or element
+        const canvaEl = target.closest('.canva-el') || target.closest('.canva-handle-move')?.closest('.canva-el');
+        if (canvaEl) {
+            if (canvaEl.classList.contains('canva-locked')) return;
+            if (target.hasAttribute('contenteditable') && document.activeElement === target && !target.closest('.canva-handle-move')) {
+                return; // Let user edit text directly
+            }
+
+            window.CanvaEngine.isDragging = true;
+            window.CanvaEngine.activeEl = canvaEl;
+            window.CanvaEngine.startX = e.clientX;
+            window.CanvaEngine.startY = e.clientY;
+
+            let currentTransform = canvaEl.style.transform;
+            window.CanvaEngine.initialX = 0;
+            window.CanvaEngine.initialY = 0;
+            if (currentTransform && currentTransform.includes("translate")) {
+                const match = currentTransform.match(/translate\(([^p]+)px,\s*([^p]+)px\)/);
+                if (match) {
+                    window.CanvaEngine.initialX = parseFloat(match[1]);
+                    window.CanvaEngine.initialY = parseFloat(match[2]);
+                }
+            } else {
+                window.CanvaEngine.initialX = parseFloat(canvaEl.style.left) || 0;
+                window.CanvaEngine.initialY = parseFloat(canvaEl.style.top) || 0;
+            }
+            canvaEl.style.cursor = 'grabbing';
+            canvaEl.style.zIndex = '999';
+        }
+    },
+
+    handleMouseMove: function(e) {
+        if (window.CanvaEngine.isResizing && window.CanvaEngine.activeEl) {
+            e.preventDefault();
+            const deltaX = e.clientX - window.CanvaEngine.startX;
+            const newSize = Math.max(10, Math.min(120, window.CanvaEngine.initialFontSize + (deltaX * 0.25)));
+            window.CanvaEngine.setFontSize(newSize);
+            return;
+        }
+
+        if (window.CanvaEngine.isDragging && window.CanvaEngine.activeEl) {
+            e.preventDefault();
+            const zoom = (parseInt(localStorage.getItem('cert_studio_zoom') || '85', 10)) / 100 || window.honorBoardScale || 1;
+            const dx = (e.clientX - window.CanvaEngine.startX) / zoom;
+            const dy = (e.clientY - window.CanvaEngine.startY) / zoom;
+            const newX = Math.round(window.CanvaEngine.initialX + dx);
+            const newY = Math.round(window.CanvaEngine.initialY + dy);
+
+            if (window.CanvaEngine.activeEl.style.position === 'absolute' && window.CanvaEngine.activeEl.style.left) {
+                window.CanvaEngine.activeEl.style.left = newX + 'px';
+                window.CanvaEngine.activeEl.style.top = newY + 'px';
+            } else {
+                window.CanvaEngine.activeEl.style.transform = `translate(${newX}px, ${newY}px)`;
+            }
+        }
+    },
+
+    handleMouseUp: function() {
+        if (window.CanvaEngine.isDragging && window.CanvaEngine.activeEl) {
+            window.CanvaEngine.activeEl.style.cursor = 'grab';
+            window.CanvaEngine.activeEl.style.zIndex = '20';
+        }
+        window.CanvaEngine.isDragging = false;
+        window.CanvaEngine.isResizing = false;
     }
-}
+};
 
 window.closeCanvaToolbar = function() {
-    const toolbar = document.getElementById('canva-toolbar');
-    if (toolbar) toolbar.classList.add('hidden');
+    window.CanvaEngine.deselect();
 };
-
 window.changeFontSize = function(delta) {
-    if (!activeEl) return;
-    const target = activeEl.querySelector('[contenteditable="true"]') || activeEl;
-    const currentSize = parseFloat(window.getComputedStyle(target).fontSize);
-    target.style.fontSize = `${currentSize + (delta * 3)}px`;
-    target.style.lineHeight = 'normal';
-    updateToolbarPosition();
+    window.CanvaEngine.adjustFontSize(delta * 2);
 };
-
 window.changeTextColor = function(color) {
-    if (!activeEl) return;
-    const targets = activeEl.querySelectorAll('[contenteditable="true"]');
-    if (targets.length > 0) {
-        targets.forEach(t => { t.style.color = color; t.style.webkitTextFillColor = color; t.style.backgroundImage = 'none'; });
-    } else {
-        activeEl.style.color = color;
-    }
-    const colorInd = document.getElementById('colorIndicator');
-    if(colorInd) colorInd.style.backgroundColor = color;
+    window.CanvaEngine.setTextColor(color);
 };
-
 window.deleteActiveElement = function() {
-    if (activeEl) {
-        activeEl.remove();
-        window.closeCanvaToolbar();
-    }
+    window.CanvaEngine.deleteActive();
 };
-
 window.addCustomText = function() {
-    const printArea = document.getElementById("top5HonorPrintArea");
+    const printArea = document.getElementById("top5HonorPrintArea") || document.getElementById("certificatePrintArea");
     if (!printArea) return;
     const newEl = document.createElement("div");
-    newEl.className = "canva-el absolute z-50 p-2 cursor-grab outline-none hover:ring-2 hover:ring-dashed hover:ring-blue-400 rounded-xl bg-white/50 backdrop-blur-sm shadow-sm transition-transform";
+    newEl.className = "canva-el absolute z-50 p-2 cursor-grab outline-none hover:ring-2 hover:ring-dashed hover:ring-purple-400 rounded-xl bg-white/60 backdrop-blur-sm shadow-sm transition-transform";
     newEl.style.top = "40%";
     newEl.style.left = "40%";
-    newEl.innerHTML = `<p contenteditable="true" spellcheck="false" class="font-moul text-[24px] text-slate-800 outline-none">អត្ថបទថ្មី</p>`;
+    newEl.innerHTML = `<p contenteditable="true" spellcheck="false" class="font-moul text-[24px] text-slate-800 outline-none">អត្ថបទថ្មី (Canva)</p>`;
     printArea.appendChild(newEl);
+    window.CanvaEngine.selectElement(newEl);
 };
-
 window.addCustomSticker = function(emoji) {
-    const printArea = document.getElementById("top5HonorPrintArea");
+    const printArea = document.getElementById("top5HonorPrintArea") || document.getElementById("certificatePrintArea");
     if (!printArea) return;
     const newEl = document.createElement("div");
-    newEl.className = "canva-el absolute z-50 p-2 cursor-grab hover:ring-2 hover:ring-dashed hover:ring-blue-400 rounded-full text-[60px] drop-shadow-lg transition-transform hover:scale-110";
+    newEl.className = "canva-el absolute z-50 p-2 cursor-grab hover:ring-2 hover:ring-dashed hover:ring-purple-400 rounded-full text-[60px] drop-shadow-lg transition-transform hover:scale-110";
     newEl.style.top = "40%";
     newEl.style.left = "40%";
     newEl.innerHTML = emoji;
     printArea.appendChild(newEl);
+    window.CanvaEngine.selectElement(newEl);
 };
 
 function rgbToHex(rgb) {

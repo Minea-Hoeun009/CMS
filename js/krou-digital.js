@@ -1929,7 +1929,7 @@ window.KrouDigital = {
                                 <!-- 🏛️ ក្បាលប័ណ្ណ (Official Header matching sample image) 🏛️ -->
                                 <div class="flex justify-between items-start text-xs px-2 pt-1">
                                     <!-- Left: MoEYS Logo & Hierarchy (ដូចរូបគំរូ - DRAGGABLE SECTION) -->
-                                    <div id="cert_sec_header_left" class="canva-draggable-section text-left pt-0.5 space-y-0.5 max-w-[270px]" style="transform: translate(${posHeaderLeft.x}px, ${posHeaderLeft.y}px);">
+                                    <div id="cert_sec_header_left" class="canva-el canva-draggable-section text-left pt-0.5 space-y-0.5 max-w-[270px]" style="transform: translate(${posHeaderLeft.x}px, ${posHeaderLeft.y}px);">
                                         <div class="drag-handle no-print hidden items-center gap-1 px-1.5 py-0.5 bg-slate-900/90 text-amber-300 text-[9px] rounded shadow border border-amber-500/60 -top-5 left-0 absolute whitespace-nowrap cursor-move z-50">
                                             <i class="fa-solid fa-up-down-left-right"></i> អូសទីតាំង
                                         </div>
@@ -1948,7 +1948,7 @@ window.KrouDigital = {
                                     </div>
 
                                     <!-- Center: Kingdom of Cambodia & National Motto (DRAGGABLE SECTION) -->
-                                    <div id="cert_sec_header_center" class="canva-draggable-section text-center pt-1" style="transform: translate(${posHeaderCenter.x}px, ${posHeaderCenter.y}px);">
+                                    <div id="cert_sec_header_center" class="canva-el canva-draggable-section text-center pt-1" style="transform: translate(${posHeaderCenter.x}px, ${posHeaderCenter.y}px);">
                                         <div class="drag-handle no-print hidden items-center gap-1 px-1.5 py-0.5 bg-slate-900/90 text-amber-300 text-[9px] rounded shadow border border-amber-500/60 -top-5 left-1/2 -translate-x-1/2 absolute whitespace-nowrap cursor-move z-50">
                                             <i class="fa-solid fa-up-down-left-right"></i> អូសទីតាំង
                                         </div>
@@ -1962,7 +1962,7 @@ window.KrouDigital = {
                                 </div>
 
                                 <!-- 🎖️ ចំណងជើងប័ណ្ណសរសើរ / លិខិតសរសើរ (Title Banner - DRAGGABLE SECTION) 🎖️ -->
-                                <div id="cert_sec_title" class="canva-draggable-section my-2 text-center" style="transform: translate(${posTitle.x}px, ${posTitle.y}px);">
+                                <div id="cert_sec_title" class="canva-el canva-draggable-section my-2 text-center" style="transform: translate(${posTitle.x}px, ${posTitle.y}px);">
                                     <div class="drag-handle no-print hidden items-center gap-1 px-2 py-0.5 bg-slate-900/90 text-amber-300 text-[10px] rounded shadow border border-amber-500/60 -top-6 left-1/2 -translate-x-1/2 absolute whitespace-nowrap cursor-move z-50">
                                         <i class="fa-solid fa-up-down-left-right"></i> អូសចំណងជើង (Drag Title)
                                     </div>
@@ -1972,7 +1972,7 @@ window.KrouDigital = {
                                 </div>
 
                                 <!-- 📜 តួសេចក្តី (Body Content - DRAGGABLE SECTION) 📜 -->
-                                <div id="cert_sec_body" class="canva-draggable-section my-1.5 max-w-4xl mx-auto space-y-2.5 text-sm md:text-base leading-relaxed text-slate-800" style="transform: translate(${posBody.x}px, ${posBody.y}px);">
+                                <div id="cert_sec_body" class="canva-el canva-draggable-section my-1.5 max-w-4xl mx-auto space-y-2.5 text-sm md:text-base leading-relaxed text-slate-800" style="transform: translate(${posBody.x}px, ${posBody.y}px);">
                                     <div class="drag-handle no-print hidden items-center gap-1 px-2 py-0.5 bg-slate-900/90 text-amber-300 text-[10px] rounded shadow border border-amber-500/60 -top-6 left-1/2 -translate-x-1/2 absolute whitespace-nowrap cursor-move z-50">
                                         <i class="fa-solid fa-up-down-left-right"></i> អូសតួសេចក្តី (Drag Body)
                                     </div>
@@ -2012,7 +2012,7 @@ window.KrouDigital = {
                                 <!-- ✍️ ហត្ថលេខា និងកាលបរិច្ឆេទ (Signatures & Date - DRAGGABLE SECTIONS) ✍️ -->
                                 <div class="flex justify-between items-end text-xs mt-4 px-4 sm:px-10">
                                     <!-- Left side: បានឃើញ និងឯកភាព / នាយករងបច្ចេកទេស -->
-                                    <div id="cert_sec_sig_left" class="canva-draggable-section text-center min-w-[150px]" style="transform: translate(${posSigLeft.x}px, ${posSigLeft.y}px);">
+                                    <div id="cert_sec_sig_left" class="canva-el canva-draggable-section text-center min-w-[150px]" style="transform: translate(${posSigLeft.x}px, ${posSigLeft.y}px);">
                                         <div class="drag-handle no-print hidden items-center gap-1 px-1.5 py-0.5 bg-slate-900/90 text-amber-300 text-[9px] rounded shadow border border-amber-500/60 -top-5 left-1/2 -translate-x-1/2 absolute whitespace-nowrap cursor-move z-50">
                                             <i class="fa-solid fa-up-down-left-right"></i> អូស
                                         </div>
@@ -2030,7 +2030,7 @@ window.KrouDigital = {
                                     </div>
 
                                     <!-- Right side: Lunar Date, Solar Date, Teacher Signature -->
-                                    <div id="cert_sec_sig_right" class="canva-draggable-section text-center min-w-[170px] space-y-0.5" style="transform: translate(${posSigRight.x}px, ${posSigRight.y}px);">
+                                    <div id="cert_sec_sig_right" class="canva-el canva-draggable-section text-center min-w-[170px] space-y-0.5" style="transform: translate(${posSigRight.x}px, ${posSigRight.y}px);">
                                         <div class="drag-handle no-print hidden items-center gap-1 px-1.5 py-0.5 bg-slate-900/90 text-amber-300 text-[9px] rounded shadow border border-amber-500/60 -top-5 left-1/2 -translate-x-1/2 absolute whitespace-nowrap cursor-move z-50">
                                             <i class="fa-solid fa-up-down-left-right"></i> អូស
                                         </div>
@@ -2076,6 +2076,11 @@ window.KrouDigital = {
                 const el = document.getElementById(p.id);
                 if (el) window.KrouDigital.initDraggable(el, 'pic', p.id);
             });
+
+            // Initialize Unified Canva Studio 5.0 Engine
+            if (typeof window.initCanvaEngine === 'function') {
+                window.initCanvaEngine();
+            }
         }, 50);
     },
     openParentPortalModal: function(query = "") {
