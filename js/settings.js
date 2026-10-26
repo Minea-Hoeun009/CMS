@@ -713,11 +713,10 @@ window.renderPersonalSettingsTab = function() {
 window.currentSettingsTab = "personal";
 
 window.switchSettingsTab = function(tabName) {
-    if (tabName === "users" || tabName === "academic") {
+    if (tabName === "users" || tabName === "academic" || tabName === "backup") {
         tabName = "personal";
     }
-    const isSchoolOrSysAdmin = typeof window.isSchoolAdmin === 'function' ? window.isSchoolAdmin() : false;
-    if (!isSchoolOrSysAdmin && (tabName === "backup" || tabName === "school")) {
+    if (tabName !== "school" && tabName !== "personal") {
         tabName = "personal";
     }
 
@@ -765,28 +764,26 @@ window.loadSettingsView = function() {
            <div class="relative z-10">
              <div class="flex items-center gap-2 mb-2">
                 <span class="px-3 py-1 bg-indigo-500/30 border border-indigo-400/40 text-indigo-200 rounded-full text-xs font-bold font-mono">
-                    ${isAdmin ? '👑 អ្នកគ្រប់គ្រងប្រព័ន្ធ (Admin)' : '👨‍🏫 គ្រូបង្រៀន (Teacher)'}
+                    ${isAdmin ? '👑 អ្នកគ្រប់គ្រងប្រព័ន្ធ (Admin)' : '👨‍🏫 គ្រូបន្ទុកថ្នាក់បឋមសិក្សា'}
                 </span>
              </div>
-             <h2 class="text-2xl md:text-3xl font-black font-moul mb-2 tracking-wide drop-shadow-md">ការកំណត់ប្រព័ន្ធ និងរចនាសម្ព័ន្ធសាលា</h2>
-             <p class="text-xs md:text-sm text-indigo-200 font-medium">គ្រប់គ្រងព័ត៌មានសាលារៀន ឆ្នាំសិក្សា ថ្នាក់រៀន មុខវិជ្ជា គណនីគ្រូ និងការបម្រុងទុកទិន្នន័យ</p>
+             <h2 class="text-2xl md:text-3xl font-black font-moul mb-2 tracking-wide drop-shadow-md">ការកំណត់ព័ត៌មានគ្រូ និងសាលារៀន</h2>
+             <p class="text-xs md:text-sm text-indigo-200 font-medium">គ្រប់គ្រងព័ត៌មានគ្រូបង្រៀន ថ្នាក់រៀនទទួលបន្ទុកបឋមសិក្សា និងព័ត៌មានទូទៅនៃសាលារៀន</p>
            </div>
            <div class="w-14 h-14 md:w-16 md:h-16 bg-white/10 border border-white/20 rounded-2xl flex items-center justify-center text-2xl md:text-3xl shadow-inner relative z-10 backdrop-blur-md shrink-0">
              <i class="fa-solid fa-gears text-indigo-200"></i>
            </div>
         </div>
 
-        <!-- Tab Navigation Bar -->
+        <!-- Tab Navigation Bar: ព័ត៌មានគ្រូ & ព័ត៌មានសាលារៀន -->
         <div class="bg-slate-100 dark:bg-slate-800 p-1.5 rounded-2xl border border-slate-200 dark:border-slate-700 flex flex-wrap gap-1 shadow-sm">
             <button id="tabBtn_personal" onclick="window.switchSettingsTab('personal')" class="flex-1 min-w-[140px] px-4 py-2.5 rounded-xl font-bold text-xs md:text-sm transition flex items-center justify-center gap-2 bg-white text-indigo-700 shadow-sm border border-indigo-200">
-                <i class="fa-solid fa-user-gear"></i> <span>ការកំណត់ផ្ទាល់ខ្លួន (My Workspace)</span>
+                <i class="fa-solid fa-chalkboard-user"></i> <span>ព័ត៌មានគ្រូ និងថ្នាក់រៀនបន្ទុក</span>
             </button>
-            <button id="tabBtn_school" onclick="window.switchSettingsTab('school')" class="${isAdmin ? '' : 'hidden'} flex-1 min-w-[140px] px-4 py-2.5 rounded-xl font-bold text-xs md:text-sm transition flex items-center justify-center gap-2 text-slate-500 hover:text-slate-700">
+            <button id="tabBtn_school" onclick="window.switchSettingsTab('school')" class="flex-1 min-w-[140px] px-4 py-2.5 rounded-xl font-bold text-xs md:text-sm transition flex items-center justify-center gap-2 text-slate-500 hover:text-slate-700">
                 <i class="fa-solid fa-school"></i> <span>ព័ត៌មានសាលារៀន</span>
             </button>
-            <button id="tabBtn_backup" onclick="window.switchSettingsTab('backup')" class="${isAdmin ? '' : 'hidden'} flex-1 min-w-[140px] px-4 py-2.5 rounded-xl font-bold text-xs md:text-sm transition flex items-center justify-center gap-2 text-slate-500 hover:text-slate-700">
-                <i class="fa-solid fa-shield-halved"></i> <span>បម្រុងទុក & Audit</span>
-            </button>
+            <button id="tabBtn_backup" onclick="window.switchSettingsTab('backup')" class="hidden" aria-hidden="true"></button>
         </div>
 
         <!-- ============================================================= -->

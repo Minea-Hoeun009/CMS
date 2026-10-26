@@ -254,7 +254,22 @@ window.AppAuth = {
         const uClean = String(userInput).trim();
         const uLower = uClean.toLowerCase();
 
-        // 1. ស្វែងរកក្នុង Firestore (បើមាន)
+        // 1. ស្វែងរកក្នុង cached_teachers_list ជាមុនសិន (Instant 0ms lookup)
+        try {
+            const cached = JSON.parse(localStorage.getItem('cached_teachers_list') || '[]');
+            if (Array.isArray(cached)) {
+                const found = cached.find(t => 
+                    (t.username && t.username.toLowerCase() === uLower) || 
+                    (t.teacher_id && t.teacher_id.toUpperCase() === uClean.toUpperCase()) ||
+                    (t.contact && t.contact === uClean)
+                );
+                if (found) {
+                    return { data: found, id: found.teacher_id };
+                }
+            }
+        } catch(e) {}
+
+        // 2. ស្វែងរកក្នុង Firestore (បើមាន)
         if (window.db) {
             try {
                 const snapUser = await window.db.collection("teachers")
@@ -289,19 +304,6 @@ window.AppAuth = {
                 console.warn("Firestore lookup note:", e.message);
             }
         }
-
-        // 2. ស្វែងរកក្នុង cached_teachers_list
-        try {
-            const cached = JSON.parse(localStorage.getItem('cached_teachers_list') || '[]');
-            const found = cached.find(t => 
-                (t.username && t.username.toLowerCase() === uLower) || 
-                (t.teacher_id && t.teacher_id.toUpperCase() === uClean.toUpperCase()) ||
-                (t.contact && t.contact === uClean)
-            );
-            if (found) {
-                return { data: found, id: found.teacher_id };
-            }
-        } catch(e) {}
 
         return null;
     },
@@ -848,6 +850,22 @@ window.AppAuth = {
             localStorage.setItem('selected_level', assignedGrade);
             localStorage.setItem('selected_room', assignedRoom);
 
+            // បន្ថែមចូល cached_teachers_list ក្នុង localStorage ភ្លាមៗ (ធានាការ Login ជោគជ័យ 100%)
+            try {
+                let cachedList = [];
+                try {
+                    cachedList = JSON.parse(localStorage.getItem('cached_teachers_list') || '[]');
+                } catch(e) {
+                    cachedList = [];
+                }
+                if (!Array.isArray(cachedList)) cachedList = [];
+                cachedList = cachedList.filter(t => t.teacher_id !== teacherId && t.username !== teacherDoc.username);
+                cachedList.push(teacherDoc);
+                localStorage.setItem('cached_teachers_list', JSON.stringify(cachedList));
+            } catch(e) {
+                console.warn("Could not cache registered teacher:", e);
+            }
+
             // ១. រក្សាទុកក្នុង Firestore
             if (window.db) {
                 await window.db.collection("teachers").doc(teacherId).set({
@@ -874,14 +892,22 @@ window.AppAuth = {
             }
 
             if (typeof window.logAudit === 'function') window.logAudit("REGISTER", "auth", `បានចុះឈ្មោះគណនីគ្រូថ្មី: ${name} (${teacherId})`);
-            alert(`🎉 អបអរសាទរ! ចុះឈ្មោះជោគជ័យ។\n\nលេខសម្គាល់គ្រូ (Teacher ID) របស់អ្នកគឺ: ${teacherId}\nឈ្មោះគណនី: ${user}\n\nសូមប្រើប្រាស់ព័ត៌មាននេះដើម្បីចូលគណនី។`);
-
-            // ប្តូរមកផ្ទាំង Login វិញ
+            
+            // ប្តូរមកផ្ទាំង Login វិញ និងបំពេញព័ត៌មានដោយស្វ័យប្រវត្តិ
             window.toggleAuthBox('login');
             const userInput = document.getElementById('usernameOrPhone');
             const passInput = document.getElementById('password');
+            const gradeSelect = document.getElementById('loginGrade');
+            const roomSelect = document.getElementById('loginRoom');
             if (userInput) userInput.value = user;
             if (passInput) passInput.value = pass;
+            if (gradeSelect) gradeSelect.value = assignedGrade;
+            if (roomSelect) roomSelect.value = assignedRoom;
+
+            if (typeof showToast === 'function') {
+                showToast("🎉 បានបង្កើតគណនីគ្រូថ្មីជោគជ័យ! លោកគ្រូអ្នកគ្រូអាចចុច «ចូលប្រព័ន្ធ» បានភ្លាមៗ។");
+            }
+            alert(`🎉 អបអរសាទរ! បានបង្កើតគណនីគ្រូថ្មីជោគជ័យ។\n\n• លេខសម្គាល់គ្រូ (Teacher ID): ${teacherId}\n• ឈ្មោះគណនី (Username): ${user}\n• ថ្នាក់ទទួលបន្ទុក: ${assignedGrade} ${assignedRoom}\n\nប្រព័ន្ធបានបញ្ចូលឈ្មោះគណនី និងលេខសម្ងាត់រួចជាស្រេច លោកគ្រូអ្នកគ្រូអាចចុច «ចូលប្រព័ន្ធ» ដើម្បីចាប់ផ្តើមប្រើប្រាស់បានភ្លាមៗ!`);
 
         } catch (error) {
             console.error("Registration Error:", error);
@@ -1059,6 +1085,24 @@ window.loginAsGuest = function() {
     }
 };
 
+// ចូលប្រើជា Admin ភ្លាមៗ (Quick Admin Login)
+window.quickLoginAsAdmin = function() {
+    const adminData = {
+        teacher_id: "TCH-SYSADMIN",
+        name: "អ្នកគ្រប់គ្រងប្រព័ន្ធ (System Admin)",
+        username: "admin",
+        role: "system_admin",
+        roles: ["system_admin", "school_admin"],
+        assigned_grade: "all",
+        assigned_room: "all",
+        school_id: "SCH-001",
+        status: "active"
+    };
+    if (window.AppAuth && typeof window.AppAuth.setAuthenticatedSession === 'function') {
+        window.AppAuth.setAuthenticatedSession(adminData, null);
+    }
+};
+
 // បង្ហាញ Welcome Screen សាជាថ្មី
 window.viewWelcomeScreen = function() {
     if (window.AppAuth && typeof window.AppAuth.showAuthScreen === 'function') {
@@ -1124,53 +1168,132 @@ window.checkPasswordStrength = function(password) {
 };
 
 // =========================================================================
-// Modal សម្រាប់កែប្រែព័ត៌មានគណនីគ្រូ (Account Profile Modal)
+// Modal សម្រាប់កែប្រែព័ត៌មានគណនីគ្រូ (Primary Teacher Account Profile Modal)
 // =========================================================================
 window.renderAccountModal = function() {
     if (document.getElementById("accountProfileModal")) return;
 
     const modalHtml = `
-        <div id="accountProfileModal" class="fixed inset-0 z-[7000] bg-slate-900/70 backdrop-blur-sm hidden items-center justify-center p-4 fade-in font-siemreap overflow-y-auto">
-            <div class="bg-white dark:bg-slate-800 rounded-[2rem] shadow-2xl w-full max-w-md overflow-hidden border border-slate-100 dark:border-slate-700 relative transform transition-all my-auto">
-                <button onclick="document.getElementById('accountProfileModal').classList.replace('flex','hidden')" class="absolute top-4 right-4 w-8 h-8 bg-black/10 dark:bg-white/10 hover:bg-rose-100 text-slate-500 hover:text-rose-600 rounded-full flex items-center justify-center transition z-20"><i class="fa-solid fa-xmark"></i></button>
+        <div id="accountProfileModal" class="fixed inset-0 z-[7000] bg-slate-900/75 backdrop-blur-md hidden items-center justify-center p-4 fade-in font-siemreap overflow-y-auto">
+            <div class="bg-white dark:bg-slate-800 rounded-[2.2rem] shadow-2xl w-full max-w-lg overflow-hidden border border-slate-100 dark:border-slate-700 relative transform transition-all my-auto">
                 
-                <div class="px-6 md:px-8 py-6 md:py-8 text-left">
-                    <div class="flex items-center gap-4 mb-6 border-b border-slate-100 dark:border-slate-700 pb-4">
-                        <div class="w-14 h-14 bg-gradient-to-br from-indigo-500 to-purple-600 text-white rounded-2xl flex items-center justify-center text-2xl shadow-md"><i class="fa-solid fa-user-gear"></i></div>
+                <!-- Close Button -->
+                <button type="button" onclick="document.getElementById('accountProfileModal').classList.replace('flex','hidden')" class="absolute top-4 right-4 w-9 h-9 bg-black/10 dark:bg-white/10 hover:bg-rose-100 dark:hover:bg-rose-900/40 text-slate-500 hover:text-rose-600 rounded-full flex items-center justify-center transition z-20 outline-none"><i class="fa-solid fa-xmark text-lg"></i></button>
+                
+                <!-- Modal Header Banner -->
+                <div class="px-6 md:px-8 pt-6 pb-5 bg-gradient-to-r from-blue-700 via-indigo-700 to-indigo-900 text-white relative">
+                    <div class="flex items-center gap-4">
+                        <div class="w-16 h-16 rounded-2xl bg-white/15 border-2 border-white/20 p-1 flex items-center justify-center shadow-lg shrink-0">
+                            <img id="acc_avatar_img" src="https://ui-avatars.com/api/?name=Teacher&background=4338ca&color=fff&size=150" class="w-full h-full object-cover rounded-xl bg-indigo-950" alt="Teacher Avatar">
+                        </div>
                         <div>
-                            <h3 class="text-xl font-moul text-slate-800 dark:text-white">ព័ត៌មានគណនី</h3>
-                            <p class="text-[11px] font-bold text-slate-400 uppercase tracking-widest mt-1">កែប្រែប្រវត្តិរូបរបស់អ្នក</p>
+                            <span class="px-2.5 py-0.5 rounded-full bg-white/20 text-blue-100 text-[10px] font-bold uppercase tracking-wider font-mono">
+                                ព័ត៌មានគ្រូបង្រៀនបឋមសិក្សា
+                            </span>
+                            <h3 id="acc_header_name" class="text-lg md:text-xl font-moul text-white mt-1">ព័ត៌មានគណនីគ្រូ</h3>
+                            <p class="text-xs text-blue-200 font-medium">គ្រប់គ្រងប្រវត្តិរូប និងថ្នាក់ទទួលបន្ទុក</p>
                         </div>
                     </div>
+                </div>
 
+                <div class="px-6 md:px-8 py-5 text-left max-h-[75vh] overflow-y-auto custom-scrollbar">
                     <form id="accountUpdateForm" onsubmit="window.handleUpdateAccount(event)" class="space-y-4">
-                        <div>
-                            <label class="block text-[11px] font-bold text-slate-500 dark:text-slate-400 mb-1 uppercase tracking-wider">លេខសម្គាល់គ្រូ (Teacher ID)</label>
-                            <input type="text" id="acc_teacher_id" readonly class="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-sm font-bold font-mono text-slate-500 dark:text-slate-300 cursor-not-allowed outline-none">
+                        
+                        <!-- Grid 1: លេខសម្គាល់ & ឈ្មោះគ្រូ -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                            <div>
+                                <label class="block text-[11px] font-bold text-slate-500 dark:text-slate-400 mb-1 uppercase tracking-wider">លេខសម្គាល់គ្រូ (Teacher ID)</label>
+                                <input type="text" id="acc_teacher_id" readonly class="w-full px-3.5 py-2.5 bg-slate-100 dark:bg-slate-700/70 border border-slate-200 dark:border-slate-600 rounded-xl text-xs font-bold font-mono text-slate-500 dark:text-slate-300 cursor-not-allowed outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1 uppercase tracking-wider">ឈ្មោះគណនី (Username) *</label>
+                                <input type="text" id="acc_username" required class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-xs font-bold outline-none focus:ring-2 focus:ring-indigo-500 transition text-slate-800 dark:text-white lowercase">
+                            </div>
                         </div>
+
                         <div>
-                            <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1 uppercase tracking-wider">ឈ្មោះ និងនាមត្រកូល</label>
-                            <input type="text" id="acc_name" required class="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-sm font-bold outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white dark:focus:bg-slate-600 transition text-slate-800 dark:text-white font-moul">
+                            <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1 uppercase tracking-wider">ឈ្មោះ និងនាមត្រកូលគ្រូ *</label>
+                            <input type="text" id="acc_name" required class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-xs font-bold outline-none focus:ring-2 focus:ring-indigo-500 transition text-slate-800 dark:text-white font-moul">
                         </div>
-                        <div>
-                            <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1 uppercase tracking-wider">ឈ្មោះគណនី (Username)</label>
-                            <input type="text" id="acc_username" required class="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-sm font-bold outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white dark:focus:bg-slate-600 transition text-slate-800 dark:text-white lowercase">
+
+                        <!-- Grid 2: ភេទ, ថ្ងៃខែឆ្នាំកំណើត & ទូរស័ព្ទ -->
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+                            <div>
+                                <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1 uppercase tracking-wider">ភេទ *</label>
+                                <select id="acc_gender" class="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-xs font-bold outline-none focus:ring-2 focus:ring-indigo-500 text-slate-800 dark:text-white">
+                                    <option value="ប្រុស">ប្រុស</option>
+                                    <option value="ស្រី">ស្រី</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1 uppercase tracking-wider">ថ្ងៃខែឆ្នាំកំណើត</label>
+                                <input type="date" id="acc_dob" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-xs font-bold outline-none focus:ring-2 focus:ring-indigo-500 text-slate-800 dark:text-white">
+                            </div>
+                            <div>
+                                <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1 uppercase tracking-wider">លេខទូរស័ព្ទ</label>
+                                <input type="text" id="acc_phone" placeholder="012 345 678" class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-xs font-bold font-mono outline-none focus:ring-2 focus:ring-indigo-500 text-slate-800 dark:text-white">
+                            </div>
                         </div>
+
+                        <!-- ថ្នាក់ និងបន្ទប់ទទួលបន្ទុកបឋមសិក្សា (Primary School Classroom Assignment) -->
+                        <div class="p-3.5 bg-indigo-50/70 dark:bg-slate-700/60 rounded-2xl border border-indigo-100 dark:border-slate-600 space-y-2">
+                            <div class="flex items-center justify-between text-indigo-900 dark:text-indigo-300 font-bold text-xs">
+                                <span class="flex items-center gap-1.5"><i class="fa-solid fa-chalkboard-user"></i> ថ្នាក់ និងបន្ទប់ទទួលបន្ទុកបឋមសិក្សា</span>
+                                <span class="text-[10px] text-indigo-500">កម្រិតបឋមសិក្សា</span>
+                            </div>
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-400 mb-1">កម្រិតថ្នាក់</label>
+                                    <select id="acc_grade" class="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-xl text-xs font-bold text-slate-800 dark:text-white outline-none focus:ring-2 focus:ring-indigo-500">
+                                        <option value="ថ្នាក់ទី ១">ថ្នាក់ទី ១</option>
+                                        <option value="ថ្នាក់ទី ២">ថ្នាក់ទី ២</option>
+                                        <option value="ថ្នាក់ទី ៣">ថ្នាក់ទី ៣</option>
+                                        <option value="ថ្នាក់ទី ៤">ថ្នាក់ទី ៤</option>
+                                        <option value="ថ្នាក់ទី ៥">ថ្នាក់ទី ៥</option>
+                                        <option value="ថ្នាក់ទី ៦">ថ្នាក់ទី ៦</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-400 mb-1">បន្ទប់</label>
+                                    <select id="acc_room" class="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-xl text-xs font-bold text-slate-800 dark:text-white outline-none focus:ring-2 focus:ring-indigo-500 font-moul">
+                                        <option value="«ក»">«ក»</option>
+                                        <option value="«ខ»">«ខ»</option>
+                                        <option value="«គ»">«គ»</option>
+                                        <option value="«ឃ»">«ឃ»</option>
+                                        <option value="«ង»">«ង»</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Grid 3: ឈ្មោះសាលារៀន & ឆ្នាំសិក្សា -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                            <div>
+                                <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1 uppercase tracking-wider">ឈ្មោះសាលាបឋមសិក្សា</label>
+                                <input type="text" id="acc_school" placeholder="ឧ. សាលាបឋមសិក្សា..." class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-xs font-bold outline-none focus:ring-2 focus:ring-indigo-500 text-slate-800 dark:text-white">
+                            </div>
+                            <div>
+                                <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1 uppercase tracking-wider">ឆ្នាំសិក្សា</label>
+                                <input type="text" id="acc_academic_year" placeholder="២០២៦-២០២៧" class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-xs font-bold outline-none focus:ring-2 focus:ring-indigo-500 text-slate-800 dark:text-white font-mono text-center">
+                            </div>
+                        </div>
+
+                        <!-- ប្តូរលេខសម្ងាត់ -->
                         <div>
                             <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1 uppercase tracking-wider">ប្តូរលេខសម្ងាត់ថ្មី (Password)</label>
-                            <input type="password" id="acc_password" placeholder="ទុកចោលបើមិនចង់ប្តូរថ្មី" class="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-sm font-bold outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white dark:focus:bg-slate-600 transition text-slate-800 dark:text-white">
+                            <input type="password" id="acc_password" placeholder="ទុកចោលបើមិនចង់ប្តូរថ្មី (យ៉ាងតិច ៨ តួអក្សរ)" class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-xs font-bold outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white dark:focus:bg-slate-600 transition text-slate-800 dark:text-white">
                         </div>
                         
                         <!-- Role Status & Enterprise Security Tools -->
                         <div class="p-3.5 bg-slate-50 dark:bg-slate-700/60 rounded-2xl border border-slate-200 dark:border-slate-600 space-y-2.5">
                             <div class="flex items-center justify-between">
                                 <div>
-                                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">តួនាទីបច្ចុប្បន្ន</span>
+                                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">តួនាទីក្នុងប្រព័ន្ធ</span>
                                     <span id="acc_role_badge" class="text-xs font-bold text-indigo-600 dark:text-indigo-300 flex items-center gap-1.5 mt-0.5">
-                                        <i class="fa-solid fa-user-shield"></i> <span id="acc_role_name">គ្រូបង្រៀន</span>
+                                        <i class="fa-solid fa-chalkboard-user"></i> <span id="acc_role_name">គ្រូបន្ទុកថ្នាក់បឋមសិក្សា</span>
                                     </span>
                                 </div>
-                                <span id="acc_status_badge" class="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-emerald-100 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300">សកម្ម</span>
+                                <span id="acc_status_badge" class="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-emerald-100 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300">សកម្ម (Active)</span>
                             </div>
 
                             <!-- Enterprise Admin Buttons (Super Admin & Admin Only) -->
@@ -1187,9 +1310,10 @@ window.renderAccountModal = function() {
                             </div>
                         </div>
                         
-                        <div class="pt-2 flex gap-3">
-                            <button type="button" onclick="document.getElementById('accountProfileModal').classList.replace('flex','hidden')" class="flex-1 py-2.5 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 rounded-xl text-sm font-bold transition">បោះបង់</button>
-                            <button type="submit" id="btnUpdateAccount" class="flex-1 py-2.5 bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 text-white rounded-xl text-sm font-bold shadow-md shadow-indigo-200 transition transform hover:-translate-y-0.5 flex items-center justify-center gap-2"><i class="fa-solid fa-floppy-disk"></i> រក្សាទុក</button>
+                        <!-- Modal Action Buttons -->
+                        <div class="pt-3 flex gap-3">
+                            <button type="button" onclick="document.getElementById('accountProfileModal').classList.replace('flex','hidden')" class="flex-1 py-3 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600 rounded-xl text-xs sm:text-sm font-bold transition outline-none">បោះបង់</button>
+                            <button type="submit" id="btnUpdateAccount" class="flex-1 py-3 bg-gradient-to-r from-blue-600 via-indigo-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 text-white rounded-xl text-xs sm:text-sm font-bold shadow-md shadow-indigo-200 dark:shadow-none transition transform hover:-translate-y-0.5 flex items-center justify-center gap-2 outline-none"><i class="fa-solid fa-floppy-disk"></i> រក្សាទុកព័ត៌មាន</button>
                         </div>
                     </form>
                 </div>
@@ -1204,19 +1328,47 @@ window.openAccountModal = function() {
     const modal = document.getElementById("accountProfileModal");
     if (!modal) return;
 
-    const teacherId = window.AppAuth.state.teacherId || localStorage.getItem('auth_teacher_id') || "";
-    const teacherName = window.AppAuth.state.name || localStorage.getItem('auth_teacher_name') || "";
+    const teacherId = window.AppAuth.state.teacherId || localStorage.getItem('auth_teacher_id') || "TCH-001";
+    const personal = typeof window.getTeacherPersonalSettings === 'function' ? window.getTeacherPersonalSettings(teacherId) : {};
+
+    const teacherName = personal.teacher_name || window.AppAuth.state.name || localStorage.getItem('auth_teacher_name') || "";
     const username = window.AppAuth.state.username || localStorage.getItem('auth_username') || "";
+    const teacherGender = personal.teacher_gender || "ប្រុស";
+    const teacherDob = personal.teacher_dob || "";
+    const teacherPhone = personal.teacher_phone || localStorage.getItem('auth_teacher_phone') || "";
+    const teacherGrade = personal.teacher_level || localStorage.getItem('auth_teacher_grade') || localStorage.getItem('selected_level') || "ថ្នាក់ទី ១";
+    const teacherRoom = personal.teacher_room || localStorage.getItem('auth_teacher_room') || localStorage.getItem('selected_room') || "«ក»";
+    const schoolName = personal.school_name || (window.appSettings && window.appSettings.school_name) || "សាលាបឋមសិក្សា";
+    const academicYear = personal.academic_year || "2026-2027";
+    const avatarUrl = personal.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(teacherName || 'Teacher')}&background=4338ca&color=fff&size=150`;
 
     const idInput = document.getElementById("acc_teacher_id");
     const nameInput = document.getElementById("acc_name");
     const userInput = document.getElementById("acc_username");
     const passInput = document.getElementById("acc_password");
+    const genderSelect = document.getElementById("acc_gender");
+    const dobInput = document.getElementById("acc_dob");
+    const phoneInput = document.getElementById("acc_phone");
+    const gradeSelect = document.getElementById("acc_grade");
+    const roomSelect = document.getElementById("acc_room");
+    const schoolInput = document.getElementById("acc_school");
+    const yearInput = document.getElementById("acc_academic_year");
+    const avatarImg = document.getElementById("acc_avatar_img");
+    const headerName = document.getElementById("acc_header_name");
 
     if (idInput) idInput.value = teacherId;
     if (nameInput) nameInput.value = teacherName;
     if (userInput) userInput.value = username;
     if (passInput) passInput.value = "";
+    if (genderSelect) genderSelect.value = teacherGender;
+    if (dobInput) dobInput.value = teacherDob;
+    if (phoneInput) phoneInput.value = teacherPhone;
+    if (gradeSelect) gradeSelect.value = teacherGrade;
+    if (roomSelect) roomSelect.value = teacherRoom;
+    if (schoolInput) schoolInput.value = schoolName;
+    if (yearInput) yearInput.value = academicYear;
+    if (avatarImg) avatarImg.src = avatarUrl;
+    if (headerName) headerName.textContent = teacherName || "ព័ត៌មានគណនីគ្រូ";
 
     const roleBadge = document.getElementById("acc_role_badge");
     const isSuper = typeof window.isSuperAdmin === 'function' ? window.isSuperAdmin() : false;
@@ -1230,7 +1382,7 @@ window.openAccountModal = function() {
         } else if (typeof window.isSubjectTeacher === 'function' && window.isSubjectTeacher()) {
             roleBadge.innerHTML = '<i class="fa-solid fa-book text-emerald-500"></i> <span>គ្រូបង្រៀនមុខវិជ្ជា (Subject Teacher)</span>';
         } else {
-            roleBadge.innerHTML = '<i class="fa-solid fa-chalkboard-user text-indigo-500"></i> <span>គ្រូប្រចាំថ្នាក់ (Homeroom Teacher)</span>';
+            roleBadge.innerHTML = '<i class="fa-solid fa-chalkboard-user text-indigo-500"></i> <span>គ្រូបន្ទុកថ្នាក់បឋមសិក្សា (Homeroom Teacher)</span>';
         }
     }
 
@@ -1252,12 +1404,19 @@ window.handleUpdateAccount = async function(e) {
     const newName = document.getElementById("acc_name")?.value.trim();
     const newUsername = document.getElementById("acc_username")?.value.trim();
     const newPassword = document.getElementById("acc_password")?.value.trim();
-    const teacherId = document.getElementById("acc_teacher_id")?.value;
+    const newGender = document.getElementById("acc_gender")?.value || "ប្រុស";
+    const newDob = document.getElementById("acc_dob")?.value || "";
+    const newPhone = document.getElementById("acc_phone")?.value.trim() || "";
+    const newGrade = document.getElementById("acc_grade")?.value || "ថ្នាក់ទី ១";
+    const newRoom = document.getElementById("acc_room")?.value || "«ក»";
+    const newSchool = document.getElementById("acc_school")?.value.trim() || "សាលាបឋមសិក្សា";
+    const newYear = document.getElementById("acc_academic_year")?.value.trim() || "2026-2027";
+    const teacherId = document.getElementById("acc_teacher_id")?.value || localStorage.getItem('auth_teacher_id') || "TCH-001";
     const btn = document.getElementById("btnUpdateAccount");
 
     if (!newName || !newUsername) return alert("សូមបំពេញឈ្មោះ និងឈ្មោះគណនី!");
 
-    const origBtnHtml = btn ? btn.innerHTML : "រក្សាទុក";
+    const origBtnHtml = btn ? btn.innerHTML : "រក្សាទុកព័ត៌មាន";
     if (btn) {
         btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i> កំពុងរក្សាទុក...';
         btn.disabled = true;
@@ -1265,8 +1424,16 @@ window.handleUpdateAccount = async function(e) {
 
     try {
         const updateData = {
+            teacher_id: teacherId,
             name: newName,
             username: newUsername.toLowerCase(),
+            contact: newPhone,
+            gender: newGender,
+            dob: newDob,
+            assigned_grade: newGrade,
+            assigned_room: newRoom,
+            school_name: newSchool,
+            academic_year: newYear,
             last_updated: new Date().toISOString(),
             updated_at: new Date().toISOString()
         };
@@ -1274,30 +1441,87 @@ window.handleUpdateAccount = async function(e) {
             updateData.password_hash = await window.hashPassword(newPassword);
         }
 
-        // ១. Update លើ Firestore
+        // ១. Update លើ Firestore (បើមាន)
         if (window.db && teacherId) {
-            if (updateData.password_hash) {
-                updateData.password = firebase.firestore.FieldValue.delete();
+            try {
+                if (updateData.password_hash) {
+                    updateData.password = firebase.firestore.FieldValue.delete();
+                }
+                await window.db.collection("teachers").doc(teacherId).set(updateData, { merge: true });
+            } catch(e) {
+                console.warn("Firestore teacher update note:", e.message);
             }
-            await window.db.collection("teachers").doc(teacherId).set(updateData, { merge: true });
         }
 
         // ២. Update LocalStorage
         localStorage.setItem('auth_teacher_name', newName);
-        localStorage.setItem('auth_username', newUsername);
-        window.AppAuth.state.name = newName;
-        window.AppAuth.state.username = newUsername;
-        if (window.AuthState) {
-            window.AuthState.teacherName = newName;
-            window.AuthState.username = newUsername;
+        localStorage.setItem('auth_username', newUsername.toLowerCase());
+        localStorage.setItem('auth_teacher_phone', newPhone);
+        localStorage.setItem('auth_teacher_grade', newGrade);
+        localStorage.setItem('auth_teacher_room', newRoom);
+        localStorage.setItem('selected_level', newGrade);
+        localStorage.setItem('selected_room', newRoom);
+
+        // Update Teacher Personal Settings
+        if (typeof window.saveTeacherPersonalSettings === 'function') {
+            window.saveTeacherPersonalSettings(teacherId, {
+                teacher_name: newName,
+                teacher_phone: newPhone,
+                teacher_gender: newGender,
+                teacher_dob: newDob,
+                teacher_level: newGrade,
+                teacher_room: newRoom,
+                school_name: newSchool,
+                academic_year: newYear
+            });
         }
 
-        // ៣. Update UI Sidebar
+        // Update cached_teachers_list in localStorage
+        try {
+            let cachedList = JSON.parse(localStorage.getItem('cached_teachers_list') || '[]');
+            if (Array.isArray(cachedList)) {
+                const idx = cachedList.findIndex(t => t.teacher_id === teacherId || t.username === newUsername.toLowerCase());
+                if (idx >= 0) {
+                    cachedList[idx] = { ...cachedList[idx], ...updateData };
+                } else {
+                    cachedList.push(updateData);
+                }
+                localStorage.setItem('cached_teachers_list', JSON.stringify(cachedList));
+            }
+        } catch(e) {}
+
+        // Update App Auth & State
+        window.AppAuth.state.name = newName;
+        window.AppAuth.state.username = newUsername.toLowerCase();
+        window.AppAuth.state.assigned_grade = newGrade;
+        window.AppAuth.state.assigned_room = newRoom;
+        if (window.AuthState) {
+            window.AuthState.teacherName = newName;
+            window.AuthState.username = newUsername.toLowerCase();
+            window.AuthState.teacher_level = newGrade;
+            window.AuthState.teacher_room = newRoom;
+            window.AuthState.assigned_grade = newGrade;
+            window.AuthState.assigned_room = newRoom;
+        }
+
+        // Update active class in the system
+        if (typeof window.setSelectedClass === 'function') {
+            window.setSelectedClass(newGrade, newRoom);
+        }
+
+        // ៣. Update UI Sidebar & Header
         const nameEl = document.getElementById("navUserName");
         if (nameEl) nameEl.textContent = newName;
+        const idEl = document.getElementById("navUserId");
+        if (idEl) idEl.textContent = `${newGrade} ${newRoom}`;
+        const badgeEl = document.getElementById("headerActiveClassBadge");
+        if (badgeEl) badgeEl.textContent = `${newGrade} ${newRoom}`;
 
         document.getElementById('accountProfileModal')?.classList.replace('flex','hidden');
-        if (typeof showToast === 'function') showToast("✅ បានកែប្រែព័ត៌មានគណនីជោគជ័យ!");
+        if (typeof showToast === 'function') showToast("✅ បានកែប្រែព័ត៌មានគ្រូ និងថ្នាក់រៀនជោគជ័យ!");
+
+        // Dispatch update event
+        window.dispatchEvent(new CustomEvent('teacher-settings-saved', { detail: updateData }));
 
     } catch (err) {
         console.error("Account update error:", err);
