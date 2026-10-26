@@ -202,37 +202,21 @@ window.loadLibraryView = async function() {
              
              <!-- Document Header (Print Only or Web Top) -->
              <div class="flex justify-between items-start mb-6 border-b border-slate-100 pb-4">
-                <div class="text-left pt-6">
-                   <p class="text-[11px] md:text-xs text-slate-700 font-siemreap font-bold">ការិយាល័យ អប់រំ យុវជន និងកីឡានៃរដ្ឋបាលស្រុក ${cleanDistrict}</p>
-                   <p class="text-[12px] md:text-[13px] font-moul text-slate-900 mt-1">${schoolName}</p>
+                <div class="text-left" style="line-height: 1.6; padding-top: 24px;">
+                   <p class="font-moul text-slate-900 text-[11px] md:text-xs mb-1" style="font-family: 'Khmer OS Muol Light', 'Moul', serif; margin: 0 0 4px 0;">ការិយាល័យ អប់រំ យុវជន និងកីឡានៃរដ្ឋបាលស្រុក ${cleanDistrict}</p>
+                   <p class="font-moul text-slate-900 text-[12px] md:text-[13px]" style="font-family: 'Khmer OS Muol Light', 'Moul', serif; margin: 0;">${schoolName}</p>
                 </div>
-                <div class="text-center">
-                   <p class="font-moul text-indigo-900 text-[12px]">ព្រះរាជាណាចក្រកម្ពុជា</p>
-                   <p class="font-moul text-indigo-900 text-[12px] mt-1">ជាតិ សាសនា ព្រះមហាក្សត្រ</p>
-                   <!-- ក្បាច់រចនាប័ទ្ម Tacteing គូរដោយ HTML សុទ្ធ (ធានា ១០០% ដើរលើគ្រប់ទូរស័ព្ទ) -->
-                    <div style="display: flex; align-items: center; justify-content: center; margin: 4px auto 12px auto; gap: 3px;">
-                        <!-- បន្ទាត់ឆ្វេង -->
-                        <div style="width: 35px; height: 1.5px; background-color: #9c6705; -webkit-print-color-adjust: exact; print-color-adjust: exact;"></div>
-                        <div style="width: 3.5px; height: 3.5px; background-color: #1e3a8a; border-radius: 50%; -webkit-print-color-adjust: exact; print-color-adjust: exact;"></div>
-                        <div style="width: 12px; height: 1.5px; background-color: #9c6705; -webkit-print-color-adjust: exact; print-color-adjust: exact;"></div>
-                        <div style="width: 3.5px; height: 3.5px; background-color: #1e3a8a; border-radius: 50%; -webkit-print-color-adjust: exact; print-color-adjust: exact;"></div>
-                        
-                        <!-- ក្បាច់កណ្តាល -->
-                        <div style="font-size: 11pt; color: #755000; margin: 0 2px; -webkit-print-color-adjust: exact; print-color-adjust: exact;">❖</div>
-                        
-                        <!-- បន្ទាត់ស្តាំ -->
-                        <div style="width: 3.5px; height: 3.5px; background-color: #1e3a8a; border-radius: 50%; -webkit-print-color-adjust: exact; print-color-adjust: exact;"></div>
-                        <div style="width: 12px; height: 1.5px; background-color: #9c6705; -webkit-print-color-adjust: exact; print-color-adjust: exact;"></div>
-                        <div style="width: 3.5px; height: 3.5px; background-color: #1e3a8a; border-radius: 50%; -webkit-print-color-adjust: exact; print-color-adjust: exact;"></div>
-                        <div style="width: 35px; height: 1.5px; background-color: #9c6705; -webkit-print-color-adjust: exact; print-color-adjust: exact;"></div>
-                    </div>
+                <div class="text-center" style="line-height: 1.6;">
+                   <p class="font-moul text-indigo-900 text-[12px] md:text-[13px] mb-1" style="font-family: 'Khmer OS Muol Light', 'Moul', serif; margin: 0 0 4px 0;">ព្រះរាជាណាចក្រកម្ពុជា</p>
+                   <p class="font-moul text-indigo-900 text-[12px] md:text-[13px]" style="font-family: 'Khmer OS Muol Light', 'Moul', serif; margin: 0;">ជាតិ សាសនា ព្រះមហាក្សត្រ</p>
+                   <img src="${window.CMS_HEADER_SYMBOL_B64 || 'assets/images/header-flourish.png'}" class="header-flourish-symbol" alt="symbol" style="display: block; margin: 4px auto 0 auto; width: 135px; height: 11px; object-fit: contain;" />
                 </div>
              </div>
 
              <!-- Title -->
              <div class="text-center mb-6 shrink-0">
                 <h2 id="libDocTitle" class="font-moul text-amber-600 text-base md:text-lg tracking-wide" style="text-shadow: 1px 1px 0px rgba(0,0,0,0.05);">បញ្ជីខ្ចីសៀវភៅសិក្សាគោល</h2>
-                <p class="text-xs md:text-sm font-bold text-slate-700 mt-1">ថ្នាក់ទី៖ <span id="libDocGradeDisplay" class="font-moul text-indigo-900">${window.currentGradeFull}</span> &nbsp;|&nbsp; ឆ្នាំសិក្សា <span class="font-siemreap">${academicYear}</span></p>
+                <p class="text-xs md:text-sm font-bold text-slate-700 mt-1">ថ្នាក់ទី៖ <span id="libDocGradeDisplay" class="font-moul text-indigo-900">${window.currentGradeFull}</span> &nbsp;|&nbsp; ឆ្នាំសិក្សា <span class="font-siemreap">${toKhNum(academicYear)}</span></p>
                 <p id="libDocSub" class="text-[10px] md:text-[11px] text-slate-500 font-bold mt-2 bg-slate-50 inline-block px-4 py-1.5 rounded-full border border-slate-100 no-print">ចុចលើប្រអប់មុខវិជ្ជា ដើម្បីជ្រើសរើសស្ថានភាព ៖ <span class='badge-new mx-1'>ថ្មី</span> - <span class='badge-old mx-1'>ចាស់</span> - <span class='badge-poor mx-1'>អន់</span> - <span class='badge-none mx-1'>គ្មាន</span></p>
              </div>
 
@@ -830,7 +814,7 @@ window.printLibraryReport = function() {
             
             .p-header { width: 100%; margin-bottom: 20px; border-collapse: collapse; }
             .p-header td { vertical-align: top; border: none; padding: 0; }
-            .ph-left { text-align: left; width: 40%; font-family: 'Khmer OS Siemreap', 'Siemreap', sans-serif; font-size: 11pt; color: #020079; line-height: 1.4; white-space: nowrap; font-weight: bold; padding-top: 24px; }
+            .ph-left { text-align: left; width: 40%; font-family: 'Khmer OS Muol Light', 'Moul', serif; font-size: 10.5pt; color: #020079; line-height: 1.6; white-space: nowrap; font-weight: normal; padding-top: 24px; }
             .ph-right { text-align: center; width: 30%; font-family: 'Khmer OS Muol Light', 'Moul', serif; font-size: 12pt; color: #020079; line-height: 1.4; }
             
             .p-title { text-align: center; margin: 10px 0 20px 0; }

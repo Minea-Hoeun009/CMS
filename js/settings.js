@@ -503,9 +503,9 @@ window.renderPersonalSettingsTab = function() {
                     <p class="text-xs text-indigo-200 mt-1 flex flex-wrap items-center gap-2 font-bold">
                         <span>អត្តលេខគ្រូ៖ <strong class="font-mono text-white">${personal.teacher_id}</strong></span>
                         <span class="text-white/40">•</span>
-                        <span>ថ្នាក់ទី៖ <strong class="text-amber-300 font-moul">${personal.teacher_level || 'ថ្នាក់ទី ១'}</strong></span>
+                        <span>គ្រូបន្ទុកថ្នាក់៖ <strong class="text-white font-moul">${personal.teacher_name || 'លោកគ្រូ អ្នកគ្រូ'}</strong></span>
                         <span class="text-white/40">•</span>
-                        <span>បន្ទប់ទទួលបន្ទុក៖ <strong class="text-amber-300 font-moul">${typeof window.normalizeRoomName === 'function' ? window.normalizeRoomName(personal.teacher_room) : (personal.teacher_room || '«ក»')}</strong></span>
+                        <span class="text-amber-300 font-moul">${personal.teacher_level || 'ថ្នាក់ទី ១'} ${typeof window.normalizeRoomName === 'function' ? window.normalizeRoomName(personal.teacher_room) : (personal.teacher_room || '«ក»')}</span>
                     </p>
                 </div>
             </div>

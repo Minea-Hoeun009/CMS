@@ -4244,12 +4244,22 @@ function renderTop5HonorBoard() {
     const container = document.getElementById("top5HonorContainer");
     if (!container) return;
 
-    const level = document.getElementById("globalLevelSelect")?.value || "ថ្នាក់ទី";
-    const room = document.getElementById("globalRoomSelect")?.value || "";
+    const sInfo = typeof appSettings !== 'undefined' ? appSettings : {};
+    const activeClass = typeof window.getCurrentSelectedClass === 'function' ? window.getCurrentSelectedClass() : null;
+    const defaultLevel = (activeClass && activeClass.level) || sInfo.teacher_level || localStorage.getItem('auth_teacher_grade') || localStorage.getItem('selected_level') || "ថ្នាក់ទី ១";
+    const defaultRoom = (activeClass && activeClass.room) || sInfo.teacher_room || localStorage.getItem('auth_teacher_room') || localStorage.getItem('selected_room') || "«ក»";
+
+    const rawLevel = document.getElementById("globalLevelSelect")?.value;
+    const rawRoom = document.getElementById("globalRoomSelect")?.value;
+    const level = (rawLevel && rawLevel !== 'all' && rawLevel !== 'ថ្នាក់ទី') ? rawLevel : defaultLevel;
+    const room = (rawRoom && rawRoom !== 'all') ? rawRoom : defaultRoom;
+    const formattedRoom = room ? (room.startsWith('«') ? room : `«${room}»`) : '«ក»';
+    const gradeClassDisplay = `${level} ${formattedRoom}`.trim();
+
     const periodType = document.getElementById("globalPeriodType")?.value || "monthly";
     const periodVal = document.getElementById("globalPeriodValue")?.value || "";
-    const sInfo = typeof appSettings !== 'undefined' ? appSettings : {};
-    const school_name = sInfo.school_name || "សាលាបឋមសិក្សាគំរូ";
+    const districtName = (sInfo.district_name || sInfo.district || sInfo.cluster || "កៀនស្វាយ").replace(/^ស្រុក\s*/, '').trim();
+    const school_name = sInfo.school_name || "សាលាបឋមសិក្សា ខ្សុំ";
     const teacher_name = sInfo.teacher_name || "គ្រូបន្ទុកថ្នាក់";
     const principal_name = sInfo.principal_name || "នាយកសាលា";
     const academic_year = sInfo.academic_year || "២០២៦-២០២៧";
@@ -4342,13 +4352,14 @@ function renderTop5HonorBoard() {
         ${themeBg}
         <div class="w-full h-full relative z-10 flex flex-col ${paddingClass}">
             <div class="shrink-0 relative flex justify-between items-start w-full z-20">
-                <div class="canva-el cursor-grab hover:ring-2 hover:ring-dashed hover:ring-blue-400 p-2 rounded-xl text-center leading-tight transition-colors hover:bg-white/40 backdrop-blur-sm z-20">
-                  <p contenteditable="true" spellcheck="false" class="font-moul text-amber-950 text-[13px] outline-none mt-1 hover:bg-white/60 px-2 py-0.5 rounded">${school_name}</p>
+                <div class="canva-el cursor-grab hover:ring-2 hover:ring-dashed hover:ring-blue-400 p-2 rounded-xl text-left leading-tight transition-colors hover:bg-white/40 backdrop-blur-sm z-20" style="padding-top: 24px;">
+                  <p contenteditable="true" spellcheck="false" class="font-moul text-amber-950 text-[11px] mb-1 outline-none hover:bg-white/60 px-1 py-0.5 rounded">ការិយាល័យ អប់រំ យុវជន និងកីឡានៃរដ្ឋបាលស្រុក ${districtName}</p>
+                  <p contenteditable="true" spellcheck="false" class="font-moul text-amber-950 text-[12px] outline-none hover:bg-white/60 px-1 py-0.5 rounded">${school_name}</p>
                 </div>
                 <div class="canva-el cursor-grab hover:ring-2 hover:ring-dashed hover:ring-blue-400 p-2 rounded-xl text-center transition-colors hover:bg-white/40 backdrop-blur-sm z-20">
-                  <p contenteditable="true" spellcheck="false" class="font-moul text-[14px] text-slate-900 outline-none drop-shadow-sm">ព្រះរាជាណាចក្រកម្ពុជា</p>
-                  <p contenteditable="true" spellcheck="false" class="font-moul text-[14px] mt-1 text-slate-800 outline-none drop-shadow-sm">ជាតិ សាសនា ព្រះមហាក្សត្រ</p>
-                  <div class="text-[10px] text-amber-600/70 tracking-[0.5em] mt-1 pointer-events-none">❖ ❖ ❖</div>
+                  <p contenteditable="true" spellcheck="false" class="font-moul text-[13px] text-slate-900 outline-none drop-shadow-sm">ព្រះរាជាណាចក្រកម្ពុជា</p>
+                  <p contenteditable="true" spellcheck="false" class="font-moul text-[13px] mt-1 text-slate-800 outline-none drop-shadow-sm">ជាតិ សាសនា ព្រះមហាក្សត្រ</p>
+                  <img src="${window.CMS_HEADER_SYMBOL_B64 || 'assets/images/header-flourish.png'}" class="header-flourish-symbol" alt="symbol" style="display: block; margin: 3px auto 0 auto; width: 125px; height: 10px; object-fit: contain;" />
                 </div>
             </div>
 
@@ -4360,7 +4371,7 @@ function renderTop5HonorBoard() {
                     <p contenteditable="true" spellcheck="false" class="font-bold text-[14px] text-amber-950 bg-white/90 inline-block px-6 py-1.5 rounded-full border border-amber-200 backdrop-blur-md shadow-sm outline-none">${periodTitleText}</p>
                 </div>
                 <div class="canva-el cursor-grab hover:ring-2 hover:ring-dashed hover:ring-blue-400 p-2 rounded-xl transition-colors hover:bg-white/40 z-20">
-                    <p class="text-amber-900 font-bold text-[13px]">បន្ទប់រៀន ៖ <span contenteditable="true" class="text-[14px] outline-none font-moul text-rose-700 bg-white/50 px-2 rounded">បន្ទប់ ${room || '«ក»'}</span> <span class="mx-2 text-slate-400">|</span> ឆ្នាំសិក្សា ៖ <span contenteditable="true" class="font-bold outline-none font-mono text-[14px] bg-white/50 px-2 rounded">${window.toKhmerNum(academic_year)}</span></p>
+                    <p class="text-amber-900 font-bold text-[13px]">ថ្នាក់ ៖ <span contenteditable="true" class="text-[14px] outline-none font-moul text-rose-700 bg-white/50 px-2 rounded">${gradeClassDisplay}</span> <span class="mx-2 text-slate-400">|</span> ឆ្នាំសិក្សា ៖ <span contenteditable="true" class="font-bold outline-none font-mono text-[14px] bg-white/50 px-2 rounded">${window.toKhmerNum(academic_year)}</span></p>
                 </div>
             </div>
 
