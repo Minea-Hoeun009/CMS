@@ -232,7 +232,8 @@ window.AppAuth = {
             };
         }
 
-        if (teacherData.status && teacherData.status.toLowerCase() !== "active") {
+        const st235 = (teacherData.status || '').toLowerCase();
+        if (st235 === 'inactive' || st235 === 'locked' || st235 === 'suspended' || st235 === 'disabled') {
             console.warn("Saved account is suspended/inactive.");
             this.clearSessionState();
             this.showAuthScreen();
@@ -316,6 +317,10 @@ window.AppAuth = {
         }
 
         window.auth.onAuthStateChanged(async (firebaseUser) => {
+            if (window._isLinkingAccount) {
+                console.log("🔗 [AuthObserver] Currently linking account, skipping session override.");
+                return;
+            }
             if (!firebaseUser) {
                 console.log("🔒 [AuthObserver] គ្មាន Firebase Auth Session ទេ។ ពិនិត្យ Session ក្នុងម៉ាស៊ីន...");
                 const savedId = localStorage.getItem('auth_teacher_id');
@@ -397,7 +402,8 @@ window.AppAuth = {
             }
 
             // ត្រួតពិនិត្យគណនី Inactive / Suspended (P1 Remediation)
-            if (teacherData.status && teacherData.status.toLowerCase() !== "active") {
+            const st405 = (teacherData.status || '').toLowerCase();
+            if (st405 === 'inactive' || st405 === 'locked' || st405 === 'suspended' || st405 === 'disabled') {
                 alert("⚠️ គណនីរបស់អ្នកត្រូវបានផ្អាក ឬចាក់សោ (Inactive/Locked) ដោយ Administrator!");
                 await window.auth.signOut();
                 this.clearSessionState();
@@ -480,7 +486,8 @@ window.AppAuth = {
                     if (!data) return;
 
                     // ១. ពិនិត្យស្ថានភាពគណនី (Inactive/Locked)
-                    if (data.status && data.status.toLowerCase() !== "active") {
+                    const st489 = (data.status || '').toLowerCase();
+                    if (st489 === 'inactive' || st489 === 'locked' || st489 === 'suspended' || st489 === 'disabled') {
                         alert("⚠️ គណនីរបស់អ្នកត្រូវបានផ្អាក ឬចាក់សោ (Inactive/Locked) ដោយ Administrator! ប្រព័ន្ធនឹងចាកចេញដោយស្វ័យប្រវត្តិ។");
                         this.logout(true);
                         return;
@@ -739,7 +746,8 @@ window.AppAuth = {
             }
 
             // ត្រួតពិនិត្យស្ថានភាពគណនី
-            if (matchedTeacher.status && matchedTeacher.status.toLowerCase() !== "active") {
+            const st749 = (matchedTeacher.status || '').toLowerCase();
+            if (st749 === 'inactive' || st749 === 'locked' || st749 === 'suspended' || st749 === 'disabled') {
                 throw new Error("⚠️ គណនីរបស់អ្នកត្រូវបានផ្អាក ឬចាក់សោ (Inactive/Locked) ដោយ Administrator!");
             }
 
@@ -2501,10 +2509,17 @@ window.applyGoogleEmailLink = async function(googleEmail) {
     personal.teacher_email = googleEmail;
     try { localStorage.setItem(`teacher_settings_${tId}`, JSON.stringify(personal)); } catch(e) {}
     localStorage.setItem('auth_email', googleEmail);
+    if (window.AppAuth && window.AppAuth.state) {
+        window.AppAuth.state.email = googleEmail;
+        if (!window.AppAuth.state.status || window.AppAuth.state.status.toLowerCase() === 'approved') {
+            window.AppAuth.state.status = "active";
+        }
+    }
 
     if (window.db) {
         await window.db.collection("teachers").doc(tId).set({
             email: googleEmail,
+            status: "active",
             last_linked_google: new Date().toISOString()
         }, { merge: true }).catch(console.warn);
     }
@@ -3170,21 +3185,27 @@ window.linkTeacherGoogleAccount = async function() {
         let googleEmail = null;
         if (window.auth && typeof firebase !== 'undefined') {
             try {
+                window._isLinkingAccount = true;
                 const provider = new firebase.auth.GoogleAuthProvider();
                 provider.setCustomParameters({ prompt: 'select_account' });
                 const result = await window.auth.signInWithPopup(provider);
                 if (result && result.user && result.user.email) {
                     await window.applyGoogleEmailLink(result.user.email);
+                    window._isLinkingAccount = false;
                     return;
                 }
             } catch(popupErr) {
+                window._isLinkingAccount = false;
                 console.warn("Popup link note:", popupErr.message);
                 window.openGoogleLoginModal('link', popupErr.message);
                 return;
+            } finally {
+                setTimeout(() => { window._isLinkingAccount = false; }, 1000);
             }
         }
         window.openGoogleLoginModal('link');
     } catch(e) {
+        window._isLinkingAccount = false;
         window.openGoogleLoginModal('link', e.message);
     }
 };
