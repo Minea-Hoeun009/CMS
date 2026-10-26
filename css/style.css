@@ -1,5 +1,5 @@
-/* ១. ទាញយក Web Fonts ជា Fallback ពី Google Fonts */
-@import url('https://fonts.googleapis.com/css2?family=Moul&family=Siemreap&display=swap');
+/* ១. ទាញយក Web Fonts ពី Google Fonts (Khmer High-Legibility Typography Stack) */
+@import url('https://fonts.googleapis.com/css2?family=Battambang:wght@400;700&family=Kantumruy+Pro:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Moul&family=Siemreap&display=swap');
 
 /* បង្ខំឱ្យ class hidden បិទបាំងគ្រប់ករណី 100% */
 .hidden {
@@ -15,8 +15,10 @@ textarea,
 p,
 td,
 th {
-  font-family: 'Khmer OS Siemreap', 'Siemreap', sans-serif;
+  font-family: 'Kantumruy Pro', 'Khmer OS Siemreap', 'Siemreap', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 /* ការពារ Font Awesome Icons មិនឱ្យបាត់ ឬក្លាយជាប្រអប់ទទេ (▯) */
@@ -60,18 +62,25 @@ i.fa-brands {
   font-weight: 400 !important;
 }
 
-/* ៣. កំណត់ Font សម្រាប់ចំណងជើងធំៗទាំងអស់ (Headings) */
+/* ៣. កំណត់ Font សម្រាប់ចំណងជើងរាជការ ប័ណ្ណផ្លូវការ និងក្បាលលិខិតជាតិ (Official Ceremonial Headers ONLY) */
+.font-moul,
+.title-moul,
+.national-header,
+.cert-title {
+  font-family: 'Khmer OS Muol Light', 'Khmer OS Muol', 'Moul', 'Kantumruy Pro', serif !important;
+  line-height: 1.45;
+  letter-spacing: 0.02em;
+}
+
+/* ចំណងជើងទូទៅ (Modern Clean Heading Stack for Cards, Widgets, Modals) */
 h1, 
 h2, 
 h3, 
 h4, 
 h5, 
-h6,
-.font-moul,
-.title-moul {
-  font-family: 'Khmer OS Muol Light', 'Khmer OS Muol', 'Moul', serif !important;
+h6 {
+  font-family: 'Kantumruy Pro', 'Khmer OS Siemreap', 'Siemreap', sans-serif;
   line-height: 1.4;
-  letter-spacing: 0.02em;
 }
 
 /* ៤. ក្បាលតារាងបញ្ឈរសម្រាប់តារាងពិន្ទុ និងវត្តមាន */
@@ -282,23 +291,8 @@ tbody tr:hover {
   padding-bottom: 6px !important;
 }
 /* ==========================================
-   ឯកសារ styles.css - រចនាបថទូទៅនៃប្រព័ន្ធសាលារៀន
+   រចនាបថទូទៅនៃប្រព័ន្ធសាលារៀន (Modern UI Utilities)
    ========================================== */
-
-/* ១. Import ក្បួនអក្សរខ្មែរពី Google Fonts */
-@import url('https://fonts.googleapis.com/css2?family=Moul&family=Siemreap&display=swap');
-
-/* ២. ការកំណត់លំនាំដើម */
-body {
-    font-family: 'Siemreap', sans-serif;
-    background-color: #f8fafc; /* ព៌ណប្រផេះស្រាល */
-    -webkit-font-smoothing: antialiased;
-    color: #1e293b;
-}
-
-.font-moul {
-    font-family: 'Moul', serif !important;
-}
 
 /* ៣. Custom Scrollbar (របារអូសចុះឡើង) */
 ::-webkit-scrollbar {

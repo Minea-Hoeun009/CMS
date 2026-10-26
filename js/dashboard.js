@@ -83,7 +83,15 @@
                 : { level: localStorage.getItem('selected_level') || "ថ្នាក់ទី ១", room: localStorage.getItem('selected_room') || "«ក»" };
             const curLevel = activeClass.level || localStorage.getItem('selected_level') || (window.appSettings && window.appSettings.teacher_level) || "ថ្នាក់ទី ១";
             const curRoom = activeClass.room || localStorage.getItem('selected_room') || (window.appSettings && window.appSettings.teacher_room) || "«ក»";
-            const currentClassFull = `${curLevel} ${curRoom}`.trim();
+            
+            let currentClassFull = "";
+            if (!curLevel || curLevel === 'all' || String(curLevel).trim().toLowerCase() === 'all') {
+                currentClassFull = "គ្រប់កម្រិតថ្នាក់";
+            } else {
+                const cleanLevel = String(curLevel).replace(/^all\s*/i, '').trim() || "ថ្នាក់ទី ១";
+                const cleanRoom = (!curRoom || curRoom === 'all') ? '' : curRoom.trim();
+                currentClassFull = `${cleanLevel} ${cleanRoom}`.trim();
+            }
 
             // ២. ទាញយក និងចម្រាញ់ទិន្នន័យសិស្សពិតប្រាកដក្នុងថ្នាក់ (Real Classroom Students)
             let classStudents = [];
@@ -277,7 +285,7 @@
                                 
                                 <div class="flex items-center gap-2">
                                     <span class="text-xs font-bold text-slate-500 dark:text-slate-400"><i class="fa-solid fa-chalkboard-user text-emerald-600"></i> ថ្នាក់ទទួលបន្ទុក៖</span>
-                                    <span class="text-xs font-bold bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 py-1.5 px-3 rounded-xl font-moul">${currentClassFull}</span>
+                                    <span class="text-xs font-bold bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 py-1.5 px-3 rounded-xl">${currentClassFull}</span>
                                 </div>
 
                                 <div class="flex items-center gap-2">
@@ -333,7 +341,7 @@
                                     </span>
                                 </div>
                                 <div>
-                                    <p class="text-xs font-bold text-slate-500 dark:text-slate-400">សិស្សស្រី (Female)</p>
+                                    <p class="text-xs font-bold text-slate-500 dark:text-slate-400">សិស្សស្រី <span class="text-[11px] font-normal text-slate-400 font-sans">(Female)</span></p>
                                     <div class="flex items-baseline gap-2 mt-1">
                                         <span class="text-3xl font-black text-pink-600 dark:text-pink-400 font-mono">${toKhNum(femaleStudents)}</span>
                                         <span class="text-[11px] text-slate-400 font-medium">នាក់</span>
@@ -356,7 +364,7 @@
                                     </span>
                                 </div>
                                 <div>
-                                    <p class="text-xs font-bold text-slate-500 dark:text-slate-400">សិស្សប្រុស (Male)</p>
+                                    <p class="text-xs font-bold text-slate-500 dark:text-slate-400">សិស្សប្រុស <span class="text-[11px] font-normal text-slate-400 font-sans">(Male)</span></p>
                                     <div class="flex items-baseline gap-2 mt-1">
                                         <span class="text-3xl font-black text-sky-600 dark:text-sky-400 font-mono">${toKhNum(maleStudents)}</span>
                                         <span class="text-[11px] text-slate-400 font-medium">នាក់</span>
@@ -408,7 +416,7 @@
                                             <div>
                                                 <h3 class="font-bold text-sm text-slate-800 dark:text-white flex items-center gap-2">
                                                     <i class="fa-solid fa-venus-mars text-indigo-500"></i>
-                                                    <span>សមាមាត្រភេទសិស្ស (Gender Ratio)</span>
+                                                    <span>សមាមាត្រភេទសិស្ស <span class="text-xs font-normal text-slate-400 font-sans">(Gender Ratio)</span></span>
                                                 </h3>
                                                 <p class="text-[11px] text-slate-400 font-medium">សិស្សប្រុស និងសិស្សស្រីក្នុង${currentClassFull}</p>
                                             </div>
@@ -474,7 +482,7 @@
                                             </div>
                                             <div>
                                                 <h3 class="font-bold text-base text-slate-800 dark:text-white flex items-center gap-2">
-                                                    <span>ក្រាបស្ថិតិសិស្សជាប់ និងធ្លាក់ (Pass / Fail)</span>
+                                                    <span>ក្រាបស្ថិតិសិស្សជាប់ និងធ្លាក់ <span class="text-xs font-normal text-slate-400 font-sans">(Pass / Fail)</span></span>
                                                 </h3>
                                                 <p class="text-xs text-slate-400 font-medium">ការវាយតម្លៃលទ្ធផលសិក្សាសរុប តាមភេទ និងអត្រាភាគរយ</p>
                                             </div>
@@ -546,7 +554,7 @@
                                     <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl shadow-sm border border-slate-200/80 dark:border-slate-700">
                                         <div class="flex justify-between items-center mb-3">
                                             <h3 class="font-bold text-sm text-slate-800 dark:text-white flex items-center gap-2">
-                                                <i class="fa-solid fa-trophy text-amber-500"></i> តារាងកិត្តិយសសិស្សឆ្នើម (Top 5)
+                                                <i class="fa-solid fa-trophy text-amber-500"></i> តារាងកិត្តិយសសិស្សឆ្នើម <span class="text-xs font-normal text-slate-400 font-sans">(Top 5)</span>
                                             </h3>
                                             <button onclick="window.switchView('scores')" class="text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline">មើលពិន្ទុពេញលេញ →</button>
                                         </div>
@@ -600,7 +608,7 @@
                                             <circle class="circle-progress-bar" cx="50" cy="50" r="40" stroke-dasharray="251.2" stroke-dashoffset="12.56"></circle>
                                         </svg>
                                         <div class="absolute inset-0 flex flex-col items-center justify-center">
-                                            <span class="text-3xl font-black text-slate-800 dark:text-white font-mono">95%</span>
+                                            <span class="text-3xl font-black text-slate-800 dark:text-white font-mono">${toKhNum(attRate || 95)}%</span>
                                             <span class="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold uppercase tracking-wider">ជោគជ័យ</span>
                                         </div>
                                     </div>
