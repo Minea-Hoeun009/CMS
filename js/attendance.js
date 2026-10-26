@@ -1908,12 +1908,40 @@ window.toggleSharedDatePanel = function(panelId) {
 };
 
 window.updateSharedDateSetting = function(k, v) {
+  if (!window.reportCardDateSettings) window.reportCardDateSettings = {};
   window.reportCardDateSettings[k] = v;
-  try { localStorage.setItem(`rc_${k}`, v); } catch(e) {}
+  try {
+    localStorage.setItem(`rc_${k}`, v);
+    if (k === 'solarDate') {
+      localStorage.setItem('rc_solar_date', v);
+      localStorage.setItem('rep_solar_date', v);
+      localStorage.setItem('selected_doc_date', v);
+      localStorage.setItem('doc_solar_date', v);
+    } else if (k === 'lunarDate') {
+      localStorage.setItem('rc_lunar_date', v);
+      localStorage.setItem('rep_lunar_date', v);
+    } else if (k === 'location') {
+      localStorage.setItem('rc_location', v);
+      localStorage.setItem('rep_location', v);
+    } else if (k === 'showLunar') {
+      localStorage.setItem('rc_show_lunar', v);
+      localStorage.setItem('rep_show_lunar', v);
+    }
+  } catch(e) {}
   
   if (k === 'location') document.querySelectorAll('.shared-location-input').forEach(el => el.value = v);
-  if (k === 'solarDate') document.querySelectorAll('.shared-solar-input').forEach(el => el.value = v);
-  if (k === 'lunarDate') document.querySelectorAll('.shared-lunar-input').forEach(el => el.value = v);
+  if (k === 'solarDate') {
+    document.querySelectorAll('.shared-solar-input').forEach(el => el.value = v);
+    if (document.getElementById('dashSolarDateDisplay')) {
+      let cleanSolar = v.replace(/ធ្វើនៅ.*?,?\s*/g, '').trim();
+      if (cleanSolar.includes("ថ្ងៃទី")) cleanSolar = cleanSolar.substring(cleanSolar.indexOf("ថ្ងៃទី"));
+      document.getElementById('dashSolarDateDisplay').textContent = cleanSolar;
+    }
+  }
+  if (k === 'lunarDate') {
+    document.querySelectorAll('.shared-lunar-input').forEach(el => el.value = v);
+    if (document.getElementById('dashLunarDateDisplay')) document.getElementById('dashLunarDateDisplay').textContent = v;
+  }
   if (k === 'showLunar') {
     document.querySelectorAll('.shared-lunar-check').forEach(el => el.checked = v);
     document.querySelectorAll('.shared-lunar-input').forEach(el => {
@@ -1921,6 +1949,12 @@ window.updateSharedDateSetting = function(k, v) {
       else el.classList.add('opacity-50', 'pointer-events-none', 'bg-slate-100');
     });
   }
+
+  try {
+    const fullDate = typeof window.getFormattedSolarDate === 'function' ? window.getFormattedSolarDate() : v;
+    document.querySelectorAll('.document-signature-date, .ps-solar-date').forEach(el => el.textContent = fullDate);
+    window.dispatchEvent(new CustomEvent('cmsDateUpdated', { detail: { key: k, value: v } }));
+  } catch(e) {}
 };
 
 window.getFormattedSolarDate = function() {

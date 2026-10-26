@@ -747,6 +747,12 @@
                </select>
             </div>
 
+            <!-- កំណត់កាលបរិច្ឆេទប្រព័ន្ធ (System Date Modal Trigger) -->
+            <button id="btnHeaderDateSettings" type="button" onclick="window.toggleSharedDatePanel()" class="hidden sm:flex items-center gap-1.5 bg-slate-50 dark:bg-slate-700 hover:bg-slate-100 dark:hover:bg-slate-600 border border-slate-200 dark:border-slate-600 rounded-xl px-2.5 py-1.5 shadow-sm text-xs font-bold text-slate-700 dark:text-slate-200 transition outline-none" title="កំណត់កាលបរិច្ឆេទប្រព័ន្ធ (រត់បំពេញគ្រប់ផ្នែក)">
+               <i class="fa-solid fa-calendar-day text-indigo-500 text-xs"></i>
+               <span class="hidden md:inline">កាលបរិច្ឆេទ</span>
+            </button>
+
             <!-- Dark Mode Toggle -->
             <button type="button" onclick="toggleDarkMode()" title="ប្តូរពណ៌" class="w-8 h-8 flex items-center justify-center rounded-xl bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-700 dark:text-amber-400 transition-colors outline-none shadow-sm">
               <i id="darkModeIcon" class="fa-solid fa-moon"></i>
@@ -1189,10 +1195,22 @@
         const year = document.getElementById("globalAcademicYear")?.value;
         if (year) {
             localStorage.setItem('selected_academic_year', year);
+            if (typeof appSettings !== 'undefined') {
+                appSettings.academic_year = year;
+            }
+            try {
+                const s = JSON.parse(localStorage.getItem('school_settings') || '{}');
+                s.academic_year = year;
+                localStorage.setItem('school_settings', JSON.stringify(s));
+            } catch(e) {}
             if (typeof window.showToast === 'function') window.showToast(`🔄 ប្តូរទៅឆ្នាំសិក្សា៖ ${year}`);
             if (typeof window.fetchStudentsForScores === 'function') window.fetchStudentsForScores();
             if (typeof window.filterStudents === 'function') window.filterStudents();
             if (typeof window.fetchMonthlyAttendance === 'function') window.fetchMonthlyAttendance();
+            if (typeof window.fetchLibraryData === 'function') window.fetchLibraryData();
+            if (typeof window.loadLibraryView === 'function' && document.getElementById('libraryView') && !document.getElementById('libraryView').classList.contains('hidden')) {
+                window.loadLibraryView();
+            }
         }
     };
 

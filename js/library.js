@@ -110,6 +110,8 @@ window.loadLibraryView = async function() {
     window.currentGradeFull = `${window.currentGradeLevel} ${window.currentGradeRoom}`.trim();
     const academicYear = sInfo.academic_year || "២០២៦-២០២៧";
     const schoolName = sInfo.school_name || "សាលាបឋមសិក្សា";
+    const rawDistrict = sInfo.district_name || sInfo.cluster || "រមាសហែក";
+    const cleanDistrict = rawDistrict.replace(/^ស្រុក\s*/, '').trim();
 
     const gradesList = typeof window.getAllGradesList === 'function' ? window.getAllGradesList() : ["ថ្នាក់ទី ១", "ថ្នាក់ទី ២", "ថ្នាក់ទី ៣", "ថ្នាក់ទី ៤", "ថ្នាក់ទី ៥", "ថ្នាក់ទី ៦"];
     const roomsList = typeof window.getAllRoomsList === 'function' ? window.getAllRoomsList() : ["«ក»", "«ខ»", "«គ»", "«ឃ»"];
@@ -200,9 +202,9 @@ window.loadLibraryView = async function() {
              
              <!-- Document Header (Print Only or Web Top) -->
              <div class="flex justify-between items-start mb-6 border-b border-slate-100 pb-4">
-                <div class="text-left"><br><br>
-                   <p class="text-[12px] font-moul text-slate-800">${schoolName}</p>
-                   <p class="text-[12px] font-bold text-slate-700 mt-1"><span id="libDocGradeDisplay" class="text-rose-600 font-moul">${window.currentGradeFull}</span></p>
+                <div class="text-left">
+                   <p class="text-[11px] md:text-xs text-slate-700 font-siemreap font-bold">ការិយាល័យអប់រំ យុវជន និងកីឡានៃរដ្ឋបាលស្រុក${cleanDistrict}</p>
+                   <p class="text-[12px] md:text-[13px] font-moul text-slate-900 mt-1">${schoolName}</p>
                 </div>
                 <div class="text-center">
                    <p class="font-moul text-indigo-900 text-[12px]">ព្រះរាជាណាចក្រកម្ពុជា</p>
@@ -230,6 +232,7 @@ window.loadLibraryView = async function() {
              <!-- Title -->
              <div class="text-center mb-6 shrink-0">
                 <h2 id="libDocTitle" class="font-moul text-amber-600 text-base md:text-lg tracking-wide" style="text-shadow: 1px 1px 0px rgba(0,0,0,0.05);">បញ្ជីខ្ចីសៀវភៅសិក្សាគោល</h2>
+                <p class="text-xs md:text-sm font-bold text-slate-700 mt-1">ថ្នាក់ទី៖ <span id="libDocGradeDisplay" class="font-moul text-indigo-900">${window.currentGradeFull}</span> &nbsp;|&nbsp; ឆ្នាំសិក្សា <span class="font-siemreap">${academicYear}</span></p>
                 <p id="libDocSub" class="text-[10px] md:text-[11px] text-slate-500 font-bold mt-2 bg-slate-50 inline-block px-4 py-1.5 rounded-full border border-slate-100 no-print">ចុចលើប្រអប់មុខវិជ្ជា ដើម្បីជ្រើសរើសស្ថានភាព ៖ <span class='badge-new mx-1'>ថ្មី</span> - <span class='badge-old mx-1'>ចាស់</span> - <span class='badge-poor mx-1'>អន់</span> - <span class='badge-none mx-1'>គ្មាន</span></p>
              </div>
 
@@ -827,7 +830,7 @@ window.printLibraryReport = function() {
             
             .p-header { width: 100%; margin-bottom: 20px; border-collapse: collapse; }
             .p-header td { vertical-align: top; border: none; padding: 0; }
-            .ph-left { text-align: left; width: 40%; font-family: 'Khmer OS Muol Light', 'Moul', serif; font-size: 11pt; color: #020079; line-height: 1.4; white-space: nowrap; }
+            .ph-left { text-align: left; width: 40%; font-family: 'Khmer OS Siemreap', 'Siemreap', sans-serif; font-size: 11pt; color: #020079; line-height: 1.4; white-space: nowrap; font-weight: bold; }
             .ph-right { text-align: center; width: 30%; font-family: 'Khmer OS Muol Light', 'Moul', serif; font-size: 12pt; color: #020079; line-height: 1.4; }
             
             .p-title { text-align: center; margin: 10px 0 20px 0; }
@@ -852,9 +855,9 @@ window.printLibraryReport = function() {
         
         <table class="p-header">
             <tr>
-                <td class="ph-left"><br>
+                <td class="ph-left">
                     ការិយាល័យអប់រំ យុវជន និងកីឡានៃរដ្ឋបាលស្រុក${districtName.replace('ស្រុក', '').trim()}<br>
-                    <span style="font-size: 12pt; display: block; margin-top: 8px;">${schoolName}</span>
+                    <span style="font-family: 'Khmer OS Muol Light', 'Moul', serif; font-size: 12pt; display: block; margin-top: 6px;">${schoolName}</span>
                 </td>
                 <td class="ph-right">
                     ព្រះរាជាណាចក្រកម្ពុជា<br>ជាតិ សាសនា ព្រះមហាក្សត្រ

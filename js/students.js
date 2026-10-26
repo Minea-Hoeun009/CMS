@@ -1088,9 +1088,9 @@ window.saveStudentData = async function(e) {
         }
     }
 
-    // Google Apps Script API
+    // Google Apps Script API (Save/Edit to Google Sheets)
     const sInfo = typeof appSettings !== 'undefined' ? appSettings : {};
-    if (sInfo.auto_sync && typeof window.apiPost === 'function') {
+    if (typeof window.apiPost === 'function') {
         try {
             const res = await window.apiPost("saveStudent", payload);
             if (res && res.status === "success") gasSaved = true;
@@ -1132,7 +1132,7 @@ window.saveStudentData = async function(e) {
 };
 
 // 🟢 STU-04: ការលុបទិន្នន័យ Soft Delete (ផ្អាក/ឈប់រៀន) និង Hard Delete (Admin) 🟢
-window.deleteStudent = function(id) {
+window.deleteStudent = async function(id) {
     const stu = (window.allStudents || []).find(s => String(s.id) === String(id));
     if (!stu) return;
 
@@ -1153,78 +1153,57 @@ window.deleteStudent = function(id) {
         return;
     }
 
-    const isAdmin = (typeof isSchoolAdmin === 'function' && isSchoolAdmin()) || 
-                    (typeof isSystemAdmin === 'function' && isSystemAdmin()) ||
-                    (typeof isCurrentUserAdmin === 'function' && isCurrentUserAdmin());
-    
-    // បង្ហាញជម្រើស Soft Delete ដើម្បីការពារប្រវត្តិពិន្ទុ និងវត្តមាន
     const gradeRoomStr = [normalizeGrade(stu.grade), stu.room].filter(Boolean).join(" ");
-    const softPrompt = confirm(`⚠️ បញ្ជាក់ការផ្អាក/ដកឈ្មោះសិស្ស៖\n\n• ឈ្មោះ៖ ${stu.name}\n• អត្តលេខ៖ ${stu.id}\n• ថ្នាក់៖ ${gradeRoomStr || 'មិនទាន់កំណត់'}\n\n[ចុច OK] ដើម្បីកំណត់ជា «ឈប់រៀន / ផ្អាក» (រក្សាទុកប្រវត្តិពិន្ទុ និងវត្តមានទាំងអស់)\n[ចុច Cancel] ដើម្បីបោះបង់`);
+    const confirmDelete = confirm(`⚠️ បញ្ជាក់ការលុបទិន្នន័យសិស្ស៖\n\n• ឈ្មោះ៖ ${stu.name}\n• អត្តលេខ៖ ${stu.id}\n• ថ្នាក់៖ ${gradeRoomStr || 'មិនទាន់កំណត់'}\n\nតើលោកគ្រូ/អ្នកគ្រូពិតជាចង់លុបទិន្នន័យសិស្ស «${stu.name}» (ID: ${stu.id}) ចេញពីប្រព័ន្ធ និង Google Sheets មែនទេ?\n⚠️ សកម្មភាពនេះនឹងលុបជួរដេកសិស្សចេញពី Google Sheets ដោយផ្ទាល់!`);
     
-    if (softPrompt) {
-        stu.status = "Withdrawn";
-        stu.updated_at = new Date().toISOString();
-        if (!Array.isArray(stu.enrollment_history)) stu.enrollment_history = [];
-        stu.enrollment_history.push({
-            grade: normalizeGrade(stu.grade),
-            room: stu.room,
-            academic_year: stu.academic_year || document.getElementById("globalAcademicYear")?.value || "2026-2027",
-            date: new Date().toISOString().split('T')[0],
-            status: "Withdrawn",
-            reason: "កំណត់ជាសិស្សឈប់រៀន (Soft Delete - រក្សាទុកប្រវត្តិពិន្ទុ និងវត្តមាន)",
-            type: "status_change",
-            created_at: new Date().toISOString()
-        });
-        if (typeof window.setMasterStudents === 'function') {
-            window.setMasterStudents(window.allStudents);
-        } else {
-            localStorage.setItem('academic_students', JSON.stringify(window.allStudents));
-        }
-        
-        if (window.db) {
-            window.db.collection("students").doc(String(id)).set({ 
-                status: "Withdrawn", 
-                enrollment_history: stu.enrollment_history,
-                updated_at: stu.updated_at,
-                last_updated: firebase.firestore.FieldValue.serverTimestamp() 
-            }, { merge: true }).catch(console.warn);
-        }
-        if (typeof window.logAudit === 'function') {
-            window.logAudit('SOFT_DELETE_STUDENT', 'student', `បានកំណត់សិស្ស ${stu.name} (${stu.id}) ជាឈប់រៀន (Soft Delete - រក្សាទុកប្រវត្តិ)`);
-        }
-        if (window.CMSEventBus && window.CMSEventTypes) {
-            window.CMSEventBus.emit(window.CMSEventTypes.STUDENT_WITHDRAWN, {
-                student_id: stu.id,
-                student_name: stu.name,
-                grade: stu.grade,
-                room: stu.room,
-                status: 'Withdrawn'
-            });
-        }
-        window.filterStudents();
-        if (typeof showToast === 'function') showToast("📦 បានកែប្រែស្ថានភាពសិស្សទៅជា «ឈប់រៀន» រួចរាល់!");
-        return;
+    if (!confirmDelete) return;
+
+    // ១. លុបចេញពី Memory & LocalStorage
+    window.allStudents = (window.allStudents || []).filter(s => String(s.id) !== String(id));
+    if (typeof window.setMasterStudents === 'function') {
+        window.setMasterStudents(window.allStudents);
+    } else {
+        localStorage.setItem('academic_students', JSON.stringify(window.allStudents));
     }
 
-    if (isAdmin) {
-        const hardPrompt = confirm(`🚨 ការព្រមានកម្រិតខ្ពស់ (Admin Only)៖\n\nតើលោកគ្រូ/អ្នកគ្រូពិតជាចង់លុបទិន្នន័យសិស្ស៖\n• ឈ្មោះ៖ ${stu.name}\n• អត្តលេខ៖ ${stu.id}\n\nចេញពីប្រព័ន្ធជាអចិន្ត្រៃយ៍មែនទេ?\n⚠️ សកម្មភាពនេះមិនអាចត្រឡប់ថយក្រោយបានឡើយ!`);
-        if (hardPrompt) {
-            window.allStudents = window.allStudents.filter(s => String(s.id) !== String(id));
-            if (typeof window.setMasterStudents === 'function') {
-                window.setMasterStudents(window.allStudents);
-            } else {
-                localStorage.setItem('academic_students', JSON.stringify(window.allStudents));
-            }
-            
-            if (window.db) {
-                window.db.collection("students").doc(String(id)).delete().catch(console.warn);
-            }
-            if (typeof window.logAudit === 'function') {
-                window.logAudit('HARD_DELETE_STUDENT', 'student', `[Admin] បានលុបសិស្ស ${stu.name} (${id}) ចេញជាអចិន្ត្រៃយ៍`);
-            }
-            window.filterStudents();
-            if (typeof showToast === 'function') showToast("🗑️ បានលុបទិន្នន័យសិស្សជាអចិន្ត្រៃយ៍ជោគជ័យ!");
+    // ២. លុបចេញពី Cloud Firestore (ប្រសិនបើបានភ្ជាប់)
+    if (window.db) {
+        window.db.collection("students").doc(String(id)).delete().catch(console.warn);
+    }
+
+    // ៣. លុបចេញពី Google Sheets តាមរយៈ GAS REST API (Hard Delete)
+    let gasDeleted = false;
+    if (typeof window.apiPost === 'function') {
+        try {
+            const res = await window.apiPost("deleteStudent", { id: id, hard_delete: true });
+            if (res && res.status === "success") gasDeleted = true;
+        } catch(gasErr) {
+            console.warn("GAS deleteStudent error:", gasErr);
         }
+    }
+
+    if (typeof window.logAudit === 'function') {
+        window.logAudit('HARD_DELETE_STUDENT', 'student', `បានលុបសិស្ស ${stu.name} (${id}) ចេញពីប្រព័ន្ធ និង Google Sheets`);
+    }
+
+    if (window.CMSEventBus && window.CMSEventTypes) {
+        window.CMSEventBus.emit(window.CMSEventTypes.STUDENT_WITHDRAWN, {
+            student_id: stu.id,
+            student_name: stu.name,
+            grade: stu.grade,
+            room: stu.room,
+            status: 'Deleted'
+        });
+    }
+
+    window.filterStudents();
+    const msg = gasDeleted 
+        ? `🗑️ បានលុបសិស្ស «${stu.name}» ចេញពីប្រព័ន្ធ និង Google Sheets រួចរាល់!` 
+        : `🗑️ បានលុបសិស្ស «${stu.name}» ចេញពីប្រព័ន្ធជោគជ័យ!`;
+    if (typeof showToast === 'function') {
+        showToast(msg);
+    } else {
+        alert(msg);
     }
 };
 

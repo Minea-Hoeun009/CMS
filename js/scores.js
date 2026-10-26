@@ -10,13 +10,11 @@ window.rankingsGenderFilter = "all"; window.rankingsViewMode = "full"; window.cu
 window.currentHonorLogo = ""; window.honorBoardScale = 0.85; window.honorBoardTheme = "gold"; window.honorBoardTopCount = 5;
 window.reportCardPrintType = 'monthly_sheet'; window.selectedReportCardStudentId = 'all'; window.selectedEducationLevel = 'auto'; window.selectedExcelFile = null;
 
-localStorage.removeItem('rc_solarDate'); localStorage.removeItem('rc_lunarDate');
-
 window.reportCardDateSettings = {
-    location: localStorage.getItem('rc_location') || "រាជធានីភ្នំពេញ",
-    solarDate: localStorage.getItem('rc_solar_date') || "ថ្ងៃទី....... ខែ....... ឆ្នាំ២០....",
-    lunarDate: localStorage.getItem('rc_lunar_date') || "ថ្ងៃ................. ខែ............. ឆ្នាំ......... ........ស័ក ព.ស.២៥....",
-    showLunar: localStorage.getItem('rc_show_lunar') !== 'false'
+    location: localStorage.getItem('rc_location') || localStorage.getItem('rep_location') || "រាជធានីភ្នំពេញ",
+    solarDate: localStorage.getItem('rc_solar_date') || localStorage.getItem('rep_solar_date') || localStorage.getItem('selected_doc_date') || "ថ្ងៃទី....... ខែ....... ឆ្នាំ២០....",
+    lunarDate: localStorage.getItem('rc_lunar_date') || localStorage.getItem('rep_lunar_date') || "ថ្ងៃ................. ខែ............. ឆ្នាំ......... ........ស័ក ព.ស.២៥....",
+    showLunar: localStorage.getItem('rc_show_lunar') !== 'false' && localStorage.getItem('rep_show_lunar') !== 'false'
 };
 
 window.CONDUCT_TEMPLATES = [
@@ -96,8 +94,26 @@ window.getKhmerLunarDate = function(dateObj = new Date()) {
 };
 
 window.updateSharedDateSetting = function(k, v) {
+    if (!window.reportCardDateSettings) window.reportCardDateSettings = {};
     window.reportCardDateSettings[k] = v;
-    try { localStorage.setItem(`rc_${k}`, v); } catch(e) {}
+    try {
+        localStorage.setItem(`rc_${k}`, v);
+        if (k === 'solarDate') {
+            localStorage.setItem('rc_solar_date', v);
+            localStorage.setItem('rep_solar_date', v);
+            localStorage.setItem('selected_doc_date', v);
+            localStorage.setItem('doc_solar_date', v);
+        } else if (k === 'lunarDate') {
+            localStorage.setItem('rc_lunar_date', v);
+            localStorage.setItem('rep_lunar_date', v);
+        } else if (k === 'location') {
+            localStorage.setItem('rc_location', v);
+            localStorage.setItem('rep_location', v);
+        } else if (k === 'showLunar') {
+            localStorage.setItem('rc_show_lunar', v);
+            localStorage.setItem('rep_show_lunar', v);
+        }
+    } catch(e) {}
     
     if (k === 'location') document.querySelectorAll('.shared-location-input').forEach(el => el.value = v);
     if (k === 'solarDate') {
@@ -119,6 +135,12 @@ window.updateSharedDateSetting = function(k, v) {
             else el.classList.add('opacity-40', 'pointer-events-none');
         });
     }
+
+    try {
+        const fullDate = typeof window.getFormattedSolarDate === 'function' ? window.getFormattedSolarDate() : v;
+        document.querySelectorAll('.document-signature-date, .ps-solar-date').forEach(el => el.textContent = fullDate);
+        window.dispatchEvent(new CustomEvent('cmsDateUpdated', { detail: { key: k, value: v } }));
+    } catch(e) {}
 };
 
 window.getFormattedSolarDate = function() {

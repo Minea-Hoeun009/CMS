@@ -1503,18 +1503,24 @@ function doPost(e) {
         return createJsonResponse({ status: 'forbidden', message: 'គ្មានសិទ្ធិលុបសិស្ស' });
       }
 
-      const studentId = payload.id || (data && data.id);
+      const studentId = payload.id || (data && data.id) || params.id;
       if (!studentId) throw new Error('បាត់លេខសម្គាល់សិស្ស (id)');
 
-      const updated = updateSingleField(SHEETS.STUDENTS, 'id', studentId, {
-        status: 'Withdrawn',
-        updated_at: new Date().toISOString()
-      });
+      const isHard = payload.hard_delete !== false && (data ? data.hard_delete !== false : true);
+      let deleted = false;
+      if (isHard) {
+        deleted = deleteRecord(SHEETS.STUDENTS, 'id', studentId);
+      } else {
+        deleted = updateSingleField(SHEETS.STUDENTS, 'id', studentId, {
+          status: 'Withdrawn',
+          updated_at: new Date().toISOString()
+        });
+      }
 
-      logSecurityEvent(auth.user?.user_id || teacherId, 'DELETE_STUDENT_WITHDRAW', 'STUDENT', studentId, 'SUCCESS');
+      logSecurityEvent(auth.user?.user_id || teacherId, isHard ? 'HARD_DELETE_STUDENT' : 'DELETE_STUDENT_WITHDRAW', 'STUDENT', studentId, 'SUCCESS');
       return createJsonResponse({
         status: 'success',
-        message: updated ? 'បានកំណត់សិស្សជា Withdrawn រួចរាល់' : 'រកមិនឃើញសិស្សដើម្បីលុប'
+        message: deleted ? 'បានលុបទិន្នន័យសិស្សពី Google Sheets ជោគជ័យ' : 'រកមិនឃើញសិស្សដើម្បីលុប'
       });
     }
 
@@ -2031,7 +2037,21 @@ function queryTable(sheetName, filters = {}) {
     for (const [key, val] of Object.entries(filters)) {
       if (val !== undefined && val !== null && String(val).trim() !== '' && String(val).toLowerCase() !== 'all') {
         const rowVal = record[key];
-        if (rowVal === undefined || String(rowVal).trim().toLowerCase() !== String(val).trim().toLowerCase()) {
+        if (key === 'grade') {
+          const rowNorm = normalizeGradeString(rowVal);
+          const valNorm = normalizeGradeString(val);
+          if (rowNorm !== valNorm && String(rowVal).trim().toLowerCase() !== String(val).trim().toLowerCase()) {
+            matches = false;
+            break;
+          }
+        } else if (key === 'room') {
+          const rowRoom = cleanRoomString(rowVal);
+          const valRoom = cleanRoomString(val);
+          if (rowRoom !== valRoom && !(valRoom === 'ក' && !rowRoom)) {
+            matches = false;
+            break;
+          }
+        } else if (rowVal === undefined || String(rowVal).trim().toLowerCase() !== String(val).trim().toLowerCase()) {
           matches = false;
           break;
         }
@@ -2146,6 +2166,48 @@ function updateSingleField(sheetName, primaryKeyName, primaryKeyValue, updateFie
     }
   }
   return false;
+}
+
+/**
+ * លុបទិន្នន័យ (Hard Delete Row) ពី Sheet តាម Primary Key
+ */
+function deleteRecord(sheetName, primaryKeyName, primaryKeyValue) {
+  const sheet = getOrCreateSheet(sheetName);
+  const lastRow = sheet.getLastRow();
+  if (lastRow <= 1) return false;
+
+  const headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0].map(h => String(h).trim());
+  const pkIndex = headers.indexOf(primaryKeyName);
+  if (pkIndex === -1) return false;
+
+  const data = sheet.getRange(2, 1, lastRow - 1, headers.length).getValues();
+  for (let r = 0; r < data.length; r++) {
+    if (String(data[r][pkIndex]).trim() === String(primaryKeyValue).trim()) {
+      sheet.deleteRow(r + 2);
+      return true;
+    }
+  }
+  return false;
+}
+
+function cleanRoomString(r) {
+  return String(r || '').replace(/[«»\s]/g, '');
+}
+
+function normalizeGradeString(str) {
+  if (!str) return '';
+  let s = String(str).trim();
+  if (s === 'all' || s === 'គ្រប់ថ្នាក់') return '';
+  const khmerToArabic = {'០':'0', '១':'1', '២':'2', '៣':'3', '៤':'4', '៥':'5', '៦':'6', '៧':'7', '៨':'8', '៩':'9'};
+  let arabicStr = s.replace(/[០-៩]/g, function(m) { return khmerToArabic[m]; });
+  let match = arabicStr.match(/[0-9]+/);
+  if (match) return 'ថ្នាក់ទី ' + toKhmerNumber(match[0]);
+  return s;
+}
+
+function toKhmerNumber(num) {
+  const khmerNumbers = ['០', '១', '២', '៣', '៤', '៥', '៦', '៧', '៨', '៩'];
+  return String(num).split('').map(function(n) { return (n >= '0' && n <= '9') ? khmerNumbers[parseInt(n, 10)] : n; }).join('');
 }
 
 /**

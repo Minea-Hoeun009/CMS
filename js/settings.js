@@ -376,6 +376,11 @@ window.handleSavePersonalTeacherSettings = async function(event) {
         window.appSettings.teacher_room = room;
         window.appSettings.academic_year = academicYear;
         localStorage.setItem('school_settings', JSON.stringify(window.appSettings));
+        if (academicYear) {
+            localStorage.setItem('selected_academic_year', academicYear);
+            const yrSelect = document.getElementById("globalAcademicYear");
+            if (yrSelect) yrSelect.value = academicYear;
+        }
 
         // Set classroom across the whole system
         if (typeof window.setSelectedClass === 'function') {
@@ -401,6 +406,12 @@ window.handleSavePersonalTeacherSettings = async function(event) {
         }
         if (typeof window.handleScoreClassChange === 'function') {
             try { window.handleScoreClassChange(); } catch(e) {}
+        }
+        if (typeof window.fetchLibraryData === 'function') {
+            try { window.fetchLibraryData(); } catch(e) {}
+        }
+        if (typeof window.loadLibraryView === 'function' && document.getElementById('libraryView') && !document.getElementById('libraryView').classList.contains('hidden')) {
+            try { window.loadLibraryView(); } catch(e) {}
         }
 
         if (typeof showToast === 'function') {
