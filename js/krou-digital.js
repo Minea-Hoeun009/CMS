@@ -792,58 +792,110 @@ window.KrouDigital = {
         if (!el) return;
         let isDragging = false;
         let startX = 0, startY = 0;
-        let initialLeft = 0, initialTop = 0;
+        let initX = 0, initY = 0;
+        const isSection = (type === 'section');
 
-        const dragHandle = el.querySelector('.drag-handle') || el;
+        const handle = el.querySelector('.drag-handle') || el;
 
-        dragHandle.onmousedown = function(e) {
-            // Do not drag if clicking on editable text or buttons
-            if (e.target.tagName === 'BUTTON' || e.target.closest('button')) return;
-            if (e.target.hasAttribute('contenteditable') || e.target.closest('[contenteditable="true"]')) return;
+        const onStart = function(clientX, clientY, target) {
+            if (target.tagName === 'BUTTON' || target.closest('button')) return false;
+            if (target.tagName === 'SELECT' || target.closest('select')) return false;
+            if (target.tagName === 'INPUT' || target.closest('input')) return false;
+            // If clicking directly inside contenteditable text and NOT clicking the drag handle, let them edit
+            if (!target.closest('.drag-handle') && (target.hasAttribute('contenteditable') || target.closest('[contenteditable="true"]'))) {
+                return false;
+            }
 
-            e.preventDefault();
             isDragging = true;
-            startX = e.clientX;
-            startY = e.clientY;
-            initialLeft = parseFloat(el.style.left) || 0;
-            initialTop = parseFloat(el.style.top) || 0;
+            startX = clientX;
+            startY = clientY;
 
-            document.onmousemove = function(e) {
-                if (!isDragging) return;
-                const zoom = (parseInt(localStorage.getItem('cert_studio_zoom') || '85', 10) || 85) / 100;
-                const dx = (e.clientX - startX) / zoom;
-                const dy = (e.clientY - startY) / zoom;
-                el.style.left = Math.max(0, Math.round(initialLeft + dx)) + 'px';
-                el.style.top = Math.max(0, Math.round(initialTop + dy)) + 'px';
-            };
+            if (isSection) {
+                const saved = JSON.parse(localStorage.getItem('cert_pos_' + id) || '{"x":0,"y":0}');
+                initX = saved.x || 0;
+                initY = saved.y || 0;
+            } else {
+                initX = parseFloat(el.style.left) || el.offsetLeft || 0;
+                initY = parseFloat(el.style.top) || el.offsetTop || 0;
+            }
+            el.style.zIndex = '999';
+            return true;
+        };
 
-            document.onmouseup = function() {
-                if (!isDragging) return;
-                isDragging = false;
-                document.onmousemove = null;
-                document.onmouseup = null;
+        const onMove = function(clientX, clientY) {
+            if (!isDragging) return;
+            const zoom = (parseInt(localStorage.getItem('cert_studio_zoom') || '85', 10)) / 100;
+            const dx = (clientX - startX) / zoom;
+            const dy = (clientY - startY) / zoom;
 
-                const newX = parseFloat(el.style.left) || 0;
-                const newY = parseFloat(el.style.top) || 0;
+            const newX = Math.round(initX + dx);
+            const newY = Math.round(initY + dy);
+
+            if (isSection) {
+                el.style.transform = `translate(${newX}px, ${newY}px)`;
+                localStorage.setItem('cert_pos_' + id, JSON.stringify({ x: newX, y: newY }));
+            } else {
+                el.style.left = newX + 'px';
+                el.style.top = newY + 'px';
                 if (type === 'text') {
                     const texts = JSON.parse(localStorage.getItem('custom_cert_texts') || '[]');
                     const item = texts.find(t => t.id === id);
                     if (item) {
-                        item.x = Math.round(newX);
-                        item.y = Math.round(newY);
+                        item.x = newX;
+                        item.y = newY;
                         localStorage.setItem('custom_cert_texts', JSON.stringify(texts));
                     }
                 } else if (type === 'pic') {
                     const pics = JSON.parse(localStorage.getItem('custom_cert_pictures') || '[]');
                     const item = pics.find(p => p.id === id);
                     if (item) {
-                        item.x = Math.round(newX);
-                        item.y = Math.round(newY);
+                        item.x = newX;
+                        item.y = newY;
                         localStorage.setItem('custom_cert_pictures', JSON.stringify(pics));
                     }
                 }
-            };
+            }
         };
+
+        const onEnd = function() {
+            if (isDragging) {
+                isDragging = false;
+                el.style.zIndex = isSection ? '20' : '30';
+            }
+        };
+
+        // Mouse Drag on Handle
+        handle.addEventListener('mousedown', function(e) {
+            if (onStart(e.clientX, e.clientY, e.target)) {
+                e.preventDefault();
+                const mouseMoveHandler = (ev) => onMove(ev.clientX, ev.clientY);
+                const mouseUpHandler = () => {
+                    onEnd();
+                    window.removeEventListener('mousemove', mouseMoveHandler);
+                    window.removeEventListener('mouseup', mouseUpHandler);
+                };
+                window.addEventListener('mousemove', mouseMoveHandler);
+                window.addEventListener('mouseup', mouseUpHandler);
+            }
+        });
+
+        // Touch Drag on Handle (mobile/tablet)
+        handle.addEventListener('touchstart', function(e) {
+            const touch = e.touches[0];
+            if (touch && onStart(touch.clientX, touch.clientY, e.target)) {
+                const touchMoveHandler = (ev) => {
+                    const t = ev.touches[0];
+                    if (t) onMove(t.clientX, t.clientY);
+                };
+                const touchEndHandler = () => {
+                    onEnd();
+                    window.removeEventListener('touchmove', touchMoveHandler);
+                    window.removeEventListener('touchend', touchEndHandler);
+                };
+                window.addEventListener('touchmove', touchMoveHandler, { passive: true });
+                window.addEventListener('touchend', touchEndHandler);
+            }
+        }, { passive: true });
     },
 
     handleUploadFrame: function(event) {
@@ -910,12 +962,12 @@ window.KrouDigital = {
                     name: file.name,
                     b64: e.target.result,
                     width: 120,
-                    x: 80 + (pics.length * 35),
-                    y: 120 + (pics.length * 25)
+                    x: 60 + (pics.length * 30),
+                    y: 80 + (pics.length * 20)
                 });
                 localStorage.setItem('custom_cert_pictures', JSON.stringify(pics));
                 if (typeof window.showToast === 'function') {
-                    window.showToast("✅ បានបញ្ចូលរូបភាពបន្ថែម (Picture/Stamp) ជោគជ័យ!", "success");
+                    window.showToast("✅ បានបញ្ចូលរូបភាពបន្ថែម (Picture/Logo) ជោគជ័យ!", "success");
                 }
                 window.KrouDigital.renderCertificateModal();
             } catch (err) {
@@ -923,6 +975,17 @@ window.KrouDigital = {
             }
         };
         reader.readAsDataURL(file);
+    },
+
+    resizePicture: function(picId, delta) {
+        const pics = JSON.parse(localStorage.getItem('custom_cert_pictures') || '[]');
+        const pic = pics.find(p => p.id === picId);
+        if (pic) {
+            pic.width = Math.max(35, Math.min(400, (pic.width || 120) + delta));
+            localStorage.setItem('custom_cert_pictures', JSON.stringify(pics));
+            const el = document.getElementById(picId);
+            if (el) el.style.width = pic.width + 'px';
+        }
     },
 
     removePicture: function(picId) {
@@ -940,8 +1003,8 @@ window.KrouDigital = {
             fontSize: 16,
             color: '#dc2626',
             fontFamily: 'font-moul',
-            x: 240,
-            y: 190 + (texts.length * 40)
+            x: 220,
+            y: 180 + (texts.length * 35)
         });
         localStorage.setItem('custom_cert_texts', JSON.stringify(texts));
         window.KrouDigital.renderCertificateModal();
@@ -952,6 +1015,36 @@ window.KrouDigital = {
         texts = texts.filter(t => t.id !== textId);
         localStorage.setItem('custom_cert_texts', JSON.stringify(texts));
         window.KrouDigital.renderCertificateModal();
+    },
+
+    resetCertPositions: function() {
+        // Clear all section transforms
+        ['sec_header_left', 'sec_header_center', 'sec_title', 'sec_body', 'sec_sig_left', 'sec_sig_right'].forEach(id => {
+            localStorage.removeItem('cert_pos_' + id);
+            const el = document.getElementById('cert_' + id);
+            if (el) el.style.transform = 'translate(0px, 0px)';
+        });
+
+        // Reset pictures and texts
+        const pics = JSON.parse(localStorage.getItem('custom_cert_pictures') || '[]');
+        pics.forEach((p, idx) => {
+            p.x = 60 + (idx * 30);
+            p.y = 80 + (idx * 20);
+            p.width = 120;
+        });
+        localStorage.setItem('custom_cert_pictures', JSON.stringify(pics));
+
+        const texts = JSON.parse(localStorage.getItem('custom_cert_texts') || '[]');
+        texts.forEach((t, idx) => {
+            t.x = 220;
+            t.y = 180 + (idx * 35);
+        });
+        localStorage.setItem('custom_cert_texts', JSON.stringify(texts));
+
+        if (typeof window.showToast === 'function') {
+            window.showToast("✅ បានកំណត់ទីតាំង និងទំហំទាំងអស់ត្រឡប់ទៅស្តង់ដារដើម!", "info");
+        }
+        this.renderCertificateModal();
     },
 
     setZoom: function(val) {
@@ -1055,7 +1148,44 @@ window.KrouDigital = {
         document.execCommand(cmd, false, val);
     },
 
-    // 🖨️ មុខងារបោះពុម្ពប័ណ្ណសរសើរពេញទំហំក្រដាស 100% ឥតដាច់ ឥតចន្លោះស (Seamless 100% A4 Print)
+    // 🖨️ បើកមើលផ្ទាំង Preview មុនព្រីន (Universal Print Preview)
+    openPrintPreview: function() {
+        const printArea = document.getElementById("certificatePrintArea");
+        if (!printArea) return;
+
+        const pageSizeKey = localStorage.getItem('cert_page_size') || 'A4-landscape';
+        const isLandscape = !pageSizeKey.includes('portrait');
+        const paper = pageSizeKey.includes('A3') ? 'A3' : pageSizeKey.includes('Letter') ? 'Letter' : 'A4';
+        const orientation = isLandscape ? 'landscape' : 'portrait';
+
+        const clone = printArea.cloneNode(true);
+        clone.style.transform = 'none';
+        clone.style.margin = '0 auto';
+        clone.style.boxShadow = 'none';
+        clone.style.borderRadius = '0';
+        clone.style.position = 'relative';
+        clone.querySelectorAll('.no-print, .drag-handle, button').forEach(el => el.remove());
+        clone.querySelectorAll('[contenteditable="true"]').forEach(el => {
+            el.removeAttribute('contenteditable');
+            el.style.outline = 'none';
+            el.style.backgroundColor = 'transparent';
+        });
+
+        if (window.CMSPrintManager && typeof window.CMSPrintManager.openUniversalPreview === 'function') {
+            window.CMSPrintManager.openUniversalPreview({
+                title: "លិខិតសរសើរ",
+                paperSize: paper,
+                orientation: orientation,
+                defaultZoom: 1.0,
+                contentHtml: clone.outerHTML,
+                autoWrapHeaderFooter: false
+            });
+        } else {
+            this.printCertificate();
+        }
+    },
+
+    // 🖨️ មុខងារបោះពុម្ពប័ណ្ណសរសើរពេញទំហំក្រដាស 100% ឥតដាច់ ឥតចន្លោះស (Seamless 100% A4 Print Engine)
     printCertificate: function() {
         if (document.activeElement && typeof document.activeElement.blur === 'function') {
             document.activeElement.blur();
@@ -1069,10 +1199,10 @@ window.KrouDigital = {
 
         const pageSizeKey = localStorage.getItem('cert_page_size') || 'A4-landscape';
         const pageSizesMap = {
-            'A4-landscape': { width: '297mm', height: '210mm', css: 'A4 landscape' },
-            'A4-portrait': { width: '210mm', height: '297mm', css: 'A4 portrait' },
-            'A3-landscape': { width: '420mm', height: '297mm', css: 'A3 landscape' },
-            'Letter-landscape': { width: '11in', height: '8.5in', css: 'Letter landscape' }
+            'A4-landscape': { width: '297mm', height: '210mm', isLandscape: true, name: 'A4' },
+            'A4-portrait': { width: '210mm', height: '297mm', isLandscape: false, name: 'A4' },
+            'A3-landscape': { width: '420mm', height: '297mm', isLandscape: true, name: 'A3' },
+            'Letter-landscape': { width: '11in', height: '8.5in', isLandscape: true, name: 'Letter' }
         };
         const curSize = pageSizesMap[pageSizeKey] || pageSizesMap['A4-landscape'];
 
@@ -1082,10 +1212,10 @@ window.KrouDigital = {
         clone.style.margin = '0 auto';
         clone.style.boxShadow = 'none';
         clone.style.borderRadius = '0';
-        clone.style.width = curSize.width;
-        clone.style.height = curSize.height;
-        clone.style.minHeight = curSize.height;
-        clone.style.maxHeight = curSize.height;
+        clone.style.width = '100%';
+        clone.style.height = '100%';
+        clone.style.minHeight = '100%';
+        clone.style.maxHeight = '100%';
         clone.style.position = 'relative';
         clone.style.left = '0';
         clone.style.top = '0';
@@ -1101,39 +1231,52 @@ window.KrouDigital = {
             el.style.backgroundColor = 'transparent';
         });
 
-        // Remove old helper iframe if existing
-        let oldIframe = document.getElementById("cms_cert_print_iframe");
-        if (oldIframe) oldIframe.remove();
+        // Collect all existing stylesheets from main window
+        const stylesHtml = Array.from(document.querySelectorAll('style, link[rel="stylesheet"]'))
+            .map(el => el.outerHTML)
+            .join('\n');
 
-        const iframe = document.createElement("iframe");
-        iframe.id = "cms_cert_print_iframe";
-        iframe.style.position = "fixed";
-        iframe.style.top = "0";
-        iframe.style.left = "0";
-        iframe.style.width = "100%";
-        iframe.style.height = "100%";
-        iframe.style.border = "none";
-        iframe.style.zIndex = "-9999";
-        iframe.style.opacity = "0.001";
-        iframe.style.pointerEvents = "none";
-        document.body.appendChild(iframe);
-
-        const doc = iframe.contentWindow.document;
-        doc.open();
-        doc.write(`
+        // Open dedicated clean print window to guarantee top-level landscape orientation in Chromium & physical printer drivers
+        const printDoc = `
             <!DOCTYPE html>
             <html lang="km">
             <head>
                 <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
                 <title>លិខិតសរសើរ - បោះពុម្ព</title>
                 <link rel="preconnect" href="https://fonts.googleapis.com">
                 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
                 <link href="https://fonts.googleapis.com/css2?family=Moul&family=Siemreap&family=Battambang&display=swap" rel="stylesheet">
                 <script src="https://cdn.tailwindcss.com"></script>
+                ${stylesHtml}
                 <style>
                     @page {
-                        size: ${curSize.css};
-                        margin: 0mm !important;
+                        size: ${curSize.isLandscape ? 'landscape' : 'portrait'};
+                        margin: 0 !important;
+                    }
+                    @media print {
+                        @page {
+                            size: ${curSize.isLandscape ? 'landscape' : 'portrait'};
+                            margin: 0 !important;
+                        }
+                        html, body {
+                            width: 100vw !important;
+                            height: 100vh !important;
+                            margin: 0 !important;
+                            padding: 0 !important;
+                            overflow: hidden !important;
+                            -webkit-print-color-adjust: exact !important;
+                            print-color-adjust: exact !important;
+                        }
+                        .no-print, .drag-handle, button {
+                            display: none !important;
+                        }
+                        #cert_print_container {
+                            width: 100vw !important;
+                            height: 100vh !important;
+                            margin: 0 !important;
+                            padding: 0 !important;
+                        }
                     }
                     * {
                         box-sizing: border-box !important;
@@ -1141,12 +1284,12 @@ window.KrouDigital = {
                         print-color-adjust: exact !important;
                     }
                     html, body {
-                        width: ${curSize.width} !important;
-                        height: ${curSize.height} !important;
-                        margin: 0 !important;
-                        padding: 0 !important;
-                        background: #ffffff !important;
-                        overflow: hidden !important;
+                        width: 100%;
+                        height: 100%;
+                        margin: 0;
+                        padding: 0;
+                        background: #ffffff;
+                        overflow: auto;
                         -webkit-print-color-adjust: exact !important;
                         print-color-adjust: exact !important;
                     }
@@ -1154,19 +1297,86 @@ window.KrouDigital = {
                     .font-siemreap { font-family: 'Siemreap', sans-serif !important; }
                     .font-battambang { font-family: 'Battambang', sans-serif !important; }
                     .no-print, .drag-handle { display: none !important; }
+                    
+                    /* Screen helper banner */
+                    .print-helper-bar {
+                        background: #1e293b;
+                        color: #f8fafc;
+                        padding: 10px 18px;
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        font-family: 'Siemreap', sans-serif;
+                        font-size: 13px;
+                        border-bottom: 2px solid #3b82f6;
+                        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+                    }
                 </style>
             </head>
-            <body style="width:${curSize.width};height:${curSize.height};margin:0;padding:0;overflow:hidden;">
-                ${clone.outerHTML}
+            <body>
+                <div class="print-helper-bar no-print">
+                    <div style="display:flex;align-items:center;gap:12px;">
+                        <span style="font-size:20px;">🖨️</span>
+                        <div>
+                            <strong>ការណែនាំដើម្បីព្រីនពេញក្រដាស A4 ស្អាត ១០០%៖</strong>
+                            <span style="color:#fde047;margin-left:6px;">សូមជ្រើសរើស Layout: <b>${curSize.isLandscape ? 'Landscape (ផ្តេក)' : 'Portrait (បញ្ឈរ)'}</b> និង Margins: <b>None (គ្មានគែម)</b> ក្នុងផ្ទាំង Print</span>
+                        </div>
+                    </div>
+                    <div style="display:flex;gap:10px;">
+                        <button onclick="window.print()" style="background:#059669;color:#fff;border:none;padding:7px 16px;border-radius:8px;font-weight:bold;cursor:pointer;font-family:'Siemreap',sans-serif;">🖨️ ចុចព្រីន (Print Now)</button>
+                        <button onclick="window.close()" style="background:#475569;color:#fff;border:none;padding:7px 14px;border-radius:8px;cursor:pointer;font-family:'Siemreap',sans-serif;">បិទ (Close)</button>
+                    </div>
+                </div>
+
+                <div id="cert_print_container" style="width:${curSize.width};height:${curSize.height};margin:0 auto;position:relative;display:flex;justify-content:center;align-items:center;">
+                    ${clone.outerHTML}
+                </div>
+
+                <script>
+                    window.onload = function() {
+                        setTimeout(function() {
+                            window.focus();
+                            window.print();
+                        }, 500);
+                    };
+                </script>
             </body>
             </html>
-        `);
-        doc.close();
+        `;
 
-        setTimeout(() => {
-            iframe.contentWindow.focus();
-            iframe.contentWindow.print();
-        }, 350);
+        const printWin = window.open('', '_blank', 'width=1100,height=800');
+        if (printWin) {
+            printWin.document.open();
+            printWin.document.write(printDoc);
+            printWin.document.close();
+        } else {
+            // Fallback to helper iframe if popups blocked
+            let oldIframe = document.getElementById("cms_cert_print_iframe");
+            if (oldIframe) oldIframe.remove();
+
+            const iframe = document.createElement("iframe");
+            iframe.id = "cms_cert_print_iframe";
+            iframe.style.position = "fixed";
+            iframe.style.top = "0";
+            iframe.style.left = "0";
+            iframe.style.width = "100%";
+            iframe.style.height = "100%";
+            iframe.style.border = "none";
+            iframe.style.zIndex = "-9999";
+            iframe.style.opacity = "0.001";
+            iframe.style.pointerEvents = "none";
+            document.body.appendChild(iframe);
+
+            const doc = iframe.contentWindow.document;
+            doc.open();
+            doc.write(printDoc);
+            doc.close();
+
+            setTimeout(() => {
+                iframe.contentWindow.focus();
+                iframe.contentWindow.print();
+            }, 600);
+        }
     },
 
     renderCertificateModal: function(studentId = null, rankNum = null, targetGrade = null, frameStyle = null) {
@@ -1190,6 +1400,14 @@ window.KrouDigital = {
         const pageSizeKey = localStorage.getItem('cert_page_size') || 'A4-landscape';
         const titleType = localStorage.getItem('cert_title_type') || 'លិខិតសរសើរ';
         const examSession = localStorage.getItem('cert_exam_session') || 'ប្រឡងឆមាសលើកទី១ ឆ្នាំសិក្សា ២០២៥ - ២០២៦';
+
+        // Load section saved positions (Canva drag offsets)
+        const posHeaderLeft = JSON.parse(localStorage.getItem('cert_pos_sec_header_left') || '{"x":0,"y":0}');
+        const posHeaderCenter = JSON.parse(localStorage.getItem('cert_pos_sec_header_center') || '{"x":0,"y":0}');
+        const posTitle = JSON.parse(localStorage.getItem('cert_pos_sec_title') || '{"x":0,"y":0}');
+        const posBody = JSON.parse(localStorage.getItem('cert_pos_sec_body') || '{"x":0,"y":0}');
+        const posSigLeft = JSON.parse(localStorage.getItem('cert_pos_sec_sig_left') || '{"x":0,"y":0}');
+        const posSigRight = JSON.parse(localStorage.getItem('cert_pos_sec_sig_right') || '{"x":0,"y":0}');
 
         // Page size mapping
         const pageSizesMap = {
@@ -1269,25 +1487,25 @@ window.KrouDigital = {
                 titleColor: certTitleColor || '#dc2626',
                 accentLine: 'border-amber-400'
             },
-            'gold-royal': {
-                name: '👑 ស៊ុមមាសរាជកាល (Gold Royal)',
+            'royal-gold': {
+                name: '👑 ស៊ុមមាសរាជការ (Royal Gold Double)',
                 outerBorder: 'border-[14px] border-double border-amber-600',
                 innerBorder: 'border-2 border-amber-400/80',
                 styleExtra: '',
-                bgGradient: 'bg-gradient-to-br from-amber-50/70 via-white to-amber-50/40',
-                cornerIcon: '❖',
+                bgGradient: 'bg-gradient-to-br from-amber-50/60 via-white to-amber-50/40',
+                cornerIcon: '⚜️',
                 cornerColor: 'text-amber-600',
                 titleColor: certTitleColor || '#b45309',
-                accentLine: 'border-amber-400'
+                accentLine: 'border-amber-500'
             },
-            'emerald-royal': {
-                name: '💎 ស៊ុមត្បូងមរកត (Emerald Royal)',
-                outerBorder: 'border-[14px] border-double border-emerald-700',
-                innerBorder: 'border-2 border-emerald-500/80',
+            'emerald-formal': {
+                name: '🌿 ស៊ុមត្បូងមរកត (Emerald Green)',
+                outerBorder: 'border-[14px] border-double border-emerald-800',
+                innerBorder: 'border-2 border-emerald-400/80',
                 styleExtra: '',
                 bgGradient: 'bg-gradient-to-br from-emerald-50/60 via-white to-teal-50/30',
-                cornerIcon: '✦',
-                cornerColor: 'text-emerald-700',
+                cornerIcon: '❖',
+                cornerColor: 'text-emerald-800',
                 titleColor: certTitleColor || '#047857',
                 accentLine: 'border-emerald-400'
             },
@@ -1352,7 +1570,15 @@ window.KrouDigital = {
                     background-color: #fefce8;
                     outline: 2px solid #b45309;
                 }
-                .drag-box:hover .drag-handle {
+                .canva-draggable-section {
+                    transition: outline 0.15s ease;
+                    position: relative;
+                }
+                .canva-draggable-section:hover {
+                    outline: 1.5px dashed rgba(217, 119, 6, 0.5);
+                    border-radius: 6px;
+                }
+                .canva-draggable-section:hover .drag-handle {
                     display: flex !important;
                 }
             </style>
@@ -1369,10 +1595,10 @@ window.KrouDigital = {
                         </div>
                         <div>
                             <div class="flex items-center gap-2">
-                                <h3 class="font-moul text-xs sm:text-sm text-amber-300">Canva Certificate Studio</h3>
+                                <h3 class="font-moul text-xs sm:text-sm text-amber-300">Canva Certificate Studio 4.0</h3>
                                 <span class="px-2 py-0.5 bg-slate-800 text-[10px] text-slate-300 border border-slate-700 rounded-md font-mono">${curPageSize.name}</span>
                             </div>
-                            <p class="text-[10px] text-slate-400">ស្ទូឌីយោរចនាប័ណ្ណសរសើរ អូសទីតាំង Text បានដោយសេរី និងព្រីនពេញក្រដាស ១០០%</p>
+                            <p class="text-[10px] text-slate-400">ស្ទូឌីយោរចនាប័ណ្ណសរសើរ អូសទីតាំង Text បានដោយសេរី និងព្រីនពេញក្រដាស A4 ១០០%</p>
                         </div>
                     </div>
 
@@ -1397,6 +1623,12 @@ window.KrouDigital = {
                                 `).join('')}
                             </select>
                         </div>
+
+                        <!-- Universal Preview Button -->
+                        <button onclick="window.KrouDigital.openPrintPreview()" class="px-3.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-indigo-300 border border-slate-700 rounded-xl text-xs font-bold transition flex items-center gap-1.5 active:scale-95 outline-none" title="បើកផ្ទាំងពិនិត្យមុនព្រីន (Universal Preview)">
+                            <i class="fa-solid fa-eye"></i>
+                            <span>Preview</span>
+                        </button>
 
                         <!-- Print Button -->
                         <button onclick="window.KrouDigital.printCertificate()" class="px-4 py-1.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white rounded-xl text-xs font-bold shadow-md shadow-emerald-500/20 transition flex items-center gap-1.5 active:scale-95 outline-none" title="បោះពុម្ពពេញទំហំក្រដាស ១០០%">
@@ -1434,10 +1666,13 @@ window.KrouDigital = {
                         </button>
                     </div>
 
-                    <!-- In-place edit notification -->
-                    <div class="flex items-center gap-1.5 text-[11px] text-amber-300 bg-amber-950/40 border border-amber-800/60 px-2.5 py-1 rounded-lg">
-                        <i class="fa-solid fa-up-down-left-right text-amber-400"></i>
-                        <span>អាចចុចលើអត្ថបទដើម្បីកែប្រែ ឬអូសផ្លាស់ប្តូរទីតាំងបានសេរី</span>
+                    <!-- Reset & Help badges -->
+                    <div class="flex items-center gap-2">
+                        <button onclick="window.KrouDigital.resetCertPositions()" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-amber-300 rounded-lg text-[11px] font-bold border border-slate-700 flex items-center gap-1" title="កំណត់ទីតាំង និងទំហំទាំងអស់ឡើងវិញ">
+                            <i class="fa-solid fa-rotate-left"></i>
+                            <span>Reset ទីតាំងដើម</span>
+                        </button>
+                        <span class="text-[11px] text-slate-400 hidden sm:inline">💡 ចុច <b class="text-amber-300">អូស (Drag)</b> ដើម្បីផ្លាស់ប្តូរទីតាំង Text ឬ Logo ដោយសេរី</span>
                     </div>
                 </div>
 
@@ -1484,7 +1719,7 @@ window.KrouDigital = {
                         <!-- Upload Custom Frame -->
                         <label class="cursor-pointer px-3 py-1.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white rounded-xl font-bold shadow transition flex items-center gap-1.5 active:scale-95" title="ផ្ទុកឡើងស៊ុមរូបភាព (JPG/PNG)">
                             <i class="fa-solid fa-image text-amber-300"></i>
-                            <span>Upload Frame</span>
+                            <span>Upload Frame (ផ្ទុកស៊ុមផ្ទាល់ខ្លួន)</span>
                             <input type="file" accept="image/*" class="hidden" onchange="window.KrouDigital.handleUploadFrame(event)">
                         </label>
                         ${customFrameB64 ? `
@@ -1496,7 +1731,7 @@ window.KrouDigital = {
                         <!-- Upload Logo -->
                         <label class="cursor-pointer px-3 py-1.5 bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white rounded-xl font-bold shadow transition flex items-center gap-1.5 active:scale-95" title="ផ្ទុកឡើងឡូហ្គោសាលា/ក្រសួង">
                             <i class="fa-solid fa-certificate text-white"></i>
-                            <span>Upload Logo</span>
+                            <span>Upload Logo (ក្បាលប័ណ្ណ)</span>
                             <input type="file" accept="image/*" class="hidden" onchange="window.KrouDigital.handleUploadLogo(event)">
                         </label>
                         ${customLogoB64 ? `
@@ -1508,18 +1743,20 @@ window.KrouDigital = {
                         <!-- Upload Picture / Stamp / Signature / Photo -->
                         <label class="cursor-pointer px-3 py-1.5 bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700 text-white rounded-xl font-bold shadow transition flex items-center gap-1.5 active:scale-95" title="Upload រូបភាពបន្ថែម ដូចជាត្រាក្រហម ហត្ថលេខា ឬរូបសិស្ស">
                             <i class="fa-solid fa-stamp text-amber-300"></i>
-                            <span>Upload Picture (ត្រា/ហត្ថលេខា/រូប)</span>
+                            <span>Upload Picture (ត្រា/ហត្ថលេខា/Logo)</span>
                             <input type="file" accept="image/*" class="hidden" onchange="window.KrouDigital.handleUploadPicture(event)">
                         </label>
 
                         <!-- Uploaded Pictures Thumbnails Count -->
                         ${customPics.length > 0 ? `
-                            <div class="flex items-center gap-1.5 bg-slate-800 border border-slate-700 px-2.5 py-1 rounded-xl">
-                                <span class="text-slate-400 text-[11px]">រូបភាពបន្ថែម (អូសទីតាំងបាន)៖</span>
+                            <div class="flex items-center gap-2 bg-slate-800 border border-slate-700 px-2.5 py-1 rounded-xl">
+                                <span class="text-slate-400 text-[11px]">រូបបន្ថែម៖</span>
                                 ${customPics.map(p => `
-                                    <div class="relative group">
-                                        <img src="${p.b64}" class="w-6 h-6 object-contain rounded border border-slate-600" title="${p.name || 'Picture'}">
-                                        <button onclick="window.KrouDigital.removePicture('${p.id}')" class="absolute -top-1 -right-1 w-3.5 h-3.5 bg-rose-600 text-white rounded-full text-[8px] flex items-center justify-center opacity-0 group-hover:opacity-100 transition" title="លុប">×</button>
+                                    <div class="flex items-center gap-1 bg-slate-900 border border-slate-700 px-1.5 py-0.5 rounded">
+                                        <img src="${p.b64}" class="w-5 h-5 object-contain rounded" title="${p.name || 'Picture'}">
+                                        <button onclick="window.KrouDigital.resizePicture('${p.id}', -15)" class="w-4 h-4 bg-slate-700 hover:bg-slate-600 text-white rounded text-[10px] flex items-center justify-center font-bold" title="បង្រួម">-</button>
+                                        <button onclick="window.KrouDigital.resizePicture('${p.id}', 15)" class="w-4 h-4 bg-slate-700 hover:bg-slate-600 text-white rounded text-[10px] flex items-center justify-center font-bold" title="ពង្រីក">+</button>
+                                        <button onclick="window.KrouDigital.removePicture('${p.id}')" class="text-rose-400 hover:text-rose-300 font-bold ml-1 text-xs" title="លុប">×</button>
                                     </div>
                                 `).join('')}
                             </div>
@@ -1568,14 +1805,13 @@ window.KrouDigital = {
                             <span class="text-slate-400 text-[11px]">ពណ៌៖</span>
                             <button onclick="window.KrouDigital.updateCertColor('#dc2626')" class="w-4 h-4 rounded-full bg-red-600 hover:scale-110 transition border border-white/40" title="ក្រហម (ដូចរូបគំរូ)"></button>
                             <button onclick="window.KrouDigital.updateCertColor('#b45309')" class="w-4 h-4 rounded-full bg-amber-600 hover:scale-110 transition border border-white/40" title="មាស"></button>
-                            <button onclick="window.KrouDigital.updateCertColor('#1e3a8a')" class="w-4 h-4 rounded-full bg-blue-800 hover:scale-110 transition border border-white/40" title="ខៀវ"></button>
-                            <button onclick="window.KrouDigital.updateCertColor('#047857')" class="w-4 h-4 rounded-full bg-emerald-700 hover:scale-110 transition border border-white/40" title="បៃតង"></button>
+                            <button onclick="window.KrouDigital.updateCertColor('#1e3a8a')" class="w-4 h-4 rounded-full bg-blue-800 hover:scale-110 transition border border-white/40" title="ខៀវចាស់"></button>
                             <button onclick="window.KrouDigital.updateCertColor('#0f172a')" class="w-4 h-4 rounded-full bg-slate-900 hover:scale-110 transition border border-white/40" title="ខ្មៅ"></button>
                             <input type="color" id="certCustomColorPicker" value="${certTitleColor}" onchange="window.KrouDigital.updateCertColor(this.value)" class="w-5 h-5 rounded cursor-pointer border-0 bg-transparent" title="ជ្រើសរើសពណ៌ផ្ទាល់ខ្លួន">
                         </div>
                     </div>
 
-                    <!-- PANE 4: STUDENT DATA AUTO-FILL -->
+                    <!-- PANE 4: DATA & AUTO-FILL -->
                     <div id="certTabPane_data" class="${activeTab === 'data' ? 'flex flex-wrap items-center gap-3' : 'hidden'}">
                         <!-- Grade Select -->
                         <div class="flex items-center gap-1.5 bg-slate-800 border border-slate-700 rounded-xl px-2.5 py-1.5">
@@ -1659,12 +1895,16 @@ window.KrouDigital = {
                                 </svg>
                             ` : ''}
 
-                            <!-- 🖼️ Additional Uploaded Pictures (Stamps, Signatures, Student Photo) Overlays - DRAGGABLE -->
+                            <!-- 🖼️ Additional Uploaded Pictures (Stamps, Signatures, Student Photo) Overlays - DRAGGABLE & RESIZABLE -->
                             ${customPics.map(pic => `
-                                <div id="${pic.id}" class="drag-box absolute select-none z-30 group cursor-move" style="left: ${pic.x}px; top: ${pic.y}px; width: ${pic.width}px;">
-                                    <div class="drag-handle no-print hidden group-hover:flex items-center justify-between gap-1 px-1.5 py-0.5 bg-slate-900/90 text-amber-300 text-[9px] rounded-md shadow-md cursor-grab active:cursor-grabbing border border-amber-500/50 -top-5 left-0 absolute whitespace-nowrap">
+                                <div id="${pic.id}" class="drag-box absolute select-none z-30 group cursor-move p-0.5 rounded hover:ring-2 hover:ring-amber-500/70" style="left: ${pic.x}px; top: ${pic.y}px; width: ${pic.width || 120}px;">
+                                    <div class="drag-handle no-print flex items-center justify-between gap-1 px-1.5 py-0.5 bg-slate-900/95 text-amber-300 text-[9px] rounded shadow-md border border-amber-500/60 -top-6 left-0 absolute whitespace-nowrap opacity-80 group-hover:opacity-100 transition cursor-move">
                                         <span><i class="fa-solid fa-up-down-left-right"></i> អូស</span>
-                                        <button onclick="window.KrouDigital.removePicture('${pic.id}')" class="text-rose-400 hover:text-rose-300 font-bold ml-1" title="លុប">×</button>
+                                        <div class="flex items-center gap-1 ml-1 border-l border-slate-700 pl-1">
+                                            <button onclick="window.KrouDigital.resizePicture('${pic.id}', -15)" class="w-3.5 h-3.5 bg-slate-800 hover:bg-slate-700 text-white rounded text-[9px] flex items-center justify-center font-bold" title="បង្រួម">-</button>
+                                            <button onclick="window.KrouDigital.resizePicture('${pic.id}', 15)" class="w-3.5 h-3.5 bg-slate-800 hover:bg-slate-700 text-white rounded text-[9px] flex items-center justify-center font-bold" title="ពង្រីក">+</button>
+                                            <button onclick="window.KrouDigital.removePicture('${pic.id}')" class="text-rose-400 hover:text-rose-300 font-bold ml-1 text-xs" title="លុប">×</button>
+                                        </div>
                                     </div>
                                     <img src="${pic.b64}" alt="${pic.name}" class="w-full h-auto object-contain pointer-events-none drop-shadow-sm" />
                                 </div>
@@ -1672,9 +1912,9 @@ window.KrouDigital = {
 
                             <!-- 🔤 Additional Custom Added Texts Overlays - DRAGGABLE -->
                             ${customTexts.map(txt => `
-                                <div id="${txt.id}" class="drag-box absolute select-text z-30 group" style="left: ${txt.x}px; top: ${txt.y}px;">
-                                    <div class="drag-handle no-print hidden group-hover:flex items-center justify-between gap-1 px-2 py-0.5 bg-slate-900/90 text-amber-300 text-[10px] rounded-md shadow-md cursor-grab active:cursor-grabbing border border-amber-500/50 -top-6 left-0 absolute whitespace-nowrap">
-                                        <span><i class="fa-solid fa-up-down-left-right"></i> អូសទីតាំង (Drag)</span>
+                                <div id="${txt.id}" class="drag-box absolute select-text z-30 group cursor-move p-1 rounded hover:ring-2 hover:ring-amber-500/70" style="left: ${txt.x}px; top: ${txt.y}px;">
+                                    <div class="drag-handle no-print flex items-center justify-between gap-1 px-2 py-0.5 bg-slate-900/90 text-amber-300 text-[10px] rounded shadow-md border border-amber-500/60 -top-6 left-0 absolute whitespace-nowrap opacity-75 group-hover:opacity-100 transition cursor-move">
+                                        <span><i class="fa-solid fa-up-down-left-right"></i> អូស (Drag)</span>
                                         <button onclick="window.KrouDigital.removeCustomText('${txt.id}')" class="text-rose-400 hover:text-rose-300 font-bold ml-1.5" title="លុប">×</button>
                                     </div>
                                     <div contenteditable="true" class="cert-editable font-bold ${txt.fontFamily}" style="font-size: ${txt.fontSize}px; color: ${txt.color}; outline: none; min-width: 60px;">
@@ -1688,8 +1928,11 @@ window.KrouDigital = {
                                 
                                 <!-- 🏛️ ក្បាលប័ណ្ណ (Official Header matching sample image) 🏛️ -->
                                 <div class="flex justify-between items-start text-xs px-2 pt-1">
-                                    <!-- Left: MoEYS Logo & Hierarchy (ដូចរូបគំរូ) -->
-                                    <div class="text-left pt-0.5 space-y-0.5 max-w-[270px]">
+                                    <!-- Left: MoEYS Logo & Hierarchy (ដូចរូបគំរូ - DRAGGABLE SECTION) -->
+                                    <div id="cert_sec_header_left" class="canva-draggable-section text-left pt-0.5 space-y-0.5 max-w-[270px]" style="transform: translate(${posHeaderLeft.x}px, ${posHeaderLeft.y}px);">
+                                        <div class="drag-handle no-print hidden items-center gap-1 px-1.5 py-0.5 bg-slate-900/90 text-amber-300 text-[9px] rounded shadow border border-amber-500/60 -top-5 left-0 absolute whitespace-nowrap cursor-move z-50">
+                                            <i class="fa-solid fa-up-down-left-right"></i> អូសទីតាំង
+                                        </div>
                                         <div class="mb-1">
                                             ${customLogoB64 ? `
                                                 <img src="${customLogoB64}" alt="Logo" class="w-14 h-14 object-contain shadow-sm rounded-full" />
@@ -1704,26 +1947,36 @@ window.KrouDigital = {
                                         <p contenteditable="true" class="cert-editable font-moul text-blue-950 text-[10px] leading-tight">${schoolName}</p>
                                     </div>
 
-                                    <!-- Center: Kingdom of Cambodia & National Motto -->
-                                    <div class="text-center pt-1">
+                                    <!-- Center: Kingdom of Cambodia & National Motto (DRAGGABLE SECTION) -->
+                                    <div id="cert_sec_header_center" class="canva-draggable-section text-center pt-1" style="transform: translate(${posHeaderCenter.x}px, ${posHeaderCenter.y}px);">
+                                        <div class="drag-handle no-print hidden items-center gap-1 px-1.5 py-0.5 bg-slate-900/90 text-amber-300 text-[9px] rounded shadow border border-amber-500/60 -top-5 left-1/2 -translate-x-1/2 absolute whitespace-nowrap cursor-move z-50">
+                                            <i class="fa-solid fa-up-down-left-right"></i> អូសទីតាំង
+                                        </div>
                                         <p contenteditable="true" class="cert-editable font-moul text-blue-950 text-sm md:text-base tracking-wide">ព្រះរាជាណាចក្រកម្ពុជា</p>
                                         <p contenteditable="true" class="cert-editable font-moul text-blue-900 text-xs md:text-sm mt-0.5">ជាតិ សាសនា ព្រះមហាក្សត្រ</p>
                                         <img src="${window.CMS_HEADER_SYMBOL_B64 || 'assets/images/header-flourish.png'}" class="header-flourish-symbol" alt="symbol" style="display: block; margin: 3px auto 0 auto; width: 130px; height: 10px; object-fit: contain;" />
                                     </div>
 
-                                    <!-- Right spacer or secondary stamp -->
+                                    <!-- Right spacer -->
                                     <div class="text-right min-w-[70px]"></div>
                                 </div>
 
-                                <!-- 🎖️ ចំណងជើងប័ណ្ណសរសើរ / លិខិតសរសើរ (Title Banner matching sample image) 🎖️ -->
-                                <div class="my-2 text-center">
+                                <!-- 🎖️ ចំណងជើងប័ណ្ណសរសើរ / លិខិតសរសើរ (Title Banner - DRAGGABLE SECTION) 🎖️ -->
+                                <div id="cert_sec_title" class="canva-draggable-section my-2 text-center" style="transform: translate(${posTitle.x}px, ${posTitle.y}px);">
+                                    <div class="drag-handle no-print hidden items-center gap-1 px-2 py-0.5 bg-slate-900/90 text-amber-300 text-[10px] rounded shadow border border-amber-500/60 -top-6 left-1/2 -translate-x-1/2 absolute whitespace-nowrap cursor-move z-50">
+                                        <i class="fa-solid fa-up-down-left-right"></i> អូសចំណងជើង (Drag Title)
+                                    </div>
                                     <h1 id="certMainTitle" contenteditable="true" class="cert-editable ${certFontFamily} text-3xl sm:text-4xl md:text-5xl drop-shadow-sm mb-1 tracking-wide" style="color: ${certTitleColor};">
                                         ${titleType}
                                     </h1>
                                 </div>
 
-                                <!-- 📜 តួសេចក្តី (Body Content matching sample image) 📜 -->
-                                <div class="my-1.5 max-w-4xl mx-auto space-y-2.5 text-sm md:text-base leading-relaxed text-slate-800">
+                                <!-- 📜 តួសេចក្តី (Body Content - DRAGGABLE SECTION) 📜 -->
+                                <div id="cert_sec_body" class="canva-draggable-section my-1.5 max-w-4xl mx-auto space-y-2.5 text-sm md:text-base leading-relaxed text-slate-800" style="transform: translate(${posBody.x}px, ${posBody.y}px);">
+                                    <div class="drag-handle no-print hidden items-center gap-1 px-2 py-0.5 bg-slate-900/90 text-amber-300 text-[10px] rounded shadow border border-amber-500/60 -top-6 left-1/2 -translate-x-1/2 absolute whitespace-nowrap cursor-move z-50">
+                                        <i class="fa-solid fa-up-down-left-right"></i> អូសតួសេចក្តី (Drag Body)
+                                    </div>
+
                                     <!-- Administration header line -->
                                     <p contenteditable="true" class="cert-editable font-moul text-blue-950 text-base md:text-lg">
                                         គណៈគ្រប់គ្រង${schoolName}
@@ -1756,10 +2009,13 @@ window.KrouDigital = {
                                     </div>
                                 </div>
 
-                                <!-- ✍️ ហត្ថលេខា និងកាលបរិច្ឆេទ (Signatures & Date matching sample image) ✍️ -->
+                                <!-- ✍️ ហត្ថលេខា និងកាលបរិច្ឆេទ (Signatures & Date - DRAGGABLE SECTIONS) ✍️ -->
                                 <div class="flex justify-between items-end text-xs mt-4 px-4 sm:px-10">
                                     <!-- Left side: បានឃើញ និងឯកភាព / នាយករងបច្ចេកទេស -->
-                                    <div class="text-center min-w-[150px]">
+                                    <div id="cert_sec_sig_left" class="canva-draggable-section text-center min-w-[150px]" style="transform: translate(${posSigLeft.x}px, ${posSigLeft.y}px);">
+                                        <div class="drag-handle no-print hidden items-center gap-1 px-1.5 py-0.5 bg-slate-900/90 text-amber-300 text-[9px] rounded shadow border border-amber-500/60 -top-5 left-1/2 -translate-x-1/2 absolute whitespace-nowrap cursor-move z-50">
+                                            <i class="fa-solid fa-up-down-left-right"></i> អូស
+                                        </div>
                                         <p contenteditable="true" class="cert-editable text-slate-700 text-[11px] font-bold">បានឃើញ និងឯកភាព</p>
                                         <p contenteditable="true" class="cert-editable font-moul text-blue-950 text-xs mt-0.5">នាយករងបច្ចេកទេស</p>
                                         
@@ -1774,7 +2030,10 @@ window.KrouDigital = {
                                     </div>
 
                                     <!-- Right side: Lunar Date, Solar Date, Teacher Signature -->
-                                    <div class="text-center min-w-[170px] space-y-0.5">
+                                    <div id="cert_sec_sig_right" class="canva-draggable-section text-center min-w-[170px] space-y-0.5" style="transform: translate(${posSigRight.x}px, ${posSigRight.y}px);">
+                                        <div class="drag-handle no-print hidden items-center gap-1 px-1.5 py-0.5 bg-slate-900/90 text-amber-300 text-[9px] rounded shadow border border-amber-500/60 -top-5 left-1/2 -translate-x-1/2 absolute whitespace-nowrap cursor-move z-50">
+                                            <i class="fa-solid fa-up-down-left-right"></i> អូស
+                                        </div>
                                         <p contenteditable="true" class="cert-editable text-slate-700 text-[10.5px]">${lunarDateStr}</p>
                                         <p contenteditable="true" class="cert-editable text-slate-700 text-[11px] font-bold">${solarDateStr}</p>
                                         <p contenteditable="true" class="cert-editable font-moul text-blue-950 text-xs mt-1">គ្រូទទួលបន្ទុកថ្នាក់</p>
@@ -1798,12 +2057,21 @@ window.KrouDigital = {
 
         modal.classList.remove("hidden");
 
-        // 🎯 ភ្ជាប់ Event សម្រាប់អូស Text និង Pictures ដោយសេរី (Init Draggables)
+        // 🎯 ភ្ជាប់ Event សម្រាប់អូស Text, Sections, និង Pictures ដោយសេរី (Init Draggables)
         setTimeout(() => {
+            // Core Sections
+            ['sec_header_left', 'sec_header_center', 'sec_title', 'sec_body', 'sec_sig_left', 'sec_sig_right'].forEach(id => {
+                const el = document.getElementById('cert_' + id);
+                if (el) window.KrouDigital.initDraggable(el, 'section', id);
+            });
+
+            // Custom Texts
             customTexts.forEach(t => {
                 const el = document.getElementById(t.id);
                 if (el) window.KrouDigital.initDraggable(el, 'text', t.id);
             });
+
+            // Custom Pictures
             customPics.forEach(p => {
                 const el = document.getElementById(p.id);
                 if (el) window.KrouDigital.initDraggable(el, 'pic', p.id);
