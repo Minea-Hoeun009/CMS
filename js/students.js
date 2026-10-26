@@ -538,19 +538,14 @@ window.filterStudents = function() {
             if (rawAssigned && rawAssigned !== "all" && rawAssigned !== "គ្រប់ថ្នាក់") {
                 const assignedGrade = typeof window.normalizeGrade === 'function' ? window.normalizeGrade(rawAssigned) : rawAssigned;
                 if (assignedGrade && normGrade && normGrade !== assignedGrade) {
-                    const hasAssignedGradeStudents = baseStudents.some(st => (typeof window.normalizeGrade === 'function' ? window.normalizeGrade(st.grade) : st.grade) === assignedGrade);
-                    if (hasAssignedGradeStudents) {
-                        return false;
-                    }
+                    return false;
                 }
             }
             const cleanScopeRoom = cleanRoom(scope.room);
             if (cleanScopeRoom && cleanScopeRoom !== "all" && cleanScopeRoom !== "គ្រប់បន្ទប់" && cleanScopeRoom !== "ទូទៅ") {
-                if (safeRoom && safeRoom !== cleanScopeRoom) {
-                    const hasAssignedRoomStudents = baseStudents.some(st => cleanRoom(st.room) === cleanScopeRoom);
-                    if (hasAssignedRoomStudents) {
-                        return false;
-                    }
+                const effectiveStudentRoom = safeRoom || 'ក';
+                if (effectiveStudentRoom !== cleanScopeRoom) {
+                    return false;
                 }
             }
         }
@@ -601,8 +596,9 @@ window.filterStudents = function() {
         return matchSearch && matchGrade && matchRoom && matchGender && matchStatus;
     });
 
-    // 🟢 Single-Classroom UX Guard: បើគ្មានពាក្យស្វែងរក ហើយតម្រងទូទៅមិនត្រូវគ្នាដោយសារ format ត្រូវបង្ហាញសិស្សសកម្មទាំងអស់ភ្លាមៗ
-    if (window.filteredStudents.length === 0 && baseStudents.length > 0 && search === "" && gender === "all") {
+    // 🟢 Single-Classroom UX Guard: ដំណើរការតែក្នុងករណី Admin ឬ Legacy Test ដែលគ្មានកំណត់វិសាលភាពថ្នាក់ជាក់លាក់
+    const hasTeacherScope = !isSchoolOrSysAdmin && !isReportViewer && scope && scope.grade && scope.grade !== "all" && scope.grade !== "គ្រប់ថ្នាក់";
+    if (!hasTeacherScope && window.filteredStudents.length === 0 && baseStudents.length > 0 && search === "" && gender === "all") {
         const activeList = baseStudents.filter(s => {
             const st = String(s?.status || '').toLowerCase().trim();
             return !inactiveStatuses.includes(st);
@@ -610,7 +606,15 @@ window.filterStudents = function() {
         window.filteredStudents = activeList.length > 0 ? activeList : [...baseStudents];
     }
 
-    if (document.getElementById("hdrTotal")) document.getElementById("hdrTotal").innerText = baseStudents.length;
+    const activeClassStus = hasTeacherScope
+        ? baseStudents.filter(s => {
+            const sg = typeof window.normalizeGrade === 'function' ? window.normalizeGrade(s.grade) : s.grade;
+            const ag = typeof window.normalizeGrade === 'function' ? window.normalizeGrade(scope.grade) : scope.grade;
+            return sg === ag;
+        })
+        : baseStudents;
+
+    if (document.getElementById("hdrTotal")) document.getElementById("hdrTotal").innerText = activeClassStus.length;
     if (document.getElementById("hdrActive")) document.getElementById("hdrActive").innerText = window.filteredStudents.length;
 
     window.renderStudentsTable();
@@ -778,10 +782,11 @@ window.openStudentModal = function(id = null) {
     if(previewImg) { previewImg.src = ""; previewImg.classList.add("hidden"); }
     if(iconPlaceholder) iconPlaceholder.classList.remove("hidden");
 
-    // 🟢 ថាមវន្ត៖ ទាញយកថ្នាក់ និងបន្ទប់ ពី Settings 🟢
-    const sInfo = typeof appSettings !== 'undefined' ? appSettings : {};
-    const defaultGrade = sInfo.teacher_level || "ថ្នាក់ទី ១";
-    const defaultRoom = sInfo.teacher_room || "«ក»";
+    // 🟢 ថាមវន្ត៖ ទាញយកថ្នាក់ និងបន្ទប់ ពី Settings / Active Class 🟢
+    const curClass = typeof window.getCurrentSelectedClass === 'function' ? window.getCurrentSelectedClass() : null;
+    const sInfo = typeof appSettings !== 'undefined' ? appSettings : (window.appSettings || JSON.parse(localStorage.getItem('school_settings') || '{}'));
+    const defaultGrade = (curClass && curClass.level) || localStorage.getItem('auth_teacher_grade') || localStorage.getItem('auth_assigned_grade') || localStorage.getItem('selected_level') || sInfo.teacher_level || "ថ្នាក់ទី ១";
+    const defaultRoom = (curClass && curClass.room) || localStorage.getItem('auth_teacher_room') || localStorage.getItem('auth_assigned_room') || localStorage.getItem('selected_room') || sInfo.teacher_room || "«ក»";
 
     if (id) {
         const stu = window.allStudents.find(s => String(s.id) === String(id));

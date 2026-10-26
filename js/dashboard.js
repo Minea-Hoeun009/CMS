@@ -89,23 +89,18 @@
             let classStudents = [];
             if (typeof window.getStudentsForClass === 'function') {
                 classStudents = window.getStudentsForClass(curLevel, curRoom, academicYear);
-            }
-            if (!classStudents || classStudents.length === 0) {
-                if (typeof window.getMasterStudents === 'function') {
-                    classStudents = window.getMasterStudents();
-                } else if (Array.isArray(window.allStudents) && window.allStudents.length > 0) {
-                    classStudents = window.allStudents;
-                } else {
-                    try { classStudents = JSON.parse(localStorage.getItem('academic_students') || '[]'); } catch (e) {}
-                }
-                const filtered = classStudents.filter(s => {
+            } else {
+                const allStus = typeof window.getMasterStudents === 'function' ? window.getMasterStudents() : (window.allStudents || []);
+                const targetG = typeof window.normalizeGrade === 'function' ? window.normalizeGrade(curLevel) : curLevel;
+                const targetR = String(curRoom || '«ក»').replace(/[«»\s]/g, '');
+                classStudents = allStus.filter(s => {
                     if (!s) return false;
+                    const st = String(s.status || "Active").toLowerCase();
+                    if (st === "dropped" || st === "withdrawn" || st === "ឈប់រៀន") return false;
                     const g = typeof window.normalizeGrade === 'function' ? window.normalizeGrade(s.grade) : s.grade;
-                    const r = String(s.room || '').replace(/[«»\s]/g, '');
-                    const targetR = curRoom.replace(/[«»\s]/g, '');
-                    return (!g || g === curLevel) && (!r || r === targetR);
+                    const r = String(s.room || '«ក»').replace(/[«»\s]/g, '');
+                    return (!targetG || targetG === 'all' || g === targetG) && (!targetR || targetR === 'all' || r === targetR);
                 });
-                if (filtered.length > 0) classStudents = filtered;
             }
 
             const activeStudents = classStudents.filter(s => {

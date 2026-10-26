@@ -620,9 +620,6 @@ window.KrouDigital = {
                 }
                 return true;
             });
-            if (classStudents.length === 0 && baseList.length > 0) {
-                classStudents = baseList;
-            }
         }
 
         container.innerHTML = `

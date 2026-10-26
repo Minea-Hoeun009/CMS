@@ -99,6 +99,16 @@ window.getTeacherGradeInfo = function() {
     const currentTeacherId = window.AuthState ? window.AuthState.teacherId : localStorage.getItem('auth_teacher_id');
     const currentYearStr = document.getElementById("globalAcademicYear")?.value || localStorage.getItem('selected_academic_year') || "2026-2027";
     
+    // អាទិភាពទី ១៖ ថ្នាក់ដែលបានចាត់តាំងរបស់គ្រូក្នុងគណនីបច្ចុប្បន្ន
+    const assignedGrade = (window.AuthState ? (window.AuthState.teacher_level || window.AuthState.assigned_grade) : null) || localStorage.getItem('auth_teacher_grade') || localStorage.getItem('auth_assigned_grade') || localStorage.getItem('selected_level');
+    const assignedRoom = (window.AuthState ? (window.AuthState.teacher_room || window.AuthState.assigned_room) : null) || localStorage.getItem('auth_teacher_room') || localStorage.getItem('auth_assigned_room') || localStorage.getItem('selected_room');
+    if (assignedGrade && assignedRoom && assignedGrade !== 'all') {
+        return {
+            level: typeof normalizeGrade === 'function' ? normalizeGrade(assignedGrade) : assignedGrade,
+            room: assignedRoom
+        };
+    }
+
     try {
         const rawStudents = typeof window.getMasterStudents === 'function' ? window.getMasterStudents() : (JSON.parse(localStorage.getItem('academic_students')) || []);
         const myStudents = rawStudents.filter(s => String(s.teacher_id) === String(currentTeacherId) && String(s.academic_year) === String(currentYearStr) && s.status !== "Dropped");
