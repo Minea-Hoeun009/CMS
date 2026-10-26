@@ -3030,11 +3030,7 @@ window.printScoreList = function() {
               <div class="header-right" style="text-align: center; line-height: 1.6;">
                 <p style="margin: 0 0 4px 0; font-size: 11pt; font-family: 'Khmer OS Muol Light', 'Moul', serif; color: #0f172a;">ព្រះរាជាណាចក្រកម្ពុជា</p>
                 <p style="margin: 0; font-size: 10.5pt; font-family: 'Khmer OS Muol Light', 'Moul', serif; color: #0f172a;">ជាតិ សាសនា ព្រះមហាក្សត្រ</p>
-                <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin: 4px auto 0 auto; width: 65%;">
-                  <div style="height: 1px; flex: 1; background: linear-gradient(to right, transparent, #334155);"></div>
-                  <span style="font-size: 10px; color: #334155;">៚ ❖ ៚</span>
-                  <div style="height: 1px; flex: 1; background: linear-gradient(to left, transparent, #334155);"></div>
-                </div>
+                <img src="${window.CMS_HEADER_SYMBOL_B64 || 'assets/images/header-flourish.png'}" class="header-flourish-symbol" alt="symbol" style="display: block; margin: 4px auto 0 auto; width: 135px; height: 11px; object-fit: contain;" />
               </div>
             </div>
             <div class="title-box" style="text-align: center; margin: 8px 0 14px 0;">
@@ -3343,11 +3339,7 @@ window.printRankingTable = function() {
               <div class="header-right" style="text-align: center; line-height: 1.6;">
                 <p style="margin: 0 0 4px 0; font-size: 11pt; font-family: 'Khmer OS Muol Light', 'Moul', serif; color: #0f172a;">ព្រះរាជាណាចក្រកម្ពុជា</p>
                 <p style="margin: 0; font-size: 10.5pt; font-family: 'Khmer OS Muol Light', 'Moul', serif; color: #0f172a;">ជាតិ សាសនា ព្រះមហាក្សត្រ</p>
-                <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin: 4px auto 0 auto; width: 65%;">
-                  <div style="height: 1px; flex: 1; background: linear-gradient(to right, transparent, #334155);"></div>
-                  <span style="font-size: 10px; color: #334155;">៚ ❖ ៚</span>
-                  <div style="height: 1px; flex: 1; background: linear-gradient(to left, transparent, #334155);"></div>
-                </div>
+                <img src="${window.CMS_HEADER_SYMBOL_B64 || 'assets/images/header-flourish.png'}" class="header-flourish-symbol" alt="symbol" style="display: block; margin: 4px auto 0 auto; width: 135px; height: 11px; object-fit: contain;" />
               </div>
             </div>
             <div class="title-box" style="text-align: center; margin: 8px 0 14px 0;">

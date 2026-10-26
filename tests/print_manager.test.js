@@ -153,7 +153,7 @@ describe('CMS Universal Print Manager & Paper Config Tests', () => {
     assert.ok(header.includes('ការិយាល័យ អប់រំ យុវជននិងកីឡានៃរដ្ឋបាលស្រុក កៀនស្វាយ'));
     assert.ok(header.includes('ព្រះរាជាណាចក្រកម្ពុជា'));
     assert.ok(header.includes('ជាតិ សាសនា ព្រះមហាក្សត្រ'));
-    assert.ok(header.includes('៚ ❖ ៚'));
+    assert.ok(header.includes('header-flourish-symbol'));
 
     const title = context.window.CMSPrintManager.getTitleHtml('បញ្ជីស្រង់ពិន្ទុប្រចាំខែមករា', ctx.academicYear, ctx.grade);
     assert.ok(title.includes('បញ្ជីស្រង់ពិន្ទុប្រចាំខែមករា'));

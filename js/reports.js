@@ -616,10 +616,8 @@ window.renderStudentStatsReportHTML = function(container, targetGrade, targetRoo
                 <div class="text-center">
                     <p class="font-moul text-slate-900 text-[13px] mb-1">ព្រះរាជាណាចក្រកម្ពុជា</p>
                     <p class="font-moul text-slate-900 text-[13px]">ជាតិ សាសនា ព្រះមហាក្សត្រ</p>
-                    <div class="flex items-center justify-center gap-2 mt-1 mx-auto w-24">
-                        <div class="h-[1px] flex-1 bg-amber-600"></div>
-                        <span class="text-amber-700 text-[10px]">៚ ❖ ៚</span>
-                        <div class="h-[1px] flex-1 bg-amber-600"></div>
+                    <div class="flex items-center justify-center mt-1 mx-auto">
+                        <img src="${window.CMS_HEADER_SYMBOL_B64 || 'assets/images/header-flourish.png'}" class="header-flourish-symbol" alt="symbol" style="display: block; margin: 2px auto 0 auto; width: 135px; height: 11px; object-fit: contain;" />
                     </div>
                 </div>
             </div>
@@ -1087,10 +1085,8 @@ window.updateStudentListContent = function() {
                     <div class="text-center">
                         <p class="font-moul text-slate-900 text-[13px] mb-1">ព្រះរាជាណាចក្រកម្ពុជា</p>
                         <p class="font-moul text-slate-900 text-[13px]">ជាតិ សាសនា ព្រះមហាក្សត្រ</p>
-                        <div class="flex items-center justify-center gap-2 mt-1 mx-auto w-24">
-                            <div class="h-[1px] flex-1 bg-amber-600"></div>
-                            <span class="text-amber-700 text-[10px]">៚ ❖ ៚</span>
-                            <div class="h-[1px] flex-1 bg-amber-600"></div>
+                        <div class="flex items-center justify-center mt-1 mx-auto">
+                            <img src="${window.CMS_HEADER_SYMBOL_B64 || 'assets/images/header-flourish.png'}" class="header-flourish-symbol" alt="symbol" style="display: block; margin: 2px auto 0 auto; width: 135px; height: 11px; object-fit: contain;" />
                         </div>
                     </div>
                 </div>
@@ -1537,10 +1533,8 @@ window.renderAttendanceContent = function() {
                     <div class="text-center">
                         <p class="font-moul text-slate-900 text-[13px] mb-1">ព្រះរាជាណាចក្រកម្ពុជា</p>
                         <p class="font-moul text-slate-900 text-[13px]">ជាតិ សាសនា ព្រះមហាក្សត្រ</p>
-                        <div class="flex items-center justify-center gap-2 mt-1 mx-auto w-24">
-                            <div class="h-[1px] flex-1 bg-amber-600"></div>
-                            <span class="text-amber-700 text-[10px]">៚ ❖ ៚</span>
-                            <div class="h-[1px] flex-1 bg-amber-600"></div>
+                        <div class="flex items-center justify-center mt-1 mx-auto">
+                            <img src="${window.CMS_HEADER_SYMBOL_B64 || 'assets/images/header-flourish.png'}" class="header-flourish-symbol" alt="symbol" style="display: block; margin: 2px auto 0 auto; width: 135px; height: 11px; object-fit: contain;" />
                         </div>
                     </div>
                 </div>

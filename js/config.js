@@ -775,7 +775,17 @@ function updateSyncBadgeUI(count) {
 // =========================================================
 // ៣. មុខងារបោះពុម្ពស្តង់ដារកម្រិតខ្ពស់ (Universal CMS Print Manager)
 // =========================================================
+// =========================================================================
+// បន្ទាត់ក្បាច់ស្តង់ដារ ជាតិ សាសនា ព្រះមហាក្សត្រ (Standard Cambodian Header Flourish)
+// =========================================================================
+window.CMS_HEADER_SYMBOL_B64 = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAJUAAAAMCAYAAABry//EAAAClklEQVR4nO1XQUtVURB+/2CWQ0ZC4WqUtLUSKTwRwxsaz1UUhItaCD4xUDdiYYtaKj4jQ9sEtQg3raJwIf2Bclk7E40U99LzDnwHh8O5l1v4svB8MLxzz8ycc+7MN3PPK5UiIiIiIk4ZxMLEMk8sD3P0o8Tynli2iaXq6TudP7F0mXnB/Hf4vSaWpow9bsEuacArRpwEkOiuAqYuoXXIhdIxkWYd0UCIupEdYjkPslWJZZBYbhDLB2JZJJYxz15lAz667gKxtJkzfIbNj4JndoRtw3P/HwfrrCOPLGlSZjQxGGvSPhLLZWK5bmQeOpUBzNWI5SuxTJeOCXVoyPAG83vEskos94zuJrG0g0i6zkVi2YTuPrEMp0R9oetjjS2PaDXMXyGWyfS8b9HVQvIF+yzgvdT/GrG0Ynw1Iy79SuRG5uW/RaijePqEWJ6CLNo5hjBOjAwasXND6DS3ieVXoMto8nq8/SyBnd1S2o2eE8snz7bZ+WTIrnaptPP9JJZ9YlkjluWAPIMoyQ7gt+PITyx3vCJ6ZfbYNKR0MmaKq9HSGkpq51/aPEtqJkDjgWBoQB+DHAmekwJSxdo1kGI/kPRurHfOxKKOLjVn7CopAde9T6naDuSQagWEqYCQjjwTXhFYGYHvFLqjji95+WpCPOohfQSAwPdm6LTqds1YK7M50K2cPAKR1tElHpi1NkwyXuqnxTzb+9WcPZf5LK2au5cthIp5fmf2swXjSLVkyO7LOGxHQJ7lnJiVTzwRZwl6N8GvXoi7C/rYam43844oHRkdpgUE08v5XRBV/8H1wX8t4NOjSfYLwxD122+8ayTLvwxieaIX8Bx9BRfuFUcao+tw3S/gV8ZlfbjAGcquKCIiIiIiThtH7PZ3/jFJD4YAAAAASUVORK5CYII=";
+window.CMS_HEADER_SYMBOL_HTML = `<img src="${window.CMS_HEADER_SYMBOL_B64}" class="header-flourish-symbol" alt="symbol" style="display: block; margin: 4px auto 0 auto; width: 135px; height: 11px; object-fit: contain;" />`;
+
 window.CMSPrintManager = {
+    HEADER_SYMBOL_B64: window.CMS_HEADER_SYMBOL_B64,
+    getHeaderSymbolHtml: function() {
+        return window.CMS_HEADER_SYMBOL_HTML;
+    },
     // បោះពុម្ព Element ឬ ID ណាមួយ ជាមួយជម្រើសទំហំក្រដាស ទិសដៅ និងមាត្រដ្ឋាន (Scale)
     print: function(elementOrId, options = {}) {
         const target = typeof elementOrId === 'string' ? document.getElementById(elementOrId) : elementOrId;
@@ -1102,11 +1112,7 @@ window.CMSPrintManager = {
               <div class="header-right" style="text-align: center; line-height: 1.6;">
                 <p style="margin: 0 0 4px 0; font-size: 11pt; font-family: 'Khmer OS Muol Light', 'Moul', serif; color: #0f172a;">ព្រះរាជាណាចក្រកម្ពុជា</p>
                 <p style="margin: 0; font-size: 10.5pt; font-family: 'Khmer OS Muol Light', 'Moul', serif; color: #0f172a;">ជាតិ សាសនា ព្រះមហាក្សត្រ</p>
-                <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin: 4px auto 0 auto; width: 65%;">
-                  <div style="height: 1px; flex: 1; background: linear-gradient(to right, transparent, #334155);"></div>
-                  <span style="font-size: 10px; color: #334155;">៚ ❖ ៚</span>
-                  <div style="height: 1px; flex: 1; background: linear-gradient(to left, transparent, #334155);"></div>
-                </div>
+                <img src="${window.CMS_HEADER_SYMBOL_B64}" class="header-flourish-symbol" alt="symbol" style="display: block; margin: 4px auto 0 auto; width: 135px; height: 11px; object-fit: contain;" />
               </div>
             </div>
         `;
