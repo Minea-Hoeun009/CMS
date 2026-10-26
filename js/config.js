@@ -3,7 +3,7 @@
 // ==========================================
 
 // 👉 URL របស់ Google Apps Script (Connected & Standardized)
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw6ZNl_m8VrX_HAgci15kWzBKIhoHOliii32LGxN7-_MIETighSV1LJvdodWET-7gtQ/exec";
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby65mFS_22-jsctxEJSLS_ebuAiWuPOrhcm1-_IVu3Xn_dePOIqPkfqDYwjc0JlU0TA/exec";
 window.SCRIPT_URL = SCRIPT_URL;
 window.getScriptUrl = function() {
   return localStorage.getItem('cms_custom_script_url') || SCRIPT_URL;
