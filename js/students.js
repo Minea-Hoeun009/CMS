@@ -189,8 +189,8 @@ window.loadStudentsView = async function() {
         const isSchoolOrSysAdmin = typeof window.isSchoolAdmin === 'function' ? window.isSchoolAdmin() : false;
         
         const curClass = typeof window.getCurrentSelectedClass === 'function' ? window.getCurrentSelectedClass() : { level: "ថ្នាក់ទី ១", room: "«ក»" };
-        let initialSelectedGrade = "all";
-        let initialSelectedRoom = "all";
+        let initialSelectedGrade = curClass.level || "ថ្នាក់ទី ១";
+        let initialSelectedRoom = curClass.room || "«ក»";
 
         const toKhNum = typeof window.toKhmerNum === 'function' ? window.toKhmerNum : String;
         const struct = window.academicStructure || window.defaultAcademicStructure || {};
@@ -1929,7 +1929,7 @@ window.printStudentList = function() {
     if (!window.filteredStudents || window.filteredStudents.length === 0) return alert("គ្មានទិន្នន័យដើម្បីបោះពុម្ពទេ!");
 
     const sInfo = typeof appSettings !== 'undefined' ? appSettings : {};
-    const schoolName = sInfo.school_name || "សាលាបឋមសិក្សា.......................";
+    const schoolName = sInfo.school_name || "សាលាបឋមសិក្សា ខ្សុំ";
     let rawDistrict = sInfo.district || "ស្រុកកៀនស្វាយ";
     const districtName = rawDistrict.replace('ស្រុក', '').trim();
     const academicYear = document.getElementById("globalAcademicYear")?.value || localStorage.getItem('selected_academic_year') || "2026-2027";
@@ -1946,24 +1946,47 @@ window.printStudentList = function() {
     const solarDateStr = `${locationStr}, ${sDate}`;
     const lunarDateStr = rDates.showLunar !== false ? (rDates.lunarDate || "ថ្ងៃ......................... ខែ............ ឆ្នាំ............ ព.ស.២៥៧...") : "";
 
-    // ទាញយកព័ត៌មានថ្នាក់ដែលគ្រូគ្រប់គ្រងពីការកំណត់ (appSettings)
-    const defaultLevel = sInfo.teacher_level || "ថ្នាក់ទី ១";
-    const defaultRoom = sInfo.teacher_room || "«ក»";
+    // ទាញយកព័ត៌មានថ្នាក់ដែលគ្រូគ្រប់គ្រងពីការកំណត់ (appSettings ឬ State)
+    const curClass = typeof window.getCurrentSelectedClass === 'function' ? window.getCurrentSelectedClass() : null;
+    const defaultLevel = (curClass && curClass.level) || sInfo.teacher_level || localStorage.getItem('auth_teacher_grade') || localStorage.getItem('selected_level') || "ថ្នាក់ទី ១";
+    const defaultRoom = (curClass && curClass.room) || sInfo.teacher_room || localStorage.getItem('auth_teacher_room') || localStorage.getItem('selected_room') || "«ក»";
 
-    // ទាញយកតម្លៃដែលគ្រូជ្រើសរើស តែបើសិនអត់ជ្រើសរើស (ឬ Error) ទាញយកថ្នាក់ដែលគ្រូគ្រប់គ្រង
-    const filterGrade = document.getElementById("stuFilterGrade")?.value || defaultLevel;
-    const filterRoom = document.getElementById("stuFilterRoom")?.value || defaultRoom;
+    // ទាញយកតម្លៃដែលគ្រូជ្រើសរើស តែបើសិនអត់ជ្រើសរើស ទាញយកថ្នាក់ដែលគ្រូគ្រប់គ្រង
+    const filterGrade = document.getElementById("stuFilterGrade")?.value;
+    const filterRoom = document.getElementById("stuFilterRoom")?.value;
     
-    // បង្ហាញចំណងជើងរង (SubTitle) តាមថ្នាក់ដែលគ្រូគ្រប់គ្រង
-    let subTitle = (filterGrade === "all" && filterRoom === "all") 
-        ? "សិស្សទាំងអស់សរុបក្នុងសាលា" 
-        : `${filterGrade === "all" ? "គ្រប់ថ្នាក់" : filterGrade} ${filterRoom === "all" ? "" : filterRoom}`.trim();
+    // បង្ហាញចំណងជើងរង (SubTitle) តាមថ្នាក់ជាក់ស្តែងរបស់គ្រូបន្ទុកថ្នាក់
+    const targetGrade = (filterGrade && filterGrade !== "all") ? filterGrade : defaultLevel;
+    const targetRoom = (filterRoom && filterRoom !== "all") ? filterRoom : defaultRoom;
+    let subTitle = `${targetGrade} ${targetRoom}`.trim();
 
-    let total = window.filteredStudents.length;
+    // ត្រងយកសិស្សក្នុងថ្នាក់ជាក់ស្តែងនោះមកបោះពុម្ព
+    const cleanRoom = (r) => String(r || '').replace(/[«»\s]/g, '');
+    const normTarget = typeof window.normalizeGrade === 'function' ? window.normalizeGrade(targetGrade) : targetGrade;
+    const targetCleanRoom = cleanRoom(targetRoom);
+
+    let baseList = (window.filteredStudents && window.filteredStudents.length > 0) ? window.filteredStudents : (window.allStudents || []);
+    let studentsToPrint = baseList.filter(stu => {
+        if (!stu) return false;
+        const stuGrade = typeof window.normalizeGrade === 'function' ? window.normalizeGrade(stu.grade) : String(stu.grade || '').trim();
+        const gradeMatches = !normTarget || normTarget === "all" || stuGrade === normTarget || String(stu.grade || '').trim() === targetGrade;
+        if (!gradeMatches) return false;
+        if (targetCleanRoom && targetCleanRoom !== 'all') {
+            const stuRoom = cleanRoom(stu.room);
+            if (stuRoom && stuRoom !== targetCleanRoom) return false;
+        }
+        return true;
+    });
+
+    if (studentsToPrint.length === 0 && baseList.length > 0) {
+        studentsToPrint = baseList;
+    }
+
+    let total = studentsToPrint.length;
     let female = 0;
 
     let rowsHtml = "";
-    window.filteredStudents.forEach((stu, idx) => {
+    studentsToPrint.forEach((stu, idx) => {
         let isF = stu.gender === 'ស្រី';
         if (isF) female++;
 
@@ -2043,10 +2066,8 @@ window.printStudentList = function() {
 // មុខងារបោះពុម្ពបញ្ជីរាយនាមសិស្ស (លម្អិត - ផ្តេក A4 Landscape)
 // ==========================================
 window.printFullStudentList = function() {
-    if (!window.filteredStudents || window.filteredStudents.length === 0) return alert("គ្មានទិន្នន័យដើម្បីបោះពុម្ពទេ!");
-
     const sInfo = typeof appSettings !== 'undefined' ? appSettings : {};
-    const schoolName = sInfo.school_name || "សាលាបឋមសិក្សា.......................";
+    const schoolName = sInfo.school_name || "សាលាបឋមសិក្សា ខ្សុំ";
     let rawDistrict = sInfo.district || "ស្រុកកៀនស្វាយ";
     const districtName = rawDistrict.replace('ស្រុក', '').trim();
     const academicYear = document.getElementById("globalAcademicYear")?.value || localStorage.getItem('selected_academic_year') || "2026-2027";
@@ -2063,20 +2084,45 @@ window.printFullStudentList = function() {
     const solarDateStr = `${locationStr}, ${sDate}`;
     const lunarDateStr = rDates.showLunar !== false ? (rDates.lunarDate || "ថ្ងៃ......................... ខែ............ ឆ្នាំ............ ព.ស.២៥៧...") : "";
 
-    // ទាញយកព័ត៌មានថ្នាក់ដែលគ្រូគ្រប់គ្រងពីការកំណត់ (appSettings)
-    const defaultLevel = sInfo.teacher_level || "ថ្នាក់ទី ១";
-    const defaultRoom = sInfo.teacher_room || "«ក»";
+    // ទាញយកព័ត៌មានថ្នាក់ដែលគ្រូគ្រប់គ្រងពីការកំណត់ (appSettings ឬ State)
+    const curClass = typeof window.getCurrentSelectedClass === 'function' ? window.getCurrentSelectedClass() : null;
+    const defaultLevel = (curClass && curClass.level) || sInfo.teacher_level || localStorage.getItem('auth_teacher_grade') || localStorage.getItem('selected_level') || "ថ្នាក់ទី ១";
+    const defaultRoom = (curClass && curClass.room) || sInfo.teacher_room || localStorage.getItem('auth_teacher_room') || localStorage.getItem('selected_room') || "«ក»";
 
-    // ទាញយកតម្លៃដែលគ្រូជ្រើសរើស តែបើសិនអត់ជ្រើសរើស (ឬ Error) ទាញយកថ្នាក់ដែលគ្រូគ្រប់គ្រង
-    const filterGrade = document.getElementById("stuFilterGrade")?.value || defaultLevel;
-    const filterRoom = document.getElementById("stuFilterRoom")?.value || defaultRoom;
+    // ទាញយកតម្លៃដែលគ្រូជ្រើសរើស តែបើសិនអត់ជ្រើសរើស ទាញយកថ្នាក់ដែលគ្រូគ្រប់គ្រង
+    const filterGrade = document.getElementById("stuFilterGrade")?.value;
+    const filterRoom = document.getElementById("stuFilterRoom")?.value;
     
-    // បង្ហាញចំណងជើងរង (SubTitle) តាមថ្នាក់ដែលគ្រូគ្រប់គ្រង
-    let subTitle = (filterGrade === "all" && filterRoom === "all") 
-        ? "សិស្សទាំងអស់សរុបក្នុងសាលា" 
-        : `${filterGrade === "all" ? "គ្រប់ថ្នាក់" : filterGrade} ${filterRoom === "all" ? "" : filterRoom}`.trim();
+    // បង្ហាញចំណងជើងរង (SubTitle) តាមថ្នាក់ជាក់ស្តែងរបស់គ្រូបន្ទុកថ្នាក់
+    const targetGrade = (filterGrade && filterGrade !== "all") ? filterGrade : defaultLevel;
+    const targetRoom = (filterRoom && filterRoom !== "all") ? filterRoom : defaultRoom;
+    let subTitle = `${targetGrade} ${targetRoom}`.trim();
 
-    let total = window.filteredStudents.length;
+    // ត្រងយកសិស្សក្នុងថ្នាក់ជាក់ស្តែងនោះមកបោះពុម្ព
+    const cleanRoom = (r) => String(r || '').replace(/[«»\s]/g, '');
+    const normTarget = typeof window.normalizeGrade === 'function' ? window.normalizeGrade(targetGrade) : targetGrade;
+    const targetCleanRoom = cleanRoom(targetRoom);
+
+    let baseList = (window.filteredStudents && window.filteredStudents.length > 0) ? window.filteredStudents : (window.allStudents || []);
+    let studentsToPrint = baseList.filter(stu => {
+        if (!stu) return false;
+        const stuGrade = typeof window.normalizeGrade === 'function' ? window.normalizeGrade(stu.grade) : String(stu.grade || '').trim();
+        const gradeMatches = !normTarget || normTarget === "all" || stuGrade === normTarget || String(stu.grade || '').trim() === targetGrade;
+        if (!gradeMatches) return false;
+        if (targetCleanRoom && targetCleanRoom !== 'all') {
+            const stuRoom = cleanRoom(stu.room);
+            if (stuRoom && stuRoom !== targetCleanRoom) return false;
+        }
+        return true;
+    });
+
+    if (studentsToPrint.length === 0 && baseList.length > 0) {
+        studentsToPrint = baseList;
+    }
+
+    if (studentsToPrint.length === 0) return alert("គ្មានទិន្នន័យដើម្បីបោះពុម្ពទេ!");
+
+    let total = studentsToPrint.length;
     let female = 0;
 
     const formatFullAddress = (v, c, d, p) => {
@@ -2089,7 +2135,7 @@ window.printFullStudentList = function() {
     };
 
     let rowsHtml = "";
-    window.filteredStudents.forEach((stu, idx) => {
+    studentsToPrint.forEach((stu, idx) => {
         let isF = stu.gender === 'ស្រី';
         if (isF) female++;
 

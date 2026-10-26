@@ -494,7 +494,7 @@ window.TimetableHomeworkManager = {
                     .text-center { text-align: center; }
                     .header-box { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px; }
                     .national-header { text-align: center; line-height: 1.5; }
-                    .school-header { text-align: left; line-height: 1.5; }
+                    .school-header { text-align: left; line-height: 1.5; padding-top: 24px; }
                     .title { font-size: 15pt; margin: 15px 0 5px 0; text-align: center; }
                     .subtitle { font-size: 11pt; text-align: center; margin-bottom: 15px; }
                     table { width: 100%; border-collapse: collapse; margin-top: 5px; }
@@ -678,7 +678,7 @@ window.TimetableHomeworkManager = {
             <div id="homeworkPrintArea" style="max-width: 210mm; min-height: 297mm; margin: 0 auto; padding: 15mm 12mm; background: white; font-family: 'Siemreap', sans-serif; color: #1e293b;">
                 <!-- Header -->
                 <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px;">
-                    <div style="text-align: center;">
+                    <div style="text-align: left; padding-top: 24px;">
                         <p style="font-family: 'Moul', serif; font-size: 10.5pt; margin: 0; color: #0f172a;">${sInfo.province || "រាជធានីភ្នំពេញ"}</p>
                         <p style="font-family: 'Moul', serif; font-size: 10.5pt; margin: 4px 0 0 0; color: #1e293b;">${schoolName}</p>
                         <p style="font-weight: bold; font-size: 9.5pt; margin: 4px 0 0 0; color: #4338ca;">ថ្នាក់បន្ទុក៖ ${gradeStr}</p>

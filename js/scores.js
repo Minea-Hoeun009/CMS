@@ -2850,7 +2850,7 @@ window.printScoreList = function() {
     const sInfo = typeof appSettings !== 'undefined' ? appSettings : {};
     const grade = (sInfo.teacher_level && sInfo.teacher_room) ? `${sInfo.teacher_level} ${sInfo.teacher_room}`.trim() : "ថ្នាក់ទី ២ «ក»";
     const districtName = (sInfo.district || "កៀនស្វាយ").replace(/^ស្រុក\s*/, '').trim(); 
-    const schoolName = sInfo.school_name || "សាលាបឋមសិក្សា ភ្នំ";
+    const schoolName = sInfo.school_name || "សាលាបឋមសិក្សា ខ្សុំ";
     const principalName = sInfo.principal_name || "";
     const teacherName = (window.AuthState ? window.AuthState.teacherName : null) || localStorage.getItem('auth_teacher_name') || sInfo.teacher_name || "";
     const academicYear = document.getElementById("globalAcademicYear")?.value || localStorage.getItem('selected_academic_year') || "២០២៦-២០២៧";
@@ -3059,8 +3059,8 @@ window.printScoreList = function() {
         <div id="print-wrapper">
           <div id="content-scaler">
             <div class="header-box" style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; width: 100%;">
-              <div class="header-left" style="text-align: left; line-height: 1.6;">
-                <p style="margin: 0 0 4px 0; font-size: 10.5pt; font-family: 'Khmer OS Muol Light', 'Moul', serif; color: #0f172a;">ការិយាល័យ អប់រំ យុវជននិងកីឡានៃរដ្ឋបាលស្រុក ${districtName}</p>
+              <div class="header-left" style="text-align: left; line-height: 1.6; padding-top: 24px;">
+                <p style="margin: 0 0 4px 0; font-size: 10.5pt; font-family: 'Khmer OS Muol Light', 'Moul', serif; color: #0f172a;">ការិយាល័យ អប់រំ យុវជន និងកីឡានៃរដ្ឋបាលស្រុក ${districtName}</p>
                 <p style="margin: 0; font-size: 10.5pt; font-family: 'Khmer OS Muol Light', 'Moul', serif; color: #0f172a;">${schoolName}</p>
               </div>
               <div class="header-right" style="text-align: center; line-height: 1.6;">
@@ -3159,7 +3159,7 @@ window.printRankingTable = function() {
     const sInfo = typeof appSettings !== 'undefined' ? appSettings : {};
     const grade = (sInfo.teacher_level && sInfo.teacher_room) ? `${sInfo.teacher_level} ${sInfo.teacher_room}`.trim() : "ថ្នាក់ទី ២ «ក»";
     const districtName = (sInfo.district || "កៀនស្វាយ").replace(/^ស្រុក\s*/, '').trim(); 
-    const schoolName = sInfo.school_name || "សាលាបឋមសិក្សា ភ្នំ";
+    const schoolName = sInfo.school_name || "សាលាបឋមសិក្សា ខ្សុំ";
     const principalName = sInfo.principal_name || "";
     const teacherName = (window.AuthState ? window.AuthState.teacherName : null) || localStorage.getItem('auth_teacher_name') || sInfo.teacher_name || "";
     const academicYear = document.getElementById("globalAcademicYear")?.value || localStorage.getItem('selected_academic_year') || "២០២៦-២០២៧";
@@ -3368,8 +3368,8 @@ window.printRankingTable = function() {
         <div id="print-wrapper">
           <div id="content-scaler">
             <div class="header-box" style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; width: 100%;">
-              <div class="header-left" style="text-align: left; line-height: 1.6;">
-                <p style="margin: 0 0 4px 0; font-size: 10.5pt; font-family: 'Khmer OS Muol Light', 'Moul', serif; color: #0f172a;">ការិយាល័យ អប់រំ យុវជននិងកីឡានៃរដ្ឋបាលស្រុក ${districtName}</p>
+              <div class="header-left" style="text-align: left; line-height: 1.6; padding-top: 24px;">
+                <p style="margin: 0 0 4px 0; font-size: 10.5pt; font-family: 'Khmer OS Muol Light', 'Moul', serif; color: #0f172a;">ការិយាល័យ អប់រំ យុវជន និងកីឡានៃរដ្ឋបាលស្រុក ${districtName}</p>
                 <p style="margin: 0; font-size: 10.5pt; font-family: 'Khmer OS Muol Light', 'Moul', serif; color: #0f172a;">${schoolName}</p>
               </div>
               <div class="header-right" style="text-align: center; line-height: 1.6;">

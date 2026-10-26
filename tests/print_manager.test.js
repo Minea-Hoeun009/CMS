@@ -150,7 +150,7 @@ describe('CMS Universal Print Manager & Paper Config Tests', () => {
     assert.equal(ctx.grade, 'ថ្នាក់ទី ២ "ក"');
 
     const header = context.window.CMSPrintManager.getHeaderHtml(ctx);
-    assert.ok(header.includes('ការិយាល័យ អប់រំ យុវជននិងកីឡានៃរដ្ឋបាលស្រុក កៀនស្វាយ'));
+    assert.ok(header.includes('ការិយាល័យ អប់រំ យុវជន និងកីឡានៃរដ្ឋបាលស្រុក កៀនស្វាយ'));
     assert.ok(header.includes('ព្រះរាជាណាចក្រកម្ពុជា'));
     assert.ok(header.includes('ជាតិ សាសនា ព្រះមហាក្សត្រ'));
     assert.ok(header.includes('header-flourish-symbol'));

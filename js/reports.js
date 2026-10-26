@@ -451,7 +451,7 @@ window.renderStudentStatsReportHTML = function(container, targetGrade, targetRoo
     // ទាញយកព័ត៌មានពីការកំណត់ (Settings)
     const districtName = (sInfo.district || "កៀនស្វាយ").replace(/^ស្រុក\s*/, '').trim(); 
     const provinceName = sInfo.province || "កណ្តាល";
-    const schoolName = sInfo.school_name || "សាលាបឋមសិក្សា ភ្នំ";
+    const schoolName = sInfo.school_name || "សាលាបឋមសិក្សា ខ្សុំ";
     const principalName = sInfo.principal_name || "";
     const teacherName = (window.AuthState ? window.AuthState.teacherName : null) || localStorage.getItem('auth_teacher_name') || sInfo.teacher_name || "";
     const teacherGender = sInfo.teacher_gender || "ប្រុស";
@@ -609,8 +609,8 @@ window.renderStudentStatsReportHTML = function(container, targetGrade, targetRoo
             </style>
 
             <div class="flex justify-between items-start mb-6">
-                <div class="text-left leading-relaxed">
-                    <p class="font-moul text-slate-900 text-[12px] mb-1">ការិយាល័យ អប់រំ យុវជននិងកីឡានៃរដ្ឋបាលស្រុក ${districtName}</p>
+                <div class="text-left leading-relaxed pt-6">
+                    <p class="font-moul text-slate-900 text-[12px] mb-1">ការិយាល័យ អប់រំ យុវជន និងកីឡានៃរដ្ឋបាលស្រុក ${districtName}</p>
                     <p class="font-moul text-slate-900 text-[12px]">${schoolName}</p>
                 </div>
                 <div class="text-center">
@@ -925,7 +925,7 @@ window.updateStudentListContent = function() {
     const curRoom = window.currentReportTargetRoom || document.getElementById("reportRoomSelect")?.value || activeClass.room || sInfo.teacher_room || "«ក»";
     const gradeFull = `${curLevel} ${curRoom}`.trim();
     const districtName = (sInfo.district || "កៀនស្វាយ").replace(/^ស្រុក\s*/, '').trim(); 
-    const schoolName = sInfo.school_name || "សាលាបឋមសិក្សា ភ្នំ";
+    const schoolName = sInfo.school_name || "សាលាបឋមសិក្សា ខ្សុំ";
     const principalName = sInfo.principal_name || "";
     const teacherName = (window.AuthState ? window.AuthState.teacherName : null) || localStorage.getItem('auth_teacher_name') || sInfo.teacher_name || "";
 
@@ -1074,8 +1074,8 @@ window.updateStudentListContent = function() {
         if (isFirstPage) {
             headerSection = `
                 <div class="flex justify-between items-start mb-6">
-                    <div class="text-left leading-relaxed">
-                        <p class="font-moul text-slate-900 text-[12px] mb-1">ការិយាល័យ អប់រំ យុវជននិងកីឡានៃរដ្ឋបាលស្រុក ${districtName}</p>
+                    <div class="text-left leading-relaxed pt-6">
+                        <p class="font-moul text-slate-900 text-[12px] mb-1">ការិយាល័យ អប់រំ យុវជន និងកីឡានៃរដ្ឋបាលស្រុក ${districtName}</p>
                         <p class="font-moul text-slate-900 text-[12px]">${schoolName}</p>
                     </div>
                     <div class="text-center">
@@ -1306,7 +1306,7 @@ window.renderAttendanceContent = function() {
     const curRoom = window.currentReportTargetRoom || document.getElementById("reportRoomSelect")?.value || activeClass.room || sInfo.teacher_room || "«ក»";
     const gradeFull = `${curLevel} ${curRoom}`.trim();
     const districtName = (sInfo.district || "កៀនស្វាយ").replace(/^ស្រុក\s*/, '').trim(); 
-    const schoolName = sInfo.school_name || "សាលាបឋមសិក្សា ភ្នំ";
+    const schoolName = sInfo.school_name || "សាលាបឋមសិក្សា ខ្សុំ";
     const principalName = sInfo.principal_name || "";
     const teacherName = (window.AuthState ? window.AuthState.teacherName : null) || localStorage.getItem('auth_teacher_name') || sInfo.teacher_name || "";
 
@@ -1522,8 +1522,8 @@ window.renderAttendanceContent = function() {
         if (isFirstPage) {
             headerSection = `
                 <div class="flex justify-between items-start mb-4">
-                    <div class="text-left leading-relaxed">
-                        <p class="font-moul text-slate-900 text-[12px] mb-1">ការិយាល័យ អប់រំ យុវជននិងកីឡានៃរដ្ឋបាលស្រុក ${districtName}</p>
+                    <div class="text-left leading-relaxed pt-6">
+                        <p class="font-moul text-slate-900 text-[12px] mb-1">ការិយាល័យ អប់រំ យុវជន និងកីឡានៃរដ្ឋបាលស្រុក ${districtName}</p>
                         <p class="font-moul text-slate-900 text-[12px]">${schoolName}</p>
                     </div>
                     <div class="text-center">

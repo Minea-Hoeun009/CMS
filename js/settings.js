@@ -493,7 +493,7 @@ window.renderPersonalSettingsTab = function() {
                     <p class="text-xs text-indigo-200 mt-1 flex flex-wrap items-center gap-2 font-bold">
                         <span>អត្តលេខគ្រូ៖ <strong class="font-mono text-white">${personal.teacher_id}</strong></span>
                         <span class="text-white/40">•</span>
-                        <span>បន្ទប់ទទួលបន្ទុក៖ <strong class="text-amber-300 font-moul">បន្ទប់ ${personal.teacher_room || '«ក»'}</strong></span>
+                        <span>បន្ទប់ទទួលបន្ទុក៖ <strong class="text-amber-300 font-moul"> ${personal.teacher_room || '«ក»'}</strong></span>
                     </p>
                 </div>
             </div>

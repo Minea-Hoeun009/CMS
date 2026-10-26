@@ -109,7 +109,7 @@ window.loadLibraryView = async function() {
     window.currentGradeRoom = activeClass.room || sInfo.teacher_room || "«ក»";
     window.currentGradeFull = `${window.currentGradeLevel} ${window.currentGradeRoom}`.trim();
     const academicYear = sInfo.academic_year || "២០២៦-២០២៧";
-    const schoolName = sInfo.school_name || "សាលាបឋមសិក្សា";
+    const schoolName = sInfo.school_name || "សាលាបឋមសិក្សា ខ្សុំ";
     const rawDistrict = sInfo.district_name || sInfo.cluster || "រមាសហែក";
     const cleanDistrict = rawDistrict.replace(/^ស្រុក\s*/, '').trim();
 
@@ -202,8 +202,8 @@ window.loadLibraryView = async function() {
              
              <!-- Document Header (Print Only or Web Top) -->
              <div class="flex justify-between items-start mb-6 border-b border-slate-100 pb-4">
-                <div class="text-left">
-                   <p class="text-[11px] md:text-xs text-slate-700 font-siemreap font-bold">ការិយាល័យអប់រំ យុវជន និងកីឡានៃរដ្ឋបាលស្រុក${cleanDistrict}</p>
+                <div class="text-left pt-6">
+                   <p class="text-[11px] md:text-xs text-slate-700 font-siemreap font-bold">ការិយាល័យ អប់រំ យុវជន និងកីឡានៃរដ្ឋបាលស្រុក ${cleanDistrict}</p>
                    <p class="text-[12px] md:text-[13px] font-moul text-slate-900 mt-1">${schoolName}</p>
                 </div>
                 <div class="text-center">
@@ -634,7 +634,7 @@ window.printLibraryReport = function() {
     if (!window.libStudents || window.libStudents.length === 0) return alert("គ្មានទិន្នន័យដើម្បីបោះពុម្ពទេ!");
 
     const sInfo = typeof appSettings !== 'undefined' ? appSettings : {};
-    const schoolName = sInfo.school_name || "សាលាបឋមសិក្សា";
+    const schoolName = sInfo.school_name || "សាលាបឋមសិក្សា ខ្សុំ";
     const districtName = sInfo.district || "ស្រុកកៀនស្វាយ";
     const academicYear = document.getElementById("globalAcademicYear")?.value || "2026-2027";
     const teacherName = window.AuthState ? window.AuthState.teacherName : (sInfo.teacher_name || ".......................");
@@ -830,7 +830,7 @@ window.printLibraryReport = function() {
             
             .p-header { width: 100%; margin-bottom: 20px; border-collapse: collapse; }
             .p-header td { vertical-align: top; border: none; padding: 0; }
-            .ph-left { text-align: left; width: 40%; font-family: 'Khmer OS Siemreap', 'Siemreap', sans-serif; font-size: 11pt; color: #020079; line-height: 1.4; white-space: nowrap; font-weight: bold; }
+            .ph-left { text-align: left; width: 40%; font-family: 'Khmer OS Siemreap', 'Siemreap', sans-serif; font-size: 11pt; color: #020079; line-height: 1.4; white-space: nowrap; font-weight: bold; padding-top: 24px; }
             .ph-right { text-align: center; width: 30%; font-family: 'Khmer OS Muol Light', 'Moul', serif; font-size: 12pt; color: #020079; line-height: 1.4; }
             
             .p-title { text-align: center; margin: 10px 0 20px 0; }
@@ -856,7 +856,7 @@ window.printLibraryReport = function() {
         <table class="p-header">
             <tr>
                 <td class="ph-left">
-                    ការិយាល័យអប់រំ យុវជន និងកីឡានៃរដ្ឋបាលស្រុក${districtName.replace('ស្រុក', '').trim()}<br>
+                    ការិយាល័យ អប់រំ យុវជន និងកីឡានៃរដ្ឋបាលស្រុក ${districtName.replace('ស្រុក', '').trim()}<br>
                     <span style="font-family: 'Khmer OS Muol Light', 'Moul', serif; font-size: 12pt; display: block; margin-top: 6px;">${schoolName}</span>
                 </td>
                 <td class="ph-right">

@@ -37,7 +37,7 @@ window.KrouDigital = {
 
         const academicYear = document.getElementById("globalAcademicYear")?.value || sInfo.academic_year || "២០២៦-២០២៧";
         const districtName = (sInfo.district || "កៀនស្វាយ").replace(/^ស្រុក\s*/, '').trim(); 
-        const schoolName = sInfo.school_name || "សាលាបឋមសិក្សា ភ្នំ";
+        const schoolName = sInfo.school_name || "សាលាបឋមសិក្សា ខ្សុំ";
         const principalName = sInfo.principal_name || "";
         const teacherName = (window.AuthState ? window.AuthState.teacherName : null) || localStorage.getItem('auth_teacher_name') || sInfo.teacher_name || "";
 
@@ -131,8 +131,8 @@ window.KrouDigital = {
                 
                 <!-- Header តាមស្តង់ដារក្រសួង -->
                 <div class="flex justify-between items-start mb-6 text-xs">
-                    <div class="text-left leading-relaxed">
-                        <p class="font-moul text-slate-900 text-[12px] mb-1">ការិយាល័យ អប់រំ យុវជននិងកីឡានៃរដ្ឋបាលស្រុក ${districtName}</p>
+                    <div class="text-left leading-relaxed pt-6">
+                        <p class="font-moul text-slate-900 text-[12px] mb-1">ការិយាល័យ អប់រំ យុវជន និងកីឡានៃរដ្ឋបាលស្រុក ${districtName}</p>
                         <p class="font-moul text-slate-900 text-[12px]">${schoolName}</p>
                     </div>
                     <div class="text-center">
@@ -254,7 +254,7 @@ window.KrouDigital = {
 
         const academicYear = document.getElementById("globalAcademicYear")?.value || sInfo.academic_year || "២០២៦-២០២៧";
         const districtName = (sInfo.district || "កៀនស្វាយ").replace(/^ស្រុក\s*/, '').trim(); 
-        const schoolName = sInfo.school_name || "សាលាបឋមសិក្សា ភ្នំ";
+        const schoolName = sInfo.school_name || "សាលាបឋមសិក្សា ខ្សុំ";
         const principalName = sInfo.principal_name || "";
         const teacherName = (window.AuthState ? window.AuthState.teacherName : null) || localStorage.getItem('auth_teacher_name') || sInfo.teacher_name || "";
         const selectedMonth = localStorage.getItem('selected_assessment_month') || "មករា";
@@ -328,8 +328,8 @@ window.KrouDigital = {
 
                 <!-- Header -->
                 <div class="flex justify-between items-start mb-6 text-xs">
-                    <div class="text-left leading-relaxed">
-                        <p class="font-moul text-slate-900 text-[12px] mb-1">ការិយាល័យ អប់រំ យុវជននិងកីឡានៃរដ្ឋបាលស្រុក ${districtName}</p>
+                    <div class="text-left leading-relaxed pt-6">
+                        <p class="font-moul text-slate-900 text-[12px] mb-1">ការិយាល័យ អប់រំ យុវជន និងកីឡានៃរដ្ឋបាលស្រុក ${districtName}</p>
                         <p class="font-moul text-slate-900 text-[12px]">${schoolName}</p>
                     </div>
                     <div class="text-center">
@@ -422,7 +422,7 @@ window.KrouDigital = {
 
         const academicYear = document.getElementById("globalAcademicYear")?.value || sInfo.academic_year || "២០២៦-២០២៧";
         const districtName = (sInfo.district || "កៀនស្វាយ").replace(/^ស្រុក\s*/, '').trim(); 
-        const schoolName = sInfo.school_name || "សាលាបឋមសិក្សា ភ្នំ";
+        const schoolName = sInfo.school_name || "សាលាបឋមសិក្សា ខ្សុំ";
         const principalName = sInfo.principal_name || "";
         const teacherName = (window.AuthState ? window.AuthState.teacherName : null) || localStorage.getItem('auth_teacher_name') || sInfo.teacher_name || "";
 
@@ -469,8 +469,8 @@ window.KrouDigital = {
             <div id="reportKoKhoPrintArea" class="bg-white p-6 md:p-10 w-full shadow-2xl rounded-2xl border border-slate-200 text-slate-800" style="max-width: 297mm; min-height: 210mm; font-family: 'Siemreap', sans-serif;">
                 
                 <div class="flex justify-between items-start mb-6 text-xs">
-                    <div class="text-left leading-relaxed">
-                        <p class="font-moul text-slate-900 text-[12px] mb-1">ការិយាល័យ អប់រំ យុវជននិងកីឡានៃរដ្ឋបាលស្រុក ${districtName}</p>
+                    <div class="text-left leading-relaxed pt-6">
+                        <p class="font-moul text-slate-900 text-[12px] mb-1">ការិយាល័យ អប់រំ យុវជន និងកីឡានៃរដ្ឋបាលស្រុក ${districtName}</p>
                         <p class="font-moul text-slate-900 text-[12px]">${schoolName}</p>
                     </div>
                     <div class="text-center">
@@ -707,7 +707,7 @@ window.KrouDigital = {
         const sInfo = window.appSettings || JSON.parse(localStorage.getItem('school_settings') || '{}');
         const academicYear = document.getElementById("globalAcademicYear")?.value || sInfo.academic_year || "២០២៦-២០២៧";
         const districtName = (sInfo.district || "កៀនស្វាយ").replace(/^ស្រុក\s*/, '').trim(); 
-        const schoolName = sInfo.school_name || "សាលាបឋមសិក្សា ភ្នំ";
+        const schoolName = sInfo.school_name || "សាលាបឋមសិក្សា ខ្សុំ";
         const principalName = sInfo.principal_name || "";
         const teacherName = (window.AuthState ? window.AuthState.teacherName : null) || localStorage.getItem('auth_teacher_name') || sInfo.teacher_name || "";
 
