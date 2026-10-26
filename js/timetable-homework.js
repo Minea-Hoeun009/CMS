@@ -39,6 +39,27 @@ window.TimetableHomeworkManager = {
         { slot: 8, session: 'afternoon', time: '១៥:៤០ - ១៦:២៥', label: 'ម៉ោងទី ៨ (រសៀល)' }
     ],
 
+    getRecessTimes: function() {
+        try {
+            const saved = localStorage.getItem('cms_custom_timetable_recess');
+            if (saved) return JSON.parse(saved);
+        } catch(e) {}
+        return {
+            morning: '០៨:៣៥ - ០៨:៥០',
+            afternoon: '១៤:៣៥ - ១៤:៥០'
+        };
+    },
+
+    saveRecessTimes: function(morning, afternoon) {
+        const toKh = typeof window.toKhmerNum === 'function' ? window.toKhmerNum : String;
+        const data = {
+            morning: morning ? toKh(morning.trim()) : '០៨:៣៥ - ០៨:៥០',
+            afternoon: afternoon ? toKh(afternoon.trim()) : '១៤:៣៥ - ១៤:៥០'
+        };
+        localStorage.setItem('cms_custom_timetable_recess', JSON.stringify(data));
+        return data;
+    },
+
     loadPeriods: function() {
         try {
             const saved = localStorage.getItem('cms_custom_timetable_periods');
@@ -72,23 +93,30 @@ window.TimetableHomeworkManager = {
                 }
             }
         }
+
+        // Save recess times too
+        const recM = document.getElementById("custom_recess_morning")?.value;
+        const recA = document.getElementById("custom_recess_afternoon")?.value;
+        this.saveRecessTimes(recM, recA);
+
         localStorage.setItem('cms_custom_timetable_periods', JSON.stringify(newPeriods));
         this.periods = newPeriods;
         this.closePeriodSettingsModal();
         this.renderView();
         if (typeof window.showToast === 'function') {
-            window.showToast("បានរក្សាទុកម៉ោងសិក្សាដោយជោគជ័យ!", "success");
+            window.showToast("បានរក្សាទុកម៉ោងសិក្សា និងម៉ោងចេញលេងដោយជោគជ័យ!", "success");
         }
     },
 
     resetPeriodsToDefault: function() {
         if (!confirm("តើអ្នកពិតជាចង់កំណត់ម៉ោងសិក្សាត្រឡប់មកស្តង់ដារក្រសួងដើមវិញមែនទេ?")) return;
         localStorage.removeItem('cms_custom_timetable_periods');
+        localStorage.removeItem('cms_custom_timetable_recess');
         this.periods = JSON.parse(JSON.stringify(this.defaultPeriods));
         this.closePeriodSettingsModal();
         this.renderView();
         if (typeof window.showToast === 'function') {
-            window.showToast("បានកំណត់ម៉ោងសិក្សាដូចដើម!", "info");
+            window.showToast("បានកំណត់ម៉ោងសិក្សា និងម៉ោងចេញលេងដូចដើម!", "info");
         }
     },
 
@@ -116,7 +144,13 @@ window.TimetableHomeworkManager = {
         { name: "សិល្បៈ", color: "bg-pink-100 text-pink-800 border-pink-200 dark:bg-pink-950/60 dark:text-pink-300" },
         { name: "ភាសាអង់គ្លេស", color: "bg-cyan-100 text-cyan-800 border-cyan-200 dark:bg-cyan-950/60 dark:text-cyan-300" },
         { name: "បំណិនជីវិត", color: "bg-teal-100 text-teal-800 border-teal-200 dark:bg-teal-950/60 dark:text-teal-300" },
-        { name: "ព័ត៌មានវិទ្យា", color: "bg-indigo-100 text-indigo-800 border-indigo-200 dark:bg-indigo-950/60 dark:text-indigo-300" }
+        { name: "ព័ត៌មានវិទ្យា", color: "bg-indigo-100 text-indigo-800 border-indigo-200 dark:bg-indigo-950/60 dark:text-indigo-300" },
+        // មុខវិជ្ជាបំប៉នបន្ថែម (Thursday & Supplementary Studies)
+        { name: "បំប៉នបន្ថែម (វិទ្យាសាស្ត្រ)", color: "bg-emerald-100 text-emerald-900 border-emerald-300 dark:bg-emerald-950/80 dark:text-emerald-200" },
+        { name: "បំប៉នបន្ថែម (ភាសាខ្មែរ)", color: "bg-sky-100 text-sky-900 border-sky-300 dark:bg-sky-950/80 dark:text-sky-200" },
+        { name: "បំប៉នបន្ថែម (គណិតវិទ្យា)", color: "bg-violet-100 text-violet-900 border-violet-300 dark:bg-violet-950/80 dark:text-violet-200" },
+        { name: "បំប៉នបន្ថែម", color: "bg-teal-100 text-teal-900 border-teal-300 dark:bg-teal-950/80 dark:text-teal-200" },
+        { name: "ក្លឹបសិក្សា/ស្វ័យសិក្សា", color: "bg-amber-100 text-amber-900 border-amber-300 dark:bg-amber-950/80 dark:text-amber-200" }
     ],
 
     // មុខវិជ្ជាអនុវិទ្យាល័យ (Secondary Subjects)
@@ -132,7 +166,9 @@ window.TimetableHomeworkManager = {
         { name: "ពលរដ្ឋវិទ្យា", color: "bg-orange-100 text-orange-800 border-orange-200 dark:bg-orange-950/60 dark:text-orange-300" },
         { name: "ភាសាអង់គ្លេស", color: "bg-cyan-100 text-cyan-800 border-cyan-200 dark:bg-cyan-950/60 dark:text-cyan-300" },
         { name: "គេហវិទ្យា/បច្ចេកវិទ្យា", color: "bg-lime-100 text-lime-800 border-lime-200 dark:bg-lime-950/60 dark:text-lime-300" },
-        { name: "អប់រំកាយ/កីឡា", color: "bg-rose-100 text-rose-800 border-rose-200 dark:bg-rose-950/60 dark:text-rose-300" }
+        { name: "អប់រំកាយ/កីឡា", color: "bg-rose-100 text-rose-800 border-rose-200 dark:bg-rose-950/60 dark:text-rose-300" },
+        { name: "បំប៉នបន្ថែម (វិទ្យាសាស្ត្រ)", color: "bg-emerald-100 text-emerald-900 border-emerald-300 dark:bg-emerald-950/80 dark:text-emerald-200" },
+        { name: "បំប៉នបន្ថែម", color: "bg-teal-100 text-teal-900 border-teal-300 dark:bg-teal-950/80 dark:text-teal-200" }
     ],
 
     init: function() {
@@ -280,6 +316,189 @@ window.TimetableHomeworkManager = {
                 grade: targetGrade,
                 academic_year: this.currentAcademicYear
             });
+        }
+    },
+
+    /**
+     * រក្សាទុកកាលវិភាគទៅកាន់ Google Sheets (Cloud Sync)
+     */
+    syncToGoogleSheets: async function() {
+        const btn = document.getElementById("btnSyncTimetableGAS");
+        const origHtml = btn ? btn.innerHTML : "";
+        if (btn) {
+            btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> <span>កំពុងរក្សាទុក...</span>`;
+            btn.disabled = true;
+        }
+
+        try {
+            const scheduleData = this.getTimetableData();
+            const activeKeys = Object.keys(scheduleData).filter(k => !!scheduleData[k].subject);
+
+            if (activeKeys.length === 0) {
+                if (typeof window.showToast === 'function') {
+                    window.showToast("⚠️ មិនទាន់មានទិន្នន័យកាលវិភាគសម្រាប់រក្សាទុកក្នុង Google Sheets ទេ!", "warning");
+                } else {
+                    alert("⚠️ មិនទាន់មានទិន្នន័យកាលវិភាគសម្រាប់រក្សាទុកក្នុង Google Sheets ទេ!");
+                }
+                return;
+            }
+
+            const classTeacher = this.getClassTeacherInfo(this.currentGrade);
+            const gradeParts = this.currentGrade.split(' ');
+            const gradeLevel = gradeParts.slice(0, 2).join(' ') || this.currentGrade;
+            const gradeRoom = gradeParts[2] || '«ក»';
+            const academicYear = this.currentAcademicYear || '2026-2027';
+
+            const entries = [];
+            for (const [key, slot] of Object.entries(scheduleData)) {
+                if (slot && slot.subject) {
+                    const [dayKey, slotNum] = key.split('_');
+                    entries.push({
+                        entry_id: `TT-${academicYear}-${gradeLevel}-${gradeRoom}-${dayKey}-${slotNum}`.replace(/[«»\s]+/g, '_'),
+                        academic_year: academicYear,
+                        grade: gradeLevel,
+                        room: gradeRoom,
+                        day_of_week: dayKey,
+                        period_slot: parseInt(slotNum, 10),
+                        subject_name: slot.subject,
+                        teacher_id: slot.teacher_id || (classTeacher ? classTeacher.teacher_id : ''),
+                        room_number: slot.room || gradeRoom,
+                        note: slot.note || ''
+                    });
+                }
+            }
+
+            let syncSuccess = false;
+
+            // ១. ផ្ញើតាម window.apiPost (ស្តង់ដារប្រព័ន្ធ)
+            if (typeof window.apiPost === 'function') {
+                try {
+                    const res = await window.apiPost('saveTimetableBatch', entries);
+                    if (res && (res.status === 'success' || res.success)) {
+                        syncSuccess = true;
+                    }
+                } catch (err) {
+                    console.warn("apiPost saveTimetableBatch fallback error:", err);
+                }
+            }
+
+            // ២. Direct Fetch ទៅ SCRIPT_URL ប្រសិនបើ apiPost មិនដំណើរការ
+            if (!syncSuccess) {
+                const scriptUrl = (typeof window.getScriptUrl === 'function' ? window.getScriptUrl() : window.SCRIPT_URL) || localStorage.getItem('cms_custom_script_url');
+                if (scriptUrl) {
+                    const token = (typeof window.getSessionToken === 'function' ? window.getSessionToken() : '') || (typeof sessionStorage !== 'undefined' ? sessionStorage.getItem('cms_session_token') : '') || '';
+                    const payload = {
+                        action: 'saveTimetableBatch',
+                        data: entries,
+                        sessionToken: token,
+                        academic_year: academicYear,
+                        grade: gradeLevel,
+                        room: gradeRoom
+                    };
+                    const response = await fetch(scriptUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                        body: JSON.stringify(payload)
+                    });
+                    const resJson = await response.json();
+                    if (resJson && (resJson.status === 'success' || resJson.success)) {
+                        syncSuccess = true;
+                    }
+                }
+            }
+
+            // ៣. Sync ទៅ Firebase Firestore ជាទិន្នន័យបម្រុងទុកបន្ថែម
+            const storageKey = this.getStorageKey(this.currentGrade);
+            if (window.db) {
+                try {
+                    await window.db.collection("timetables").doc(storageKey).set({
+                        grade: this.currentGrade,
+                        academic_year: academicYear,
+                        schedule: scheduleData,
+                        total_slots: entries.length,
+                        updated_by: localStorage.getItem('auth_teacher_id') || 'TCH-013',
+                        last_updated: firebase.firestore.FieldValue.serverTimestamp()
+                    }, { merge: true });
+                } catch(e) {
+                    console.warn("Firestore timetable backup notice:", e);
+                }
+            }
+
+            if (typeof window.logAudit === 'function') {
+                window.logAudit('SYNC_TIMETABLE_GAS', 'timetable', `បានរក្សាទុកកាលវិភាគថ្នាក់ ${this.currentGrade} (${entries.length} ម៉ោង) ទៅក្នុង Google Sheets`);
+            }
+
+            if (typeof window.showToast === 'function') {
+                window.showToast(`🎉 បានរក្សាទុកកាលវិភាគថ្នាក់ ${this.currentGrade} (${entries.length} ម៉ោង) ទៅក្នុង Google Sheets ដោយជោគជ័យ!`, "success");
+            } else {
+                alert(`🎉 បានរក្សាទុកកាលវិភាគថ្នាក់ ${this.currentGrade} (${entries.length} ម៉ោង) ទៅក្នុង Google Sheets ដោយជោគជ័យ!`);
+            }
+
+        } catch (error) {
+            console.error("Google Sheets timetable sync error:", error);
+            if (typeof window.showToast === 'function') {
+                window.showToast(`⚠️ បរាជ័យក្នុងការតភ្ជាប់ Google Sheets: ${error.message || error}`, "error");
+            } else {
+                alert(`⚠️ បរាជ័យក្នុងការតភ្ជាប់ Google Sheets: ${error.message || error}`);
+            }
+        } finally {
+            if (btn) {
+                btn.innerHTML = origHtml || `<i class="fa-solid fa-cloud-arrow-up text-amber-300"></i> <span>រក្សាទុកក្នុង Google Sheets</span>`;
+                btn.disabled = false;
+            }
+        }
+    },
+
+    /**
+     * បើក Modal រៀបចំម៉ោងបំប៉នបន្ថែមថ្ងៃព្រហស្បតិ៍
+     */
+    openThursdayRemedialModal: function() {
+        const modal = document.getElementById("thursdayRemedialModal");
+        if (modal) modal.classList.remove("hidden");
+    },
+
+    closeThursdayRemedialModal: function() {
+        const modal = document.getElementById("thursdayRemedialModal");
+        if (modal) modal.classList.add("hidden");
+    },
+
+    /**
+     * អនុវត្តម៉ោងបំប៉នបន្ថែមថ្ងៃព្រហស្បតិ៍
+     */
+    applyThursdayRemedial: function() {
+        const p1 = document.getElementById("thu_slot_1")?.value || "បំប៉នបន្ថែម (ភាសាខ្មែរ)";
+        const p2 = document.getElementById("thu_slot_2")?.value || "បំប៉នបន្ថែម (គណិតវិទ្យា)";
+        const p3 = document.getElementById("thu_slot_3")?.value || "បំប៉នបន្ថែម (វិទ្យាសាស្ត្រ)";
+        const p4 = document.getElementById("thu_slot_4")?.value || "ក្លឹបសិក្សា/ស្វ័យសិក្សា";
+        const sessionChoice = document.getElementById("thu_session_choice")?.value || "morning";
+
+        const data = this.getTimetableData();
+        const classTeacher = this.getClassTeacherInfo(this.currentGrade);
+        const tId = classTeacher ? classTeacher.teacher_id : '';
+        const tName = classTeacher ? classTeacher.name : '';
+        const room = this.currentGrade.split(' ')[1] || '«ក»';
+
+        const slots = sessionChoice === "afternoon" 
+            ? [ { slot: 5, sub: p1 }, { slot: 6, sub: p2 }, { slot: 7, sub: p3 }, { slot: 8, sub: p4 } ]
+            : [ { slot: 1, sub: p1 }, { slot: 2, sub: p2 }, { slot: 3, sub: p3 }, { slot: 4, sub: p4 } ];
+
+        slots.forEach(s => {
+            if (s.sub && s.sub !== 'empty') {
+                data[`thu_${s.slot}`] = {
+                    subject: s.sub,
+                    teacher_id: tId,
+                    teacher_name: tName,
+                    room: room,
+                    note: "ម៉ោងបំប៉នបន្ថែមថ្ងៃព្រហស្បតិ៍"
+                };
+            }
+        });
+
+        this.saveTimetableData(data);
+        this.closeThursdayRemedialModal();
+        this.renderView();
+        if (typeof showToast === 'function') {
+            showToast("🎉 បានរៀបចំម៉ោងបំប៉នបន្ថែមថ្ងៃព្រហស្បតិ៍ដោយជោគជ័យ!", "success");
         }
     },
 
@@ -580,6 +799,7 @@ window.TimetableHomeworkManager = {
         const teacherName = classTeacher ? classTeacher.name : (sInfo.teacher_name || "គ្រូទទួលបន្ទុកថ្នាក់");
         const academicYear = this.currentAcademicYear;
         const data = this.getTimetableData();
+        const recessTimes = this.getRecessTimes();
 
         const tableHtml = `
                 <table class="timetable-main-table">
@@ -594,7 +814,7 @@ window.TimetableHomeworkManager = {
                             <td colspan="7">● វេនព្រឹក (MORNING SESSION)</td>
                         </tr>
                         ${this.periods.filter(p => p.session === 'morning').map(p => {
-                            return `
+                            let pRow = `
                                 <tr>
                                     <td>
                                         <b>${p.label.split(' ')[0]} ${p.label.split(' ')[1]}</b><br>
@@ -614,13 +834,23 @@ window.TimetableHomeworkManager = {
                                     }).join("")}
                                 </tr>
                             `;
+                            if (p.slot === 2) {
+                                pRow += `
+                                    <tr style="background-color: #fef3c7; font-weight: bold; text-align: center;">
+                                        <td colspan="7" style="padding: 5px; font-size: 9.5pt; color: #92400e; border: 1px solid #111;">
+                                            🔔 ម៉ោងចេញលេង (${recessTimes.morning})
+                                        </td>
+                                    </tr>
+                                `;
+                            }
+                            return pRow;
                         }).join("")}
 
                         <tr class="session-header">
                             <td colspan="7">● វេនរសៀល (AFTERNOON SESSION)</td>
                         </tr>
                         ${this.periods.filter(p => p.session === 'afternoon').map(p => {
-                            return `
+                            let pRow = `
                                 <tr>
                                     <td>
                                         <b>${p.label.split(' ')[0]} ${p.label.split(' ')[1]}</b><br>
@@ -640,6 +870,16 @@ window.TimetableHomeworkManager = {
                                     }).join("")}
                                 </tr>
                             `;
+                            if (p.slot === 6) {
+                                pRow += `
+                                    <tr style="background-color: #fef3c7; font-weight: bold; text-align: center;">
+                                        <td colspan="7" style="padding: 5px; font-size: 9.5pt; color: #92400e; border: 1px solid #111;">
+                                            🔔 ម៉ោងចេញលេង (${recessTimes.afternoon})
+                                        </td>
+                                    </tr>
+                                `;
+                            }
+                            return pRow;
                         }).join("")}
                     </tbody>
                 </table>
@@ -668,7 +908,8 @@ window.TimetableHomeworkManager = {
                 orientation: "landscape",
                 defaultZoom: 1.0,
                 contentHtml: tableHtml + footnotePrintHtml,
-                extraStyles: timetableExtraStyles
+                extraStyles: timetableExtraStyles,
+                footerHtml: "" // 👈 Prevent duplicate footer signatures
             });
             return;
         }
@@ -728,7 +969,7 @@ window.TimetableHomeworkManager = {
                             <td colspan="7">● វេនព្រឹក (MORNING SESSION)</td>
                         </tr>
                         ${this.periods.filter(p => p.session === 'morning').map(p => {
-                            return `
+                            let pRow = `
                                 <tr>
                                     <td>
                                         <b>${p.label.split(' ')[0]} ${p.label.split(' ')[1]}</b><br>
@@ -748,13 +989,23 @@ window.TimetableHomeworkManager = {
                                     }).join("")}
                                 </tr>
                             `;
+                            if (p.slot === 2) {
+                                pRow += `
+                                    <tr style="background-color: #fef3c7; font-weight: bold; text-align: center;">
+                                        <td colspan="7" style="padding: 5px; font-size: 9.5pt; color: #92400e; border: 1px solid #111;">
+                                            🔔 ម៉ោងចេញលេង (${recessTimes.morning})
+                                        </td>
+                                    </tr>
+                                `;
+                            }
+                            return pRow;
                         }).join("")}
 
                         <tr class="session-header">
                             <td colspan="7">● វេនរសៀល (AFTERNOON SESSION)</td>
                         </tr>
                         ${this.periods.filter(p => p.session === 'afternoon').map(p => {
-                            return `
+                            let pRow = `
                                 <tr>
                                     <td>
                                         <b>${p.label.split(' ')[0]} ${p.label.split(' ')[1]}</b><br>
@@ -774,6 +1025,16 @@ window.TimetableHomeworkManager = {
                                     }).join("")}
                                 </tr>
                             `;
+                            if (p.slot === 6) {
+                                pRow += `
+                                    <tr style="background-color: #fef3c7; font-weight: bold; text-align: center;">
+                                        <td colspan="7" style="padding: 5px; font-size: 9.5pt; color: #92400e; border: 1px solid #111;">
+                                            🔔 ម៉ោងចេញលេង (${recessTimes.afternoon})
+                                        </td>
+                                    </tr>
+                                `;
+                            }
+                            return pRow;
                         }).join("")}
                     </tbody>
                 </table>
@@ -947,6 +1208,7 @@ window.TimetableHomeworkManager = {
         const classTeacher = this.getClassTeacherInfo(this.currentGrade);
         const data = this.getTimetableData();
         const activeSlotsCount = Object.keys(data).filter(k => !!data[k].subject).length;
+        const recessTimes = this.getRecessTimes();
 
         // កំណត់សិទ្ធិ Admin
         const isAdmin = typeof window.isSchoolAdmin === 'function' ? window.isSchoolAdmin() : true;
@@ -1003,6 +1265,18 @@ window.TimetableHomeworkManager = {
 
                     <!-- Action Buttons -->
                     <div class="flex flex-wrap items-center gap-2.5 w-full lg:w-auto justify-end">
+                        <!-- Save / Sync to Google Sheets Button -->
+                        <button onclick="window.TimetableHomeworkManager.syncToGoogleSheets()" id="btnSyncTimetableGAS" class="px-4 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-700 hover:to-teal-800 text-white rounded-2xl text-xs font-black shadow-md hover:shadow-lg transition flex items-center gap-2 transform hover:-translate-y-0.5">
+                            <i class="fa-solid fa-cloud-arrow-up text-amber-300"></i>
+                            <span>រក្សាទុកក្នុង Google Sheets</span>
+                        </button>
+
+                        <!-- Thursday Remedial Setup Button -->
+                        <button onclick="window.TimetableHomeworkManager.openThursdayRemedialModal()" class="px-4 py-2.5 bg-purple-50 hover:bg-purple-100 text-purple-700 dark:bg-purple-950/60 dark:text-purple-300 rounded-2xl text-xs font-bold transition flex items-center gap-2 shadow-sm border border-purple-200/60">
+                            <i class="fa-solid fa-graduation-cap text-purple-600"></i>
+                            <span>បំប៉នថ្ងៃព្រហស្បតិ៍</span>
+                        </button>
+
                         <!-- Configure Period Times Button -->
                         <button onclick="window.TimetableHomeworkManager.openPeriodSettingsModal()" class="px-4 py-2.5 bg-teal-50 hover:bg-teal-100 text-teal-800 dark:bg-teal-950/60 dark:text-teal-300 rounded-2xl text-xs font-bold transition flex items-center gap-2 shadow-sm border border-teal-200/60">
                             <i class="fa-solid fa-clock text-teal-600"></i>
@@ -1073,7 +1347,20 @@ window.TimetableHomeworkManager = {
                                             <i class="fa-solid fa-sun mr-2 text-amber-500"></i> វេនព្រឹក (Morning Session)
                                         </td>
                                     </tr>
-                                    ${this.periods.filter(p => p.session === 'morning').map(p => this.renderPeriodRow(p)).join("")}
+                                    ${this.periods.filter(p => p.session === 'morning').map(p => {
+                                        let rowHtml = this.renderPeriodRow(p);
+                                        if (p.slot === 2) {
+                                            rowHtml += `
+                                                <tr class="bg-amber-100/80 dark:bg-amber-950/40 font-bold text-center text-amber-900 dark:text-amber-200 border-y border-amber-300/80 dark:border-amber-700/60">
+                                                    <td colspan="7" class="py-2 px-4 text-xs font-bold">
+                                                        <i class="fa-solid fa-bell text-amber-600 animate-bounce mr-1.5"></i>
+                                                        ម៉ោងចេញលេងពេលព្រឹក (${recessTimes.morning})
+                                                    </td>
+                                                </tr>
+                                            `;
+                                        }
+                                        return rowHtml;
+                                    }).join("")}
 
                                     <!-- Afternoon Session Section -->
                                     <tr class="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/40 dark:to-indigo-950/40 font-bold text-blue-900 dark:text-blue-300">
@@ -1081,7 +1368,20 @@ window.TimetableHomeworkManager = {
                                             <i class="fa-solid fa-cloud-sun mr-2 text-blue-500"></i> វេនរសៀល (Afternoon Session)
                                         </td>
                                     </tr>
-                                    ${this.periods.filter(p => p.session === 'afternoon').map(p => this.renderPeriodRow(p)).join("")}
+                                    ${this.periods.filter(p => p.session === 'afternoon').map(p => {
+                                        let rowHtml = this.renderPeriodRow(p);
+                                        if (p.slot === 6) {
+                                            rowHtml += `
+                                                <tr class="bg-amber-100/80 dark:bg-amber-950/40 font-bold text-center text-amber-900 dark:text-amber-200 border-y border-amber-300/80 dark:border-amber-700/60">
+                                                    <td colspan="7" class="py-2 px-4 text-xs font-bold">
+                                                        <i class="fa-solid fa-bell text-amber-600 animate-bounce mr-1.5"></i>
+                                                        ម៉ោងចេញលេងពេលរសៀល (${recessTimes.afternoon})
+                                                    </td>
+                                                </tr>
+                                            `;
+                                        }
+                                        return rowHtml;
+                                    }).join("")}
                                 </tbody>
                             </table>
                         </div>
@@ -1112,6 +1412,23 @@ window.TimetableHomeworkManager = {
                     </div>
 
                     <div class="space-y-6 text-xs">
+                        <!-- ម៉ោងចេញលេង (Recess Breaks) -->
+                        <div class="p-4 bg-amber-50/80 dark:bg-amber-950/30 rounded-2xl border border-amber-200/80 dark:border-amber-700/50 space-y-3">
+                            <h4 class="font-bold text-amber-800 dark:text-amber-300 text-sm flex items-center gap-2">
+                                <i class="fa-solid fa-bell text-amber-600"></i> ម៉ោងចេញលេង (Recess / Break Times)
+                            </h4>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block font-bold text-slate-700 dark:text-slate-200 mb-1">ចេញលេងពេលព្រឹក (ក្រោយម៉ោងទី ២)</label>
+                                    <input type="text" id="custom_recess_morning" value="${recessTimes.morning}" class="w-full px-3 py-2 rounded-xl border border-amber-300 dark:border-amber-700 bg-white dark:bg-slate-800 text-xs font-mono font-bold text-amber-900 dark:text-amber-200 outline-none focus:ring-2 focus:ring-amber-500" placeholder="ឧ. ០៨:៣៥ - ០៨:៥០">
+                                </div>
+                                <div>
+                                    <label class="block font-bold text-slate-700 dark:text-slate-200 mb-1">ចេញលេងពេលរសៀល (ក្រោយម៉ោងទី ៦)</label>
+                                    <input type="text" id="custom_recess_afternoon" value="${recessTimes.afternoon}" class="w-full px-3 py-2 rounded-xl border border-amber-300 dark:border-amber-700 bg-white dark:bg-slate-800 text-xs font-mono font-bold text-amber-900 dark:text-amber-200 outline-none focus:ring-2 focus:ring-amber-500" placeholder="ឧ. ១៤:៣៥ - ១៤:៥០">
+                                </div>
+                            </div>
+                        </div>
+
                         <!-- វេនព្រឹក (Morning Periods) -->
                         <div>
                             <h4 class="font-bold text-emerald-700 dark:text-emerald-400 text-sm mb-3 flex items-center gap-2">
@@ -1167,6 +1484,92 @@ window.TimetableHomeworkManager = {
                 </div>
             </div>
 
+            <!-- MODAL: Thursday Remedial Setup Modal (ម៉ោងបំប៉នបន្ថែមថ្ងៃព្រហស្បតិ៍) -->
+            <div id="thursdayRemedialModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 font-siemreap">
+                <div class="bg-white dark:bg-slate-800 rounded-[2.5rem] w-full max-w-lg p-6 md:p-8 shadow-2xl border border-slate-200 dark:border-slate-700 animate-scale-up space-y-5 text-xs">
+                    <div class="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-700">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-2xl bg-purple-100 text-purple-700 dark:bg-purple-900/60 dark:text-purple-300 flex items-center justify-center text-lg">
+                                <i class="fa-solid fa-graduation-cap"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-moul text-sm text-slate-800 dark:text-white">រៀបចំម៉ោងបំប៉នបន្ថែមថ្ងៃព្រហស្បតិ៍</h4>
+                                <span class="text-[11px] text-purple-600 font-bold">វិទ្យាសាស្ត្រ • ភាសាខ្មែរ • គណិតវិទ្យា (${this.currentGrade})</span>
+                            </div>
+                        </div>
+                        <button onclick="window.TimetableHomeworkManager.closeThursdayRemedialModal()" class="text-slate-400 hover:text-slate-600 text-lg">
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
+                    </div>
+
+                    <div class="space-y-3.5">
+                        <div>
+                            <label class="block font-bold text-slate-700 dark:text-slate-300 mb-1">វេនសិក្សាសម្រាប់បំប៉ន</label>
+                            <select id="thu_session_choice" class="w-full bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-2xl px-3.5 py-2 font-bold text-slate-800 dark:text-white outline-none">
+                                <option value="morning">វេនព្រឹក (ម៉ោងទី ១ ដល់ ទី ៤)</option>
+                                <option value="afternoon">វេនរសៀល (ម៉ោងទី ៥ ដល់ ទី ៨)</option>
+                            </select>
+                        </div>
+
+                        <div class="space-y-2">
+                            <label class="block font-bold text-slate-700 dark:text-slate-300">កំណត់មុខវិជ្ជាបំប៉ននីមួយៗ</label>
+                            <div class="grid grid-cols-2 gap-2.5">
+                                <div>
+                                    <span class="text-[10px] text-slate-500 font-bold block mb-1">ម៉ោងទី ១៖</span>
+                                    <select id="thu_slot_1" class="w-full bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl px-2.5 py-2 text-xs font-bold text-slate-800 dark:text-white outline-none">
+                                        <option value="បំប៉នបន្ថែម (ភាសាខ្មែរ)" selected>បំប៉ន (ភាសាខ្មែរ)</option>
+                                        <option value="បំប៉នបន្ថែម (គណិតវិទ្យា)">បំប៉ន (គណិតវិទ្យា)</option>
+                                        <option value="បំប៉នបន្ថែម (វិទ្យាសាស្ត្រ)">បំប៉ន (វិទ្យាសាស្ត្រ)</option>
+                                        <option value="បំប៉នបន្ថែម">បំប៉នបន្ថែមទូទៅ</option>
+                                        <option value="empty">-- ទុកទំនេរ --</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <span class="text-[10px] text-slate-500 font-bold block mb-1">ម៉ោងទី ២៖</span>
+                                    <select id="thu_slot_2" class="w-full bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl px-2.5 py-2 text-xs font-bold text-slate-800 dark:text-white outline-none">
+                                        <option value="បំប៉នបន្ថែម (គណិតវិទ្យា)" selected>បំប៉ន (គណិតវិទ្យា)</option>
+                                        <option value="បំប៉នបន្ថែម (ភាសាខ្មែរ)">បំប៉ន (ភាសាខ្មែរ)</option>
+                                        <option value="បំប៉នបន្ថែម (វិទ្យាសាស្ត្រ)">បំប៉ន (វិទ្យាសាស្ត្រ)</option>
+                                        <option value="បំប៉នបន្ថែម">បំប៉នបន្ថែមទូទៅ</option>
+                                        <option value="empty">-- ទុកទំនេរ --</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <span class="text-[10px] text-slate-500 font-bold block mb-1">ម៉ោងទី ៣ (វិទ្យាសាស្ត្រ)៖</span>
+                                    <select id="thu_slot_3" class="w-full bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl px-2.5 py-2 text-xs font-bold text-slate-800 dark:text-white outline-none">
+                                        <option value="បំប៉នបន្ថែម (វិទ្យាសាស្ត្រ)" selected>🔬 បំប៉ន (វិទ្យាសាស្ត្រ)</option>
+                                        <option value="បំប៉នបន្ថែម (ភាសាខ្មែរ)">បំប៉ន (ភាសាខ្មែរ)</option>
+                                        <option value="បំប៉នបន្ថែម (គណិតវិទ្យា)">បំប៉ន (គណិតវិទ្យា)</option>
+                                        <option value="បំប៉នបន្ថែម">បំប៉នបន្ថែមទូទៅ</option>
+                                        <option value="empty">-- ទុកទំនេរ --</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <span class="text-[10px] text-slate-500 font-bold block mb-1">ម៉ោងទី ៤៖</span>
+                                    <select id="thu_slot_4" class="w-full bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl px-2.5 py-2 text-xs font-bold text-slate-800 dark:text-white outline-none">
+                                        <option value="ក្លឹបសិក្សា/ស្វ័យសិក្សា" selected>ក្លឹបសិក្សា/ស្វ័យសិក្សា</option>
+                                        <option value="បំប៉នបន្ថែម (វិទ្យាសាស្ត្រ)">🔬 បំប៉ន (វិទ្យាសាស្ត្រ)</option>
+                                        <option value="បំប៉នបន្ថែម (ភាសាខ្មែរ)">បំប៉ន (ភាសាខ្មែរ)</option>
+                                        <option value="បំប៉នបន្ថែម (គណិតវិទ្យា)">បំប៉ន (គណិតវិទ្យា)</option>
+                                        <option value="empty">-- ទុកទំនេរ --</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-purple-50 dark:bg-purple-950/40 p-3 rounded-2xl border border-purple-200/60 dark:border-purple-800/60 text-purple-900 dark:text-purple-200 text-[11px] leading-relaxed">
+                            <i class="fa-solid fa-circle-check text-purple-600 mr-1"></i>
+                            មុខវិជ្ជាបំប៉នបន្ថែមនៅថ្ងៃព្រហស្បតិ៍រួមមាន <b>វិទ្យាសាស្ត្រ</b>, <b>ភាសាខ្មែរ</b>, <b>គណិតវិទ្យា</b> និង<b>ក្លឹបសិក្សា</b> តាមការណែនាំរបស់ក្រសួង។
+                        </div>
+                    </div>
+
+                    <div class="flex justify-end gap-2 pt-3 border-t border-slate-100 dark:border-slate-700">
+                        <button type="button" onclick="window.TimetableHomeworkManager.closeThursdayRemedialModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl font-bold">បោះបង់</button>
+                        <button type="button" onclick="window.TimetableHomeworkManager.applyThursdayRemedial()" class="px-5 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-xl font-bold shadow-md flex items-center gap-1.5">
+                            <i class="fa-solid fa-check"></i> អនុវត្តម៉ោងបំប៉ន
+                        </button>
+                    </div>
+                </div>
             </div>
 
             <!-- MODAL 1: Smart Auto-Generator Modal (ម៉ាស៊ីនបង្កើតកាលវិភាគឆ្លាតវៃ) -->
@@ -1304,6 +1707,28 @@ window.TimetableHomeworkManager = {
                     <form id="editSlotForm" onsubmit="window.TimetableHomeworkManager.handleSaveSlot(event)" class="space-y-3.5 text-xs">
                         <input type="hidden" id="slotDayKey">
                         <input type="hidden" id="slotIndex">
+
+                        <!-- Quick Box for Thursday Remedial Subjects -->
+                        <div id="thuRemedialQuickBox" class="hidden p-3 bg-purple-50 dark:bg-purple-950/40 rounded-2xl border border-purple-200 dark:border-purple-800 space-y-2">
+                            <div class="text-[11px] font-bold text-purple-900 dark:text-purple-200 flex items-center gap-1.5">
+                                <i class="fa-solid fa-bolt text-purple-600"></i>
+                                <span>ជ្រើសរើសរហ័ស ម៉ោងបំប៉នថ្ងៃព្រហស្បតិ៍៖</span>
+                            </div>
+                            <div class="flex flex-wrap gap-1.5">
+                                <button type="button" onclick="document.getElementById('slotSubjectSelect').value='បំប៉នបន្ថែម (វិទ្យាសាស្ត្រ)'" class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-purple-300 dark:border-purple-700 text-purple-700 dark:text-purple-300 rounded-xl text-[10.5px] font-bold hover:bg-purple-100 transition shadow-xs">
+                                    🔬 បំប៉នវិទ្យាសាស្ត្រ
+                                </button>
+                                <button type="button" onclick="document.getElementById('slotSubjectSelect').value='បំប៉នបន្ថែម (ភាសាខ្មែរ)'" class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-purple-300 dark:border-purple-700 text-purple-700 dark:text-purple-300 rounded-xl text-[10.5px] font-bold hover:bg-purple-100 transition shadow-xs">
+                                    📖 បំប៉នភាសាខ្មែរ
+                                </button>
+                                <button type="button" onclick="document.getElementById('slotSubjectSelect').value='បំប៉នបន្ថែម (គណិតវិទ្យា)'" class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-purple-300 dark:border-purple-700 text-purple-700 dark:text-purple-300 rounded-xl text-[10.5px] font-bold hover:bg-purple-100 transition shadow-xs">
+                                    📐 បំប៉នគណិតវិទ្យា
+                                </button>
+                                <button type="button" onclick="document.getElementById('slotSubjectSelect').value='ក្លឹបសិក្សា/ស្វ័យសិក្សា'" class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-purple-300 dark:border-purple-700 text-purple-700 dark:text-purple-300 rounded-xl text-[10.5px] font-bold hover:bg-purple-100 transition shadow-xs">
+                                    🏆 ក្លឹបសិក្សា
+                                </button>
+                            </div>
+                        </div>
 
                         <div>
                             <label class="block font-bold text-slate-700 dark:text-slate-300 mb-1">មុខវិជ្ជា (Subject)</label>
@@ -1523,6 +1948,16 @@ window.TimetableHomeworkManager = {
 
         // ត្រួតពិនិត្យ Conflict ដំបូង
         this.handleSlotTeacherChange(slotData.teacher_id || "");
+
+        // បង្ហាញ Quick Box សម្រាប់ថ្ងៃព្រហស្បតិ៍
+        const thuBox = document.getElementById("thuRemedialQuickBox");
+        if (thuBox) {
+            if (dayKey === 'thu') {
+                thuBox.classList.remove("hidden");
+            } else {
+                thuBox.classList.add("hidden");
+            }
+        }
 
         modal.classList.remove("hidden");
     },

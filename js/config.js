@@ -1223,9 +1223,11 @@ window.CMSPrintManager = {
         // ពិនិត្យមើលថាតើ Content ខាងក្នុងមាន Header/Footer រួចហើយ ឬត្រូវការចាក់បញ្ចូលស្វ័យប្រវត្តិ
         let bodyContent = options.contentHtml || "";
         if (options.autoWrapHeaderFooter !== false && !options.fullHtml) {
-            const headerHtml = options.headerHtml || this.getHeaderHtml(ctx);
-            const titleHtml = options.titleHtml || this.getTitleHtml(titleText, ctx.academicYear, ctx.grade);
-            const footerHtml = options.footerHtml || this.getFooterHtml(ctx, options.roleLeft || "នាយក/នាយិកាសាលា", options.roleRight || "គ្រូបន្ទុកថ្នាក់", options.middleColHtml || "");
+            const headerHtml = options.headerHtml !== undefined ? options.headerHtml : this.getHeaderHtml(ctx);
+            const titleHtml = options.titleHtml !== undefined ? options.titleHtml : this.getTitleHtml(titleText, ctx.academicYear, ctx.grade);
+            const footerHtml = (options.footerHtml !== undefined && options.footerHtml !== null) 
+                ? options.footerHtml 
+                : this.getFooterHtml(ctx, options.roleLeft || "នាយក/នាយិកាសាលា", options.roleRight || "គ្រូបន្ទុកថ្នាក់", options.middleColHtml || "");
             bodyContent = `
                 ${headerHtml}
                 ${titleHtml}

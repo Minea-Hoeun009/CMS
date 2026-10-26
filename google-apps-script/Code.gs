@@ -1896,8 +1896,8 @@ function doPost(e) {
     // ៣.១៩ Save Timetable
     if (action === 'saveTimetable' || action === 'saveTimetableBatch') {
       const auth = authenticateSession(sessionToken);
-      if (auth.authenticated && !authorizeRole(auth.user, ['super_admin', 'admin'])) {
-        return createJsonResponse({ status: 'forbidden', message: 'ទាមទារសិទ្ធិ Admin' });
+      if (auth.authenticated && !authorizeRole(auth.user, ['super_admin', 'admin', 'homeroom_teacher'])) {
+        return createJsonResponse({ status: 'forbidden', message: 'ទាមទារសិទ្ធិ Admin ឬ គ្រូបន្ទុកថ្នាក់' });
       }
       const ttList = Array.isArray(data) ? data : (data.timetables || [data]);
       const nowIso = new Date().toISOString();
