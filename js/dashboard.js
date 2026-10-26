@@ -54,7 +54,7 @@
      */
     window.loadDashboard = function() {
         try {
-            const container = document.getElementById("dashboardView") || document.getElementById("mainContentArea") || document.getElementById("appView");
+            const container = document.getElementById("dashboardContainer") || document.getElementById("dashboardView") || document.getElementById("mainContentArea") || document.getElementById("appView");
             if (!container) return;
 
             const role = resolveUserRole();
@@ -240,10 +240,10 @@
             const failPct = totalAssessed > 0 ? (100 - passPct) : 0;
 
             // Container setup
-            container.className = "p-3 sm:p-6 transition-all duration-300 h-full w-full flex flex-col min-h-0 bg-slate-50 dark:bg-slate-900";
+            container.className = "p-2 md:p-6 transition duration-500 h-full w-full flex flex-col min-h-0 bg-slate-50 dark:bg-slate-900";
             container.innerHTML = `
-                <div class="w-full h-full overflow-y-auto overflow-x-hidden custom-scrollbar relative z-10">
-                    <div class="flex flex-col font-siemreap text-slate-800 dark:text-slate-100 max-w-[1600px] mx-auto pb-16 space-y-6">
+                <div class="w-full h-full overflow-y-auto overflow-x-hidden custom-scrollbar bg-slate-50 dark:bg-slate-900 relative">
+                    <div class="flex animate-fade-in flex-col font-siemreap text-slate-800 dark:text-slate-100 max-w-[1680px] mx-auto pb-16 pt-1 space-y-6">
                         
                         <!-- 🟢 ១. Modern Executive Header Banner (Same as Other Modules) 🟢 -->
                         ${typeof window.renderExecutiveHeaderHTML === 'function' ? window.renderExecutiveHeaderHTML({
@@ -387,16 +387,6 @@
                                     <p class="text-[11px] text-emerald-600 mt-2 font-bold flex items-center gap-1">
                                         <i class="fa-solid fa-circle-check text-xs"></i>
                                         <span>${attAbsent > 0 ? `អវត្តមាន ${toKhNum(attAbsent)} នាក់` : 'សិស្សទាំងអស់ចូលរៀនធម្មតា'}</span>
-                                    </p>
-                                </div>
-                            </div>
-
-                        </div>
-                                        <span class="text-[11px] text-slate-400 font-medium">អត្រាចូលរួម</span>
-                                    </div>
-                                    <p class="text-[10px] text-slate-400 mt-2 font-bold flex items-center gap-1">
-                                        <span class="text-emerald-500 font-bold">+5%</span>
-                                        <span data-i18n="fromYesterday">${t('fromYesterday', 'ពីម្សិលមិញ')}</span>
                                     </p>
                                 </div>
                             </div>
