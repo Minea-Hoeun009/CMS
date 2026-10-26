@@ -565,18 +565,23 @@ window.fetchMonthlyAttendance = async function(forceRefresh = false) {
             }
         }
 
-        // បញ្ចូលថ្ងៃឈប់សម្រាក
-        Object.keys(window.monthlyHolidays).forEach(dayKey => {
-            const d = parseInt(dayKey, 10);
-            if (d >= 1 && d <= daysInMonth) {
-                attendanceStudents.forEach(s => {
-                    if (!monthlyAttendanceData[s.id]) monthlyAttendanceData[s.id] = {};
+        // ធ្វើសមកាលកម្មថ្ងៃឈប់សម្រាកក្នុងទិន្នន័យវត្តមាន (Smart Holiday Synchronization)
+        for (let d = 1; d <= daysInMonth; d++) {
+            const isOff = !!window.monthlyHolidays[d];
+            attendanceStudents.forEach(s => {
+                if (!monthlyAttendanceData[s.id]) monthlyAttendanceData[s.id] = {};
+                if (isOff) {
                     if (!monthlyAttendanceData[s.id][d]) {
                         monthlyAttendanceData[s.id][d] = "៖";
                     }
-                });
-            }
-        });
+                } else {
+                    // ប្រសិនបើថ្ងៃនេះមិនមែនជាថ្ងៃឈប់សម្រាកទេ តែជាប់សញ្ញា "៖" ចាស់ -> សម្អាតចេញ
+                    if (monthlyAttendanceData[s.id][d] === "៖" || monthlyAttendanceData[s.id][d] === ":") {
+                        delete monthlyAttendanceData[s.id][d];
+                    }
+                }
+            });
+        }
 
         try { localStorage.setItem(`att_${fullGradeName}_${month}_${year}`, JSON.stringify(monthlyAttendanceData)); } catch(e) {}
 
@@ -1113,7 +1118,7 @@ window.openHolidayManagerModal = function() {
     if (!modal) {
         modal = document.createElement("div");
         modal.id = "holidayManagerModal";
-        modal.className = "fixed inset-0 z-[130] bg-slate-900/70 backdrop-blur-md flex justify-center items-center p-2 sm:p-4 no-print";
+        modal.className = "fixed inset-0 z-[130] bg-black/50 flex justify-center items-center p-2 sm:p-4 no-print font-siemreap";
         document.body.appendChild(modal);
     }
 
@@ -1234,9 +1239,14 @@ window.renderHolidayModalContent = function() {
              ` : ''}
           </div>
 
-          <button onclick="window.clearAllHolidays()" class="px-4 py-2 bg-white hover:bg-rose-50 text-rose-600 border border-rose-200 rounded-xl text-[13px] font-bold transition shadow-sm hover:shadow">
-            <i class="fa-solid fa-trash-can"></i> សម្អាតថ្ងៃឈប់ទាំងអស់
-          </button>
+          <div class="flex items-center gap-2">
+            <button onclick="window.cleanExtraneousHolidays()" class="px-4 py-2 bg-white hover:bg-amber-50 text-amber-800 border border-amber-300 rounded-xl text-[13px] font-bold transition shadow-sm hover:shadow flex items-center gap-1.5" title="សម្អាតសញ្ញា ៖ លើសដែលមិនមែនជាថ្ងៃឈប់ចេញពីតារាង">
+              <i class="fa-solid fa-broom text-amber-600"></i> សម្អាតសញ្ញា (៖) លើស
+            </button>
+            <button onclick="window.clearAllHolidays()" class="px-4 py-2 bg-white hover:bg-rose-50 text-rose-600 border border-rose-200 rounded-xl text-[13px] font-bold transition shadow-sm hover:shadow flex items-center gap-1.5">
+              <i class="fa-solid fa-trash-can"></i> សម្អាតថ្ងៃឈប់ទាំងអស់
+            </button>
+          </div>
         </div>
 
         <div class="p-6 overflow-y-auto flex-1 custom-scrollbar grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
@@ -1317,12 +1327,93 @@ window.autoSet4thThursday = function(dayNumber) {
     if (typeof showToast === 'function') showToast(`📅 បានកំណត់ថ្ងៃព្រហស្បតិ៍សប្តាហ៍ទី៤ (ថ្ងៃទី ${dayNumber})!`);
 };
 
-window.clearAllHolidays = function() {
-    if (!confirm("តើអ្នកពិតជាចង់សម្អាតថ្ងៃឈប់សម្រាកទាំងអស់មែនទេ?")) return;
-    window.monthlyHolidays = {};
-    window.renderHolidayModalContent();
+// 🟢 សម្អាតសញ្ញា ៖ លើសដែលមិនមែនជាថ្ងៃឈប់សម្រាក 🟢
+window.cleanExtraneousHolidays = function() {
+    const year = parseInt(document.getElementById("attYearSelect")?.value || new Date().getFullYear());
+    const month = document.getElementById("attMonthSelect")?.value || "មករា";
+    const gradeInfo = window.getTeacherGradeInfo();
+    const fullGradeName = `${gradeInfo.level} ${gradeInfo.room}`;
+    const monthMap = { "មករា": 1, "កុម្ភៈ": 2, "មីនា": 3, "មេសា": 4, "ឧសភា": 5, "មិថុនា": 6, "កក្កដា": 7, "សីហា": 8, "កញ្ញា": 9, "តុលា": 10, "វិច្ឆិកា": 11, "ធ្នូ": 12 };
+    const daysInMonth = new Date(year, monthMap[month] || 1, 0).getDate();
+
+    let cleanedCount = 0;
+    if (Array.isArray(attendanceStudents)) {
+        attendanceStudents.forEach(s => {
+            if (monthlyAttendanceData[s.id]) {
+                for (let d = 1; d <= daysInMonth; d++) {
+                    const isOff = !!window.monthlyHolidays[d];
+                    if (!isOff && (monthlyAttendanceData[s.id][d] === "៖" || monthlyAttendanceData[s.id][d] === ":")) {
+                        delete monthlyAttendanceData[s.id][d];
+                        cleanedCount++;
+                        const cellInput = document.getElementById(`att_${s.id}_${d}`);
+                        if (cellInput) {
+                            cellInput.value = "";
+                            cellInput.className = `att-input w-full h-[36px] text-center text-xs font-bold border-0 outline-none bg-transparent uppercase ${window.getColorClass("")} transition-all cursor-text focus:bg-white`;
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    try {
+        localStorage.setItem(`att_${fullGradeName}_${month}_${year}`, JSON.stringify(monthlyAttendanceData));
+        localStorage.setItem('academic_monthly_attendance', JSON.stringify(monthlyAttendanceData));
+    } catch(e) {}
+
+    window.monthlyAttendanceData = monthlyAttendanceData;
+    window.renderCalendarHeaders(year, monthMap[month] || 1, daysInMonth);
+    window.calculateAllAttendance();
+    if (typeof showToast === 'function') showToast(`🧹 បានសម្អាតសញ្ញា ៖ លើសចំនួន ${cleanedCount} ក្រឡារួចរាល់!`);
 };
 
+// 🟢 សម្អាតថ្ងៃឈប់សម្រាកទាំងអស់ 🟢
+window.clearAllHolidays = function() {
+    if (!confirm("តើអ្នកពិតជាចង់សម្អាតថ្ងៃឈប់សម្រាកទាំងអស់មែនទេ? រាល់សញ្ញា (៖) ក្នុងតារាងវត្តមាននឹងត្រូវលុបចេញវិញ។")) return;
+    
+    const year = parseInt(document.getElementById("attYearSelect")?.value || new Date().getFullYear());
+    const month = document.getElementById("attMonthSelect")?.value || "មករា";
+    const gradeInfo = window.getTeacherGradeInfo();
+    const fullGradeName = `${gradeInfo.level} ${gradeInfo.room}`;
+    const monthMap = { "មករា": 1, "កុម្ភៈ": 2, "មីនា": 3, "មេសា": 4, "ឧសភា": 5, "មិថុនា": 6, "កក្កដា": 7, "សីហា": 8, "កញ្ញា": 9, "តុលា": 10, "វិច្ឆិកា": 11, "ធ្នូ": 12 };
+    const daysInMonth = new Date(year, monthMap[month] || 1, 0).getDate();
+
+    window.monthlyHolidays = {};
+    try {
+        localStorage.removeItem(`att_holidays_${fullGradeName}_${month}_${year}`);
+        localStorage.removeItem(`att_holidays_${gradeInfo.level}_${month}_${year}`);
+    } catch(e) {}
+
+    if (Array.isArray(attendanceStudents)) {
+        attendanceStudents.forEach(s => {
+            if (monthlyAttendanceData[s.id]) {
+                for (let d = 1; d <= daysInMonth; d++) {
+                    if (monthlyAttendanceData[s.id][d] === "៖" || monthlyAttendanceData[s.id][d] === ":") {
+                        delete monthlyAttendanceData[s.id][d];
+                        const cellInput = document.getElementById(`att_${s.id}_${d}`);
+                        if (cellInput) {
+                            cellInput.value = "";
+                            cellInput.className = `att-input w-full h-[36px] text-center text-xs font-bold border-0 outline-none bg-transparent uppercase ${window.getColorClass("")} transition-all cursor-text focus:bg-white`;
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    try {
+        localStorage.setItem(`att_${fullGradeName}_${month}_${year}`, JSON.stringify(monthlyAttendanceData));
+        localStorage.setItem('academic_monthly_attendance', JSON.stringify(monthlyAttendanceData));
+    } catch(e) {}
+
+    window.monthlyAttendanceData = monthlyAttendanceData;
+    window.renderHolidayModalContent();
+    window.renderCalendarHeaders(year, monthMap[month] || 1, daysInMonth);
+    window.calculateAllAttendance();
+    if (typeof showToast === 'function') showToast("🗑️ បានសម្អាតថ្ងៃឈប់សម្រាក និងសញ្ញា ៖ ទាំងអស់រួចរាល់!");
+};
+
+// 🟢 រក្សាទុក និងអនុវត្តថ្ងៃឈប់សម្រាកទៅក្នុងតារាង 🟢
 window.applyAndSaveHolidays = function() {
     const year = parseInt(document.getElementById("attYearSelect")?.value || new Date().getFullYear());
     const month = document.getElementById("attMonthSelect")?.value || "មករា";
@@ -1337,31 +1428,53 @@ window.applyAndSaveHolidays = function() {
 
     try {
         localStorage.setItem(`att_holidays_${fullGradeName}_${month}_${year}`, JSON.stringify(window.monthlyHolidays));
+        localStorage.setItem(`att_holidays_${levelVal}_${month}_${year}`, JSON.stringify(window.monthlyHolidays));
     } catch(e) {}
 
-    Object.keys(window.monthlyHolidays).forEach(dayKey => {
-        const d = parseInt(dayKey, 10);
-        if (d >= 1 && d <= daysInMonth) {
+    // រៀបចំធ្វើបច្ចុប្បន្នភាពទិន្នន័យក្នុងតារាង៖
+    // ១. ថ្ងៃណាដែលកំណត់ជាថ្ងៃឈប់សម្រាក (window.monthlyHolidays[d]) -> បញ្ចូល "៖" ប្រសិនបើក្រឡានោះទទេ ឬធ្លាប់ជា "៖"
+    // ២. ថ្ងៃណាដែលលែងជាថ្ងៃឈប់សម្រាក (លុប/ដោះធីក) -> លុប "៖" ចេញពីក្រឡាវិញភ្លាមៗ!
+    for (let d = 1; d <= daysInMonth; d++) {
+        const isOff = !!window.monthlyHolidays[d];
+        if (Array.isArray(attendanceStudents)) {
             attendanceStudents.forEach(s => {
                 if (!monthlyAttendanceData[s.id]) monthlyAttendanceData[s.id] = {};
-                if (!monthlyAttendanceData[s.id][d]) {
-                    monthlyAttendanceData[s.id][d] = "៖";
-                    const cellInput = document.getElementById(`att_${s.id}_${d}`);
-                    if (cellInput) {
-                        cellInput.value = "៖";
-                        cellInput.className = `att-input w-full h-[36px] text-center text-xs font-bold border-0 outline-none bg-transparent uppercase ${window.getColorClass("៖")} transition-all cursor-text focus:bg-white`;
+                const curVal = monthlyAttendanceData[s.id][d];
+
+                if (isOff) {
+                    if (!curVal || curVal === "៖" || curVal === ":") {
+                        monthlyAttendanceData[s.id][d] = "៖";
+                        const cellInput = document.getElementById(`att_${s.id}_${d}`);
+                        if (cellInput) {
+                            cellInput.value = "៖";
+                            cellInput.className = `att-input w-full h-[36px] text-center text-xs font-bold border-0 outline-none bg-transparent uppercase ${window.getColorClass("៖")} transition-all cursor-text focus:bg-white`;
+                        }
+                    }
+                } else {
+                    if (curVal === "៖" || curVal === ":") {
+                        delete monthlyAttendanceData[s.id][d];
+                        const cellInput = document.getElementById(`att_${s.id}_${d}`);
+                        if (cellInput) {
+                            cellInput.value = "";
+                            cellInput.className = `att-input w-full h-[36px] text-center text-xs font-bold border-0 outline-none bg-transparent uppercase ${window.getColorClass("")} transition-all cursor-text focus:bg-white`;
+                        }
                     }
                 }
             });
         }
-    });
+    }
+
+    try {
+        localStorage.setItem(`att_${fullGradeName}_${month}_${year}`, JSON.stringify(monthlyAttendanceData));
+        localStorage.setItem('academic_monthly_attendance', JSON.stringify(monthlyAttendanceData));
+    } catch(e) {}
 
     window.monthlyAttendanceData = monthlyAttendanceData;
     window.renderCalendarHeaders(year, monthMap[month] || 1, daysInMonth);
     window.calculateAllAttendance();
 
     document.getElementById("holidayManagerModal")?.classList.add("hidden");
-    if (typeof showToast === 'function') showToast("✅ បានរក្សាទុក និងអនុវត្តថ្ងៃឈប់សម្រាកបានជោគជ័យ!");
+    if (typeof showToast === 'function') showToast("✅ បានរក្សាទុក និងធ្វើបច្ចុប្បន្នភាពថ្ងៃឈប់សម្រាកជោគជ័យ!");
 };
 
 // =====================================================================
@@ -1393,7 +1506,7 @@ window.openDailyAttendanceModal = function(selectedDay = null) {
     if (!modal) {
         modal = document.createElement("div");
         modal.id = "dailyAttendanceModal";
-        modal.className = "fixed inset-0 z-[120] bg-slate-900/70 backdrop-blur-md flex justify-center items-center p-2 sm:p-4 no-print";
+        modal.className = "fixed inset-0 z-[120] bg-black/50 flex justify-center items-center p-2 sm:p-4 no-print font-siemreap";
         document.body.appendChild(modal);
     }
 
@@ -2246,7 +2359,7 @@ window.openAnnualReportModal = function() {
     if (!modal) {
         modal = document.createElement('div');
         modal.id = 'annualReportModal';
-        modal.className = 'fixed inset-0 z-[3000] bg-slate-900/80 backdrop-blur-sm p-4 flex items-center justify-center font-siemreap';
+        modal.className = 'fixed inset-0 z-[3000] bg-black/50 p-4 flex items-center justify-center font-siemreap';
         modal.innerHTML = `
             <div class="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden flex flex-col border border-slate-200 animate-scale-up">
                 <div class="bg-gradient-to-r from-indigo-600 to-blue-600 p-5 flex justify-between items-center text-white">
@@ -2685,7 +2798,7 @@ window.openFrequentAbsenceModal = function() {
     if (!modal) {
         modal = document.createElement("div");
         modal.id = "frequentAbsenceModal";
-        modal.className = "fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 font-siemreap";
+        modal.className = "fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4 font-siemreap";
         document.body.appendChild(modal);
     }
 
