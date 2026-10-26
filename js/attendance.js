@@ -532,10 +532,10 @@ window.renderCalendarHeaders = function(year, monthNum, daysInMonth) {
     if (!trKhmer || !trNums) return;
 
     let khmerDaysHtml = `
-      <th rowspan="2" class="border-r border-slate-300 print:border-black p-2 sticky left-0 z-20 bg-slate-100" style="width: 40px; min-width: 40px; max-width: 40px;">ល.រ</th>
-      <th rowspan="2" class="border-r border-slate-300 print:border-black p-2 sticky left-[40px] z-20 bg-slate-100 hidden md:table-cell" style="width: 75px; min-width: 75px; max-width: 75px;">អត្តលេខ</th>
-      <th rowspan="2" class="border-r border-slate-300 print:border-black text-left px-4 sticky md:left-[115px] left-[40px] z-20 bg-slate-100" style="width: 195px; min-width: 195px; max-width: 195px;">គោត្តនាម និងនាម</th>
-      <th rowspan="2" class="border-r border-slate-300 print:border-black p-2 bg-slate-50" style="width: 42px; min-width: 42px; max-width: 42px;">ភេទ</th>
+      <th rowspan="2" class="border-r border-slate-300 print:border-black p-1.5 sticky left-0 z-20 bg-slate-100 font-bold text-center text-slate-700 font-mono" style="width: 38px; min-width: 38px; max-width: 38px;">ល.រ</th>
+      <th rowspan="2" class="border-r border-slate-300 print:border-black p-1.5 sticky left-[38px] z-20 bg-slate-100 font-bold text-center text-slate-700 font-mono text-[11px]" style="width: 70px; min-width: 70px; max-width: 70px;">អត្តលេខ</th>
+      <th rowspan="2" class="border-r border-slate-300 print:border-black text-left px-3 sticky left-[108px] z-20 bg-slate-100 font-moul text-slate-800 text-[12px]" style="width: 170px; min-width: 170px; max-width: 170px;">គោត្តនាម និងនាម</th>
+      <th rowspan="2" class="border-r border-slate-300 print:border-black p-1.5 sticky left-[278px] z-20 bg-slate-100 font-moul text-center text-slate-700 text-[11px]" style="width: 44px; min-width: 44px; max-width: 44px;">ភេទ</th>
     `;
     let numDaysHtml = "";
 
@@ -658,10 +658,10 @@ window.renderAttendanceRows = function(daysInMonth) {
 
             rowsHTML += `
               <tr class="hover:bg-slate-50/80 transition-colors border-b border-slate-200 print:border-black h-[36px] bg-white group">
-                <td class="border-r border-slate-200 print:border-black text-center font-bold sticky left-0 z-10 bg-white group-hover:bg-slate-50 font-mono text-[11px] text-slate-400" style="width: 40px; min-width: 40px; max-width: 40px;">${idx + 1}</td>
-                <td class="border-r border-slate-200 print:border-black text-center font-mono text-[11px] font-bold text-indigo-400/70 hidden md:table-cell sticky left-[40px] z-10 bg-white group-hover:bg-slate-50" style="width: 75px; min-width: 75px; max-width: 75px;">${s.id || '-'}</td>
-                <td class="border-r border-slate-200 print:border-black px-4 text-left font-bold text-slate-800 sticky md:left-[115px] left-[40px] z-10 bg-white group-hover:bg-slate-50 font-Siemreap text-[13px] truncate" style="width: 195px; min-width: 195px; max-width: 195px;" title="${s.name || ''}">${s.name || '-'}</td>
-                <td class="border-r border-slate-200 print:border-black text-center font-bold ${genderColor} font-Siemreap text-[12px]" style="width: 42px; min-width: 42px; max-width: 42px;">${genderShort}</td>
+                <td class="border-r border-slate-200 print:border-black text-center font-bold sticky left-0 z-10 bg-white group-hover:bg-slate-50 font-mono text-[11px] text-slate-400" style="width: 38px; min-width: 38px; max-width: 38px;">${idx + 1}</td>
+                <td class="border-r border-slate-200 print:border-black text-center font-mono text-[11px] font-bold text-indigo-500/80 sticky left-[38px] z-10 bg-white group-hover:bg-slate-50" style="width: 70px; min-width: 70px; max-width: 70px;">${s.id || '-'}</td>
+                <td class="border-r border-slate-200 print:border-black px-3 text-left font-bold text-slate-800 sticky left-[108px] z-10 bg-white group-hover:bg-slate-50 font-siemreap text-[13px] truncate" style="width: 170px; min-width: 170px; max-width: 170px;" title="${s.name || ''}">${s.name || '-'}</td>
+                <td class="border-r border-slate-200 print:border-black text-center font-bold ${genderColor} font-siemreap text-[12px] sticky left-[278px] z-10 bg-white group-hover:bg-slate-50" style="width: 44px; min-width: 44px; max-width: 44px;">${genderShort}</td>
                 
                 ${dayInputs}
 
@@ -780,7 +780,7 @@ window.calculateStudentAbsence = function(studentId, daysInMonth) {
 window.calculateDailyTotals = function(daysInMonth) {
     let dailyTotalsHtml = `
       <tr class="h-[40px] text-center bg-slate-100 font-siemreap shadow-inner">
-        <td colspan="4" class="border-r border-slate-300 print:border-black px-4 text-right font-bold text-slate-700 sticky left-0 z-10 bg-slate-100 text-[11px] uppercase tracking-widest">សរុបអវត្តមានប្រចាំថ្ងៃ</td>`;
+        <td colspan="4" class="border-r border-slate-300 print:border-black px-4 text-right font-bold text-slate-700 sticky left-0 z-10 bg-slate-100 text-[11px] uppercase tracking-widest" style="width: 322px; min-width: 322px; max-width: 322px;">សរុបអវត្តមានប្រចាំថ្ងៃ</td>`;
     
     let grandTotalPerm = 0, grandTotalUnex = 0, grandTotalSick = 0, grandTotalLate = 0;
 

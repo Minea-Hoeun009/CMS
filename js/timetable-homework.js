@@ -28,6 +28,84 @@ window.TimetableHomeworkManager = {
         { slot: 8, session: 'afternoon', time: '១៥:៤០ - ១៦:២៥', label: 'ម៉ោងទី ៨ (រសៀល)' }
     ],
 
+    defaultPeriods: [
+        { slot: 1, session: 'morning', time: '០៧:០០ - ០៧:៤៥', label: 'ម៉ោងទី ១ (ព្រឹក)' },
+        { slot: 2, session: 'morning', time: '០៧:៥០ - ០៨:៣៥', label: 'ម៉ោងទី ២ (ព្រឹក)' },
+        { slot: 3, session: 'morning', time: '០៨:៥០ - ០៩:៣៥', label: 'ម៉ោងទី ៣ (ព្រឹក)' },
+        { slot: 4, session: 'morning', time: '០៩:៤០ - ១០:២៥', label: 'ម៉ោងទី ៤ (ព្រឹក)' },
+        { slot: 5, session: 'afternoon', time: '១៣:០០ - ១៣:៤៥', label: 'ម៉ោងទី ៥ (រសៀល)' },
+        { slot: 6, session: 'afternoon', time: '១៣:៥០ - ១៤:៣៥', label: 'ម៉ោងទី ៦ (រសៀល)' },
+        { slot: 7, session: 'afternoon', time: '១៤:៥០ - ១៥:៣៥', label: 'ម៉ោងទី ៧ (រសៀល)' },
+        { slot: 8, session: 'afternoon', time: '១៥:៤០ - ១៦:២៥', label: 'ម៉ោងទី ៨ (រសៀល)' }
+    ],
+
+    loadPeriods: function() {
+        try {
+            const saved = localStorage.getItem('cms_custom_timetable_periods');
+            if (saved) {
+                const parsed = JSON.parse(saved);
+                if (Array.isArray(parsed) && parsed.length > 0) {
+                    this.periods = parsed;
+                    return;
+                }
+            }
+        } catch (e) {
+            console.error("កំហុសក្នុងការទាញយកម៉ោងសិក្សា:", e);
+        }
+        this.periods = JSON.parse(JSON.stringify(this.defaultPeriods));
+    },
+
+    saveCustomPeriods: function() {
+        const newPeriods = JSON.parse(JSON.stringify(this.periods));
+        for (let i = 1; i <= 8; i++) {
+            const timeInp = document.getElementById(`custom_period_time_${i}`);
+            const labelInp = document.getElementById(`custom_period_label_${i}`);
+            const target = newPeriods.find(p => p.slot === i);
+            if (target) {
+                if (timeInp && timeInp.value.trim()) {
+                    let val = timeInp.value.trim();
+                    if (window.toKhmerNum) val = window.toKhmerNum(val);
+                    target.time = val;
+                }
+                if (labelInp && labelInp.value.trim()) {
+                    target.label = labelInp.value.trim();
+                }
+            }
+        }
+        localStorage.setItem('cms_custom_timetable_periods', JSON.stringify(newPeriods));
+        this.periods = newPeriods;
+        this.closePeriodSettingsModal();
+        this.renderView();
+        if (typeof window.showToast === 'function') {
+            window.showToast("បានរក្សាទុកម៉ោងសិក្សាដោយជោគជ័យ!", "success");
+        }
+    },
+
+    resetPeriodsToDefault: function() {
+        if (!confirm("តើអ្នកពិតជាចង់កំណត់ម៉ោងសិក្សាត្រឡប់មកស្តង់ដារក្រសួងដើមវិញមែនទេ?")) return;
+        localStorage.removeItem('cms_custom_timetable_periods');
+        this.periods = JSON.parse(JSON.stringify(this.defaultPeriods));
+        this.closePeriodSettingsModal();
+        this.renderView();
+        if (typeof window.showToast === 'function') {
+            window.showToast("បានកំណត់ម៉ោងសិក្សាដូចដើម!", "info");
+        }
+    },
+
+    openPeriodSettingsModal: function() {
+        const modal = document.getElementById('periodSettingsModal');
+        if (modal) {
+            modal.classList.remove('hidden');
+        }
+    },
+
+    closePeriodSettingsModal: function() {
+        const modal = document.getElementById('periodSettingsModal');
+        if (modal) {
+            modal.classList.add('hidden');
+        }
+    },
+
     // មុខវិជ្ជាបឋមសិក្សា (Primary Subjects)
     primarySubjects: [
         { name: "ភាសាខ្មែរ", color: "bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-950/60 dark:text-blue-300" },
@@ -58,6 +136,7 @@ window.TimetableHomeworkManager = {
     ],
 
     init: function() {
+        this.loadPeriods();
         const sInfo = window.appSettings || JSON.parse(localStorage.getItem('school_settings') || '{}');
         this.currentAcademicYear = document.getElementById("globalAcademicYear")?.value || 
                                    localStorage.getItem('selected_academic_year') || 
@@ -779,23 +858,20 @@ window.TimetableHomeworkManager = {
                     
                     <div class="relative z-10 space-y-2">
                         <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 text-xs font-bold border border-emerald-400/30">
-                            <i class="fa-solid fa-wand-magic-sparkles"></i> ប្រព័ន្ធរៀបចំកាលវិភាគឆ្លាតវៃ (Smart CMS Schedule)
+                            <i class="fa-solid fa-calendar-check"></i> កាលវិភាគសិក្សាផ្លូវការ (Study Timetable)
                         </div>
                         <h2 class="text-2xl md:text-3xl font-black font-moul tracking-wide drop-shadow-md">
-                            កាលវិភាគបង្រៀន & កិច្ចការផ្ទះ
+                            កាលវិភាគសិក្សា
                         </h2>
                         <p class="text-xs md:text-sm text-indigo-200 font-medium max-w-2xl">
-                            រៀបចំកាលវិភាគតាមថ្នាក់ជូនលោកគ្រូ-អ្នកគ្រូ ប្រើប្រាស់មុខងារស្វ័យប្រវត្តិតាមស្តង់ដារក្រសួង និងត្រួតពិនិត្យភាពជាន់ម៉ោងបង្រៀន
+                            រៀបចំកាលវិភាគសិក្សាតាមថ្នាក់ កំណត់ម៉ោងសិក្សានីមួយៗដោយខ្លួនឯង ប្រើប្រាស់មុខងារស្វ័យប្រវត្តិតាមស្តង់ដារ និងត្រួតពិនិត្យភាពជាន់ម៉ោងបង្រៀន
                         </p>
                     </div>
 
-                    <!-- Navigation Switch Tabs -->
-                    <div class="flex items-center gap-2 bg-black/40 backdrop-blur-md p-1.5 rounded-2xl border border-white/10 relative z-10 shrink-0">
-                        <button onclick="window.TimetableHomeworkManager.switchTab('timetable')" class="px-5 py-2.5 rounded-xl text-xs font-bold transition flex items-center gap-2 ${this.activeTab === 'timetable' ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-lg' : 'text-slate-300 hover:text-white'}">
-                            <i class="fa-solid fa-calendar-days"></i> កាលវិភាគបង្រៀន
-                        </button>
-                        <button onclick="window.TimetableHomeworkManager.switchTab('homework')" class="px-5 py-2.5 rounded-xl text-xs font-bold transition flex items-center gap-2 ${this.activeTab === 'homework' ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-lg' : 'text-slate-300 hover:text-white'}">
-                            <i class="fa-solid fa-book-open-reader"></i> កិច្ចការផ្ទះ (${this.currentGrade})
+                    <!-- Action: Configure Study Periods -->
+                    <div class="flex items-center gap-2 relative z-10 shrink-0">
+                        <button onclick="window.TimetableHomeworkManager.openPeriodSettingsModal()" class="px-5 py-3 rounded-2xl text-xs font-bold transition flex items-center gap-2 bg-gradient-to-r from-teal-500 to-emerald-600 hover:from-teal-600 hover:to-emerald-700 text-white shadow-lg border border-white/20 transform hover:-translate-y-0.5">
+                            <i class="fa-solid fa-clock text-amber-300 text-sm"></i> កំណត់ម៉ោងសិក្សា
                         </button>
                     </div>
                 </div>
@@ -834,6 +910,12 @@ window.TimetableHomeworkManager = {
 
                     <!-- Action Buttons -->
                     <div class="flex flex-wrap items-center gap-2.5 w-full lg:w-auto justify-end">
+                        <!-- Configure Period Times Button -->
+                        <button onclick="window.TimetableHomeworkManager.openPeriodSettingsModal()" class="px-4 py-2.5 bg-teal-50 hover:bg-teal-100 text-teal-800 dark:bg-teal-950/60 dark:text-teal-300 rounded-2xl text-xs font-bold transition flex items-center gap-2 shadow-sm border border-teal-200/60">
+                            <i class="fa-solid fa-clock text-teal-600"></i>
+                            <span>កំណត់ម៉ោង</span>
+                        </button>
+
                         <!-- Smart Auto-Generator Button -->
                         <button onclick="window.TimetableHomeworkManager.openSmartGeneratorModal()" class="px-4 py-2.5 bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 hover:from-amber-600 hover:to-orange-600 text-white rounded-2xl text-xs font-black shadow-md hover:shadow-lg transition flex items-center gap-2 transform hover:-translate-y-0.5">
                             <i class="fa-solid fa-bolt-lightning text-yellow-200"></i>
@@ -859,8 +941,8 @@ window.TimetableHomeworkManager = {
                     </div>
                 </div>
 
-                <!-- Tab Content 1: Timetable -->
-                <div id="tabContentTimetable" class="${this.activeTab === 'timetable' ? 'block' : 'hidden'} space-y-6">
+                <!-- Timetable Grid Container -->
+                <div id="tabContentTimetable" class="space-y-6">
                     <div class="bg-white dark:bg-slate-800 rounded-[2rem] p-6 shadow-sm border border-slate-200/80 dark:border-slate-700 overflow-hidden">
                         
                         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4 pb-3 border-b border-slate-100 dark:border-slate-700">
@@ -895,7 +977,7 @@ window.TimetableHomeworkManager = {
                                     <!-- Morning Session Section -->
                                     <tr class="bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-950/40 dark:to-teal-950/40 font-bold text-emerald-900 dark:text-emerald-300">
                                         <td colspan="7" class="py-2 text-left px-4">
-                                            <i class="fa-solid fa-sun mr-2 text-amber-500"></i> វេនព្រឹក (Morning Session — ០៧:០០ ដល់ ១០:២៥)
+                                            <i class="fa-solid fa-sun mr-2 text-amber-500"></i> វេនព្រឹក (Morning Session)
                                         </td>
                                     </tr>
                                     ${this.periods.filter(p => p.session === 'morning').map(p => this.renderPeriodRow(p)).join("")}
@@ -903,7 +985,7 @@ window.TimetableHomeworkManager = {
                                     <!-- Afternoon Session Section -->
                                     <tr class="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/40 dark:to-indigo-950/40 font-bold text-blue-900 dark:text-blue-300">
                                         <td colspan="7" class="py-2 text-left px-4">
-                                            <i class="fa-solid fa-cloud-sun mr-2 text-blue-500"></i> វេនរសៀល (Afternoon Session — ១៣:០០ ដល់ ១៦:២៥)
+                                            <i class="fa-solid fa-cloud-sun mr-2 text-blue-500"></i> វេនរសៀល (Afternoon Session)
                                         </td>
                                     </tr>
                                     ${this.periods.filter(p => p.session === 'afternoon').map(p => this.renderPeriodRow(p)).join("")}
@@ -913,33 +995,81 @@ window.TimetableHomeworkManager = {
                     </div>
                 </div>
 
-                <!-- Tab Content 2: Homework -->
-                <div id="tabContentHomework" class="${this.activeTab === 'homework' ? 'block' : 'hidden'} space-y-6">
-                    <div class="bg-white dark:bg-slate-800 rounded-[2rem] p-6 shadow-sm border border-slate-200/80 dark:border-slate-700">
-                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 pb-4 border-b border-slate-100 dark:border-slate-700">
-                            <div>
-                                <h3 class="font-moul text-slate-800 dark:text-white text-base">
-                                    កិច្ចការផ្ទះ & Assignment (${this.currentGrade})
-                                </h3>
-                                <p class="text-xs text-slate-400 mt-1">ដាក់កិច្ចការ និងតាមដានការប្រគល់របស់សិស្សក្នុងថ្នាក់</p>
+            </div>
+
+            <!-- MODAL: Period Settings Modal (កំណត់ម៉ោងសិក្សានីមួយៗដោយខ្លួនឯង) -->
+            <div id="periodSettingsModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 font-siemreap">
+                <div class="bg-white dark:bg-slate-800 rounded-[2.5rem] w-full max-w-2xl max-h-[90vh] overflow-y-auto p-6 md:p-8 shadow-2xl border border-slate-200 dark:border-slate-700 animate-scale-up space-y-6 custom-scrollbar">
+                    <div class="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-slate-700">
+                        <div class="flex items-center gap-3">
+                            <div class="w-12 h-12 rounded-2xl bg-teal-100 text-teal-700 dark:bg-teal-900/60 dark:text-teal-300 flex items-center justify-center text-xl shadow-inner">
+                                <i class="fa-solid fa-clock"></i>
                             </div>
-                            <div class="flex items-center gap-2">
-                                <button onclick="window.TimetableHomeworkManager.printHomeworkSheet()" class="px-4 py-2.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-300 rounded-2xl text-xs font-bold transition flex items-center gap-2 shadow-sm" title="បោះពុម្ពតារាងកិច្ចការផ្ទះជាក្រដាស A4">
-                                    <i class="fa-solid fa-print"></i>
-                                    <span>ព្រីនកិច្ចការ (A4)</span>
-                                </button>
-                                <button onclick="window.TimetableHomeworkManager.openNewHomeworkModal()" class="px-5 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white rounded-2xl text-xs font-bold shadow-md transition flex items-center gap-2">
-                                    <i class="fa-solid fa-plus"></i> បង្កើតកិច្ចការផ្ទះថ្មី
-                                </button>
+                            <div>
+                                <h3 class="font-moul text-base text-slate-800 dark:text-white">កំណត់ម៉ោងសិក្សានីមួយៗ</h3>
+                                <p class="text-xs text-slate-400">កំណត់ម៉ោងចូលរៀន និងចេញរៀនសម្រាប់ម៉ោងនីមួយៗតាមការជាក់ស្ដែង</p>
+                            </div>
+                        </div>
+                        <button onclick="window.TimetableHomeworkManager.closePeriodSettingsModal()" class="w-9 h-9 rounded-full bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-500 text-sm flex items-center justify-center transition">
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
+                    </div>
+
+                    <div class="space-y-6 text-xs">
+                        <!-- វេនព្រឹក (Morning Periods) -->
+                        <div>
+                            <h4 class="font-bold text-emerald-700 dark:text-emerald-400 text-sm mb-3 flex items-center gap-2">
+                                <i class="fa-solid fa-sun text-amber-500"></i> វេនព្រឹក (Morning Sessions)
+                            </h4>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                ${this.periods.filter(p => p.session === 'morning').map(p => `
+                                    <div class="p-3.5 bg-slate-50 dark:bg-slate-700/50 rounded-2xl border border-slate-200/80 dark:border-slate-600 space-y-2">
+                                        <div class="flex items-center justify-between">
+                                            <label class="font-bold text-slate-700 dark:text-slate-200">${p.label}</label>
+                                            <span class="text-[10px] text-slate-400 font-mono">Slot ${p.slot}</span>
+                                        </div>
+                                        <input type="text" id="custom_period_label_${p.slot}" value="${p.label}" class="w-full px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-xs font-bold text-slate-800 dark:text-white outline-none focus:ring-2 focus:ring-teal-500" placeholder="ឈ្មោះម៉ោងសិក្សា">
+                                        <input type="text" id="custom_period_time_${p.slot}" value="${p.time}" class="w-full px-3 py-2 rounded-xl border border-teal-200 dark:border-teal-700 bg-white dark:bg-slate-800 text-xs font-mono font-bold text-teal-800 dark:text-teal-300 outline-none focus:ring-2 focus:ring-teal-500" placeholder="ឧ. ០៧:០០ - ០៧:៤៥">
+                                    </div>
+                                `).join('')}
                             </div>
                         </div>
 
-                        <!-- Homework Cards Grid -->
-                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5" id="homeworkCardsGrid">
-                            <!-- Populated dynamically -->
+                        <!-- វេនរសៀល (Afternoon Periods) -->
+                        <div>
+                            <h4 class="font-bold text-blue-700 dark:text-blue-400 text-sm mb-3 flex items-center gap-2">
+                                <i class="fa-solid fa-cloud-sun text-blue-500"></i> វេនរសៀល (Afternoon Sessions)
+                            </h4>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                ${this.periods.filter(p => p.session === 'afternoon').map(p => `
+                                    <div class="p-3.5 bg-slate-50 dark:bg-slate-700/50 rounded-2xl border border-slate-200/80 dark:border-slate-600 space-y-2">
+                                        <div class="flex items-center justify-between">
+                                            <label class="font-bold text-slate-700 dark:text-slate-200">${p.label}</label>
+                                            <span class="text-[10px] text-slate-400 font-mono">Slot ${p.slot}</span>
+                                        </div>
+                                        <input type="text" id="custom_period_label_${p.slot}" value="${p.label}" class="w-full px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-xs font-bold text-slate-800 dark:text-white outline-none focus:ring-2 focus:ring-teal-500" placeholder="ឈ្មោះម៉ោងសិក្សា">
+                                        <input type="text" id="custom_period_time_${p.slot}" value="${p.time}" class="w-full px-3 py-2 rounded-xl border border-blue-200 dark:border-blue-700 bg-white dark:bg-slate-800 text-xs font-mono font-bold text-blue-800 dark:text-blue-300 outline-none focus:ring-2 focus:ring-teal-500" placeholder="ឧ. ១៣:០០ - ១៣:៤៥">
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col sm:flex-row items-center justify-between gap-3 pt-4 border-t border-slate-100 dark:border-slate-700">
+                        <button onclick="window.TimetableHomeworkManager.resetPeriodsToDefault()" class="w-full sm:w-auto px-4 py-2.5 rounded-xl text-xs font-bold text-rose-600 hover:bg-rose-50 transition border border-rose-200/60">
+                            <i class="fa-solid fa-rotate-left mr-1"></i> កំណត់ដូចដើម (ក្រសួង)
+                        </button>
+                        <div class="flex items-center gap-2 w-full sm:w-auto justify-end">
+                            <button onclick="window.TimetableHomeworkManager.closePeriodSettingsModal()" class="px-5 py-2.5 rounded-xl text-xs font-bold text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700 transition">
+                                បោះបង់
+                            </button>
+                            <button onclick="window.TimetableHomeworkManager.saveCustomPeriods()" class="px-6 py-2.5 bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700 text-white rounded-xl text-xs font-bold shadow-md transition flex items-center gap-2">
+                                <i class="fa-solid fa-check"></i> រក្សាទុកម៉ោងសិក្សា
+                            </button>
                         </div>
                     </div>
                 </div>
+            </div>
 
             </div>
 
