@@ -552,34 +552,105 @@ window.KrouDigital = {
     renderHealthTracker: function(container, targetGrade = null, targetRoom = null) {
         if (!container) return;
         const sInfo = window.appSettings || JSON.parse(localStorage.getItem('school_settings') || '{}');
-        const activeClass = typeof window.getCurrentSelectedClass === 'function' ? window.getCurrentSelectedClass() : { level: "ថ្នាក់ទី ៤", room: "«ក»" };
-        const curLevel = targetGrade || activeClass.level;
-        const curRoom = targetRoom || activeClass.room;
-        const gradeFull = `${curLevel} ${curRoom}`.trim();
+        const activeClass = typeof window.getCurrentSelectedClass === 'function' ? window.getCurrentSelectedClass() : null;
+        const defaultLevel = (activeClass && activeClass.level) || sInfo.teacher_level || localStorage.getItem('auth_teacher_grade') || localStorage.getItem('selected_level') || "ថ្នាក់ទី ១";
+        const defaultRoom = (activeClass && activeClass.room) || sInfo.teacher_room || localStorage.getItem('auth_teacher_room') || localStorage.getItem('selected_room') || "«ក»";
+        const curLevel = targetGrade || defaultLevel;
+        const curRoom = targetRoom || defaultRoom;
+        const formattedRoom = curRoom ? (curRoom.startsWith('«') ? curRoom : `«${curRoom}»`) : '«ក»';
+        const gradeFull = `${curLevel} ${formattedRoom}`.trim();
 
-        const academicYear = document.getElementById("globalAcademicYear")?.value || sInfo.academic_year || "២០២៦-២០២៧";
-        const allStudents = window.allStudents || JSON.parse(localStorage.getItem('academic_students') || '[]');
+        const districtName = (sInfo.district_name || sInfo.district || sInfo.cluster || "កៀនស្វាយ").replace(/^ស្រុក\s*/, '').trim();
+        const schoolName = sInfo.school_name || "សាលាបឋមសិក្សា ខ្សុំ";
+        const teacherName = (window.AuthState ? window.AuthState.teacherName : null) || localStorage.getItem('auth_teacher_name') || sInfo.teacher_name || "ហឿន មិនា";
+        const principalName = sInfo.principal_name || "នាយកសាលា";
+        const rawAcademicYear = document.getElementById("globalAcademicYear")?.value || localStorage.getItem('selected_academic_year') || sInfo.academic_year || "២០២៦-២០២៧";
+        const academicYear = typeof window.toKhmerNum === 'function' ? window.toKhmerNum(rawAcademicYear) : rawAcademicYear;
         const healthRecords = JSON.parse(localStorage.getItem('student_health_records') || '{}');
 
-        // ចម្រាញ់សិស្សតាមថ្នាក់
-        const classStudents = typeof window.getStudentsForClass === 'function'
-            ? window.getStudentsForClass(curLevel, curRoom, academicYear)
-            : allStudents.filter(s => {
-                if (s.status === "Dropped" || s.status === "Withdrawn") return false;
-                return (s.grade || "").replace(/\s+/g, '') === curLevel.replace(/\s+/g, '') &&
-                       (s.room || "").replace(/[«»\s]/g, '') === curRoom.replace(/[«»\s]/g, '');
+        // Resolve dates
+        let locShort = "";
+        const rawLoc = document.getElementById('global_loc_input')?.value || localStorage.getItem('rc_location') || localStorage.getItem('rep_location');
+        if (rawLoc) {
+            locShort = rawLoc.replace(/^ធ្វើនៅ\s*/, '').replace(/,+$/, '').trim();
+        } else {
+            locShort = schoolName.replace(/^(សាលាបឋមសិក្សា|អនុវិទ្យាល័យ|វិទ្យាល័យ|សាលា)\s*/g, '').trim();
+            if (!locShort) locShort = districtName || "កៀនស្វាយ";
+        }
+
+        let sDate = "";
+        const rawDate = document.getElementById('global_sol_input')?.value || localStorage.getItem('rc_solar_date') || localStorage.getItem('rep_solar_date');
+        if (rawDate && rawDate.trim()) {
+            sDate = rawDate.trim();
+        } else {
+            sDate = "ថ្ងៃទី.......ខែ..........ឆ្នាំ២០២៦";
+        }
+        if (sDate.includes("ថ្ងៃទី")) sDate = sDate.substring(sDate.indexOf("ថ្ងៃទី"));
+        const solarDateStr = `ធ្វើនៅ ${locShort}, ${sDate}`;
+
+        let isLunarChecked = true;
+        const chkBox = document.getElementById('global_lun_chk');
+        if (chkBox) isLunarChecked = chkBox.checked;
+        else isLunarChecked = (localStorage.getItem('rc_show_lunar') !== 'false' && localStorage.getItem('rep_show_lunar') !== 'false');
+
+        let lun = document.getElementById('global_lun_input')?.value || localStorage.getItem('rc_lunar_date') || localStorage.getItem('rep_lunar_date') || "ថ្ងៃ....................ខែ..................ឆ្នាំ...............ព.ស.២៥៧០";
+        const lunarDateStr = isLunarChecked ? lun : "";
+
+        // ចម្រាញ់សិស្សតាមថ្នាក់ with robust fallback
+        let classStudents = typeof window.getStudentsForClass === 'function'
+            ? window.getStudentsForClass(curLevel, curRoom, rawAcademicYear)
+            : [];
+
+        if (!classStudents || classStudents.length === 0) {
+            const baseList = (window.filteredStudents && window.filteredStudents.length > 0)
+                ? window.filteredStudents
+                : (window.allStudents || JSON.parse(localStorage.getItem('academic_students') || '[]'));
+            const targetNorm = typeof window.normalizeGrade === 'function' ? window.normalizeGrade(curLevel) : curLevel;
+            const targetRoomClean = String(curRoom || '').replace(/[«»\s]/g, '');
+
+            classStudents = baseList.filter(s => {
+                if (!s) return false;
+                const sStat = String(s.status || 'Active').trim().toLowerCase();
+                if (sStat === 'dropped' || sStat === 'withdrawn' || sStat === 'ឈប់រៀន' || sStat === 'បោះបង់') return false;
+                const sGrade = typeof window.normalizeGrade === 'function' ? window.normalizeGrade(s.grade) : s.grade;
+                if (targetNorm && sGrade !== targetNorm) return false;
+                if (targetRoomClean && targetRoomClean !== 'all') {
+                    const sRoom = String(s.room || '«ក»').replace(/[«»\s]/g, '');
+                    if (sRoom !== targetRoomClean) return false;
+                }
+                return true;
             });
+            if (classStudents.length === 0 && baseList.length > 0) {
+                classStudents = baseList;
+            }
+        }
 
         container.innerHTML = `
             <div id="healthTrackerArea" class="bg-white p-6 md:p-8 w-full shadow-2xl rounded-2xl border border-slate-200 text-slate-800" style="max-width: 297mm; min-height: 210mm; font-family: 'Siemreap', sans-serif;">
                 
+                <!-- MoEYS Official Standard Letterhead -->
+                <div class="flex justify-between items-start mb-6 text-xs">
+                    <div class="text-left leading-relaxed pt-6">
+                        <p class="font-moul text-slate-900 text-[12px] mb-1">ការិយាល័យ អប់រំ យុវជន និងកីឡានៃរដ្ឋបាលស្រុក ${districtName}</p>
+                        <p class="font-moul text-slate-900 text-[12px]">${schoolName}</p>
+                    </div>
+                    <div class="text-center">
+                        <p class="font-moul text-slate-900 text-[13px] mb-1">ព្រះរាជាណាចក្រកម្ពុជា</p>
+                        <p class="font-moul text-slate-900 text-[13px]">ជាតិ សាសនា ព្រះមហាក្សត្រ</p>
+                        <div class="flex items-center justify-center mt-1 mx-auto">
+                            <img src="${window.CMS_HEADER_SYMBOL_B64 || 'assets/images/header-flourish.png'}" class="header-flourish-symbol" alt="symbol" style="display: block; margin: 2px auto 0 auto; width: 135px; height: 11px; object-fit: contain;" />
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Document Title Header -->
                 <div class="text-center mb-6">
                     <h3 class="font-moul text-base text-slate-800 flex items-center justify-center gap-2">
-                        <i class="fa-solid fa-heart-pulse text-rose-500"></i>
+                        <i class="fa-solid fa-heart-pulse text-rose-500 print:hidden"></i>
                         <span>របាយការណ៍ និងការតាមដានសុខភាពសិស្ស</span>
                     </h3>
-                    <p class="text-xs text-slate-500 font-bold mt-1">គណនា BMI ស្វ័យប្រវត្តិ, ការពិនិត្យភ្នែក និងកំណត់ត្រាវ៉ាក់សាំង (ថ្នាក់៖ ${gradeFull} - ${schoolName})</p>
+                    <p class="text-xs text-slate-600 font-bold mt-1">ថ្នាក់៖ ${gradeFull} | ឆ្នាំសិក្សា ${academicYear}</p>
+                    <p class="text-[11px] text-slate-500 mt-0.5 print:hidden">គណនា BMI ស្វ័យប្រវត្តិ, ការពិនិត្យភ្នែក និងកំណត់ត្រាវ៉ាក់សាំង</p>
                 </div>
 
                 <div class="overflow-x-auto mb-6">
@@ -644,6 +715,21 @@ window.KrouDigital = {
                     </table>
                 </div>
 
+                <!-- Signatures Section -->
+                <div class="flex justify-between items-start text-xs mt-10 pt-4 px-8 font-siemreap">
+                    <div class="text-center w-2/5">
+                        <p class="mb-1 text-slate-700">បានឃើញ និងឯកភាព</p>
+                        <p class="font-moul text-slate-900 mb-16">នាយក/នាយិកាសាលា</p>
+                        <p class="font-moul text-slate-900 text-sm">${principalName}</p>
+                    </div>
+                    <div class="text-center w-2/5">
+                        <p class="mb-1 text-slate-700">${lunarDateStr || 'ថ្ងៃ....................ខែ..................ឆ្នាំ...............ព.ស.២៥៧០'}</p>
+                        <p class="mb-1 text-slate-700">${solarDateStr}</p>
+                        <p class="font-moul text-slate-900 mb-16">គ្រូបន្ទុកថ្នាក់</p>
+                        <p class="font-moul text-slate-900 text-sm">${teacherName}</p>
+                    </div>
+                </div>
+
             </div>
         `;
     },
@@ -670,19 +756,34 @@ window.KrouDigital = {
     },
 
     saveHealthRecords: function() {
-        const allStudents = window.allStudents || JSON.parse(localStorage.getItem('academic_students') || '[]');
         const records = JSON.parse(localStorage.getItem('student_health_records') || '{}');
-        allStudents.forEach(stu => {
-            const hInput = document.getElementById(`h_height_${stu.id}`);
-            const wInput = document.getElementById(`h_weight_${stu.id}`);
-            if (hInput && wInput) {
-                const h = parseFloat(hInput.value || 135);
-                const w = parseFloat(wInput.value || 30);
-                const vision = document.getElementById(`h_vision_${stu.id}`)?.value || "ធម្មតា";
-                const vaccine = document.getElementById(`h_vaccine_${stu.id}`)?.value || "ពេញលេញ";
-                records[stu.id] = { height: h, weight: w, vision, vaccine };
-            }
-        });
+        const heightInputs = document.querySelectorAll("input[id^='h_height_']");
+        if (heightInputs && heightInputs.length > 0) {
+            heightInputs.forEach(hInput => {
+                const stuId = hInput.id.replace('h_height_', '');
+                const wInput = document.getElementById(`h_weight_${stuId}`);
+                if (wInput) {
+                    const h = parseFloat(hInput.value || 135);
+                    const w = parseFloat(wInput.value || 30);
+                    const vision = document.getElementById(`h_vision_${stuId}`)?.value || "ធម្មតា";
+                    const vaccine = document.getElementById(`h_vaccine_${stuId}`)?.value || "ពេញលេញ";
+                    records[stuId] = { height: h, weight: w, vision, vaccine };
+                }
+            });
+        } else {
+            const allStudents = window.allStudents || JSON.parse(localStorage.getItem('academic_students') || '[]');
+            allStudents.forEach(stu => {
+                const hInput = document.getElementById(`h_height_${stu.id}`);
+                const wInput = document.getElementById(`h_weight_${stu.id}`);
+                if (hInput && wInput) {
+                    const h = parseFloat(hInput.value || 135);
+                    const w = parseFloat(wInput.value || 30);
+                    const vision = document.getElementById(`h_vision_${stu.id}`)?.value || "ធម្មតា";
+                    const vaccine = document.getElementById(`h_vaccine_${stu.id}`)?.value || "ពេញលេញ";
+                    records[stu.id] = { height: h, weight: w, vision, vaccine };
+                }
+            });
+        }
         localStorage.setItem('student_health_records', JSON.stringify(records));
         if (typeof showToast === 'function') showToast("✅ បានរក្សាទុកទិន្នន័យសុខភាពសិស្សជោគជ័យ!", "success");
     },
