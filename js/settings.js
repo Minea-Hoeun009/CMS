@@ -138,8 +138,8 @@ window.getTeacherPersonalSettings = function(teacherId) {
         telegram_username: (saved && saved.telegram_username) || (isCurrentTeacher ? localStorage.getItem('auth_telegram_username') : "") || "",
         telegram_id: (saved && saved.telegram_id) || (isCurrentTeacher ? localStorage.getItem('auth_telegram_id') : "") || "",
         teacher_edu: (saved && saved.teacher_edu) || s.teacher_edu || "",
-        teacher_level: (saved && saved.teacher_level) || (isCurrentTeacher ? (localStorage.getItem('selected_level') || authState.teacher_level || s.teacher_level) : null) || "ថ្នាក់ទី ១",
-        teacher_room: (saved && saved.teacher_room) || (isCurrentTeacher ? (localStorage.getItem('selected_room') || authState.teacher_room || s.teacher_room) : null) || "«ក»",
+        teacher_level: (saved && saved.teacher_level) || (isCurrentTeacher ? (localStorage.getItem('auth_teacher_grade') || localStorage.getItem('auth_teacher_level') || localStorage.getItem('selected_level') || authState.teacher_level || s.teacher_level) : null) || "ថ្នាក់ទី ១",
+        teacher_room: (saved && saved.teacher_room) || (isCurrentTeacher ? (localStorage.getItem('auth_teacher_room') || localStorage.getItem('selected_room') || authState.teacher_room || s.teacher_room) : null) || "«ក»",
         academic_year: (saved && saved.academic_year) || localStorage.getItem('selected_academic_year') || s.academic_year || "2026-2027",
         features: {
             attendance: saved?.features?.attendance !== false,
@@ -478,8 +478,18 @@ window.renderPersonalSettingsTab = function() {
     const gradesList = typeof window.getAllGradesList === 'function' ? window.getAllGradesList() : ["ថ្នាក់ទី ១", "ថ្នាក់ទី ២", "ថ្នាក់ទី ៣", "ថ្នាក់ទី ៤", "ថ្នាក់ទី ៥", "ថ្នាក់ទី ៦"];
     const roomsList = typeof window.getAllRoomsList === 'function' ? window.getAllRoomsList() : ["«ក»", "«ខ»", "«គ»", "«ឃ»"];
 
-    const gradesOpts = gradesList.map(g => `<option value="${g}" ${g === personal.teacher_level ? 'selected' : ''}>${g}</option>`).join('');
-    const roomsOpts = roomsList.map(r => `<option value="${r}" ${r === personal.teacher_room ? 'selected' : ''}>${r}</option>`).join('');
+    const normCurrentGrade = typeof window.normalizeGrade === 'function' ? window.normalizeGrade(personal.teacher_level) : personal.teacher_level;
+    const gradesOpts = gradesList.map(g => {
+        const normG = typeof window.normalizeGrade === 'function' ? window.normalizeGrade(g) : g;
+        const isSel = (g === personal.teacher_level || normG === normCurrentGrade);
+        return `<option value="${g}" ${isSel ? 'selected' : ''}>${g}</option>`;
+    }).join('');
+    const cleanCurrentRoom = String(personal.teacher_room || '').replace(/[«»\s]/g, '');
+    const roomsOpts = roomsList.map(r => {
+        const cleanR = String(r || '').replace(/[«»\s]/g, '');
+        const isSel = (r === personal.teacher_room || cleanR === cleanCurrentRoom);
+        return `<option value="${r}" ${isSel ? 'selected' : ''}>${r}</option>`;
+    }).join('');
 
     container.innerHTML = `
         <!-- Welcome & Quick Status Banner -->
@@ -493,7 +503,9 @@ window.renderPersonalSettingsTab = function() {
                     <p class="text-xs text-indigo-200 mt-1 flex flex-wrap items-center gap-2 font-bold">
                         <span>អត្តលេខគ្រូ៖ <strong class="font-mono text-white">${personal.teacher_id}</strong></span>
                         <span class="text-white/40">•</span>
-                        <span>បន្ទប់ទទួលបន្ទុក៖ <strong class="text-amber-300 font-moul"> ${personal.teacher_room || '«ក»'}</strong></span>
+                        <span>ថ្នាក់ទី៖ <strong class="text-amber-300 font-moul">${personal.teacher_level || 'ថ្នាក់ទី ១'}</strong></span>
+                        <span class="text-white/40">•</span>
+                        <span>បន្ទប់ទទួលបន្ទុក៖ <strong class="text-amber-300 font-moul">${typeof window.normalizeRoomName === 'function' ? window.normalizeRoomName(personal.teacher_room) : (personal.teacher_room || '«ក»')}</strong></span>
                     </p>
                 </div>
             </div>
@@ -582,7 +594,7 @@ window.renderPersonalSettingsTab = function() {
                     </div>
 
                     <div>
-                        <label class="block font-bold text-indigo-700 dark:text-indigo-400 mb-2">កម្រិតថ្នាក់ទទួលបន្ទុក (Grade Level) *</label>
+                        <label class="block font-bold text-indigo-700 dark:text-indigo-400 mb-2">ថ្នាក់ទីទទួលបន្ទុក (Grade Level) *</label>
                         <select id="pers_teacher_level" class="w-full bg-indigo-50/50 dark:bg-slate-700 border-2 border-indigo-200 dark:border-indigo-500/40 rounded-xl px-4 py-2.5 font-bold text-indigo-900 dark:text-indigo-200 outline-none focus:ring-2 focus:ring-indigo-500">
                             ${gradesOpts}
                         </select>
@@ -933,7 +945,8 @@ window.loadSettingsView = function() {
                             <h3 id="display_teacher_name" class="font-moul text-lg text-slate-800 uppercase">${window.appSettings.teacher_name || 'លោកគ្រូ អ្នកគ្រូ'}</h3>
                             <div class="flex flex-wrap items-center justify-center sm:justify-start gap-2 mt-1">
                                 <span class="px-2.5 py-0.5 bg-indigo-50 text-indigo-700 border border-indigo-100 rounded-full text-xs font-bold font-mono">ID: ${localStorage.getItem('auth_teacher_id') || 'TCH-001'}</span>
-                                <span class="px-2.5 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-100 rounded-full text-xs font-bold">បន្ទប់ ${window.appSettings.teacher_room || '«ក»'}</span>
+                                <span class="px-2.5 py-0.5 bg-indigo-50 text-indigo-700 border border-indigo-100 rounded-full text-xs font-bold font-moul">${window.appSettings.teacher_level || 'ថ្នាក់ទី ១'}</span>
+                                <span class="px-2.5 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-100 rounded-full text-xs font-bold font-moul">បន្ទប់ ${window.appSettings.teacher_room || '«ក»'}</span>
                             </div>
                         </div>
                     </div>
