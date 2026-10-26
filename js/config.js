@@ -1943,8 +1943,9 @@ window.renderExecutiveHeaderHTML = function(options = {}) {
                         <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-indigo-950/70 border border-white/20 font-bold font-moul text-amber-300 shadow-sm">
                             ${currentClassFull}
                         </span>
-                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-white/10 border border-white/15 font-mono text-[11px] text-blue-100 font-bold">
-                            ${teacherCode}
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-white/10 border border-white/15 text-[11px] text-blue-100 font-bold">
+                            <i class="fa-solid fa-chalkboard-user text-amber-300"></i>
+                            <span>${teacherName} (${teacherCode})</span>
                         </span>
                         ${extraBadgesHtml}
                     </div>

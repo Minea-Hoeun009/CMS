@@ -245,69 +245,23 @@
                 <div class="w-full h-full overflow-y-auto overflow-x-hidden custom-scrollbar relative z-10">
                     <div class="flex flex-col font-siemreap text-slate-800 dark:text-slate-100 max-w-[1600px] mx-auto pb-16 space-y-6">
                         
-                        <!-- 🟢 ១. Modern Executive Header Banner (Match Image 2) 🟢 -->
-                        <div class="bg-gradient-to-r from-blue-600 via-blue-600 to-indigo-600 rounded-[2.5rem] p-6 sm:p-8 text-white shadow-xl relative overflow-hidden border border-white/20">
-                            <!-- Subtle glowing background shapes -->
-                            <div class="absolute -right-12 -bottom-12 w-80 h-80 bg-white/10 rounded-full blur-3xl pointer-events-none"></div>
-                            <div class="absolute -left-12 -top-12 w-64 h-64 bg-indigo-400/20 rounded-full blur-3xl pointer-events-none"></div>
-
-                            <div class="relative z-10 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
-                                
-                                <!-- Left Column: Greetings & Teacher Info -->
-                                <div class="space-y-3">
-                                    <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-white/15 backdrop-blur-md border border-white/20 text-xs font-bold text-white shadow-sm">
-                                        <i class="fa-solid fa-graduation-cap text-amber-300"></i>
-                                        <span>ឆ្នាំសិក្សា ${toKhNum(academicYear)}</span>
-                                    </div>
-
-                                    <h1 class="text-2xl sm:text-3xl lg:text-4xl font-black font-moul tracking-wide text-white drop-shadow-md">
-                                        សួស្តី ${teacherName}! 👋
-                                    </h1>
-
-                                    <div class="flex flex-wrap items-center gap-3 pt-1 text-xs text-blue-100 font-medium">
-                                        <span class="flex items-center gap-2 text-white/95">
-                                            <i class="fa-solid fa-laptop-code text-blue-200"></i>
-                                            <span>លោកគ្រូអ្នកគ្រូកំពុងស្ថិតក្នុងទំព័រដើម</span>
-                                        </span>
-                                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-indigo-950/70 border border-white/20 font-bold font-moul text-amber-300 shadow-sm">
-                                            ${currentClassFull}
-                                        </span>
-                                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-white/10 border border-white/15 font-mono text-[11px] text-blue-100 font-bold">
-                                            ${teacherCode}
-                                        </span>
-                                    </div>
-                                </div>
-
-                                <!-- Right Column: Modern Glass Card for Time & Dates (Exact Match Image 2) -->
-                                <div class="w-full lg:w-auto shrink-0">
-                                    <div class="bg-white/10 backdrop-blur-md border border-white/20 rounded-3xl p-5 shadow-inner space-y-3 min-w-[280px] sm:min-w-[340px]">
-                                        <!-- Realtime Digital Clock Row -->
-                                        <div class="flex items-center gap-3.5 pb-2.5 border-b border-white/15">
-                                            <div class="w-11 h-11 rounded-2xl bg-white/20 text-white flex items-center justify-center text-xl shrink-0 shadow-sm border border-white/25">
-                                                <i class="fa-regular fa-clock"></i>
-                                            </div>
-                                            <div>
-                                                <span class="text-[10px] text-blue-200 font-bold uppercase tracking-wider block">ម៉ោងបច្ចុប្បន្ន</span>
-                                                <span id="dashClock" class="text-2xl sm:text-3xl font-black font-mono tracking-wider text-amber-300 block leading-tight">--:--:--</span>
-                                            </div>
-                                        </div>
-
-                                        <!-- Lunar Date Row -->
-                                        <div class="flex items-center gap-2.5 text-xs text-white/95 font-medium">
-                                            <i class="fa-solid fa-moon text-amber-300 text-sm shrink-0"></i>
-                                            <span class="truncate">${lunarDateStr}</span>
-                                        </div>
-
-                                        <!-- Solar Date Row -->
-                                        <div class="flex items-center gap-2.5 text-xs text-white/95 font-medium">
-                                            <i class="fa-regular fa-calendar-check text-blue-200 text-sm shrink-0"></i>
-                                            <span>${solarDateStr}</span>
-                                        </div>
-                                    </div>
-                                </div>
-
-                            </div>
-                        </div>
+                        <!-- 🟢 ១. Modern Executive Header Banner (Same as Other Modules) 🟢 -->
+                        ${typeof window.renderExecutiveHeaderHTML === 'function' ? window.renderExecutiveHeaderHTML({
+                            title: "ទំព័រដើម",
+                            subtitle: "ផ្ទាំងគ្រប់គ្រងទិន្នន័យរួម និងស្ថិតិសាលារៀន",
+                            icon: "fa-solid fa-house",
+                            currentClass: currentClassFull,
+                            academicYear: academicYear,
+                            clockId: "dashClock",
+                            teacherName: teacherName,
+                            teacherCode: teacherCode,
+                            extraBadgesHtml: roleKpiBadge,
+                            extraActionsHtml: `
+                                <button onclick="window.refreshDashboardData()" class="px-4 py-2 rounded-2xl text-xs font-bold transition flex items-center gap-2 bg-white/20 hover:bg-white/30 text-white shadow-sm border border-white/25 transform hover:-translate-y-0.5">
+                                    <i class="fa-solid fa-rotate text-amber-300"></i> ទាញយកទិន្នន័យថ្មី
+                                </button>
+                            `
+                        }) : ''}
 
                         <!-- 2. Filter & Quick Scope Bar -->
                         <div class="bg-white dark:bg-slate-800 px-4 py-3 rounded-2xl shadow-sm border border-slate-200/80 dark:border-slate-700 flex flex-wrap items-center justify-between gap-3">
