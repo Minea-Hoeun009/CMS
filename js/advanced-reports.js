@@ -26,7 +26,7 @@ window.AdvancedReports = {
         if (!modal) {
             modal = document.createElement("div");
             modal.id = "reportCardModal";
-            modal.className = "fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-2 sm:p-4 font-siemreap overflow-y-auto";
+            modal.className = "fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-2 sm:p-4 font-siemreap overflow-y-auto";
             document.body.appendChild(modal);
         }
 
@@ -198,7 +198,7 @@ window.AdvancedReports = {
         if (!modal) {
             modal = document.createElement("div");
             modal.id = "masterExportChoiceModal";
-            modal.className = "fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 font-siemreap";
+            modal.className = "fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4 font-siemreap";
             document.body.appendChild(modal);
         }
 
@@ -1105,7 +1105,7 @@ window.AdvancedReports = {
         if (!modal) {
             modal = document.createElement("div");
             modal.id = "excelImportModal";
-            modal.className = "fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 font-siemreap";
+            modal.className = "fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4 font-siemreap";
             document.body.appendChild(modal);
         }
 

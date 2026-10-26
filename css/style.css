@@ -635,3 +635,12 @@ tbody tr:hover {
   transform: translateY(-4px);
   box-shadow: 0 12px 28px -6px rgba(0, 0, 0, 0.12);
 }
+
+/* 🟢 Standard Pop-up Modals: Clean overlay without background blur 🟢 */
+div[id$="Modal"],
+div[id*="Modal"],
+div[id^="modal-"],
+.modal-overlay {
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}

@@ -1397,10 +1397,10 @@ window.renderStudentModalTemplate = function() {
 
     mContainer.innerHTML = `
         <!-- ទម្រង់ចុះឈ្មោះ និងកែប្រែ -->
-        <div id="studentModal" class="fixed inset-0 z-[6000] bg-slate-900/70 backdrop-blur-md hidden items-center justify-center p-2 md:p-6 fade-in font-siemreap overflow-y-auto custom-scrollbar">
+        <div id="studentModal" class="fixed inset-0 z-[6000] bg-black/50 hidden items-center justify-center p-2 md:p-6 fade-in font-siemreap overflow-y-auto custom-scrollbar">
             <div class="bg-white rounded-[2rem] md:rounded-[2.5rem] shadow-[0_20px_60px_-15px_rgba(0,0,0,0.3)] w-full max-w-5xl overflow-hidden border border-slate-100 flex flex-col my-auto transform transition-all max-h-[95vh]">
                 
-                <div class="px-6 md:px-10 py-5 border-b border-slate-100 bg-white/80 backdrop-blur-xl flex justify-between items-center shrink-0 sticky top-0 z-30">
+                <div class="px-6 md:px-10 py-5 border-b border-slate-100 bg-white flex justify-between items-center shrink-0 sticky top-0 z-30">
                     <h3 id="stuModalTitle" class="font-moul text-lg md:text-xl text-slate-800 flex items-center gap-3"></h3>
                     <button type="button" onclick="document.getElementById('studentModal').classList.replace('flex','hidden')" class="w-10 h-10 bg-slate-100 hover:bg-rose-100 text-slate-500 hover:text-rose-600 rounded-full flex items-center justify-center transition hover:scale-105"><i class="fa-solid fa-xmark text-lg"></i></button>
                 </div>
@@ -1514,7 +1514,7 @@ window.renderStudentModalTemplate = function() {
                             </div>
                         </div>
 
-                        <div class="flex flex-col-reverse md:flex-row justify-between items-center pt-6 mt-6 border-t border-slate-200 gap-4 sticky bottom-0 bg-slate-50/90 pb-4 backdrop-blur-md z-30">
+                        <div class="flex flex-col-reverse md:flex-row justify-between items-center pt-6 mt-6 border-t border-slate-200 gap-4 sticky bottom-0 bg-slate-50 pb-4 z-30">
                             <button type="button" onclick="window.clearStudentForm()" class="w-full md:w-auto px-6 py-3.5 bg-white border border-slate-200 text-slate-600 hover:bg-slate-100 hover:text-rose-600 rounded-2xl text-[14px] font-bold transition flex justify-center items-center gap-2 shadow-sm"><i class="fa-solid fa-eraser"></i> សម្អាត</button>
                             <div class="flex gap-3 w-full md:w-auto">
                                 <button type="button" onclick="document.getElementById('studentModal').classList.replace('flex','hidden')" class="flex-1 md:flex-none px-6 py-3.5 bg-slate-200 text-slate-700 hover:bg-slate-300 rounded-2xl text-[14px] font-bold transition">បោះបង់</button>
@@ -1527,11 +1527,11 @@ window.renderStudentModalTemplate = function() {
         </div>
 
         <!-- 🟢 ផ្ទាំង Modal សលាកបត្របុគ្គល / ប្រវត្តិរូបសិស្ស (Student Cumulative Record Modal HTML) 🟢 -->
-        <div id="studentProfileModal" class="fixed inset-0 z-[7000] bg-slate-900/80 backdrop-blur-md hidden items-start sm:items-center justify-center p-2 sm:p-4 md:p-6 overflow-y-auto custom-scrollbar" onclick="if(event.target===this) window.closeStudentProfileModal()">
+        <div id="studentProfileModal" class="fixed inset-0 z-[7000] bg-black/50 hidden items-start sm:items-center justify-center p-2 sm:p-4 md:p-6 overflow-y-auto custom-scrollbar" onclick="if(event.target===this) window.closeStudentProfileModal()">
             <div class="bg-white dark:bg-slate-800 rounded-3xl md:rounded-[2.5rem] shadow-2xl w-full max-w-4xl overflow-hidden border border-slate-100 dark:border-slate-700 flex flex-col my-2 sm:my-auto max-h-[92vh] relative">
                 
                 <!-- Sticky Top Header Bar (Always Visible Close & Print Controls) -->
-                <div class="sticky top-0 z-40 bg-white/95 dark:bg-slate-800/95 backdrop-blur-md px-6 py-3.5 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center shrink-0">
+                <div class="sticky top-0 z-40 bg-white dark:bg-slate-800 px-6 py-3.5 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center shrink-0">
                     <div class="flex items-center gap-2.5">
                         <div class="w-8 h-8 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center text-sm shadow-sm"><i class="fa-solid fa-address-card"></i></div>
                         <div>
@@ -1642,7 +1642,7 @@ window.renderStudentModalTemplate = function() {
         </div>
 
         <!-- 🟢 ផ្ទាំង Modal ផ្ទេរថ្នាក់ / ប្តូរបន្ទប់រៀន (ACAD-05 / STU-04) 🟢 -->
-        <div id="studentTransferModal" class="fixed inset-0 z-[6500] bg-slate-900/70 backdrop-blur-md hidden items-center justify-center p-4 fade-in font-siemreap overflow-y-auto custom-scrollbar">
+        <div id="studentTransferModal" class="fixed inset-0 z-[6500] bg-black/50 hidden items-center justify-center p-4 fade-in font-siemreap overflow-y-auto custom-scrollbar">
             <div class="bg-white rounded-[2rem] shadow-2xl w-full max-w-lg overflow-hidden border border-slate-100 flex flex-col my-auto transform transition-all">
                 <div class="px-6 py-4 border-b border-slate-100 bg-slate-50/80 flex justify-between items-center">
                     <div class="flex items-center gap-3">
