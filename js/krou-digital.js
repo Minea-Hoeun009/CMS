@@ -36,9 +36,38 @@ window.KrouDigital = {
         const gradeFull = `${curLevel} ${curRoom}`.trim();
 
         const academicYear = document.getElementById("globalAcademicYear")?.value || sInfo.academic_year || "២០២៦-២០២៧";
-        const schoolName = sInfo.school_name || "សាលាបឋមសិក្សា";
-        const teacherName = sInfo.teacher_name || ".......................";
-        const principalName = sInfo.principal_name || ".......................";
+        const districtName = (sInfo.district || "កៀនស្វាយ").replace(/^ស្រុក\s*/, '').trim(); 
+        const schoolName = sInfo.school_name || "សាលាបឋមសិក្សា ភ្នំ";
+        const principalName = sInfo.principal_name || "";
+        const teacherName = (window.AuthState ? window.AuthState.teacherName : null) || localStorage.getItem('auth_teacher_name') || sInfo.teacher_name || "";
+
+        let locShort = "";
+        const rawLoc = document.getElementById('global_loc_input')?.value || localStorage.getItem('rc_location') || localStorage.getItem('rep_location');
+        if (rawLoc) {
+            locShort = rawLoc.replace(/^ធ្វើនៅ\s*/, '').replace(/,+$/, '').trim();
+        } else {
+            locShort = schoolName.replace(/^(សាលាបឋមសិក្សា|អនុវិទ្យាល័យ|វិទ្យាល័យ|សាលា)\s*/g, '').trim();
+            if (!locShort) locShort = districtName || "ភ្នំ";
+        }
+
+        let sDate = "";
+        const rawDate = document.getElementById('global_sol_input')?.value || localStorage.getItem('rc_solar_date') || localStorage.getItem('rep_solar_date');
+        if (rawDate && rawDate.trim()) {
+            sDate = rawDate.trim();
+        } else {
+            sDate = "ថ្ងៃទី.......ខែ..........ឆ្នាំ២០២៦";
+        }
+        if (sDate.includes("ថ្ងៃទី")) sDate = sDate.substring(sDate.indexOf("ថ្ងៃទី"));
+
+        const solarDateStr = `ធ្វើនៅ ${locShort}, ${sDate}`;
+
+        let isLunarChecked = true;
+        const chkBox = document.getElementById('global_lun_chk');
+        if (chkBox) isLunarChecked = chkBox.checked;
+        else isLunarChecked = (localStorage.getItem('rc_show_lunar') !== 'false' && localStorage.getItem('rep_show_lunar') !== 'false');
+
+        let lun = document.getElementById('global_lun_input')?.value || localStorage.getItem('rc_lunar_date') || localStorage.getItem('rep_lunar_date') || "ថ្ងៃ....................ខែ..................ឆ្នាំ...............ព.ស.២៥៧០";
+        const lunarDateStr = isLunarChecked ? lun : "";
 
         const allStudents = window.allStudents || JSON.parse(localStorage.getItem('academic_students') || '[]');
         const allScores = JSON.parse(localStorage.getItem('academic_scores') || '[]');
@@ -102,22 +131,24 @@ window.KrouDigital = {
                 
                 <!-- Header តាមស្តង់ដារក្រសួង -->
                 <div class="flex justify-between items-start mb-6 text-xs">
-                    <div class="text-center">
-                        <p class="font-moul text-slate-900">${sInfo.province || "រាជធានីភ្នំពេញ"}</p>
-                        <p class="font-moul text-slate-800 mt-1">${schoolName}</p>
-                        <p class="font-bold text-slate-600 mt-0.5">ថ្នាក់បន្ទុក៖ ${gradeFull}</p>
+                    <div class="text-left leading-relaxed">
+                        <p class="font-moul text-slate-900 text-[12px] mb-1">ការិយាល័យ អប់រំ យុវជននិងកីឡានៃរដ្ឋបាលស្រុក ${districtName}</p>
+                        <p class="font-moul text-slate-900 text-[12px]">${schoolName}</p>
                     </div>
                     <div class="text-center">
-                        <p class="font-moul text-slate-900 text-sm">ព្រះរាជាណាចក្រកម្ពុជា</p>
-                        <p class="font-moul text-slate-800 text-xs mt-1">ជាតិ សាសនា ព្រះមហាក្សត្រ</p>
-                        <div class="text-amber-600 font-bold tracking-widest text-[10px] mt-1">❖ ❖ ❖</div>
+                        <p class="font-moul text-slate-900 text-[13px] mb-1">ព្រះរាជាណាចក្រកម្ពុជា</p>
+                        <p class="font-moul text-slate-900 text-[13px]">ជាតិ សាសនា ព្រះមហាក្សត្រ</p>
+                        <div class="flex items-center justify-center gap-2 mt-1 mx-auto w-24">
+                            <div class="h-[1px] flex-1 bg-amber-600"></div>
+                            <span class="text-amber-700 text-[10px]">៚ ❖ ៚</span>
+                            <div class="h-[1px] flex-1 bg-amber-600"></div>
+                        </div>
                     </div>
                 </div>
 
                 <div class="text-center mb-6">
-                    <h3 class="font-moul text-base text-indigo-950">តារាងស្រង់ពិន្ទុ និងការវាយតម្លៃលទ្ធផលសិក្សាសិស្ស</h3>
-                    <h4 class="font-moul text-sm text-slate-800 mt-1">ប្រចាំខែ ${selectedMonth} ឆ្នាំសិក្សា ${academicYear}</h4>
-                    <p class="text-xs font-bold text-slate-500 mt-1">ថ្នាក់៖ ${gradeFull}</p>
+                    <h3 class="font-moul text-base text-blue-900">តារាងស្រង់ពិន្ទុ និងការវាយតម្លៃលទ្ធផលសិក្សាសិស្ស</h3>
+                    <h4 class="font-moul text-sm text-red-600 mt-1">${gradeFull} | ឆ្នាំសិក្សា ${academicYear} (ខែ ${selectedMonth})</h4>
                 </div>
 
                 <!-- តារាងពិន្ទុផ្លូវការ -->
@@ -194,18 +225,17 @@ window.KrouDigital = {
                 </div>
 
                 <!-- ហត្ថលេខា និងកាលបរិច្ឆេទ -->
-                <div class="flex justify-between items-center text-xs mt-10 pt-4 px-8">
-                    <div class="text-center">
-                        <p class="font-bold">បានឃើញ និងឯកភាព</p>
-                        <p class="font-moul text-slate-800 mt-1">នាយកសាលា</p>
-                        <div class="h-16"></div>
-                        <p class="font-bold text-slate-700">${principalName}</p>
+                <div class="flex justify-between items-start text-xs mt-10 pt-4 px-8 font-siemreap">
+                    <div class="text-center w-2/5">
+                        <p class="mb-1 text-slate-700">បានឃើញ និងឯកភាព</p>
+                        <p class="font-moul text-slate-900 mb-16">នាយក/នាយិកាសាលា</p>
+                        <p class="font-moul text-slate-900 text-sm">${principalName}</p>
                     </div>
-                    <div class="text-center">
-                        <p class="text-slate-500">ថ្ងៃ..................ខែ.........ឆ្នាំ..........ព.ស.២៥...</p>
-                        <p class="font-bold mt-1">គ្រូបន្ទុកថ្នាក់</p>
-                        <div class="h-16"></div>
-                        <p class="font-bold text-slate-700">${teacherName}</p>
+                    <div class="text-center w-2/5">
+                        <p class="mb-1 text-slate-700">${lunarDateStr || 'ថ្ងៃ....................ខែ..................ឆ្នាំ...............ព.ស.២៥៧០'}</p>
+                        <p class="mb-1 text-slate-700">${solarDateStr}</p>
+                        <p class="font-moul text-slate-900 mb-16">គ្រូបន្ទុកថ្នាក់</p>
+                        <p class="font-moul text-slate-900 text-sm">${teacherName}</p>
                     </div>
                 </div>
 
@@ -225,10 +255,39 @@ window.KrouDigital = {
         const gradeFull = `${curLevel} ${curRoom}`.trim();
 
         const academicYear = document.getElementById("globalAcademicYear")?.value || sInfo.academic_year || "២០២៦-២០២៧";
-        const schoolName = sInfo.school_name || "សាលាបឋមសិក្សា";
-        const teacherName = sInfo.teacher_name || "គ្រូបន្ទុកថ្នាក់";
-        const principalName = sInfo.principal_name || "នាយកសាលា";
+        const districtName = (sInfo.district || "កៀនស្វាយ").replace(/^ស្រុក\s*/, '').trim(); 
+        const schoolName = sInfo.school_name || "សាលាបឋមសិក្សា ភ្នំ";
+        const principalName = sInfo.principal_name || "";
+        const teacherName = (window.AuthState ? window.AuthState.teacherName : null) || localStorage.getItem('auth_teacher_name') || sInfo.teacher_name || "";
         const selectedMonth = localStorage.getItem('selected_assessment_month') || "មករា";
+
+        let locShort = "";
+        const rawLoc = document.getElementById('global_loc_input')?.value || localStorage.getItem('rc_location') || localStorage.getItem('rep_location');
+        if (rawLoc) {
+            locShort = rawLoc.replace(/^ធ្វើនៅ\s*/, '').replace(/,+$/, '').trim();
+        } else {
+            locShort = schoolName.replace(/^(សាលាបឋមសិក្សា|អនុវិទ្យាល័យ|វិទ្យាល័យ|សាលា)\s*/g, '').trim();
+            if (!locShort) locShort = districtName || "ភ្នំ";
+        }
+
+        let sDate = "";
+        const rawDate = document.getElementById('global_sol_input')?.value || localStorage.getItem('rc_solar_date') || localStorage.getItem('rep_solar_date');
+        if (rawDate && rawDate.trim()) {
+            sDate = rawDate.trim();
+        } else {
+            sDate = "ថ្ងៃទី.......ខែ..........ឆ្នាំ២០២៦";
+        }
+        if (sDate.includes("ថ្ងៃទី")) sDate = sDate.substring(sDate.indexOf("ថ្ងៃទី"));
+
+        const solarDateStr = `ធ្វើនៅ ${locShort}, ${sDate}`;
+
+        let isLunarChecked = true;
+        const chkBox = document.getElementById('global_lun_chk');
+        if (chkBox) isLunarChecked = chkBox.checked;
+        else isLunarChecked = (localStorage.getItem('rc_show_lunar') !== 'false' && localStorage.getItem('rep_show_lunar') !== 'false');
+
+        let lun = document.getElementById('global_lun_input')?.value || localStorage.getItem('rc_lunar_date') || localStorage.getItem('rep_lunar_date') || "ថ្ងៃ....................ខែ..................ឆ្នាំ...............ព.ស.២៥៧០";
+        const lunarDateStr = isLunarChecked ? lun : "";
 
         const allStudents = window.allStudents || JSON.parse(localStorage.getItem('academic_students') || '[]');
         const allScores = JSON.parse(localStorage.getItem('academic_scores') || '[]');
@@ -271,21 +330,25 @@ window.KrouDigital = {
 
                 <!-- Header -->
                 <div class="flex justify-between items-start mb-6 text-xs">
-                    <div class="text-center">
-                        <p class="font-moul text-amber-950">${schoolName}</p>
-                        <p class="font-bold text-slate-700 mt-1">ថ្នាក់បន្ទុក៖ ${gradeFull}</p>
+                    <div class="text-left leading-relaxed">
+                        <p class="font-moul text-slate-900 text-[12px] mb-1">ការិយាល័យ អប់រំ យុវជននិងកីឡានៃរដ្ឋបាលស្រុក ${districtName}</p>
+                        <p class="font-moul text-slate-900 text-[12px]">${schoolName}</p>
                     </div>
                     <div class="text-center">
-                        <p class="font-moul text-slate-900 text-xs">ព្រះរាជាណាចក្រកម្ពុជា</p>
-                        <p class="font-moul text-slate-800 text-[10px] mt-0.5">ជាតិ សាសនា ព្រះមហាក្សត្រ</p>
+                        <p class="font-moul text-slate-900 text-[13px] mb-1">ព្រះរាជាណាចក្រកម្ពុជា</p>
+                        <p class="font-moul text-slate-900 text-[13px]">ជាតិ សាសនា ព្រះមហាក្សត្រ</p>
+                        <div class="flex items-center justify-center gap-2 mt-1 mx-auto w-24">
+                            <div class="h-[1px] flex-1 bg-amber-600"></div>
+                            <span class="text-amber-700 text-[10px]">៚ ❖ ៚</span>
+                            <div class="h-[1px] flex-1 bg-amber-600"></div>
+                        </div>
                     </div>
                 </div>
 
                 <!-- Title -->
                 <div class="text-center my-6">
-                    <span class="inline-block px-4 py-1 bg-amber-500 text-white rounded-full font-bold text-[11px] mb-2 shadow-sm tracking-wider uppercase">តារាងកិត្តិយស</span>
-                    <h2 class="font-moul text-xl text-amber-900 drop-shadow-sm">តារាងកិត្តិយសសិស្សឆ្នើម Top 5</h2>
-                    <p class="text-xs font-bold text-amber-700 mt-1">ប្រចាំខែ ${selectedMonth} ឆ្នាំសិក្សា ${academicYear} (ថ្នាក់៖ ${gradeFull})</p>
+                    <h2 class="font-moul text-xl text-blue-900 drop-shadow-sm">តារាងកិត្តិយសសិស្សឆ្នើម Top 5</h2>
+                    <p class="font-moul text-sm text-red-600 mt-1">${gradeFull} | ឆ្នាំសិក្សា ${academicYear} (ខែ ${selectedMonth})</p>
                 </div>
 
                 <!-- Top 5 Cards Grid -->
@@ -332,18 +395,17 @@ window.KrouDigital = {
                 </div>
 
                 <!-- Footer Signatures -->
-                <div class="flex justify-between items-center text-xs mt-12 pt-4 px-6">
-                    <div class="text-center">
-                        <p class="font-bold">បានឃើញ និងអនុម័ត</p>
-                        <p class="font-moul text-amber-950 mt-1">នាយកសាលា</p>
-                        <div class="h-14"></div>
-                        <p class="font-bold text-slate-800">${principalName}</p>
+                <div class="flex justify-between items-start text-xs mt-12 pt-4 px-6 font-siemreap">
+                    <div class="text-center w-2/5">
+                        <p class="mb-1 text-slate-700">បានឃើញ និងឯកភាព</p>
+                        <p class="font-moul text-slate-900 mb-16">នាយក/នាយិកាសាលា</p>
+                        <p class="font-moul text-slate-900 text-sm">${principalName}</p>
                     </div>
-                    <div class="text-center">
-                        <p class="text-slate-500">ថ្ងៃ..................ខែ.........ឆ្នាំ..........</p>
-                        <p class="font-bold mt-1">គ្រូបន្ទុកថ្នាក់</p>
-                        <div class="h-14"></div>
-                        <p class="font-bold text-slate-800">${teacherName}</p>
+                    <div class="text-center w-2/5">
+                        <p class="mb-1 text-slate-700">${lunarDateStr || 'ថ្ងៃ....................ខែ..................ឆ្នាំ...............ព.ស.២៥៧០'}</p>
+                        <p class="mb-1 text-slate-700">${solarDateStr}</p>
+                        <p class="font-moul text-slate-900 mb-16">គ្រូបន្ទុកថ្នាក់</p>
+                        <p class="font-moul text-slate-900 text-sm">${teacherName}</p>
                     </div>
                 </div>
 
@@ -363,7 +425,39 @@ window.KrouDigital = {
         const gradeFull = `${curLevel} ${curRoom}`.trim();
 
         const academicYear = document.getElementById("globalAcademicYear")?.value || sInfo.academic_year || "២០២៦-២០២៧";
-        const schoolName = sInfo.school_name || "សាលាបឋមសិក្សា";
+        const districtName = (sInfo.district || "កៀនស្វាយ").replace(/^ស្រុក\s*/, '').trim(); 
+        const schoolName = sInfo.school_name || "សាលាបឋមសិក្សា ភ្នំ";
+        const principalName = sInfo.principal_name || "";
+        const teacherName = (window.AuthState ? window.AuthState.teacherName : null) || localStorage.getItem('auth_teacher_name') || sInfo.teacher_name || "";
+
+        let locShort = "";
+        const rawLoc = document.getElementById('global_loc_input')?.value || localStorage.getItem('rc_location') || localStorage.getItem('rep_location');
+        if (rawLoc) {
+            locShort = rawLoc.replace(/^ធ្វើនៅ\s*/, '').replace(/,+$/, '').trim();
+        } else {
+            locShort = schoolName.replace(/^(សាលាបឋមសិក្សា|អនុវិទ្យាល័យ|វិទ្យាល័យ|សាលា)\s*/g, '').trim();
+            if (!locShort) locShort = districtName || "ភ្នំ";
+        }
+
+        let sDate = "";
+        const rawDate = document.getElementById('global_sol_input')?.value || localStorage.getItem('rc_solar_date') || localStorage.getItem('rep_solar_date');
+        if (rawDate && rawDate.trim()) {
+            sDate = rawDate.trim();
+        } else {
+            sDate = "ថ្ងៃទី.......ខែ..........ឆ្នាំ២០២៦";
+        }
+        if (sDate.includes("ថ្ងៃទី")) sDate = sDate.substring(sDate.indexOf("ថ្ងៃទី"));
+
+        const solarDateStr = `ធ្វើនៅ ${locShort}, ${sDate}`;
+
+        let isLunarChecked = true;
+        const chkBox = document.getElementById('global_lun_chk');
+        if (chkBox) isLunarChecked = chkBox.checked;
+        else isLunarChecked = (localStorage.getItem('rc_show_lunar') !== 'false' && localStorage.getItem('rep_show_lunar') !== 'false');
+
+        let lun = document.getElementById('global_lun_input')?.value || localStorage.getItem('rc_lunar_date') || localStorage.getItem('rep_lunar_date') || "ថ្ងៃ....................ខែ..................ឆ្នាំ...............ព.ស.២៥៧០";
+        const lunarDateStr = isLunarChecked ? lun : "";
+
         const allStudents = window.allStudents || JSON.parse(localStorage.getItem('academic_students') || '[]');
 
         // ចម្រាញ់សិស្សតាមថ្នាក់
@@ -379,20 +473,24 @@ window.KrouDigital = {
             <div id="reportKoKhoPrintArea" class="bg-white p-6 md:p-10 w-full shadow-2xl rounded-2xl border border-slate-200 text-slate-800" style="max-width: 297mm; min-height: 210mm; font-family: 'Siemreap', sans-serif;">
                 
                 <div class="flex justify-between items-start mb-6 text-xs">
-                    <div class="text-center">
-                        <p class="font-moul text-slate-900">${schoolName}</p>
-                        <p class="font-bold text-slate-600 mt-0.5">ថ្នាក់បន្ទុក៖ ${gradeFull}</p>
+                    <div class="text-left leading-relaxed">
+                        <p class="font-moul text-slate-900 text-[12px] mb-1">ការិយាល័យ អប់រំ យុវជននិងកីឡានៃរដ្ឋបាលស្រុក ${districtName}</p>
+                        <p class="font-moul text-slate-900 text-[12px]">${schoolName}</p>
                     </div>
                     <div class="text-center">
-                        <p class="font-moul text-slate-900 text-sm">ព្រះរាជាណាចក្រកម្ពុជា</p>
-                        <p class="font-moul text-slate-800 text-xs mt-1">ជាតិ សាសនា ព្រះមហាក្សត្រ</p>
+                        <p class="font-moul text-slate-900 text-[13px] mb-1">ព្រះរាជាណាចក្រកម្ពុជា</p>
+                        <p class="font-moul text-slate-900 text-[13px]">ជាតិ សាសនា ព្រះមហាក្សត្រ</p>
+                        <div class="flex items-center justify-center gap-2 mt-1 mx-auto w-24">
+                            <div class="h-[1px] flex-1 bg-amber-600"></div>
+                            <span class="text-amber-700 text-[10px]">៚ ❖ ៚</span>
+                            <div class="h-[1px] flex-1 bg-amber-600"></div>
+                        </div>
                     </div>
                 </div>
 
                 <div class="text-center mb-6">
-                    <h3 class="font-moul text-base text-indigo-950">សេចក្តីសម្រេចលទ្ធផលសិក្សាប្រចាំឆមាស និងប្រចាំឆ្នាំ</h3>
-                    <h4 class="font-moul text-sm text-slate-800 mt-1">ឆ្នាំសិក្សា ${academicYear}</h4>
-                    <p class="text-xs font-bold text-slate-500 mt-1">ថ្នាក់៖ ${gradeFull}</p>
+                    <h3 class="font-moul text-base text-blue-900">សេចក្តីសម្រេចលទ្ធផលសិក្សាប្រចាំឆមាស និងប្រចាំឆ្នាំ</h3>
+                    <h4 class="font-moul text-sm text-red-600 mt-1">${gradeFull} | ឆ្នាំសិក្សា ${academicYear}</h4>
                 </div>
 
                 <div class="overflow-x-auto mb-6">
@@ -436,14 +534,17 @@ window.KrouDigital = {
                     </table>
                 </div>
 
-                <div class="flex justify-between items-center text-xs mt-10 pt-4 px-8">
-                    <div class="text-center">
-                        <p class="font-bold">បានឃើញ និងអនុម័ត</p>
-                        <p class="font-moul text-slate-800 mt-1">ប្រធានការិយាល័យអប់រំ / នាយក</p>
+                <div class="flex justify-between items-start text-xs mt-10 pt-4 px-8 font-siemreap">
+                    <div class="text-center w-2/5">
+                        <p class="mb-1 text-slate-700">បានឃើញ និងឯកភាព</p>
+                        <p class="font-moul text-slate-900 mb-16">នាយក/នាយិកាសាលា</p>
+                        <p class="font-moul text-slate-900 text-sm">${principalName}</p>
                     </div>
-                    <div class="text-center">
-                        <p class="text-slate-500">ថ្ងៃ..................ខែ.........ឆ្នាំ..........</p>
-                        <p class="font-bold mt-1">គ្រូបន្ទុកថ្នាក់</p>
+                    <div class="text-center w-2/5">
+                        <p class="mb-1 text-slate-700">${lunarDateStr || 'ថ្ងៃ....................ខែ..................ឆ្នាំ...............ព.ស.២៥៧០'}</p>
+                        <p class="mb-1 text-slate-700">${solarDateStr}</p>
+                        <p class="font-moul text-slate-900 mb-16">គ្រូបន្ទុកថ្នាក់</p>
+                        <p class="font-moul text-slate-900 text-sm">${teacherName}</p>
                     </div>
                 </div>
 
@@ -611,8 +712,30 @@ window.KrouDigital = {
         const student = selectableStudents.find(s => String(s.id) === String(studentId)) || selectableStudents[0] || allStudents[0] || { name: "សុខ សាន្ត", gender: "ប្រុស", grade: curLevel };
         const sInfo = window.appSettings || JSON.parse(localStorage.getItem('school_settings') || '{}');
         const academicYear = document.getElementById("globalAcademicYear")?.value || sInfo.academic_year || "២០២៦-២០២៧";
-        const schoolName = sInfo.school_name || "សាលាបឋមសិក្សា";
-        const principalName = sInfo.principal_name || "នាយកសាលា";
+        const districtName = (sInfo.district || "កៀនស្វាយ").replace(/^ស្រុក\s*/, '').trim(); 
+        const schoolName = sInfo.school_name || "សាលាបឋមសិក្សា ភ្នំ";
+        const principalName = sInfo.principal_name || "";
+        const teacherName = (window.AuthState ? window.AuthState.teacherName : null) || localStorage.getItem('auth_teacher_name') || sInfo.teacher_name || "";
+
+        let locShort = "";
+        const rawLoc = document.getElementById('global_loc_input')?.value || localStorage.getItem('rc_location') || localStorage.getItem('rep_location');
+        if (rawLoc) {
+            locShort = rawLoc.replace(/^ធ្វើនៅ\s*/, '').replace(/,+$/, '').trim();
+        } else {
+            locShort = schoolName.replace(/^(សាលាបឋមសិក្សា|អនុវិទ្យាល័យ|វិទ្យាល័យ|សាលា)\s*/g, '').trim();
+            if (!locShort) locShort = districtName || "ភ្នំ";
+        }
+
+        let sDate = "";
+        const rawDate = document.getElementById('global_sol_input')?.value || localStorage.getItem('rc_solar_date') || localStorage.getItem('rep_solar_date');
+        if (rawDate && rawDate.trim()) {
+            sDate = rawDate.trim();
+        } else {
+            sDate = "ថ្ងៃទី.......ខែ..........ឆ្នាំ២០២៦";
+        }
+        if (sDate.includes("ថ្ងៃទី")) sDate = sDate.substring(sDate.indexOf("ថ្ងៃទី"));
+
+        const solarDateStr = `ធ្វើនៅ ${locShort}, ${sDate}`;
 
         const gradesList = typeof window.getAllGradesList === 'function' ? window.getAllGradesList() : ["ថ្នាក់ទី ១", "ថ្នាក់ទី ២", "ថ្នាក់ទី ៣", "ថ្នាក់ទី ៤", "ថ្នាក់ទី ៥", "ថ្នាក់ទី ៦"];
 
@@ -712,11 +835,11 @@ window.KrouDigital = {
                         <div class="text-center">
                             <p class="font-bold text-slate-600">គ្រូបន្ទុកថ្នាក់</p>
                             <div class="h-16"></div>
-                            <p class="font-bold text-slate-800">................................</p>
+                            <p class="font-bold text-slate-800">${teacherName}</p>
                         </div>
                         <div class="text-center">
-                            <p class="text-slate-500">រាជធានី/ខេត្ត.......... ថ្ងៃទី...... ខែ...... ឆ្នាំ ២០២...</p>
-                            <p class="font-moul text-amber-950 mt-1">នាយកសាលា</p>
+                            <p class="text-slate-500">${solarDateStr}</p>
+                            <p class="font-moul text-amber-950 mt-1">នាយក/នាយិកាសាលា</p>
                             <div class="h-14"></div>
                             <p class="font-bold text-slate-900">${principalName}</p>
                         </div>

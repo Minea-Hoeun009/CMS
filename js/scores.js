@@ -2812,33 +2812,52 @@ window.printScoreList = function() {
     const type = document.getElementById("globalPeriodType")?.value || "monthly";
     const month = document.getElementById("globalPeriodValue")?.value || "មករា";
     const sInfo = typeof appSettings !== 'undefined' ? appSettings : {};
-    const grade = (sInfo.teacher_level && sInfo.teacher_room) ? `${sInfo.teacher_level} ${sInfo.teacher_room}`.trim() : "ថ្នាក់ទី";
-    const districtName = (sInfo.district || "ស្រុកកៀនស្វាយ").replace('ស្រុក', '').trim(); 
-    const schoolName = sInfo.school_name || "សាលាបឋមសិក្សា.....................";
-    const principalName = sInfo.principal_name || ".......................";
-    const teacherName = window.AuthState ? window.AuthState.teacherName : (localStorage.getItem('auth_teacher_name') || '.......................');
-    const academicYear = document.getElementById("globalAcademicYear")?.value || localStorage.getItem('selected_academic_year') || "2026-2027";
+    const grade = (sInfo.teacher_level && sInfo.teacher_room) ? `${sInfo.teacher_level} ${sInfo.teacher_room}`.trim() : "ថ្នាក់ទី ២ «ក»";
+    const districtName = (sInfo.district || "កៀនស្វាយ").replace(/^ស្រុក\s*/, '').trim(); 
+    const schoolName = sInfo.school_name || "សាលាបឋមសិក្សា ភ្នំ";
+    const principalName = sInfo.principal_name || "";
+    const teacherName = (window.AuthState ? window.AuthState.teacherName : null) || localStorage.getItem('auth_teacher_name') || sInfo.teacher_name || "";
+    const academicYear = document.getElementById("globalAcademicYear")?.value || localStorage.getItem('selected_academic_year') || "២០២៦-២០២៧";
 
     let titleText = `បញ្ជីស្រង់ពិន្ទុប្រចាំខែ${month}`;
     if (type === "semester") titleText = month.includes("ឆមាសទី១") ? "បញ្ជីស្រង់ពិន្ទុប្រឡងឆមាសលើកទី១" : (month.includes("ឆមាសទី២") ? "បញ្ជីស្រង់ពិន្ទុប្រឡងឆមាសលើកទី២" : `បញ្ជីស្រង់ពិន្ទុប្រឡង${month}`);
     else if (type === "annual") titleText = `បញ្ជីស្រង់ពិន្ទុប្រចាំឆ្នាំសិក្សា`;
 
     // 🔴 ជួសជុលប្រព័ន្ធទាញយកកាលបរិច្ឆេទឱ្យបានត្រឹមត្រូវ ១០០% (Real-time Fetching) 🔴
-    let loc = document.getElementById('global_loc_input')?.value || localStorage.getItem('rc_location') || localStorage.getItem('rep_location') || "ធ្វើនៅ.........................";
-    let sol = document.getElementById('global_sol_input')?.value || localStorage.getItem('rc_solar_date') || localStorage.getItem('rep_solar_date') || "ថ្ងៃទី....... ខែ....... ឆ្នាំ២០....";
-    let lun = document.getElementById('global_lun_input')?.value || localStorage.getItem('rc_lunar_date') || localStorage.getItem('rep_lunar_date') || "ថ្ងៃ......................... ខែ............ ឆ្នាំ............ ព.ស.២៥៧...";
-    
+    let locShort = "";
+    const rawLoc = document.getElementById('global_loc_input')?.value || localStorage.getItem('rc_location') || localStorage.getItem('rep_location');
+    if (rawLoc) {
+        locShort = rawLoc.replace(/^ធ្វើនៅ\s*/, '').replace(/,+$/, '').trim();
+    } else {
+        locShort = schoolName.replace(/^(សាលាបឋមសិក្សា|អនុវិទ្យាល័យ|វិទ្យាល័យ|សាលា)\s*/g, '').trim();
+        if (!locShort) locShort = districtName || "ភ្នំ";
+    }
+
+    let sDate = "";
+    const rawDate = document.getElementById('global_sol_input')?.value || localStorage.getItem('rc_solar_date') || localStorage.getItem('rep_solar_date');
+    if (rawDate && rawDate.trim()) {
+        sDate = rawDate.trim();
+    } else {
+        sDate = "ថ្ងៃទី.......ខែ..........ឆ្នាំ២០២៦";
+    }
+    if (sDate.includes("ថ្ងៃទី")) sDate = sDate.substring(sDate.indexOf("ថ្ងៃទី"));
+
+    const solarDateStr = `ធ្វើនៅ ${locShort}, ${sDate}`;
+
+    let lunarDateStr = "";
     let isLunarChecked = true;
     const chkBox = document.getElementById('global_lun_chk');
     if (chkBox) isLunarChecked = chkBox.checked;
     else isLunarChecked = (localStorage.getItem('rc_show_lunar') !== 'false' && localStorage.getItem('rep_show_lunar') !== 'false');
 
-    let locationStr = loc.trim().replace(/,+$/, '');
-    let sDate = sol.trim();
-    if (sDate.includes("ថ្ងៃទី")) sDate = sDate.substring(sDate.indexOf("ថ្ងៃទី"));
-    
-    const solarDateStr = `${locationStr}, ${sDate}`;
-    const lunarDateStr = isLunarChecked ? lun : "";
+    if (isLunarChecked) {
+        const rawLun = document.getElementById('global_lun_input')?.value || localStorage.getItem('rc_lunar_date') || localStorage.getItem('rep_lunar_date');
+        if (rawLun && rawLun.trim()) {
+            lunarDateStr = rawLun.trim();
+        } else {
+            lunarDateStr = "ថ្ងៃ....................ខែ..................ឆ្នាំ...............ព.ស.២៥៧០";
+        }
+    }
     // 🔴 ================================================================= 🔴
 
     // 🔴 បង្ខំតម្រៀបទិន្នន័យតាមអក្ខរក្រម (ក-អ) មុនពេលបង្កើតតារាង
@@ -3003,11 +3022,25 @@ window.printScoreList = function() {
 
         <div id="print-wrapper">
           <div id="content-scaler">
-            <div class="header-box">
-              <div class="header-left"><br><p>ការិយាល័យអប់រំ យុវជន និងកីឡានៃរដ្ឋបាលស្រុក${districtName}</p><p>${schoolName}</p><p>${grade}</p></div>
-              <div class="header-right"><p>ព្រះរាជាណាចក្រកម្ពុជា</p><p>ជាតិ សាសនា ព្រះមហាក្សត្រ</p><div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin: 4px auto 10px auto; width: 60%;"><div style="height: 1px; flex: 1; background: linear-gradient(to right, transparent, #d97706);"></div><span style="color: #d97706; font-size: 11px;">❖ ❖ ❖</span><div style="height: 1px; flex: 1; background: linear-gradient(to left, transparent, #d97706);"></div></div></div>
+            <div class="header-box" style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; width: 100%;">
+              <div class="header-left" style="text-align: left; line-height: 1.6;">
+                <p style="margin: 0 0 4px 0; font-size: 10.5pt; font-family: 'Khmer OS Muol Light', 'Moul', serif; color: #0f172a;">ការិយាល័យ អប់រំ យុវជននិងកីឡានៃរដ្ឋបាលស្រុក ${districtName}</p>
+                <p style="margin: 0; font-size: 10.5pt; font-family: 'Khmer OS Muol Light', 'Moul', serif; color: #0f172a;">${schoolName}</p>
+              </div>
+              <div class="header-right" style="text-align: center; line-height: 1.6;">
+                <p style="margin: 0 0 4px 0; font-size: 11pt; font-family: 'Khmer OS Muol Light', 'Moul', serif; color: #0f172a;">ព្រះរាជាណាចក្រកម្ពុជា</p>
+                <p style="margin: 0; font-size: 10.5pt; font-family: 'Khmer OS Muol Light', 'Moul', serif; color: #0f172a;">ជាតិ សាសនា ព្រះមហាក្សត្រ</p>
+                <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin: 4px auto 0 auto; width: 65%;">
+                  <div style="height: 1px; flex: 1; background: linear-gradient(to right, transparent, #334155);"></div>
+                  <span style="font-size: 10px; color: #334155;">៚ ❖ ៚</span>
+                  <div style="height: 1px; flex: 1; background: linear-gradient(to left, transparent, #334155);"></div>
+                </div>
+              </div>
             </div>
-            <div class="title-box"><h2>${titleText}</h2><p>ឆ្នាំសិក្សា ៖ ${academicYear}</p></div>
+            <div class="title-box" style="text-align: center; margin: 8px 0 14px 0;">
+              <h2 style="margin: 0 0 4px 0; font-size: 14pt; color: #1e3a8a; letter-spacing: 0.5px; font-family: 'Khmer OS Muol Light', 'Moul', serif;">${titleText}</h2>
+              <p style="margin: 0; font-size: 11pt; color: #dc2626; font-family: 'Khmer OS Muol Light', 'Moul', serif;">${grade} | ឆ្នាំសិក្សា ${academicYear}</p>
+            </div>
             
             ${htmlTable}
             
@@ -3016,9 +3049,18 @@ window.printScoreList = function() {
                 <tr><td style="width: 100%;">❖ ${passLabel} <b>${passed}</b> នាក់ (<b>${passPct}%</b>) ស្រី <b>${passedF}</b> នាក់ (<b>${passFPct}%</b>)</td></tr>
                 <tr><td style="width: 100%;">❖ ${failLabel} <b>${failed}</b> នាក់ (<b>${failPct}%</b>) ស្រី <b>${failedF}</b> នាក់ (<b>${failFPct}%</b>)</td></tr>
             </table>
-            <div class="bottom-sig-container">
-                <div class="sig-box-left"><br><br><p class="font-moul" style="margin-bottom: 5px; font-size: 11pt;">បានឃើញ និងឯកភាព</p><p class="font-moul" style="margin-bottom: 50px; font-size: 11pt;">នាយកសាលា</p><p class="font-moul" style="font-size: 11pt;">${principalName}</p></div>
-                <div class="sig-box-right"><p style="margin: 0 0 5px 0; font-size: 11pt;">${lunarDateStr}</p><p style="margin: 0 0 5px 0; font-size: 11pt;">${solarDateStr}</p><p class="font-moul" style="margin-bottom: 50px; font-size: 11pt;">គ្រូបន្ទុកថ្នាក់</p><p class="font-moul" style="font-size: 11pt;">${teacherName}</p></div>
+            <div class="bottom-sig-container" style="display: flex; justify-content: space-between; align-items: flex-start; width: 100%; page-break-inside: avoid; padding: 0 20px; margin-top: 15px;">
+                <div class="sig-box-left" style="width: 40%; text-align: center;">
+                    <p style="margin: 0 0 4px 0; font-size: 11pt; font-family: 'Siemreap', sans-serif; color: #000;">បានឃើញ និងឯកភាព</p>
+                    <p style="margin: 0 0 55px 0; font-size: 11pt; font-family: 'Khmer OS Muol Light', 'Moul', serif; color: #000;">នាយក/នាយិកាសាលា</p>
+                    <p style="margin: 0; font-size: 11pt; font-family: 'Khmer OS Muol Light', 'Moul', serif; color: #000;">${principalName}</p>
+                </div>
+                <div class="sig-box-right" style="width: 40%; text-align: center;">
+                    <p style="margin: 0 0 4px 0; font-size: 11pt; font-family: 'Siemreap', sans-serif; color: #000;">${lunarDateStr || 'ថ្ងៃ....................ខែ..................ឆ្នាំ...............ព.ស.២៥៧០'}</p>
+                    <p style="margin: 0 0 6px 0; font-size: 11pt; font-family: 'Siemreap', sans-serif; color: #000;">${solarDateStr}</p>
+                    <p style="margin: 0 0 55px 0; font-size: 11pt; font-family: 'Khmer OS Muol Light', 'Moul', serif; color: #000;">គ្រូបន្ទុកថ្នាក់</p>
+                    <p style="margin: 0; font-size: 11pt; font-family: 'Khmer OS Muol Light', 'Moul', serif; color: #000;">${teacherName}</p>
+                </div>
             </div>
           </div>
         </div>
@@ -3083,32 +3125,44 @@ window.printRankingTable = function() {
     const type = document.getElementById("globalPeriodType")?.value || "monthly";
     const month = document.getElementById("globalPeriodValue")?.value || "មករា";
     const sInfo = typeof appSettings !== 'undefined' ? appSettings : {};
-    const grade = (sInfo.teacher_level && sInfo.teacher_room) ? `${sInfo.teacher_level} ${sInfo.teacher_room}`.trim() : "ថ្នាក់ទី";
-    const districtName = (sInfo.district || "ស្រុកកៀនស្វាយ").replace('ស្រុក', '').trim(); 
-    const schoolName = sInfo.school_name || "សាលាបឋមសិក្សា.......................";
-    const principalName = sInfo.principal_name || ".......................";
-    const teacherName = window.AuthState ? window.AuthState.teacherName : (localStorage.getItem('auth_teacher_name') || '.......................');
-    const academicYear = document.getElementById("globalAcademicYear")?.value || localStorage.getItem('selected_academic_year') || "2026-2027";
+    const grade = (sInfo.teacher_level && sInfo.teacher_room) ? `${sInfo.teacher_level} ${sInfo.teacher_room}`.trim() : "ថ្នាក់ទី ២ «ក»";
+    const districtName = (sInfo.district || "កៀនស្វាយ").replace(/^ស្រុក\s*/, '').trim(); 
+    const schoolName = sInfo.school_name || "សាលាបឋមសិក្សា ភ្នំ";
+    const principalName = sInfo.principal_name || "";
+    const teacherName = (window.AuthState ? window.AuthState.teacherName : null) || localStorage.getItem('auth_teacher_name') || sInfo.teacher_name || "";
+    const academicYear = document.getElementById("globalAcademicYear")?.value || localStorage.getItem('selected_academic_year') || "២០២៦-២០២៧";
 
     let titleText = `ចំណាត់ថ្នាក់ប្រចាំខែ${month}`;
     if (type === "semester") titleText = month.includes("ឆមាសលើកទី១") ? "ចំណាត់ថ្នាក់ប្រចាំឆមាសលើកទី១" : (month.includes("ឆមាសលើកទី២") ? "ចំណាត់ថ្នាក់ប្រចាំឆមាសលើកទី២" : `ចំណាត់ថ្នាក់${month}`);
     else if (type === "annual") titleText = `ចំណាត់ថ្នាក់ប្រចាំឆ្នាំ`;
 
     // 🔴 ជួសជុលប្រព័ន្ធទាញយកកាលបរិច្ឆេទឱ្យបានត្រឹមត្រូវ ១០០% (Real-time Fetching) 🔴
-    let loc = document.getElementById('global_loc_input')?.value || localStorage.getItem('rc_location') || localStorage.getItem('rep_location') || "ធ្វើនៅ.........................";
-    let sol = document.getElementById('global_sol_input')?.value || localStorage.getItem('rc_solar_date') || localStorage.getItem('rep_solar_date') || "ថ្ងៃទី....... ខែ....... ឆ្នាំ២០....";
-    let lun = document.getElementById('global_lun_input')?.value || localStorage.getItem('rc_lunar_date') || localStorage.getItem('rep_lunar_date') || "ថ្ងៃ......................... ខែ............ ឆ្នាំ............ ព.ស.២៥៧...";
-    
+    let locShort = "";
+    const rawLoc = document.getElementById('global_loc_input')?.value || localStorage.getItem('rc_location') || localStorage.getItem('rep_location');
+    if (rawLoc) {
+        locShort = rawLoc.replace(/^ធ្វើនៅ\s*/, '').replace(/,+$/, '').trim();
+    } else {
+        locShort = schoolName.replace(/^(សាលាបឋមសិក្សា|អនុវិទ្យាល័យ|វិទ្យាល័យ|សាលា)\s*/g, '').trim();
+        if (!locShort) locShort = districtName || "ភ្នំ";
+    }
+
+    let sDate = "";
+    const rawDate = document.getElementById('global_sol_input')?.value || localStorage.getItem('rc_solar_date') || localStorage.getItem('rep_solar_date');
+    if (rawDate && rawDate.trim()) {
+        sDate = rawDate.trim();
+    } else {
+        sDate = "ថ្ងៃទី.......ខែ..........ឆ្នាំ២០២៦";
+    }
+    if (sDate.includes("ថ្ងៃទី")) sDate = sDate.substring(sDate.indexOf("ថ្ងៃទី"));
+
+    const solarDateStr = `ធ្វើនៅ ${locShort}, ${sDate}`;
+
     let isLunarChecked = true;
     const chkBox = document.getElementById('global_lun_chk');
     if (chkBox) isLunarChecked = chkBox.checked;
     else isLunarChecked = (localStorage.getItem('rc_show_lunar') !== 'false' && localStorage.getItem('rep_show_lunar') !== 'false');
 
-    let locationStr = loc.trim().replace(/,+$/, '');
-    let sDate = sol.trim();
-    if (sDate.includes("ថ្ងៃទី")) sDate = sDate.substring(sDate.indexOf("ថ្ងៃទី"));
-    
-    const solarDateStr = `${locationStr}, ${sDate}`;
+    let lun = document.getElementById('global_lun_input')?.value || localStorage.getItem('rc_lunar_date') || localStorage.getItem('rep_lunar_date') || "ថ្ងៃ....................ខែ..................ឆ្នាំ...............ព.ស.២៥៧០";
     const lunarDateStr = isLunarChecked ? lun : "";
     // 🔴 ================================================================= 🔴
 
@@ -3281,11 +3335,25 @@ window.printRankingTable = function() {
 
         <div id="print-wrapper">
           <div id="content-scaler">
-            <div class="header-box">
-                <div class="header-left"><br><br><p>ការិយាល័យអប់រំ យុវជន និងកីឡានៃរដ្ឋបាលស្រុក${districtName}</p><p>${schoolName}</p><p>${grade}</p></div>
-                <div class="header-right"><p>ព្រះរាជាណាចក្រកម្ពុជា</p><p>ជាតិ សាសនា ព្រះមហាក្សត្រ</p><div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin: 4px auto 10px auto; width: 60%;"><div style="height: 1px; flex: 1; background: linear-gradient(to right, transparent, #d97706);"></div><span style="color: #d97706; font-size: 11px;">❖ ❖ ❖</span><div style="height: 1px; flex: 1; background: linear-gradient(to left, transparent, #d97706);"></div></div></div>
+            <div class="header-box" style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; width: 100%;">
+              <div class="header-left" style="text-align: left; line-height: 1.6;">
+                <p style="margin: 0 0 4px 0; font-size: 10.5pt; font-family: 'Khmer OS Muol Light', 'Moul', serif; color: #0f172a;">ការិយាល័យ អប់រំ យុវជននិងកីឡានៃរដ្ឋបាលស្រុក ${districtName}</p>
+                <p style="margin: 0; font-size: 10.5pt; font-family: 'Khmer OS Muol Light', 'Moul', serif; color: #0f172a;">${schoolName}</p>
+              </div>
+              <div class="header-right" style="text-align: center; line-height: 1.6;">
+                <p style="margin: 0 0 4px 0; font-size: 11pt; font-family: 'Khmer OS Muol Light', 'Moul', serif; color: #0f172a;">ព្រះរាជាណាចក្រកម្ពុជា</p>
+                <p style="margin: 0; font-size: 10.5pt; font-family: 'Khmer OS Muol Light', 'Moul', serif; color: #0f172a;">ជាតិ សាសនា ព្រះមហាក្សត្រ</p>
+                <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin: 4px auto 0 auto; width: 65%;">
+                  <div style="height: 1px; flex: 1; background: linear-gradient(to right, transparent, #334155);"></div>
+                  <span style="font-size: 10px; color: #334155;">៚ ❖ ៚</span>
+                  <div style="height: 1px; flex: 1; background: linear-gradient(to left, transparent, #334155);"></div>
+                </div>
+              </div>
             </div>
-            <div class="title-box"><h2>${titleText}</h2><p>ឆ្នាំសិក្សា ៖ ${academicYear}</p></div>
+            <div class="title-box" style="text-align: center; margin: 8px 0 14px 0;">
+              <h2 style="margin: 0 0 4px 0; font-size: 14pt; color: #1e3a8a; letter-spacing: 0.5px; font-family: 'Khmer OS Muol Light', 'Moul', serif;">${titleText}</h2>
+              <p style="margin: 0; font-size: 11pt; color: #dc2626; font-family: 'Khmer OS Muol Light', 'Moul', serif;">${grade} | ឆ្នាំសិក្សា ${academicYear}</p>
+            </div>
             
             <table class="rnk-table"><thead>${headerHtml}</thead><tbody>${rowsHtml}</tbody></table>
             
@@ -3294,9 +3362,18 @@ window.printRankingTable = function() {
                 <tr><td style="width: 100%;">❖ ${passLabel} <b>${passed}</b> នាក់ (<b>${passPct}%</b>) ស្រី <b>${passedF}</b> នាក់ (<b>${passFPct}%</b>)</td></tr>
                 <tr><td style="width: 100%;">❖ ${failLabel} <b>${failed}</b> នាក់ (<b>${failPct}%</b>) ស្រី <b>${failedF}</b> នាក់ (<b>${failFPct}%</b>)</td></tr>
             </table>
-            <div class="bottom-sig-container">
-                <div class="sig-box-left"><br><br><p class="font-moul" style="margin-bottom: 5px; font-size: 11pt;">បានឃើញ និងឯកភាព</p><p class="font-moul" style="margin-bottom: 50px; font-size: 11pt;">នាយកសាលា</p><p class="font-moul" style="font-size: 11pt;">${principalName}</p></div>
-                <div class="sig-box-right"><p style="margin: 0 0 5px 0; font-size: 11pt;">${lunarDateStr}</p><p style="margin: 0 0 5px 0; font-size: 11pt;">${solarDateStr}</p><p class="font-moul" style="margin-bottom: 50px; font-size: 11pt;">គ្រូបន្ទុកថ្នាក់</p><p class="font-moul" style="font-size: 11pt;">${teacherName}</p></div>
+            <div class="bottom-sig-container" style="display: flex; justify-content: space-between; align-items: flex-start; width: 100%; page-break-inside: avoid; padding: 0 20px; margin-top: 15px;">
+                <div class="sig-box-left" style="width: 40%; text-align: center;">
+                    <p style="margin: 0 0 4px 0; font-size: 11pt; font-family: 'Siemreap', sans-serif; color: #000;">បានឃើញ និងឯកភាព</p>
+                    <p style="margin: 0 0 55px 0; font-size: 11pt; font-family: 'Khmer OS Muol Light', 'Moul', serif; color: #000;">នាយក/នាយិកាសាលា</p>
+                    <p style="margin: 0; font-size: 11pt; font-family: 'Khmer OS Muol Light', 'Moul', serif; color: #000;">${principalName}</p>
+                </div>
+                <div class="sig-box-right" style="width: 40%; text-align: center;">
+                    <p style="margin: 0 0 4px 0; font-size: 11pt; font-family: 'Siemreap', sans-serif; color: #000;">${lunarDateStr || 'ថ្ងៃ....................ខែ..................ឆ្នាំ...............ព.ស.២៥៧០'}</p>
+                    <p style="margin: 0 0 6px 0; font-size: 11pt; font-family: 'Siemreap', sans-serif; color: #000;">${solarDateStr}</p>
+                    <p style="margin: 0 0 55px 0; font-size: 11pt; font-family: 'Khmer OS Muol Light', 'Moul', serif; color: #000;">គ្រូបន្ទុកថ្នាក់</p>
+                    <p style="margin: 0; font-size: 11pt; font-family: 'Khmer OS Muol Light', 'Moul', serif; color: #000;">${teacherName}</p>
+                </div>
             </div>
           </div>
         </div>
@@ -3772,7 +3849,7 @@ window.generateMonthlySheetHTML = function(stu, periodOverride = null) {
          </div>
        </div>
        <div style="display: flex; justify-content: space-between; align-items: flex-start; text-align: center; margin-bottom: 2mm;">
-         <div style="width: 40%;"><p style="margin: 0 0 3px 0; font-size: 11.5px; font-weight: bold;">បានឃើញ និងឯកភាព</p><p style="margin: 0 0 40px 0; font-family: 'Moul', serif; font-size: 11.5px; color: #1e3a8a;">នាយកសាលា</p><p style="margin: 0; color: #64748b;">................................................</p></div>
+         <div style="width: 40%;"><p style="margin: 0 0 3px 0; font-size: 11.5px; font-weight: bold;">បានឃើញ និងឯកភាព</p><p style="margin: 0 0 40px 0; font-family: 'Moul', serif; font-size: 11.5px; color: #1e3a8a;">នាយក/នាយិកាសាលា</p><p style="margin: 0; color: #64748b;">................................................</p></div>
          <div style="width: 50%;">
             <p class="rc-lunar-date-lbl" style="margin: 0 0 2px 0; font-size: 10.5px; color: #1e293b; display: ${rDates.showLunar ? 'block' : 'none'};">${lunarDateStr}</p>
             <p class="rc-solar-date-lbl" style="margin: 0 0 3px 0; font-size: 11px; color: #1e293b;">${solarDateStr}</p>
@@ -3922,7 +3999,7 @@ window.generateCoverAndProfileHTML = function(stu) {
            </div>
            <div style="display: flex; justify-content: space-between; text-align: center; font-size: 12.5px; margin-top: 4mm; padding-top: 3mm; border-top: 1.5px solid #e2e8f0;">
               <div style="width: 44%;"><p style="margin: 0 0 45px 0; font-weight: bold; color: #334155;">ហត្ថលេខា ឬស្នាមមេដៃអាណាព្យាបាល</p><p style="margin: 0; color: #94a3b8; font-size: 11px;">............................................................</p></div>
-              <div style="width: 44%;"><p style="margin: 0 0 4px 0; font-size: 11px; color: #64748b;">${window.getFormattedSolarDate()}</p><p style="margin: 0 0 35px 0; font-family: 'Moul', serif; font-size: 12.5px; color: #1e3a8a;">នាយកសាលា</p><p style="margin: 0; color: #94a3b8; font-size: 11px;">............................................................</p></div>
+              <div style="width: 44%;"><p style="margin: 0 0 4px 0; font-size: 11px; color: #64748b;">${window.getFormattedSolarDate()}</p><p style="margin: 0 0 35px 0; font-family: 'Moul', serif; font-size: 12.5px; color: #1e3a8a;">នាយក/នាយិកាសាលា</p><p style="margin: 0; color: #94a3b8; font-size: 11px;">............................................................</p></div>
            </div>
         </div>
       </div>
@@ -4265,7 +4342,7 @@ function renderTop5HonorBoard() {
               <div class="flex justify-between items-end text-[13px] font-bold px-8">
                 <div class="text-center canva-el cursor-grab hover:ring-2 hover:ring-dashed hover:ring-blue-400 p-3 rounded-xl transition-colors hover:bg-white/50 backdrop-blur-sm">
                   <p contenteditable="true" spellcheck="false" class="mb-2 text-slate-800 outline-none font-normal">បានឃើញ និងឯកភាព</p>
-                  <p contenteditable="true" spellcheck="false" class="font-moul text-[12px] text-slate-900 mb-10 outline-none">នាយកសាលា</p>
+                  <p contenteditable="true" spellcheck="false" class="font-moul text-[12px] text-slate-900 mb-10 outline-none">នាយក/នាយិកាសាលា</p>
                   <div contenteditable="true" spellcheck="false" class="font-moul text-[14px] text-indigo-950 outline-none min-w-[120px] border-b border-dashed border-transparent hover:border-slate-400 pb-1">${principal_name}</div>
                 </div>
                 <div class="text-center canva-el cursor-grab hover:ring-2 hover:ring-dashed hover:ring-blue-400 p-3 rounded-xl transition-colors hover:bg-white/50 backdrop-blur-sm">

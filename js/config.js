@@ -1016,10 +1016,10 @@ window.CMSPrintManager = {
     // ៤. មុខងារទាញយកទិន្នន័យបរិបទ និងកាលបរិច្ឆេទស្តង់ដារ (Standard Print Context & Dates)
     getStandardContext: function(custom = {}) {
         const sInfo = typeof appSettings !== 'undefined' ? appSettings : {};
-        const districtName = (custom.districtName || sInfo.district || "ស្រុកកៀនស្វាយ").replace('ស្រុក', '').trim();
-        const schoolName = custom.schoolName || sInfo.school_name || "សាលាបឋមសិក្សា.....................";
-        const principalName = custom.principalName || sInfo.principal_name || ".......................";
-        const teacherName = custom.teacherName || (window.AuthState ? window.AuthState.teacherName : null) || localStorage.getItem('auth_teacher_name') || sInfo.teacher_name || ".......................";
+        const districtName = (custom.districtName || sInfo.district || "កៀនស្វាយ").replace(/^ស្រុក\s*/, '').trim();
+        const schoolName = custom.schoolName || sInfo.school_name || "សាលាបឋមសិក្សា ភ្នំ";
+        const principalName = custom.principalName || sInfo.principal_name || "";
+        const teacherName = custom.teacherName || (window.AuthState ? window.AuthState.teacherName : null) || localStorage.getItem('auth_teacher_name') || sInfo.teacher_name || "";
         const academicYear = custom.academicYear || document.getElementById("globalAcademicYear")?.value || localStorage.getItem('selected_academic_year') || sInfo.academic_year || "២០២៦-២០២៧";
         
         let grade = custom.grade;
@@ -1030,25 +1030,54 @@ window.CMSPrintManager = {
             } else if (sInfo.teacher_level) {
                 grade = `${sInfo.teacher_level} ${sInfo.teacher_room || ''}`.trim();
             } else {
-                grade = "ថ្នាក់ទី";
+                grade = "ថ្នាក់ទី ២ «ក»";
             }
         }
 
-        let loc = custom.location || document.getElementById('global_loc_input')?.value || localStorage.getItem('rc_location') || localStorage.getItem('rep_location') || (districtName ? `ធ្វើនៅស្រុក${districtName}` : "ធ្វើនៅ.........................");
-        let sol = custom.solarDate || document.getElementById('global_sol_input')?.value || localStorage.getItem('rc_solar_date') || localStorage.getItem('rep_solar_date') || "ថ្ងៃទី....... ខែ....... ឆ្នាំ២០....";
-        let lun = custom.lunarDate || document.getElementById('global_lun_input')?.value || localStorage.getItem('rc_lunar_date') || localStorage.getItem('rep_lunar_date') || "ថ្ងៃ......................... ខែ............ ឆ្នាំ............ ព.ស.២៥៧...";
+        let locShort = "";
+        if (custom.location) {
+            locShort = custom.location.replace(/^ធ្វើនៅ\s*/, '').replace(/,+$/, '').trim();
+        } else {
+            const rawLoc = document.getElementById('global_loc_input')?.value || localStorage.getItem('rc_location') || localStorage.getItem('rep_location');
+            if (rawLoc) {
+                locShort = rawLoc.replace(/^ធ្វើនៅ\s*/, '').replace(/,+$/, '').trim();
+            } else {
+                locShort = schoolName.replace(/^(សាលាបឋមសិក្សា|អនុវិទ្យាល័យ|វិទ្យាល័យ|សាលា)\s*/g, '').trim();
+                if (!locShort) locShort = districtName || "ភ្នំ";
+            }
+        }
 
+        let sDate = "";
+        if (custom.solarDate) {
+            sDate = custom.solarDate.trim();
+        } else {
+            const rawDate = document.getElementById('global_sol_input')?.value || localStorage.getItem('rc_solar_date') || localStorage.getItem('rep_solar_date');
+            if (rawDate && rawDate.trim()) {
+                sDate = rawDate.trim();
+            } else {
+                sDate = "ថ្ងៃទី.......ខែ..........ឆ្នាំ២០២៦";
+            }
+        }
+        if (sDate.includes("ថ្ងៃទី")) sDate = sDate.substring(sDate.indexOf("ថ្ងៃទី"));
+
+        const solarDateStr = `ធ្វើនៅ ${locShort}, ${sDate}`;
+
+        let lunarDateStr = "";
         let isLunarChecked = true;
         const chkBox = document.getElementById('global_lun_chk');
         if (chkBox) isLunarChecked = chkBox.checked;
         else isLunarChecked = (localStorage.getItem('rc_show_lunar') !== 'false' && localStorage.getItem('rep_show_lunar') !== 'false');
 
-        let locationStr = loc.trim().replace(/,+$/, '');
-        let sDate = sol.trim();
-        if (sDate.includes("ថ្ងៃទី")) sDate = sDate.substring(sDate.indexOf("ថ្ងៃទី"));
-
-        const solarDateStr = `${locationStr}, ${sDate}`;
-        const lunarDateStr = isLunarChecked ? lun : "";
+        if (custom.lunarDate) {
+            lunarDateStr = custom.lunarDate.trim();
+        } else if (isLunarChecked) {
+            const rawLun = document.getElementById('global_lun_input')?.value || localStorage.getItem('rc_lunar_date') || localStorage.getItem('rep_lunar_date');
+            if (rawLun && rawLun.trim()) {
+                lunarDateStr = rawLun.trim();
+            } else {
+                lunarDateStr = "ថ្ងៃ....................ខែ..................ឆ្នាំ...............ព.ស.២៥៧០";
+            }
+        }
 
         return {
             districtName,
@@ -1062,33 +1091,54 @@ window.CMSPrintManager = {
         };
     },
 
-    // ៥. ទម្រង់ក្បាលលិខិតស្តង់ដារ (Standard Letterhead Header)
+    // ៥. ទម្រង់ក្បាលលិខិតស្តង់ដារ (Standard Letterhead Header ដូចរូបគំរូ)
     getHeaderHtml: function(ctx) {
         return `
-            <div class="header-box">
-              <div class="header-left"><br><p>ការិយាល័យអប់រំ យុវជន និងកីឡានៃរដ្ឋបាលស្រុក${ctx.districtName}</p><p>${ctx.schoolName}</p><p>${ctx.grade}</p></div>
-              <div class="header-right"><p>ព្រះរាជាណាចក្រកម្ពុជា</p><p>ជាតិ សាសនា ព្រះមហាក្សត្រ</p><div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin: 4px auto 10px auto; width: 60%;"><div style="height: 1px; flex: 1; background: linear-gradient(to right, transparent, #d97706);"></div><span style="color: #d97706; font-size: 11px;">❖ ❖ ❖</span><div style="height: 1px; flex: 1; background: linear-gradient(to left, transparent, #d97706);"></div></div></div>
+            <div class="header-box" style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; width: 100%;">
+              <div class="header-left" style="text-align: left; line-height: 1.6;">
+                <p style="margin: 0 0 4px 0; font-size: 10.5pt; font-family: 'Khmer OS Muol Light', 'Moul', serif; color: #0f172a;">ការិយាល័យ អប់រំ យុវជននិងកីឡានៃរដ្ឋបាលស្រុក ${ctx.districtName}</p>
+                <p style="margin: 0; font-size: 10.5pt; font-family: 'Khmer OS Muol Light', 'Moul', serif; color: #0f172a;">${ctx.schoolName}</p>
+              </div>
+              <div class="header-right" style="text-align: center; line-height: 1.6;">
+                <p style="margin: 0 0 4px 0; font-size: 11pt; font-family: 'Khmer OS Muol Light', 'Moul', serif; color: #0f172a;">ព្រះរាជាណាចក្រកម្ពុជា</p>
+                <p style="margin: 0; font-size: 10.5pt; font-family: 'Khmer OS Muol Light', 'Moul', serif; color: #0f172a;">ជាតិ សាសនា ព្រះមហាក្សត្រ</p>
+                <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin: 4px auto 0 auto; width: 65%;">
+                  <div style="height: 1px; flex: 1; background: linear-gradient(to right, transparent, #334155);"></div>
+                  <span style="font-size: 10px; color: #334155;">៚ ❖ ៚</span>
+                  <div style="height: 1px; flex: 1; background: linear-gradient(to left, transparent, #334155);"></div>
+                </div>
+              </div>
             </div>
         `;
     },
 
-    // ៦. ទម្រង់ចំណងជើងឯកសារស្តង់ដារ (Standard Document Title)
-    getTitleHtml: function(titleText, academicYear) {
+    // ៦. ទម្រង់ចំណងជើងឯកសារស្តង់ដារ (Standard Document Title ដូចរូបគំរូ)
+    getTitleHtml: function(titleText, academicYear, grade = "") {
+        const gradePart = grade ? `${grade} | ` : "";
         return `
-            <div class="title-box">
-              <h2>${titleText}</h2>
-              <p>ឆ្នាំសិក្សា ៖ ${academicYear}</p>
+            <div class="title-box" style="text-align: center; margin: 8px 0 14px 0;">
+              <h2 style="margin: 0 0 4px 0; font-size: 14pt; color: #1e3a8a; letter-spacing: 0.5px; font-family: 'Khmer OS Muol Light', 'Moul', serif;">${titleText}</h2>
+              <p style="margin: 0; font-size: 11pt; color: #dc2626; font-family: 'Khmer OS Muol Light', 'Moul', serif;">${gradePart}ឆ្នាំសិក្សា ${academicYear}</p>
             </div>
         `;
     },
 
-    // ៧. ទម្រង់ហត្ថលេខា និងកាលបរិច្ឆេទខាងក្រោមស្តង់ដារ (Standard Signatures & Dates)
-    getFooterHtml: function(ctx, customRoleLeft = "នាយកសាលា", customRoleRight = "គ្រូបន្ទុកថ្នាក់", middleColHtml = "") {
+    // ៧. ទម្រង់ហត្ថលេខា និងកាលបរិច្ឆេទខាងក្រោមស្តង់ដារ (Standard Signatures & Dates ដូចរូបគំរូ)
+    getFooterHtml: function(ctx, customRoleLeft = "នាយក/នាយិកាសាលា", customRoleRight = "គ្រូបន្ទុកថ្នាក់", middleColHtml = "") {
         return `
-            <div class="bottom-sig-container">
-                <div class="sig-box-left"><br><br><p class="font-moul" style="margin-bottom: 5px; font-size: 11pt;">បានឃើញ និងឯកភាព</p><p class="font-moul" style="margin-bottom: 50px; font-size: 11pt;">${customRoleLeft}</p><p class="font-moul" style="font-size: 11pt;">${ctx.principalName}</p></div>
+            <div class="bottom-sig-container" style="display: flex; justify-content: space-between; align-items: flex-start; width: 100%; page-break-inside: avoid; padding: 0 20px; margin-top: 15px;">
+                <div class="sig-box-left" style="width: 40%; text-align: center;">
+                    <p style="margin: 0 0 4px 0; font-size: 11pt; font-family: 'Siemreap', sans-serif; color: #000;">បានឃើញ និងឯកភាព</p>
+                    <p style="margin: 0 0 55px 0; font-size: 11pt; font-family: 'Khmer OS Muol Light', 'Moul', serif; color: #000;">${customRoleLeft}</p>
+                    <p style="margin: 0; font-size: 11pt; font-family: 'Khmer OS Muol Light', 'Moul', serif; color: #000;">${ctx.principalName || ''}</p>
+                </div>
                 ${middleColHtml}
-                <div class="sig-box-right"><p style="margin: 0 0 5px 0; font-size: 11pt;">${ctx.lunarDateStr}</p><p style="margin: 0 0 5px 0; font-size: 11pt;">${ctx.solarDateStr}</p><p class="font-moul" style="margin-bottom: 50px; font-size: 11pt;">${customRoleRight}</p><p class="font-moul" style="font-size: 11pt;">${ctx.teacherName}</p></div>
+                <div class="sig-box-right" style="width: 40%; text-align: center;">
+                    <p style="margin: 0 0 4px 0; font-size: 11pt; font-family: 'Siemreap', sans-serif; color: #000;">${ctx.lunarDateStr || 'ថ្ងៃ....................ខែ..................ឆ្នាំ...............ព.ស.២៥៧០'}</p>
+                    <p style="margin: 0 0 6px 0; font-size: 11pt; font-family: 'Siemreap', sans-serif; color: #000;">${ctx.solarDateStr}</p>
+                    <p style="margin: 0 0 55px 0; font-size: 11pt; font-family: 'Khmer OS Muol Light', 'Moul', serif; color: #000;">${customRoleRight}</p>
+                    <p style="margin: 0; font-size: 11pt; font-family: 'Khmer OS Muol Light', 'Moul', serif; color: #000;">${ctx.teacherName || ''}</p>
+                </div>
             </div>
         `;
     },
@@ -1106,8 +1156,8 @@ window.CMSPrintManager = {
         let bodyContent = options.contentHtml || "";
         if (options.autoWrapHeaderFooter !== false && !options.fullHtml) {
             const headerHtml = options.headerHtml || this.getHeaderHtml(ctx);
-            const titleHtml = options.titleHtml || this.getTitleHtml(titleText, ctx.academicYear);
-            const footerHtml = options.footerHtml || this.getFooterHtml(ctx, options.roleLeft || "នាយកសាលា", options.roleRight || "គ្រូបន្ទុកថ្នាក់", options.middleColHtml || "");
+            const titleHtml = options.titleHtml || this.getTitleHtml(titleText, ctx.academicYear, ctx.grade);
+            const footerHtml = options.footerHtml || this.getFooterHtml(ctx, options.roleLeft || "នាយក/នាយិកាសាលា", options.roleRight || "គ្រូបន្ទុកថ្នាក់", options.middleColHtml || "");
             bodyContent = `
                 ${headerHtml}
                 ${titleHtml}

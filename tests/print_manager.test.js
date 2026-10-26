@@ -150,18 +150,18 @@ describe('CMS Universal Print Manager & Paper Config Tests', () => {
     assert.equal(ctx.grade, 'ថ្នាក់ទី ២ "ក"');
 
     const header = context.window.CMSPrintManager.getHeaderHtml(ctx);
-    assert.ok(header.includes('ការិយាល័យអប់រំ យុវជន និងកីឡានៃរដ្ឋបាលស្រុកកៀនស្វាយ'));
+    assert.ok(header.includes('ការិយាល័យ អប់រំ យុវជននិងកីឡានៃរដ្ឋបាលស្រុក កៀនស្វាយ'));
     assert.ok(header.includes('ព្រះរាជាណាចក្រកម្ពុជា'));
     assert.ok(header.includes('ជាតិ សាសនា ព្រះមហាក្សត្រ'));
-    assert.ok(header.includes('❖ ❖ ❖'));
+    assert.ok(header.includes('៚ ❖ ៚'));
 
-    const title = context.window.CMSPrintManager.getTitleHtml('បញ្ជីស្រង់ពិន្ទុប្រចាំខែមករា', ctx.academicYear);
+    const title = context.window.CMSPrintManager.getTitleHtml('បញ្ជីស្រង់ពិន្ទុប្រចាំខែមករា', ctx.academicYear, ctx.grade);
     assert.ok(title.includes('បញ្ជីស្រង់ពិន្ទុប្រចាំខែមករា'));
-    assert.ok(title.includes('ឆ្នាំសិក្សា ៖ ២០២៦-២០២៧'));
+    assert.ok(title.includes('ឆ្នាំសិក្សា ២០២៦-២០២៧'));
 
     const footer = context.window.CMSPrintManager.getFooterHtml(ctx);
     assert.ok(footer.includes('បានឃើញ និងឯកភាព'));
-    assert.ok(footer.includes('នាយកសាលា'));
+    assert.ok(footer.includes('នាយក/នាយិកាសាលា'));
     assert.ok(footer.includes('គ្រូបន្ទុកថ្នាក់'));
     assert.ok(footer.includes('ហឿន មិនា'));
   });
