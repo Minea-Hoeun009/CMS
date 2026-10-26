@@ -409,9 +409,13 @@ function getAuthCredentials() {
  * មុខងារសម្រាប់ហៅទិន្នន័យ (GET)
  */
 async function apiGet(action, params = {}) {
-  // 🟢 បញ្ចូលអត្តសញ្ញាណគ្រូ និងឆ្នាំសិក្សា ទៅក្នុងប៉ារ៉ាម៉ែត្រជានិច្ច 🟢
+  // 🟢 បញ្ចូលអត្តសញ្ញាណគ្រូ ឆ្នាំសិក្សា និង Session Token ទៅក្នុងប៉ារ៉ាម៉ែត្រជានិច្ច 🟢
   const auth = getAuthCredentials();
+  const sessionToken = (typeof window.getSessionToken === 'function' ? window.getSessionToken() : '') || (typeof sessionStorage !== 'undefined' ? sessionStorage.getItem('cms_session_token') : '') || '';
   const finalParams = { ...auth, ...params };
+  if (sessionToken && !finalParams.session_token) {
+    finalParams.session_token = sessionToken;
+  }
   
   const cacheKey = `cache_${action}_${JSON.stringify(finalParams)}`;
   const cachedData = localStorage.getItem(cacheKey);
@@ -581,16 +585,24 @@ window.fetchStudentsDataFast = async function() {
  */
 async function apiPost(action, payload = {}) {
   const auth = getAuthCredentials();
+  const sessionToken = (typeof window.getSessionToken === 'function' ? window.getSessionToken() : '') || (typeof sessionStorage !== 'undefined' ? sessionStorage.getItem('cms_session_token') : '') || '';
   
   const requestBody = {
       action: action,
+      session_token: payload.session_token || sessionToken,
       teacher_id: auth.teacher_id,
       academic_year: auth.academic_year,
-      data: payload.data ? payload.data : payload
+      data: payload.data !== undefined ? payload.data : payload
   };
   
   if (payload && payload.id) requestBody.id = payload.id;
   else if (payload && payload.data && payload.data.id) requestBody.id = payload.data.id;
+  if (payload && payload.id_token) requestBody.id_token = payload.id_token;
+  if (payload && payload.auth_data) requestBody.auth_data = payload.auth_data;
+  if (payload && payload.target_user_id) requestBody.target_user_id = payload.target_user_id;
+  if (payload && payload.role) requestBody.role = payload.role;
+  if (payload && payload.new_role) requestBody.new_role = payload.new_role;
+  if (payload && payload.new_status) requestBody.new_status = payload.new_status;
 
   // ⚡ INSTANT SERVER POST: Send directly to Google Apps Script right away
   try {

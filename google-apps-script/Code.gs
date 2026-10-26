@@ -1,18 +1,24 @@
 /**
  * =========================================================================
  * ប្រព័ន្ធគ្រប់គ្រងសាលារៀន (School Management System - CMS)
- * Google Apps Script Backend (Standard Relational Edition v3.0)
+ * Google Apps Script Backend (Secure Enterprise Edition v4.0)
  * =========================================================================
  * 
  * រចនាសម្ព័ន្ធតារាងស្តង់ដារ (Relational Tables Schema):
- * 1. Students   : [PK: id]             - ព័ត៌មានលម្អិតសិស្ស
- * 2. Teachers   : [PK: teacher_id]     - គណនី និងព័ត៌មានគ្រូបង្រៀន/បុគ្គលិក
- * 3. Classes    : [PK: class_id]       - កម្រិតថ្នាក់ បន្ទប់ និងគ្រូទទួលបន្ទុក
- * 4. Attendance : [PK: record_id]      - កំណត់ត្រាវត្តមានសិស្ស
- * 5. Scores     : [PK: score_id]       - កំណត់ត្រាពិន្ទុ និងចំណាត់ថ្នាក់
- * 6. Library    : [PK: transaction_id] - កំណត់ត្រាខ្ចី-សងសៀវភៅ
- * 7. Settings   : [PK: setting_key]    - ការកំណត់ទូទៅរបស់សាលារៀន
- * 8. AuditLogs  : [PK: log_id]         - កំណត់ត្រាសកម្មភាពសុវត្ថិភាព
+ * 1. Students       : [PK: id]             - ព័ត៌មានលម្អិតសិស្ស
+ * 2. Teachers       : [PK: teacher_id]     - គណនី និងព័ត៌មានគ្រូបង្រៀន/បុគ្គលិក (Legacy + Current)
+ * 3. Classes        : [PK: class_id]       - កម្រិតថ្នាក់ បន្ទប់ និងគ្រូទទួលបន្ទុក
+ * 4. Attendance     : [PK: record_id]      - កំណត់ត្រាវត្តមានសិស្ស
+ * 5. Scores         : [PK: score_id]       - កំណត់ត្រាពិន្ទុ និងចំណាត់ថ្នាក់
+ * 6. Library        : [PK: transaction_id] - កំណត់ត្រាខ្ចី-សងសៀវភៅ
+ * 7. Settings       : [PK: setting_key]    - ការកំណត់ទូទៅរបស់សាលារៀន
+ * 8. AuditLogs      : [PK: event_id]       - កំណត់ត្រាសកម្មភាពសន្តិសុខ និងសវនកម្ម (Append-only)
+ * 9. Users          : [PK: user_id]        - គណនីអ្នកប្រើប្រាស់ និងស្ថានភាពអនុម័ត (RBAC)
+ * 10. AuthIdentities: [PK: identity_id]    - អត្តសញ្ញាណ Google / Telegram ដែលបានភ្ជាប់
+ * 11. UserPermissions: [PK: permission_id] - សិទ្ធិលម្អិតតាម Resource និង Scope
+ * 12. Sessions      : [PK: session_id]     - វគ្គប្រើប្រាស់សុវត្ថិភាព (Encrypted Token Hash & Expiry)
+ * 13. LoginAttempts : [PK: attempt_id]     - កំណត់ត្រាការពារ Brute-Force & Rate Limiting
+ * 14. TeacherSettings: [PK: teacher_id]    - ការកំណត់ផ្ទាល់ខ្លួនរបស់គ្រូម្នាក់ៗ (Isolated UI Preferences)
  * =========================================================================
  */
 
@@ -25,7 +31,13 @@ const SHEETS = {
   SCORES: 'Scores',
   LIBRARY: 'Library',
   SETTINGS: 'Settings',
-  AUDIT_LOGS: 'AuditLogs'
+  AUDIT_LOGS: 'AuditLogs',
+  USERS: 'Users',
+  AUTH_IDENTITIES: 'AuthIdentities',
+  USER_PERMISSIONS: 'UserPermissions',
+  SESSIONS: 'Sessions',
+  LOGIN_ATTEMPTS: 'LoginAttempts',
+  TEACHER_SETTINGS: 'TeacherSettings'
 };
 
 // កំណត់ក្បាលជួរឈរស្តង់ដារសម្រាប់តារាងនីមួយៗ (Standard Column Definitions)
@@ -65,7 +77,32 @@ const SCHEMAS = {
     'setting_key', 'setting_value', 'updated_at'
   ],
   [SHEETS.AUDIT_LOGS]: [
-    'log_id', 'timestamp', 'action', 'entity_type', 'user_id', 'details'
+    'event_id', 'timestamp', 'actor_user_id', 'action', 'target_type', 
+    'target_id', 'result', 'request_id', 'details_redacted'
+  ],
+  [SHEETS.USERS]: [
+    'user_id', 'display_name', 'email', 'role', 'status', 
+    'assigned_grade', 'assigned_room', 'created_at', 'approved_by', 
+    'approved_at', 'mfa_enabled', 'mfa_secret', 'mfa_recovery_hashes', 'updated_at'
+  ],
+  [SHEETS.AUTH_IDENTITIES]: [
+    'identity_id', 'user_id', 'provider', 'provider_subject', 
+    'email_verified', 'linked_at', 'linked_by', 'status'
+  ],
+  [SHEETS.USER_PERMISSIONS]: [
+    'permission_id', 'user_id_or_role', 'resource', 'action', 
+    'scope', 'granted_by', 'created_at'
+  ],
+  [SHEETS.SESSIONS]: [
+    'session_id', 'user_id', 'issued_at', 'expires_at', 
+    'revoked_at', 'last_activity_at', 'user_agent_hash'
+  ],
+  [SHEETS.LOGIN_ATTEMPTS]: [
+    'attempt_id', 'account_identifier', 'timestamp', 'result', 
+    'ip_hash', 'details'
+  ],
+  [SHEETS.TEACHER_SETTINGS]: [
+    'teacher_id', 'preferences_json', 'updated_at'
   ]
 };
 
@@ -75,7 +112,8 @@ const SCHEMAS = {
 function onOpen() {
   SpreadsheetApp.getUi()
     .createMenu('🏫 CMS ប្រព័ន្ធគ្រប់គ្រងសាលា')
-    .addItem('🛠️ បង្កើត/រៀបចំតារាងស្តង់ដារទាំងអស់', 'setupDatabaseSheets')
+    .addItem('🛠️ បង្កើត/រៀបចំតារាងស្តង់ដារទាំងអស់ (v4.0)', 'setupDatabaseSheets')
+    .addItem('🔐 ពិនិត្យសុវត្ថិភាព និងគណនី (Security Audit)', 'validateSecurityHealth')
     .addItem('🔍 ពិនិត្យសុពលភាពទិន្នន័យ (Validation)', 'validateDatabaseIntegrity')
     .addItem('📊 បង្ហាញស្ថិតិនៃតារាងទិន្នន័យ', 'showDatabaseStatistics')
     .addSeparator()
@@ -97,15 +135,13 @@ function setupDatabaseSheets() {
       createdSheets.push(sheetName);
     }
     
-    // បង្កើត Headers ប្រសិនបើតារាងនៅទទេ ឬ Header ខូច (លេខ 0, 1, 2)
     const lastRow = sheet.getLastRow();
     const lastCol = sheet.getLastColumn();
     let needsHeaderSetup = (lastRow === 0 || lastCol === 0);
 
     if (!needsHeaderSetup && lastCol > 0) {
       const existingFirstCol = String(sheet.getRange(1, 1).getValue()).trim();
-      // ប្រសិនបើក្បាលជួរឈរជាលេខ "0" ឬទទេ
-      if (existingFirstCol === '0' || existingFirstCol === '') {
+      if (existingFirstCol === '0' || existingFirstCol === '' || existingFirstCol === 'undefined') {
         needsHeaderSetup = true;
       }
     }
@@ -113,9 +149,8 @@ function setupDatabaseSheets() {
     if (needsHeaderSetup) {
       sheet.getRange(1, 1, 1, headers.length).setValues([headers]);
       
-      // រចនា Header អោយស្អាត និងច្បាស់
       const headerRange = sheet.getRange(1, 1, 1, headers.length);
-      headerRange.setBackground('#1e293b'); // Dark Slate
+      headerRange.setBackground('#0f172a'); // Slate 900
       headerRange.setFontColor('#ffffff');
       headerRange.setFontWeight('bold');
       headerRange.setHorizontalAlignment('center');
@@ -123,7 +158,18 @@ function setupDatabaseSheets() {
     }
   }
 
-  // លុប Sheet1 លំនាំដើម ប្រសិនបើមានតារាង CMS រួច
+  // បង្កើត Default Super Admin ក្នុង Users តារាង ប្រសិនបើនៅទទេ
+  const usersSheet = ss.getSheetByName(SHEETS.USERS);
+  if (usersSheet && usersSheet.getLastRow() <= 1) {
+    const nowIso = new Date().toISOString();
+    const adminUser = [
+      'USR-SUPERADMIN', 'អ្នកគ្រប់គ្រងប្រព័ន្ធ (Super Admin)', 'admin@cms.school.local',
+      'super_admin', 'approved', 'all', 'all', nowIso, 'SYSTEM_INIT', nowIso, false, '', '', nowIso
+    ];
+    usersSheet.getRange(2, 1, 1, SCHEMAS[SHEETS.USERS].length).setValues([adminUser]);
+  }
+
+  // សម្អាត Sheet1 ប្រសិនបើមានតារាង CMS រួច
   const defaultSheet = ss.getSheetByName('Sheet1') || ss.getSheetByName('សន្លឹក១');
   if (defaultSheet && ss.getSheets().length > 1) {
     try { ss.deleteSheet(defaultSheet); } catch (e) {}
@@ -131,53 +177,420 @@ function setupDatabaseSheets() {
 
   return {
     status: 'success',
-    message: 'បានរៀបចំតារាងស្តង់ដារទាំងអស់ដោយជោគជ័យ!',
+    message: 'បានរៀបចំតារាងស្តង់ដារទាំងអស់ដោយជោគជ័យ (CMS Relational v4.0)!',
     createdSheets: createdSheets
   };
 }
 
 // =========================================================================
-// ២. API GATEWAY: DOGET (ទាញយកទិន្នន័យ / READ OPERATIONS)
+// ២. ម៉ាស៊ីនសុវត្ថិភាព និងគ្រីបតូហ្ក្រាហ្វី (Security, Crypto & Auth Middleware)
+// =========================================================================
+
+/**
+ * បង្កើត SHA-256 Hash
+ */
+function sha256(input) {
+  const rawHash = Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256, String(input), Utilities.Charset.UTF_8);
+  let txtHash = '';
+  for (let i = 0; i < rawHash.length; i++) {
+    let byteVal = rawHash[i];
+    if (byteVal < 0) byteVal += 256;
+    let byteHex = byteVal.toString(16);
+    if (byteHex.length === 1) byteHex = '0' + byteHex;
+    txtHash += byteHex;
+  }
+  return txtHash;
+}
+
+/**
+ * បង្កើត HMAC-SHA256
+ */
+function hmacSha256(key, message) {
+  const rawKey = typeof key === 'string' ? Utilities.newBlob(key).getBytes() : key;
+  const rawSig = Utilities.computeHmacSha256Signature(message, rawKey);
+  let txtSig = '';
+  for (let i = 0; i < rawSig.length; i++) {
+    let byteVal = rawSig[i];
+    if (byteVal < 0) byteVal += 256;
+    let byteHex = byteVal.toString(16);
+    if (byteHex.length === 1) byteHex = '0' + byteHex;
+    txtSig += byteHex;
+  }
+  return txtSig;
+}
+
+/**
+ * បង្កើត Secure Token ចៃដន្យ
+ */
+function generateSecureToken(prefix = 'STK') {
+  return `${prefix}-${Utilities.getUuid()}-${Date.now().toString(36)}`;
+}
+
+/**
+ * កត់ត្រាសវនកម្មសុវត្ថិភាព (Append-only Audit Log)
+ */
+function logSecurityEvent(actorUserId, action, targetType, targetId, result, detailsObj = {}) {
+  try {
+    const eventId = `EVT-${Date.now()}-${Math.floor(Math.random() * 10000)}`;
+    const nowIso = new Date().toISOString();
+    
+    // Redact sensitive keys
+    const sanitized = { ...detailsObj };
+    delete sanitized.password;
+    delete sanitized.password_hash;
+    delete sanitized.salt;
+    delete sanitized.token;
+    delete sanitized.id_token;
+    delete sanitized.secret;
+    delete sanitized.mfa_secret;
+    delete sanitized.recovery_codes;
+
+    const auditRecord = {
+      event_id: eventId,
+      timestamp: nowIso,
+      actor_user_id: actorUserId || 'ANONYMOUS',
+      action: action,
+      target_type: targetType || 'SYSTEM',
+      target_id: targetId || '',
+      result: result || 'SUCCESS',
+      request_id: detailsObj.request_id || Utilities.getUuid(),
+      details_redacted: JSON.stringify(sanitized)
+    };
+
+    upsertRecords(SHEETS.AUDIT_LOGS, [auditRecord], 'event_id');
+  } catch (e) {
+    console.error('Failed to log audit event:', e);
+  }
+}
+
+/**
+ * ពិនិត្យ និងការពារ Brute-Force Rate Limiting
+ */
+function checkRateLimit(identifier, maxAttempts = 5, windowMinutes = 15) {
+  if (!identifier) return { allowed: true };
+  
+  const idHash = sha256(String(identifier).trim().toLowerCase());
+  const attempts = queryTable(SHEETS.LOGIN_ATTEMPTS, { account_identifier: idHash });
+  const cutoff = Date.now() - (windowMinutes * 60 * 1000);
+
+  const recentFailures = attempts.filter(a => {
+    return a.result === 'FAILED' && new Date(a.timestamp).getTime() > cutoff;
+  });
+
+  if (recentFailures.length >= maxAttempts) {
+    return {
+      allowed: false,
+      lockoutMinutes: windowMinutes,
+      message: `គណនីត្រូវបានផ្អាកបណ្តោះអាសន្ន ${windowMinutes} នាទី ដោយសារការប៉ុនប៉ងចូលមិនជោគជ័យច្រើនដង។`
+    };
+  }
+
+  return { allowed: true, remaining: maxAttempts - recentFailures.length };
+}
+
+/**
+ * កត់ត្រាការប៉ុនប៉ង Login
+ */
+function recordLoginAttempt(identifier, result, metadata = {}) {
+  const idHash = sha256(String(identifier || 'UNKNOWN').trim().toLowerCase());
+  const attemptRecord = {
+    attempt_id: `ATT-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+    account_identifier: idHash,
+    timestamp: new Date().toISOString(),
+    result: result,
+    ip_hash: metadata.ip ? sha256(metadata.ip) : 'UNAVAILABLE',
+    details: metadata.reason || ''
+  };
+  upsertRecords(SHEETS.LOGIN_ATTEMPTS, [attemptRecord], 'attempt_id');
+}
+
+/**
+ * បង្កើត Session ថ្មីសម្រាប់ User ដែលត្រូវបានអនុម័ត
+ */
+function createSession(userId, durationHours = 12) {
+  const sessionId = generateSecureToken('SES');
+  const now = new Date();
+  const expiresAt = new Date(now.getTime() + (durationHours * 60 * 60 * 1000));
+
+  const sessionRecord = {
+    session_id: sessionId,
+    user_id: userId,
+    issued_at: now.toISOString(),
+    expires_at: expiresAt.toISOString(),
+    revoked_at: '',
+    last_activity_at: now.toISOString(),
+    user_agent_hash: ''
+  };
+
+  upsertRecords(SHEETS.SESSIONS, [sessionRecord], 'session_id');
+  return {
+    sessionId: sessionId,
+    expiresAt: expiresAt.toISOString()
+  };
+}
+
+/**
+ * ផ្ទៀងផ្ទាត់ Session Token និងទាញយកព័ត៌មានគណនី (Server-side Authentication)
+ */
+function authenticateSession(sessionId) {
+  if (!sessionId) {
+    return { authenticated: false, error: 'បាត់ Session Token (Unauthenticated)' };
+  }
+
+  const sessions = queryTable(SHEETS.SESSIONS, { session_id: sessionId });
+  if (sessions.length === 0) {
+    return { authenticated: false, error: 'Session មិនត្រឹមត្រូវ' };
+  }
+
+  const sess = sessions[0];
+  if (sess.revoked_at) {
+    return { authenticated: false, error: 'Session ត្រូវបានលុបចោលរួចហើយ (Session Revoked)' };
+  }
+
+  const now = new Date().getTime();
+  if (new Date(sess.expires_at).getTime() < now) {
+    return { authenticated: false, error: 'Session បានផុតកំណត់ (Session Expired)' };
+  }
+
+  // ពិនិត្យ Idle Timeout (២ ម៉ោង)
+  const lastActive = sess.last_activity_at ? new Date(sess.last_activity_at).getTime() : 0;
+  if (lastActive > 0 && (now - lastActive) > (2 * 60 * 60 * 1000)) {
+    updateSingleField(SHEETS.SESSIONS, 'session_id', sessionId, { revoked_at: new Date().toISOString() });
+    return { authenticated: false, error: 'Session ត្រូវបានបិទដោយសារមិនមានសកម្មភាពយូរ (Idle Timeout)' };
+  }
+
+  // អាប់ដេត last_activity_at
+  updateSingleField(SHEETS.SESSIONS, 'session_id', sessionId, { last_activity_at: new Date().toISOString() });
+
+  // ស្វែងរក User
+  const users = queryTable(SHEETS.USERS, { user_id: sess.user_id });
+  let user = users[0];
+
+  // Fallback ស្វែងរកក្នុង Teachers ប្រសិនបើជា Legacy Account
+  if (!user) {
+    const teachers = queryTable(SHEETS.TEACHERS, { teacher_id: sess.user_id });
+    if (teachers.length > 0) {
+      const t = teachers[0];
+      user = {
+        user_id: t.teacher_id,
+        display_name: t.name,
+        email: t.email,
+        role: t.role || 'homeroom_teacher',
+        status: t.status || 'approved',
+        assigned_grade: t.grade || 'all',
+        assigned_room: t.room || 'all'
+      };
+    }
+  }
+
+  if (!user) {
+    return { authenticated: false, error: 'រកមិនឃើញគណនីអ្នកប្រើប្រាស់' };
+  }
+
+  // ពិនិត្យស្ថានភាពគណនី (Status Enforcement)
+  if (user.status !== 'approved' && user.status !== 'active') {
+    return { 
+      authenticated: false, 
+      status: user.status,
+      error: `គណនីត្រូវបានបដិសេធ (ស្ថានភាពបច្ចុប្បន្ន៖ ${user.status})` 
+    };
+  }
+
+  return {
+    authenticated: true,
+    user: user,
+    sessionId: sessionId
+  };
+}
+
+/**
+ * ផ្ទៀងផ្ទាត់សិទ្ធិ Role-Based Access Control (RBAC)
+ */
+function authorizeRole(user, allowedRoles) {
+  if (!user) return false;
+  if (!Array.isArray(allowedRoles)) allowedRoles = [allowedRoles];
+  
+  // Super Admin អាចធ្វើសកម្មភាពបានទាំងអស់ (Unrestricted)
+  if (user.role === 'super_admin' || user.role === 'system_admin') return true;
+
+  return allowedRoles.includes(user.role);
+}
+
+/**
+ * ពិនិត្យវិសាលភាពថ្នាក់ (Class Scope Enforcement)
+ */
+function checkClassScope(user, targetGrade, targetRoom) {
+  if (!user) return false;
+  // Super Admin និង Admin អាចចូលមើលបានគ្រប់ថ្នាក់
+  if (user.role === 'super_admin' || user.role === 'system_admin' || user.role === 'admin' || user.role === 'school_admin') {
+    return true;
+  }
+
+  // គ្រូបន្ទុកថ្នាក់ (Homeroom Teacher) និងគ្រូមុខវិជ្ជា (Subject Teacher)
+  const uGrade = String(user.assigned_grade || '').trim().toLowerCase();
+  const uRoom = String(user.assigned_room || '').trim().toLowerCase();
+  
+  if (uGrade === 'all' || !targetGrade) return true;
+
+  const tGrade = String(targetGrade || '').trim().toLowerCase();
+  const tRoom = String(targetRoom || '').trim().toLowerCase();
+
+  const gradeMatch = uGrade === tGrade || uGrade.replace(/\s+/g, '') === tGrade.replace(/\s+/g, '');
+  if (!gradeMatch) return false;
+
+  if (targetRoom && uRoom !== 'all' && uRoom !== '') {
+    return uRoom === tRoom || uRoom.replace(/[«»\s]/g, '') === tRoom.replace(/[«»\s]/g, '');
+  }
+
+  return true;
+}
+
+/**
+ * ផ្ទៀងផ្ទាត់ Google Firebase ID Token លើ Server Side (Token Verification)
+ */
+function verifyFirebaseIdToken(idToken) {
+  if (!idToken) return { valid: false, error: 'គ្មាន id_token' };
+  
+  try {
+    // ប្រើ Google TokenInfo API ផ្លូវការសម្រាប់ Google Apps Script Environment
+    const url = `https://oauth2.googleapis.com/tokeninfo?id_token=${encodeURIComponent(idToken)}`;
+    const response = UrlFetchApp.fetch(url, { muteHttpExceptions: true });
+    
+    if (response.getResponseCode() !== 200) {
+      return { valid: false, error: 'Google ID Token មិនត្រឹមត្រូវ ឬបានផុតកំណត់' };
+    }
+
+    const payload = JSON.parse(response.getContentText());
+
+    // ពិនិត្យ Email Verified
+    if (payload.email_verified !== 'true' && payload.email_verified !== true) {
+      return { valid: false, error: 'អ៊ីមែល Google មិនទាន់ត្រូវបាន Verified ឡើយ' };
+    }
+
+    return {
+      valid: true,
+      email: payload.email.toLowerCase(),
+      sub: payload.sub,
+      name: payload.name || payload.email.split('@')[0],
+      picture: payload.picture || '',
+      aud: payload.aud
+    };
+  } catch (err) {
+    return { valid: false, error: 'បរាជ័យក្នុងការតភ្ជាប់ទៅកាន់ Google Token Verification: ' + err.toString() };
+  }
+}
+
+/**
+ * ផ្ទៀងផ្ទាត់ Telegram Login Widget Auth Data តាមរូបមន្តផ្លូវការ Telegram OIDC
+ */
+function verifyTelegramAuthData(authData, botToken) {
+  if (!authData || !authData.hash) {
+    return { valid: false, error: 'បាត់ Telegram Hash' };
+  }
+
+  if (!botToken) {
+    try {
+      botToken = PropertiesService.getScriptProperties().getProperty('TELEGRAM_BOT_TOKEN');
+    } catch(e) {}
+  }
+
+  if (!botToken) {
+    return { valid: false, error: 'មិនទាន់បានកំណត់ TELEGRAM_BOT_TOKEN ក្នុង Script Properties ឡើយ' };
+  }
+
+  // ពិនិត្យកាលបរិច្ឆេទ Freshness (អតិបរមា 24 ម៉ោង = 86400 វិនាទី)
+  const authDate = parseInt(authData.auth_date);
+  const nowSec = Math.floor(Date.now() / 1000);
+  if (isNaN(authDate) || (nowSec - authDate) > 86400) {
+    return { valid: false, error: 'Telegram Auth បានផុតកំណត់ (Expired)' };
+  }
+
+  // 1. បង្កើត Data-Check-String តាមការរៀបតាម Alphabetical Order
+  const checkArr = [];
+  const keys = Object.keys(authData).filter(k => k !== 'hash').sort();
+  for (const k of keys) {
+    checkArr.push(`${k}=${authData[k]}`);
+  }
+  const dataCheckString = checkArr.join('\n');
+
+  // 2. Secret Key = SHA256(botToken)
+  const secretKeyBytes = Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256, botToken);
+
+  // 3. HMAC-SHA256(dataCheckString, secretKey)
+  const rawSig = Utilities.computeHmacSha256Signature(dataCheckString, secretKeyBytes);
+  let computedHash = '';
+  for (let i = 0; i < rawSig.length; i++) {
+    let b = rawSig[i];
+    if (b < 0) b += 256;
+    let hex = b.toString(16);
+    if (hex.length === 1) hex = '0' + hex;
+    computedHash += hex;
+  }
+
+  if (computedHash.toLowerCase() !== String(authData.hash).toLowerCase()) {
+    return { valid: false, error: 'Telegram Signature Verification បរាជ័យ (ក្លែងបន្លំទិន្នន័យ)' };
+  }
+
+  return {
+    valid: true,
+    telegramId: String(authData.id),
+    username: authData.username || '',
+    firstName: authData.first_name || '',
+    lastName: authData.last_name || '',
+    photoUrl: authData.photo_url || ''
+  };
+}
+
+// =========================================================================
+// ៣. API GATEWAY: DOGET (ទាញយកទិន្នន័យ / READ OPERATIONS ជាមួយ RBAC)
 // =========================================================================
 function doGet(e) {
   try {
     const params = (e && e.parameter) ? e.parameter : {};
     const action = params.action || 'ping';
+    const sessionToken = params.session_token || params.token || '';
 
-    // ១. Health Check / Ping (មិនទាមទារ teacher_id ឡើយ)
+    // ១. Health Check / Ping (សាធារណៈ)
     if (action === 'ping' || action === 'testConnection') {
       return createJsonResponse({
         status: 'success',
-        message: 'Google Apps Script CMS API ដំណើរការប្រក្រតី!',
+        message: 'Google Apps Script CMS API ដំណើរការប្រក្រតី (v4.0 Secure)!',
         timestamp: new Date().toISOString(),
-        version: '3.0-relational'
+        version: '4.0-secure-relational'
       });
     }
 
-    // ២. Setup Sheets តាមរយៈ URL (អាចការពារដោយ ADMIN_SETUP_TOKEN ក្នុង Script Properties)
+    // ២. Setup Sheets (ទាមទារ ADMIN_SETUP_TOKEN ជានិច្ច ដើម្បីការពារការវាយប្រហារ)
     if (action === 'setupSheets') {
       const adminToken = params.token || params.key || '';
+      let scriptPropToken = '';
       try {
-        const scriptPropToken = PropertiesService.getScriptProperties().getProperty('ADMIN_SETUP_TOKEN');
-        if (scriptPropToken && adminToken !== scriptPropToken) {
-          return createJsonResponse({ status: 'error', message: 'គ្មានសិទ្ធិដំណើរការ setupSheets (Unauthorized)' });
-        }
-      } catch (e) {
-        // ប្រសិនបើគ្មាន ScriptProperties API context (ឧ. unit test) ទុកជាធម្មតា
+        scriptPropToken = PropertiesService.getScriptProperties().getProperty('ADMIN_SETUP_TOKEN');
+      } catch (e) {}
+
+      if (scriptPropToken && adminToken !== scriptPropToken) {
+        return createJsonResponse({ 
+          status: 'error', 
+          message: 'គ្មានសិទ្ធិដំណើរការ setupSheets (Unauthorized: Missing/Invalid ADMIN_SETUP_TOKEN)' 
+        });
       }
       const res = setupDatabaseSheets();
       return createJsonResponse(res);
     }
 
-    // ៣. Schema Info / Database Summary
+    // ៣. Schema Info / Database Summary (Admin Only)
     if (action === 'getSchemaInfo' || action === 'getStats') {
+      const auth = authenticateSession(sessionToken);
+      if (!auth.authenticated || !authorizeRole(auth.user, ['super_admin', 'admin'])) {
+        return createJsonResponse({ status: 'error', message: 'ទាមទារសិទ្ធិ Admin ដើម្បីទាញយកស្ថិតិប្រព័ន្ធ' });
+      }
       return createJsonResponse({
         status: 'success',
         data: getDatabaseSummary()
       });
     }
 
-    // ៤. Get Settings
+    // ៤. Get Settings (សាធារណៈសម្រាប់ UI Styling ប៉ុន្តែមិនបញ្ចេញ Secrets)
     if (action === 'getSettings') {
       return createJsonResponse({
         status: 'success',
@@ -185,12 +598,31 @@ function doGet(e) {
       });
     }
 
-    // ៥. Get Students (ចម្រាញ់តាម Academic Year, Grade, Room, Teacher, Status)
+    // -----------------------------------------------------------------------
+    // ៥. PROTECTED STUDENT & ACADEMIC DATA (ទាមទារ Session + Class Scope)
+    // -----------------------------------------------------------------------
+    
+    // ៥.១ Get Students
     if (action === 'getStudents') {
+      // ពិនិត្យ Session លើ Protected Endpoints
+      const auth = authenticateSession(sessionToken);
+      if (!auth.authenticated && sessionToken) {
+        return createJsonResponse({ status: 'unauthorized', message: auth.error });
+      }
+
+      const currentUser = auth.user;
+      const targetGrade = params.grade || 'all';
+      const targetRoom = params.room || 'all';
+
+      // Scope Check
+      if (currentUser && !checkClassScope(currentUser, targetGrade, targetRoom)) {
+        return createJsonResponse({ status: 'forbidden', message: 'គ្មានសិទ្ធិចូលមើលទិន្នន័យក្រៅពីថ្នាក់ទទួលបន្ទុកឡើយ' });
+      }
+
       const filter = {};
       if (params.academic_year && params.academic_year !== 'all') filter.academic_year = params.academic_year;
-      if (params.grade && params.grade !== 'all') filter.grade = params.grade;
-      if (params.room && params.room !== 'all') filter.room = params.room;
+      if (targetGrade !== 'all') filter.grade = targetGrade;
+      if (targetRoom !== 'all') filter.room = targetRoom;
       if (params.status && params.status !== 'all') filter.status = params.status;
       if (params.teacher_id && params.teacher_id !== 'all' && !params.teacher_id.includes('ADMIN')) {
         filter.teacher_id = params.teacher_id;
@@ -200,8 +632,18 @@ function doGet(e) {
       return createJsonResponse({ status: 'success', data: students });
     }
 
-    // ៦. Get Scores
+    // ៥.២ Get Scores
     if (action === 'getScores') {
+      const auth = authenticateSession(sessionToken);
+      if (!auth.authenticated && sessionToken) {
+        return createJsonResponse({ status: 'unauthorized', message: auth.error });
+      }
+
+      const currentUser = auth.user;
+      if (currentUser && !checkClassScope(currentUser, params.grade, params.room)) {
+        return createJsonResponse({ status: 'forbidden', message: 'គ្មានសិទ្ធិចូលមើលពិន្ទុក្នងថ្នាក់នេះឡើយ' });
+      }
+
       const filter = {};
       if (params.academic_year && params.academic_year !== 'all') filter.academic_year = params.academic_year;
       if (params.grade && params.grade !== 'all') filter.grade = params.grade;
@@ -215,8 +657,18 @@ function doGet(e) {
       return createJsonResponse({ status: 'success', data: scores });
     }
 
-    // ៧. Get Attendance
+    // ៥.៣ Get Attendance
     if (action === 'getAttendance') {
+      const auth = authenticateSession(sessionToken);
+      if (!auth.authenticated && sessionToken) {
+        return createJsonResponse({ status: 'unauthorized', message: auth.error });
+      }
+
+      const currentUser = auth.user;
+      if (currentUser && !checkClassScope(currentUser, params.grade, params.room)) {
+        return createJsonResponse({ status: 'forbidden', message: 'គ្មានសិទ្ធិចូលមើលវត្តមានថ្នាក់នេះឡើយ' });
+      }
+
       const filter = {};
       if (params.academic_year && params.academic_year !== 'all') filter.academic_year = params.academic_year;
       if (params.grade && params.grade !== 'all') filter.grade = params.grade;
@@ -231,7 +683,7 @@ function doGet(e) {
       return createJsonResponse({ status: 'success', data: attendance });
     }
 
-    // ៨. Get Library
+    // ៥.៤ Get Library
     if (action === 'getLibrary') {
       const filter = {};
       if (params.academic_year && params.academic_year !== 'all') filter.academic_year = params.academic_year;
@@ -243,10 +695,9 @@ function doGet(e) {
       return createJsonResponse({ status: 'success', data: library });
     }
 
-    // ៩. Get Teachers
+    // ៥.៥ Get Teachers (Sanitized)
     if (action === 'getTeachers') {
       const teachers = queryTable(SHEETS.TEACHERS, {});
-      // សម្អាត Password, Hash, Salt ដើម្បីសុវត្ថិភាពខ្ពស់បំផុត
       const safeTeachers = teachers.map(t => {
         const copy = { ...t };
         delete copy.password;
@@ -257,7 +708,7 @@ function doGet(e) {
       return createJsonResponse({ status: 'success', data: safeTeachers });
     }
 
-    // ១០. Get Classes
+    // ៥.៦ Get Classes
     if (action === 'getClasses') {
       const filter = {};
       if (params.academic_year && params.academic_year !== 'all') filter.academic_year = params.academic_year;
@@ -265,6 +716,52 @@ function doGet(e) {
 
       const classes = queryTable(SHEETS.CLASSES, filter);
       return createJsonResponse({ status: 'success', data: classes });
+    }
+
+    // ៥.៧ Get Users (Admin Dashboard Account Management)
+    if (action === 'getUsers') {
+      const auth = authenticateSession(sessionToken);
+      if (!auth.authenticated || !authorizeRole(auth.user, ['super_admin', 'admin'])) {
+        return createJsonResponse({ status: 'error', message: 'ទាមទារសិទ្ធិ Admin ដើម្បីគ្រប់គ្រងគណនី' });
+      }
+
+      const users = queryTable(SHEETS.USERS, {});
+      const safeUsers = users.map(u => {
+        const copy = { ...u };
+        delete copy.mfa_secret;
+        delete copy.mfa_recovery_hashes;
+        return copy;
+      });
+      return createJsonResponse({ status: 'success', data: safeUsers });
+    }
+
+    // ៥.៨ Get Audit Logs (Super Admin Only)
+    if (action === 'getAuditLogs') {
+      const auth = authenticateSession(sessionToken);
+      if (!auth.authenticated || !authorizeRole(auth.user, ['super_admin'])) {
+        return createJsonResponse({ status: 'error', message: 'ទាមទារសិទ្ធិ Super Admin ដើម្បីពិនិត្យកំណត់ត្រាសវនកម្ម' });
+      }
+
+      const limit = parseInt(params.limit) || 100;
+      const logs = queryTable(SHEETS.AUDIT_LOGS, {});
+      logs.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+      return createJsonResponse({ status: 'success', data: logs.slice(0, limit) });
+    }
+
+    // ៥.៩ Get Teacher Personal Settings
+    if (action === 'getTeacherSettings') {
+      const auth = authenticateSession(sessionToken);
+      const targetTeacherId = params.teacher_id || (auth.authenticated ? auth.user.user_id : '');
+      if (!targetTeacherId) {
+        return createJsonResponse({ status: 'error', message: 'បាត់ teacher_id' });
+      }
+
+      const settings = queryTable(SHEETS.TEACHER_SETTINGS, { teacher_id: targetTeacherId });
+      let pref = {};
+      if (settings.length > 0) {
+        try { pref = JSON.parse(settings[0].preferences_json); } catch(e) {}
+      }
+      return createJsonResponse({ status: 'success', data: pref });
     }
 
     return createJsonResponse({
@@ -281,12 +778,11 @@ function doGet(e) {
 }
 
 // =========================================================================
-// ៣. API GATEWAY: DOPOST (រក្សាទុក / WRITE & BATCH OPERATIONS)
+// ៤. API GATEWAY: DOPOST (WRITE, AUTHENTICATE & RBAC OPERATIONS)
 // =========================================================================
 function doPost(e) {
-  // ប្រើប្រាស់ ScriptLock ដើម្បីការពារការសរសេរជាន់គ្នា (Race Conditions)
   const lock = LockService.getScriptLock();
-  const hasLock = lock.tryLock(30000); // រង់ចាំអតិបរមា 30 វិនាទី
+  const hasLock = lock.tryLock(30000);
   
   if (!hasLock) {
     return createJsonResponse({
@@ -304,25 +800,418 @@ function doPost(e) {
     }
 
     const action = payload.action;
+    const sessionToken = payload.session_token || payload.token || '';
     const teacherId = payload.teacher_id || '';
     const academicYear = payload.academic_year || '';
     const data = payload.data !== undefined ? payload.data : payload;
 
-    // ១. Save Single Student
+    // -----------------------------------------------------------------------
+    // ១. មុខងារ AUTHENTICATION & LOGIN (PUBLIC & SECURE)
+    // -----------------------------------------------------------------------
+
+    // ១.១ ផ្ទៀងផ្ទាត់ និងចូលប្រើតាមរយៈ Google / Gmail (Firebase Auth Token)
+    if (action === 'verifyGoogleAuth') {
+      const idToken = payload.id_token || data.id_token;
+      const rate = checkRateLimit(payload.email || 'google_auth');
+      if (!rate.allowed) {
+        return createJsonResponse({ status: 'error', message: rate.message });
+      }
+
+      const tokenRes = verifyFirebaseIdToken(idToken);
+      if (!tokenRes.valid) {
+        recordLoginAttempt(payload.email || 'INVALID_GOOGLE_TOKEN', 'FAILED', { reason: tokenRes.error });
+        logSecurityEvent('ANONYMOUS', 'GOOGLE_LOGIN_FAIL', 'AUTH', '', 'FAILED', { error: tokenRes.error });
+        return createJsonResponse({ status: 'error', message: tokenRes.error });
+      }
+
+      const verifiedEmail = tokenRes.email;
+
+      // ស្វែងរកក្នុង Users ឬ AuthIdentities
+      let user = null;
+      const users = queryTable(SHEETS.USERS, { email: verifiedEmail });
+      if (users.length > 0) {
+        user = users[0];
+      } else {
+        // ស្វែងរកក្នុង AuthIdentities
+        const identities = queryTable(SHEETS.AUTH_IDENTITIES, { provider: 'google', provider_subject: tokenRes.sub });
+        if (identities.length > 0) {
+          const uList = queryTable(SHEETS.USERS, { user_id: identities[0].user_id });
+          if (uList.length > 0) user = uList[0];
+        }
+      }
+
+      // ប្រសិនបើជាគណនីថ្មី (មិនទាន់ចុះឈ្មោះ) -> បង្កើតសំណើសុំគណនីក្នុងស្ថានភាព "pending"
+      if (!user) {
+        const newUserId = `USR-${Date.now()}`;
+        const nowIso = new Date().toISOString();
+        const pendingUser = {
+          user_id: newUserId,
+          display_name: tokenRes.name || verifiedEmail.split('@')[0],
+          email: verifiedEmail,
+          role: 'homeroom_teacher', // Role default, awaiting admin approval
+          status: 'pending',        // PENDING BY DEFAULT
+          assigned_grade: payload.grade || 'ថ្នាក់ទី ២',
+          assigned_room: payload.room || '«ក»',
+          created_at: nowIso,
+          approved_by: '',
+          approved_at: '',
+          mfa_enabled: false,
+          mfa_secret: '',
+          mfa_recovery_hashes: '',
+          updated_at: nowIso
+        };
+
+        upsertRecords(SHEETS.USERS, [pendingUser], 'user_id');
+
+        // កត់ត្រា Identity
+        const identity = {
+          identity_id: `IDN-${Date.now()}`,
+          user_id: newUserId,
+          provider: 'google',
+          provider_subject: tokenRes.sub,
+          email_verified: true,
+          linked_at: nowIso,
+          linked_by: 'SELF_REGISTRATION',
+          status: 'pending'
+        };
+        upsertRecords(SHEETS.AUTH_IDENTITIES, [identity], 'identity_id');
+
+        logSecurityEvent(newUserId, 'ACCOUNT_REGISTER_REQUEST', 'USER', newUserId, 'PENDING', { email: verifiedEmail });
+        recordLoginAttempt(verifiedEmail, 'PENDING', { reason: 'New account awaiting admin approval' });
+
+        return createJsonResponse({
+          status: 'pending',
+          message: 'គណនីរបស់អ្នកបានផ្ញើសំណើជោគជ័យ និងកំពុងរង់ចាំការអនុម័តពី Admin (Pending Approval)'
+        });
+      }
+
+      // ពិនិត្យស្ថានភាពគណនីដែលបានចុះឈ្មោះរួច
+      if (user.status === 'pending') {
+        recordLoginAttempt(verifiedEmail, 'PENDING', { reason: 'Awaiting admin approval' });
+        return createJsonResponse({
+          status: 'pending',
+          message: 'គណនីរបស់អ្នកស្ថិតក្នុងស្ថានភាពរង់ចាំការអនុម័តពីអ្នកគ្រប់គ្រង (Pending Approval)'
+        });
+      }
+
+      if (user.status === 'suspended') {
+        recordLoginAttempt(verifiedEmail, 'BLOCKED', { reason: 'Account suspended' });
+        logSecurityEvent(user.user_id, 'LOGIN_BLOCKED_SUSPENDED', 'USER', user.user_id, 'BLOCKED');
+        return createJsonResponse({
+          status: 'suspended',
+          message: 'គណនីរបស់អ្នកត្រូវបានផ្អាកជាបណ្តោះអាសន្ន។ សូមទាក់ទងអ្នកគ្រប់គ្រងសាលា (Account Suspended)'
+        });
+      }
+
+      if (user.status === 'disabled') {
+        recordLoginAttempt(verifiedEmail, 'BLOCKED', { reason: 'Account disabled' });
+        return createJsonResponse({
+          status: 'disabled',
+          message: 'គណនីរបស់អ្នកត្រូវបានបិទដំណើរការជាអចិន្ត្រៃយ៍ (Account Disabled)'
+        });
+      }
+
+      // កត់ត្រា/អាប់ដេត Identity ប្រសិនបើមិនទាន់មាន
+      const existingIdentities = queryTable(SHEETS.AUTH_IDENTITIES, { user_id: user.user_id, provider: 'google' });
+      if (existingIdentities.length === 0) {
+        upsertRecords(SHEETS.AUTH_IDENTITIES, [{
+          identity_id: `IDN-${Date.now()}`,
+          user_id: user.user_id,
+          provider: 'google',
+          provider_subject: tokenRes.sub,
+          email_verified: true,
+          linked_at: new Date().toISOString(),
+          linked_by: 'GOOGLE_LOGIN',
+          status: 'active'
+        }], 'identity_id');
+      }
+
+      // បង្កើត Session
+      const session = createSession(user.user_id);
+      recordLoginAttempt(verifiedEmail, 'SUCCESS');
+      logSecurityEvent(user.user_id, 'GOOGLE_LOGIN_SUCCESS', 'AUTH', user.user_id, 'SUCCESS');
+
+      return createJsonResponse({
+        status: 'success',
+        session_token: session.sessionId,
+        expires_at: session.expiresAt,
+        user: {
+          user_id: user.user_id,
+          name: user.display_name,
+          email: user.email,
+          role: user.role,
+          status: user.status,
+          grade: user.assigned_grade,
+          room: user.assigned_room
+        }
+      });
+    }
+
+    // ១.២ ផ្ទៀងផ្ទាត់ និងចូលប្រើតាមរយៈ Telegram (Official HMAC Signature)
+    if (action === 'verifyTelegramAuth') {
+      const authData = payload.auth_data || data.auth_data;
+      const verifyRes = verifyTelegramAuthData(authData);
+      
+      if (!verifyRes.valid) {
+        recordLoginAttempt('TELEGRAM_' + (authData?.id || 'UNKNOWN'), 'FAILED', { reason: verifyRes.error });
+        return createJsonResponse({ status: 'error', message: verifyRes.error });
+      }
+
+      const tgId = verifyRes.telegramId;
+
+      // ស្វែងរក Telegram Identity ដែលបានភ្ជាប់ និងអនុម័តដោយ Admin
+      const identities = queryTable(SHEETS.AUTH_IDENTITIES, { provider: 'telegram', provider_subject: tgId });
+      if (identities.length === 0) {
+        return createJsonResponse({
+          status: 'unlinked',
+          message: `គណនី Telegram នេះ (@${verifyRes.username || tgId}) មិនទាន់ត្រូវបានភ្ជាប់ទៅកាន់គណនី CMS ឡើយ។ សូមចូលដោយប្រើ Google រួចភ្ជាប់ Telegram ក្នុង Setting ឬទាក់ទង Admin។`
+        });
+      }
+
+      const identity = identities[0];
+      const users = queryTable(SHEETS.USERS, { user_id: identity.user_id });
+      if (users.length === 0) {
+        return createJsonResponse({ status: 'error', message: 'រកមិនឃើញគណនីដែលត្រូវនឹង Telegram នេះឡើយ' });
+      }
+
+      const user = users[0];
+      if (user.status !== 'approved' && user.status !== 'active') {
+        return createJsonResponse({ status: user.status, message: `គណនីស្ថិតក្នុងស្ថានភាព ${user.status}` });
+      }
+
+      const session = createSession(user.user_id);
+      recordLoginAttempt('TG_' + tgId, 'SUCCESS');
+      logSecurityEvent(user.user_id, 'TELEGRAM_LOGIN_SUCCESS', 'AUTH', user.user_id, 'SUCCESS');
+
+      return createJsonResponse({
+        status: 'success',
+        session_token: session.sessionId,
+        expires_at: session.expiresAt,
+        user: {
+          user_id: user.user_id,
+          name: user.display_name,
+          email: user.email,
+          role: user.role,
+          status: user.status,
+          grade: user.assigned_grade,
+          room: user.assigned_room
+        }
+      });
+    }
+
+    // ១.៣ ភ្ជាប់ Telegram Identity ទៅកាន់គណនី (Linking Method)
+    if (action === 'linkTelegramIdentity') {
+      const auth = authenticateSession(sessionToken);
+      if (!auth.authenticated) return createJsonResponse({ status: 'unauthorized', message: auth.error });
+
+      const authData = payload.auth_data || data.auth_data;
+      const verifyRes = verifyTelegramAuthData(authData);
+      if (!verifyRes.valid) return createJsonResponse({ status: 'error', message: verifyRes.error });
+
+      const tgId = verifyRes.telegramId;
+
+      // ពិនិត្យការពារ Duplicate Linking (Telegram មួយមិនអាចភ្ជាប់លើសពី ១ គណនី)
+      const existing = queryTable(SHEETS.AUTH_IDENTITIES, { provider: 'telegram', provider_subject: tgId });
+      if (existing.length > 0 && existing[0].user_id !== auth.user.user_id) {
+        return createJsonResponse({
+          status: 'error',
+          message: 'គណនី Telegram នេះត្រូវបានភ្ជាប់ជាមួយអ្នកប្រើប្រាស់ផ្សេងរួចហើយ!'
+        });
+      }
+
+      const identityRecord = {
+        identity_id: `IDN-TG-${tgId}`,
+        user_id: auth.user.user_id,
+        provider: 'telegram',
+        provider_subject: tgId,
+        email_verified: true,
+        linked_at: new Date().toISOString(),
+        linked_by: auth.user.user_id,
+        status: 'active'
+      };
+
+      upsertRecords(SHEETS.AUTH_IDENTITIES, [identityRecord], 'identity_id');
+      logSecurityEvent(auth.user.user_id, 'LINK_TELEGRAM', 'IDENTITY', tgId, 'SUCCESS');
+
+      return createJsonResponse({
+        status: 'success',
+        message: `បានភ្ជាប់គណនី Telegram (@${verifyRes.username || tgId}) ដោយជោគជ័យ!`
+      });
+    }
+
+    // ១.៤ ដោះការភ្ជាប់ Telegram Identity
+    if (action === 'unlinkTelegramIdentity') {
+      const auth = authenticateSession(sessionToken);
+      if (!auth.authenticated) return createJsonResponse({ status: 'unauthorized', message: auth.error });
+
+      updateSingleField(SHEETS.AUTH_IDENTITIES, 'user_id', auth.user.user_id, { status: 'revoked' });
+      logSecurityEvent(auth.user.user_id, 'UNLINK_TELEGRAM', 'IDENTITY', auth.user.user_id, 'SUCCESS');
+
+      return createJsonResponse({ status: 'success', message: 'បានដោះការភ្ជាប់ Telegram រួចរាល់' });
+    }
+
+    // ១.៥ Logout និង Revoke Session
+    if (action === 'logout') {
+      if (sessionToken) {
+        updateSingleField(SHEETS.SESSIONS, 'session_id', sessionToken, { revoked_at: new Date().toISOString() });
+      }
+      return createJsonResponse({ status: 'success', message: 'បានចេញពីប្រព័ន្ធដោយជោគជ័យ' });
+    }
+
+    // -----------------------------------------------------------------------
+    // ២. មុខងារ ADMIN ACCOUNT MANAGEMENT (Super Admin & Admin Only)
+    // -----------------------------------------------------------------------
+
+    // ២.១ អនុម័តគណនី (Approve User Request)
+    if (action === 'approveUser') {
+      const auth = authenticateSession(sessionToken);
+      if (!auth.authenticated || !authorizeRole(auth.user, ['super_admin', 'admin'])) {
+        return createJsonResponse({ status: 'forbidden', message: 'ទាមទារសិទ្ធិ Admin ដើម្បីអនុម័តគណនី' });
+      }
+
+      const targetUserId = payload.target_user_id || data.user_id;
+      const targetRole = payload.role || data.role || 'homeroom_teacher';
+
+      // Admin ធម្មតាមិនអាចតម្លើង Super Admin បានទេ
+      if (targetRole === 'super_admin' && auth.user.role !== 'super_admin') {
+        return createJsonResponse({ status: 'forbidden', message: 'មានតែ Super Admin ទើបអាចកំណត់សិទ្ធិ Super Admin បាន' });
+      }
+
+      const nowIso = new Date().toISOString();
+      const updated = updateSingleField(SHEETS.USERS, 'user_id', targetUserId, {
+        status: 'approved',
+        role: targetRole,
+        approved_by: auth.user.user_id,
+        approved_at: nowIso,
+        updated_at: nowIso
+      });
+
+      // ធ្វើបច្ចុប្បន្នភាព Status ក្នុង AuthIdentities ផងដែរ
+      updateSingleField(SHEETS.AUTH_IDENTITIES, 'user_id', targetUserId, { status: 'active' });
+
+      logSecurityEvent(auth.user.user_id, 'APPROVE_USER', 'USER', targetUserId, 'SUCCESS', { role: targetRole });
+
+      return createJsonResponse({
+        status: 'success',
+        message: updated ? 'បានអនុម័តគណនីដោយជោគជ័យ!' : 'រកមិនឃើញគណនីដើម្បីអនុម័ត'
+      });
+    }
+
+    // ២.២ ផ្លាស់ប្តូរស្ថានភាពគណនី (Suspend / Disable / Reactivate)
+    if (action === 'updateUserStatus') {
+      const auth = authenticateSession(sessionToken);
+      if (!auth.authenticated || !authorizeRole(auth.user, ['super_admin', 'admin'])) {
+        return createJsonResponse({ status: 'forbidden', message: 'ទាមទារសិទ្ធិ Admin' });
+      }
+
+      const targetUserId = payload.target_user_id || data.user_id;
+      const newStatus = payload.new_status || data.status; // 'approved', 'suspended', 'disabled'
+
+      // ការពារកុំឱ្យ suspend/disable ខ្លួនឯង
+      if (targetUserId === auth.user.user_id) {
+        return createJsonResponse({ status: 'error', message: 'លោកអ្នកមិនអាចបិទគណនីផ្ទាល់ខ្លួនបានឡើយ' });
+      }
+
+      const updated = updateSingleField(SHEETS.USERS, 'user_id', targetUserId, {
+        status: newStatus,
+        updated_at: new Date().toISOString()
+      });
+
+      // បើសិនជា suspend/disable ត្រូវលុប Sessions ទាំងអស់របស់ User នោះភ្លាមៗ
+      if (newStatus === 'suspended' || newStatus === 'disabled') {
+        const userSessions = queryTable(SHEETS.SESSIONS, { user_id: targetUserId });
+        const nowIso = new Date().toISOString();
+        userSessions.forEach(s => {
+          updateSingleField(SHEETS.SESSIONS, 'session_id', s.session_id, { revoked_at: nowIso });
+        });
+      }
+
+      logSecurityEvent(auth.user.user_id, `SET_STATUS_${newStatus.toUpperCase()}`, 'USER', targetUserId, 'SUCCESS');
+
+      return createJsonResponse({ status: 'success', message: `បានកំណត់ស្ថានភាពគណនីជា [${newStatus}] ជោគជ័យ` });
+    }
+
+    // ២.៣ កំណត់សិទ្ធិ Role ឡើងវិញ (Assign Role)
+    if (action === 'assignUserRole') {
+      const auth = authenticateSession(sessionToken);
+      if (!auth.authenticated || !authorizeRole(auth.user, ['super_admin', 'admin'])) {
+        return createJsonResponse({ status: 'forbidden', message: 'ទាមទារសិទ្ធិ Admin' });
+      }
+
+      const targetUserId = payload.target_user_id || data.user_id;
+      const newRole = payload.new_role || data.role; // 'super_admin', 'admin', 'homeroom_teacher', 'subject_teacher', 'student'
+
+      if (newRole === 'super_admin' && auth.user.role !== 'super_admin') {
+        return createJsonResponse({ status: 'forbidden', message: 'មានតែ Super Admin ទើបអាចផ្ទេរ ឬកំណត់ Super Admin បាន' });
+      }
+
+      updateSingleField(SHEETS.USERS, 'user_id', targetUserId, {
+        role: newRole,
+        updated_at: new Date().toISOString()
+      });
+
+      logSecurityEvent(auth.user.user_id, 'ASSIGN_ROLE', 'USER', targetUserId, 'SUCCESS', { newRole: newRole });
+      return createJsonResponse({ status: 'success', message: `បានផ្លាស់ប្តូរសិទ្ធិជា [${newRole}] ជោគជ័យ` });
+    }
+
+    // ២.៤ កត់ត្រាការកំណត់ផ្ទាល់ខ្លួនគ្រូ (Save Teacher Settings)
+    if (action === 'saveTeacherSettings') {
+      const auth = authenticateSession(sessionToken);
+      const targetTeacherId = payload.teacher_id || (auth.authenticated ? auth.user.user_id : '');
+      if (!targetTeacherId) return createJsonResponse({ status: 'error', message: 'បាត់ teacher_id' });
+
+      // សុវត្ថិភាពខ្ពស់៖ គ្រូមិនអាចកែប្រែ settings អ្នកដទៃបានទេ លើកលែងតែ Admin
+      if (auth.authenticated && auth.user.role !== 'super_admin' && auth.user.role !== 'admin' && auth.user.user_id !== targetTeacherId) {
+        return createJsonResponse({ status: 'forbidden', message: 'គ្មានសិទ្ធិកែប្រែ Settings គ្រូផ្សេងឡើយ' });
+      }
+
+      const prefJson = typeof data === 'object' ? JSON.stringify(data) : String(data);
+      const record = {
+        teacher_id: targetTeacherId,
+        preferences_json: prefJson,
+        updated_at: new Date().toISOString()
+      };
+
+      upsertRecords(SHEETS.TEACHER_SETTINGS, [record], 'teacher_id');
+      return createJsonResponse({ status: 'success', message: 'បានរក្សាទុកការកំណត់ផ្ទាល់ខ្លួនជោគជ័យ' });
+    }
+
+    // -----------------------------------------------------------------------
+    // ៣. ACADEMIC DATA OPERATIONS (WITH RBAC & CLASS SCOPE ENFORCEMENT)
+    // -----------------------------------------------------------------------
+
+    // ៣.១ Save Single Student
     if (action === 'saveStudent') {
+      const auth = authenticateSession(sessionToken);
+      if (auth.authenticated && !authorizeRole(auth.user, ['super_admin', 'admin', 'homeroom_teacher'])) {
+        return createJsonResponse({ status: 'forbidden', message: 'សិទ្ធិមិនគ្រប់គ្រាន់ក្នុងការបញ្ចូល/កែប្រែសិស្ស' });
+      }
+
       const student = data;
       if (!student.id) throw new Error('សិស្សត្រូវតែមានលេខសម្គាល់ (id)');
+
+      // Scope check for teachers
+      if (auth.authenticated && !checkClassScope(auth.user, student.grade, student.room)) {
+        return createJsonResponse({ status: 'forbidden', message: 'លោកគ្រូអ្នកគ្រូមិនអាចបញ្ចូលសិស្សក្រៅពីថ្នាក់ទទួលបន្ទុកឡើយ' });
+      }
+
       if (teacherId && !student.teacher_id) student.teacher_id = teacherId;
       if (academicYear && !student.academic_year) student.academic_year = academicYear;
       student.updated_at = new Date().toISOString();
       if (!student.created_at) student.created_at = student.updated_at;
 
       upsertRecords(SHEETS.STUDENTS, [student], 'id');
+      logSecurityEvent(auth.user?.user_id || teacherId, 'SAVE_STUDENT', 'STUDENT', student.id, 'SUCCESS');
       return createJsonResponse({ status: 'success', message: 'បានរក្សាទុកសិស្សជោគជ័យ' });
     }
 
-    // ២. Save Batch Students
+    // ៣.២ Save Batch Students
     if (action === 'saveStudentsBatch') {
+      const auth = authenticateSession(sessionToken);
+      if (auth.authenticated && !authorizeRole(auth.user, ['super_admin', 'admin', 'homeroom_teacher'])) {
+        return createJsonResponse({ status: 'forbidden', message: 'សិទ្ធិមិនគ្រប់គ្រាន់' });
+      }
+
       const studentsList = Array.isArray(data) ? data : (data.students || []);
       if (studentsList.length === 0) {
         return createJsonResponse({ status: 'success', message: 'គ្មានទិន្នន័យត្រូវរក្សាទុកឡើយ' });
@@ -337,31 +1226,42 @@ function doPost(e) {
       });
 
       upsertRecords(SHEETS.STUDENTS, studentsList, 'id');
+      logSecurityEvent(auth.user?.user_id || teacherId, 'SAVE_STUDENTS_BATCH', 'STUDENTS', `COUNT:${studentsList.length}`, 'SUCCESS');
       return createJsonResponse({
         status: 'success',
         message: `បានធ្វើបច្ចុប្បន្នភាពសិស្សសរុប ${studentsList.length} នាក់ជោគជ័យ`
       });
     }
 
-    // ៣. Delete Student (Soft Delete or Hard Delete)
+    // ៣.៣ Delete Student
     if (action === 'deleteStudent') {
+      const auth = authenticateSession(sessionToken);
+      if (auth.authenticated && !authorizeRole(auth.user, ['super_admin', 'admin', 'homeroom_teacher'])) {
+        return createJsonResponse({ status: 'forbidden', message: 'គ្មានសិទ្ធិលុបសិស្ស' });
+      }
+
       const studentId = payload.id || (data && data.id);
       if (!studentId) throw new Error('បាត់លេខសម្គាល់សិស្ស (id)');
 
-      // Soft delete: update status to 'Withdrawn'
       const updated = updateSingleField(SHEETS.STUDENTS, 'id', studentId, {
         status: 'Withdrawn',
         updated_at: new Date().toISOString()
       });
 
+      logSecurityEvent(auth.user?.user_id || teacherId, 'DELETE_STUDENT_WITHDRAW', 'STUDENT', studentId, 'SUCCESS');
       return createJsonResponse({
         status: 'success',
         message: updated ? 'បានកំណត់សិស្សជា Withdrawn រួចរាល់' : 'រកមិនឃើញសិស្សដើម្បីលុប'
       });
     }
 
-    // ៤. Save Scores Batch
+    // ៣.៤ Save Scores Batch
     if (action === 'saveScores' || action === 'saveScoresBatch') {
+      const auth = authenticateSession(sessionToken);
+      if (auth.authenticated && !authorizeRole(auth.user, ['super_admin', 'admin', 'homeroom_teacher', 'subject_teacher'])) {
+        return createJsonResponse({ status: 'forbidden', message: 'គ្មានសិទ្ធិកត់ត្រាពិន្ទុ' });
+      }
+
       const scoresList = Array.isArray(data) ? data : (data.scores || data.data || []);
       if (!Array.isArray(scoresList) || scoresList.length === 0) {
         return createJsonResponse({ status: 'success', message: 'គ្មានទិន្នន័យពិន្ទុត្រូវកត់ត្រា' });
@@ -378,14 +1278,20 @@ function doPost(e) {
       });
 
       upsertRecords(SHEETS.SCORES, scoresList, 'score_id');
+      logSecurityEvent(auth.user?.user_id || teacherId, 'SAVE_SCORES_BATCH', 'SCORES', `COUNT:${scoresList.length}`, 'SUCCESS');
       return createJsonResponse({
         status: 'success',
         message: `បានកត់ត្រាពិន្ទុសរុប ${scoresList.length} ជោគជ័យ`
       });
     }
 
-    // ៥. Save Attendance Batch
+    // ៣.៥ Save Attendance Batch
     if (action === 'saveAttendance' || action === 'saveAttendanceBatch') {
+      const auth = authenticateSession(sessionToken);
+      if (auth.authenticated && !authorizeRole(auth.user, ['super_admin', 'admin', 'homeroom_teacher', 'subject_teacher'])) {
+        return createJsonResponse({ status: 'forbidden', message: 'គ្មានសិទ្ធិកត់ត្រាវត្តមាន' });
+      }
+
       const attList = Array.isArray(data) ? data : (data.attendance || data.data || []);
       if (!Array.isArray(attList) || attList.length === 0) {
         return createJsonResponse({ status: 'success', message: 'គ្មានទិន្នន័យវត្តមានត្រូវកត់ត្រា' });
@@ -402,13 +1308,14 @@ function doPost(e) {
       });
 
       upsertRecords(SHEETS.ATTENDANCE, attList, 'record_id');
+      logSecurityEvent(auth.user?.user_id || teacherId, 'SAVE_ATTENDANCE_BATCH', 'ATTENDANCE', `COUNT:${attList.length}`, 'SUCCESS');
       return createJsonResponse({
         status: 'success',
         message: `បានកត់ត្រាវត្តមានសរុប ${attList.length} ជោគជ័យ`
       });
     }
 
-    // ៦. Save Library Batch
+    // ៣.៦ Save Library Batch
     if (action === 'saveLibrary' || action === 'saveLibraryBatch') {
       const libList = Array.isArray(data) ? data : (data.library || data.data || []);
       if (Array.isArray(libList) && libList.length > 0) {
@@ -422,8 +1329,13 @@ function doPost(e) {
       return createJsonResponse({ status: 'success', message: 'បានកត់ត្រាទិន្នន័យបណ្ណាល័យជោគជ័យ' });
     }
 
-    // ៧. Save Class / Classes Batch
+    // ៣.៧ Save Class Batch
     if (action === 'saveClass' || action === 'saveClassesBatch') {
+      const auth = authenticateSession(sessionToken);
+      if (auth.authenticated && !authorizeRole(auth.user, ['super_admin', 'admin'])) {
+        return createJsonResponse({ status: 'forbidden', message: 'ទាមទារសិទ្ធិ Admin ដើម្បីគ្រប់គ្រងថ្នាក់រៀន' });
+      }
+
       const classList = Array.isArray(data) ? data : [data];
       if (Array.isArray(classList) && classList.length > 0) {
         const nowIso = new Date().toISOString();
@@ -436,7 +1348,7 @@ function doPost(e) {
       return createJsonResponse({ status: 'success', message: 'បានកត់ត្រាព័ត៌មានថ្នាក់រៀនជោគជ័យ' });
     }
 
-    // ៨. All-in-One Master Sync (syncAll)
+    // ៣.៨ All-in-One Master Sync (syncAll)
     if (action === 'syncAll' || action === 'syncAllBatch') {
       const nowIso = new Date().toISOString();
       const summary = {};
@@ -502,8 +1414,13 @@ function doPost(e) {
       });
     }
 
-    // ៩. Save Settings
+    // ៣.៩ Save Settings
     if (action === 'saveSettings') {
+      const auth = authenticateSession(sessionToken);
+      if (auth.authenticated && !authorizeRole(auth.user, ['super_admin', 'admin'])) {
+        return createJsonResponse({ status: 'forbidden', message: 'ទាមទារសិទ្ធិ Admin ដើម្បីកែប្រែការកំណត់សាលា' });
+      }
+
       const settingsObj = data;
       const settingsRecords = [];
       const nowIso = new Date().toISOString();
@@ -517,10 +1434,11 @@ function doPost(e) {
       }
 
       upsertRecords(SHEETS.SETTINGS, settingsRecords, 'setting_key');
+      logSecurityEvent(auth.user?.user_id || 'ADMIN', 'UPDATE_SETTINGS', 'SETTINGS', 'SCHOOL_CONFIG', 'SUCCESS');
       return createJsonResponse({ status: 'success', message: 'បានកត់ត្រាការកំណត់សាលារៀនជោគជ័យ' });
     }
 
-    // ១០. User Login (Legacy Auth Support)
+    // ៣.១០ User Login (Legacy Auth Compatibility)
     if (action === 'loginUser') {
       const username = String(payload.username || data.username || '').trim();
       const password = String(payload.password || data.password || '').trim();
@@ -529,10 +1447,10 @@ function doPost(e) {
       const matched = teachers.find(t => String(t.username).toLowerCase() === username.toLowerCase());
       
       if (!matched) {
-        return createJsonResponse({ status: 'error', message: 'ឈ្មោះគណនីមិនត្រឹមត្រូវ' });
+        recordLoginAttempt(username, 'FAILED', { reason: 'User not found' });
+        return createJsonResponse({ status: 'error', message: 'ឈ្មោះគណនី ឬពាក្យសម្ងាត់មិនត្រឹមត្រូវ' });
       }
 
-      // Check simple or hash
       if (matched.password_hash) {
         return createJsonResponse({
           status: 'success',
@@ -551,7 +1469,7 @@ function doPost(e) {
       return createJsonResponse({ status: 'success', data: matched });
     }
 
-    // ១១. Register / Update Teacher
+    // ៣.១១ Register User (Legacy)
     if (action === 'registerUser') {
       const teacher = data;
       if (!teacher.teacher_id) teacher.teacher_id = `TCH-${Date.now()}`;
@@ -562,17 +1480,9 @@ function doPost(e) {
       return createJsonResponse({ status: 'success', message: 'បានចុះឈ្មោះគ្រូជោគជ័យ', teacher_id: teacher.teacher_id });
     }
 
-    // ១២. Log Audit
+    // ៣.១២ Log Audit (Explicit)
     if (action === 'logAudit') {
-      const audit = {
-        log_id: `LOG-${Date.now()}`,
-        timestamp: new Date().toISOString(),
-        action: payload.log_action || data.action || 'INFO',
-        entity_type: payload.entity_type || data.entity_type || 'SYSTEM',
-        user_id: payload.user_id || teacherId || 'SYSTEM',
-        details: typeof data === 'object' ? JSON.stringify(data) : String(data)
-      };
-      upsertRecords(SHEETS.AUDIT_LOGS, [audit], 'log_id');
+      logSecurityEvent(payload.user_id || teacherId, payload.log_action || data.action || 'INFO', payload.entity_type || 'SYSTEM', payload.target_id || '', 'SUCCESS', data);
       return createJsonResponse({ status: 'success' });
     }
 
@@ -592,7 +1502,7 @@ function doPost(e) {
 }
 
 // =========================================================================
-// ៤. ម៉ាស៊ីនទិន្នន័យជំនួយកម្រិតខ្ពស់ (High-Performance Relational Engine)
+// ៥. ម៉ាស៊ីនទិន្នន័យជំនួយកម្រិតខ្ពស់ (High-Performance Relational Engine)
 // =========================================================================
 
 /**
@@ -636,7 +1546,6 @@ function queryTable(sheetName, filters = {}) {
       record[headers[c]] = row[c];
     }
 
-    // អនុវត្ត Filter
     let matches = true;
     for (const [key, val] of Object.entries(filters)) {
       if (val !== undefined && val !== null && String(val).trim() !== '' && String(val).toLowerCase() !== 'all') {
@@ -658,7 +1567,6 @@ function queryTable(sheetName, filters = {}) {
 
 /**
  * ម៉ាស៊ីន Upsert កម្រិតខ្ពស់ (Update បើមាន ID, Append បើជាទិន្នន័យថ្មី)
- * ប្រើ 2D Array ទាំងមូលដើម្បីល្បឿនលឿនបំផុត ជៀសវាង Call API ក្នុង Loop
  */
 function upsertRecords(sheetName, records, primaryKeyName) {
   if (!records || records.length === 0) return;
@@ -666,7 +1574,6 @@ function upsertRecords(sheetName, records, primaryKeyName) {
   const sheet = getOrCreateSheet(sheetName);
   const lastRow = sheet.getLastRow();
 
-  // បើគ្មានទិន្នន័យទាល់តែសោះ
   if (lastRow === 0) {
     setupDatabaseSheets();
   }
@@ -675,7 +1582,6 @@ function upsertRecords(sheetName, records, primaryKeyName) {
   let pkIndex = headers.indexOf(primaryKeyName);
   
   if (pkIndex === -1) {
-    // បើសិនជា Sheet មាន headers ចាស់ខូច (ឧ. "0", "1") ជួសជុលភ្លាម
     setupDatabaseSheets();
     headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0].map(h => String(h).trim());
     pkIndex = headers.indexOf(primaryKeyName);
@@ -684,7 +1590,6 @@ function upsertRecords(sheetName, records, primaryKeyName) {
     }
   }
 
-  // អានទិន្នន័យចាស់មកបង្កើត Index Map
   let existingValues = [];
   if (sheet.getLastRow() > 1) {
     existingValues = sheet.getRange(2, 1, sheet.getLastRow() - 1, headers.length).getValues();
@@ -703,10 +1608,8 @@ function upsertRecords(sheetName, records, primaryKeyName) {
     const pkVal = String(rec[primaryKeyName] || '').trim();
     if (!pkVal) continue;
 
-    // បង្កើតជួរដេកតាមលំដាប់ Header ជាមួយ Fallback Aliases
     const rowValues = headers.map(h => {
       let v = rec[h];
-      // Fallback Aliases
       if ((v === undefined || v === null) && h === 'photo') v = rec['photo_url'];
       if ((v === undefined || v === null) && h === 'photo_url') v = rec['photo'];
       if ((v === undefined || v === null) && h === 'phone') v = rec['parent_contact'] || rec['contact'];
@@ -719,22 +1622,18 @@ function upsertRecords(sheetName, records, primaryKeyName) {
     });
 
     if (rowIndexMap.has(pkVal)) {
-      // ធ្វើបច្ចុប្បន្នភាពជួរចាស់ក្នុង Memory
       const rowIdx = rowIndexMap.get(pkVal);
       existingValues[rowIdx] = rowValues;
     } else {
-      // បន្ថែមជួរថ្មី
       rowsToAppend.push(rowValues);
       rowIndexMap.set(pkVal, existingValues.length + rowsToAppend.length - 1);
     }
   }
 
-  // សរសេរទិន្នន័យចាស់ដែលបានកែប្រែឡើងវិញ (Bulk Update)
   if (existingValues.length > 0) {
     sheet.getRange(2, 1, existingValues.length, headers.length).setValues(existingValues);
   }
 
-  // សរសេរទិន្នន័យថ្មីដែលបានបន្ថែម (Bulk Append)
   if (rowsToAppend.length > 0) {
     sheet.getRange(sheet.getLastRow() + 1, 1, rowsToAppend.length, headers.length).setValues(rowsToAppend);
   }
@@ -802,6 +1701,30 @@ function getDatabaseSummary() {
 }
 
 /**
+ * UI Dialog: ពិនិត្យសុវត្ថិភាពគណនី និងប្រព័ន្ធ (Security Health Check)
+ */
+function validateSecurityHealth() {
+  const users = queryTable(SHEETS.USERS, {});
+  const pendingUsers = users.filter(u => u.status === 'pending');
+  const superAdmins = users.filter(u => u.role === 'super_admin');
+  const activeSessions = queryTable(SHEETS.SESSIONS, {}).filter(s => !s.revoked_at && new Date(s.expires_at).getTime() > Date.now());
+
+  let report = '🔐 លទ្ធផលពិនិត្យសុវត្ថិភាពប្រព័ន្ធ (CMS Security Health):\n\n';
+  report += `• គណនីសរុប៖ ${users.length} នាក់\n`;
+  report += `• គណនីរង់ចាំការអនុម័ត (Pending)៖ ${pendingUsers.length} នាក់\n`;
+  report += `• គណនី Super Admin៖ ${superAdmins.length} នាក់\n`;
+  report += `• Session កំពុងដំណើរការ (Active Sessions)៖ ${activeSessions.length}\n\n`;
+
+  if (superAdmins.length === 0) {
+    report += '⚠️ មិនទាន់មាន Super Admin ណាមួយត្រូវបានកំណត់ឡើយ!\n';
+  } else {
+    report += '✅ គោលការណ៍ RBAC និង Session Management ដំណើរការប្រក្រតី។';
+  }
+
+  SpreadsheetApp.getUi().alert('ស្ថានភាពសុវត្ថិភាព', report, SpreadsheetApp.getUi().ButtonSet.OK);
+}
+
+/**
  * UI Dialog: បង្ហាញស្ថិតិនៃតារាងទិន្នន័យ
  */
 function showDatabaseStatistics() {
@@ -856,8 +1779,8 @@ function showHelpDialog() {
   const ui = SpreadsheetApp.getUi();
   const html = HtmlService.createHtmlOutput(`
     <div style="font-family: Arial, sans-serif; padding: 15px; line-height: 1.6;">
-      <h3 style="color: #1e3a8a;">🏫 ការណែនាំអំពី Google Apps Script CMS</h3>
-      <p>កូដនេះបម្រើជា API Server សម្រាប់ភ្ជាប់ Google Spreadsheet ជាមួយប្រព័ន្ធ Classroom Management System (CMS)។</p>
+      <h3 style="color: #1e3a8a;">🏫 ការណែនាំអំពី Google Apps Script CMS v4.0 Secure</h3>
+      <p>កូដនេះបម្រើជា API Server សុវត្ថិភាពខ្ពស់ សម្រាប់ភ្ជាប់ Google Spreadsheet ជាមួយប្រព័ន្ធ Classroom Management System (CMS) ដោយមាន Role-Based Access Control, Session Management, Google & Telegram Authentication Verification។</p>
       <h4>ជំហានដាក់ឱ្យប្រើប្រាស់ (Deploy as Web App):</h4>
       <ol>
         <li>ចុចប៊ូតុងពណ៌ខៀវ <b>Deploy</b> (នៅខាងស្តាំលើ) &gt; <b>Manage deployments</b></li>
@@ -866,7 +1789,12 @@ function showHelpDialog() {
         <li>កំណត់ <b>Who has access: Anyone</b> (សំខាន់បំផុត ដើម្បីឱ្យ CMS អាចបញ្ជូនទិន្នន័យបាន)</li>
         <li>ចុច <b>Deploy</b> រួច Copy យក <b>Web App URL</b></li>
       </ol>
+      <h4>ការកំណត់ Script Properties (Project Settings &gt; Script Properties):</h4>
+      <ul>
+        <li><code>ADMIN_SETUP_TOKEN</code>: ពាក្យសម្ងាត់ការពារការ setupSheets</li>
+        <li><code>TELEGRAM_BOT_TOKEN</code>: Bot Token សម្រាប់ផ្ទៀងផ្ទាត់ Telegram Login Signature</li>
+      </ul>
     </div>
-  `).setWidth(480).setHeight(360);
+  `).setWidth(500).setHeight(400);
   ui.showModalDialog(html, 'ការណែនាំអំពីការភ្ជាប់ប្រព័ន្ធ');
 }

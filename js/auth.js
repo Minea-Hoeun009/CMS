@@ -1161,20 +1161,33 @@ window.renderAccountModal = function() {
                             <input type="password" id="acc_password" placeholder="ទុកចោលបើមិនចង់ប្តូរថ្មី" class="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-sm font-bold outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white dark:focus:bg-slate-600 transition text-slate-800 dark:text-white">
                         </div>
                         
-                        <!-- Role Status & Elevate to Admin -->
-                        <div class="p-3 bg-indigo-50/70 dark:bg-indigo-950/40 rounded-xl border border-indigo-100 dark:border-indigo-900/50 flex items-center justify-between">
-                            <div>
-                                <span class="text-[10px] font-bold text-indigo-400 uppercase tracking-wider block">តួនាទីបច្ចុប្បន្ន</span>
-                                <span id="acc_role_badge" class="text-xs font-bold text-indigo-700 dark:text-indigo-300 flex items-center gap-1.5 mt-0.5">
-                                    <i class="fa-solid fa-crown text-amber-500"></i> អ្នកគ្រប់គ្រងប្រព័ន្ធ (Admin)
-                                </span>
+                        <!-- Role Status & Enterprise Security Tools -->
+                        <div class="p-3.5 bg-slate-50 dark:bg-slate-700/60 rounded-2xl border border-slate-200 dark:border-slate-600 space-y-2.5">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">តួនាទីបច្ចុប្បន្ន</span>
+                                    <span id="acc_role_badge" class="text-xs font-bold text-indigo-600 dark:text-indigo-300 flex items-center gap-1.5 mt-0.5">
+                                        <i class="fa-solid fa-user-shield"></i> <span id="acc_role_name">គ្រូបង្រៀន</span>
+                                    </span>
+                                </div>
+                                <span id="acc_status_badge" class="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-emerald-100 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300">សកម្ម</span>
                             </div>
-                            <button type="button" onclick="window.setMeAsAdmin()" class="px-3 py-1.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white rounded-lg text-xs font-bold transition flex items-center gap-1.5 shadow-sm active:scale-95">
-                                <i class="fa-solid fa-crown text-[11px]"></i> កំណត់ជា Admin
-                            </button>
+
+                            <!-- Enterprise Admin Buttons (Super Admin & Admin Only) -->
+                            <div id="acc_admin_tools" class="pt-2 border-t border-slate-200 dark:border-slate-600 flex flex-wrap gap-2">
+                                <button type="button" onclick="window.openAccountManagementModal()" id="btnAccManageUsers" class="flex-1 py-2 px-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-sm">
+                                    <i class="fa-solid fa-users-gear text-xs"></i> គ្រប់គ្រងគណនី
+                                </button>
+                                <button type="button" onclick="window.openMfaSetupModal()" id="btnAccMfaSetup" class="py-2 px-3 bg-slate-800 hover:bg-slate-900 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-sm">
+                                    <i class="fa-solid fa-shield-halved text-xs text-amber-400"></i> MFA
+                                </button>
+                                <button type="button" onclick="window.openAuditLogModal()" id="btnAccAuditLogs" class="py-2 px-3 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-sm">
+                                    <i class="fa-solid fa-list-check text-xs"></i> សវនកម្ម
+                                </button>
+                            </div>
                         </div>
                         
-                        <div class="pt-4 flex gap-3">
+                        <div class="pt-2 flex gap-3">
                             <button type="button" onclick="document.getElementById('accountProfileModal').classList.replace('flex','hidden')" class="flex-1 py-2.5 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 rounded-xl text-sm font-bold transition">បោះបង់</button>
                             <button type="submit" id="btnUpdateAccount" class="flex-1 py-2.5 bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 text-white rounded-xl text-sm font-bold shadow-md shadow-indigo-200 transition transform hover:-translate-y-0.5 flex items-center justify-center gap-2"><i class="fa-solid fa-floppy-disk"></i> រក្សាទុក</button>
                         </div>
@@ -1206,11 +1219,28 @@ window.openAccountModal = function() {
     if (passInput) passInput.value = "";
 
     const roleBadge = document.getElementById("acc_role_badge");
+    const isSuper = typeof window.isSuperAdmin === 'function' ? window.isSuperAdmin() : false;
+    const isAdmin = typeof window.isSchoolAdmin === 'function' ? window.isSchoolAdmin() : false;
+
     if (roleBadge) {
-        const isAdmin = typeof window.isSchoolAdmin === 'function' ? window.isSchoolAdmin() : true;
-        roleBadge.innerHTML = isAdmin 
-            ? '<i class="fa-solid fa-crown text-amber-500"></i> <span class="text-amber-700 dark:text-amber-300 font-bold">អ្នកគ្រប់គ្រងប្រព័ន្ធ (Admin)</span>'
-            : '<i class="fa-solid fa-chalkboard-user text-indigo-500"></i> <span>គ្រូបង្រៀន (Teacher)</span>';
+        if (isSuper) {
+            roleBadge.innerHTML = '<i class="fa-solid fa-crown text-amber-500"></i> <span class="text-amber-700 dark:text-amber-300 font-bold">Super Admin (អ្នកគ្រប់គ្រងជាន់ខ្ពស់)</span>';
+        } else if (isAdmin) {
+            roleBadge.innerHTML = '<i class="fa-solid fa-user-shield text-indigo-500"></i> <span class="text-indigo-700 dark:text-indigo-300 font-bold">Admin (អ្នកគ្រប់គ្រងសាលា)</span>';
+        } else if (typeof window.isSubjectTeacher === 'function' && window.isSubjectTeacher()) {
+            roleBadge.innerHTML = '<i class="fa-solid fa-book text-emerald-500"></i> <span>គ្រូបង្រៀនមុខវិជ្ជា (Subject Teacher)</span>';
+        } else {
+            roleBadge.innerHTML = '<i class="fa-solid fa-chalkboard-user text-indigo-500"></i> <span>គ្រូប្រចាំថ្នាក់ (Homeroom Teacher)</span>';
+        }
+    }
+
+    const adminTools = document.getElementById("acc_admin_tools");
+    const btnAudit = document.getElementById("btnAccAuditLogs");
+    if (adminTools) {
+        adminTools.style.display = (isAdmin || isSuper) ? "flex" : "none";
+    }
+    if (btnAudit) {
+        btnAudit.style.display = isSuper ? "inline-flex" : "none";
     }
 
     modal.classList.remove("hidden");
@@ -1325,16 +1355,42 @@ window.ROLE_DEFINITIONS = {
 };
 
 // មុខងារជំនួយបំលែងតួនាទីជា Array (Multi-role Normalizer)
-window.normalizeRoles = function(rolesInput, fallbackRole = "teacher") {
+window.normalizeRoles = function(rolesInput, fallbackRole = "homeroom_teacher") {
     if (Array.isArray(rolesInput) && rolesInput.length > 0) {
         return rolesInput.map(r => String(r).toLowerCase().trim()).filter(Boolean);
     }
-    const single = String(rolesInput || fallbackRole || 'teacher').toLowerCase().trim();
-    if (single === 'admin') return ['system_admin', 'school_admin'];
-    if (single === 'sysadmin') return ['system_admin'];
-    if (single === 'schooladmin') return ['school_admin'];
-    if (single === 'viewer') return ['report_viewer'];
+    const single = String(rolesInput || fallbackRole || 'homeroom_teacher').toLowerCase().trim();
+    if (single === 'super_admin' || single === 'superadmin' || single === 'sysadmin') return ['super_admin', 'admin'];
+    if (single === 'admin' || single === 'school_admin' || single === 'schooladmin' || single === 'system_admin') return ['admin', 'homeroom_teacher'];
+    if (single === 'homeroom_teacher' || single === 'homeroom' || single === 'teacher') return ['homeroom_teacher'];
+    if (single === 'subject_teacher' || single === 'subject') return ['subject_teacher'];
+    if (single === 'student') return ['student'];
     return [single];
+};
+
+window.isSuperAdmin = function() {
+    const roles = typeof window.getUserRoles === 'function' ? window.getUserRoles() : [];
+    return roles.includes('super_admin') || (window.AppAuth?.state?.role === 'super_admin');
+};
+
+window.isSchoolAdmin = function() {
+    const roles = typeof window.getUserRoles === 'function' ? window.getUserRoles() : [];
+    return roles.includes('super_admin') || roles.includes('admin') || roles.includes('school_admin') || roles.includes('system_admin') || (window.AppAuth?.state?.role === 'super_admin' || window.AppAuth?.state?.role === 'admin');
+};
+
+window.isHomeroomTeacher = function() {
+    const roles = typeof window.getUserRoles === 'function' ? window.getUserRoles() : [];
+    return window.isSchoolAdmin() || roles.includes('homeroom_teacher') || roles.includes('teacher');
+};
+
+window.isSubjectTeacher = function() {
+    const roles = typeof window.getUserRoles === 'function' ? window.getUserRoles() : [];
+    return roles.includes('subject_teacher');
+};
+
+window.isStudent = function() {
+    const roles = typeof window.getUserRoles === 'function' ? window.getUserRoles() : [];
+    return roles.includes('student');
 };
 
 // ទាញយក Roles ទាំងអស់របស់អ្នកប្រើប្រាស់បច្ចុប្បន្ន
@@ -2158,6 +2214,80 @@ window.applyGoogleEmailLink = async function(googleEmail) {
 };
 
 window.AppAuth.authenticateSocialUser = async function(socialProfile) {
+    let idToken = socialProfile.idToken || null;
+    if (!idToken && window.auth && window.auth.currentUser) {
+        try {
+            idToken = await window.auth.currentUser.getIdToken(true);
+        } catch(e) {}
+    }
+
+    const loginGradeEl = document.getElementById('loginGrade');
+    const loginRoomEl = document.getElementById('loginRoom');
+    const selectedGrade = loginGradeEl ? loginGradeEl.value : 'ថ្នាក់ទី ១';
+    const selectedRoom = loginRoomEl ? loginRoomEl.value : '«ក»';
+
+    // ១. ផ្ទៀងផ្ទាត់ Firebase ID Token នៅលើ Server-side (Google Apps Script API)
+    if (idToken && typeof window.apiPost === 'function') {
+        try {
+            const serverRes = await window.apiPost('verifyGoogleAuth', {
+                id_token: idToken,
+                grade: selectedGrade,
+                room: selectedRoom,
+                email: socialProfile.email
+            });
+
+            if (serverRes) {
+                if (serverRes.status === 'success') {
+                    if (serverRes.session_token) {
+                        window.setSessionToken(serverRes.session_token);
+                    }
+                    const user = serverRes.user;
+                    window.AppAuth.setAuthenticatedSession({
+                        teacher_id: user.user_id,
+                        name: user.name || socialProfile.displayName,
+                        username: (user.email || '').split('@')[0],
+                        email: user.email,
+                        role: user.role,
+                        roles: [user.role],
+                        assigned_grade: user.grade || selectedGrade,
+                        assigned_room: user.room || selectedRoom,
+                        status: user.status || 'approved'
+                    }, socialProfile.uid);
+
+                    const modal = document.getElementById("googleLoginModal");
+                    if (modal) { modal.classList.add('hidden'); modal.style.display = 'none'; }
+                    if (typeof showToast === 'function') showToast(`🎉 សូមស្វាគមន៍! បានចូលប្រព័ន្ធដោយជោគជ័យ`);
+                    return;
+                }
+
+                if (serverRes.status === 'pending') {
+                    const modal = document.getElementById("googleLoginModal");
+                    if (modal) { modal.classList.add('hidden'); modal.style.display = 'none'; }
+                    window.showPendingApprovalScreen({
+                        name: socialProfile.displayName,
+                        email: socialProfile.email
+                    }, serverRes.message);
+                    return;
+                }
+
+                if (serverRes.status === 'suspended' || serverRes.status === 'disabled') {
+                    const modal = document.getElementById("googleLoginModal");
+                    if (modal) { modal.classList.add('hidden'); modal.style.display = 'none'; }
+                    window.showAccessDeniedScreen(serverRes.message);
+                    return;
+                }
+
+                if (serverRes.status === 'error') {
+                    alert("❌ " + serverRes.message);
+                    return;
+                }
+            }
+        } catch(apiErr) {
+            console.warn("GAS Server verifyGoogleAuth note:", apiErr);
+        }
+    }
+
+    // ២. ប្រសិនបើមិនទាន់មាន Profile (Fallback សម្រាប់ Offline/Firestore Setup)
     let teacherData = null;
     let teacherDocId = null;
 
@@ -2183,17 +2313,6 @@ window.AppAuth.authenticateSocialUser = async function(socialProfile) {
                     teacherDocId = snapUid.docs[0].id;
                 }
             }
-            if (!teacherData && socialProfile.email) {
-                const uName = socialProfile.email.split('@')[0].toLowerCase();
-                const snapUname = await window.db.collection("teachers")
-                    .where("username", "==", uName)
-                    .limit(1)
-                    .get();
-                if (!snapUname.empty) {
-                    teacherData = snapUname.docs[0].data();
-                    teacherDocId = snapUname.docs[0].id;
-                }
-            }
         } catch(e) {
             console.warn("Firestore social lookup note:", e.message);
         }
@@ -2201,19 +2320,19 @@ window.AppAuth.authenticateSocialUser = async function(socialProfile) {
 
     if (!teacherData) {
         const uName = (socialProfile.email || "user").split('@')[0].toLowerCase();
-        const isAdmin = uName.includes("admin") || uName === "sysadmin";
         const randomSuffix = Math.floor(1000 + Math.random() * 9000);
+        // Default role is homeroom_teacher, NEVER auto-grant admin on Google login
         teacherData = {
-            teacher_id: isAdmin ? "TCH-SYSADMIN" : `TCH-SOC-${randomSuffix}`,
-            name: socialProfile.displayName || (isAdmin ? "អ្នកគ្រប់គ្រងប្រព័ន្ធ" : "លោកគ្រូ អ្នកគ្រូ"),
+            teacher_id: `TCH-SOC-${randomSuffix}`,
+            name: socialProfile.displayName || "លោកគ្រូ អ្នកគ្រូ",
             username: uName,
             email: socialProfile.email || "",
-            roles: isAdmin ? ["system_admin", "school_admin"] : ["teacher"],
-            role: isAdmin ? "system_admin" : "teacher",
-            assigned_grade: isAdmin ? "all" : "ថ្នាក់ទី ១",
-            assigned_room: isAdmin ? "all" : "«ក»",
+            roles: ["homeroom_teacher"],
+            role: "homeroom_teacher",
+            assigned_grade: selectedGrade || "ថ្នាក់ទី ១",
+            assigned_room: selectedRoom || "«ក»",
             school_id: "SCH-001",
-            status: "active",
+            status: "approved",
             auth_uid: socialProfile.uid,
             photo_url: socialProfile.photoURL || "",
             created_at: new Date().toISOString()
@@ -2224,10 +2343,9 @@ window.AppAuth.authenticateSocialUser = async function(socialProfile) {
         }
     }
 
-    if (teacherData.status && teacherData.status.toLowerCase() !== "active") {
-        alert("⚠️ គណនីរបស់អ្នកត្រូវបានផ្អាក ឬចាក់សោ (Inactive/Locked) ដោយ Administrator!");
+    if (teacherData.status && teacherData.status.toLowerCase() !== "active" && teacherData.status.toLowerCase() !== "approved") {
+        window.showAccessDeniedScreen("⚠️ គណនីរបស់អ្នកត្រូវបានផ្អាក ឬចាក់សោ (Inactive/Locked) ដោយ Administrator!");
         window.AppAuth.clearSessionState();
-        window.AppAuth.showAuthScreen();
         return;
     }
 
@@ -2559,95 +2677,98 @@ window.onTelegramAuth = async function(tgUser) {
     try {
         const isLinkMode = window.telegramAuthMode === 'link';
 
-        // ករណី Link Mode (ភ្ជាប់ទៅគណនីគ្រូដែលកំពុង Login)
+        // ករណី Link Mode (ភ្ជាប់ Telegram ទៅកាន់គណនីបច្ចុប្បន្ន)
         if (isLinkMode) {
-            const tId = localStorage.getItem('auth_teacher_id') || (window.AppAuth?.state?.teacherId) || "TCH-001";
-            let personal = typeof window.getTeacherPersonalSettings === 'function' ? window.getTeacherPersonalSettings(tId) : {};
-            personal.telegram_username = tgUser.username || "";
-            personal.telegram_id = String(tgUser.id);
-
-            try { localStorage.setItem(`teacher_settings_${tId}`, JSON.stringify(personal)); } catch(e) {}
-            if (tgUser.username) localStorage.setItem('auth_telegram_username', tgUser.username);
-            localStorage.setItem('auth_telegram_id', String(tgUser.id));
-
-            if (window.db) {
-                await window.db.collection("teachers").doc(tId).set({
-                    telegram_username: tgUser.username || "",
-                    telegram_id: String(tgUser.id),
-                    last_linked_telegram: new Date().toISOString()
-                }, { merge: true }).catch(console.warn);
-            }
-
-            const modal = document.getElementById("telegramLoginModal");
-            if (modal) { modal.classList.add("hidden"); modal.style.display = "none"; }
-
-            if (typeof window.renderPersonalSettingsBadges === 'function') window.renderPersonalSettingsBadges(personal);
-            const tgField = document.getElementById("pers_telegram_username");
-            if (tgField) tgField.value = tgUser.username || "";
-            const tgIdField = document.getElementById("pers_telegram_id");
-            if (tgIdField) tgIdField.value = String(tgUser.id);
-
-            if (typeof showToast === 'function') showToast(`✅ បានភ្ជាប់គណនី Telegram (@${tgUser.username || tgUser.id}) ជោគជ័យ!`);
-            return;
-        }
-
-        const tgEmail = `tg_${tgUser.id}@cms.school.local`;
-        const pass = `tg#auth_${tgUser.id}_pass`;
-
-        let cred;
-        if (window.auth) {
-            try {
-                cred = await window.auth.signInWithEmailAndPassword(tgEmail, pass);
-            } catch(e) {
-                if (e.code === 'auth/user-not-found' || e.code === 'auth/invalid-credential') {
-                    cred = await window.auth.createUserWithEmailAndPassword(tgEmail, pass);
+            if (typeof window.apiPost === 'function') {
+                const res = await window.apiPost('linkTelegramIdentity', { auth_data: tgUser });
+                if (res && res.status === 'success') {
+                    const modal = document.getElementById("telegramLoginModal");
+                    if (modal) { modal.classList.add("hidden"); modal.style.display = "none"; }
+                    if (typeof showToast === 'function') showToast(`✅ បានភ្ជាប់គណនី Telegram (@${tgUser.username || tgUser.id}) ជោគជ័យ!`);
+                    const tgField = document.getElementById("pers_telegram_username");
+                    if (tgField) tgField.value = tgUser.username || "";
+                    const tgIdField = document.getElementById("pers_telegram_id");
+                    if (tgIdField) tgIdField.value = String(tgUser.id);
+                    return;
+                } else {
+                    alert("❌ " + (res?.message || "បរាជ័យក្នុងការភ្ជាប់ Telegram Identity!"));
+                    return;
                 }
             }
         }
 
+        // ករណី Login Mode តាម Telegram (HMAC Verification នៅ Server)
+        if (typeof window.apiPost === 'function') {
+            const res = await window.apiPost('verifyTelegramAuth', { auth_data: tgUser });
+            if (res) {
+                if (res.status === 'success') {
+                    if (res.session_token) window.setSessionToken(res.session_token);
+                    const user = res.user;
+                    window.AppAuth.setAuthenticatedSession({
+                        teacher_id: user.user_id,
+                        name: user.name || `${tgUser.first_name || ''} ${tgUser.last_name || ''}`.trim(),
+                        username: user.email ? user.email.split('@')[0] : (tgUser.username || `tg_${tgUser.id}`),
+                        email: user.email || "",
+                        role: user.role,
+                        roles: [user.role],
+                        assigned_grade: user.grade || "ថ្នាក់ទី ១",
+                        assigned_room: user.room || "«ក»",
+                        status: user.status || "approved"
+                    }, `tg_${tgUser.id}`);
+
+                    const modal = document.getElementById("telegramLoginModal");
+                    if (modal) { modal.classList.add("hidden"); modal.style.display = "none"; }
+                    if (typeof showToast === 'function') showToast(`🎉 បានចូលប្រើតាម Telegram (@${tgUser.username || tgUser.id}) ជោគជ័យ!`);
+                    return;
+                }
+
+                if (res.status === 'unlinked') {
+                    alert(`⚠️ ${res.message}`);
+                    return;
+                }
+
+                if (res.status === 'pending') {
+                    const modal = document.getElementById("telegramLoginModal");
+                    if (modal) { modal.classList.add("hidden"); modal.style.display = "none"; }
+                    window.showPendingApprovalScreen({
+                        name: `${tgUser.first_name || ''} ${tgUser.last_name || ''}`.trim() || tgUser.username,
+                        email: '@' + (tgUser.username || tgUser.id)
+                    }, res.message);
+                    return;
+                }
+
+                if (res.status === 'suspended' || res.status === 'disabled') {
+                    const modal = document.getElementById("telegramLoginModal");
+                    if (modal) { modal.classList.add("hidden"); modal.style.display = "none"; }
+                    window.showAccessDeniedScreen(res.message);
+                    return;
+                }
+
+                if (res.status === 'error') {
+                    alert("❌ " + res.message);
+                    return;
+                }
+            }
+        }
+
+        // Fallback Local Auth if offline
         const teacherId = `TCH-TG-${tgUser.id}`;
-        let teacherData = null;
-
-        if (window.db) {
-            try {
-                const docSnap = await window.db.collection("teachers").doc(teacherId).get();
-                if (docSnap.exists) {
-                    teacherData = docSnap.data();
-                }
-            } catch(e) {}
-        }
-
-        if (!teacherData) {
-            teacherData = {
-                teacher_id: teacherId,
-                name: `${tgUser.first_name || ''} ${tgUser.last_name || ''}`.trim() || tgUser.username || "Telegram User",
-                username: tgUser.username ? tgUser.username.toLowerCase() : `tg_${tgUser.id}`,
-                telegram_id: String(tgUser.id),
-                telegram_username: tgUser.username || "",
-                photo_url: tgUser.photo_url || "",
-                auth_uid: cred?.user?.uid || teacherId,
-                role: "teacher",
-                roles: ["teacher"],
-                assigned_grade: "ថ្នាក់ទី ១",
-                assigned_room: "«ក»",
-                school_id: "SCH-001",
-                status: "active",
-                created_at: new Date().toISOString()
-            };
-            if (window.db) {
-                await window.db.collection("teachers").doc(teacherId).set(teacherData, { merge: true }).catch(console.warn);
-            }
-        }
-
+        let teacherData = {
+            teacher_id: teacherId,
+            name: `${tgUser.first_name || ''} ${tgUser.last_name || ''}`.trim() || tgUser.username || "Telegram User",
+            username: tgUser.username ? tgUser.username.toLowerCase() : `tg_${tgUser.id}`,
+            telegram_id: String(tgUser.id),
+            telegram_username: tgUser.username || "",
+            role: "homeroom_teacher",
+            roles: ["homeroom_teacher"],
+            assigned_grade: "ថ្នាក់ទី ១",
+            assigned_room: "«ក»",
+            school_id: "SCH-001",
+            status: "approved"
+        };
         const modal = document.getElementById("telegramLoginModal");
         if (modal) { modal.classList.add("hidden"); modal.style.display = "none"; }
-
-        // ✅ ធ្វើសមកាលកម្មចូលប្រព័ន្ធ និងអនុវត្តការកំណត់ផ្ទាល់ខ្លួនរបស់គ្រូ
-        window.AppAuth.setAuthenticatedSession(teacherData, cred?.user?.uid || teacherId);
-        if (typeof window.loadAndApplyTeacherSettings === 'function') {
-            window.loadAndApplyTeacherSettings(teacherData.teacher_id);
-        }
-        if (typeof showToast === 'function') showToast(`🎉 សូមស្វាគមន៍ ${tgUser.first_name || teacherData.name}! ចូលតាម Telegram (auth.telegram.org) ជោគជ័យ`);
+        window.AppAuth.setAuthenticatedSession(teacherData, `tg_${tgUser.id}`);
 
     } catch(err) {
         console.error("Telegram Widget Error:", err);
@@ -2713,79 +2834,681 @@ window.unlinkTeacherTelegramAccount = function() {
 };
 
 // =========================================================================
-// 👑 មុខងារកំណត់អ្នកប្រើប្រាស់បច្ចុប្បន្នជា Admin (Administrator Elevation)
+// 🛡️ Enterprise Secure Session & Account Management Functions
 // =========================================================================
-window.setMeAsAdmin = async function(customName = null) {
-    const currentId = localStorage.getItem('auth_teacher_id') || (window.AppAuth && window.AppAuth.state ? window.AppAuth.state.teacherId : null) || "TCH-SYSADMIN";
-    const currentName = customName || localStorage.getItem('auth_teacher_name') || (window.AppAuth && window.AppAuth.state ? window.AppAuth.state.name : null) || "អ្នកគ្រប់គ្រងប្រព័ន្ធ (Admin)";
-    const currentUsername = localStorage.getItem('auth_username') || (window.AppAuth && window.AppAuth.state ? window.AppAuth.state.username : null) || "admin";
 
-    const adminRoles = ["system_admin", "school_admin"];
-    const adminData = {
-        teacher_id: currentId,
-        name: currentName,
-        username: currentUsername,
-        roles: adminRoles,
-        role: "system_admin",
-        assigned_grade: "all",
-        assigned_room: "all",
-        school_id: localStorage.getItem('auth_school_id') || "SCH-001",
-        status: "active"
-    };
-
-    if (window.AppAuth && typeof window.AppAuth.setAuthenticatedSession === 'function') {
-        window.AppAuth.setAuthenticatedSession(adminData, window.auth?.currentUser?.uid || null);
-    } else {
-        localStorage.setItem('auth_teacher_id', adminData.teacher_id);
-        localStorage.setItem('auth_teacher_name', adminData.name);
-        localStorage.setItem('auth_username', adminData.username);
-        localStorage.setItem('auth_role', 'system_admin');
-        localStorage.setItem('auth_roles', JSON.stringify(adminRoles));
-        localStorage.setItem('auth_assigned_grade', 'all');
-        localStorage.setItem('auth_assigned_room', 'all');
-        localStorage.setItem('auth_session_active', 'true');
+// ១. ការគ្រប់គ្រង Session Token (SessionStorage Isolation)
+window.getSessionToken = function() {
+    try {
+        return sessionStorage.getItem('cms_session_token') || "";
+    } catch(e) {
+        return "";
     }
-
-    // Persist to Firestore if available
-    if (window.db && currentId) {
-        try {
-            await window.db.collection("teachers").doc(currentId).set({
-                roles: adminRoles,
-                role: "system_admin",
-                assigned_grade: "all",
-                assigned_room: "all",
-                updated_at: new Date().toISOString()
-            }, { merge: true });
-        } catch(e) {
-            console.warn("Firestore admin sync note:", e);
-        }
-    }
-
-    // Update UI elements
-    const nameEl = document.getElementById("navUserName");
-    const idEl = document.getElementById("navUserId");
-    if (nameEl) nameEl.textContent = adminData.name;
-    if (idEl) idEl.textContent = adminData.teacher_id;
-
-    if (typeof window.applyRoleBasedNavigation === 'function') {
-        window.applyRoleBasedNavigation();
-    }
-    if (typeof window.filterStudents === 'function') {
-        window.filterStudents();
-    }
-    if (typeof window.renderSettingsGeneral === 'function') {
-        window.renderSettingsGeneral();
-    }
-
-    const modal = document.getElementById("accountProfileModal");
-    if (modal) modal.classList.replace("flex", "hidden");
-
-    if (typeof showToast === 'function') {
-        showToast("👑 បានកំណត់គណនីរបស់អ្នកជា Administrator ជោគជ័យ! សិទ្ធិទាំងអស់ត្រូវបានបើកដំណើរការ។", "success");
-    }
-    return adminData;
 };
 
-window.quickLoginAsAdmin = async function() {
-    return await window.setMeAsAdmin("អ្នកគ្រប់គ្រងប្រព័ន្ធ (Admin)");
+window.setSessionToken = function(token) {
+    try {
+        if (token) {
+            sessionStorage.setItem('cms_session_token', token);
+        } else {
+            sessionStorage.removeItem('cms_session_token');
+        }
+    } catch(e) {}
+};
+
+window.clearSession = function() {
+    window.setSessionToken(null);
+    try {
+        sessionStorage.removeItem('cms_user_profile');
+        sessionStorage.removeItem('cms_session_token');
+        localStorage.removeItem('auth_teacher_id');
+        localStorage.removeItem('auth_teacher_name');
+        localStorage.removeItem('auth_username');
+        localStorage.removeItem('auth_role');
+        localStorage.removeItem('auth_roles');
+        localStorage.removeItem('auth_session_active');
+    } catch(e) {}
+    if (window.AppAuth) {
+        window.AppAuth.state.isLoggedIn = false;
+        window.AppAuth.state.teacherId = "";
+        window.AppAuth.state.role = "guest";
+        window.AppAuth.state.roles = [];
+    }
+    if (window.AppState) window.AppState.isLoggedIn = false;
+};
+
+// ២. ផ្ទាំងរង់ចាំការអនុម័ត (Pending Approval Screen)
+window.showPendingApprovalScreen = function(userData = {}, message = "") {
+    const screen = document.getElementById("pendingApprovalScreen");
+    const nameEl = document.getElementById("pendingUserName");
+    const emailEl = document.getElementById("pendingUserEmail");
+    const msgEl = document.getElementById("pendingApprovalMessage");
+
+    if (nameEl) nameEl.textContent = userData.name || userData.display_name || "អ្នកប្រើប្រាស់";
+    if (emailEl) emailEl.textContent = userData.email || userData.username || "-";
+    if (msgEl && message) msgEl.textContent = message;
+
+    if (screen) {
+        screen.classList.remove("hidden");
+        screen.classList.add("flex");
+    }
+};
+
+window.closePendingScreenAndLogout = async function() {
+    const screen = document.getElementById("pendingApprovalScreen");
+    if (screen) {
+        screen.classList.remove("flex");
+        screen.classList.add("hidden");
+    }
+    await window.handleLogout();
+};
+
+window.checkPendingApprovalStatus = async function() {
+    if (window.auth && window.auth.currentUser) {
+        try {
+            const token = await window.auth.currentUser.getIdToken(true);
+            const res = await window.apiPost('verifyGoogleAuth', { id_token: token });
+            if (res && res.status === 'success') {
+                const screen = document.getElementById("pendingApprovalScreen");
+                if (screen) { screen.classList.remove("flex"); screen.classList.add("hidden"); }
+                window.setSessionToken(res.session_token);
+                window.AppAuth.setAuthenticatedSession(res.user, window.auth.currentUser.uid);
+                if (typeof showToast === 'function') showToast("🎉 គណនីរបស់អ្នកត្រូវបានអនុម័តរួចរាល់ហើយ!");
+                return;
+            } else if (res && res.status === 'pending') {
+                if (typeof showToast === 'function') showToast("ℹ️ គណនីនៅតែស្ថិតក្នុងស្ថានភាពរង់ចាំការអនុម័ត។");
+            } else if (res && (res.status === 'suspended' || res.status === 'disabled')) {
+                window.showAccessDeniedScreen(res.message);
+            }
+        } catch(e) {
+            console.warn("Check status error:", e);
+        }
+    } else {
+        alert("សូមចូលប្រព័ន្ធម្តងទៀត ដើម្បីពិនិត្យស្ថានភាពគណនី។");
+        await window.handleLogout();
+    }
+};
+
+// ៣. ផ្ទាំងបដិសេធការចូល (Access Denied / Suspended Screen)
+window.showAccessDeniedScreen = function(message = "") {
+    const screen = document.getElementById("accessDeniedScreen");
+    const msgEl = document.getElementById("accessDeniedMessage");
+    if (msgEl && message) msgEl.textContent = message;
+
+    if (screen) {
+        screen.classList.remove("hidden");
+        screen.classList.add("flex");
+    }
+};
+
+window.closeAccessDeniedAndLogout = async function() {
+    const screen = document.getElementById("accessDeniedScreen");
+    if (screen) {
+        screen.classList.remove("flex");
+        screen.classList.add("hidden");
+    }
+    await window.handleLogout();
+};
+
+// ៤. ចាកចេញពីប្រព័ន្ធ និង Revoke Session នៅ Server (Logout)
+window.handleLogout = async function() {
+    const token = window.getSessionToken();
+    try {
+        if (token && typeof window.apiPost === 'function') {
+            await window.apiPost('logout', { session_token: token });
+        }
+    } catch(e) {
+        console.warn("Server logout revocation error:", e);
+    }
+
+    try {
+        if (window.auth && typeof window.auth.signOut === 'function') {
+            await window.auth.signOut();
+        }
+    } catch(e) {}
+
+    window.clearSession();
+
+    // បិទ Modals ទាំងអស់
+    document.querySelectorAll('[id$="Modal"], [id$="Screen"]').forEach(el => {
+        if (el.id !== 'landing-screen') {
+            el.classList.add('hidden');
+            el.classList.remove('flex');
+        }
+    });
+
+    const landing = document.getElementById("landing-screen");
+    if (landing) {
+        landing.classList.remove("hidden");
+        landing.style.display = "flex";
+    }
+    if (typeof showToast === 'function') showToast("👋 បានចេញពីប្រព័ន្ធដោយជោគជ័យ។");
+};
+
+// ៥. គ្រប់គ្រងគណនី និងអនុម័តអ្នកប្រើប្រាស់ (Admin Account Management Modal)
+window.openAccountManagementModal = async function() {
+    let modal = document.getElementById("accountManagementModal");
+    if (!modal) {
+        modal = document.createElement("div");
+        modal.id = "accountManagementModal";
+        modal.className = "fixed inset-0 z-[8000] bg-slate-900/80 backdrop-blur-md hidden items-center justify-center p-4 font-siemreap overflow-y-auto";
+        modal.innerHTML = `
+            <div class="bg-white dark:bg-slate-800 rounded-3xl shadow-2xl w-full max-w-4xl overflow-hidden border border-slate-200 dark:border-slate-700 my-auto transform transition-all" onclick="event.stopPropagation()">
+                <div class="px-6 py-4 bg-gradient-to-r from-indigo-700 via-indigo-600 to-blue-600 text-white flex justify-between items-center">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center text-lg">
+                            <i class="fa-solid fa-users-gear"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-moul text-base">គ្រប់គ្រងគណនី និងអនុម័តសិទ្ធិ</h3>
+                            <p class="text-xs text-indigo-100">អនុម័ត, កំណត់ Role, ផ្អាក ឬបិទគណនីក្នុងប្រព័ន្ធ</p>
+                        </div>
+                    </div>
+                    <button type="button" onclick="document.getElementById('accountManagementModal').classList.replace('flex','hidden')" class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+
+                <!-- Controls & Filters -->
+                <div class="p-4 bg-slate-50 dark:bg-slate-700/50 border-b border-slate-200 dark:border-slate-600 flex flex-wrap gap-3 items-center justify-between text-xs">
+                    <div class="flex items-center gap-2 flex-1 min-w-[200px]">
+                        <i class="fa-solid fa-magnifying-glass text-slate-400"></i>
+                        <input type="text" id="accMgmtSearch" oninput="window.filterUsersList()" placeholder="ស្វែងរកតាមឈ្មោះ, អ៊ីមែល, ឬ User ID..." class="w-full px-3 py-1.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-xl font-bold outline-none focus:ring-2 focus:ring-indigo-500">
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <label class="font-bold text-slate-500 dark:text-slate-400">ស្ថានភាព៖</label>
+                        <select id="accMgmtStatusFilter" onchange="window.filterUsersList()" class="px-3 py-1.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-xl font-bold outline-none">
+                            <option value="all">ទាំងអស់ (All)</option>
+                            <option value="pending">រង់ចាំអនុម័ត (Pending)</option>
+                            <option value="approved">បានអនុម័ត (Approved)</option>
+                            <option value="suspended">បានផ្អាក (Suspended)</option>
+                            <option value="disabled">បានបិទ (Disabled)</option>
+                        </select>
+                        <button type="button" onclick="window.loadUsersList()" class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold transition flex items-center gap-1.5">
+                            <i class="fa-solid fa-rotate"></i> Refresh
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Users Table Container -->
+                <div class="p-4 max-h-[60vh] overflow-y-auto custom-scrollbar">
+                    <div id="accMgmtLoading" class="text-center py-10 text-slate-400 text-xs font-bold">
+                        <i class="fa-solid fa-circle-notch fa-spin text-lg mb-2"></i><br>កំពុងទាញយកទិន្នន័យគណនី...
+                    </div>
+                    <table id="accMgmtTable" class="w-full text-xs text-left hidden">
+                        <thead class="bg-slate-100 dark:bg-slate-700/60 text-slate-600 dark:text-slate-300 uppercase font-bold text-[10px]">
+                            <tr>
+                                <th class="p-2.5 rounded-l-xl">អ្នកប្រើប្រាស់</th>
+                                <th class="p-2.5">តួនាទី (Role)</th>
+                                <th class="p-2.5">ថ្នាក់ទទួលបន្ទុក</th>
+                                <th class="p-2.5">ស្ថានភាព</th>
+                                <th class="p-2.5 rounded-r-xl text-center">សកម្មភាព</th>
+                            </tr>
+                        </thead>
+                        <tbody id="accMgmtTableBody" class="divide-y divide-slate-100 dark:divide-slate-700"></tbody>
+                    </table>
+                </div>
+
+                <div class="p-4 bg-slate-50 dark:bg-slate-700/50 border-t border-slate-200 dark:border-slate-600 flex justify-between items-center text-xs">
+                    <span id="accMgmtCount" class="text-slate-400 font-bold">សរុប៖ ០ នាក់</span>
+                    <button type="button" onclick="document.getElementById('accountManagementModal').classList.replace('flex','hidden')" class="px-4 py-2 bg-slate-200 dark:bg-slate-600 hover:bg-slate-300 dark:hover:bg-slate-500 text-slate-700 dark:text-white rounded-xl font-bold transition">បិទ</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+    }
+
+    modal.classList.remove("hidden");
+    modal.classList.add("flex");
+    await window.loadUsersList();
+};
+
+window.cachedUsersList = [];
+
+window.loadUsersList = async function() {
+    const loading = document.getElementById("accMgmtLoading");
+    const table = document.getElementById("accMgmtTable");
+    if (loading) loading.classList.remove("hidden");
+    if (table) table.classList.add("hidden");
+
+    try {
+        let users = [];
+        if (typeof window.apiGet === 'function') {
+            const res = await window.apiGet("getUsers");
+            if (res && res.status === "success" && Array.isArray(res.data)) {
+                users = res.data;
+            }
+        }
+        if (users.length === 0 && window.db) {
+            const snap = await window.db.collection("teachers").get();
+            users = snap.docs.map(d => {
+                const dt = d.data();
+                return {
+                    user_id: dt.teacher_id || d.id,
+                    display_name: dt.name || "គ្រូ",
+                    email: dt.email || dt.username || "",
+                    role: dt.role || "homeroom_teacher",
+                    status: dt.status || "approved",
+                    assigned_grade: dt.assigned_grade || "-",
+                    assigned_room: dt.assigned_room || "-"
+                };
+            });
+        }
+        window.cachedUsersList = users;
+        window.filterUsersList();
+    } catch(err) {
+        console.error("Load users error:", err);
+        if (loading) loading.innerHTML = `<span class="text-rose-500 font-bold">❌ បរាជ័យក្នុងការទាញយកបញ្ជីអ្នកប្រើ៖ ${err.message}</span>`;
+    }
+};
+
+window.filterUsersList = function() {
+    const query = document.getElementById("accMgmtSearch")?.value.toLowerCase().trim() || "";
+    const statusFilter = document.getElementById("accMgmtStatusFilter")?.value || "all";
+    const tbody = document.getElementById("accMgmtTableBody");
+    const table = document.getElementById("accMgmtTable");
+    const loading = document.getElementById("accMgmtLoading");
+    const countEl = document.getElementById("accMgmtCount");
+
+    if (!tbody) return;
+
+    let filtered = window.cachedUsersList || [];
+    if (statusFilter !== 'all') {
+        filtered = filtered.filter(u => String(u.status).toLowerCase() === statusFilter);
+    }
+    if (query) {
+        filtered = filtered.filter(u => 
+            String(u.display_name || '').toLowerCase().includes(query) ||
+            String(u.email || '').toLowerCase().includes(query) ||
+            String(u.user_id || '').toLowerCase().includes(query)
+        );
+    }
+
+    if (countEl) countEl.textContent = `សរុប៖ ${filtered.length} នាក់`;
+    if (loading) loading.classList.add("hidden");
+    if (table) table.classList.remove("hidden");
+
+    if (filtered.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" class="py-8 text-center text-slate-400 font-bold">គ្មានគណនីត្រូវនឹងលក្ខខណ្ឌស្វែងរកឡើយ</td></tr>`;
+        return;
+    }
+
+    const isSuper = typeof window.isSuperAdmin === 'function' ? window.isSuperAdmin() : false;
+
+    tbody.innerHTML = filtered.map(u => {
+        const uId = u.user_id || "";
+        const uName = u.display_name || u.name || "អ្នកប្រើប្រាស់";
+        const uEmail = u.email || "-";
+        const uRole = u.role || "homeroom_teacher";
+        const uStatus = String(u.status || "pending").toLowerCase();
+        const uGrade = u.assigned_grade || "-";
+        const uRoom = u.assigned_room || "-";
+
+        let statusBadge = "";
+        if (uStatus === 'approved') statusBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-700">Approved</span>`;
+        else if (uStatus === 'pending') statusBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-700 animate-pulse">Pending</span>`;
+        else if (uStatus === 'suspended') statusBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-100 text-rose-700">Suspended</span>`;
+        else if (uStatus === 'disabled') statusBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-200 text-slate-700">Disabled</span>`;
+        else statusBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-600">${uStatus}</span>`;
+
+        return `
+            <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/40 transition">
+                <td class="p-2.5">
+                    <div class="font-bold text-slate-800 dark:text-white">${uName}</div>
+                    <div class="text-[10px] text-slate-400 font-mono">${uEmail} (${uId})</div>
+                </td>
+                <td class="p-2.5">
+                    <select onchange="window.handleAssignUserRole('${uId}', this.value)" class="px-2 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-lg text-xs font-bold outline-none">
+                        <option value="super_admin" ${uRole==='super_admin'?'selected':''} ${!isSuper?'disabled':''}>Super Admin</option>
+                        <option value="admin" ${uRole==='admin'?'selected':''}>Admin</option>
+                        <option value="homeroom_teacher" ${uRole==='homeroom_teacher'?'selected':''}>Homeroom Teacher</option>
+                        <option value="subject_teacher" ${uRole==='subject_teacher'?'selected':''}>Subject Teacher</option>
+                        <option value="student" ${uRole==='student'?'selected':''}>Student</option>
+                    </select>
+                </td>
+                <td class="p-2.5 font-bold text-slate-600 dark:text-slate-300">${uGrade} ${uRoom}</td>
+                <td class="p-2.5">${statusBadge}</td>
+                <td class="p-2.5 text-center">
+                    <div class="flex items-center justify-center gap-1.5">
+                        ${uStatus === 'pending' ? `
+                            <button type="button" onclick="window.handleApproveUser('${uId}', '${uRole}')" class="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-[11px] font-bold transition shadow-sm flex items-center gap-1">
+                                <i class="fa-solid fa-check"></i> អនុម័ត
+                            </button>
+                        ` : ''}
+                        ${uStatus === 'approved' ? `
+                            <button type="button" onclick="window.handleUpdateUserStatus('${uId}', 'suspended')" class="px-2 py-1 bg-amber-500 hover:bg-amber-600 text-white rounded-lg text-[11px] font-bold transition shadow-sm flex items-center gap-1" title="ផ្អាកគណនី">
+                                <i class="fa-solid fa-pause"></i> ផ្អាក
+                            </button>
+                        ` : ''}
+                        ${uStatus === 'suspended' ? `
+                            <button type="button" onclick="window.handleUpdateUserStatus('${uId}', 'approved')" class="px-2 py-1 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-[11px] font-bold transition shadow-sm flex items-center gap-1" title="បើកដំណើរការឡើងវិញ">
+                                <i class="fa-solid fa-play"></i> បើកវិញ
+                            </button>
+                        ` : ''}
+                        ${uStatus !== 'disabled' ? `
+                            <button type="button" onclick="window.handleUpdateUserStatus('${uId}', 'disabled')" class="px-2 py-1 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-[11px] font-bold transition shadow-sm flex items-center gap-1" title="បិទគណនីជាស្ថាពរ">
+                                <i class="fa-solid fa-ban"></i>
+                            </button>
+                        ` : ''}
+                    </div>
+                </td>
+            </tr>
+        `;
+    }).join("");
+};
+
+window.handleApproveUser = async function(userId, role) {
+    if (!confirm(`តើលោកអ្នកពិតជាចង់អនុម័តគណនី ${userId} ជាមួយតួនាទី ${role} មែនទេ?`)) return;
+    try {
+        const res = await window.apiPost('approveUser', { target_user_id: userId, role: role });
+        if (res && res.status === 'success') {
+            if (typeof showToast === 'function') showToast("✅ " + res.message);
+            await window.loadUsersList();
+        } else {
+            alert("❌ " + (res?.message || "បរាជ័យក្នុងការអនុម័ត"));
+        }
+    } catch(e) {
+        alert("❌ Error: " + e.message);
+    }
+};
+
+window.handleUpdateUserStatus = async function(userId, newStatus) {
+    const actionKhmer = newStatus === 'approved' ? 'បើកដំណើរការ' : (newStatus === 'suspended' ? 'ផ្អាក' : 'បិទ');
+    if (!confirm(`តើលោកអ្នកពិតជាចង់${actionKhmer}គណនី ${userId} មែនទេ?`)) return;
+    try {
+        const res = await window.apiPost('updateUserStatus', { target_user_id: userId, new_status: newStatus });
+        if (res && res.status === 'success') {
+            if (typeof showToast === 'function') showToast("✅ " + res.message);
+            await window.loadUsersList();
+        } else {
+            alert("❌ " + (res?.message || "បរាជ័យក្នុងការផ្លាស់ប្តូរស្ថានភាព"));
+        }
+    } catch(e) {
+        alert("❌ Error: " + e.message);
+    }
+};
+
+window.handleAssignUserRole = async function(userId, newRole) {
+    try {
+        const res = await window.apiPost('assignUserRole', { target_user_id: userId, new_role: newRole });
+        if (res && res.status === 'success') {
+            if (typeof showToast === 'function') showToast(`✅ បានផ្លាស់ប្តូរសិទ្ធិគណនីជា [${newRole}]`);
+        } else {
+            alert("❌ " + (res?.message || "បរាជ័យក្នុងការផ្លាស់ប្តូរ Role"));
+            await window.loadUsersList();
+        }
+    } catch(e) {
+        alert("❌ Error: " + e.message);
+        await window.loadUsersList();
+    }
+};
+
+// ៦. ការកំណត់ Multi-Factor Authentication (MFA Setup Modal)
+window.openMfaSetupModal = function() {
+    let modal = document.getElementById("mfaSetupModal");
+    if (!modal) {
+        modal = document.createElement("div");
+        modal.id = "mfaSetupModal";
+        modal.className = "fixed inset-0 z-[8000] bg-slate-900/80 backdrop-blur-md hidden items-center justify-center p-4 font-siemreap overflow-y-auto";
+        modal.innerHTML = `
+            <div class="bg-white dark:bg-slate-800 rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden border border-slate-200 dark:border-slate-700 my-auto transform transition-all" onclick="event.stopPropagation()">
+                <div class="px-6 py-4 bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white flex justify-between items-center">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center text-lg">
+                            <i class="fa-solid fa-shield-halved"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-moul text-base">កំណត់សុវត្ថិភាព MFA (TOTP)</h3>
+                            <p class="text-xs text-slate-300">ការផ្ទៀងផ្ទាត់ ២ ជាន់សម្រាប់ Admin Accounts</p>
+                        </div>
+                    </div>
+                    <button type="button" onclick="document.getElementById('mfaSetupModal').classList.replace('flex','hidden')" class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+
+                <div class="p-6 space-y-4 text-xs">
+                    <div class="p-3.5 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 rounded-2xl flex items-start gap-2.5 text-amber-800 dark:text-amber-200">
+                        <i class="fa-solid fa-circle-info text-base text-amber-500 shrink-0 mt-0.5"></i>
+                        <p class="leading-relaxed">
+                            MFA បង្កើនសុវត្ថិភាពការពារការជ្រៀតចូលដោយគ្មានការអនុញ្ញាត។ ប្រើកម្មវិធី <strong>Google Authenticator</strong> ឬ <strong>1Password</strong> ដើម្បីស្កេន QR Code ខាងក្រោម។
+                        </p>
+                    </div>
+
+                    <div class="flex flex-col items-center justify-center py-2">
+                        <div id="mfaQrContainer" class="p-3 bg-white rounded-2xl shadow-md border border-slate-200 mb-3">
+                            <img id="mfaQrImage" src="" alt="MFA QR Code" class="w-40 h-40">
+                        </div>
+                        <div class="w-full">
+                            <label class="block text-[11px] font-bold text-slate-400 mb-1 uppercase tracking-wider">Secret Key (បញ្ចូលដោយដៃ):</label>
+                            <div class="flex gap-2">
+                                <input type="text" id="mfaSecretDisplay" readonly class="w-full px-3 py-2 bg-slate-100 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl font-mono font-bold text-slate-700 dark:text-white text-center">
+                                <button type="button" onclick="window.copyMfaSecret()" class="px-3 py-2 bg-slate-200 hover:bg-slate-300 dark:bg-slate-600 dark:hover:bg-slate-500 rounded-xl font-bold transition">
+                                    <i class="fa-regular fa-copy"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Single-use Recovery Codes -->
+                    <div class="pt-3 border-t border-slate-200 dark:border-slate-700">
+                        <label class="block text-[11px] font-bold text-slate-500 dark:text-slate-400 mb-1.5 uppercase tracking-wider">
+                            លេខកូដសង្គ្រោះបន្ទាន់ ៨ ខ្ទង់ (Backup Recovery Codes)
+                        </label>
+                        <p class="text-[11px] text-slate-400 mb-2 leading-relaxed">រក្សាទុកលេខកូដទាំងនេះនៅកន្លែងមានសុវត្ថិភាព។ លេខកូដនីមួយៗអាចប្រើបានម្តងគត់នៅពេលបាត់ Authenticator App។</p>
+                        <div id="mfaRecoveryCodesBox" class="grid grid-cols-2 gap-2 bg-slate-50 dark:bg-slate-700/60 p-3 rounded-2xl border border-slate-200 dark:border-slate-600 font-mono text-center text-slate-700 dark:text-slate-200 font-bold"></div>
+                        <div class="flex justify-end gap-2 mt-2">
+                            <button type="button" onclick="window.copyRecoveryCodes()" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 rounded-lg text-slate-600 dark:text-slate-300 font-bold transition flex items-center gap-1.5">
+                                <i class="fa-regular fa-copy text-xs"></i> ចម្លងលេខកូដទាំងអស់
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="p-4 bg-slate-50 dark:bg-slate-700/50 border-t border-slate-200 dark:border-slate-600 flex justify-end gap-2">
+                    <button type="button" onclick="document.getElementById('mfaSetupModal').classList.replace('flex','hidden')" class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition shadow-md">
+                        <i class="fa-solid fa-check mr-1"></i> រួចរាល់
+                    </button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+    }
+
+    modal.classList.remove("hidden");
+    modal.classList.add("flex");
+    window.generateMfaSetup();
+};
+
+window.generateMfaSetup = function() {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
+    let secret = '';
+    const array = new Uint8Array(20);
+    (window.crypto || window.msCrypto).getRandomValues(array);
+    for (let i = 0; i < array.length; i++) {
+        secret += chars[array[i] % chars.length];
+    }
+
+    const email = window.AppAuth?.state?.username || 'admin';
+    const totpUri = `otpauth://totp/CMS:${encodeURIComponent(email)}?secret=${secret}&issuer=ClassroomManagementSystem`;
+    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(totpUri)}`;
+
+    const secretEl = document.getElementById("mfaSecretDisplay");
+    const qrImg = document.getElementById("mfaQrImage");
+    if (secretEl) secretEl.value = secret;
+    if (qrImg) qrImg.src = qrUrl;
+
+    // Generate 8 recovery codes
+    const recoveryCodes = [];
+    for (let i = 0; i < 8; i++) {
+        const rand = Math.floor(10000000 + Math.random() * 90000000);
+        const code = `${String(rand).slice(0, 4)}-${String(rand).slice(4, 8)}`;
+        recoveryCodes.push(code);
+    }
+    window.currentMfaRecoveryCodes = recoveryCodes;
+
+    const box = document.getElementById("mfaRecoveryCodesBox");
+    if (box) {
+        box.innerHTML = recoveryCodes.map(c => `<div class="p-1.5 bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-600">${c}</div>`).join("");
+    }
+};
+
+window.copyMfaSecret = function() {
+    const val = document.getElementById("mfaSecretDisplay")?.value;
+    if (val && navigator.clipboard) {
+        navigator.clipboard.writeText(val);
+        if (typeof showToast === 'function') showToast("📋 បានចម្លង MFA Secret រួចរាល់!");
+    }
+};
+
+window.copyRecoveryCodes = function() {
+    if (window.currentMfaRecoveryCodes && navigator.clipboard) {
+        navigator.clipboard.writeText(window.currentMfaRecoveryCodes.join("\n"));
+        if (typeof showToast === 'function') showToast("📋 បានចម្លង Recovery Codes ទាំង ៨ រួចរាល់!");
+    }
+};
+
+// ៧. កំណត់ហេតុសុវត្ថិភាពសវនកម្ម (Audit Logs Modal - Super Admin Only)
+window.openAuditLogModal = async function() {
+    let modal = document.getElementById("auditLogModal");
+    if (!modal) {
+        modal = document.createElement("div");
+        modal.id = "auditLogModal";
+        modal.className = "fixed inset-0 z-[8000] bg-slate-900/80 backdrop-blur-md hidden items-center justify-center p-4 font-siemreap overflow-y-auto";
+        modal.innerHTML = `
+            <div class="bg-white dark:bg-slate-800 rounded-3xl shadow-2xl w-full max-w-5xl overflow-hidden border border-slate-200 dark:border-slate-700 my-auto transform transition-all" onclick="event.stopPropagation()">
+                <div class="px-6 py-4 bg-gradient-to-r from-amber-600 via-amber-700 to-slate-800 text-white flex justify-between items-center">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center text-lg">
+                            <i class="fa-solid fa-list-check"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-moul text-base">កំណត់ត្រាសវនកម្មសុវត្ថិភាពប្រព័ន្ធ (Audit Logs)</h3>
+                            <p class="text-xs text-amber-100">ត្រួតពិនិត្យរាល់សកម្មភាពចូលប្រព័ន្ធ និងការកែប្រែទិន្នន័យ (Append-Only Log)</p>
+                        </div>
+                    </div>
+                    <button type="button" onclick="document.getElementById('auditLogModal').classList.replace('flex','hidden')" class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+
+                <div class="p-4 bg-slate-50 dark:bg-slate-700/50 border-b border-slate-200 dark:border-slate-600 flex flex-wrap gap-3 items-center justify-between text-xs">
+                    <div class="flex items-center gap-2 flex-1 min-w-[200px]">
+                        <i class="fa-solid fa-magnifying-glass text-slate-400"></i>
+                        <input type="text" id="auditSearchInput" oninput="window.filterAuditLogs()" placeholder="ស្វែងរកតាម User ID, សកម្មភាព, ឬ Target..." class="w-full px-3 py-1.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-xl font-bold outline-none focus:ring-2 focus:ring-amber-500">
+                    </div>
+                    <button type="button" onclick="window.loadAuditLogs()" class="px-3 py-1.5 bg-amber-600 hover:bg-amber-700 text-white rounded-xl font-bold transition flex items-center gap-1.5">
+                        <i class="fa-solid fa-rotate"></i> Refresh Logs
+                    </button>
+                </div>
+
+                <div class="p-4 max-h-[60vh] overflow-y-auto custom-scrollbar">
+                    <div id="auditLoading" class="text-center py-10 text-slate-400 text-xs font-bold">
+                        <i class="fa-solid fa-circle-notch fa-spin text-lg mb-2"></i><br>កំពុងទាញយកកំណត់ត្រាសវនកម្ម...
+                    </div>
+                    <table id="auditTable" class="w-full text-xs text-left hidden">
+                        <thead class="bg-slate-100 dark:bg-slate-700/60 text-slate-600 dark:text-slate-300 uppercase font-bold text-[10px]">
+                            <tr>
+                                <th class="p-2.5 rounded-l-xl">កាលបរិច្ឆេទ & ម៉ោង</th>
+                                <th class="p-2.5">អ្នកដំណើរការ (Actor)</th>
+                                <th class="p-2.5">សកម្មភាព (Action)</th>
+                                <th class="p-2.5">គោលដៅ (Target)</th>
+                                <th class="p-2.5">លទ្ធផល</th>
+                                <th class="p-2.5 rounded-r-xl">ព័ត៌មានលម្អិត</th>
+                            </tr>
+                        </thead>
+                        <tbody id="auditTableBody" class="divide-y divide-slate-100 dark:divide-slate-700 font-mono text-[11px]"></tbody>
+                    </table>
+                </div>
+
+                <div class="p-4 bg-slate-50 dark:bg-slate-700/50 border-t border-slate-200 dark:border-slate-600 flex justify-between items-center text-xs">
+                    <span id="auditCount" class="text-slate-400 font-bold">កំណត់ត្រា៖ ០ ព្រឹត្តិការណ៍</span>
+                    <button type="button" onclick="document.getElementById('auditLogModal').classList.replace('flex','hidden')" class="px-4 py-2 bg-slate-200 dark:bg-slate-600 hover:bg-slate-300 text-slate-700 dark:text-white rounded-xl font-bold transition">បិទ</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+    }
+
+    modal.classList.remove("hidden");
+    modal.classList.add("flex");
+    await window.loadAuditLogs();
+};
+
+window.cachedAuditLogs = [];
+
+window.loadAuditLogs = async function() {
+    const loading = document.getElementById("auditLoading");
+    const table = document.getElementById("auditTable");
+    if (loading) loading.classList.remove("hidden");
+    if (table) table.classList.add("hidden");
+
+    try {
+        let logs = [];
+        if (typeof window.apiGet === 'function') {
+            const res = await window.apiGet("getAuditLogs", { limit: 100 });
+            if (res && res.status === "success" && Array.isArray(res.data)) {
+                logs = res.data;
+            }
+        }
+        window.cachedAuditLogs = logs;
+        window.filterAuditLogs();
+    } catch(err) {
+        console.error("Load audit logs error:", err);
+        if (loading) loading.innerHTML = `<span class="text-rose-500 font-bold">❌ Error: ${err.message}</span>`;
+    }
+};
+
+window.filterAuditLogs = function() {
+    const query = document.getElementById("auditSearchInput")?.value.toLowerCase().trim() || "";
+    const tbody = document.getElementById("auditTableBody");
+    const table = document.getElementById("auditTable");
+    const loading = document.getElementById("auditLoading");
+    const countEl = document.getElementById("auditCount");
+
+    if (!tbody) return;
+
+    let filtered = window.cachedAuditLogs || [];
+    if (query) {
+        filtered = filtered.filter(l => 
+            String(l.actor_user_id || '').toLowerCase().includes(query) ||
+            String(l.action || '').toLowerCase().includes(query) ||
+            String(l.target_id || '').toLowerCase().includes(query) ||
+            String(l.details || '').toLowerCase().includes(query)
+        );
+    }
+
+    if (countEl) countEl.textContent = `កំណត់ត្រា៖ ${filtered.length} ព្រឹត្តិការណ៍`;
+    if (loading) loading.classList.add("hidden");
+    if (table) table.classList.remove("hidden");
+
+    if (filtered.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" class="py-8 text-center text-slate-400 font-bold font-siemreap">គ្មានកំណត់ត្រាត្រូវនឹងលក្ខខណ្ឌស្វែងរកឡើយ</td></tr>`;
+        return;
+    }
+
+    tbody.innerHTML = filtered.map(l => {
+        const time = l.timestamp ? new Date(l.timestamp).toLocaleString('en-GB') : "-";
+        const actor = l.actor_user_id || "ANONYMOUS";
+        const action = l.action || "-";
+        const target = `${l.target_type || ''}: ${l.target_id || ''}`;
+        const status = l.status || "SUCCESS";
+        const details = l.details || "-";
+
+        let statusClass = "text-emerald-600";
+        if (status === 'FAILED') statusClass = "text-rose-600";
+        else if (status === 'BLOCKED') statusClass = "text-amber-600";
+        else if (status === 'PENDING') statusClass = "text-sky-600";
+
+        return `
+            <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/40 transition">
+                <td class="p-2.5 text-slate-500">${time}</td>
+                <td class="p-2.5 font-bold text-slate-800 dark:text-white">${actor}</td>
+                <td class="p-2.5 font-bold text-indigo-600 dark:text-indigo-400">${action}</td>
+                <td class="p-2.5 text-slate-600 dark:text-slate-300">${target}</td>
+                <td class="p-2.5 font-bold ${statusClass}">${status}</td>
+                <td class="p-2.5 text-[10px] text-slate-400 truncate max-w-xs" title="${details}">${details}</td>
+            </tr>
+        `;
+    }).join("");
 };
