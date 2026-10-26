@@ -1385,8 +1385,44 @@ window.CMSPrintManager = {
             }
         }
         
-        // Fallback ប្រសិនបើ Pop-up ត្រូវបានបិទ (Iframe Printing)
-        this.print(document.body, { title: titleText, paperSize, orientation });
+        // Fallback ប្រសិនបើ Pop-up ត្រូវបានបិទ (Direct Iframe Printing)
+        try {
+            let oldIframe = document.getElementById("cms_print_frame_helper");
+            if (oldIframe) oldIframe.remove();
+
+            const iframe = document.createElement("iframe");
+            iframe.id = "cms_print_frame_helper";
+            iframe.style.position = "fixed";
+            iframe.style.top = "0";
+            iframe.style.left = "0";
+            iframe.style.width = "100%";
+            iframe.style.height = "100%";
+            iframe.style.border = "none";
+            iframe.style.zIndex = "-9999";
+            iframe.style.opacity = "0.01";
+            iframe.style.pointerEvents = "none";
+            document.body.appendChild(iframe);
+
+            const doc = iframe.contentWindow || iframe.contentDocument;
+            const iframeDoc = doc.document || doc;
+            iframeDoc.open();
+            iframeDoc.write(printDocument);
+            iframeDoc.close();
+
+            setTimeout(() => {
+                try {
+                    iframe.contentWindow.focus();
+                    iframe.contentWindow.print();
+                } catch(pErr) {
+                    console.warn("Iframe print error:", pErr);
+                    window.print();
+                }
+            }, 600);
+            return;
+        } catch(fallbackErr) {
+            console.error("Print fallback error:", fallbackErr);
+            window.print();
+        }
     }
 };
 

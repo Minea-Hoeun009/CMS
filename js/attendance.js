@@ -816,14 +816,15 @@ window.calculateMoEYSSummary = function() {
     const studentRows = document.querySelectorAll("#mainAttendanceTable tbody tr");
     
     if(!attendanceStudents || attendanceStudents.length === 0 || (studentRows.length === 1 && studentRows[0].cells.length < 10)) {
+        const emptyData = {
+            totalStudents: 0, femaleStudents: 0, grandPerm: 0, grandUnex: 0, grandSick: 0,
+            totalAbsentSessions: 0, actualSchoolDays: 0, offDaysCount: 0, totalSessionsRequired: 0,
+            actualAttendedSessions: 0, absencePercentage: "0.00", attendancePercentage: "0.00"
+        };
         if(typeof window.renderKpiSummaryCards === 'function') {
-             window.renderKpiSummaryCards({
-                totalStudents: 0, femaleStudents: 0, grandPerm: 0, grandUnex: 0, grandSick: 0,
-                totalAbsentSessions: 0, actualSchoolDays: 0, offDaysCount: 0, totalSessionsRequired: 0,
-                actualAttendedSessions: 0, absencePercentage: "0.00", attendancePercentage: "0.00"
-             });
+             window.renderKpiSummaryCards(emptyData);
         }
-        return;
+        return emptyData;
     }
 
     const totalStudents = attendanceStudents.length;
@@ -898,6 +899,8 @@ window.calculateMoEYSSummary = function() {
         classAvgPctCell.textContent = `${attendancePercentage.toFixed(0)}%`;
     }
 
+    const totalSessionsRequired = totalSessionsCountable || (actualSchoolDays * totalStudents);
+
     const summaryData = {
         totalStudents,
         femaleStudents,
@@ -907,7 +910,7 @@ window.calculateMoEYSSummary = function() {
         totalAbsentSessions,
         actualSchoolDays,
         offDaysCount,
-        totalSessionsRequired,
+        totalSessionsRequired: totalSessionsRequired,
         actualAttendedSessions,
         absencePercentage: absencePercentage.toFixed(2),
         attendancePercentage: attendancePercentage.toFixed(2)
@@ -2063,30 +2066,22 @@ window.printOfficialAttendance = function() {
     clonedTable.insertAdjacentHTML('afterbegin', colGroupHtml);
 
     const month = document.getElementById("attMonthSelect")?.value || "មករា";
-    const gradeInfo = window.getTeacherGradeInfo();
-    const grade = `${gradeInfo.level} ${gradeInfo.room}`;
+    const gradeSelect = document.getElementById("attGradeSelect");
+    const roomSelect = document.getElementById("attRoomSelect");
+    const curClass = typeof window.getCurrentSelectedClass === 'function' ? window.getCurrentSelectedClass() : { level: "ថ្នាក់ទី ១", room: "«ក»" };
+    const gradeInfo = typeof window.getTeacherGradeInfo === 'function' ? window.getTeacherGradeInfo() : curClass;
+    const selectedGrade = gradeSelect ? normalizeGrade(gradeSelect.value) : (curClass.level || gradeInfo.level || "ថ្នាក់ទី ១");
+    const selectedRoom = roomSelect ? roomSelect.value.trim() : (curClass.room || gradeInfo.room || "«ក»");
+    const grade = `${selectedGrade} ${selectedRoom}`;
 
-    // 🔒 ពិនិត្យសិទ្ធិថ្នាក់ទទួលខុសត្រូវ (Section 3.4: គ្រូមិនអាចកែទិន្នន័យរបស់ថ្នាក់ផ្សេង ប្រសិនបើគ្មានសិទ្ធិ)
-    if (typeof window.isTeacher === 'function' && window.isTeacher() && !window.isCurrentUserAdmin()) {
-        const myGrade = String(window.AuthState?.assigned_grade || localStorage.getItem('auth_assigned_grade') || "").replace(/\s+/g, '');
-        const myRoom = String(window.AuthState?.assigned_room || localStorage.getItem('auth_assigned_room') || "").replace(/[«»\s]/g, '');
-        const curGradeClean = String(gradeInfo.level || "").replace(/\s+/g, '');
-        const curRoomClean = String(gradeInfo.room || "").replace(/[«»\s]/g, '');
-
-        if (myGrade && (curGradeClean !== myGrade || (myRoom && curRoomClean !== myRoom))) {
-            alert(`🔒 លោកគ្រូ/អ្នកគ្រូមានសិទ្ធិកត់ត្រាវត្តមានតែថ្នាក់ «${window.AuthState?.assigned_grade || myGrade} ${window.AuthState?.assigned_room || myRoom}» ប៉ុណ្ណោះ!\nមិនអាចកែប្រែវត្តមានរបស់ថ្នាក់ផ្សេងបានឡើយ។`);
-            return;
-        }
-    }
-    
     const sInfo = typeof appSettings !== 'undefined' ? appSettings : {};
-    let rawDistrict = sInfo.district || "ស្រុកកៀនស្វាយ";
-    const districtName = rawDistrict.replace('ស្រុក', '').trim(); 
+    let rawDistrict = sInfo.district_name || sInfo.cluster || sInfo.district || "ស្រុកកៀនស្វាយ";
+    const districtName = rawDistrict.replace(/^ស្រុក\s*/, '').trim(); 
     
-    const schoolName = sInfo.school_name || "សាលាបឋមសិក្សា ធំ";
+    const schoolName = sInfo.school_name || "សាលាបឋមសិក្សា";
     const principalName = sInfo.principal_name || ".......................";
-    const teacherName = window.AuthState ? window.AuthState.teacherName : ".......................";
-    const academicYear = document.getElementById("globalAcademicYear")?.value || "2026-2027";
+    const teacherName = (window.AuthState && window.AuthState.teacherName) || localStorage.getItem('auth_teacher_name') || sInfo.teacher_name || ".......................";
+    const academicYear = document.getElementById("globalAcademicYear")?.value || localStorage.getItem('selected_academic_year') || sInfo.academic_year || "2026-2027";
     
     const totalStudents = summary?.totalStudents || 0;
     const femaleStudents = summary?.femaleStudents || 0;
