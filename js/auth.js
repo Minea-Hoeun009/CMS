@@ -1114,6 +1114,13 @@ window.viewWelcomeScreen = function() {
 window.handleLogin = (e) => window.AppAuth.login(e);
 window.handleRegister = (e) => window.AppAuth.register(e);
 window.handleLogout = () => window.AppAuth.logout();
+window.confirmLogout = function() {
+    if (confirm("តើលោកគ្រូ អ្នកគ្រូពិតជាចង់ចាកចេញពីប្រព័ន្ធមែនទេ?")) {
+        const modal = document.getElementById("accountProfileModal");
+        if (modal) modal.classList.replace("flex", "hidden");
+        window.handleLogout();
+    }
+};
 window.setupWorkspace = () => window.AppAuth.showWorkspace();
 
 // បិទ/បើកមើលលេខសម្ងាត់
@@ -1320,6 +1327,14 @@ window.renderAccountModal = function() {
                         <div class="pt-3 flex gap-3">
                             <button type="button" onclick="document.getElementById('accountProfileModal').classList.replace('flex','hidden')" class="flex-1 py-3 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600 rounded-xl text-xs sm:text-sm font-bold transition outline-none">បោះបង់</button>
                             <button type="submit" id="btnUpdateAccount" class="flex-1 py-3 bg-gradient-to-r from-blue-600 via-indigo-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 text-white rounded-xl text-xs sm:text-sm font-bold shadow-md shadow-indigo-200 dark:shadow-none transition transform hover:-translate-y-0.5 flex items-center justify-center gap-2 outline-none"><i class="fa-solid fa-floppy-disk"></i> រក្សាទុកព័ត៌មាន</button>
+                        </div>
+
+                        <!-- មុខងារចាកចេញពីប្រព័ន្ធ (Logout Button in Teacher Account Modal) -->
+                        <div class="pt-4 mt-2 border-t border-slate-100 dark:border-slate-700">
+                            <button type="button" onclick="window.confirmLogout()" class="w-full py-3 bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/40 dark:hover:bg-rose-900/50 text-rose-600 dark:text-rose-300 border border-rose-200 dark:border-rose-800 rounded-xl text-xs sm:text-sm font-bold transition flex items-center justify-center gap-2.5 outline-none shadow-sm hover:shadow active:scale-[0.99]">
+                                <i class="fa-solid fa-right-from-bracket text-rose-500"></i>
+                                <span>ចាកចេញពីប្រព័ន្ធ (Log Out)</span>
+                            </button>
                         </div>
                     </form>
                 </div>

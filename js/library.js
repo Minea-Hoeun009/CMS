@@ -853,7 +853,7 @@ window.printLibraryReport = function() {
         <table class="p-header">
             <tr>
                 <td class="ph-left"><br>
-                    ការិយាល័យអប់រំ យុវជន និងកីឡានៃរដ្ឋបាលស្រុក${districtName.replace('ស្រុក', '').trim()}<br><br>
+                    ការិយាល័យអប់រំ យុវជន និងកីឡានៃរដ្ឋបាលស្រុក${districtName.replace('ស្រុក', '').trim()}<br>
                     <span style="font-size: 12pt; display: block; margin-top: 8px;">${schoolName}</span>
                 </td>
                 <td class="ph-right">

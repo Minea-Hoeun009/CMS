@@ -298,6 +298,10 @@ window.handleSavePersonalTeacherSettings = async function(event) {
     const schoolName = document.getElementById("set_school_name")?.value.trim() || "";
     const schoolEn = document.getElementById("set_school_en")?.value.trim() || "";
     const districtName = document.getElementById("set_cluster")?.value.trim() || "";
+    const province = document.getElementById("set_school_province")?.value.trim() || "";
+    const commune = document.getElementById("set_school_commune")?.value.trim() || "";
+    const village = document.getElementById("set_school_village")?.value.trim() || "";
+    const cluster = document.getElementById("set_school_cluster")?.value.trim() || "";
     const principalName = document.getElementById("set_principal_name")?.value.trim() || "";
     const schoolPhone = document.getElementById("set_school_phone")?.value.trim() || "";
     const schoolEmail = document.getElementById("set_school_email")?.value.trim() || "";
@@ -333,6 +337,10 @@ window.handleSavePersonalTeacherSettings = async function(event) {
         school_name: schoolName,
         school_en: schoolEn,
         district_name: districtName,
+        province: province,
+        commune: commune,
+        village: village,
+        school_cluster: cluster,
         principal_name: principalName,
         school_phone: schoolPhone,
         school_email: schoolEmail
@@ -356,6 +364,10 @@ window.handleSavePersonalTeacherSettings = async function(event) {
             window.appSettings.cluster = districtName;
             window.appSettings.district_name = districtName;
         }
+        if (province) window.appSettings.province = province;
+        if (commune) window.appSettings.commune = commune;
+        if (village) window.appSettings.village = village;
+        if (cluster) window.appSettings.school_cluster = cluster;
         if (principalName) window.appSettings.principal_name = principalName;
         if (schoolPhone) window.appSettings.school_phone = schoolPhone;
         if (schoolEmail) window.appSettings.school_email = schoolEmail;
@@ -535,8 +547,28 @@ window.renderPersonalSettingsTab = function() {
                     </div>
 
                     <div>
-                        <label class="block font-bold text-slate-700 dark:text-slate-300 mb-2">ការិយាល័យអប់រំ យុវជន និងកីឡានៃរដ្ឋបាលស្រុក *</label>
+                        <label class="block font-bold text-slate-700 dark:text-slate-300 mb-2">កម្រងសាលារៀន (Cluster) *</label>
+                        <input type="text" id="set_school_cluster" value="${window.appSettings?.school_cluster || window.appSettings?.cluster_name || ''}" placeholder="ឧ. កម្រងបឋមសិក្សា..." class="w-full bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl px-4 py-2.5 font-bold outline-none focus:ring-2 focus:ring-indigo-400 text-slate-800 dark:text-white">
+                    </div>
+
+                    <div>
+                        <label class="block font-bold text-slate-700 dark:text-slate-300 mb-2">ភូមិ (Village)</label>
+                        <input type="text" id="set_school_village" value="${window.appSettings?.village || ''}" placeholder="ឧ. ភូមិធំ" class="w-full bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl px-4 py-2.5 font-bold outline-none focus:ring-2 focus:ring-indigo-400 text-slate-800 dark:text-white">
+                    </div>
+
+                    <div>
+                        <label class="block font-bold text-slate-700 dark:text-slate-300 mb-2">ឃុំ / សង្កាត់ (Commune)</label>
+                        <input type="text" id="set_school_commune" value="${window.appSettings?.commune || ''}" placeholder="ឧ. ឃុំភ្នំ" class="w-full bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl px-4 py-2.5 font-bold outline-none focus:ring-2 focus:ring-indigo-400 text-slate-800 dark:text-white">
+                    </div>
+
+                    <div>
+                        <label class="block font-bold text-slate-700 dark:text-slate-300 mb-2">ស្រុក / ខណ្ឌ (ការិយាល័យអប់រំ) *</label>
                         <input type="text" id="set_cluster" value="${window.appSettings?.cluster || window.appSettings?.district_name || 'កៀនស្វាយ'}" placeholder="ឧ. កៀនស្វាយ" class="w-full bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl px-4 py-2.5 font-bold outline-none focus:ring-2 focus:ring-indigo-400 text-slate-800 dark:text-white">
+                    </div>
+
+                    <div>
+                        <label class="block font-bold text-slate-700 dark:text-slate-300 mb-2">ខេត្ត / រាជធានី (Province) *</label>
+                        <input type="text" id="set_school_province" value="${window.appSettings?.province || 'កណ្តាល'}" placeholder="ឧ. កណ្តាល" class="w-full bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl px-4 py-2.5 font-bold outline-none focus:ring-2 focus:ring-indigo-400 text-slate-800 dark:text-white">
                     </div>
 
                     <div>
@@ -549,7 +581,7 @@ window.renderPersonalSettingsTab = function() {
                         <input type="text" id="set_school_phone" value="${window.appSettings?.school_phone || ''}" placeholder="012 345 678" class="w-full bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl px-4 py-2.5 font-mono font-bold outline-none focus:ring-2 focus:ring-indigo-400 text-slate-800 dark:text-white">
                     </div>
 
-                    <div>
+                    <div class="md:col-span-3">
                         <label class="block font-bold text-slate-700 dark:text-slate-300 mb-2">អ៊ីមែលផ្លូវការសាលា</label>
                         <input type="email" id="set_school_email" value="${window.appSettings?.school_email || ''}" placeholder="school@moeys.gov.kh" class="w-full bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl px-4 py-2.5 font-mono font-bold outline-none focus:ring-2 focus:ring-indigo-400 text-slate-800 dark:text-white">
                     </div>

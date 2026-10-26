@@ -2296,7 +2296,7 @@ window.exportScoreEntryToExcel = function() {
         <body>
             <table>
                 <tr>
-                    <td colspan="15" style="border: none; text-align: left; vertical-align: top; font-family: 'Khmer OS Muol Light', Moul, serif; font-size: 11pt; padding-left: 10px;">ការិយាល័យអប់រំ យុវជន និងកីឡានៃរដ្ឋបាលស្រុក${districtName}<br><br>${schoolName}<br>${grade}</td>
+                    <td colspan="15" style="border: none; text-align: left; vertical-align: top; font-family: 'Khmer OS Muol Light', Moul, serif; font-size: 11pt; padding-left: 10px;">ការិយាល័យអប់រំ យុវជន និងកីឡានៃរដ្ឋបាលស្រុក${districtName}<br>${schoolName}<br>${grade}</td>
                     <td colspan="15" style="border: none; text-align: center; vertical-align: top; font-family: 'Khmer OS Muol Light', Moul, serif; font-size: 12pt;">ព្រះរាជាណាចក្រកម្ពុជា<br>ជាតិ សាសនា ព្រះមហាក្សត្រ<br><div style="color: #d97706; font-size: 11px;">❖ ❖ ❖</div></td>
                 </tr>
                 <tr><td colspan="30" style="border: none; height: 15px;"></td></tr>
@@ -2576,7 +2576,7 @@ window.downloadExcelTemplate = function() {
         <table border="0" style="width: 100%; margin-bottom: 20px;">
             <tr>
                 <td colspan="${leftCols}" style="text-align: left; vertical-align: top;"><br>
-                    <b style="font-family: 'Khmer OS Muol Light', 'Moul', serif; font-size: 11pt; color: #1e3a8a;">ការិយាល័យអប់រំ យុវជន និងកីឡានៃរដ្ឋបាលស្រុក${districtName}</b><br><br>
+                    <b style="font-family: 'Khmer OS Muol Light', 'Moul', serif; font-size: 11pt; color: #1e3a8a;">ការិយាល័យអប់រំ យុវជន និងកីឡានៃរដ្ឋបាលស្រុក${districtName}</b><br>
                     <b style="font-family: 'Khmer OS Muol Light', 'Moul', serif; font-size: 12pt; color: #1e3a8a;">${schoolName}</b><br>
                     <b style="font-family: 'Khmer OS Muol Light', 'Moul', serif; font-size: 12pt; color: #1e3a8a;">បន្ទប់ ${sInfo.teacher_room || '«ក»'}</b>
                 </td>
@@ -3039,7 +3039,6 @@ window.printScoreList = function() {
             <div class="header-box" style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; width: 100%;">
               <div class="header-left" style="text-align: left; line-height: 1.6;">
                 <p style="margin: 0 0 4px 0; font-size: 10.5pt; font-family: 'Khmer OS Muol Light', 'Moul', serif; color: #0f172a;">ការិយាល័យ អប់រំ យុវជននិងកីឡានៃរដ្ឋបាលស្រុក ${districtName}</p>
-                <br><br>
                 <p style="margin: 0; font-size: 10.5pt; font-family: 'Khmer OS Muol Light', 'Moul', serif; color: #0f172a;">${schoolName}</p>
               </div>
               <div class="header-right" style="text-align: center; line-height: 1.6;">
@@ -3349,7 +3348,6 @@ window.printRankingTable = function() {
             <div class="header-box" style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; width: 100%;">
               <div class="header-left" style="text-align: left; line-height: 1.6;">
                 <p style="margin: 0 0 4px 0; font-size: 10.5pt; font-family: 'Khmer OS Muol Light', 'Moul', serif; color: #0f172a;">ការិយាល័យ អប់រំ យុវជននិងកីឡានៃរដ្ឋបាលស្រុក ${districtName}</p>
-                <br><br>
                 <p style="margin: 0; font-size: 10.5pt; font-family: 'Khmer OS Muol Light', 'Moul', serif; color: #0f172a;">${schoolName}</p>
               </div>
               <div class="header-right" style="text-align: center; line-height: 1.6;">
