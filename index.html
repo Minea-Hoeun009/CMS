@@ -317,30 +317,44 @@
                                     </div>
                                 </div>
 
-                                <!-- កំណត់បន្ទប់រៀនទទួលបន្ទុក (Homeroom Classroom Setup) -->
-                                <div class="p-3 bg-emerald-50/60 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-800 rounded-2xl space-y-2">
+                                <!-- កំណត់ថ្នាក់ និងបន្ទប់រៀនទទួលបន្ទុក (Homeroom Classroom Setup) -->
+                                <div class="p-3 bg-emerald-50/60 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-800 rounded-2xl space-y-2.5">
                                     <div class="flex items-center gap-2 text-emerald-800 dark:text-emerald-300 font-bold text-xs">
                                         <i class="fa-solid fa-chalkboard-user"></i>
-                                        <span>កំណត់បន្ទប់រៀនទទួលបន្ទុក *</span>
-                                    </div>
-                                    <div class="hidden" aria-hidden="true">
-                                        <select id="regGrade"><option value="" selected></option></select>
+                                        <span>កំណត់ថ្នាក់ និងបន្ទប់រៀនទទួលបន្ទុក *</span>
                                     </div>
                                     <div class="grid grid-cols-2 gap-2">
                                         <div>
-                                            <label class="block text-[10px] font-bold text-slate-500 mb-1">បន្ទប់</label>
+                                            <label class="block text-[10px] font-bold text-slate-500 mb-1">ថ្នាក់ទី *</label>
+                                            <select id="regGrade" class="w-full px-2.5 py-2 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-xs font-bold text-slate-700 dark:text-white outline-none focus:ring-2 focus:ring-emerald-500">
+                                                <option value="ថ្នាក់ទី ១" selected>ថ្នាក់ទី ១</option>
+                                                <option value="ថ្នាក់ទី ២">ថ្នាក់ទី ២</option>
+                                                <option value="ថ្នាក់ទី ៣">ថ្នាក់ទី ៣</option>
+                                                <option value="ថ្នាក់ទី ៤">ថ្នាក់ទី ៤</option>
+                                                <option value="ថ្នាក់ទី ៥">ថ្នាក់ទី ៥</option>
+                                                <option value="ថ្នាក់ទី ៦">ថ្នាក់ទី ៦</option>
+                                                <option value="ថ្នាក់ទី ៧">ថ្នាក់ទី ៧</option>
+                                                <option value="ថ្នាក់ទី ៨">ថ្នាក់ទី ៨</option>
+                                                <option value="ថ្នាក់ទី ៩">ថ្នាក់ទី ៩</option>
+                                                <option value="ថ្នាក់ទី ១០">ថ្នាក់ទី ១០</option>
+                                                <option value="ថ្នាក់ទី ១១">ថ្នាក់ទី ១១</option>
+                                                <option value="ថ្នាក់ទី ១២">ថ្នាក់ទី ១២</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label class="block text-[10px] font-bold text-slate-500 mb-1">បន្ទប់ *</label>
                                             <select id="regRoom" class="w-full px-2.5 py-2 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-xs font-bold text-slate-700 dark:text-white outline-none focus:ring-2 focus:ring-emerald-500 font-moul">
-                                                <option value="«ក»">«ក»</option>
+                                                <option value="«ក»" selected>«ក»</option>
                                                 <option value="«ខ»">«ខ»</option>
                                                 <option value="«គ»">«គ»</option>
                                                 <option value="«ឃ»">«ឃ»</option>
                                                 <option value="«ង»">«ង»</option>
                                             </select>
                                         </div>
-                                        <div>
-                                            <label class="block text-[10px] font-bold text-slate-500 mb-1">ឈ្មោះសាលារៀន</label>
-                                            <input type="text" id="regSchool" placeholder="ឧ. សាលាបឋមសិក្សា..." class="w-full px-2.5 py-1.5 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-xs font-bold text-slate-700 dark:text-white outline-none focus:ring-2 focus:ring-emerald-500">
-                                        </div>
+                                    </div>
+                                    <div>
+                                        <label class="block text-[10px] font-bold text-slate-500 mb-1">ឈ្មោះសាលារៀន</label>
+                                        <input type="text" id="regSchool" placeholder="ឧ. សាលាបឋមសិក្សា ខ្សុំ" class="w-full px-2.5 py-1.5 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-xs font-bold text-slate-700 dark:text-white outline-none focus:ring-2 focus:ring-emerald-500">
                                     </div>
                                 </div>
 

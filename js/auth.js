@@ -810,9 +810,10 @@ window.AppAuth = {
             const teacherId = `TCH-${randomSuffix}`;
             const passwordHash = await window.hashPassword(pass);
 
+            const sInfo = window.appSettings || JSON.parse(localStorage.getItem('school_settings') || '{}');
             const assignedGrade = document.getElementById('regGrade')?.value || "ថ្នាក់ទី ១";
             const assignedRoom = document.getElementById('regRoom')?.value || "«ក»";
-            const schoolName = document.getElementById('regSchool')?.value.trim() || "សាលារៀនយើង";
+            const schoolName = document.getElementById('regSchool')?.value.trim() || sInfo.school_name || "សាលាបឋមសិក្សា ខ្សុំ";
 
             const teacherDoc = {
                 teacher_id: teacherId,
@@ -870,15 +871,32 @@ window.AppAuth = {
                 console.warn("Could not cache registered teacher:", e);
             }
 
-            // ១. រក្សាទុកក្នុង Firestore
-            if (window.db) {
-                await window.db.collection("teachers").doc(teacherId).set({
-                    ...teacherDoc,
-                    personal_settings: personalPayload
-                });
+            // ១. ចុះឈ្មោះក្នុង Firebase Authentication (ប្រសិនបើ Server បានកំណត់)
+            if (window.auth) {
+                try {
+                    const email = window.toAuthEmail(user);
+                    const userCred = await window.auth.createUserWithEmailAndPassword(email, pass);
+                    if (userCred && userCred.user) {
+                        teacherDoc.auth_uid = userCred.user.uid;
+                    }
+                } catch(authErr) {
+                    console.warn("Firebase Auth registration note:", authErr.code, authErr.message);
+                }
             }
 
-            // ២. រក្សាទុកក្នុង Google Sheets / Apps Script (Backup & Standard Relational Tables)
+            // ២. រក្សាទុកក្នុង Firestore (Gracefully caught to prevent blocking when permissions are restricted)
+            if (window.db) {
+                try {
+                    await window.db.collection("teachers").doc(teacherId).set({
+                        ...teacherDoc,
+                        personal_settings: personalPayload
+                    });
+                } catch(fsErr) {
+                    console.warn("Firestore direct teacher write skipped:", fsErr.message);
+                }
+            }
+
+            // ៣. រក្សាទុកក្នុង Google Sheets / Apps Script (Backup & Standard Relational Tables)
             if (typeof window.apiPost === 'function') {
                 try {
                     await window.apiPost("registerUser", teacherDoc);
