@@ -500,6 +500,47 @@ body {
    Phase 3 UX/UI Standardization Additions
 ======================================================== */
 
+/* ========================================================
+   Modern Khmer Royal Blue Design System & Sidebar Theme
+======================================================== */
+.sidebar-khmer-royal {
+    background: linear-gradient(180deg, #10489c 0%, #0d3b82 50%, #092a61 100%) !important;
+}
+
+.sidebar-btn-active,
+.sidebar-khmer-btn-active {
+    background: rgba(255, 255, 255, 0.18) !important;
+    color: #ffffff !important;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.16) !important;
+    border-left: 3.5px solid #60a5fa !important;
+}
+
+.sidebar-khmer-btn {
+    border-left: 3.5px solid transparent;
+    transition: all 0.2s ease;
+}
+.sidebar-khmer-btn:hover {
+    background: rgba(255, 255, 255, 0.1) !important;
+    color: #ffffff !important;
+}
+
+/* Circular Progress Gauge (Daily Status) */
+.circle-progress-bg {
+    fill: none;
+    stroke: #e2e8f0;
+    stroke-width: 8;
+}
+.dark .circle-progress-bg {
+    stroke: #334155;
+}
+.circle-progress-bar {
+    fill: none;
+    stroke: #2563eb;
+    stroke-width: 8;
+    stroke-linecap: round;
+    transition: stroke-dashoffset 1s ease-in-out;
+}
+
 /* Accessible Focus States (A11y) */
 :focus-visible {
     outline: 2px solid #6366f1 !important;
