@@ -1759,6 +1759,16 @@ window.saveMonthlyAttendance = async function() {
         window.logAudit('SAVE_ATTENDANCE', 'attendance', `បានរក្សាទុកវត្តមានសិស្សថ្នាក់ ${grade} ខែ${month} ឆ្នាំ${year} (កត់ត្រាបាន ${batchPayload.length} វត្តមាន | Cloud: ${cloudSaved ? 'Yes' : 'No'})`);
     }
 
+    // 📡 ៥. Emit Event to Central EventBus (Dynamic Architecture)
+    if (window.CMSEventBus && window.CMSEventTypes) {
+        window.CMSEventBus.emit(window.CMSEventTypes.ATTENDANCE_RECORDED, {
+            grade: grade,
+            month: month,
+            year: year,
+            total_records: batchPayload.length
+        });
+    }
+
     setTimeout(() => {
         if (btn) {
             btn.disabled = false;

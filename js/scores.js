@@ -1219,6 +1219,16 @@ window.saveScoresData = async function() {
         if (typeof window.logAudit === 'function' && (cloudSaved || gasSaved || localSaved)) {
             window.logAudit('SAVE_SCORES', 'score', `បានរក្សាទុកពិន្ទុសិស្សថ្នាក់ ${grade} វគ្គ/ខែ៖ ${type === "annual" ? "ប្រចាំឆ្នាំ" : month} (ចំនួន ${scoresPayload.length} នាក់ | Cloud: ${cloudSaved ? 'Yes' : 'No'})`);
         }
+
+        // 📡 ៤. Emit Event to Central EventBus (Dynamic Architecture)
+        if (window.CMSEventBus && window.CMSEventTypes) {
+            window.CMSEventBus.emit(window.CMSEventTypes.SCORE_UPDATED, {
+                grade: grade,
+                month: month,
+                type: type,
+                total_students: scoresPayload.length
+            });
+        }
     } catch (error) {
         alert("❌ " + error.message);
     } finally {

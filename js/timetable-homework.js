@@ -194,6 +194,14 @@ window.TimetableHomeworkManager = {
         if (typeof window.logAudit === 'function') {
             window.logAudit('UPDATE_TIMETABLE', 'timetable', `Admin បានកែសម្រួលកាលវិភាគបង្រៀនថ្នាក់ ${targetGrade} (ឆ្នាំ ${this.currentAcademicYear})`);
         }
+
+        // 📡 Emit Event to EventBus
+        if (window.CMSEventBus && window.CMSEventTypes) {
+            window.CMSEventBus.emit(window.CMSEventTypes.TIMETABLE_CHANGED, {
+                grade: targetGrade,
+                academic_year: this.currentAcademicYear
+            });
+        }
     },
 
     /**
@@ -1443,6 +1451,14 @@ window.TimetableHomeworkManager = {
             } catch(e) {
                 console.warn("Firestore homework save note:", e);
             }
+        }
+
+        // 📡 Emit Event to EventBus
+        if (window.CMSEventBus && window.CMSEventTypes) {
+            window.CMSEventBus.emit(window.CMSEventTypes.HOMEWORK_ASSIGNED, {
+                grade: this.currentGrade,
+                total_assignments: (list || []).length
+            });
         }
     },
 

@@ -37,7 +37,17 @@ const SHEETS = {
   USER_PERMISSIONS: 'UserPermissions',
   SESSIONS: 'Sessions',
   LOGIN_ATTEMPTS: 'LoginAttempts',
-  TEACHER_SETTINGS: 'TeacherSettings'
+  TEACHER_SETTINGS: 'TeacherSettings',
+  ACADEMIC_YEARS: 'AcademicYears',
+  SUBJECTS: 'Subjects',
+  ENROLLMENTS: 'Enrollments',
+  TEACHER_ASSIGNMENTS: 'TeacherAssignments',
+  EXAMINATIONS: 'Examinations',
+  TIMETABLES: 'Timetables',
+  HOMEWORK: 'Homework',
+  ANNOUNCEMENTS: 'Announcements',
+  NOTIFICATIONS: 'Notifications',
+  EVENT_QUEUE: 'EventQueue'
 };
 
 // កំណត់ក្បាលជួរឈរស្តង់ដារសម្រាប់តារាងនីមួយៗ (Standard Column Definitions)
@@ -103,6 +113,36 @@ const SCHEMAS = {
   ],
   [SHEETS.TEACHER_SETTINGS]: [
     'teacher_id', 'preferences_json', 'updated_at'
+  ],
+  [SHEETS.ACADEMIC_YEARS]: [
+    'year_id', 'name', 'start_date', 'end_date', 'status', 'is_current', 'updated_at'
+  ],
+  [SHEETS.SUBJECTS]: [
+    'subject_id', 'name_kh', 'name_en', 'grade_level', 'category', 'credit_hours', 'status', 'updated_at'
+  ],
+  [SHEETS.ENROLLMENTS]: [
+    'enrollment_id', 'student_id', 'academic_year', 'grade', 'room', 'enrollment_date', 'status', 'transfer_notes', 'updated_at'
+  ],
+  [SHEETS.TEACHER_ASSIGNMENTS]: [
+    'assignment_id', 'teacher_id', 'academic_year', 'grade', 'room', 'subject_id', 'role_in_class', 'updated_at'
+  ],
+  [SHEETS.EXAMINATIONS]: [
+    'exam_id', 'academic_year', 'semester', 'month', 'exam_name', 'grade', 'subject', 'max_score', 'status', 'published_at', 'updated_at'
+  ],
+  [SHEETS.TIMETABLES]: [
+    'entry_id', 'academic_year', 'grade', 'room', 'day_of_week', 'period_slot', 'subject_name', 'teacher_id', 'room_number', 'updated_at'
+  ],
+  [SHEETS.HOMEWORK]: [
+    'homework_id', 'academic_year', 'grade', 'room', 'subject_name', 'teacher_id', 'title', 'description', 'due_date', 'status', 'created_at'
+  ],
+  [SHEETS.ANNOUNCEMENTS]: [
+    'announcement_id', 'title', 'content', 'priority', 'target_role', 'target_grade', 'author_id', 'published_at', 'status'
+  ],
+  [SHEETS.NOTIFICATIONS]: [
+    'notification_id', 'user_id', 'title', 'message', 'type', 'is_read', 'created_at', 'link_action'
+  ],
+  [SHEETS.EVENT_QUEUE]: [
+    'event_id', 'event_type', 'timestamp', 'actor_user_id', 'affected_record_ids', 'payload_json', 'processing_status', 'retry_count', 'processed_at'
   ]
 };
 
@@ -302,6 +342,70 @@ function recordLoginAttempt(identifier, result, metadata = {}) {
     details: metadata.reason || ''
   };
   upsertRecords(SHEETS.LOGIN_ATTEMPTS, [attemptRecord], 'attempt_id');
+}
+
+/**
+ * បញ្ជូនព្រឹត្តិការណ៍ប្រព័ន្ធទៅកាន់ Event Queue និង Audit Log
+ */
+function emitSystemEvent(eventType, actorId, affectedIds, payloadObj = {}) {
+  try {
+    const eventId = `EVT-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+    const nowIso = new Date().toISOString();
+    const eventRecord = {
+      event_id: eventId,
+      event_type: eventType,
+      timestamp: nowIso,
+      actor_user_id: actorId || 'SYSTEM',
+      affected_record_ids: Array.isArray(affectedIds) ? affectedIds.join(',') : String(affectedIds || ''),
+      payload_json: JSON.stringify(payloadObj),
+      processing_status: 'PROCESSED',
+      retry_count: 0,
+      processed_at: nowIso
+    };
+    upsertRecords(SHEETS.EVENT_QUEUE, [eventRecord], 'event_id');
+    logSecurityEvent(actorId, `EVENT_${eventType}`, 'EVENT', eventId, 'SUCCESS', payloadObj);
+    return eventRecord;
+  } catch(e) {
+    console.warn("Event emit note:", e);
+    return null;
+  }
+}
+
+/**
+ * គណនាមធ្យមភាគ និងចំណាត់ថ្នាក់ឡើងវិញដោយស្វ័យប្រវត្តិតាមថ្នាក់ (Auto-Recalculate Rankings)
+ */
+function recalculateScoresAndRankings(academicYear, grade, room, month) {
+  try {
+    const query = {};
+    if (academicYear) query.academic_year = academicYear;
+    if (grade) query.grade = grade;
+    if (room) query.room = room;
+    if (month) query.month = month;
+    
+    const scores = queryTable(SHEETS.SCORES, query);
+    if (!scores || scores.length === 0) return 0;
+    
+    // តម្រៀបពិន្ទុចុះពីធំទៅតូច
+    scores.sort((a, b) => (parseFloat(b.total) || parseFloat(b.score) || 0) - (parseFloat(a.total) || parseFloat(a.score) || 0));
+    
+    const nowIso = new Date().toISOString();
+    scores.forEach((s, idx) => {
+      s.rank = idx + 1;
+      const avg = parseFloat(s.average) || parseFloat(s.score) || 0;
+      if (avg >= 8.5) s.grade_letter = 'ល្អណាស់ (A)';
+      else if (avg >= 7.0) s.grade_letter = 'ល្អ (B)';
+      else if (avg >= 6.0) s.grade_letter = 'ល្អបង្គួរ (C)';
+      else if (avg >= 5.0) s.grade_letter = 'មធ្យម (D)';
+      else s.grade_letter = 'ខ្សោយ (F)';
+      s.updated_at = nowIso;
+    });
+    
+    upsertRecords(SHEETS.SCORES, scores, 'score_id');
+    return scores.length;
+  } catch(e) {
+    console.warn("Recalculate scores error:", e);
+    return 0;
+  }
 }
 
 /**
@@ -762,6 +866,165 @@ function doGet(e) {
         try { pref = JSON.parse(settings[0].preferences_json); } catch(e) {}
       }
       return createJsonResponse({ status: 'success', data: pref });
+    }
+
+    // ៥.១០ Get Academic Years
+    if (action === 'getAcademicYears') {
+      const years = queryTable(SHEETS.ACADEMIC_YEARS, {});
+      return createJsonResponse({ status: 'success', data: years });
+    }
+
+    // ៥.១១ Get Subjects
+    if (action === 'getSubjects') {
+      const query = {};
+      if (params.grade_level) query.grade_level = params.grade_level;
+      const subjects = queryTable(SHEETS.SUBJECTS, query);
+      return createJsonResponse({ status: 'success', data: subjects });
+    }
+
+    // ៥.១២ Get Enrollments
+    if (action === 'getEnrollments') {
+      const query = {};
+      if (params.academic_year) query.academic_year = params.academic_year;
+      if (params.grade) query.grade = params.grade;
+      if (params.room) query.room = params.room;
+      if (params.student_id) query.student_id = params.student_id;
+      const enrollments = queryTable(SHEETS.ENROLLMENTS, query);
+      return createJsonResponse({ status: 'success', data: enrollments });
+    }
+
+    // ៥.១៣ Get Teacher Assignments
+    if (action === 'getTeacherAssignments') {
+      const query = {};
+      if (params.teacher_id) query.teacher_id = params.teacher_id;
+      if (params.academic_year) query.academic_year = params.academic_year;
+      const assignments = queryTable(SHEETS.TEACHER_ASSIGNMENTS, query);
+      return createJsonResponse({ status: 'success', data: assignments });
+    }
+
+    // ៥.១៤ Get Examinations
+    if (action === 'getExaminations') {
+      const query = {};
+      if (params.academic_year) query.academic_year = params.academic_year;
+      if (params.grade) query.grade = params.grade;
+      if (params.month) query.month = params.month;
+      const exams = queryTable(SHEETS.EXAMINATIONS, query);
+      return createJsonResponse({ status: 'success', data: exams });
+    }
+
+    // ៥.១៥ Get Timetables
+    if (action === 'getTimetables') {
+      const query = {};
+      if (params.academic_year) query.academic_year = params.academic_year;
+      if (params.grade) query.grade = params.grade;
+      if (params.room) query.room = params.room;
+      if (params.teacher_id) query.teacher_id = params.teacher_id;
+      const timetables = queryTable(SHEETS.TIMETABLES, query);
+      return createJsonResponse({ status: 'success', data: timetables });
+    }
+
+    // ៥.១៦ Get Homework
+    if (action === 'getHomework') {
+      const query = {};
+      if (params.academic_year) query.academic_year = params.academic_year;
+      if (params.grade) query.grade = params.grade;
+      if (params.room) query.room = params.room;
+      const homework = queryTable(SHEETS.HOMEWORK, query);
+      return createJsonResponse({ status: 'success', data: homework });
+    }
+
+    // ៥.១៧ Get Announcements
+    if (action === 'getAnnouncements') {
+      const announcements = queryTable(SHEETS.ANNOUNCEMENTS, {});
+      return createJsonResponse({ status: 'success', data: announcements });
+    }
+
+    // ៥.១៨ Get Notifications
+    if (action === 'getNotifications') {
+      const auth = authenticateSession(sessionToken);
+      const targetUserId = auth.authenticated ? auth.user.user_id : (params.user_id || 'PUBLIC');
+      const notifications = queryTable(SHEETS.NOTIFICATIONS, { user_id: targetUserId });
+      return createJsonResponse({ status: 'success', data: notifications });
+    }
+
+    // ៥.១៩ Get Events (Event Queue - Admin Only)
+    if (action === 'getEvents') {
+      const auth = authenticateSession(sessionToken);
+      if (!auth.authenticated || !authorizeRole(auth.user, ['super_admin', 'admin'])) {
+        return createJsonResponse({ status: 'forbidden', message: 'ទាមទារសិទ្ធិ Admin' });
+      }
+      const events = queryTable(SHEETS.EVENT_QUEUE, {});
+      events.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+      return createJsonResponse({ status: 'success', data: events.slice(0, 50) });
+    }
+
+    // ៥.២០ Dynamic Role-Aware Dashboard Stats Aggregation
+    if (action === 'getDashboardStats') {
+      const auth = authenticateSession(sessionToken);
+      const user = auth.authenticated ? auth.user : { role: 'guest', assigned_grade: 'all', assigned_room: 'all' };
+      const role = user.role || 'guest';
+      const academicYear = params.academic_year || '2026-2027';
+
+      // Load relevant student records based on scope
+      let studentFilter = { academic_year: academicYear };
+      if (role === 'homeroom_teacher' && user.assigned_grade && user.assigned_grade !== 'all') {
+        studentFilter.grade = user.assigned_grade;
+        if (user.assigned_room && user.assigned_room !== 'all') studentFilter.room = user.assigned_room;
+      }
+      const students = queryTable(SHEETS.STUDENTS, studentFilter);
+      const activeStudents = students.filter(s => s.status !== 'Dropped');
+      const droppedCount = students.filter(s => s.status === 'Dropped').length;
+      const femaleCount = activeStudents.filter(s => s.gender === 'ស្រី' || s.gender === 'F').length;
+
+      // Classes count
+      const classes = queryTable(SHEETS.CLASSES, { academic_year: academicYear });
+      const teachers = queryTable(SHEETS.TEACHERS, {});
+
+      // Today's attendance stats
+      const todayDate = new Date().toISOString().split('T')[0];
+      const todayAtt = queryTable(SHEETS.ATTENDANCE, { date: todayDate, academic_year: academicYear });
+      let presentToday = 0, absentToday = 0, lateToday = 0, excusedToday = 0;
+      todayAtt.forEach(a => {
+        const st = String(a.status || '').toUpperCase();
+        if (st === 'PRESENT' || st === 'មក' || st === 'P') presentToday++;
+        else if (st === 'ABSENT' || st === 'អវត្តមាន' || st === 'A') absentToday++;
+        else if (st === 'LATE' || st === 'យឺត' || st === 'L') lateToday++;
+        else excusedToday++;
+      });
+
+      // Pending users count (Admin only)
+      let pendingApprovals = 0;
+      if (role === 'super_admin' || role === 'admin') {
+        const pendingUsers = queryTable(SHEETS.USERS, { status: 'pending' });
+        pendingApprovals = pendingUsers.length;
+      }
+
+      // Recent announcements
+      const announcements = queryTable(SHEETS.ANNOUNCEMENTS, {}).slice(0, 5);
+
+      return createJsonResponse({
+        status: 'success',
+        data: {
+          role: role,
+          academic_year: academicYear,
+          scope: { grade: user.assigned_grade || 'all', room: user.assigned_room || 'all' },
+          total_students: activeStudents.length,
+          female_students: femaleCount,
+          male_students: activeStudents.length - femaleCount,
+          dropped_students: droppedCount,
+          total_classes: classes.length,
+          total_teachers: teachers.length,
+          attendance_today: {
+            present: presentToday,
+            absent: absentToday,
+            late: lateToday,
+            excused: excusedToday,
+            rate: activeStudents.length > 0 ? Math.round((presentToday / activeStudents.length) * 100) : 100
+          },
+          pending_approvals: pendingApprovals,
+          recent_announcements: announcements
+        }
+      });
     }
 
     return createJsonResponse({
@@ -1278,6 +1541,11 @@ function doPost(e) {
       });
 
       upsertRecords(SHEETS.SCORES, scoresList, 'score_id');
+      if (scoresList.length > 0) {
+        const sample = scoresList[0];
+        recalculateScoresAndRankings(sample.academic_year, sample.grade, sample.room, sample.month);
+        emitSystemEvent('SCORE_UPDATED', auth.user?.user_id || teacherId, scoresList.map(s => s.score_id), { count: scoresList.length });
+      }
       logSecurityEvent(auth.user?.user_id || teacherId, 'SAVE_SCORES_BATCH', 'SCORES', `COUNT:${scoresList.length}`, 'SUCCESS');
       return createJsonResponse({
         status: 'success',
@@ -1308,6 +1576,9 @@ function doPost(e) {
       });
 
       upsertRecords(SHEETS.ATTENDANCE, attList, 'record_id');
+      if (attList.length > 0) {
+        emitSystemEvent('ATTENDANCE_RECORDED', auth.user?.user_id || teacherId, attList.map(a => a.record_id), { count: attList.length });
+      }
       logSecurityEvent(auth.user?.user_id || teacherId, 'SAVE_ATTENDANCE_BATCH', 'ATTENDANCE', `COUNT:${attList.length}`, 'SUCCESS');
       return createJsonResponse({
         status: 'success',
@@ -1484,6 +1755,208 @@ function doPost(e) {
     if (action === 'logAudit') {
       logSecurityEvent(payload.user_id || teacherId, payload.log_action || data.action || 'INFO', payload.entity_type || 'SYSTEM', payload.target_id || '', 'SUCCESS', data);
       return createJsonResponse({ status: 'success' });
+    }
+
+    // ៣.១៣ Save Academic Year
+    if (action === 'saveAcademicYear') {
+      const auth = authenticateSession(sessionToken);
+      if (auth.authenticated && !authorizeRole(auth.user, ['super_admin', 'admin'])) {
+        return createJsonResponse({ status: 'forbidden', message: 'ទាមទារសិទ្ធិ Admin' });
+      }
+      const item = data;
+      if (!item.year_id) item.year_id = `AY-${Date.now()}`;
+      item.updated_at = new Date().toISOString();
+      upsertRecords(SHEETS.ACADEMIC_YEARS, [item], 'year_id');
+      emitSystemEvent('ACADEMIC_YEAR_SAVED', auth.user?.user_id, [item.year_id], item);
+      return createJsonResponse({ status: 'success', message: 'បានកត់ត្រាឆ្នាំសិក្សាជោគជ័យ' });
+    }
+
+    // ៣.១៤ Save Subject
+    if (action === 'saveSubject') {
+      const auth = authenticateSession(sessionToken);
+      if (auth.authenticated && !authorizeRole(auth.user, ['super_admin', 'admin'])) {
+        return createJsonResponse({ status: 'forbidden', message: 'ទាមទារសិទ្ធិ Admin' });
+      }
+      const item = data;
+      if (!item.subject_id) item.subject_id = `SUB-${Date.now()}`;
+      item.updated_at = new Date().toISOString();
+      upsertRecords(SHEETS.SUBJECTS, [item], 'subject_id');
+      emitSystemEvent('SUBJECT_SAVED', auth.user?.user_id, [item.subject_id], item);
+      return createJsonResponse({ status: 'success', message: 'បានកត់ត្រាមុខវិជ្ជាជោគជ័យ' });
+    }
+
+    // ៣.១៥ Enroll Student in Class
+    if (action === 'enrollStudent') {
+      const auth = authenticateSession(sessionToken);
+      if (auth.authenticated && !authorizeRole(auth.user, ['super_admin', 'admin', 'homeroom_teacher'])) {
+        return createJsonResponse({ status: 'forbidden', message: 'គ្មានសិទ្ធិចុះឈ្មោះសិស្ស' });
+      }
+      const enrollment = data;
+      if (!enrollment.enrollment_id) enrollment.enrollment_id = `ENR-${Date.now()}`;
+      enrollment.updated_at = new Date().toISOString();
+      if (!enrollment.enrollment_date) enrollment.enrollment_date = enrollment.updated_at;
+      enrollment.status = 'active';
+
+      upsertRecords(SHEETS.ENROLLMENTS, [enrollment], 'enrollment_id');
+      emitSystemEvent('STUDENT_ENROLLED', auth.user?.user_id || teacherId, [enrollment.student_id], enrollment);
+      return createJsonResponse({ status: 'success', message: 'បានចុះឈ្មោះសិស្សចូលក្នុងថ្នាក់រៀនជោគជ័យ' });
+    }
+
+    // ៣.១៦ Transfer Student (Preserve Historical Records)
+    if (action === 'transferStudent') {
+      const auth = authenticateSession(sessionToken);
+      if (auth.authenticated && !authorizeRole(auth.user, ['super_admin', 'admin'])) {
+        return createJsonResponse({ status: 'forbidden', message: 'ទាមទារសិទ្ធិ Admin ដើម្បីផ្ទេរថ្នាក់សិស្ស' });
+      }
+      const studentId = data.student_id;
+      const newGrade = data.new_grade;
+      const newRoom = data.new_room;
+      const notes = data.transfer_notes || 'ផ្ទេរទៅថ្នាក់ថ្មី';
+      const nowIso = new Date().toISOString();
+
+      // Update student's active enrollment to 'transferred'
+      const oldEnrollments = queryTable(SHEETS.ENROLLMENTS, { student_id: studentId, status: 'active' });
+      if (oldEnrollments.length > 0) {
+        oldEnrollments.forEach(e => {
+          updateSingleField(SHEETS.ENROLLMENTS, 'enrollment_id', e.enrollment_id, {
+            status: 'transferred',
+            transfer_notes: notes,
+            updated_at: nowIso
+          });
+        });
+      }
+
+      // Create new active enrollment
+      const newEnrollment = {
+        enrollment_id: `ENR-${Date.now()}`,
+        student_id: studentId,
+        academic_year: data.academic_year || academicYear,
+        grade: newGrade,
+        room: newRoom,
+        enrollment_date: nowIso,
+        status: 'active',
+        transfer_notes: notes,
+        updated_at: nowIso
+      };
+      upsertRecords(SHEETS.ENROLLMENTS, [newEnrollment], 'enrollment_id');
+
+      // Update student table record
+      updateSingleField(SHEETS.STUDENTS, 'id', studentId, {
+        grade: newGrade,
+        room: newRoom,
+        updated_at: nowIso
+      });
+
+      emitSystemEvent('STUDENT_TRANSFERRED', auth.user?.user_id, [studentId], { newGrade, newRoom, notes });
+      return createJsonResponse({ status: 'success', message: `បានផ្ទេរសិស្សទៅកាន់ ${newGrade} ${newRoom} ដោយជោគជ័យ!` });
+    }
+
+    // ៣.១៧ Assign Teacher to Class/Subject
+    if (action === 'assignTeacher') {
+      const auth = authenticateSession(sessionToken);
+      if (auth.authenticated && !authorizeRole(auth.user, ['super_admin', 'admin'])) {
+        return createJsonResponse({ status: 'forbidden', message: 'ទាមទារសិទ្ធិ Admin ដើម្បីចាត់តាំងគ្រូ' });
+      }
+      const assign = data;
+      if (!assign.assignment_id) assign.assignment_id = `ASN-${Date.now()}`;
+      assign.updated_at = new Date().toISOString();
+      upsertRecords(SHEETS.TEACHER_ASSIGNMENTS, [assign], 'assignment_id');
+      emitSystemEvent('TEACHER_ASSIGNED', auth.user?.user_id, [assign.teacher_id], assign);
+      return createJsonResponse({ status: 'success', message: 'បានចាត់តាំងគ្រូបង្រៀនជោគជ័យ' });
+    }
+
+    // ៣.១៨ Save Examination & Publish
+    if (action === 'saveExamination' || action === 'publishExamination') {
+      const auth = authenticateSession(sessionToken);
+      if (auth.authenticated && !authorizeRole(auth.user, ['super_admin', 'admin', 'homeroom_teacher', 'subject_teacher'])) {
+        return createJsonResponse({ status: 'forbidden', message: 'គ្មានសិទ្ធិគ្រប់គ្រងការប្រឡង' });
+      }
+      const exam = data;
+      if (!exam.exam_id) exam.exam_id = `EXM-${Date.now()}`;
+      exam.updated_at = new Date().toISOString();
+      if (action === 'publishExamination') {
+        exam.status = 'published';
+        exam.published_at = exam.updated_at;
+      }
+      upsertRecords(SHEETS.EXAMINATIONS, [exam], 'exam_id');
+      emitSystemEvent(action === 'publishExamination' ? 'EXAM_PUBLISHED' : 'EXAM_SAVED', auth.user?.user_id, [exam.exam_id], exam);
+      return createJsonResponse({ status: 'success', message: 'បានកត់ត្រាការប្រឡងជោគជ័យ' });
+    }
+
+    // ៣.១៩ Save Timetable
+    if (action === 'saveTimetable' || action === 'saveTimetableBatch') {
+      const auth = authenticateSession(sessionToken);
+      if (auth.authenticated && !authorizeRole(auth.user, ['super_admin', 'admin'])) {
+        return createJsonResponse({ status: 'forbidden', message: 'ទាមទារសិទ្ធិ Admin' });
+      }
+      const ttList = Array.isArray(data) ? data : (data.timetables || [data]);
+      const nowIso = new Date().toISOString();
+      ttList.forEach(t => {
+        if (!t.entry_id) t.entry_id = `TT-${t.academic_year || ''}-${t.grade || ''}-${t.room || ''}-${t.day_of_week || ''}-${t.period_slot || ''}`;
+        t.updated_at = nowIso;
+      });
+      upsertRecords(SHEETS.TIMETABLES, ttList, 'entry_id');
+      emitSystemEvent('TIMETABLE_CHANGED', auth.user?.user_id, ttList.map(t => t.entry_id), { count: ttList.length });
+      return createJsonResponse({ status: 'success', message: `បានកត់ត្រាកាលវិភាគបង្រៀន (${ttList.length} ម៉ោង) ជោគជ័យ` });
+    }
+
+    // ៣.២០ Save Homework
+    if (action === 'saveHomework') {
+      const auth = authenticateSession(sessionToken);
+      if (auth.authenticated && !authorizeRole(auth.user, ['super_admin', 'admin', 'homeroom_teacher', 'subject_teacher'])) {
+        return createJsonResponse({ status: 'forbidden', message: 'គ្មានសិទ្ធិកត់ត្រាកិច្ចការផ្ទះ' });
+      }
+      const hw = data;
+      if (!hw.homework_id) hw.homework_id = `HW-${Date.now()}`;
+      hw.created_at = new Date().toISOString();
+      upsertRecords(SHEETS.HOMEWORK, [hw], 'homework_id');
+      emitSystemEvent('HOMEWORK_ASSIGNED', auth.user?.user_id, [hw.homework_id], hw);
+      return createJsonResponse({ status: 'success', message: 'បានកត់ត្រាកិច្ចការផ្ទះជោគជ័យ' });
+    }
+
+    // ៣.២១ Save Announcement & Broadcast Notification
+    if (action === 'saveAnnouncement') {
+      const auth = authenticateSession(sessionToken);
+      if (auth.authenticated && !authorizeRole(auth.user, ['super_admin', 'admin'])) {
+        return createJsonResponse({ status: 'forbidden', message: 'ទាមទារសិទ្ធិ Admin ដើម្បីផ្សព្វផ្សាយដំណឹង' });
+      }
+      const ann = data;
+      if (!ann.announcement_id) ann.announcement_id = `ANN-${Date.now()}`;
+      const nowIso = new Date().toISOString();
+      ann.published_at = nowIso;
+      ann.author_id = auth.user?.user_id || 'ADMIN';
+      upsertRecords(SHEETS.ANNOUNCEMENTS, [ann], 'announcement_id');
+
+      // Create notification for target audience
+      const notif = {
+        notification_id: `NOTIF-${Date.now()}`,
+        user_id: ann.target_role === 'all' ? 'PUBLIC' : ann.target_role,
+        title: ann.title,
+        message: ann.content ? ann.content.slice(0, 100) + '...' : '',
+        type: ann.priority || 'general',
+        is_read: false,
+        created_at: nowIso,
+        link_action: 'announcements'
+      };
+      upsertRecords(SHEETS.NOTIFICATIONS, [notif], 'notification_id');
+      emitSystemEvent('ANNOUNCEMENT_POSTED', auth.user?.user_id, [ann.announcement_id], ann);
+      return createJsonResponse({ status: 'success', message: 'បានផ្សព្វផ្សាយសេចក្តីជូនដំណឹងជោគជ័យ' });
+    }
+
+    // ៣.២២ Mark Notification Read
+    if (action === 'markNotificationRead') {
+      const notifId = data.notification_id || payload.notification_id;
+      if (notifId) {
+        updateSingleField(SHEETS.NOTIFICATIONS, 'notification_id', notifId, { is_read: true });
+      }
+      return createJsonResponse({ status: 'success' });
+    }
+
+    // ៣.២៣ Emit Generic System Event
+    if (action === 'emitEvent') {
+      const auth = authenticateSession(sessionToken);
+      const ev = emitSystemEvent(data.event_type || 'CUSTOM', auth.user?.user_id || 'CLIENT', data.affected_ids || [], data.payload || {});
+      return createJsonResponse({ status: 'success', data: ev });
     }
 
     return createJsonResponse({

@@ -1036,6 +1036,18 @@ window.saveStudentData = async function(e) {
         );
     }
 
+    // 📡 ៤. Emit System Event to Central EventBus (Dynamic Architecture)
+    if (window.CMSEventBus && window.CMSEventTypes) {
+        window.CMSEventBus.emit(window.CMSEventTypes.STUDENT_ENROLLED, {
+            student_id: payload.id,
+            student_name: payload.name,
+            grade: payload.grade,
+            room: payload.room,
+            academic_year: payload.academic_year || localStorage.getItem('selected_academic_year') || '2026-2027',
+            is_edit: isEdit
+        });
+    }
+
     btn.innerHTML = origText;
     btn.disabled = false; 
 };
@@ -1100,6 +1112,15 @@ window.deleteStudent = function(id) {
         }
         if (typeof window.logAudit === 'function') {
             window.logAudit('SOFT_DELETE_STUDENT', 'student', `បានកំណត់សិស្ស ${stu.name} (${stu.id}) ជាឈប់រៀន (Soft Delete - រក្សាទុកប្រវត្តិ)`);
+        }
+        if (window.CMSEventBus && window.CMSEventTypes) {
+            window.CMSEventBus.emit(window.CMSEventTypes.STUDENT_WITHDRAWN, {
+                student_id: stu.id,
+                student_name: stu.name,
+                grade: stu.grade,
+                room: stu.room,
+                status: 'Withdrawn'
+            });
         }
         window.filterStudents();
         if (typeof showToast === 'function') showToast("📦 បានកែប្រែស្ថានភាពសិស្សទៅជា «ឈប់រៀន» រួចរាល់!");
