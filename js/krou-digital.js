@@ -786,10 +786,7 @@ window.KrouDigital = {
     },
 
     // =====================================================================
-    // ៥. ប័ណ្ណសរសើរ / វិញ្ញាបនបត្រ (Official Honor Praise Certificate Generator)
-    // =====================================================================
-    // =====================================================================
-    // ៥. ប័ណ្ណសរសើរ / វិញ្ញាបនបត្រ (Canva-Style Certificate Studio with Custom Upload Frame)
+    // ៥. ប័ណ្ណសរសើរ / វិញ្ញាបនបត្រ (Professional Canva-Style Certificate Studio 4.0)
     // =====================================================================
     handleUploadFrame: function(event) {
         const file = event.target.files && event.target.files[0];
@@ -817,7 +814,7 @@ window.KrouDigital = {
         const activeStId = document.getElementById("certStudentSelect")?.value || null;
         const activeRank = document.getElementById("certRankSelect")?.value || 1;
         const activeGrade = document.getElementById("certGradeSelect")?.value || null;
-        window.KrouDigital.renderCertificateModal(activeStId, activeRank, activeGrade, 'gold-royal');
+        window.KrouDigital.renderCertificateModal(activeStId, activeRank, activeGrade, 'khmer-kbach-gold');
     },
 
     handleUploadLogo: function(event) {
@@ -827,11 +824,10 @@ window.KrouDigital = {
         reader.onload = function(e) {
             try {
                 localStorage.setItem('custom_cert_logo_b64', e.target.result);
-                const activeStId = document.getElementById("certStudentSelect")?.value || null;
-                const activeRank = document.getElementById("certRankSelect")?.value || 1;
-                const activeGrade = document.getElementById("certGradeSelect")?.value || null;
-                const activeFrame = document.getElementById("certFrameSelect")?.value || 'gold-royal';
-                window.KrouDigital.renderCertificateModal(activeStId, activeRank, activeGrade, activeFrame);
+                if (typeof window.showToast === 'function') {
+                    window.showToast("✅ បានបញ្ចូល Logo / ត្រា ជោគជ័យ!", "success");
+                }
+                window.KrouDigital.renderCertificateModal();
             } catch (err) {
                 alert("ទំហំឡូហ្គោធំពេក សូមជ្រើសរើសរូបភាពក្រោម 1MB");
             }
@@ -841,11 +837,96 @@ window.KrouDigital = {
 
     removeCustomLogo: function() {
         localStorage.removeItem('custom_cert_logo_b64');
-        const activeStId = document.getElementById("certStudentSelect")?.value || null;
-        const activeRank = document.getElementById("certRankSelect")?.value || 1;
-        const activeGrade = document.getElementById("certGradeSelect")?.value || null;
-        const activeFrame = document.getElementById("certFrameSelect")?.value || 'gold-royal';
-        window.KrouDigital.renderCertificateModal(activeStId, activeRank, activeGrade, activeFrame);
+        window.KrouDigital.renderCertificateModal();
+    },
+
+    handleUploadPicture: function(event) {
+        const file = event.target.files && event.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                const pics = JSON.parse(localStorage.getItem('custom_cert_pictures') || '[]');
+                pics.push({
+                    id: 'pic_' + Date.now(),
+                    name: file.name,
+                    b64: e.target.result,
+                    width: 120,
+                    x: 60 + (pics.length * 35),
+                    y: 110 + (pics.length * 25)
+                });
+                localStorage.setItem('custom_cert_pictures', JSON.stringify(pics));
+                if (typeof window.showToast === 'function') {
+                    window.showToast("✅ បានបញ្ចូលរូបភាពបន្ថែម (Picture/Stamp) ជោគជ័យ!", "success");
+                }
+                window.KrouDigital.renderCertificateModal();
+            } catch (err) {
+                alert("ទំហំរូបភាពធំពេក សូមជ្រើសរើសរូបភាពក្រោម 2MB");
+            }
+        };
+        reader.readAsDataURL(file);
+    },
+
+    removePicture: function(picId) {
+        let pics = JSON.parse(localStorage.getItem('custom_cert_pictures') || '[]');
+        pics = pics.filter(p => p.id !== picId);
+        localStorage.setItem('custom_cert_pictures', JSON.stringify(pics));
+        window.KrouDigital.renderCertificateModal();
+    },
+
+    addCustomText: function() {
+        const texts = JSON.parse(localStorage.getItem('custom_cert_texts') || '[]');
+        texts.push({
+            id: 'txt_' + Date.now(),
+            content: "អត្ថបទថ្មី (ចុចលើអត្ថបទដើម្បីកែសម្រួល)",
+            fontSize: 15,
+            color: '#dc2626',
+            fontFamily: 'font-moul',
+            x: 220,
+            y: 180 + (texts.length * 40)
+        });
+        localStorage.setItem('custom_cert_texts', JSON.stringify(texts));
+        window.KrouDigital.renderCertificateModal();
+    },
+
+    removeCustomText: function(textId) {
+        let texts = JSON.parse(localStorage.getItem('custom_cert_texts') || '[]');
+        texts = texts.filter(t => t.id !== textId);
+        localStorage.setItem('custom_cert_texts', JSON.stringify(texts));
+        window.KrouDigital.renderCertificateModal();
+    },
+
+    setZoom: function(val) {
+        const zoom = Math.max(40, Math.min(200, parseInt(val, 10) || 100));
+        localStorage.setItem('cert_studio_zoom', zoom);
+        const wrapper = document.getElementById("certificatePrintWrapper");
+        if (wrapper) {
+            wrapper.style.transform = "scale(" + (zoom / 100) + ")";
+            wrapper.style.transformOrigin = 'top center';
+        }
+        const label = document.getElementById("certZoomDisplay");
+        if (label) label.textContent = zoom + '%';
+        const slider = document.getElementById("certZoomSlider");
+        if (slider) slider.value = zoom;
+    },
+
+    zoomIn: function() {
+        const cur = parseInt(localStorage.getItem('cert_studio_zoom') || '100', 10);
+        this.setZoom(cur + 10);
+    },
+
+    zoomOut: function() {
+        const cur = parseInt(localStorage.getItem('cert_studio_zoom') || '100', 10);
+        this.setZoom(cur - 10);
+    },
+
+    zoomFit: function() {
+        this.setZoom(85);
+    },
+
+    setPageSize: function(sizeKey) {
+        localStorage.setItem('cert_page_size', sizeKey);
+        this.renderCertificateModal();
     },
 
     updateCertPadding: function(val) {
@@ -877,6 +958,43 @@ window.KrouDigital = {
         localStorage.setItem('cert_title_color', colorHex);
         const title = document.getElementById("certMainTitle");
         if (title) title.style.color = colorHex;
+        const colorInput = document.getElementById("certCustomColorPicker");
+        if (colorInput) colorInput.value = colorHex;
+    },
+
+    updateCertBgColor: function(colorHex) {
+        localStorage.setItem('cert_bg_color', colorHex);
+        const canvas = document.getElementById("certificatePrintArea");
+        if (canvas) canvas.style.backgroundColor = colorHex;
+    },
+
+    toggleWatermark: function(enabled) {
+        localStorage.setItem('cert_watermark_enabled', enabled ? 'true' : 'false');
+        this.renderCertificateModal();
+    },
+
+    setActiveTab: function(tabName) {
+        localStorage.setItem('cert_active_tab', tabName);
+        const allTabs = ['design', 'text', 'uploads', 'data'];
+        allTabs.forEach(t => {
+            const pane = document.getElementById('certTabPane_' + t);
+            const btn = document.getElementById('certTabBtn_' + t);
+            if (pane) {
+                if (t === tabName) pane.classList.remove('hidden');
+                else pane.classList.add('hidden');
+            }
+            if (btn) {
+                if (t === tabName) {
+                    btn.className = 'px-3.5 py-1.5 rounded-xl font-bold text-xs bg-indigo-600 text-white shadow-md shadow-indigo-500/30 flex items-center gap-1.5 transition';
+                } else {
+                    btn.className = 'px-3.5 py-1.5 rounded-xl font-bold text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center gap-1.5 transition';
+                }
+            }
+        });
+    },
+
+    execTextCmd: function(cmd, val = null) {
+        document.execCommand(cmd, false, val);
     },
 
     printCertificate: function() {
@@ -886,18 +1004,36 @@ window.KrouDigital = {
         window.print();
     },
 
-    renderCertificateModal: function(studentId = null, rankNum = 1, targetGrade = null, frameStyle = null) {
+    renderCertificateModal: function(studentId = null, rankNum = null, targetGrade = null, frameStyle = null) {
         const customFrameB64 = localStorage.getItem('custom_cert_frame_b64');
         if (!frameStyle) {
-            frameStyle = customFrameB64 ? 'custom-uploaded' : (localStorage.getItem('cert_last_frame') || 'gold-royal');
+            frameStyle = customFrameB64 ? 'custom-uploaded' : (localStorage.getItem('cert_last_frame') || 'khmer-kbach-gold');
         }
         localStorage.setItem('cert_last_frame', frameStyle);
 
         const customLogoB64 = localStorage.getItem('custom_cert_logo_b64');
-        const certPadding = parseInt(localStorage.getItem('cert_padding') || '40', 10);
+        const customPics = JSON.parse(localStorage.getItem('custom_cert_pictures') || '[]');
+        const customTexts = JSON.parse(localStorage.getItem('custom_cert_texts') || '[]');
+        const certPadding = parseInt(localStorage.getItem('cert_padding') || '36', 10);
         const certFontScale = parseInt(localStorage.getItem('cert_font_scale') || '100', 10);
         const certFontFamily = localStorage.getItem('cert_font_family') || 'font-moul';
-        const certTitleColor = localStorage.getItem('cert_title_color') || '#92400e';
+        const certTitleColor = localStorage.getItem('cert_title_color') || '#dc2626';
+        const certBgColor = localStorage.getItem('cert_bg_color') || '#ffffff';
+        const watermarkEnabled = localStorage.getItem('cert_watermark_enabled') !== 'false';
+        const activeTab = localStorage.getItem('cert_active_tab') || 'design';
+        const studioZoom = parseInt(localStorage.getItem('cert_studio_zoom') || '85', 10);
+        const pageSizeKey = localStorage.getItem('cert_page_size') || 'A4-landscape';
+        const titleType = localStorage.getItem('cert_title_type') || 'លិខិតសរសើរ';
+        const examSession = localStorage.getItem('cert_exam_session') || 'ប្រឡងឆមាសលើកទី១ ឆ្នាំសិក្សា ២០២៥ - ២០២៦';
+
+        // Page size mapping
+        const pageSizesMap = {
+            'A4-landscape': { name: 'A4 ផ្តេក (297 x 210 mm)', width: '297mm', height: '210mm', css: 'A4 landscape' },
+            'A4-portrait': { name: 'A4 បញ្ឈរ (210 x 297 mm)', width: '210mm', height: '297mm', css: 'A4 portrait' },
+            'A3-landscape': { name: 'A3 ផ្តេក (420 x 297 mm)', width: '420mm', height: '297mm', css: 'A3 landscape' },
+            'Letter-landscape': { name: 'Letter ផ្តេក (11 x 8.5 in)', width: '11in', height: '8.5in', css: 'Letter landscape' }
+        };
+        const curPageSize = pageSizesMap[pageSizeKey] || pageSizesMap['A4-landscape'];
 
         const allStudents = window.allStudents || JSON.parse(localStorage.getItem('academic_students') || '[]');
         const activeClass = typeof window.getCurrentSelectedClass === 'function' ? window.getCurrentSelectedClass() : { level: "ថ្នាក់ទី ៤", room: "«ក»" };
@@ -910,21 +1046,24 @@ window.KrouDigital = {
         });
         const selectableStudents = classStudents.length > 0 ? classStudents : allStudents;
 
-        const student = selectableStudents.find(s => String(s.id) === String(studentId)) || selectableStudents[0] || allStudents[0] || { name: "សុខ សាន្ត", gender: "ប្រុស", grade: curLevel, id: "STU-001" };
+        const student = selectableStudents.find(s => String(s.id) === String(studentId)) || selectableStudents[0] || allStudents[0] || { name: "ណៃ ច័ន្ទសុផានី", gender: "ស្រី", grade: curLevel, id: "STU-001" };
+        const activeRank = rankNum !== null ? rankNum : (localStorage.getItem('cert_last_rank') || '3');
+        localStorage.setItem('cert_last_rank', activeRank);
+
         const sInfo = window.appSettings || JSON.parse(localStorage.getItem('school_settings') || '{}');
-        const academicYear = document.getElementById("globalAcademicYear")?.value || sInfo.academic_year || "២០២៦-២០២៧";
-        const districtName = (sInfo.district || "កៀនស្វាយ").replace(/^ស្រុក\s*/, '').trim(); 
-        const schoolName = sInfo.school_name || "សាលាបឋមសិក្សា ខ្សុំ";
-        const principalName = sInfo.principal_name || "នាយកសាលា";
-        const teacherName = (window.AuthState ? window.AuthState.teacherName : null) || localStorage.getItem('auth_teacher_name') || sInfo.teacher_name || "គ្រូបន្ទុកថ្នាក់";
+        const academicYear = document.getElementById("globalAcademicYear")?.value || sInfo.academic_year || "២០២៥ - ២០២៦";
+        const districtName = (sInfo.district || "អង្គរជ័យ").replace(/^ស្រុក\s*/, '').trim(); 
+        const provinceName = sInfo.province || "កំពត";
+        const schoolName = sInfo.school_name || "វិទ្យាល័យ សម្តេច ជា ស៊ីម អង្គរជ័យ";
+        const principalName = sInfo.principal_name || "គឹម ទ្រី";
+        const teacherName = (window.AuthState ? window.AuthState.teacherName : null) || localStorage.getItem('auth_teacher_name') || sInfo.teacher_name || "លុយ សុផល";
 
         let locShort = "";
         const rawLoc = document.getElementById('global_loc_input')?.value || localStorage.getItem('rc_location') || localStorage.getItem('rep_location');
         if (rawLoc) {
             locShort = rawLoc.replace(/^ធ្វើនៅ\s*/, '').replace(/,+$/, '').trim();
         } else {
-            locShort = schoolName.replace(/^(សាលាបឋមសិក្សា|អនុវិទ្យាល័យ|វិទ្យាល័យ|សាលា)\s*/g, '').trim();
-            if (!locShort) locShort = districtName || "ភ្នំ";
+            locShort = districtName || schoolName.replace(/^(សាលាបឋមសិក្សា|អនុវិទ្យាល័យ|វិទ្យាល័យ|សាលា)\s*/g, '').trim() || "ភ្នំពេញ";
         }
 
         let sDate = "";
@@ -932,96 +1071,97 @@ window.KrouDigital = {
         if (rawDate && rawDate.trim()) {
             sDate = rawDate.trim();
         } else {
-            sDate = "ថ្ងៃទី.......ខែ..........ឆ្នាំ២០២៦";
+            sDate = "ថ្ងៃទី២៥ ខែកុម្ភៈ ឆ្នាំ២០២៦";
         }
         if (sDate.includes("ថ្ងៃទី")) sDate = sDate.substring(sDate.indexOf("ថ្ងៃទី"));
 
-        const solarDateStr = `ធ្វើនៅ ${locShort}, ${sDate}`;
+        const solarDateStr = `${locShort} ${sDate}`;
+        const lunarDateStr = "ថ្ងៃពុធ ៩កើត ខែផល្គុន ឆ្នាំម្សាញ់ សប្តស័ក ព.ស. ២៥៦៩";
 
-        const gradesList = typeof window.getAllGradesList === 'function' ? window.getAllGradesList() : ["ថ្នាក់ទី ១", "ថ្នាក់ទី ២", "ថ្នាក់ទី ៣", "ថ្នាក់ទី ៤", "ថ្នាក់ទី ៥", "ថ្នាក់ទី ៦"];
+        const gradesList = typeof window.getAllGradesList === 'function' ? window.getAllGradesList() : ["ថ្នាក់ទី ១", "ថ្នាក់ទី ២", "ថ្នាក់ទី ៣", "ថ្នាក់ទី ៤", "ថ្នាក់ទី ៥", "ថ្នាក់ទី ៦", "10A", "10B", "11A", "12A"];
 
         // 🎨 ម៉ូដស៊ុម Preset
         const frameStylesMap = {
+            'khmer-kbach-gold': {
+                name: '🏵️ ស៊ុមផ្កាក្បាច់ខ្មែរពណ៌មាស (Gold Kbach - ដូចរូបគំរូ)',
+                outerBorder: 'border-[16px] border-[#b45309]',
+                innerBorder: 'border-2 border-[#15803d]',
+                styleExtra: 'box-shadow: inset 0 0 0 3px #15803d, inset 0 0 0 5px #ffffff, inset 0 0 0 7px #15803d;',
+                bgGradient: 'bg-white',
+                cornerIcon: '🏵️',
+                cornerColor: 'text-amber-600',
+                titleColor: certTitleColor || '#dc2626',
+                accentLine: 'border-amber-400'
+            },
             'custom-uploaded': {
                 name: '🖼️ ស៊ុមផ្ទុកឡើងផ្ទាល់ខ្លួន (Custom Frame)',
                 outerBorder: 'border-0',
                 innerBorder: 'border-0',
+                styleExtra: '',
                 bgGradient: 'bg-transparent',
                 cornerIcon: '',
                 cornerColor: 'text-transparent',
-                titleColor: certTitleColor,
-                badgeBg: 'bg-amber-100 text-amber-900',
+                titleColor: certTitleColor || '#dc2626',
                 accentLine: 'border-amber-400'
             },
             'gold-royal': {
                 name: '👑 ស៊ុមមាសរាជកាល (Gold Royal)',
                 outerBorder: 'border-[14px] border-double border-amber-600',
                 innerBorder: 'border-2 border-amber-400/80',
+                styleExtra: '',
                 bgGradient: 'bg-gradient-to-br from-amber-50/70 via-white to-amber-50/40',
                 cornerIcon: '❖',
                 cornerColor: 'text-amber-600',
-                titleColor: certTitleColor || 'text-amber-800',
-                badgeBg: 'bg-amber-100 text-amber-900',
+                titleColor: certTitleColor || '#b45309',
                 accentLine: 'border-amber-400'
-            },
-            'khmer-kbach': {
-                name: '🏵️ ស៊ុមផ្កាក្បាច់ខ្មែរ (Khmer Kbach)',
-                outerBorder: 'border-[14px] border-double border-yellow-700',
-                innerBorder: 'border-2 border-dashed border-amber-500',
-                bgGradient: 'bg-gradient-to-br from-yellow-50/70 via-white to-amber-50/40',
-                cornerIcon: '🏵️',
-                cornerColor: 'text-amber-700',
-                titleColor: certTitleColor || 'text-amber-900',
-                badgeBg: 'bg-amber-100 text-amber-900',
-                accentLine: 'border-amber-500'
             },
             'emerald-royal': {
                 name: '💎 ស៊ុមត្បូងមរកត (Emerald Royal)',
                 outerBorder: 'border-[14px] border-double border-emerald-700',
                 innerBorder: 'border-2 border-emerald-500/80',
+                styleExtra: '',
                 bgGradient: 'bg-gradient-to-br from-emerald-50/60 via-white to-teal-50/30',
                 cornerIcon: '✦',
                 cornerColor: 'text-emerald-700',
-                titleColor: certTitleColor || 'text-emerald-900',
-                badgeBg: 'bg-emerald-100 text-emerald-900',
+                titleColor: certTitleColor || '#047857',
                 accentLine: 'border-emerald-400'
             },
             'burgundy-classic': {
-                name: '🍷 ស៊ុមក្រហមឈាមជ្រូក (Burgundy Classic)',
+                name: '🍷 ស៊ុមក្រហមឈាមជ្រូក (Burgundy Luxury)',
                 outerBorder: 'border-[14px] border-double border-rose-800',
                 innerBorder: 'border-2 border-rose-400/80',
+                styleExtra: '',
                 bgGradient: 'bg-gradient-to-br from-rose-50/60 via-white to-orange-50/30',
                 cornerIcon: '⚜️',
                 cornerColor: 'text-rose-800',
-                titleColor: certTitleColor || 'text-rose-900',
-                badgeBg: 'bg-rose-100 text-rose-900',
+                titleColor: certTitleColor || '#991b1b',
                 accentLine: 'border-rose-400'
             },
             'navy-modern': {
                 name: '🏛️ ស៊ុមខៀវរាជការទំនើប (Navy Executive)',
                 outerBorder: 'border-[14px] border-double border-indigo-900',
                 innerBorder: 'border-2 border-indigo-400/80',
+                styleExtra: '',
                 bgGradient: 'bg-gradient-to-br from-blue-50/60 via-white to-indigo-50/30',
                 cornerIcon: '★',
                 cornerColor: 'text-indigo-800',
-                titleColor: certTitleColor || 'text-indigo-950',
-                badgeBg: 'bg-indigo-100 text-indigo-900',
+                titleColor: certTitleColor || '#1e3a8a',
                 accentLine: 'border-indigo-400'
             },
             'plain-blank': {
                 name: '📄 គ្មានស៊ុម (សម្រាប់ក្រដាសមានស៊ុមស្រាប់)',
                 outerBorder: 'border-0',
                 innerBorder: 'border-0',
+                styleExtra: '',
                 bgGradient: 'bg-transparent',
                 cornerIcon: '',
                 cornerColor: 'text-transparent',
-                titleColor: certTitleColor || 'text-amber-900',
-                badgeBg: 'bg-slate-100 text-slate-800',
+                titleColor: certTitleColor || '#dc2626',
                 accentLine: 'border-slate-300'
             }
         };
 
-        const activeFrame = frameStylesMap[frameStyle] || (customFrameB64 ? frameStylesMap['custom-uploaded'] : frameStylesMap['gold-royal']);
+        const activeFrame = frameStylesMap[frameStyle] || (customFrameB64 ? frameStylesMap['custom-uploaded'] : frameStylesMap['khmer-kbach-gold']);
 
         let modal = document.getElementById("certificateModal");
         if (!modal) {
@@ -1035,8 +1175,8 @@ window.KrouDigital = {
             <style>
                 @media print {
                     html, body {
-                        width: 297mm !important;
-                        height: 210mm !important;
+                        width: ${curPageSize.width} !important;
+                        height: ${curPageSize.height} !important;
                         margin: 0 !important;
                         padding: 0 !important;
                         background: #fff !important;
@@ -1049,12 +1189,13 @@ window.KrouDigital = {
                         position: absolute !important;
                         left: 0 !important;
                         top: 0 !important;
-                        width: 297mm !important;
-                        height: 210mm !important;
-                        min-height: 210mm !important;
-                        max-height: 210mm !important;
+                        width: ${curPageSize.width} !important;
+                        height: ${curPageSize.height} !important;
+                        min-height: ${curPageSize.height} !important;
+                        max-height: ${curPageSize.height} !important;
                         margin: 0 !important;
                         padding: 0 !important;
+                        transform: none !important;
                         background: #fff !important;
                         box-shadow: none !important;
                         border: none !important;
@@ -1063,11 +1204,11 @@ window.KrouDigital = {
                         print-color-adjust: exact !important;
                     }
                     #certificatePrintArea {
-                        width: 297mm !important;
-                        height: 210mm !important;
-                        min-height: 210mm !important;
-                        max-width: 297mm !important;
-                        max-height: 210mm !important;
+                        width: ${curPageSize.width} !important;
+                        height: ${curPageSize.height} !important;
+                        min-height: ${curPageSize.height} !important;
+                        max-width: ${curPageSize.width} !important;
+                        max-height: ${curPageSize.height} !important;
                         border-radius: 0 !important;
                         box-shadow: none !important;
                         margin: 0 !important;
@@ -1075,12 +1216,13 @@ window.KrouDigital = {
                         print-color-adjust: exact !important;
                     }
                     @page {
-                        size: A4 landscape;
+                        size: ${curPageSize.css};
                         margin: 0mm;
                     }
+                    .no-print { display: none !important; }
                 }
                 .cert-editable {
-                    transition: all 0.2s ease;
+                    transition: all 0.15s ease;
                     border-radius: 4px;
                     padding: 1px 4px;
                 }
@@ -1095,41 +1237,98 @@ window.KrouDigital = {
                 }
             </style>
 
-            <div class="bg-slate-900 border border-slate-700/80 rounded-3xl w-full max-w-6xl shadow-2xl relative my-4 text-slate-100 flex flex-col overflow-hidden">
+            <div class="bg-slate-900 border border-slate-700/80 rounded-3xl w-full max-w-7xl shadow-2xl relative my-3 text-slate-100 flex flex-col overflow-hidden max-h-[96vh]">
                 
-                <!-- 🎨 CANVA-STYLE TOP STUDIO RIBBON 🎨 -->
-                <div class="bg-gradient-to-r from-slate-900 via-slate-850 to-slate-900 p-3 sm:p-4 border-b border-slate-700/80 flex flex-wrap justify-between items-center gap-3 no-print">
+                <!-- 🎨 CANVA-STYLE TOP STUDIO HEADER 🎨 -->
+                <div class="bg-gradient-to-r from-slate-900 via-slate-850 to-slate-900 px-4 py-3 border-b border-slate-700/80 flex flex-wrap justify-between items-center gap-3 no-print">
                     
-                    <!-- Left: Logo & Studio Title -->
-                    <div class="flex items-center gap-2">
-                        <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-amber-500 via-orange-500 to-rose-500 flex items-center justify-center text-white shadow-md shadow-amber-500/30">
-                            <i class="fa-solid fa-palette text-sm"></i>
+                    <!-- Left: Studio Logo & Title -->
+                    <div class="flex items-center gap-2.5">
+                        <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-amber-500 via-rose-500 to-indigo-600 flex items-center justify-center text-white shadow-md shadow-indigo-500/20">
+                            <i class="fa-solid fa-wand-magic-sparkles text-sm"></i>
                         </div>
                         <div>
-                            <h3 class="font-moul text-xs sm:text-sm text-amber-300">Canva Certificate Studio</h3>
-                            <p class="text-[10px] text-slate-400">រចនាប័ណ្ណសរសើរ កែប្រែផ្ទាល់ &amp; Upload Frame ងាយស្រួល</p>
+                            <div class="flex items-center gap-2">
+                                <h3 class="font-moul text-xs sm:text-sm text-amber-300">Canva Certificate Studio</h3>
+                                <span class="px-2 py-0.5 bg-slate-800 text-[10px] text-slate-300 border border-slate-700 rounded-md font-mono">${curPageSize.name}</span>
+                            </div>
+                            <p class="text-[10px] text-slate-400">ស្ទូឌីយោរចនាប័ណ្ណសរសើរ / លិខិតសរសើរ កែប្រែផ្ទាល់ និងទាញយកបានគ្រប់ទំហំ</p>
                         </div>
                     </div>
 
-                    <!-- Center: Canva Control Pills -->
-                    <div class="flex flex-wrap items-center gap-2">
-                        
-                        <!-- Upload Custom Frame Button -->
-                        <label class="cursor-pointer px-3 py-1.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white rounded-xl text-xs font-bold shadow-md transition flex items-center gap-1.5 active:scale-95" title="ផ្ទុកឡើងស៊ុមរូបភាព (JPG/PNG)">
-                            <i class="fa-solid fa-cloud-arrow-up text-amber-300"></i>
-                            <span>Upload Frame</span>
-                            <input type="file" accept="image/*" class="hidden" onchange="window.KrouDigital.handleUploadFrame(event)">
-                        </label>
+                    <!-- Center: Zoom In / Zoom Out Controls -->
+                    <div class="flex items-center gap-1.5 bg-slate-800/90 border border-slate-700 px-2.5 py-1 rounded-xl text-xs">
+                        <span class="text-slate-400 text-[11px] mr-1"><i class="fa-solid fa-magnifying-glass"></i> Zoom:</span>
+                        <button onclick="window.KrouDigital.zoomOut()" class="w-6 h-6 rounded-lg bg-slate-700 hover:bg-slate-600 text-white flex items-center justify-center font-bold text-xs transition" title="Zoom Out (-10%)">-</button>
+                        <input type="range" id="certZoomSlider" min="50" max="150" value="${studioZoom}" oninput="window.KrouDigital.setZoom(this.value)" class="w-20 accent-indigo-500 cursor-pointer">
+                        <button onclick="window.KrouDigital.zoomIn()" class="w-6 h-6 rounded-lg bg-slate-700 hover:bg-slate-600 text-white flex items-center justify-center font-bold text-xs transition" title="Zoom In (+10%)">+</button>
+                        <span id="certZoomDisplay" class="font-mono text-indigo-300 font-bold min-w-[36px] text-center">${studioZoom}%</span>
+                        <button onclick="window.KrouDigital.zoomFit()" class="px-2 py-0.5 text-[10px] bg-slate-700 hover:bg-slate-600 text-amber-300 rounded font-bold transition" title="Fit to Screen">Fit</button>
+                    </div>
 
-                        ${customFrameB64 ? `
-                            <button onclick="window.KrouDigital.removeCustomFrame()" class="px-2.5 py-1.5 bg-rose-950/70 hover:bg-rose-900 text-rose-300 border border-rose-800/80 rounded-xl text-xs font-bold transition flex items-center gap-1 active:scale-95" title="លុបស៊ុមផ្ទាល់ខ្លួន">
-                                <i class="fa-solid fa-trash-can"></i> លុបស៊ុម
-                            </button>
-                        ` : ''}
+                    <!-- Right: Page Size & Action Buttons -->
+                    <div class="flex items-center gap-2">
+                        <!-- Set Page Size Dropdown -->
+                        <div class="flex items-center gap-1 bg-slate-800 border border-slate-700 rounded-xl px-2.5 py-1.5 text-xs">
+                            <i class="fa-solid fa-file-invoice text-indigo-400 text-xs"></i>
+                            <select onchange="window.KrouDigital.setPageSize(this.value)" class="bg-transparent text-slate-200 outline-none cursor-pointer font-bold text-xs">
+                                ${Object.entries(pageSizesMap).map(([k, v]) => `
+                                    <option value="${k}" ${k === pageSizeKey ? 'selected' : ''} class="bg-slate-900 text-white">${v.name}</option>
+                                `).join('')}
+                            </select>
+                        </div>
 
-                        <!-- Frame Styles Dropdown -->
-                        <div class="flex items-center gap-1.5 bg-slate-800 border border-slate-700 rounded-xl px-2.5 py-1.5 text-xs">
+                        <!-- Print Button -->
+                        <button onclick="window.KrouDigital.printCertificate()" class="px-4 py-1.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white rounded-xl text-xs font-bold shadow-md shadow-emerald-500/20 transition flex items-center gap-1.5 active:scale-95 outline-none">
+                            <i class="fa-solid fa-print text-amber-300"></i>
+                            <span>ព្រីន (Print)</span>
+                        </button>
+
+                        <!-- Close Button -->
+                        <button onclick="document.getElementById('certificateModal').classList.add('hidden')" class="w-8 h-8 bg-slate-800 hover:bg-rose-900/80 text-slate-300 hover:text-white rounded-xl font-bold flex items-center justify-center transition border border-slate-700" title="បិទ (Close)">
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
+                    </div>
+
+                </div>
+
+                <!-- 🎛️ CANVA CATEGORY TABS BAR 🎛️ -->
+                <div class="bg-slate-850 px-4 py-2 border-b border-slate-700/60 flex flex-wrap items-center justify-between gap-2 text-xs no-print">
+                    <!-- Tab Switcher Buttons -->
+                    <div class="flex items-center gap-1.5">
+                        <button id="certTabBtn_design" onclick="window.KrouDigital.setActiveTab('design')" class="${activeTab === 'design' ? 'px-3.5 py-1.5 rounded-xl font-bold text-xs bg-indigo-600 text-white shadow-md shadow-indigo-500/30 flex items-center gap-1.5 transition' : 'px-3.5 py-1.5 rounded-xl font-bold text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center gap-1.5 transition'}">
                             <i class="fa-solid fa-border-all text-amber-400"></i>
+                            <span>ស៊ុម & ផ្ទៃ (Borders)</span>
+                        </button>
+                        <button id="certTabBtn_uploads" onclick="window.KrouDigital.setActiveTab('uploads')" class="${activeTab === 'uploads' ? 'px-3.5 py-1.5 rounded-xl font-bold text-xs bg-indigo-600 text-white shadow-md shadow-indigo-500/30 flex items-center gap-1.5 transition' : 'px-3.5 py-1.5 rounded-xl font-bold text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center gap-1.5 transition'}">
+                            <i class="fa-solid fa-cloud-arrow-up text-indigo-400"></i>
+                            <span>Uploads (Logo/Frame/Pic)</span>
+                        </button>
+                        <button id="certTabBtn_text" onclick="window.KrouDigital.setActiveTab('text')" class="${activeTab === 'text' ? 'px-3.5 py-1.5 rounded-xl font-bold text-xs bg-indigo-600 text-white shadow-md shadow-indigo-500/30 flex items-center gap-1.5 transition' : 'px-3.5 py-1.5 rounded-xl font-bold text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center gap-1.5 transition'}">
+                            <i class="fa-solid fa-font text-teal-400"></i>
+                            <span>អត្ថបទ & ពុម្ព (Text & Fonts)</span>
+                        </button>
+                        <button id="certTabBtn_data" onclick="window.KrouDigital.setActiveTab('data')" class="${activeTab === 'data' ? 'px-3.5 py-1.5 rounded-xl font-bold text-xs bg-indigo-600 text-white shadow-md shadow-indigo-500/30 flex items-center gap-1.5 transition' : 'px-3.5 py-1.5 rounded-xl font-bold text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center gap-1.5 transition'}">
+                            <i class="fa-solid fa-user-graduate text-purple-400"></i>
+                            <span>ទិន្នន័យសិស្ស (Auto-fill)</span>
+                        </button>
+                    </div>
+
+                    <!-- In-place edit notification -->
+                    <div class="flex items-center gap-1.5 text-[11px] text-amber-300 bg-amber-950/40 border border-amber-800/60 px-2.5 py-1 rounded-lg">
+                        <i class="fa-solid fa-i-cursor text-amber-400"></i>
+                        <span>ចុចលើអត្ថបទណាមួយលើប័ណ្ណដើម្បីកែសម្រួលផ្ទាល់</span>
+                    </div>
+                </div>
+
+                <!-- 🛠️ TAB CONTENT TOOLBAR PANES 🛠️ -->
+                <div class="bg-slate-900 px-4 py-2.5 border-b border-slate-700/60 text-xs no-print">
+                    
+                    <!-- PANE 1: DESIGN & BORDERS -->
+                    <div id="certTabPane_design" class="${activeTab === 'design' ? 'flex flex-wrap items-center gap-3' : 'hidden'}">
+                        <!-- Frame Selector -->
+                        <div class="flex items-center gap-1.5 bg-slate-800 border border-slate-700 rounded-xl px-2.5 py-1.5">
+                            <span class="text-slate-400">ម៉ូដស៊ុម៖</span>
                             <select id="certFrameSelect" onchange="window.KrouDigital.renderCertificateModal(document.getElementById('certStudentSelect')?.value, document.getElementById('certRankSelect')?.value, document.getElementById('certGradeSelect')?.value, this.value)" class="bg-transparent text-amber-200 outline-none cursor-pointer font-bold">
                                 ${Object.entries(frameStylesMap).map(([key, item]) => `
                                     <option value="${key}" ${key === frameStyle ? 'selected' : ''} class="bg-slate-900 text-white">${item.name}</option>
@@ -1137,41 +1336,129 @@ window.KrouDigital = {
                             </select>
                         </div>
 
-                        <!-- Frame Padding Slider (Margin Adjuster for uploaded frames) -->
-                        <div class="flex items-center gap-2 bg-slate-800 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-slate-300">
+                        <!-- Frame Padding Slider -->
+                        <div class="flex items-center gap-2 bg-slate-800 border border-slate-700 rounded-xl px-3 py-1.5 text-slate-300">
                             <span>គម្លាតស៊ុម៖</span>
-                            <input type="range" min="15" max="90" value="${certPadding}" oninput="window.KrouDigital.updateCertPadding(this.value)" class="w-16 accent-amber-500 cursor-pointer">
+                            <input type="range" min="10" max="95" value="${certPadding}" oninput="window.KrouDigital.updateCertPadding(this.value)" class="w-20 accent-amber-500 cursor-pointer">
                             <span id="certPaddingDisplay" class="font-mono text-amber-400 font-bold">${certPadding}px</span>
                         </div>
 
-                        <!-- Text Scale Slider -->
-                        <div class="flex items-center gap-2 bg-slate-800 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-slate-300">
+                        <!-- Background Color -->
+                        <div class="flex items-center gap-1.5 bg-slate-800 border border-slate-700 rounded-xl px-2.5 py-1.5">
+                            <span class="text-slate-400">ពណ៌ផ្ទៃ៖</span>
+                            <button onclick="window.KrouDigital.updateCertBgColor('#ffffff')" class="w-4 h-4 rounded-full bg-white border border-slate-400 hover:scale-110 transition" title="ស (White)"></button>
+                            <button onclick="window.KrouDigital.updateCertBgColor('#fefcf3')" class="w-4 h-4 rounded-full bg-[#fefcf3] border border-amber-300 hover:scale-110 transition" title="ក្រដាសចាស់ (Ivory)"></button>
+                            <button onclick="window.KrouDigital.updateCertBgColor('#fffbeb')" class="w-4 h-4 rounded-full bg-[#fffbeb] border border-amber-400 hover:scale-110 transition" title="ពងមាន់ (Cream)"></button>
+                            <button onclick="window.KrouDigital.updateCertBgColor('#f8fafc')" class="w-4 h-4 rounded-full bg-[#f8fafc] border border-blue-300 hover:scale-110 transition" title="ទឹកកក (Ice)"></button>
+                        </div>
+
+                        <!-- Watermark Romduol Pattern Switch -->
+                        <label class="flex items-center gap-2 bg-slate-800 border border-slate-700 rounded-xl px-3 py-1.5 cursor-pointer text-slate-300 hover:text-white transition">
+                            <input type="checkbox" ${watermarkEnabled ? 'checked' : ''} onchange="window.KrouDigital.toggleWatermark(this.checked)" class="accent-indigo-500 w-3.5 h-3.5 cursor-pointer">
+                            <span>Watermark ផ្កាក្បាច់</span>
+                        </label>
+                    </div>
+
+                    <!-- PANE 2: UPLOADS (LOGO, FRAME, PICTURES) -->
+                    <div id="certTabPane_uploads" class="${activeTab === 'uploads' ? 'flex flex-wrap items-center gap-3' : 'hidden'}">
+                        <!-- Upload Custom Frame -->
+                        <label class="cursor-pointer px-3 py-1.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white rounded-xl font-bold shadow transition flex items-center gap-1.5 active:scale-95" title="ផ្ទុកឡើងស៊ុមរូបភាព (JPG/PNG)">
+                            <i class="fa-solid fa-image text-amber-300"></i>
+                            <span>Upload Frame</span>
+                            <input type="file" accept="image/*" class="hidden" onchange="window.KrouDigital.handleUploadFrame(event)">
+                        </label>
+                        ${customFrameB64 ? `
+                            <button onclick="window.KrouDigital.removeCustomFrame()" class="px-2 py-1 bg-rose-950/70 hover:bg-rose-900 text-rose-300 border border-rose-800 rounded-xl font-bold transition flex items-center gap-1" title="លុបស៊ុម">
+                                <i class="fa-solid fa-trash-can text-xs"></i> លុបស៊ុម
+                            </button>
+                        ` : ''}
+
+                        <!-- Upload Logo -->
+                        <label class="cursor-pointer px-3 py-1.5 bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white rounded-xl font-bold shadow transition flex items-center gap-1.5 active:scale-95" title="ផ្ទុកឡើងឡូហ្គោសាលា/ក្រសួង">
+                            <i class="fa-solid fa-certificate text-white"></i>
+                            <span>Upload Logo</span>
+                            <input type="file" accept="image/*" class="hidden" onchange="window.KrouDigital.handleUploadLogo(event)">
+                        </label>
+                        ${customLogoB64 ? `
+                            <button onclick="window.KrouDigital.removeCustomLogo()" class="px-2 py-1 bg-rose-950/70 hover:bg-rose-900 text-rose-300 border border-rose-800 rounded-xl font-bold transition flex items-center gap-1" title="លុប Logo">
+                                <i class="fa-solid fa-trash-can text-xs"></i> លុប Logo
+                            </button>
+                        ` : ''}
+
+                        <!-- Upload Picture / Stamp / Signature / Photo -->
+                        <label class="cursor-pointer px-3 py-1.5 bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700 text-white rounded-xl font-bold shadow transition flex items-center gap-1.5 active:scale-95" title="Upload រូបភាពបន្ថែម ដូចជាត្រាក្រហម ហត្ថលេខា ឬរូបសិស្ស">
+                            <i class="fa-solid fa-stamp text-amber-300"></i>
+                            <span>Upload Picture (ត្រា/ហត្ថលេខា/រូប)</span>
+                            <input type="file" accept="image/*" class="hidden" onchange="window.KrouDigital.handleUploadPicture(event)">
+                        </label>
+
+                        <!-- Uploaded Pictures Thumbnails Count -->
+                        ${customPics.length > 0 ? `
+                            <div class="flex items-center gap-1.5 bg-slate-800 border border-slate-700 px-2.5 py-1 rounded-xl">
+                                <span class="text-slate-400 text-[11px]">រូបភាពបន្ថែម៖</span>
+                                ${customPics.map(p => `
+                                    <div class="relative group">
+                                        <img src="${p.b64}" class="w-6 h-6 object-contain rounded border border-slate-600" title="${p.name || 'Picture'}">
+                                        <button onclick="window.KrouDigital.removePicture('${p.id}')" class="absolute -top-1 -right-1 w-3.5 h-3.5 bg-rose-600 text-white rounded-full text-[8px] flex items-center justify-center opacity-0 group-hover:opacity-100 transition" title="លុប">×</button>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        ` : ''}
+                    </div>
+
+                    <!-- PANE 3: TEXT & FONTS -->
+                    <div id="certTabPane_text" class="${activeTab === 'text' ? 'flex flex-wrap items-center gap-3' : 'hidden'}">
+                        <!-- Add Text Box Button -->
+                        <button onclick="window.KrouDigital.addCustomText()" class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold shadow transition flex items-center gap-1.5 active:scale-95">
+                            <i class="fa-solid fa-plus text-amber-300"></i>
+                            <span>+ Add Text (បន្ថែមអត្ថបទ)</span>
+                        </button>
+
+                        <!-- Font Family -->
+                        <div class="flex items-center gap-1.5 bg-slate-800 border border-slate-700 rounded-xl px-2.5 py-1.5">
+                            <span class="text-slate-400">ពុម្ពអក្សរ៖</span>
+                            <select onchange="window.KrouDigital.updateCertFontFamily(this.value)" class="bg-transparent text-indigo-300 outline-none cursor-pointer font-bold">
+                                <option value="font-moul" ${certFontFamily === 'font-moul' ? 'selected' : ''} class="bg-slate-900 text-white">Khmer OS Muol Light</option>
+                                <option value="font-siemreap" ${certFontFamily === 'font-siemreap' ? 'selected' : ''} class="bg-slate-900 text-white">Siemreap (ស្តង់ដារ)</option>
+                                <option value="font-battambang" ${certFontFamily === 'font-battambang' ? 'selected' : ''} class="bg-slate-900 text-white">Battambang</option>
+                            </select>
+                        </div>
+
+                        <!-- Font Scale Slider -->
+                        <div class="flex items-center gap-2 bg-slate-800 border border-slate-700 rounded-xl px-3 py-1.5 text-slate-300">
                             <i class="fa-solid fa-text-height text-indigo-400"></i>
-                            <input type="range" min="80" max="130" value="${certFontScale}" oninput="window.KrouDigital.updateCertFontScale(this.value)" class="w-16 accent-indigo-500 cursor-pointer">
+                            <span>ទំហំអក្សរ៖</span>
+                            <input type="range" min="80" max="135" value="${certFontScale}" oninput="window.KrouDigital.updateCertFontScale(this.value)" class="w-20 accent-indigo-500 cursor-pointer">
                             <span id="certScaleDisplay" class="font-mono text-indigo-300 font-bold">${certFontScale}%</span>
                         </div>
 
+                        <!-- Text Formatting (Bold, Italic, Align) -->
+                        <div class="flex items-center gap-1 bg-slate-800 border border-slate-700 rounded-xl px-2 py-1">
+                            <button onclick="window.KrouDigital.execTextCmd('bold')" class="w-6 h-6 rounded bg-slate-700 hover:bg-slate-600 font-bold text-white transition" title="Bold">B</button>
+                            <button onclick="window.KrouDigital.execTextCmd('italic')" class="w-6 h-6 rounded bg-slate-700 hover:bg-slate-600 italic text-white transition" title="Italic">I</button>
+                            <button onclick="window.KrouDigital.execTextCmd('underline')" class="w-6 h-6 rounded bg-slate-700 hover:bg-slate-600 underline text-white transition" title="Underline">U</button>
+                            <div class="w-px h-4 bg-slate-600 mx-1"></div>
+                            <button onclick="window.KrouDigital.execTextCmd('justifyLeft')" class="w-6 h-6 rounded bg-slate-700 hover:bg-slate-600 text-white transition" title="Left"><i class="fa-solid fa-align-left text-[10px]"></i></button>
+                            <button onclick="window.KrouDigital.execTextCmd('justifyCenter')" class="w-6 h-6 rounded bg-slate-700 hover:bg-slate-600 text-white transition" title="Center"><i class="fa-solid fa-align-center text-[10px]"></i></button>
+                            <button onclick="window.KrouDigital.execTextCmd('justifyRight')" class="w-6 h-6 rounded bg-slate-700 hover:bg-slate-600 text-white transition" title="Right"><i class="fa-solid fa-align-right text-[10px]"></i></button>
+                        </div>
+
+                        <!-- Text Color Swatches & Picker -->
+                        <div class="flex items-center gap-1.5 bg-slate-800 border border-slate-700 rounded-xl px-2.5 py-1">
+                            <span class="text-slate-400 text-[11px]">ពណ៌៖</span>
+                            <button onclick="window.KrouDigital.updateCertColor('#dc2626')" class="w-4 h-4 rounded-full bg-red-600 hover:scale-110 transition border border-white/40" title="ក្រហម (ដូចរូបគំរូ)"></button>
+                            <button onclick="window.KrouDigital.updateCertColor('#b45309')" class="w-4 h-4 rounded-full bg-amber-600 hover:scale-110 transition border border-white/40" title="មាស"></button>
+                            <button onclick="window.KrouDigital.updateCertColor('#1e3a8a')" class="w-4 h-4 rounded-full bg-blue-800 hover:scale-110 transition border border-white/40" title="ខៀវ"></button>
+                            <button onclick="window.KrouDigital.updateCertColor('#047857')" class="w-4 h-4 rounded-full bg-emerald-700 hover:scale-110 transition border border-white/40" title="បៃតង"></button>
+                            <button onclick="window.KrouDigital.updateCertColor('#0f172a')" class="w-4 h-4 rounded-full bg-slate-900 hover:scale-110 transition border border-white/40" title="ខ្មៅ"></button>
+                            <input type="color" id="certCustomColorPicker" value="${certTitleColor}" onchange="window.KrouDigital.updateCertColor(this.value)" class="w-5 h-5 rounded cursor-pointer border-0 bg-transparent" title="ជ្រើសរើសពណ៌ផ្ទាល់ខ្លួន">
+                        </div>
                     </div>
 
-                    <!-- Right: Print and Close -->
-                    <div class="flex items-center gap-2">
-                        <button onclick="window.KrouDigital.printCertificate()" class="px-5 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white rounded-xl text-xs font-bold shadow-lg shadow-emerald-500/30 transition flex items-center gap-2 active:scale-95 outline-none">
-                            <i class="fa-solid fa-print text-amber-300"></i>
-                            <span>បោះពុម្ព (Print A4)</span>
-                        </button>
-                        <button onclick="document.getElementById('certificateModal').classList.add('hidden')" class="w-9 h-9 bg-slate-800 hover:bg-rose-900/80 text-slate-300 hover:text-white rounded-xl font-bold flex items-center justify-center transition border border-slate-700" title="បិទ (Close)">
-                            <i class="fa-solid fa-xmark"></i>
-                        </button>
-                    </div>
-
-                </div>
-
-                <!-- ⚙️ SECONDARY CANVA TOOLBAR (Student Data & Content Selectors) ⚙️ -->
-                <div class="bg-slate-850 px-4 py-2.5 border-b border-slate-700/60 flex flex-wrap items-center justify-between gap-2.5 text-xs no-print">
-                    
-                    <div class="flex flex-wrap items-center gap-2">
-                        <!-- ថ្នាក់ -->
-                        <div class="flex items-center gap-1.5 bg-slate-800 border border-slate-700 rounded-xl px-3 py-1.5">
+                    <!-- PANE 4: STUDENT DATA AUTO-FILL -->
+                    <div id="certTabPane_data" class="${activeTab === 'data' ? 'flex flex-wrap items-center gap-3' : 'hidden'}">
+                        <!-- Grade Select -->
+                        <div class="flex items-center gap-1.5 bg-slate-800 border border-slate-700 rounded-xl px-2.5 py-1.5">
                             <span class="text-slate-400">ថ្នាក់៖</span>
                             <select id="certGradeSelect" onchange="window.KrouDigital.renderCertificateModal(null, document.getElementById('certRankSelect')?.value, this.value, '${frameStyle}')" class="bg-transparent text-indigo-300 font-bold outline-none cursor-pointer">
                                 <option value="all" class="bg-slate-900 text-white">គ្រប់ថ្នាក់</option>
@@ -1179,8 +1466,8 @@ window.KrouDigital = {
                             </select>
                         </div>
 
-                        <!-- សិស្ស -->
-                        <div class="flex items-center gap-1.5 bg-slate-800 border border-slate-700 rounded-xl px-3 py-1.5">
+                        <!-- Student Select -->
+                        <div class="flex items-center gap-1.5 bg-slate-800 border border-slate-700 rounded-xl px-2.5 py-1.5">
                             <span class="text-slate-400">សិស្ស៖</span>
                             <select id="certStudentSelect" onchange="window.KrouDigital.renderCertificateModal(this.value, document.getElementById('certRankSelect')?.value, '${curLevel}', '${frameStyle}')" class="bg-transparent text-white font-bold outline-none cursor-pointer max-w-[170px] truncate">
                                 ${selectableStudents.map(s => `
@@ -1189,162 +1476,193 @@ window.KrouDigital = {
                             </select>
                         </div>
 
-                        <!-- ប្រភេទប័ណ្ណ -->
-                        <div class="flex items-center gap-1.5 bg-slate-800 border border-slate-700 rounded-xl px-3 py-1.5">
-                            <span class="text-slate-400">ប្រភេទប័ណ្ណ៖</span>
-                            <select id="certRankSelect" onchange="window.KrouDigital.renderCertificateModal('${student.id}', this.value, '${curLevel}', '${frameStyle}')" class="bg-transparent text-amber-400 font-bold outline-none cursor-pointer">
-                                <option value="1" ${rankNum == 1 ? 'selected' : ''} class="bg-slate-900 text-white">សិស្សពូកែលំដាប់ទី ១</option>
-                                <option value="2" ${rankNum == 2 ? 'selected' : ''} class="bg-slate-900 text-white">សិស្សពូកែលំដាប់ទី ២</option>
-                                <option value="3" ${rankNum == 3 ? 'selected' : ''} class="bg-slate-900 text-white">សិស្សពូកែលំដាប់ទី ៣</option>
-                                <option value="4" ${rankNum == 4 ? 'selected' : ''} class="bg-slate-900 text-white">សិស្សពូកែលំដាប់ទី ៤</option>
-                                <option value="5" ${rankNum == 5 ? 'selected' : ''} class="bg-slate-900 text-white">សិស្សពូកែលំដាប់ទី ៥</option>
-                                <option value="month" ${rankNum == 'month' ? 'selected' : ''} class="bg-slate-900 text-white">សិស្សឆ្នើមប្រចាំខែ</option>
-                                <option value="year" ${rankNum == 'year' ? 'selected' : ''} class="bg-slate-900 text-white">សិស្សឆ្នើមប្រចាំឆ្នាំ</option>
-                                <option value="conduct" ${rankNum == 'conduct' ? 'selected' : ''} class="bg-slate-900 text-white">សិស្សមានវិន័យ និងសីលធម៌ល្អ</option>
-                                <option value="custom" ${rankNum == 'custom' ? 'selected' : ''} class="bg-slate-900 text-white">ប័ណ្ណសរសើរពិសេស (កែសម្រួលផ្ទាល់)</option>
+                        <!-- Title Type (លិខិតសរសើរ vs ប័ណ្ណសរសើរ) -->
+                        <div class="flex items-center gap-1.5 bg-slate-800 border border-slate-700 rounded-xl px-2.5 py-1.5">
+                            <span class="text-slate-400">ចំណងជើង៖</span>
+                            <select onchange="localStorage.setItem('cert_title_type', this.value); document.getElementById('certMainTitle').innerText = this.value;" class="bg-transparent text-amber-300 font-bold outline-none cursor-pointer">
+                                <option value="លិខិតសរសើរ" ${titleType === 'លិខិតសរសើរ' ? 'selected' : ''} class="bg-slate-900 text-white">លិខិតសរសើរ (ដូចរូបគំរូ)</option>
+                                <option value="ប័ណ្ណសរសើរ" ${titleType === 'ប័ណ្ណសរសើរ' ? 'selected' : ''} class="bg-slate-900 text-white">ប័ណ្ណសរសើរ</option>
+                                <option value="វិញ្ញាបនបត្រកិត្តិយស" ${titleType === 'វិញ្ញាបនបត្រកិត្តិយស' ? 'selected' : ''} class="bg-slate-900 text-white">វិញ្ញាបនបត្រកិត្តិយស</option>
                             </select>
                         </div>
 
-                        <!-- Upload School Logo / Stamp -->
-                        <label class="cursor-pointer px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 rounded-xl transition flex items-center gap-1.5 active:scale-95" title="Upload ត្រា ឬ ឡូហ្គោសាលា">
-                            <i class="fa-solid fa-stamp text-amber-400"></i>
-                            <span>Upload ត្រា/Logo</span>
-                            <input type="file" accept="image/*" class="hidden" onchange="window.KrouDigital.handleUploadLogo(event)">
-                        </label>
-                        ${customLogoB64 ? `
-                            <button onclick="window.KrouDigital.removeCustomLogo()" class="text-rose-400 hover:text-rose-300 font-bold px-1" title="លុប Logo">
-                                <i class="fa-solid fa-xmark"></i>
-                            </button>
-                        ` : ''}
-                    </div>
-
-                    <div class="flex items-center gap-2">
-                        <!-- Color Palette for Title -->
-                        <div class="flex items-center gap-1 bg-slate-800 border border-slate-700 rounded-xl px-2 py-1">
-                            <span class="text-slate-400 text-[10px] mr-1">ពណ៌ចំណងជើង៖</span>
-                            <button onclick="window.KrouDigital.updateCertColor('#b45309')" class="w-4 h-4 rounded-full bg-amber-600 hover:scale-110 transition border border-white/40" title="Gold"></button>
-                            <button onclick="window.KrouDigital.updateCertColor('#1e3a8a')" class="w-4 h-4 rounded-full bg-blue-800 hover:scale-110 transition border border-white/40" title="Navy"></button>
-                            <button onclick="window.KrouDigital.updateCertColor('#991b1b')" class="w-4 h-4 rounded-full bg-red-800 hover:scale-110 transition border border-white/40" title="Ruby"></button>
-                            <button onclick="window.KrouDigital.updateCertColor('#065f46')" class="w-4 h-4 rounded-full bg-emerald-800 hover:scale-110 transition border border-white/40" title="Emerald"></button>
-                            <button onclick="window.KrouDigital.updateCertColor('#0f172a')" class="w-4 h-4 rounded-full bg-slate-900 hover:scale-110 transition border border-white/40" title="Dark"></button>
+                        <!-- Rank Select -->
+                        <div class="flex items-center gap-1.5 bg-slate-800 border border-slate-700 rounded-xl px-2.5 py-1.5">
+                            <span class="text-slate-400">កិត្តិយស៖</span>
+                            <select id="certRankSelect" onchange="window.KrouDigital.renderCertificateModal('${student.id}', this.value, '${curLevel}', '${frameStyle}')" class="bg-transparent text-amber-400 font-bold outline-none cursor-pointer">
+                                <option value="1" ${activeRank == 1 ? 'selected' : ''} class="bg-slate-900 text-white">ចំណាត់ថ្នាក់លេខ ១</option>
+                                <option value="2" ${activeRank == 2 ? 'selected' : ''} class="bg-slate-900 text-white">ចំណាត់ថ្នាក់លេខ ២</option>
+                                <option value="3" ${activeRank == 3 ? 'selected' : ''} class="bg-slate-900 text-white">ចំណាត់ថ្នាក់លេខ ៣ (ដូចរូបគំរូ)</option>
+                                <option value="4" ${activeRank == 4 ? 'selected' : ''} class="bg-slate-900 text-white">ចំណាត់ថ្នាក់លេខ ៤</option>
+                                <option value="5" ${activeRank == 5 ? 'selected' : ''} class="bg-slate-900 text-white">ចំណាត់ថ្នាក់លេខ ៥</option>
+                                <option value="month" ${activeRank == 'month' ? 'selected' : ''} class="bg-slate-900 text-white">សិស្សឆ្នើមប្រចាំខែ</option>
+                                <option value="year" ${activeRank == 'year' ? 'selected' : ''} class="bg-slate-900 text-white">សិស្សឆ្នើមប្រចាំឆ្នាំ</option>
+                                <option value="conduct" ${activeRank == 'conduct' ? 'selected' : ''} class="bg-slate-900 text-white">សិស្សមានវិន័យ និងសីលធម៌ល្អ</option>
+                            </select>
                         </div>
-
-                        <span class="inline-flex items-center gap-1 px-2.5 py-1 bg-amber-950/60 text-amber-300 border border-amber-800/80 rounded-xl text-[11px] font-bold">
-                            <i class="fa-solid fa-i-cursor text-amber-400"></i> ចុចលើអក្សរដើម្បីកែសម្រួល
-                        </span>
                     </div>
 
                 </div>
 
-                <!-- 📜 CANVAS WORKSPACE AREA (A4 Landscape Paper) 📜 -->
-                <div class="w-full flex-1 overflow-x-auto custom-scrollbar flex justify-center p-4 sm:p-8 bg-slate-950/90">
-                    <div id="certificatePrintWrapper" class="transition-all relative flex justify-center items-center shadow-2xl rounded-2xl">
+                <!-- 📜 CANVAS WORKSPACE AREA (ZOOMABLE) 📜 -->
+                <div class="w-full flex-1 overflow-auto custom-scrollbar flex justify-center items-start p-4 sm:p-8 bg-slate-950/95 min-h-[500px]">
+                    <div id="certificatePrintWrapper" class="transition-transform duration-200 relative flex justify-center items-center shadow-2xl rounded-2xl" style="transform: scale(${studioZoom / 100}); transform-origin: top center;">
                         
-                        <!-- ក្រដាសប័ណ្ណសរសើរ A4 Landscape Canvas -->
+                        <!-- ក្រដាសប័ណ្ណសរសើរ / លិខិតសរសើរ Canvas -->
                         <div id="certificatePrintArea" class="${activeFrame.bgGradient} ${activeFrame.outerBorder} rounded-2xl relative text-center text-slate-900 overflow-hidden" 
-                             style="width: 297mm; min-height: 210mm; max-width: 297mm; background-color: #ffffff; font-size: ${certFontScale}%;">
+                             style="width: ${curPageSize.width}; min-height: ${curPageSize.height}; max-width: ${curPageSize.width}; background-color: ${certBgColor}; font-size: ${certFontScale}%; ${activeFrame.styleExtra || ''}">
                             
                             <!-- 🖼️ Custom Uploaded Frame Layer (Full Bleed Background) -->
                             ${customFrameB64 ? `
                                 <img src="${customFrameB64}" alt="Certificate Frame" class="absolute inset-0 w-full h-full object-fill pointer-events-none select-none z-0" style="width: 100%; height: 100%;" />
                             ` : ''}
 
-                            <!-- 🖼️ Built-in Frame Corner Accents (When no custom uploaded frame) -->
-                            ${!customFrameB64 && activeFrame.cornerIcon ? `
-                                <div class="absolute inset-3 ${activeFrame.innerBorder} rounded-xl pointer-events-none z-10"></div>
-                                <div class="absolute top-4 left-5 ${activeFrame.cornerColor} text-2xl font-serif select-none pointer-events-none z-10">${activeFrame.cornerIcon}</div>
-                                <div class="absolute top-4 right-5 ${activeFrame.cornerColor} text-2xl font-serif select-none pointer-events-none z-10">${activeFrame.cornerIcon}</div>
-                                <div class="absolute bottom-4 left-5 ${activeFrame.cornerColor} text-2xl font-serif select-none pointer-events-none z-10">${activeFrame.cornerIcon}</div>
-                                <div class="absolute bottom-4 right-5 ${activeFrame.cornerColor} text-2xl font-serif select-none pointer-events-none z-10">${activeFrame.cornerIcon}</div>
+                            <!-- 🖼️ Built-in Khmer Kbach / Royal Borders -->
+                            ${!customFrameB64 && activeFrame.innerBorder ? `
+                                <div class="absolute inset-2 sm:inset-3 ${activeFrame.innerBorder} rounded-xl pointer-events-none z-10"></div>
                             ` : ''}
 
-                            <!-- 📝 Internal Content Container with Dynamic Padding Slider -->
-                            <div id="certificateInnerCanvas" class="relative z-20 flex flex-col justify-between h-full w-full" style="padding: ${certPadding}px; min-height: 210mm; box-sizing: border-box;">
-                                
-                                <!-- ក្បាលប័ណ្ណ (Header) -->
-                                <div class="flex justify-between items-start text-xs px-2 pt-1">
-                                    <div class="text-left pt-1">
-                                        <p contenteditable="true" class="cert-editable font-moul text-amber-950 text-[13px] leading-snug">${schoolName}</p>
-                                        <p contenteditable="true" class="cert-editable text-slate-500 font-bold mt-1 text-[11px]">លេខ៖ .......... / ប.ស.ស</p>
+                            <!-- 🏵️ Khmer Romduol Watermark Pattern (Matching Sample Image!) -->
+                            ${watermarkEnabled ? `
+                                <svg width="100%" height="100%" class="absolute inset-0 pointer-events-none select-none z-10 opacity-[0.065]" xmlns="http://www.w3.org/2000/svg">
+                                    <defs>
+                                        <pattern id="khmerRomduolPattern" width="90" height="90" patternUnits="userSpaceOnUse">
+                                            <circle cx="45" cy="45" r="4" fill="#92400e"/>
+                                            <path d="M45,20 C42,32 42,38 45,41 C48,38 48,32 45,20 Z" fill="#92400e"/>
+                                            <path d="M45,70 C42,58 42,52 45,49 C48,52 48,58 45,70 Z" fill="#92400e"/>
+                                            <path d="M20,45 C32,42 38,42 41,45 C38,48 32,48 20,45 Z" fill="#92400e"/>
+                                            <path d="M70,45 C58,42 52,42 49,45 C52,48 58,48 70,45 Z" fill="#92400e"/>
+                                            <circle cx="45" cy="45" r="14" fill="none" stroke="#92400e" stroke-width="0.8" stroke-dasharray="2,2"/>
+                                        </pattern>
+                                    </defs>
+                                    <rect width="100%" height="100%" fill="url(#khmerRomduolPattern)"/>
+                                </svg>
+                            ` : ''}
+
+                            <!-- 🖼️ Additional Uploaded Pictures (Stamps, Signatures, Student Photo) Overlays -->
+                            ${customPics.map(pic => `
+                                <div id="${pic.id}" class="absolute select-none z-30 group" style="left: ${pic.x}px; top: ${pic.y}px; width: ${pic.width}px;">
+                                    <img src="${pic.b64}" alt="${pic.name}" class="w-full h-auto object-contain pointer-events-none drop-shadow-sm" />
+                                    <button onclick="window.KrouDigital.removePicture('${pic.id}')" class="absolute -top-2 -right-2 w-5 h-5 bg-rose-600 hover:bg-rose-700 text-white rounded-full text-[10px] flex items-center justify-center shadow no-print opacity-0 group-hover:opacity-100 transition" title="លុបរូបភាពនេះ">
+                                        <i class="fa-solid fa-xmark"></i>
+                                    </button>
+                                </div>
+                            `).join('')}
+
+                            <!-- 🔤 Additional Custom Added Texts Overlays -->
+                            ${customTexts.map(txt => `
+                                <div id="${txt.id}" class="absolute select-text z-30 group" style="left: ${txt.x}px; top: ${txt.y}px;">
+                                    <div contenteditable="true" class="cert-editable font-bold ${txt.fontFamily}" style="font-size: ${txt.fontSize}px; color: ${txt.color};">
+                                        ${txt.content}
                                     </div>
-                                    <div class="text-center">
-                                        <p contenteditable="true" class="cert-editable font-moul text-slate-900 text-sm">ព្រះរាជាណាចក្រកម្ពុជា</p>
-                                        <p contenteditable="true" class="cert-editable font-moul text-slate-800 text-xs mt-0.5">ជាតិ សាសនា ព្រះមហាក្សត្រ</p>
+                                    <button onclick="window.KrouDigital.removeCustomText('${txt.id}')" class="absolute -top-2.5 -right-2.5 w-4 h-4 bg-rose-600 hover:bg-rose-700 text-white rounded-full text-[9px] flex items-center justify-center shadow no-print opacity-0 group-hover:opacity-100 transition" title="លុបអត្ថបទនេះ">
+                                        <i class="fa-solid fa-xmark"></i>
+                                    </button>
+                                </div>
+                            `).join('')}
+
+                            <!-- 📝 Internal Content Container with Dynamic Padding Slider -->
+                            <div id="certificateInnerCanvas" class="relative z-20 flex flex-col justify-between h-full w-full" style="padding: ${certPadding}px; min-height: ${curPageSize.height}; box-sizing: border-box;">
+                                
+                                <!-- 🏛️ ក្បាលប័ណ្ណ (Official Header matching sample image) 🏛️ -->
+                                <div class="flex justify-between items-start text-xs px-2 pt-1">
+                                    <!-- Left: MoEYS Logo & Hierarchy (ដូចរូបគំរូ) -->
+                                    <div class="text-left pt-0.5 space-y-0.5 max-w-[270px]">
+                                        <div class="mb-1">
+                                            ${customLogoB64 ? `
+                                                <img src="${customLogoB64}" alt="Logo" class="w-14 h-14 object-contain shadow-sm rounded-full" />
+                                            ` : `
+                                                <div class="w-12 h-12 rounded-full border border-amber-500/80 bg-amber-50 flex items-center justify-center text-amber-700 text-xl shadow-sm">
+                                                    <i class="fa-solid fa-award"></i>
+                                                </div>
+                                            `}
+                                        </div>
+                                        <p contenteditable="true" class="cert-editable font-moul text-blue-950 text-[10.5px] leading-tight">មន្ទីរអប់រំ យុវជន និងកីឡាខេត្ត${provinceName}</p>
+                                        <p contenteditable="true" class="cert-editable font-moul text-blue-950 text-[10px] leading-tight">ការិយាល័យអប់រំ យុវជន និងកីឡានៃរដ្ឋបាលស្រុក${districtName}</p>
+                                        <p contenteditable="true" class="cert-editable font-moul text-blue-950 text-[10px] leading-tight">${schoolName}</p>
+                                    </div>
+
+                                    <!-- Center: Kingdom of Cambodia & National Motto -->
+                                    <div class="text-center pt-1">
+                                        <p contenteditable="true" class="cert-editable font-moul text-blue-950 text-sm md:text-base tracking-wide">ព្រះរាជាណាចក្រកម្ពុជា</p>
+                                        <p contenteditable="true" class="cert-editable font-moul text-blue-900 text-xs md:text-sm mt-0.5">ជាតិ សាសនា ព្រះមហាក្សត្រ</p>
                                         <img src="${window.CMS_HEADER_SYMBOL_B64 || 'assets/images/header-flourish.png'}" class="header-flourish-symbol" alt="symbol" style="display: block; margin: 3px auto 0 auto; width: 130px; height: 10px; object-fit: contain;" />
                                     </div>
-                                    <div class="text-right pt-1 opacity-90 min-w-[70px]">
-                                        ${customLogoB64 ? `
-                                            <img src="${customLogoB64}" alt="School Logo" class="w-14 h-14 object-contain mx-auto rounded-full shadow-sm" />
-                                        ` : `
-                                            <div class="w-12 h-12 rounded-full border-2 border-amber-400 bg-amber-50 flex items-center justify-center text-amber-600 text-xl shadow-sm mx-auto">
-                                                <i class="fa-solid fa-award"></i>
-                                            </div>
-                                        `}
-                                    </div>
+
+                                    <!-- Right spacer or secondary stamp -->
+                                    <div class="text-right min-w-[70px]"></div>
                                 </div>
 
-                                <!-- ចំណងជើងប័ណ្ណសរសើរ (Title Banner) -->
-                                <div class="my-2">
-                                    <h1 id="certMainTitle" contenteditable="true" class="cert-editable font-moul text-2xl md:text-4xl drop-shadow-sm mb-1" style="color: ${certTitleColor};">
-                                        ប័ណ្ណសរសើរ
+                                <!-- 🎖️ ចំណងជើងប័ណ្ណសរសើរ / លិខិតសរសើរ (Title Banner matching sample image) 🎖️ -->
+                                <div class="my-2 text-center">
+                                    <h1 id="certMainTitle" contenteditable="true" class="cert-editable ${certFontFamily} text-3xl sm:text-4xl md:text-5xl drop-shadow-sm mb-1 tracking-wide" style="color: ${certTitleColor};">
+                                        ${titleType}
                                     </h1>
-                                    <p contenteditable="true" class="cert-editable text-[11px] font-bold text-amber-950 uppercase tracking-[0.25em]">CERTIFICATE OF HONOR & EXCELLENCE</p>
                                 </div>
 
-                                <!-- តួសេចក្តី (Certificate Body) -->
-                                <div class="my-2 max-w-3xl mx-auto space-y-3 text-sm md:text-base leading-relaxed">
-                                    <p contenteditable="true" class="cert-editable text-slate-700">
-                                        គណៈគ្រប់គ្រង និងលោកគ្រូ អ្នកគ្រូ នៃ <strong>${schoolName}</strong> សូមសម្តែងនូវការកោតសរសើរចំពោះ៖
+                                <!-- 📜 តួសេចក្តី (Body Content matching sample image) 📜 -->
+                                <div class="my-1.5 max-w-4xl mx-auto space-y-2.5 text-sm md:text-base leading-relaxed text-slate-800">
+                                    <!-- Administration header line -->
+                                    <p contenteditable="true" class="cert-editable font-moul text-blue-950 text-base md:text-lg">
+                                        គណៈគ្រប់គ្រង${schoolName}
                                     </p>
                                     
-                                    <div class="my-1.5">
-                                        <h2 contenteditable="true" class="cert-editable font-moul text-2xl md:text-3xl text-indigo-950 py-1 border-b-2 border-dashed ${activeFrame.accentLine} inline-block px-10">
+                                    <!-- Praise to student line -->
+                                    <div class="text-slate-800 text-sm md:text-base flex flex-wrap items-center justify-center gap-1.5 pt-0.5">
+                                        <span contenteditable="true" class="cert-editable">សរសើរចំពោះសិស្សឈ្មោះ៖</span>
+                                        <span contenteditable="true" class="cert-editable font-moul text-xl md:text-2xl text-blue-950 px-3 border-b-2 border-dashed border-amber-600 inline-block font-bold">
                                             ${student.name}
-                                        </h2>
+                                        </span>
+                                        <span contenteditable="true" class="cert-editable">រៀនថ្នាក់ទី</span>
+                                        <span contenteditable="true" class="cert-editable font-bold text-blue-900 px-1.5 text-base md:text-lg">${student.grade || curLevel} ${student.room || ''}</span>
+                                        <span contenteditable="true" class="cert-editable">ដែលបានយកចិត្តទុកដាក់</span>
                                     </div>
 
-                                    <p contenteditable="true" class="cert-editable text-slate-700 text-xs md:text-sm">
-                                        ភេទ៖ <strong>${student.gender || 'ប្រុស'}</strong> &nbsp;|&nbsp; សិស្សថ្នាក់៖ <strong>${student.grade || curLevel} ${student.room || ''}</strong> &nbsp;|&nbsp; អត្តលេខ៖ <span class="font-mono font-bold">${student.id}</span>
-                                    </p>
+                                    <!-- Study performance line -->
+                                    <div class="text-slate-800 text-sm md:text-base flex flex-wrap items-center justify-center gap-1.5">
+                                        <span contenteditable="true" class="cert-editable">ខិតខំសិក្សារៀនសូត្រ ទទួលបានចំណាត់ថ្នាក់លេខ</span>
+                                        <span contenteditable="true" class="cert-editable font-moul text-lg md:text-xl text-red-600 font-bold px-1.5">${activeRank}</span>
+                                        <span contenteditable="true" class="cert-editable">និទ្ទេស</span>
+                                        <span contenteditable="true" class="cert-editable font-moul text-lg md:text-xl text-red-600 font-bold px-1.5">${activeRank == 1 ? 'A' : activeRank == 2 ? 'B' : activeRank == 3 ? 'C' : 'ល្អ'}</span>
+                                    </div>
 
-                                    <div contenteditable="true" class="cert-editable text-slate-800 font-medium text-sm md:text-base px-4 py-1 leading-relaxed">
-                                        ${rankNum == 'conduct' ? 
-                                            `ដែលបានខិតខំប្រឹងប្រែងគោរពវិន័យ មានសីលធម៌ សុជីវធម៌ល្អប្រពៃ និងជាគំរូដ៏ល្អដល់មិត្តរួមថ្នាក់` : 
-                                          rankNum == 'month' ?
-                                            `ដែលទទួលបានជោគជ័យ និងចំណាត់ថ្នាក់ឆ្នើមជា <span class="font-moul text-amber-700">«សិស្សឆ្នើមប្រចាំខែ»</span> ក្នុងការសិក្សា និងវិន័យល្អ` :
-                                          rankNum == 'year' ?
-                                            `ដែលទទួលបានជោគជ័យ និងចំណាត់ថ្នាក់ឆ្នើមជា <span class="font-moul text-amber-700">«សិស្សឆ្នើមប្រចាំឆ្នាំ»</span> ក្នុងការប្រឡង និងវាយតម្លៃលទ្ធផលសិក្សា` :
-                                          rankNum == 'custom' ?
-                                            `ដែលបានខិតខំប្រឹងប្រែងរៀនសូត្រ សម្រេចបានលទ្ធផលយ៉ាងត្រចះត្រចង់ ក្នុងការអប់រំ និងសកម្មភាពនានា` :
-                                            `ដែលទទួលបានជោគជ័យ និងចំណាត់ថ្នាក់ជា <span class="font-moul text-amber-700">«សិស្សពូកែលំដាប់ទី ${rankNum}»</span> ក្នុងការប្រឡង និងវាយតម្លៃលទ្ធផលសិក្សា`}
-                                        ប្រចាំឆ្នាំសិក្សា <strong>${academicYear}</strong>។
+                                    <!-- Exam Session / Academic Year (in red Moul font matching image) -->
+                                    <div class="pt-1">
+                                        <p contenteditable="true" class="cert-editable font-moul text-red-600 text-sm md:text-base tracking-wide">
+                                            ${examSession}
+                                        </p>
                                     </div>
                                 </div>
 
-                                <!-- ហត្ថលេខា និងកាលបរិច្ឆេទ (Signatures & Date) -->
-                                <div class="flex justify-between items-end text-xs mt-6 px-6 md:px-12">
-                                    <div class="text-center min-w-[140px]">
-                                        <p contenteditable="true" class="cert-editable font-bold text-slate-600 text-[11px]">គ្រូបន្ទុកថ្នាក់</p>
-                                        <div class="h-16 flex items-center justify-center text-slate-300 text-xs italic">
+                                <!-- ✍️ ហត្ថលេខា និងកាលបរិច្ឆេទ (Signatures & Date matching sample image) ✍️ -->
+                                <div class="flex justify-between items-end text-xs mt-4 px-4 sm:px-10">
+                                    <!-- Left side: បានឃើញ និងឯកភាព / នាយករងបច្ចេកទេស -->
+                                    <div class="text-center min-w-[150px]">
+                                        <p contenteditable="true" class="cert-editable text-slate-700 text-[11px] font-bold">បានឃើញ និងឯកភាព</p>
+                                        <p contenteditable="true" class="cert-editable font-moul text-blue-950 text-xs mt-0.5">នាយករងបច្ចេកទេស</p>
+                                        
+                                        <!-- Stamp & Signature Holder -->
+                                        <div class="h-16 flex items-center justify-center relative my-1">
+                                            <div class="w-16 h-16 rounded-full border border-dashed border-rose-400/80 flex items-center justify-center text-[9px] text-rose-500 select-none">
+                                                (ត្រាក្រហម)
+                                            </div>
+                                        </div>
+
+                                        <p contenteditable="true" class="cert-editable font-moul text-red-600 text-sm font-bold mt-1">${principalName}</p>
+                                    </div>
+
+                                    <!-- Right side: Lunar Date, Solar Date, Teacher Signature -->
+                                    <div class="text-center min-w-[170px] space-y-0.5">
+                                        <p contenteditable="true" class="cert-editable text-slate-700 text-[10.5px]">${lunarDateStr}</p>
+                                        <p contenteditable="true" class="cert-editable text-slate-700 text-[11px] font-bold">${solarDateStr}</p>
+                                        <p contenteditable="true" class="cert-editable font-moul text-blue-950 text-xs mt-1">គ្រូទទួលបន្ទុកថ្នាក់</p>
+                                        
+                                        <!-- Teacher Signature Holder -->
+                                        <div class="h-14 flex items-center justify-center text-slate-400 text-xs italic">
                                             (ហត្ថលេខា)
                                         </div>
-                                        <p contenteditable="true" class="cert-editable font-bold text-slate-800 text-xs">${teacherName}</p>
-                                    </div>
 
-                                    <!-- ត្រាសាលា (School Stamp Area) -->
-                                    <div class="text-center opacity-60">
-                                        <div class="w-16 h-16 rounded-full border border-dashed border-amber-500/60 flex items-center justify-center text-[10px] text-amber-700">
-                                            ទីតាំងបោះត្រា
-                                        </div>
-                                    </div>
-
-                                    <div class="text-center min-w-[140px]">
-                                        <p contenteditable="true" class="cert-editable text-slate-500 text-[11px]">${solarDateStr}</p>
-                                        <p contenteditable="true" class="cert-editable font-moul text-amber-950 mt-1 text-[11px]">នាយក/នាយិកាសាលា</p>
-                                        <div class="h-14 flex items-center justify-center text-slate-300 text-xs italic">
-                                            (ហត្ថលេខា និងត្រា)
-                                        </div>
-                                        <p contenteditable="true" class="cert-editable font-bold text-slate-900 text-xs">${principalName}</p>
+                                        <p contenteditable="true" class="cert-editable font-moul text-blue-950 text-sm font-bold">${teacherName}</p>
                                     </div>
                                 </div>
 
