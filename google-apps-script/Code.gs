@@ -1420,15 +1420,15 @@ function doPost(e) {
     // ២.៤ កត់ត្រាការកំណត់ផ្ទាល់ខ្លួនគ្រូ (Save Teacher Settings)
     if (action === 'saveTeacherSettings') {
       const auth = authenticateSession(sessionToken);
-      const targetTeacherId = payload.teacher_id || (auth.authenticated ? auth.user.user_id : '');
-      if (!targetTeacherId) return createJsonResponse({ status: 'error', message: 'បាត់ teacher_id' });
+      const targetTeacherId = payload.teacher_id || (auth.authenticated ? auth.user.user_id : '') || 'TCH-001';
 
       // សុវត្ថិភាពខ្ពស់៖ គ្រូមិនអាចកែប្រែ settings អ្នកដទៃបានទេ លើកលែងតែ Admin
       if (auth.authenticated && auth.user.role !== 'super_admin' && auth.user.role !== 'admin' && auth.user.user_id !== targetTeacherId) {
         return createJsonResponse({ status: 'forbidden', message: 'គ្មានសិទ្ធិកែប្រែ Settings គ្រូផ្សេងឡើយ' });
       }
 
-      const prefJson = typeof data === 'object' ? JSON.stringify(data) : String(data);
+      const prefData = data !== undefined ? data : payload;
+      const prefJson = typeof prefData === 'object' ? JSON.stringify(prefData) : String(prefData);
       const record = {
         teacher_id: targetTeacherId,
         preferences_json: prefJson,
@@ -1694,15 +1694,17 @@ function doPost(e) {
     // ៣.៩ Save Settings
     if (action === 'saveSettings') {
       const auth = authenticateSession(sessionToken);
-      if (auth.authenticated && !authorizeRole(auth.user, ['super_admin', 'admin'])) {
-        return createJsonResponse({ status: 'forbidden', message: 'ទាមទារសិទ្ធិ Admin ដើម្បីកែប្រែការកំណត់សាលា' });
+      if (auth.authenticated && !authorizeRole(auth.user, ['super_admin', 'admin', 'homeroom_teacher', 'teacher'])) {
+        return createJsonResponse({ status: 'forbidden', message: 'ទាមទារសិទ្ធិ Admin ឬ គ្រូទទួលបន្ទុក ដើម្បីកែប្រែការកំណត់សាលា' });
       }
 
-      const settingsObj = data;
+      const settingsObj = (data && typeof data === 'object') ? data : (payload && typeof payload === 'object' ? payload : {});
       const settingsRecords = [];
       const nowIso = new Date().toISOString();
+      const skipKeys = ['action', 'session_token', 'data', 'teacher_id', 'academic_year'];
       
       for (const [key, value] of Object.entries(settingsObj)) {
+        if (skipKeys.includes(key)) continue;
         settingsRecords.push({
           setting_key: key,
           setting_value: typeof value === 'object' ? JSON.stringify(value) : String(value),
@@ -1710,7 +1712,9 @@ function doPost(e) {
         });
       }
 
-      upsertRecords(SHEETS.SETTINGS, settingsRecords, 'setting_key');
+      if (settingsRecords.length > 0) {
+        upsertRecords(SHEETS.SETTINGS, settingsRecords, 'setting_key');
+      }
       logSecurityEvent(auth.user?.user_id || 'ADMIN', 'UPDATE_SETTINGS', 'SETTINGS', 'SCHOOL_CONFIG', 'SUCCESS');
       return createJsonResponse({ status: 'success', message: 'បានកត់ត្រាការកំណត់សាលារៀនជោគជ័យ' });
     }

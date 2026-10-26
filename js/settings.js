@@ -414,10 +414,36 @@ window.handleSavePersonalTeacherSettings = async function(event) {
             try { window.loadLibraryView(); } catch(e) {}
         }
 
+        // Save Settings to Google Sheets (Real-time REST API)
+        let gasSaved = false;
+        if (typeof window.apiPost === 'function') {
+            try {
+                const results = await Promise.allSettled([
+                    window.apiPost("saveSettings", window.appSettings),
+                    window.apiPost("saveTeacherSettings", { teacher_id: tId, data: payload }),
+                    window.apiPost("saveClass", {
+                        class_id: `CLS-${level}-${room}`,
+                        grade: level,
+                        room: room,
+                        teacher_id: tId,
+                        teacher_name: payload.teacher_name,
+                        academic_year: academicYear
+                    })
+                ]);
+                gasSaved = results.some(r => r.status === 'fulfilled');
+            } catch(gasErr) {
+                console.warn("GAS saveSettings error:", gasErr);
+            }
+        }
+
+        const successMsg = gasSaved 
+            ? "🎉 បានរក្សាទុកការកំណត់ និង Sync ទៅកាន់ Google Sheet ដោយជោគជ័យ!" 
+            : "🎉 បានរក្សាទុកព័ត៌មានគ្រូ និងព័ត៌មានសាលារៀនដោយជោគជ័យ!";
+
         if (typeof showToast === 'function') {
-            showToast("🎉 បានរក្សាទុកព័ត៌មានគ្រូ និងព័ត៌មានសាលារៀនដោយជោគជ័យ!");
+            showToast(successMsg);
         } else {
-            alert("✅ បានរក្សាទុកព័ត៌មានគ្រូ និងព័ត៌មានសាលារៀនដោយជោគជ័យ!");
+            alert(successMsg);
         }
 
     } catch(err) {
@@ -2929,6 +2955,16 @@ window.handleSaveSettings = async function(event) {
                 console.log("✅ Settings persisted to Firestore for school:", schoolId);
             } catch(fsErr) {
                 console.warn("Firestore settings save failed:", fsErr);
+            }
+        }
+
+        // រក្សាទុកក្នុង Google Sheets
+        if (typeof window.apiPost === 'function') {
+            try {
+                const gasRes = await window.apiPost("saveSettings", payload);
+                if (gasRes && gasRes.status === "success") cloudSaved = true;
+            } catch(gasErr) {
+                console.warn("GAS saveSettings error:", gasErr);
             }
         }
         

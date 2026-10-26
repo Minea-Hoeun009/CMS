@@ -77,35 +77,49 @@
                 }
             } catch (e) { rawStudents = []; }
 
-            // ចម្រាញ់តាមឆ្នាំសិក្សា
-            let yearStudents = rawStudents.filter(s => {
-                if (!s) return false;
-                if (s.academic_year && s.academic_year !== academicYear) return false;
-                return true;
-            });
-            if (yearStudents.length === 0) yearStudents = rawStudents;
+            // ១. ស្វែងរកថ្នាក់ទទួលបន្ទុករបស់គ្រូ (Teacher's Homeroom Class)
+            const activeClass = typeof window.getCurrentSelectedClass === 'function' 
+                ? window.getCurrentSelectedClass() 
+                : { level: localStorage.getItem('selected_level') || "ថ្នាក់ទី ១", room: localStorage.getItem('selected_room') || "«ក»" };
+            const curLevel = activeClass.level || localStorage.getItem('selected_level') || (window.appSettings && window.appSettings.teacher_level) || "ថ្នាក់ទី ១";
+            const curRoom = activeClass.room || localStorage.getItem('selected_room') || (window.appSettings && window.appSettings.teacher_room) || "«ក»";
+            const currentClassFull = `${curLevel} ${curRoom}`.trim();
 
-            // ចម្រាញ់តាមថ្នាក់ដែលបានជ្រើស
-            let scopedStudents = yearStudents;
-            if (selectedClass && selectedClass !== 'all') {
-                scopedStudents = yearStudents.filter(s => {
-                    const sClass = `${s.grade || ''} ${s.room || ''}`.trim();
-                    return sClass === selectedClass.trim();
+            // ២. ទាញយក និងចម្រាញ់ទិន្នន័យសិស្សពិតប្រាកដក្នុងថ្នាក់ (Real Classroom Students)
+            let classStudents = [];
+            if (typeof window.getStudentsForClass === 'function') {
+                classStudents = window.getStudentsForClass(curLevel, curRoom, academicYear);
+            }
+            if (!classStudents || classStudents.length === 0) {
+                if (typeof window.getMasterStudents === 'function') {
+                    classStudents = window.getMasterStudents();
+                } else if (Array.isArray(window.allStudents) && window.allStudents.length > 0) {
+                    classStudents = window.allStudents;
+                } else {
+                    try { classStudents = JSON.parse(localStorage.getItem('academic_students') || '[]'); } catch (e) {}
+                }
+                const filtered = classStudents.filter(s => {
+                    if (!s) return false;
+                    const g = typeof window.normalizeGrade === 'function' ? window.normalizeGrade(s.grade) : s.grade;
+                    const r = String(s.room || '').replace(/[«»\s]/g, '');
+                    const targetR = curRoom.replace(/[«»\s]/g, '');
+                    return (!g || g === curLevel) && (!r || r === targetR);
                 });
+                if (filtered.length > 0) classStudents = filtered;
             }
 
-            const activeStudents = scopedStudents.filter(s => s.status !== "Dropped" && s.status !== "Withdrawn");
-            const totalStudents = activeStudents.length || 328; // Fallback to mockup sample
-            const femaleStudents = activeStudents.filter(s => s.gender === 'ស្រី' || s.gender === 'F').length || Math.round(totalStudents * 0.48);
+            const activeStudents = classStudents.filter(s => {
+                const st = String(s.status || "Active").toLowerCase();
+                return st !== "dropped" && st !== "withdrawn" && st !== "ឈប់រៀន";
+            });
+
+            const totalStudents = activeStudents.length;
+            const femaleStudents = activeStudents.filter(s => s.gender === 'ស្រី' || s.gender === 'F').length;
             const maleStudents = totalStudents - femaleStudents;
+            const femalePercent = totalStudents > 0 ? Math.round((femaleStudents / totalStudents) * 100) : 0;
+            const malePercent = totalStudents > 0 ? (100 - femalePercent) : 0;
 
-            // រាប់ចំនួនថ្នាក់រៀន
-            const classSet = new Set(yearStudents.map(s => `${s.grade || 'ថ្នាក់ទី ១'} ${s.room || '«ក»'}`.trim()));
-            const availableClasses = Array.from(classSet);
-            const totalClassesCount = availableClasses.length > 0 ? availableClasses.length : 12;
-            const totalTeachersCount = 24;
-
-            // ២. គណនាទិន្នន័យវត្តមានសម្រាប់កាលបរិច្ឆេទជ្រើសរើស (Attendance Stats)
+            // ៣. គណនាទិន្នន័យវត្តមានសម្រាប់កាលបរិច្ឆេទជ្រើសរើស (Attendance Stats)
             const chosenDate = new Date(currentFilter.selectedDate);
             const todayDayNum = chosenDate.getDate();
             let attPresent = 0, attPerm = 0, attUnex = 0, attLate = 0;
@@ -126,8 +140,10 @@
                 else if (code && code !== "៖" && code !== "-") attPresent++;
             });
 
-            // Default mockup rates if no manual record for today yet
-            const attRate = attendanceMarkedCount > 0 ? Math.round((attPresent / (activeStudents.length || 1)) * 100) : 92;
+            const attRate = attendanceMarkedCount > 0 
+                ? Math.round((attPresent / (activeStudents.length || 1)) * 100) 
+                : (totalStudents > 0 ? 100 : 0);
+            const attAbsent = attPerm + attUnex;
 
             // Role-specific KPI metrics and badge calculation
             let roleKpiBadge = '';
@@ -189,11 +205,8 @@
                                 </div>
                                 
                                 <div class="flex items-center gap-2">
-                                    <span class="text-xs font-bold text-slate-500 dark:text-slate-400"><i class="fa-solid fa-school text-emerald-600"></i> ${t('classes', 'ថ្នាក់រៀន')}៖</span>
-                                    <select id="dashFilterClass" onchange="window.handleDashboardFilterChange('selectedClass', this.value)" class="text-xs font-bold bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 py-1.5 px-3 rounded-xl border-0 focus:ring-2 focus:ring-blue-500 cursor-pointer outline-none">
-                                        <option value="all" ${selectedClass === 'all' ? 'selected' : ''}>ថ្នាក់ទាំងអស់ (${totalClassesCount} ថ្នាក់)</option>
-                                        ${availableClasses.map(c => `<option value="${c}" ${selectedClass === c ? 'selected' : ''}>${c}</option>`).join('')}
-                                    </select>
+                                    <span class="text-xs font-bold text-slate-500 dark:text-slate-400"><i class="fa-solid fa-chalkboard-user text-emerald-600"></i> ថ្នាក់ទទួលបន្ទុក៖</span>
+                                    <span class="text-xs font-bold bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 py-1.5 px-3 rounded-xl font-moul">${currentClassFull}</span>
                                 </div>
 
                                 <div class="flex items-center gap-2">
@@ -203,8 +216,8 @@
                             </div>
 
                             <div class="flex items-center gap-2">
-                                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 border border-blue-200/60 dark:border-blue-800">
-                                    <i class="fa-solid fa-shield-halved text-xs"></i> ${getRoleTitle(role)}
+                                <span class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 border border-blue-200/60 dark:border-blue-800">
+                                    <i class="fa-solid fa-chalkboard-user text-xs"></i> គ្រូបន្ទុកថ្នាក់ ${currentClassFull}
                                 </span>
                                 <button onclick="window.refreshDashboardData()" title="ទាញយកទិន្នន័យស្រស់" class="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-blue-50 hover:text-blue-600 flex items-center justify-center transition outline-none">
                                     <i class="fa-solid fa-arrows-rotate text-xs"></i>
@@ -223,13 +236,13 @@
                                         <i class="fa-solid fa-graduation-cap text-amber-300"></i>
                                         <span>${t('academicYear', 'ឆ្នាំសិក្សា')} ${academicYear}</span>
                                         <span>•</span>
-                                        <span>${selectedClass === 'all' ? 'ទូទាំងសាលារៀន' : selectedClass}</span>
+                                        <span class="font-moul text-amber-200">${currentClassFull}</span>
                                     </div>
                                     <h2 class="text-2xl sm:text-3xl font-bold font-siemreap tracking-wide leading-snug">
                                         ${t('welcomeTitle', 'សូមស្វាគមន៍មកកាន់ប្រព័ន្ធគ្រប់គ្រងថ្នាក់រៀន!')}
                                     </h2>
                                     <p class="text-blue-100 text-xs sm:text-sm font-medium max-w-2xl leading-relaxed">
-                                        ${t('welcomeSub', 'គ្រប់គ្រងទិន្នន័យសាលារៀន ស្រង់វត្តមាន និងលទ្ធផលសិក្សារបស់សិស្សានុសិស្សប្រកបដោយប្រសិទ្ធភាព')}
+                                        គ្រប់គ្រងទិន្នន័យសិស្ស ស្រង់វត្តមានប្រចាំថ្ងៃ និងលទ្ធផលសិក្សារបស់សិស្សានុសិស្សក្នុង${currentClassFull} ប្រកបដោយប្រសិទ្ធភាព
                                     </p>
                                 </div>
 
@@ -246,74 +259,74 @@
                             </div>
                         </div>
 
-                        <!-- 3. Top 4 Stat Cards (KPI Counters with Trend Badges matching Mockup) -->
+                        <!-- 3. Top 4 Stat Cards: សិស្សសរុប, សិស្សស្រី, សិស្សប្រុស, វត្តមានថ្ងៃនេះ -->
                         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                             
                             <!-- Card 1: សិស្សសរុប (Total Students) -->
                             <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl shadow-sm border border-slate-200/80 dark:border-slate-700 hover:shadow-md transition flex flex-col justify-between">
                                 <div class="flex items-center justify-between mb-3">
                                     <div class="w-12 h-12 rounded-2xl bg-blue-50 dark:bg-blue-950 text-blue-600 dark:text-blue-400 flex items-center justify-center text-xl">
-                                        <i class="fa-solid fa-user-graduate"></i>
+                                        <i class="fa-solid fa-users"></i>
                                     </div>
-                                    <span class="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-600 bg-emerald-50 dark:bg-emerald-950/60 px-2.5 py-1 rounded-full border border-emerald-200/50">
-                                        <i class="fa-solid fa-arrow-trend-up text-[10px]"></i> +12%
+                                    <span class="inline-flex items-center gap-1 text-[11px] font-bold text-blue-600 bg-blue-50 dark:bg-blue-950/60 px-2.5 py-1 rounded-full border border-blue-200/50">
+                                        <i class="fa-solid fa-school text-[10px]"></i> ${currentClassFull}
                                     </span>
                                 </div>
                                 <div>
                                     <p class="text-xs font-bold text-slate-500 dark:text-slate-400" data-i18n="totalStudents">${t('totalStudents', 'សិស្សសរុប')}</p>
                                     <div class="flex items-baseline gap-2 mt-1">
-                                        <span class="text-3xl font-black text-slate-800 dark:text-white font-mono">${totalStudents}</span>
+                                        <span class="text-3xl font-black text-slate-800 dark:text-white font-mono">${toKhNum(totalStudents)}</span>
                                         <span class="text-[11px] text-slate-400 font-medium">នាក់</span>
                                     </div>
-                                    <p class="text-[10px] text-slate-400 mt-2 font-bold flex items-center gap-1">
-                                        <span class="text-emerald-500 font-bold">+12%</span>
-                                        <span data-i18n="fromLastMonth">${t('fromLastMonth', 'ពីខែមុន')}</span>
+                                    <p class="text-[11px] text-blue-600 mt-2 font-bold flex items-center gap-1">
+                                        <i class="fa-solid fa-circle-check text-xs"></i>
+                                        <span>ក្នុងបន្ទប់សិក្សា ${currentClassFull}</span>
                                     </p>
                                 </div>
                             </div>
 
-                            <!-- Card 2: គ្រូសរុប (Total Teachers) -->
+                            <!-- Card 2: សិស្សស្រី (Female Students) -->
                             <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl shadow-sm border border-slate-200/80 dark:border-slate-700 hover:shadow-md transition flex flex-col justify-between">
                                 <div class="flex items-center justify-between mb-3">
-                                    <div class="w-12 h-12 rounded-2xl bg-emerald-50 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 flex items-center justify-center text-xl">
-                                        <i class="fa-solid fa-chalkboard-user"></i>
+                                    <div class="w-12 h-12 rounded-2xl bg-pink-50 dark:bg-pink-950 text-pink-600 dark:text-pink-400 flex items-center justify-center text-xl">
+                                        <i class="fa-solid fa-venus"></i>
                                     </div>
-                                    <span class="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-600 bg-emerald-50 dark:bg-emerald-950/60 px-2.5 py-1 rounded-full border border-emerald-200/50">
-                                        <i class="fa-solid fa-arrow-trend-up text-[10px]"></i> +4%
+                                    <span class="inline-flex items-center gap-1 text-[11px] font-bold text-pink-600 bg-pink-50 dark:bg-pink-950/60 px-2.5 py-1 rounded-full border border-pink-200/50">
+                                        ${toKhNum(femalePercent)}% នៃសរុប
                                     </span>
                                 </div>
                                 <div>
-                                    <p class="text-xs font-bold text-slate-500 dark:text-slate-400" data-i18n="totalTeachers">${t('totalTeachers', 'គ្រូសរុប')}</p>
+                                    <p class="text-xs font-bold text-slate-500 dark:text-slate-400">សិស្សស្រី (Female)</p>
                                     <div class="flex items-baseline gap-2 mt-1">
-                                        <span class="text-3xl font-black text-slate-800 dark:text-white font-mono">${totalTeachersCount}</span>
+                                        <span class="text-3xl font-black text-pink-600 dark:text-pink-400 font-mono">${toKhNum(femaleStudents)}</span>
                                         <span class="text-[11px] text-slate-400 font-medium">នាក់</span>
                                     </div>
-                                    <p class="text-[10px] text-slate-400 mt-2 font-bold flex items-center gap-1">
-                                        <span class="text-emerald-500 font-bold">+4%</span>
-                                        <span data-i18n="fromLastMonth">${t('fromLastMonth', 'ពីខែមុន')}</span>
+                                    <p class="text-[11px] text-pink-500 mt-2 font-bold flex items-center gap-1">
+                                        <i class="fa-solid fa-percent text-xs"></i>
+                                        <span>សមាមាត្រសិស្សស្រី ${toKhNum(femalePercent)}%</span>
                                     </p>
                                 </div>
                             </div>
 
-                            <!-- Card 3: ថ្នាក់សរុប (Total Classes) -->
+                            <!-- Card 3: សិស្សប្រុស (Male Students) -->
                             <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl shadow-sm border border-slate-200/80 dark:border-slate-700 hover:shadow-md transition flex flex-col justify-between">
                                 <div class="flex items-center justify-between mb-3">
-                                    <div class="w-12 h-12 rounded-2xl bg-amber-50 dark:bg-amber-950 text-amber-600 dark:text-amber-400 flex items-center justify-center text-xl">
-                                        <i class="fa-solid fa-school"></i>
+                                    <div class="w-12 h-12 rounded-2xl bg-sky-50 dark:bg-sky-950 text-sky-600 dark:text-sky-400 flex items-center justify-center text-xl">
+                                        <i class="fa-solid fa-mars"></i>
                                     </div>
-                                    <span class="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-600 bg-emerald-50 dark:bg-emerald-950/60 px-2.5 py-1 rounded-full border border-emerald-200/50">
-                                        <i class="fa-solid fa-arrow-trend-up text-[10px]"></i> +9%
+                                    <span class="inline-flex items-center gap-1 text-[11px] font-bold text-sky-600 bg-sky-50 dark:bg-sky-950/60 px-2.5 py-1 rounded-full border border-sky-200/50">
+                                        ${toKhNum(malePercent)}% នៃសរុប
                                     </span>
                                 </div>
                                 <div>
-                                    <p class="text-xs font-bold text-slate-500 dark:text-slate-400" data-i18n="totalClasses">${t('totalClasses', 'ថ្នាក់សរុប')}</p>
+                                    <p class="text-xs font-bold text-slate-500 dark:text-slate-400">សិស្សប្រុស (Male)</p>
                                     <div class="flex items-baseline gap-2 mt-1">
-                                        <span class="text-3xl font-black text-slate-800 dark:text-white font-mono">${totalClassesCount}</span>
-                                        <span class="text-[11px] text-slate-400 font-medium">ថ្នាក់</span>
+                                        <span class="text-3xl font-black text-sky-600 dark:text-sky-400 font-mono">${toKhNum(maleStudents)}</span>
+                                        <span class="text-[11px] text-slate-400 font-medium">នាក់</span>
                                     </div>
-                                    <p class="text-[10px] text-slate-400 mt-2 font-bold flex items-center gap-1">
-                                        <span class="text-emerald-500 font-bold">+9%</span>
-                                        <span data-i18n="fromLastMonth">${t('fromLastMonth', 'ពីខែមុន')}</span>
+                                    <p class="text-[11px] text-sky-500 mt-2 font-bold flex items-center gap-1">
+                                        <i class="fa-solid fa-percent text-xs"></i>
+                                        <span>សមាមាត្រសិស្សប្រុស ${toKhNum(malePercent)}%</span>
                                     </p>
                                 </div>
                             </div>
@@ -321,17 +334,27 @@
                             <!-- Card 4: វត្តមានថ្ងៃនេះ (Today Attendance) -->
                             <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl shadow-sm border border-slate-200/80 dark:border-slate-700 hover:shadow-md transition flex flex-col justify-between">
                                 <div class="flex items-center justify-between mb-3">
-                                    <div class="w-12 h-12 rounded-2xl bg-indigo-50 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 flex items-center justify-center text-xl">
+                                    <div class="w-12 h-12 rounded-2xl bg-emerald-50 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 flex items-center justify-center text-xl">
                                         <i class="fa-solid fa-clipboard-check"></i>
                                     </div>
                                     <span class="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-600 bg-emerald-50 dark:bg-emerald-950/60 px-2.5 py-1 rounded-full border border-emerald-200/50">
-                                        <i class="fa-solid fa-arrow-trend-up text-[10px]"></i> +5%
+                                        ${toKhNum(attendanceMarkedCount > 0 ? attPresent : totalStudents)} / ${toKhNum(totalStudents)} នាក់
                                     </span>
                                 </div>
                                 <div>
                                     <p class="text-xs font-bold text-slate-500 dark:text-slate-400" data-i18n="todayAttendance">${t('todayAttendance', 'វត្តមានថ្ងៃនេះ')}</p>
                                     <div class="flex items-baseline gap-2 mt-1">
-                                        <span class="text-3xl font-black text-indigo-600 dark:text-indigo-400 font-mono">${attRate}%</span>
+                                        <span class="text-3xl font-black text-emerald-600 dark:text-emerald-400 font-mono">${toKhNum(attRate)}%</span>
+                                        <span class="text-[11px] text-slate-400 font-medium">អត្រាចូលរៀន</span>
+                                    </div>
+                                    <p class="text-[11px] text-emerald-600 mt-2 font-bold flex items-center gap-1">
+                                        <i class="fa-solid fa-circle-check text-xs"></i>
+                                        <span>${attAbsent > 0 ? `អវត្តមាន ${toKhNum(attAbsent)} នាក់` : 'សិស្សទាំងអស់ចូលរៀនធម្មតា'}</span>
+                                    </p>
+                                </div>
+                            </div>
+
+                        </div>
                                         <span class="text-[11px] text-slate-400 font-medium">អត្រាចូលរួម</span>
                                     </div>
                                     <p class="text-[10px] text-slate-400 mt-2 font-bold flex items-center gap-1">
@@ -352,52 +375,64 @@
                                 <!-- Top Charts Grid (2 Columns: Line Chart & Donut Chart) -->
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     
-                                    <!-- Chart 1: Line Chart - កំណើនសិស្សតាមឆ្នាំ -->
+                                    <!-- Chart 1: Donut Chart - សមាមាត្រភេទសិស្ស (សិស្សប្រុស vs សិស្សស្រី) -->
                                     <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl shadow-sm border border-slate-200/80 dark:border-slate-700 flex flex-col justify-between">
                                         <div class="flex justify-between items-center mb-3">
                                             <div>
-                                                <h3 class="font-bold text-sm text-slate-800 dark:text-white" data-i18n="studentCountByYear">
-                                                    ${t('studentCountByYear', 'ចំនួនសិស្សតាមឆ្នាំសិក្សា')}
+                                                <h3 class="font-bold text-sm text-slate-800 dark:text-white flex items-center gap-2">
+                                                    <i class="fa-solid fa-venus-mars text-indigo-500"></i>
+                                                    <span>សមាមាត្រភេទសិស្ស (Gender Ratio)</span>
                                                 </h3>
-                                                <p class="text-[11px] text-slate-400 font-medium">កំណើនសិស្សពីឆ្នាំ ២០២០ ដល់ ២០២៥</p>
+                                                <p class="text-[11px] text-slate-400 font-medium">សិស្សប្រុស និងសិស្សស្រីក្នុង${currentClassFull}</p>
                                             </div>
-                                            <span class="w-8 h-8 rounded-xl bg-blue-50 dark:bg-blue-950 text-blue-600 flex items-center justify-center text-xs">
-                                                <i class="fa-solid fa-chart-line"></i>
-                                            </span>
-                                        </div>
-                                        <div class="relative h-56 flex items-center justify-center w-full">
-                                            <canvas id="chartStudentGrowth"></canvas>
-                                        </div>
-                                    </div>
-
-                                    <!-- Chart 2: Donut Chart - វត្តមានសិស្ស -->
-                                    <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl shadow-sm border border-slate-200/80 dark:border-slate-700 flex flex-col justify-between">
-                                        <div class="flex justify-between items-center mb-3">
-                                            <div>
-                                                <h3 class="font-bold text-sm text-slate-800 dark:text-white" data-i18n="attendanceStats">
-                                                    ${t('attendanceStats', 'ស្ថិតិវត្តមាន')}
-                                                </h3>
-                                                <p class="text-[11px] text-slate-400 font-medium">អត្រាវត្តមានប្រចាំថ្ងៃសរុប</p>
-                                            </div>
-                                            <span class="w-8 h-8 rounded-xl bg-indigo-50 dark:bg-indigo-950 text-indigo-600 flex items-center justify-center text-xs">
+                                            <span class="w-8 h-8 rounded-xl bg-pink-50 dark:bg-pink-950 text-pink-600 flex items-center justify-center text-xs">
                                                 <i class="fa-solid fa-chart-pie"></i>
                                             </span>
                                         </div>
                                         <div class="relative h-44 flex items-center justify-center">
+                                            <canvas id="chartStudentDemographics"></canvas>
+                                            <canvas id="chartStudentGrowth" class="hidden"></canvas>
+                                            <!-- Center Total Overlay -->
+                                            <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                                                <span class="text-2xl font-black text-slate-800 dark:text-white font-mono leading-none">${toKhNum(totalStudents)}</span>
+                                                <span class="text-[10px] text-slate-400 font-bold mt-0.5">សិស្សសរុប</span>
+                                            </div>
+                                        </div>
+                                        <!-- Donut Legend (Female vs Male) -->
+                                        <div class="grid grid-cols-2 gap-2 pt-3 border-t border-slate-100 dark:border-slate-700 text-[11px] font-bold">
+                                            <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-pink-500 shrink-0"></span><span>សិស្សស្រី</span>: <span class="font-mono text-pink-600">${toKhNum(femaleStudents)}</span> (${toKhNum(femalePercent)}%)</div>
+                                            <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-blue-500 shrink-0"></span><span>សិស្សប្រុស</span>: <span class="font-mono text-blue-600">${toKhNum(maleStudents)}</span> (${toKhNum(malePercent)}%)</div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Chart 2: Donut Chart - វត្តមានសិស្សថ្ងៃនេះ -->
+                                    <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl shadow-sm border border-slate-200/80 dark:border-slate-700 flex flex-col justify-between">
+                                        <div class="flex justify-between items-center mb-3">
+                                            <div>
+                                                <h3 class="font-bold text-sm text-slate-800 dark:text-white flex items-center gap-2">
+                                                    <i class="fa-solid fa-clipboard-user text-emerald-500"></i>
+                                                    <span data-i18n="attendanceStats">${t('attendanceStats', 'ស្ថិតិវត្តមានថ្ងៃនេះ')}</span>
+                                                </h3>
+                                                <p class="text-[11px] text-slate-400 font-medium">ស្ថានភាពវត្តមានសិស្សក្នុង${currentClassFull}</p>
+                                            </div>
+                                            <span class="w-8 h-8 rounded-xl bg-emerald-50 dark:bg-emerald-950 text-emerald-600 flex items-center justify-center text-xs">
+                                                <i class="fa-solid fa-chart-simple"></i>
+                                            </span>
+                                        </div>
+                                        <div class="relative h-44 flex items-center justify-center">
                                             <canvas id="chartAttendanceDonut"></canvas>
-                                            <canvas id="chartStudentDemographics" class="hidden"></canvas>
                                             <!-- Center Percentage Overlay -->
                                             <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                                                <span class="text-2xl font-black text-slate-800 dark:text-white font-mono leading-none">${attRate}%</span>
+                                                <span class="text-2xl font-black text-slate-800 dark:text-white font-mono leading-none">${toKhNum(attRate)}%</span>
                                                 <span class="text-[10px] text-slate-400 font-bold mt-0.5" data-i18n="present">${t('present', 'វត្តមាន')}</span>
                                             </div>
                                         </div>
                                         <!-- Donut Legend (4 Categories) -->
                                         <div class="grid grid-cols-2 gap-2 pt-3 border-t border-slate-100 dark:border-slate-700 text-[11px] font-bold">
-                                            <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-blue-600 shrink-0"></span><span data-i18n="present">${t('present', 'វត្តមាន')}</span>: 92%</div>
-                                            <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-rose-500 shrink-0"></span><span data-i18n="absent">${t('absent', 'អវត្តមាន')}</span>: 4%</div>
-                                            <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-amber-500 shrink-0"></span><span data-i18n="late">${t('late', 'យឺត')}</span>: 2%</div>
-                                            <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500 shrink-0"></span><span data-i18n="excused">${t('excused', 'លើកលែង')}</span>: 2%</div>
+                                            <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-blue-600 shrink-0"></span><span data-i18n="present">${t('present', 'វត្តមាន')}</span>: <span class="font-mono text-blue-600">${toKhNum(attPresent)}</span> (${toKhNum(attRate)}%)</div>
+                                            <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-rose-500 shrink-0"></span><span data-i18n="absent">${t('absent', 'អវត្តមាន')}</span>: <span class="font-mono text-rose-500">${toKhNum(attUnex)}</span></div>
+                                            <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-amber-500 shrink-0"></span><span data-i18n="late">${t('late', 'យឺត')}</span>: <span class="font-mono text-amber-500">${toKhNum(attLate)}</span></div>
+                                            <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500 shrink-0"></span><span data-i18n="excused">${t('excused', 'ច្បាប់')}</span>: <span class="font-mono text-emerald-500">${toKhNum(attPerm)}</span></div>
                                         </div>
                                     </div>
 
@@ -617,32 +652,20 @@
                 </div>
             `;
 
-            // ៥. គូរ Line Chart: កំណើនសិស្សតាមឆ្នាំ
+            // ៥. គូរ Donut Chart: សមាមាត្រភេទសិស្ស (Gender Ratio)
             if (typeof Chart !== 'undefined') {
-                const growthCtx = document.getElementById('chartStudentGrowth');
-                if (growthCtx) {
-                    if (window.dashGrowthChart) window.dashGrowthChart.destroy();
-                    
-                    const isKm = (window.CMS_I18N?.currentLang || 'km') === 'km';
-                    const years = isKm ? ['២០២០', '២០២១', '២០២២', '២០២៣', '២០២៤', '២០២៥'] : ['2020', '2021', '2022', '2023', '2024', '2025'];
-                    const counts = [210, 245, 278, 295, 312, totalStudents];
-
-                    window.dashGrowthChart = new Chart(growthCtx, {
-                        type: 'line',
+                const demoCtx = document.getElementById('chartStudentDemographics');
+                if (demoCtx) {
+                    if (window.dashDemoChart) window.dashDemoChart.destroy();
+                    window.dashDemoChart = new Chart(demoCtx, {
+                        type: 'doughnut',
                         data: {
-                            labels: years,
+                            labels: ['សិស្សស្រី', 'សិស្សប្រុស'],
                             datasets: [{
-                                label: t('totalStudents', 'សិស្ស'),
-                                data: counts,
-                                borderColor: '#2563eb',
-                                backgroundColor: 'rgba(37, 99, 235, 0.1)',
-                                fill: true,
-                                tension: 0.4,
-                                pointBackgroundColor: '#2563eb',
-                                pointBorderColor: '#ffffff',
-                                pointBorderWidth: 2,
-                                pointRadius: 4,
-                                pointHoverRadius: 6
+                                data: [femaleStudents || 1, maleStudents || 1],
+                                backgroundColor: ['#ec4899', '#3b82f6'],
+                                borderWidth: 0,
+                                hoverOffset: 4
                             }]
                         },
                         options: {
@@ -655,20 +678,17 @@
                                     titleFont: { family: 'Siemreap', size: 12 },
                                     bodyFont: { family: 'Siemreap', size: 12 },
                                     padding: 10,
-                                    cornerRadius: 8
+                                    cornerRadius: 8,
+                                    callbacks: {
+                                        label: function(context) {
+                                            const val = context.raw;
+                                            const pct = totalStudents > 0 ? Math.round((val / totalStudents) * 100) : 50;
+                                            return ` ${context.label}: ${val} នាក់ (${pct}%)`;
+                                        }
+                                    }
                                 }
                             },
-                            scales: {
-                                y: {
-                                    beginAtZero: false,
-                                    grid: { color: 'rgba(226, 232, 240, 0.6)' },
-                                    ticks: { font: { size: 10 } }
-                                },
-                                x: {
-                                    grid: { display: false },
-                                    ticks: { font: { family: 'Siemreap', size: 10 } }
-                                }
-                            }
+                            cutout: '76%'
                         }
                     });
                 }
@@ -677,12 +697,17 @@
                 const attCtx = document.getElementById('chartAttendanceDonut');
                 if (attCtx) {
                     if (window.dashAttendanceChart) window.dashAttendanceChart.destroy();
+                    const presentCount = attendanceMarkedCount > 0 ? attPresent : (totalStudents > 0 ? totalStudents : 1);
+                    const unexCount = attUnex;
+                    const lateCount = attLate;
+                    const permCount = attPerm;
+
                     window.dashAttendanceChart = new Chart(attCtx, {
                         type: 'doughnut',
                         data: {
                             labels: [t('present', 'វត្តមាន'), t('absent', 'អវត្តមាន'), t('late', 'យឺត'), t('excused', 'លើកលែង')],
                             datasets: [{
-                                data: [92, 4, 2, 2],
+                                data: [presentCount, unexCount, lateCount, permCount],
                                 backgroundColor: ['#2563eb', '#ef4444', '#f59e0b', '#10b981'],
                                 borderWidth: 0,
                                 hoverOffset: 4
@@ -701,7 +726,7 @@
                                     cornerRadius: 8,
                                     callbacks: {
                                         label: function(context) {
-                                            return ` ${context.label}: ${context.raw}%`;
+                                            return ` ${context.label}: ${context.raw} នាក់`;
                                         }
                                     }
                                 }

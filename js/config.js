@@ -3,10 +3,10 @@
 // ==========================================
 
 // 👉 URL របស់ Google Apps Script (Connected & Standardized)
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwPENjHCg_DgJG4IusO0ZkN2d2zTwzHH4QTdxAEI9KlyVhdJcUkKecSzd5vUxqHtIy1/exec";
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw6ZNl_m8VrX_HAgci15kWzBKIhoHOliii32LGxN7-_MIETighSV1LJvdodWET-7gtQ/exec";
 window.SCRIPT_URL = SCRIPT_URL;
 window.getScriptUrl = function() {
-  return SCRIPT_URL;
+  return localStorage.getItem('cms_custom_script_url') || SCRIPT_URL;
 };
 
 // ⚡ Global Standardized Grade & Room Helpers

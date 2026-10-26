@@ -345,7 +345,7 @@ window.loadStudentsView = async function() {
                                         <th class="p-4 border-b border-slate-200 font-moul text-slate-700">គោត្តនាម និងនាម</th>
                                         <th class="p-4 border-b border-slate-200 text-center w-16">ភេទ</th>
                                         <th class="p-4 border-b border-slate-200 w-32 text-center">ថ្ងៃខែឆ្នាំកំណើត</th>
-                                        <th class="p-4 border-b border-slate-200 w-32 text-center">បន្ទប់រៀន</th>
+                                        <th class="p-4 border-b border-slate-200 w-36 text-center font-moul text-slate-700">ថ្នាក់ និងបន្ទប់</th>
                                         <th class="p-4 border-b border-slate-200 w-40">ទីលំនៅ (ភូមិ/ឃុំ)</th>
                                         <th class="p-4 border-b border-slate-200 text-center w-36 no-print">សកម្មភាព</th>
                                     </tr>
@@ -688,7 +688,7 @@ window.renderStudentsTable = function() {
                 <td class="p-3 text-center font-Siemreap text-[14px]">${genBadge}</td>
                 <td class="p-3 text-center text-slate-600 font-Siemreap text-[14px] whitespace-nowrap">${formatDate(stu.dob)} ${ageHtml}</td>
                 <td class="p-3 text-center text-slate-700">
-                   <span class="border border-slate-200 px-3 py-1.5 rounded-xl text-[12px] bg-white shadow-sm text-slate-700 whitespace-nowrap"><span class="text-indigo-600 font-moul">បន្ទប់ ${window.escapeHtml(stu.room) || '«ក»'}</span></span> 
+                   <span class="border border-indigo-100 bg-indigo-50/70 px-3 py-1.5 rounded-xl text-[12px] shadow-sm text-indigo-900 font-moul whitespace-nowrap">${displayGrade || 'ថ្នាក់ទី ១'} ${window.escapeHtml(stu.room) || '«ក»'}</span> 
                 </td>
                 <td class="p-3 text-slate-500 text-[12px]"><i class="fa-solid fa-map-pin text-slate-300 mr-1.5"></i> ${window.escapeHtml(addrText)}</td>
                 <td class="p-3 text-center no-print">
