@@ -788,6 +788,64 @@ window.KrouDigital = {
     // =====================================================================
     // ៥. ប័ណ្ណសរសើរ / វិញ្ញាបនបត្រ (Professional Canva-Style Certificate Studio 4.0)
     // =====================================================================
+    initDraggable: function(el, type, id) {
+        if (!el) return;
+        let isDragging = false;
+        let startX = 0, startY = 0;
+        let initialLeft = 0, initialTop = 0;
+
+        const dragHandle = el.querySelector('.drag-handle') || el;
+
+        dragHandle.onmousedown = function(e) {
+            // Do not drag if clicking on editable text or buttons
+            if (e.target.tagName === 'BUTTON' || e.target.closest('button')) return;
+            if (e.target.hasAttribute('contenteditable') || e.target.closest('[contenteditable="true"]')) return;
+
+            e.preventDefault();
+            isDragging = true;
+            startX = e.clientX;
+            startY = e.clientY;
+            initialLeft = parseFloat(el.style.left) || 0;
+            initialTop = parseFloat(el.style.top) || 0;
+
+            document.onmousemove = function(e) {
+                if (!isDragging) return;
+                const zoom = (parseInt(localStorage.getItem('cert_studio_zoom') || '85', 10) || 85) / 100;
+                const dx = (e.clientX - startX) / zoom;
+                const dy = (e.clientY - startY) / zoom;
+                el.style.left = Math.max(0, Math.round(initialLeft + dx)) + 'px';
+                el.style.top = Math.max(0, Math.round(initialTop + dy)) + 'px';
+            };
+
+            document.onmouseup = function() {
+                if (!isDragging) return;
+                isDragging = false;
+                document.onmousemove = null;
+                document.onmouseup = null;
+
+                const newX = parseFloat(el.style.left) || 0;
+                const newY = parseFloat(el.style.top) || 0;
+                if (type === 'text') {
+                    const texts = JSON.parse(localStorage.getItem('custom_cert_texts') || '[]');
+                    const item = texts.find(t => t.id === id);
+                    if (item) {
+                        item.x = Math.round(newX);
+                        item.y = Math.round(newY);
+                        localStorage.setItem('custom_cert_texts', JSON.stringify(texts));
+                    }
+                } else if (type === 'pic') {
+                    const pics = JSON.parse(localStorage.getItem('custom_cert_pictures') || '[]');
+                    const item = pics.find(p => p.id === id);
+                    if (item) {
+                        item.x = Math.round(newX);
+                        item.y = Math.round(newY);
+                        localStorage.setItem('custom_cert_pictures', JSON.stringify(pics));
+                    }
+                }
+            };
+        };
+    },
+
     handleUploadFrame: function(event) {
         const file = event.target.files && event.target.files[0];
         if (!file) return;
@@ -852,8 +910,8 @@ window.KrouDigital = {
                     name: file.name,
                     b64: e.target.result,
                     width: 120,
-                    x: 60 + (pics.length * 35),
-                    y: 110 + (pics.length * 25)
+                    x: 80 + (pics.length * 35),
+                    y: 120 + (pics.length * 25)
                 });
                 localStorage.setItem('custom_cert_pictures', JSON.stringify(pics));
                 if (typeof window.showToast === 'function') {
@@ -878,12 +936,12 @@ window.KrouDigital = {
         const texts = JSON.parse(localStorage.getItem('custom_cert_texts') || '[]');
         texts.push({
             id: 'txt_' + Date.now(),
-            content: "អត្ថបទថ្មី (ចុចលើអត្ថបទដើម្បីកែសម្រួល)",
-            fontSize: 15,
+            content: "អត្ថបទថ្មី (ចុចអូស ឬកែសម្រួល)",
+            fontSize: 16,
             color: '#dc2626',
             fontFamily: 'font-moul',
-            x: 220,
-            y: 180 + (texts.length * 40)
+            x: 240,
+            y: 190 + (texts.length * 40)
         });
         localStorage.setItem('custom_cert_texts', JSON.stringify(texts));
         window.KrouDigital.renderCertificateModal();
@@ -911,12 +969,12 @@ window.KrouDigital = {
     },
 
     zoomIn: function() {
-        const cur = parseInt(localStorage.getItem('cert_studio_zoom') || '100', 10);
+        const cur = parseInt(localStorage.getItem('cert_studio_zoom') || '85', 10);
         this.setZoom(cur + 10);
     },
 
     zoomOut: function() {
-        const cur = parseInt(localStorage.getItem('cert_studio_zoom') || '100', 10);
+        const cur = parseInt(localStorage.getItem('cert_studio_zoom') || '85', 10);
         this.setZoom(cur - 10);
     },
 
@@ -997,11 +1055,118 @@ window.KrouDigital = {
         document.execCommand(cmd, false, val);
     },
 
+    // 🖨️ មុខងារបោះពុម្ពប័ណ្ណសរសើរពេញទំហំក្រដាស 100% ឥតដាច់ ឥតចន្លោះស (Seamless 100% A4 Print)
     printCertificate: function() {
         if (document.activeElement && typeof document.activeElement.blur === 'function') {
             document.activeElement.blur();
         }
-        window.print();
+
+        const printArea = document.getElementById("certificatePrintArea");
+        if (!printArea) {
+            window.print();
+            return;
+        }
+
+        const pageSizeKey = localStorage.getItem('cert_page_size') || 'A4-landscape';
+        const pageSizesMap = {
+            'A4-landscape': { width: '297mm', height: '210mm', css: 'A4 landscape' },
+            'A4-portrait': { width: '210mm', height: '297mm', css: 'A4 portrait' },
+            'A3-landscape': { width: '420mm', height: '297mm', css: 'A3 landscape' },
+            'Letter-landscape': { width: '11in', height: '8.5in', css: 'Letter landscape' }
+        };
+        const curSize = pageSizesMap[pageSizeKey] || pageSizesMap['A4-landscape'];
+
+        // Clone printArea cleanly
+        const clone = printArea.cloneNode(true);
+        clone.style.transform = 'none';
+        clone.style.margin = '0 auto';
+        clone.style.boxShadow = 'none';
+        clone.style.borderRadius = '0';
+        clone.style.width = curSize.width;
+        clone.style.height = curSize.height;
+        clone.style.minHeight = curSize.height;
+        clone.style.maxHeight = curSize.height;
+        clone.style.position = 'relative';
+        clone.style.left = '0';
+        clone.style.top = '0';
+        clone.style.boxSizing = 'border-box';
+
+        // Remove all controls, drag handles, delete buttons, and toolbars
+        clone.querySelectorAll('.no-print, .drag-handle, button').forEach(el => el.remove());
+
+        // Clean up contenteditable and outline
+        clone.querySelectorAll('[contenteditable="true"]').forEach(el => {
+            el.removeAttribute('contenteditable');
+            el.style.outline = 'none';
+            el.style.backgroundColor = 'transparent';
+        });
+
+        // Remove old helper iframe if existing
+        let oldIframe = document.getElementById("cms_cert_print_iframe");
+        if (oldIframe) oldIframe.remove();
+
+        const iframe = document.createElement("iframe");
+        iframe.id = "cms_cert_print_iframe";
+        iframe.style.position = "fixed";
+        iframe.style.top = "0";
+        iframe.style.left = "0";
+        iframe.style.width = "100%";
+        iframe.style.height = "100%";
+        iframe.style.border = "none";
+        iframe.style.zIndex = "-9999";
+        iframe.style.opacity = "0.001";
+        iframe.style.pointerEvents = "none";
+        document.body.appendChild(iframe);
+
+        const doc = iframe.contentWindow.document;
+        doc.open();
+        doc.write(`
+            <!DOCTYPE html>
+            <html lang="km">
+            <head>
+                <meta charset="UTF-8">
+                <title>លិខិតសរសើរ - បោះពុម្ព</title>
+                <link rel="preconnect" href="https://fonts.googleapis.com">
+                <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+                <link href="https://fonts.googleapis.com/css2?family=Moul&family=Siemreap&family=Battambang&display=swap" rel="stylesheet">
+                <script src="https://cdn.tailwindcss.com"></script>
+                <style>
+                    @page {
+                        size: ${curSize.css};
+                        margin: 0mm !important;
+                    }
+                    * {
+                        box-sizing: border-box !important;
+                        -webkit-print-color-adjust: exact !important;
+                        print-color-adjust: exact !important;
+                    }
+                    html, body {
+                        width: ${curSize.width} !important;
+                        height: ${curSize.height} !important;
+                        margin: 0 !important;
+                        padding: 0 !important;
+                        background: #ffffff !important;
+                        overflow: hidden !important;
+                        -webkit-print-color-adjust: exact !important;
+                        print-color-adjust: exact !important;
+                    }
+                    .font-moul { font-family: 'Khmer OS Muol Light', 'Moul', serif !important; }
+                    .font-siemreap { font-family: 'Siemreap', sans-serif !important; }
+                    .font-battambang { font-family: 'Battambang', sans-serif !important; }
+                    .no-print, .drag-handle { display: none !important; }
+                </style>
+            </head>
+            <body style="width:${curSize.width};height:${curSize.height};margin:0;padding:0;overflow:hidden;">
+                ${clone.outerHTML}
+            </body>
+            </html>
+        `);
+        doc.close();
+
+        setTimeout(() => {
+            iframe.contentWindow.focus();
+            iframe.contentWindow.print();
+        }, 350);
     },
 
     renderCertificateModal: function(studentId = null, rankNum = null, targetGrade = null, frameStyle = null) {
@@ -1173,54 +1338,6 @@ window.KrouDigital = {
 
         modal.innerHTML = `
             <style>
-                @media print {
-                    html, body {
-                        width: ${curPageSize.width} !important;
-                        height: ${curPageSize.height} !important;
-                        margin: 0 !important;
-                        padding: 0 !important;
-                        background: #fff !important;
-                        overflow: visible !important;
-                    }
-                    body * { visibility: hidden !important; }
-                    #certificateModal, #certificateModal * { overflow: visible !important; }
-                    #certificatePrintWrapper, #certificatePrintWrapper * { visibility: visible !important; }
-                    #certificatePrintWrapper {
-                        position: absolute !important;
-                        left: 0 !important;
-                        top: 0 !important;
-                        width: ${curPageSize.width} !important;
-                        height: ${curPageSize.height} !important;
-                        min-height: ${curPageSize.height} !important;
-                        max-height: ${curPageSize.height} !important;
-                        margin: 0 !important;
-                        padding: 0 !important;
-                        transform: none !important;
-                        background: #fff !important;
-                        box-shadow: none !important;
-                        border: none !important;
-                        border-radius: 0 !important;
-                        -webkit-print-color-adjust: exact !important;
-                        print-color-adjust: exact !important;
-                    }
-                    #certificatePrintArea {
-                        width: ${curPageSize.width} !important;
-                        height: ${curPageSize.height} !important;
-                        min-height: ${curPageSize.height} !important;
-                        max-width: ${curPageSize.width} !important;
-                        max-height: ${curPageSize.height} !important;
-                        border-radius: 0 !important;
-                        box-shadow: none !important;
-                        margin: 0 !important;
-                        -webkit-print-color-adjust: exact !important;
-                        print-color-adjust: exact !important;
-                    }
-                    @page {
-                        size: ${curPageSize.css};
-                        margin: 0mm;
-                    }
-                    .no-print { display: none !important; }
-                }
                 .cert-editable {
                     transition: all 0.15s ease;
                     border-radius: 4px;
@@ -1234,6 +1351,9 @@ window.KrouDigital = {
                 .cert-editable:focus {
                     background-color: #fefce8;
                     outline: 2px solid #b45309;
+                }
+                .drag-box:hover .drag-handle {
+                    display: flex !important;
                 }
             </style>
 
@@ -1252,7 +1372,7 @@ window.KrouDigital = {
                                 <h3 class="font-moul text-xs sm:text-sm text-amber-300">Canva Certificate Studio</h3>
                                 <span class="px-2 py-0.5 bg-slate-800 text-[10px] text-slate-300 border border-slate-700 rounded-md font-mono">${curPageSize.name}</span>
                             </div>
-                            <p class="text-[10px] text-slate-400">ស្ទូឌីយោរចនាប័ណ្ណសរសើរ / លិខិតសរសើរ កែប្រែផ្ទាល់ និងទាញយកបានគ្រប់ទំហំ</p>
+                            <p class="text-[10px] text-slate-400">ស្ទូឌីយោរចនាប័ណ្ណសរសើរ អូសទីតាំង Text បានដោយសេរី និងព្រីនពេញក្រដាស ១០០%</p>
                         </div>
                     </div>
 
@@ -1279,7 +1399,7 @@ window.KrouDigital = {
                         </div>
 
                         <!-- Print Button -->
-                        <button onclick="window.KrouDigital.printCertificate()" class="px-4 py-1.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white rounded-xl text-xs font-bold shadow-md shadow-emerald-500/20 transition flex items-center gap-1.5 active:scale-95 outline-none">
+                        <button onclick="window.KrouDigital.printCertificate()" class="px-4 py-1.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white rounded-xl text-xs font-bold shadow-md shadow-emerald-500/20 transition flex items-center gap-1.5 active:scale-95 outline-none" title="បោះពុម្ពពេញទំហំក្រដាស ១០០%">
                             <i class="fa-solid fa-print text-amber-300"></i>
                             <span>ព្រីន (Print)</span>
                         </button>
@@ -1306,7 +1426,7 @@ window.KrouDigital = {
                         </button>
                         <button id="certTabBtn_text" onclick="window.KrouDigital.setActiveTab('text')" class="${activeTab === 'text' ? 'px-3.5 py-1.5 rounded-xl font-bold text-xs bg-indigo-600 text-white shadow-md shadow-indigo-500/30 flex items-center gap-1.5 transition' : 'px-3.5 py-1.5 rounded-xl font-bold text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center gap-1.5 transition'}">
                             <i class="fa-solid fa-font text-teal-400"></i>
-                            <span>អត្ថបទ & ពុម្ព (Text & Fonts)</span>
+                            <span>អត្ថបទ & អូស Text (Drag)</span>
                         </button>
                         <button id="certTabBtn_data" onclick="window.KrouDigital.setActiveTab('data')" class="${activeTab === 'data' ? 'px-3.5 py-1.5 rounded-xl font-bold text-xs bg-indigo-600 text-white shadow-md shadow-indigo-500/30 flex items-center gap-1.5 transition' : 'px-3.5 py-1.5 rounded-xl font-bold text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center gap-1.5 transition'}">
                             <i class="fa-solid fa-user-graduate text-purple-400"></i>
@@ -1316,8 +1436,8 @@ window.KrouDigital = {
 
                     <!-- In-place edit notification -->
                     <div class="flex items-center gap-1.5 text-[11px] text-amber-300 bg-amber-950/40 border border-amber-800/60 px-2.5 py-1 rounded-lg">
-                        <i class="fa-solid fa-i-cursor text-amber-400"></i>
-                        <span>ចុចលើអត្ថបទណាមួយលើប័ណ្ណដើម្បីកែសម្រួលផ្ទាល់</span>
+                        <i class="fa-solid fa-up-down-left-right text-amber-400"></i>
+                        <span>អាចចុចលើអត្ថបទដើម្បីកែប្រែ ឬអូសផ្លាស់ប្តូរទីតាំងបានសេរី</span>
                     </div>
                 </div>
 
@@ -1395,7 +1515,7 @@ window.KrouDigital = {
                         <!-- Uploaded Pictures Thumbnails Count -->
                         ${customPics.length > 0 ? `
                             <div class="flex items-center gap-1.5 bg-slate-800 border border-slate-700 px-2.5 py-1 rounded-xl">
-                                <span class="text-slate-400 text-[11px]">រូបភាពបន្ថែម៖</span>
+                                <span class="text-slate-400 text-[11px]">រូបភាពបន្ថែម (អូសទីតាំងបាន)៖</span>
                                 ${customPics.map(p => `
                                     <div class="relative group">
                                         <img src="${p.b64}" class="w-6 h-6 object-contain rounded border border-slate-600" title="${p.name || 'Picture'}">
@@ -1406,12 +1526,12 @@ window.KrouDigital = {
                         ` : ''}
                     </div>
 
-                    <!-- PANE 3: TEXT & FONTS -->
+                    <!-- PANE 3: TEXT & FONTS & DRAGGABLE TEXT -->
                     <div id="certTabPane_text" class="${activeTab === 'text' ? 'flex flex-wrap items-center gap-3' : 'hidden'}">
                         <!-- Add Text Box Button -->
-                        <button onclick="window.KrouDigital.addCustomText()" class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold shadow transition flex items-center gap-1.5 active:scale-95">
+                        <button onclick="window.KrouDigital.addCustomText()" class="px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold shadow transition flex items-center gap-1.5 active:scale-95" title="បន្ថែមអត្ថបទថ្មីដែលអាចអូសទីតាំងបានសេរី">
                             <i class="fa-solid fa-plus text-amber-300"></i>
-                            <span>+ Add Text (បន្ថែមអត្ថបទ)</span>
+                            <span>+ Add Text (បន្ថែមអត្ថបទអូសបាន)</span>
                         </button>
 
                         <!-- Font Family -->
@@ -1510,7 +1630,7 @@ window.KrouDigital = {
                         
                         <!-- ក្រដាសប័ណ្ណសរសើរ / លិខិតសរសើរ Canvas -->
                         <div id="certificatePrintArea" class="${activeFrame.bgGradient} ${activeFrame.outerBorder} rounded-2xl relative text-center text-slate-900 overflow-hidden" 
-                             style="width: ${curPageSize.width}; min-height: ${curPageSize.height}; max-width: ${curPageSize.width}; background-color: ${certBgColor}; font-size: ${certFontScale}%; ${activeFrame.styleExtra || ''}">
+                             style="width: ${curPageSize.width}; height: ${curPageSize.height}; min-height: ${curPageSize.height}; max-height: ${curPageSize.height}; max-width: ${curPageSize.width}; background-color: ${certBgColor}; font-size: ${certFontScale}%; ${activeFrame.styleExtra || ''}">
                             
                             <!-- 🖼️ Custom Uploaded Frame Layer (Full Bleed Background) -->
                             ${customFrameB64 ? `
@@ -1539,30 +1659,32 @@ window.KrouDigital = {
                                 </svg>
                             ` : ''}
 
-                            <!-- 🖼️ Additional Uploaded Pictures (Stamps, Signatures, Student Photo) Overlays -->
+                            <!-- 🖼️ Additional Uploaded Pictures (Stamps, Signatures, Student Photo) Overlays - DRAGGABLE -->
                             ${customPics.map(pic => `
-                                <div id="${pic.id}" class="absolute select-none z-30 group" style="left: ${pic.x}px; top: ${pic.y}px; width: ${pic.width}px;">
+                                <div id="${pic.id}" class="drag-box absolute select-none z-30 group cursor-move" style="left: ${pic.x}px; top: ${pic.y}px; width: ${pic.width}px;">
+                                    <div class="drag-handle no-print hidden group-hover:flex items-center justify-between gap-1 px-1.5 py-0.5 bg-slate-900/90 text-amber-300 text-[9px] rounded-md shadow-md cursor-grab active:cursor-grabbing border border-amber-500/50 -top-5 left-0 absolute whitespace-nowrap">
+                                        <span><i class="fa-solid fa-up-down-left-right"></i> អូស</span>
+                                        <button onclick="window.KrouDigital.removePicture('${pic.id}')" class="text-rose-400 hover:text-rose-300 font-bold ml-1" title="លុប">×</button>
+                                    </div>
                                     <img src="${pic.b64}" alt="${pic.name}" class="w-full h-auto object-contain pointer-events-none drop-shadow-sm" />
-                                    <button onclick="window.KrouDigital.removePicture('${pic.id}')" class="absolute -top-2 -right-2 w-5 h-5 bg-rose-600 hover:bg-rose-700 text-white rounded-full text-[10px] flex items-center justify-center shadow no-print opacity-0 group-hover:opacity-100 transition" title="លុបរូបភាពនេះ">
-                                        <i class="fa-solid fa-xmark"></i>
-                                    </button>
                                 </div>
                             `).join('')}
 
-                            <!-- 🔤 Additional Custom Added Texts Overlays -->
+                            <!-- 🔤 Additional Custom Added Texts Overlays - DRAGGABLE -->
                             ${customTexts.map(txt => `
-                                <div id="${txt.id}" class="absolute select-text z-30 group" style="left: ${txt.x}px; top: ${txt.y}px;">
-                                    <div contenteditable="true" class="cert-editable font-bold ${txt.fontFamily}" style="font-size: ${txt.fontSize}px; color: ${txt.color};">
+                                <div id="${txt.id}" class="drag-box absolute select-text z-30 group" style="left: ${txt.x}px; top: ${txt.y}px;">
+                                    <div class="drag-handle no-print hidden group-hover:flex items-center justify-between gap-1 px-2 py-0.5 bg-slate-900/90 text-amber-300 text-[10px] rounded-md shadow-md cursor-grab active:cursor-grabbing border border-amber-500/50 -top-6 left-0 absolute whitespace-nowrap">
+                                        <span><i class="fa-solid fa-up-down-left-right"></i> អូសទីតាំង (Drag)</span>
+                                        <button onclick="window.KrouDigital.removeCustomText('${txt.id}')" class="text-rose-400 hover:text-rose-300 font-bold ml-1.5" title="លុប">×</button>
+                                    </div>
+                                    <div contenteditable="true" class="cert-editable font-bold ${txt.fontFamily}" style="font-size: ${txt.fontSize}px; color: ${txt.color}; outline: none; min-width: 60px;">
                                         ${txt.content}
                                     </div>
-                                    <button onclick="window.KrouDigital.removeCustomText('${txt.id}')" class="absolute -top-2.5 -right-2.5 w-4 h-4 bg-rose-600 hover:bg-rose-700 text-white rounded-full text-[9px] flex items-center justify-center shadow no-print opacity-0 group-hover:opacity-100 transition" title="លុបអត្ថបទនេះ">
-                                        <i class="fa-solid fa-xmark"></i>
-                                    </button>
                                 </div>
                             `).join('')}
 
                             <!-- 📝 Internal Content Container with Dynamic Padding Slider -->
-                            <div id="certificateInnerCanvas" class="relative z-20 flex flex-col justify-between h-full w-full" style="padding: ${certPadding}px; min-height: ${curPageSize.height}; box-sizing: border-box;">
+                            <div id="certificateInnerCanvas" class="relative z-20 flex flex-col justify-between h-full w-full" style="padding: ${certPadding}px; height: 100%; box-sizing: border-box;">
                                 
                                 <!-- 🏛️ ក្បាលប័ណ្ណ (Official Header matching sample image) 🏛️ -->
                                 <div class="flex justify-between items-start text-xs px-2 pt-1">
@@ -1675,6 +1797,18 @@ window.KrouDigital = {
         `;
 
         modal.classList.remove("hidden");
+
+        // 🎯 ភ្ជាប់ Event សម្រាប់អូស Text និង Pictures ដោយសេរី (Init Draggables)
+        setTimeout(() => {
+            customTexts.forEach(t => {
+                const el = document.getElementById(t.id);
+                if (el) window.KrouDigital.initDraggable(el, 'text', t.id);
+            });
+            customPics.forEach(p => {
+                const el = document.getElementById(p.id);
+                if (el) window.KrouDigital.initDraggable(el, 'pic', p.id);
+            });
+        }, 50);
     },
     openParentPortalModal: function(query = "") {
         let modal = document.getElementById("parentPortalModal");
