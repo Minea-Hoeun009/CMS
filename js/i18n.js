@@ -7,7 +7,7 @@
     const translations = {
         km: {
             appName: "Classroom CMS",
-            appSubtitle: "ប្រព័ន្ធគ្រប់គ្រងថ្នាក់រៀន",
+            appSubtitle: "ប្រព័ន្ធគ្រប់គ្រងថ្នាក់រៀនឌីជីថល",
             dashboard: "ទំព័រដើម",
             students: "គ្រប់គ្រងសិស្ស",
             teachers: "គ្រូ",

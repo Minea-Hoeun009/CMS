@@ -178,17 +178,12 @@ window.TimetableHomeworkManager = {
                                    localStorage.getItem('selected_academic_year') || 
                                    sInfo.academic_year || "2026-2027";
 
-        // កំណត់ថ្នាក់ដំបូង
-        const availableClasses = this.getAvailableClasses();
-        const savedSelectedClass = localStorage.getItem('admin_selected_timetable_class');
-        
-        if (savedSelectedClass && availableClasses.includes(savedSelectedClass)) {
-            this.currentGrade = savedSelectedClass;
-        } else if (availableClasses.length > 0) {
-            this.currentGrade = availableClasses[0];
-        } else {
-            this.currentGrade = "ថ្នាក់ទី ១ «ក»";
-        }
+        // កំណត់ថ្នាក់ដំបូង តាមថ្នាក់ទទួលបន្ទុករបស់គ្រូបច្ចុប្បន្ន
+        const activeClass = typeof window.getCurrentSelectedClass === 'function' 
+            ? window.getCurrentSelectedClass() 
+            : { level: localStorage.getItem('selected_level') || "ថ្នាក់ទី ១", room: localStorage.getItem('selected_room') || "«ក»" };
+        const homeroomClass = `${activeClass.level || "ថ្នាក់ទី ១"} ${activeClass.room || "«ក»"}`.trim();
+        this.currentGrade = homeroomClass || "ថ្នាក់ទី ១ «ក»";
 
         this.renderView();
     },
@@ -1231,22 +1226,11 @@ window.TimetableHomeworkManager = {
                     `
                 }) : ''}
 
-                <!-- Control Bar for Admin (Class Selector, Smart Generator, Copy, Print) -->
+                <!-- Control Bar (Class Info, Smart Generator, Copy, Print) -->
                 <div class="bg-white dark:bg-slate-800 rounded-3xl p-5 shadow-sm border border-slate-200/80 dark:border-slate-700 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
                     
-                    <!-- Class Selector -->
+                    <!-- Class Teacher & Active Slots Badges -->
                     <div class="flex flex-wrap items-center gap-3 w-full lg:w-auto">
-                        <div class="flex items-center gap-2">
-                            <span class="text-xs font-bold text-slate-500 dark:text-slate-400 whitespace-nowrap">
-                                <i class="fa-solid fa-graduation-cap text-indigo-600 mr-1"></i> ជ្រើសរើសថ្នាក់៖
-                            </span>
-                            <select onchange="window.TimetableHomeworkManager.handleClassChange(this.value)" class="bg-indigo-50/70 hover:bg-indigo-50 border border-indigo-200 dark:bg-slate-700 dark:border-slate-600 rounded-2xl px-4 py-2.5 text-xs font-bold text-indigo-900 dark:text-indigo-200 outline-none focus:ring-2 focus:ring-indigo-400 cursor-pointer shadow-sm">
-                                ${availableClasses.map(c => `
-                                    <option value="${c}" ${c === this.currentGrade ? 'selected' : ''}>${c}</option>
-                                `).join("")}
-                            </select>
-                        </div>
-
                         <!-- Class Teacher Badge -->
                         <div class="flex items-center gap-2 px-3.5 py-2 rounded-2xl bg-slate-100 dark:bg-slate-700/60 border border-slate-200/60 dark:border-slate-600 text-xs">
                             <i class="fa-solid fa-chalkboard-user text-emerald-600"></i>

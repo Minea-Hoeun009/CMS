@@ -54,4 +54,15 @@ describe('Dashboard Executive Header Consistency Tests', () => {
         assert.ok(indexHtml.includes('js/dashboard.js?v='), 'dashboard.js must have cache busting version parameter');
         assert.ok(indexHtml.includes('js/config.js?v='), 'config.js must have cache busting version parameter');
     });
+
+    test('3. Welcome Screen displays digital classroom title and creator attribution', () => {
+        const indexHtml = fs.readFileSync('index.html', 'utf8');
+        assert.ok(indexHtml.includes('ប្រព័ន្ធគ្រប់គ្រងថ្នាក់រៀនឌីជីថល'), 'Must display grand title ប្រព័ន្ធគ្រប់គ្រងថ្នាក់រៀនឌីជីថល');
+        assert.ok(indexHtml.includes('ប្រព័ន្ធនេះបង្កើតដោយ៖ ហឿន មិនា | ICT Teacher'), 'Must display creator attribution');
+    });
+
+    test('4. Timetable module does not have class dropdown selector', () => {
+        const timetableCode = fs.readFileSync('js/timetable-homework.js', 'utf8');
+        assert.ok(!timetableCode.includes('<option value="${c}" ${c === this.currentGrade'), 'Must not contain class selection dropdown options in timetable toolbar');
+    });
 });
