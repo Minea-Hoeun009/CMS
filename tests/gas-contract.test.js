@@ -46,4 +46,13 @@ test('Google Apps Script Contract & Security Tests', async (t) => {
     assert.ok(codeGsContent.includes("SHEETS.SCORES, scoresList, 'score_id'"));
     assert.ok(codeGsContent.includes("SHEETS.ATTENDANCE, attList, 'record_id'"));
   });
+
+  await t.test('6. Reports and Timetables sheets and sync actions are defined', () => {
+    assert.ok(codeGsContent.includes("REPORTS: 'Reports'"), 'Must define REPORTS sheet name');
+    assert.ok(codeGsContent.includes("TIMETABLES: 'Timetables'"), 'Must define TIMETABLES sheet name');
+    assert.ok(codeGsContent.includes("[SHEETS.REPORTS]: [") || codeGsContent.includes("[SHEETS.REPORTS] = ["), 'Must define schema for Reports');
+    assert.ok(codeGsContent.includes("'saveReport'"), 'Must handle saveReport in doPost');
+    assert.ok(codeGsContent.includes("'saveReportsBatch'"), 'Must handle saveReportsBatch in doPost');
+    assert.ok(codeGsContent.includes("syncAll"), 'Must handle syncAll');
+  });
 });

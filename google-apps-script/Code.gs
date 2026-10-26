@@ -45,6 +45,7 @@ const SHEETS = {
   EXAMINATIONS: 'Examinations',
   TIMETABLES: 'Timetables',
   HOMEWORK: 'Homework',
+  REPORTS: 'Reports',
   ANNOUNCEMENTS: 'Announcements',
   NOTIFICATIONS: 'Notifications',
   EVENT_QUEUE: 'EventQueue'
@@ -134,6 +135,9 @@ const SCHEMAS = {
   ],
   [SHEETS.HOMEWORK]: [
     'homework_id', 'academic_year', 'grade', 'room', 'subject_name', 'teacher_id', 'title', 'description', 'due_date', 'status', 'created_at'
+  ],
+  [SHEETS.REPORTS]: [
+    'report_id', 'report_type', 'report_title', 'academic_year', 'grade', 'room', 'month', 'semester', 'total_students', 'female_students', 'passed_students', 'failed_students', 'report_data_json', 'generated_by', 'created_at', 'updated_at'
   ],
   [SHEETS.ANNOUNCEMENTS]: [
     'announcement_id', 'title', 'content', 'priority', 'target_role', 'target_grade', 'author_id', 'published_at', 'status'
@@ -933,6 +937,18 @@ function doGet(e) {
       return createJsonResponse({ status: 'success', data: homework });
     }
 
+    // ៥.១៦.១ Get Reports
+    if (action === 'getReports') {
+      const query = {};
+      if (params.academic_year) query.academic_year = params.academic_year;
+      if (params.grade) query.grade = params.grade;
+      if (params.room) query.room = params.room;
+      if (params.report_type) query.report_type = params.report_type;
+      if (params.month) query.month = params.month;
+      const reports = queryTable(SHEETS.REPORTS, query);
+      return createJsonResponse({ status: 'success', data: reports });
+    }
+
     // ៥.១៧ Get Announcements
     if (action === 'getAnnouncements') {
       const announcements = queryTable(SHEETS.ANNOUNCEMENTS, {});
@@ -1684,6 +1700,27 @@ function doPost(e) {
         summary.library = libList.length;
       }
 
+      const ttList = data.timetables || [];
+      if (Array.isArray(ttList) && ttList.length > 0) {
+        ttList.forEach(t => {
+          if (!t.entry_id) t.entry_id = `TT-${t.academic_year || academicYear}-${t.grade || ''}-${t.room || ''}-${t.day_of_week || ''}-${t.period_slot || ''}`.replace(/[«»\s]+/g, '_');
+          t.updated_at = nowIso;
+        });
+        upsertRecords(SHEETS.TIMETABLES, ttList, 'entry_id');
+        summary.timetables = ttList.length;
+      }
+
+      const repList = data.reports || [];
+      if (Array.isArray(repList) && repList.length > 0) {
+        repList.forEach(r => {
+          if (!r.report_id) r.report_id = `REP-${r.academic_year || academicYear}-${r.grade || ''}-${r.room || ''}-${r.report_type || ''}-${r.month || ''}`.replace(/[«»\s]+/g, '_');
+          r.updated_at = nowIso;
+          if (!r.created_at) r.created_at = nowIso;
+        });
+        upsertRecords(SHEETS.REPORTS, repList, 'report_id');
+        summary.reports = repList.length;
+      }
+
       return createJsonResponse({
         status: 'success',
         message: 'បានធ្វើសមកាលកម្មទិន្នន័យទាំងអស់ទៅកាន់ Google Sheets ជោគជ័យ!',
@@ -1908,6 +1945,22 @@ function doPost(e) {
       upsertRecords(SHEETS.TIMETABLES, ttList, 'entry_id');
       emitSystemEvent('TIMETABLE_CHANGED', auth.user?.user_id, ttList.map(t => t.entry_id), { count: ttList.length });
       return createJsonResponse({ status: 'success', message: `បានកត់ត្រាកាលវិភាគបង្រៀន (${ttList.length} ម៉ោង) ជោគជ័យ` });
+    }
+
+    // ៣.១៩.១ Save Reports (របាយការណ៍ផ្សេងៗ)
+    if (action === 'saveReport' || action === 'saveReportsBatch') {
+      const repList = Array.isArray(data) ? data : (data.reports || [data]);
+      const nowIso = new Date().toISOString();
+      repList.forEach(r => {
+        if (!r.report_id) {
+          r.report_id = `REP-${r.academic_year || ''}-${r.grade || ''}-${r.room || ''}-${r.report_type || ''}-${r.month || ''}`.replace(/[«»\s]+/g, '_');
+        }
+        r.updated_at = nowIso;
+        if (!r.created_at) r.created_at = nowIso;
+      });
+      upsertRecords(SHEETS.REPORTS, repList, 'report_id');
+      emitSystemEvent('REPORT_SAVED', auth.user?.user_id, repList.map(r => r.report_id), { count: repList.length });
+      return createJsonResponse({ status: 'success', message: `បានរក្សាទុករបាយការណ៍ (${repList.length}) ទៅក្នុង Google Sheets ជោគជ័យ` });
     }
 
     // ៣.២០ Save Homework

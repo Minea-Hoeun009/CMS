@@ -75,6 +75,7 @@ window.loadReportsView = function() {
                 </div>
 
                 <div class="flex items-center gap-2">
+                    <button type="button" id="btnSyncReportsGAS" onclick="window.syncReportsToGoogleSheets(this)" class="px-3.5 py-1.5 bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-700 hover:to-teal-800 text-white rounded-xl text-xs font-bold shadow-sm transition flex items-center gap-1.5 active:scale-95 outline-none" title="ធ្វើសមកាលកម្មរបាយការណ៍ទាំងអស់ទៅ Google Sheets"><i class="fa-solid fa-cloud-arrow-up text-amber-300"></i><span>Sync របាយការណ៍ទៅ Google Sheets</span></button>
                     <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-purple-50 text-purple-700 dark:bg-purple-950/60 dark:text-purple-300 border border-purple-200/60 dark:border-purple-800">
                         <i class="fa-solid fa-file-invoice text-xs"></i> របាយការណ៍កម្រិតថ្នាក់
                     </span>
@@ -223,6 +224,7 @@ window.loadReportsView = function() {
 
                     <!-- ផ្នែកខាងស្តាំ៖ ការកំណត់ប្រភេទក្រដាស ទិសដៅ មាត្រដ្ឋាន និងប៊ូតុងព្រីន -->
                     <div id="reportDetailPrintToolbarArea" class="flex flex-wrap items-center gap-2">
+                        <button type="button" onclick="window.saveCurrentReportToGoogleSheets(this)" class="px-4 py-2 bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-700 hover:to-teal-800 text-white rounded-xl text-xs font-bold shadow-md transition flex items-center gap-1.5 active:scale-95 outline-none" title="រក្សាទុករបាយការណ៍នេះទៅក្នុង Google Sheets"><i class="fa-solid fa-cloud-arrow-up text-amber-300"></i><span>រក្សាទុកក្នុង Sheets</span></button>
                         ${window.CMSPrintManager ? window.CMSPrintManager.renderToolbarHtml('reportPaperArea', 'portrait', 'A4', 100) : `
                             <button onclick="window.printCurrentReport()" class="px-5 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-xl text-xs font-bold shadow-md shadow-blue-500/30 transition flex items-center gap-2 active:scale-95 outline-none">
                                 <i class="fa-solid fa-print"></i> បោះពុម្ព
@@ -1835,4 +1837,264 @@ window.printReportArea = function(areaId, orientation = 'portrait') {
       printWindow.focus();
       printWindow.print();
     }, 800);
+};
+
+/**
+ * ========================================================
+ * មុខងាររក្សាទុក និងធ្វើសមកាលកម្មរបាយការណ៍ទៅ Google Sheets
+ * ========================================================
+ */
+window.buildReportRecord = function(extraProps = {}) {
+    const reportType = window.currentActiveReportType || 'general';
+    const reportTitleElem = document.getElementById('reportDetailTitle');
+    const reportTitle = reportTitleElem ? reportTitleElem.textContent.trim() : 'របាយការណ៍ទូទៅ';
+    
+    const activeClass = typeof window.getCurrentSelectedClass === 'function' ? window.getCurrentSelectedClass() : { level: 'ថ្នាក់ទី ៤', room: '«ក»' };
+    const curLevel = window.currentReportTargetGrade || document.getElementById('reportGradeSelect')?.value || activeClass.level || 'ថ្នាក់ទី ៤';
+    const curRoom = window.currentReportTargetRoom || document.getElementById('reportRoomSelect')?.value || activeClass.room || '«ក»';
+    const academicYear = localStorage.getItem('academic_year') || '2026-2027';
+    const month = localStorage.getItem('selected_assessment_month') || 'មករា';
+    const semester = localStorage.getItem('selected_assessment_semester') || 'ឆមាសទី១';
+    const teacherId = localStorage.getItem('auth_teacher_id') || 'TCH-013';
+
+    let classStudents = [];
+    if (Array.isArray(window.students)) {
+        classStudents = window.students.filter(s => {
+            if (!s) return false;
+            const sLevel = (s.grade_level || s.grade || '').trim();
+            const sRoom = (s.classroom || s.room || '').trim();
+            return (!curLevel || sLevel === curLevel) && (!curRoom || sRoom === curRoom);
+        });
+        if (classStudents.length === 0 && window.students.length > 0) {
+            classStudents = window.students;
+        }
+    }
+
+    const totalStudents = classStudents.length;
+    const femaleStudents = classStudents.filter(s => s && (s.gender === 'F' || s.gender === 'ស្រី')).length;
+
+    let passed = 0;
+    let failed = 0;
+    if (Array.isArray(window.gradesData)) {
+        const studentGrades = window.gradesData.filter(g => classStudents.some(s => s.id === g.student_id));
+        studentGrades.forEach(g => {
+            const avg = parseFloat(g.average || g.total_score || 0);
+            if (avg >= 25 || avg >= 5) passed++;
+            else failed++;
+        });
+    }
+
+    const safeIdPart = (reportType + '-' + academicYear + '-' + curLevel + '-' + curRoom + '-' + month).replace(/[«»\s\/\\]+/g, '_');
+    const reportId = 'REP-' + safeIdPart;
+
+    const summaryData = {
+        report_type: reportType,
+        total_students: totalStudents,
+        female_students: femaleStudents,
+        passed_students: passed,
+        failed_students: failed,
+        generated_at: new Date().toISOString()
+    };
+
+    return Object.assign({
+        report_id: reportId,
+        report_type: reportType,
+        report_title: reportTitle,
+        academic_year: academicYear,
+        grade: curLevel,
+        room: curRoom,
+        month: month,
+        semester: semester,
+        total_students: totalStudents,
+        female_students: femaleStudents,
+        passed_students: passed,
+        failed_students: failed,
+        report_data_json: JSON.stringify(summaryData),
+        generated_by: teacherId,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+    }, extraProps);
+};
+
+window.saveCurrentReportToGoogleSheets = async function(btnElement) {
+    const btn = btnElement || document.querySelector('#reportDetailPrintToolbarArea button[onclick*="saveCurrentReportToGoogleSheets"]');
+    const origHtml = btn ? btn.innerHTML : '';
+    if (btn) {
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin text-amber-300"></i> <span>កំពុងរក្សាទុក...</span>';
+        btn.disabled = true;
+    }
+
+    try {
+        const reportRecord = window.buildReportRecord();
+
+        try {
+            let cached = [];
+            const raw = localStorage.getItem('cached_reports_list');
+            if (raw) {
+                cached = JSON.parse(raw);
+                if (!Array.isArray(cached)) cached = [];
+            }
+            const existIdx = cached.findIndex(r => r && r.report_id === reportRecord.report_id);
+            if (existIdx >= 0) {
+                cached[existIdx] = reportRecord;
+            } else {
+                cached.unshift(reportRecord);
+            }
+            if (cached.length > 50) cached = cached.slice(0, 50);
+            localStorage.setItem('cached_reports_list', JSON.stringify(cached));
+        } catch (storageErr) {
+            console.warn('Storage cache error:', storageErr);
+        }
+
+        let saveSuccess = false;
+        if (typeof window.apiPost === 'function') {
+            try {
+                const res = await window.apiPost('saveReport', reportRecord);
+                if (res && (res.status === 'success' || res.success)) {
+                    saveSuccess = true;
+                }
+            } catch (apiErr) {
+                console.warn('apiPost saveReport notice:', apiErr);
+            }
+        }
+
+        if (!saveSuccess) {
+            const scriptUrl = (typeof window.getScriptUrl === 'function' ? window.getScriptUrl() : window.SCRIPT_URL) || localStorage.getItem('cms_custom_script_url');
+            if (scriptUrl) {
+                const token = (typeof window.getSessionToken === 'function' ? window.getSessionToken() : '') || (typeof sessionStorage !== 'undefined' ? sessionStorage.getItem('cms_session_token') : '') || '';
+                const response = await fetch(scriptUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify({
+                        action: 'saveReport',
+                        data: reportRecord,
+                        sessionToken: token
+                    })
+                });
+                const resJson = await response.json();
+                if (resJson && (resJson.status === 'success' || resJson.success)) {
+                    saveSuccess = true;
+                }
+            }
+        }
+
+        if (window.db) {
+            try {
+                await window.db.collection('reports').doc(reportRecord.report_id).set(reportRecord, { merge: true });
+            } catch (fsErr) {
+                console.warn('Firestore reports backup notice:', fsErr);
+            }
+        }
+
+        if (saveSuccess) {
+            if (typeof window.showToast === 'function') {
+                window.showToast('✅ បានរក្សាទុករបាយការណ៍ "' + reportRecord.report_title + '" ទៅក្នុង Google Sheets (សន្លឹក Reports) រួចរាល់!', 'success');
+            } else {
+                alert('✅ បានរក្សាទុករបាយការណ៍ "' + reportRecord.report_title + '" ទៅក្នុង Google Sheets រួចរាល់!');
+            }
+        } else {
+            if (typeof window.showToast === 'function') {
+                window.showToast('⚠️ បានរក្សាទុកក្នុងឧបករណ៍រួចរាល់ ប៉ុន្តែមិនទាន់អាចបញ្ជូនទៅ Google Sheet បានទេ (សូមពិនិត្យការតភ្ជាប់)', 'warning');
+            } else {
+                alert('⚠️ បានរក្សាទុកក្នុងឧបករណ៍រួចរាល់ ប៉ុន្តែមិនទាន់អាចបញ្ជូនទៅ Google Sheet បានទេ');
+            }
+        }
+    } catch (e) {
+        console.error('Save report to sheets error:', e);
+        if (typeof window.showToast === 'function') {
+            window.showToast('❌ បរាជ័យក្នុងការរក្សាទុករបាយការណ៍: ' + (e.message || e), 'error');
+        } else {
+            alert('❌ បរាជ័យក្នុងការរក្សាទុករបាយការណ៍');
+        }
+    } finally {
+        if (btn) {
+            btn.innerHTML = origHtml;
+            btn.disabled = false;
+        }
+    }
+};
+
+window.syncReportsToGoogleSheets = async function(btnElement) {
+    const btn = btnElement || document.getElementById('btnSyncReportsGAS');
+    const origHtml = btn ? btn.innerHTML : '';
+    if (btn) {
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin text-amber-300"></i> <span>កំពុង Sync...</span>';
+        btn.disabled = true;
+    }
+
+    try {
+        let reportsToSync = [];
+        const raw = localStorage.getItem('cached_reports_list');
+        if (raw) {
+            try {
+                reportsToSync = JSON.parse(raw);
+            } catch (e) {
+                reportsToSync = [];
+            }
+        }
+
+        if (!Array.isArray(reportsToSync) || reportsToSync.length === 0) {
+            const currentRec = window.buildReportRecord();
+            reportsToSync = [currentRec];
+            localStorage.setItem('cached_reports_list', JSON.stringify(reportsToSync));
+        }
+
+        let syncSuccess = false;
+        if (typeof window.apiPost === 'function') {
+            try {
+                const res = await window.apiPost('saveReportsBatch', reportsToSync);
+                if (res && (res.status === 'success' || res.success)) {
+                    syncSuccess = true;
+                }
+            } catch (apiErr) {
+                console.warn('apiPost saveReportsBatch notice:', apiErr);
+            }
+        }
+
+        if (!syncSuccess) {
+            const scriptUrl = (typeof window.getScriptUrl === 'function' ? window.getScriptUrl() : window.SCRIPT_URL) || localStorage.getItem('cms_custom_script_url');
+            if (scriptUrl) {
+                const token = (typeof window.getSessionToken === 'function' ? window.getSessionToken() : '') || (typeof sessionStorage !== 'undefined' ? sessionStorage.getItem('cms_session_token') : '') || '';
+                const response = await fetch(scriptUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify({
+                        action: 'saveReportsBatch',
+                        data: reportsToSync,
+                        sessionToken: token
+                    })
+                });
+                const resJson = await response.json();
+                if (resJson && (resJson.status === 'success' || resJson.success)) {
+                    syncSuccess = true;
+                }
+            }
+        }
+
+        if (syncSuccess) {
+            if (typeof window.showToast === 'function') {
+                window.showToast('✅ ធ្វើសមកាលកម្មរបាយការណ៍ចំនួន ' + reportsToSync.length + ' ទៅក្នុង Google Sheets (សន្លឹក Reports) បានជោគជ័យ!', 'success');
+            } else {
+                alert('✅ ធ្វើសមកាលកម្មរបាយការណ៍ចំនួន ' + reportsToSync.length + ' ទៅក្នុង Google Sheets បានជោគជ័យ!');
+            }
+        } else {
+            if (typeof window.showToast === 'function') {
+                window.showToast('⚠️ មិនអាចធ្វើសមកាលកម្មរបាយការណ៍ទៅ Google Sheets បានទេ សូមពិនិត្យ Script URL', 'warning');
+            } else {
+                alert('⚠️ មិនអាចធ្វើសមកាលកម្មរបាយការណ៍ទៅ Google Sheets បានទេ');
+            }
+        }
+    } catch (e) {
+        console.error('Sync reports error:', e);
+        if (typeof window.showToast === 'function') {
+            window.showToast('❌ បរាជ័យក្នុងការធ្វើសមកាលកម្ម: ' + (e.message || e), 'error');
+        } else {
+            alert('❌ បរាជ័យក្នុងការធ្វើសមកាលកម្មរបាយការណ៍');
+        }
+    } finally {
+        if (btn) {
+            btn.innerHTML = origHtml;
+            btn.disabled = false;
+        }
+    }
 };

@@ -1459,6 +1459,36 @@ window.syncAllExistingDataToGoogleSheets = async function(btnElement) {
         const teacherName = localStorage.getItem('auth_teacher_name') || "លោកគ្រូ អ្នកគ្រូ";
         const academicYear = document.getElementById("globalAcademicYear")?.value || localStorage.getItem('selected_academic_year') || "2026-2027";
 
+        // ទាញយកកាលវិភាគ (Timetables)
+        let timetables = [];
+        try {
+            const ttKey = `timetable_${(currentClass.level + '_' + currentClass.room).replace(/[«»\s]+/g, '_')}`;
+            const rawTt = JSON.parse(localStorage.getItem(ttKey) || localStorage.getItem('timetable_default') || '{}');
+            for (const [key, slot] of Object.entries(rawTt)) {
+                if (slot && slot.subject) {
+                    const [dayKey, slotNum] = key.split('_');
+                    timetables.push({
+                        entry_id: `TT-${academicYear}-${currentClass.level}-${currentClass.room}-${dayKey}-${slotNum}`.replace(/[«»\s]+/g, '_'),
+                        academic_year: academicYear,
+                        grade: currentClass.level,
+                        room: currentClass.room,
+                        day_of_week: dayKey,
+                        period_slot: parseInt(slotNum, 10),
+                        subject_name: slot.subject,
+                        teacher_id: slot.teacher_id || teacherId,
+                        room_number: slot.room || currentClass.room,
+                        updated_at: new Date().toISOString()
+                    });
+                }
+            }
+        } catch(e) {}
+
+        // ទាញយករបាយការណ៍ (Reports)
+        let reports = [];
+        try {
+            reports = JSON.parse(localStorage.getItem('cached_reports_list') || '[]');
+        } catch(e) {}
+
         // ១. ព្យាយាម Sync ទាំងអស់ក្នុងពេលតែមួយ (Master Bulk Sync)
         let masterSyncSuccess = false;
         try {
@@ -1474,7 +1504,9 @@ window.syncAllExistingDataToGoogleSheets = async function(btnElement) {
                 students: students || [],
                 scores: scores || [],
                 attendance: attendance || [],
-                library: library || []
+                library: library || [],
+                timetables: timetables || [],
+                reports: reports || []
             });
             if (masterRes && masterRes.status === "success") {
                 masterSyncSuccess = true;
@@ -1515,6 +1547,22 @@ window.syncAllExistingDataToGoogleSheets = async function(btnElement) {
                     await window.apiPost("saveLibraryBatch", library);
                 } catch(e) {
                     await window.apiPost("saveLibrary", { data: library });
+                }
+            }
+
+            if (timetables && timetables.length > 0) {
+                try {
+                    await window.apiPost("saveTimetableBatch", timetables);
+                } catch(e) {
+                    console.warn("saveTimetableBatch notice:", e);
+                }
+            }
+
+            if (reports && reports.length > 0) {
+                try {
+                    await window.apiPost("saveReportsBatch", reports);
+                } catch(e) {
+                    console.warn("saveReportsBatch notice:", e);
                 }
             }
         }
