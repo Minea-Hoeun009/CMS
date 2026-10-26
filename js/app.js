@@ -42,6 +42,8 @@ window.setupWorkspace = function() {
     }
     if (appView) {
         appView.classList.remove('hidden');
+        appView.classList.add('flex');
+        appView.style.display = 'flex';
     }
 
     // Update ឈ្មោះគ្រូនៅលើ Sidebar

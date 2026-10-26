@@ -1,6 +1,11 @@
 /* ១. ទាញយក Web Fonts ជា Fallback ពី Google Fonts */
 @import url('https://fonts.googleapis.com/css2?family=Moul&family=Siemreap&display=swap');
 
+/* បង្ខំឱ្យ class hidden បិទបាំងគ្រប់ករណី 100% */
+.hidden {
+  display: none !important;
+}
+
 /* ២. កំណត់ Font សម្រាប់អត្ថបទ និងតួអក្សរទូទៅ (Body, Table, Input, Button) */
 body,
 input,
