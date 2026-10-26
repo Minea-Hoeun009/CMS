@@ -907,11 +907,24 @@ window.CMSPrintManager = {
             clone.style.borderRadius = "0";
             clone.style.margin = "0 auto";
             clone.style.background = "white";
+            clone.style.padding = "0";
+            clone.style.minHeight = "auto";
         }
-        if (clone.firstElementChild && clone.firstElementChild.style) {
-            clone.firstElementChild.style.boxShadow = "none";
-            clone.firstElementChild.style.border = "none";
-            clone.firstElementChild.style.borderRadius = "0";
+        if (clone.firstElementChild) {
+            if (clone.firstElementChild.style) {
+                clone.firstElementChild.style.boxShadow = "none";
+                clone.firstElementChild.style.border = "none";
+                clone.firstElementChild.style.borderRadius = "0";
+                clone.firstElementChild.style.padding = "0";
+                clone.firstElementChild.style.minHeight = "auto";
+            }
+            if (clone.firstElementChild.classList) {
+                clone.firstElementChild.classList.remove(
+                    "p-4", "sm:p-6", "p-6", "md:p-10", "p-8", "md:p-12",
+                    "rounded-xl", "rounded-2xl", "border", "border-slate-200",
+                    "border-slate-300", "shadow-sm", "shadow-md", "shadow-xl", "shadow-2xl"
+                );
+            }
         }
 
         // ចម្លង Stylesheet ទាំងអស់ពី App ដើម្បីឱ្យទម្រង់អក្សរ និងតារាងចេញមកស្អាត ១០០%

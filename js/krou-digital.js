@@ -879,6 +879,13 @@ window.KrouDigital = {
         if (title) title.style.color = colorHex;
     },
 
+    printCertificate: function() {
+        if (document.activeElement && typeof document.activeElement.blur === 'function') {
+            document.activeElement.blur();
+        }
+        window.print();
+    },
+
     renderCertificateModal: function(studentId = null, rankNum = 1, targetGrade = null, frameStyle = null) {
         const customFrameB64 = localStorage.getItem('custom_cert_frame_b64');
         if (!frameStyle) {
@@ -1027,14 +1034,25 @@ window.KrouDigital = {
         modal.innerHTML = `
             <style>
                 @media print {
+                    html, body {
+                        width: 297mm !important;
+                        height: 210mm !important;
+                        margin: 0 !important;
+                        padding: 0 !important;
+                        background: #fff !important;
+                        overflow: visible !important;
+                    }
                     body * { visibility: hidden !important; }
+                    #certificateModal, #certificateModal * { overflow: visible !important; }
                     #certificatePrintWrapper, #certificatePrintWrapper * { visibility: visible !important; }
                     #certificatePrintWrapper {
-                        position: fixed !important;
+                        position: absolute !important;
                         left: 0 !important;
                         top: 0 !important;
                         width: 297mm !important;
                         height: 210mm !important;
+                        min-height: 210mm !important;
+                        max-height: 210mm !important;
                         margin: 0 !important;
                         padding: 0 !important;
                         background: #fff !important;
@@ -1047,6 +1065,7 @@ window.KrouDigital = {
                     #certificatePrintArea {
                         width: 297mm !important;
                         height: 210mm !important;
+                        min-height: 210mm !important;
                         max-width: 297mm !important;
                         max-height: 210mm !important;
                         border-radius: 0 !important;
@@ -1136,7 +1155,7 @@ window.KrouDigital = {
 
                     <!-- Right: Print and Close -->
                     <div class="flex items-center gap-2">
-                        <button onclick="window.print()" class="px-5 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white rounded-xl text-xs font-bold shadow-lg shadow-emerald-500/30 transition flex items-center gap-2 active:scale-95 outline-none">
+                        <button onclick="window.KrouDigital.printCertificate()" class="px-5 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white rounded-xl text-xs font-bold shadow-lg shadow-emerald-500/30 transition flex items-center gap-2 active:scale-95 outline-none">
                             <i class="fa-solid fa-print text-amber-300"></i>
                             <span>បោះពុម្ព (Print A4)</span>
                         </button>

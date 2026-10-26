@@ -377,6 +377,10 @@ window.closeReportDetail = function() {
 };
 
 window.printCurrentReport = function() {
+    if (window.currentActiveReportType === 'stats') {
+        window.printStudentStatsReport();
+        return;
+    }
     const paperArea = document.getElementById("reportPaperArea");
     if (!paperArea) {
         window.print();
@@ -534,7 +538,7 @@ window.renderStudentStatsReportHTML = function(container, targetGrade, targetRoo
     });
 
     container.innerHTML = `
-        <div id="studentStatsPrintArea" class="bg-white p-6 md:p-10 w-full shadow-[0_10px_40px_rgba(0,0,0,0.08)] rounded-xl border border-slate-300 text-blue-950 font-siemreap" style="max-width: 210mm; min-height: 297mm; margin: 0 auto; box-sizing: border-box; color: #002b66;">
+        <div id="studentStatsPrintArea" class="bg-white p-4 sm:p-6 w-full shadow-[0_10px_40px_rgba(0,0,0,0.08)] rounded-xl border border-slate-300 text-blue-950 font-siemreap" style="max-width: 210mm; margin: 0 auto; box-sizing: border-box; color: #002b66;">
             
             <style>
                 .moeys-table {
@@ -899,27 +903,43 @@ window.printStudentStatsReport = function() {
 
     const clonedPrintArea = printArea.cloneNode(true);
     clonedPrintArea.style.boxShadow = 'none';
+    clonedPrintArea.style.border = 'none';
+    clonedPrintArea.style.borderRadius = '0';
+    clonedPrintArea.style.padding = '0';
+    clonedPrintArea.style.minHeight = 'auto';
     clonedPrintArea.style.margin = '0 auto';
     clonedPrintArea.style.maxWidth = '100%';
+    clonedPrintArea.classList.remove('p-4', 'sm:p-6', 'p-6', 'md:p-10', 'rounded-xl', 'border', 'border-slate-300', 'shadow-[0_10px_40px_rgba(0,0,0,0.08)]');
     
     // បម្លែង Input contenteditable ទៅជាអក្សរសាមញ្ញដើម្បីបោះពុម្ព
     const editables = clonedPrintArea.querySelectorAll('[contenteditable="true"]');
     editables.forEach(el => {
-        let val = el.innerText || el.textContent;
         el.removeAttribute('contenteditable');
-        // ដក border ចេញពេលព្រីនសម្រាប់ box-input-text តែរក្សា box-input
+        el.style.outline = 'none';
+        el.style.backgroundColor = 'transparent';
         if (el.classList.contains('box-input-text')) {
             el.style.border = 'none';
             el.style.padding = '0';
         }
     });
 
+    const extraMoeysStyles = `
+        @page { size: A4 portrait; margin: 5mm; }
+        .moeys-table { width: 100% !important; border-collapse: collapse !important; font-size: 9.8px !important; border: 1.5px solid #002b66 !important; }
+        .moeys-table th, .moeys-table td { border: 1px solid #002b66 !important; padding: 2px 3px !important; vertical-align: middle !important; }
+        .moeys-table th { font-family: 'Siemreap', sans-serif !important; font-weight: bold !important; background-color: #ffffff !important; text-align: center !important; color: #002b66 !important; }
+        .moeys-header-blue { font-family: 'Moul', serif !important; color: #002b66 !important; }
+        .moeys-lavender-row { background-color: #e0e7ff !important; font-weight: bold !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+        #studentStatsPrintArea { width: 100% !important; max-width: 100% !important; padding: 0 !important; margin: 0 auto !important; border: none !important; box-shadow: none !important; min-height: auto !important; }
+    `;
+
     if (window.CMSPrintManager && typeof window.CMSPrintManager.openUniversalPreview === 'function') {
         window.CMSPrintManager.openUniversalPreview({
             title: "តារាងស្ថិតិចំនួនសិស្សតាមថ្នាក់",
             paperSize: "A4",
             orientation: "portrait",
-            defaultZoom: 1.0,
+            defaultZoom: 0.95,
+            extraStyles: extraMoeysStyles,
             contentHtml: clonedPrintArea.outerHTML,
             autoWrapHeaderFooter: false
         });
@@ -931,44 +951,40 @@ window.printStudentStatsReport = function() {
       <html lang="km">
       <head>
         <meta charset="utf-8">
-        <title>របាយការណ៍សិស្ស - KrouDigital</title>
+        <title>តារាងស្ថិតិចំនួនសិស្សតាមថ្នាក់ - KrouDigital</title>
         <script src="https://cdn.tailwindcss.com"></script>
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Moul&family=Siemreap&display=swap" rel="stylesheet">
         <style>
-          @import url('https://fonts.googleapis.com/css2?family=Moul&family=Siemreap&display=swap');
-          @page { size: A4 portrait; margin: 10mm; }
+          @page { size: A4 portrait; margin: 5mm; }
           * { box-sizing: border-box !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; font-family: 'Siemreap', sans-serif; }
-          html, body { background: #fff; width: 100%; height: 100%; }
+          html, body { background: #fff; width: 100%; margin: 0; padding: 0; }
           .font-moul { font-family: 'Moul', serif !important; }
-          
-          /* Copy specific styles needed for print */
-          .form-table { width: 100%; border-collapse: collapse; font-size: 11.5px; }
-          .form-table th, .form-table td { border: 1px solid #94a3b8; padding: 4px; text-align: center; vertical-align: middle; }
-          .form-table th { color: #1e3a8a; font-weight: bold; font-family: 'Siemreap', sans-serif; background-color: #f8fafc; }
-          .form-section { margin-bottom: 15px; }
-          .form-header { background-color: #1e3a8a; color: white; padding: 6px 10px; border-radius: 6px 6px 0 0; font-family: 'Moul', serif; font-size: 12.5px; border: 1px solid #1e3a8a; display: flex; flex-direction: column; }
-          .form-header .sub-text { font-family: 'Siemreap', sans-serif; font-size: 10px; font-weight: normal; color: #cbd5e1; margin-top: 2px; }
-          .form-wrapper { border: 1px solid #1e3a8a; border-top: none; border-radius: 0 0 6px 6px; overflow: hidden; }
-          .box-input { border: 1px solid #cbd5e1; border-radius: 2px; display: inline-block; padding: 1px 4px; min-width: 20px; text-align: center; font-family: 'Arial', sans-serif; font-weight: bold; color: #475569; }
-          .table-1 td { padding: 5px 10px; border: 1px solid #cbd5e1; }
-          .table-1 td:first-child { text-align: right; width: 45%; color: #475569; }
-          .table-1 td:last-child { text-align: left; }
+          ${extraMoeysStyles}
         </style>
       </head>
       <body>
-        ${clonedPrintArea.outerHTML}
+        <div style="width: 100%; max-width: 200mm; margin: 0 auto;">
+          ${clonedPrintArea.outerHTML}
+        </div>
+        <script>
+          window.onload = function() {
+            setTimeout(function() { window.print(); }, 250);
+          };
+        </script>
       </body>
       </html>
     `;
 
     const printWindow = window.open('', '_blank', 'width=1000,height=900');
-    printWindow.document.open();
-    printWindow.document.write(printDocument);
-    printWindow.document.close();
-
-    setTimeout(() => {
-      printWindow.focus();
-      printWindow.print();
-    }, 800);
+    if (printWindow) {
+        printWindow.document.open();
+        printWindow.document.write(printDocument);
+        printWindow.document.close();
+    } else {
+        window.print();
+    }
 };
 
 // ==========================================================================
