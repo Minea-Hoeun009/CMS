@@ -124,4 +124,24 @@ describe('Student List Filtering & Single-Classroom UX Guard Tests', () => {
     assert.equal(context.window.filteredStudents.length, 2);
   });
 
+  test('5. formatDate correctly formats ISO timestamps from Google Sheets to DD/MM/YYYY and YYYY-MM-DD', () => {
+    const { context } = createStudentsContext();
+    assert.equal(typeof context.window.formatDate, 'function');
+
+    // Values from the user screenshot with surrounding quotes
+    assert.equal(context.window.formatDate('"2013-07-12T17:00:00.000Z"'), '13/07/2013');
+    assert.equal(context.window.formatDate('"2013-07-14T17:00:00.000Z"'), '15/07/2013');
+    assert.equal(context.window.formatDate('"2013-07-16T17:00:00.000Z"'), '17/07/2013');
+    assert.equal(context.window.formatDate('"2013-08-19T17:00:00.000Z"'), '20/08/2013');
+
+    // For input date picker (YYYY-MM-DD)
+    assert.equal(context.window.formatDate('"2013-07-12T17:00:00.000Z"', 'YYYY-MM-DD'), '2013-07-13');
+
+    // Standard date strings
+    assert.equal(context.window.formatDate('2013-07-13'), '13/07/2013');
+    assert.equal(context.window.formatDate('13/07/2013'), '13/07/2013');
+    assert.equal(context.window.formatDate(''), '-');
+    assert.equal(context.window.formatDate(null), '-');
+  });
+
 });

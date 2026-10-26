@@ -90,7 +90,7 @@ window.AdvancedReports = {
                         <div class="text-right">
                             <p><span class="font-bold">គោត្តនាម និងនាម៖</span> <span class="font-moul text-indigo-900">${student.name}</span></p>
                             <p><span class="font-bold">អត្តលេខ៖</span> <span class="font-mono font-bold">${student.id}</span> | <span class="font-bold">ភេទ៖</span> ${student.gender || 'ប្រុស'}</p>
-                            <p><span class="font-bold">ថ្ងៃខែឆ្នាំកំណើត៖</span> ${student.dob || '-'}</p>
+                            <p><span class="font-bold">ថ្ងៃខែឆ្នាំកំណើត៖</span> ${typeof window.formatDate === 'function' ? window.formatDate(student.dob) : (student.dob || '-')}</p>
                         </div>
                     </div>
 
@@ -210,7 +210,7 @@ window.AdvancedReports = {
             "គោត្តនាម និងនាម": s.name,
             "ឈ្មោះឡាតាំង": s.name_en || "",
             "ភេទ": s.gender || "ប្រុស",
-            "ថ្ងៃខែឆ្នាំកំណើត": s.dob || "",
+            "ថ្ងៃខែឆ្នាំកំណើត": typeof window.formatDate === 'function' ? window.formatDate(s.dob) : (s.dob || ""),
             "ថ្នាក់": s.class || sInfo.teacher_level || "",
             "ទូរស័ព្ទ": s.phone || "",
             "អាសយដ្ឋាន": s.address || ""
@@ -543,7 +543,7 @@ window.AdvancedReports = {
                             <td class="p-2 font-bold font-moul text-xs">${s.name}</td>
                             <td class="p-2 font-mono text-[11px] uppercase">${s.name_en || '-'}</td>
                             <td class="p-2 text-center font-bold ${s.gender === 'ស្រី' ? 'text-pink-500' : 'text-blue-500'}">${s.gender}</td>
-                            <td class="p-2 text-center font-mono">${s.dob || '-'}</td>
+                            <td class="p-2 text-center font-mono">${typeof window.formatDate === 'function' ? window.formatDate(s.dob) : (s.dob || '-')}</td>
                             <td class="p-2 text-center font-bold text-slate-700">${s.grade}</td>
                             <td class="p-2 text-center font-moul text-rose-500">${s.room}</td>
                             <td class="p-2 font-mono">${s.parent_contact || '-'}</td>

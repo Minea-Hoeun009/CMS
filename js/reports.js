@@ -1006,11 +1006,7 @@ window.updateStudentListContent = function() {
         pageStus.forEach((stu, localIdx) => {
             let globalIdx = isFirstPage ? localIdx : (ROWS_PER_PAGE_FIRST + (pageIdx - 1) * ROWS_PER_PAGE_NEXT + localIdx);
             
-            let dob = stu.dob ? stu.dob.replace(/-/g, '/') : "....................";
-            if (dob.includes("/")) {
-                let p = dob.split("/");
-                if (p[0].length === 4) dob = `${p[2]}/${p[1]}/${p[0]}`; 
-            }
+            let dob = stu.dob ? (typeof window.formatDate === 'function' ? window.formatDate(stu.dob) : stu.dob) : "....................";
             
             let nameKh = stu.name || "";
             

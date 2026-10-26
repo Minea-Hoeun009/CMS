@@ -478,6 +478,56 @@ window.normalizeGrade = function(str) {
     return s;
 };
 
+// Universal Date Formatter: supports ISO timestamps (e.g. "2013-07-12T17:00:00.000Z"), YYYY-MM-DD, DD/MM/YYYY, etc.
+window.formatDate = function(dateVal, format = 'DD/MM/YYYY') {
+    if (!dateVal && dateVal !== 0) return "-";
+    let str = String(dateVal).trim().replace(/^["']+|["']+$/g, '');
+    if (!str || str === "undefined" || str === "null") return "-";
+
+    const dmyMatch = str.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);
+    if (dmyMatch) {
+        const day = dmyMatch[1].padStart(2, '0');
+        const month = dmyMatch[2].padStart(2, '0');
+        const year = dmyMatch[3];
+        if (format === 'YYYY-MM-DD') return `${year}-${month}-${day}`;
+        return `${day}/${month}/${year}`;
+    }
+
+    const ymdMatch = str.match(/^(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})$/);
+    if (ymdMatch) {
+        const year = ymdMatch[1];
+        const month = ymdMatch[2].padStart(2, '0');
+        const day = ymdMatch[3].padStart(2, '0');
+        if (format === 'YYYY-MM-DD') return `${year}-${month}-${day}`;
+        return `${day}/${month}/${year}`;
+    }
+
+    let parsedDate = new Date(str);
+    if (!isNaN(parsedDate.getTime())) {
+        try {
+            const parts = new Intl.DateTimeFormat('en-GB', {
+                timeZone: 'Asia/Phnom_Penh',
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric'
+            }).formatToParts(parsedDate);
+            const day = parts.find(p => p.type === 'day')?.value || String(parsedDate.getDate()).padStart(2, '0');
+            const month = parts.find(p => p.type === 'month')?.value || String(parsedDate.getMonth() + 1).padStart(2, '0');
+            const year = parts.find(p => p.type === 'year')?.value || String(parsedDate.getFullYear());
+            if (format === 'YYYY-MM-DD') return `${year}-${month}-${day}`;
+            return `${day}/${month}/${year}`;
+        } catch (e) {
+            const d = new Date(parsedDate.getTime() + (7 * 60 * 60 * 1000));
+            const day = String(d.getUTCDate()).padStart(2, '0');
+            const month = String(d.getUTCMonth() + 1).padStart(2, '0');
+            const year = d.getUTCFullYear();
+            if (format === 'YYYY-MM-DD') return `${year}-${month}-${day}`;
+            return `${day}/${month}/${year}`;
+        }
+    }
+    return str;
+};
+
 // ១. ទាញយកបញ្ជីសិស្សមេទាំងអស់ (Master Students List) ពី Student Management
 window.getMasterStudents = function() {
     if (window.allStudents && Array.isArray(window.allStudents) && window.allStudents.length > 0) {

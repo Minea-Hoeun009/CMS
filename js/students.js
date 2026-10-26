@@ -101,20 +101,61 @@ function normalizeGrade(str) {
     return s;
 }
 
-function formatDate(dateStr) {
-    if (!dateStr) return "-";
-    let str = String(dateStr);
-    if (str.includes('T')) str = str.split('T')[0];
-    if (str.includes('-')) {
-        const parts = str.split('-');
-        if (parts.length === 3) return `${parts[2].padStart(2, '0')}/${parts[1].padStart(2, '0')}/${parts[0]}`;
+const formatDate = function(dateVal, format = 'DD/MM/YYYY') {
+    if (!dateVal && dateVal !== 0) return "-";
+    let str = String(dateVal).trim().replace(/^["']+|["']+$/g, '');
+    if (!str || str === "undefined" || str === "null") return "-";
+
+    const dmyMatch = str.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);
+    if (dmyMatch) {
+        const day = dmyMatch[1].padStart(2, '0');
+        const month = dmyMatch[2].padStart(2, '0');
+        const year = dmyMatch[3];
+        if (format === 'YYYY-MM-DD') return `${year}-${month}-${day}`;
+        return `${day}/${month}/${year}`;
+    }
+
+    const ymdMatch = str.match(/^(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})$/);
+    if (ymdMatch) {
+        const year = ymdMatch[1];
+        const month = ymdMatch[2].padStart(2, '0');
+        const day = ymdMatch[3].padStart(2, '0');
+        if (format === 'YYYY-MM-DD') return `${year}-${month}-${day}`;
+        return `${day}/${month}/${year}`;
+    }
+
+    let parsedDate = new Date(str);
+    if (!isNaN(parsedDate.getTime())) {
+        try {
+            const parts = new Intl.DateTimeFormat('en-GB', {
+                timeZone: 'Asia/Phnom_Penh',
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric'
+            }).formatToParts(parsedDate);
+            const day = parts.find(p => p.type === 'day')?.value || String(parsedDate.getDate()).padStart(2, '0');
+            const month = parts.find(p => p.type === 'month')?.value || String(parsedDate.getMonth() + 1).padStart(2, '0');
+            const year = parts.find(p => p.type === 'year')?.value || String(parsedDate.getFullYear());
+            if (format === 'YYYY-MM-DD') return `${year}-${month}-${day}`;
+            return `${day}/${month}/${year}`;
+        } catch (e) {
+            const d = new Date(parsedDate.getTime() + (7 * 60 * 60 * 1000));
+            const day = String(d.getUTCDate()).padStart(2, '0');
+            const month = String(d.getUTCMonth() + 1).padStart(2, '0');
+            const year = d.getUTCFullYear();
+            if (format === 'YYYY-MM-DD') return `${year}-${month}-${day}`;
+            return `${day}/${month}/${year}`;
+        }
     }
     return str;
-}
+};
+window.formatDate = formatDate;
 
 function calculateAge(dobStr) {
     if (!dobStr) return "-";
-    const dob = new Date(dobStr);
+    const cleanDob = formatDate(dobStr, 'YYYY-MM-DD');
+    if (!cleanDob || cleanDob === "-") return "-";
+    const dob = new Date(cleanDob);
     if (isNaN(dob.getTime())) return "-";
     const diff_ms = Date.now() - dob.getTime();
     const age_dt = new Date(diff_ms); 
@@ -753,8 +794,8 @@ window.openStudentModal = function(id = null) {
             document.getElementById("stu_name").value = stu.name || "";
             if (document.getElementById("stu_name_en")) document.getElementById("stu_name_en").value = stu.name_en || stu.name_latin || "";
             document.getElementById("stu_gender").value = stu.gender || "ប្រុស";
-            document.getElementById("stu_dob").value = stu.dob || ""; 
-            if (document.getElementById("stu_enrollment_date")) document.getElementById("stu_enrollment_date").value = stu.enrollment_date || "";
+            document.getElementById("stu_dob").value = (formatDate(stu.dob, "YYYY-MM-DD") !== "-") ? formatDate(stu.dob, "YYYY-MM-DD") : (stu.dob || ""); 
+            if (document.getElementById("stu_enrollment_date")) document.getElementById("stu_enrollment_date").value = (formatDate(stu.enrollment_date, "YYYY-MM-DD") !== "-") ? formatDate(stu.enrollment_date, "YYYY-MM-DD") : (stu.enrollment_date || "");
             
             if (stu.photo_url && stu.photo_url.trim() !== "") {
                 if(previewImg) { previewImg.src = stu.photo_url; previewImg.classList.remove("hidden"); }

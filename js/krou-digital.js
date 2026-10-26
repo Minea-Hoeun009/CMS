@@ -181,7 +181,7 @@ window.KrouDigital = {
                                     <td class="border border-slate-300 p-1.5 font-mono">${i + 1}</td>
                                     <td class="border border-slate-300 p-1.5 text-left font-bold text-slate-900">${stu.name}</td>
                                     <td class="border border-slate-300 p-1.5 ${stu.gender === 'ស្រី' || stu.gender === 'F' ? 'text-rose-600 font-bold' : ''}">${stu.gender || 'ប្រុស'}</td>
-                                    <td class="border border-slate-300 p-1.5 font-mono text-[11px]">${stu.dob || '-'}</td>
+                                    <td class="border border-slate-300 p-1.5 font-mono text-[11px]">${typeof window.formatDate === 'function' ? window.formatDate(stu.dob) : (stu.dob || '-')}</td>
                                     <td class="border border-slate-300 p-1.5 font-mono">${stu.khmer.toFixed(1)}</td>
                                     <td class="border border-slate-300 p-1.5 font-mono">${stu.math.toFixed(1)}</td>
                                     <td class="border border-slate-300 p-1.5 font-mono">${stu.science.toFixed(1)}</td>

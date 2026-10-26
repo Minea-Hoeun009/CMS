@@ -2016,7 +2016,15 @@ function queryTable(sheetName, filters = {}) {
     const row = data[r];
     const record = {};
     for (let c = 0; c < headers.length; c++) {
-      record[headers[c]] = row[c];
+      let cellVal = row[c];
+      if (cellVal instanceof Date) {
+        try {
+          cellVal = Utilities.formatDate(cellVal, "Asia/Phnom_Penh", "yyyy-MM-dd");
+        } catch (e) {
+          cellVal = cellVal.toISOString().split('T')[0];
+        }
+      }
+      record[headers[c]] = cellVal;
     }
 
     let matches = true;
