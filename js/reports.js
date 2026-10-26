@@ -417,23 +417,24 @@ window.updateReportViewSettings = function() {
 // ==========================================================================
 window.renderStudentStatsReportHTML = function(container, targetGrade, targetRoom) {
     const sInfo = typeof appSettings !== 'undefined' ? appSettings : {};
-    const academicYear = document.getElementById("globalAcademicYear")?.value || sInfo.academic_year || "២០២៦-២០២៧";
+    const academicYear = document.getElementById("globalAcademicYear")?.value || sInfo.academic_year || "២០២៤-២០២៥";
     const activeClass = typeof window.getCurrentSelectedClass === 'function' ? window.getCurrentSelectedClass() : { level: "ថ្នាក់ទី ៤", room: "«ក»" };
     const curLevel = targetGrade || window.currentReportTargetGrade || document.getElementById("reportGradeSelect")?.value || activeClass.level || sInfo.teacher_level || "ថ្នាក់ទី ៤";
     const curRoom = targetRoom || window.currentReportTargetRoom || document.getElementById("reportRoomSelect")?.value || activeClass.room || sInfo.teacher_room || "«ក»";
     const gradeFull = `${curLevel} ${curRoom}`.trim();
-    
-    // ទាញយកព័ត៌មានពីការកំណត់ (Settings)
-    const districtName = (sInfo.district || "កៀនស្វាយ").replace(/^ស្រុក\s*/, '').trim(); 
-    const provinceName = sInfo.province || "កណ្តាល";
-    const schoolName = sInfo.school_name || "សាលាបឋមសិក្សា ខ្សុំ";
-    const principalName = sInfo.principal_name || "";
-    const teacherName = (window.AuthState ? window.AuthState.teacherName : null) || localStorage.getItem('auth_teacher_name') || sInfo.teacher_name || "";
-    const teacherGender = sInfo.teacher_gender || "ប្រុស";
-    const teacherAge = sInfo.teacher_age || "៣០"; 
-    const teacherEthnicity = sInfo.teacher_ethnicity || "ខ្មែរ"; 
+    const gradeShort = gradeFull.replace(/^(ថ្នាក់ទី|ថ្នាក់)\s*/, '').replace(/[«»]/g, '').trim();
+
+    // ព័ត៌មានរដ្ឋបាល
+    const districtName = (sInfo.district || "រុក្ខគិរី").replace(/^ស្រុក\s*/, '').trim(); 
+    const provinceName = sInfo.province || "បាត់ដំបង";
+    const schoolName = sInfo.school_name || "សាលាបឋមសិក្សា ដង្កោ";
+    const teacherName = (window.AuthState ? window.AuthState.teacherName : null) || localStorage.getItem('auth_teacher_name') || sInfo.teacher_name || "សេក ពុទ្ធី";
+    const teacherGender = sInfo.teacher_gender || "ប្រុស/ស្រី";
+    const teacherAge = sInfo.teacher_age || "២៦ ឆ្នាំ"; 
+    const teacherEthnicity = sInfo.teacher_ethnicity || "មិនមែន/ទេ"; 
     const teacherEducation = sInfo.teacher_edu || "បរិញ្ញាបត្រ"; 
-    const teacherExperience = sInfo.teacher_exp || "៥ឆ្នាំ"; 
+    const teacherExperience = sInfo.teacher_exp || "៦ ឆ្នាំ"; 
+    const teacherRank = sInfo.teacher_rank || "ក.ល";
 
     let locShort = "";
     const rawLoc = document.getElementById('global_loc_input')?.value || localStorage.getItem('rc_location') || localStorage.getItem('rep_location');
@@ -441,7 +442,7 @@ window.renderStudentStatsReportHTML = function(container, targetGrade, targetRoo
         locShort = rawLoc.replace(/^ធ្វើនៅ\s*/, '').replace(/,+$/, '').trim();
     } else {
         locShort = schoolName.replace(/^(សាលាបឋមសិក្សា|អនុវិទ្យាល័យ|វិទ្យាល័យ|សាលា)\s*/g, '').trim();
-        if (!locShort) locShort = districtName || "ភ្នំ";
+        if (!locShort) locShort = districtName || "ដង្កោ";
     }
 
     let sDate = "";
@@ -449,333 +450,449 @@ window.renderStudentStatsReportHTML = function(container, targetGrade, targetRoo
     if (rawDate && rawDate.trim()) {
         sDate = rawDate.trim();
     } else {
-        sDate = "ថ្ងៃទី.......ខែ..........ឆ្នាំ២០២៦";
+        sDate = "ថ្ងៃទី១១ ខែធ្នូ ឆ្នាំ២០២៣";
     }
     if (sDate.includes("ថ្ងៃទី")) sDate = sDate.substring(sDate.indexOf("ថ្ងៃទី"));
 
-    const solarDateStr = `ធ្វើនៅ ${locShort}, ${sDate}`;
+    const solarDateStr = `ធ្វើនៅ ${locShort} ${sDate}`;
+    const lunarDateStr = document.getElementById('global_lun_input')?.value || localStorage.getItem('rc_lunar_date') || localStorage.getItem('rep_lunar_date') || "ថ្ងៃចន្ទ ១៤រោច ខែកត្តិក ឆ្នាំថោះ បញ្ចស័ក ព.ស. ២៥៦៧";
 
-    let isLunarChecked = true;
-    const chkBox = document.getElementById('global_lun_chk');
-    if (chkBox) isLunarChecked = chkBox.checked;
-    else isLunarChecked = (localStorage.getItem('rc_show_lunar') !== 'false' && localStorage.getItem('rep_show_lunar') !== 'false');
-
-    let lun = document.getElementById('global_lun_input')?.value || localStorage.getItem('rc_lunar_date') || localStorage.getItem('rep_lunar_date') || "ថ្ងៃ....................ខែ..................ឆ្នាំ...............ព.ស.២៥៧០";
-    const lunarDateStr = isLunarChecked ? lun : ""; 
-    
-    // គណនាទិន្នន័យអាយុពីបញ្ជីសិស្សតាមថ្នាក់ដែលបានជ្រើសរើស (Single Source of Truth)
+    // គណនាទិន្នន័យអាយុសិស្សក្នុងថ្នាក់
     const studentsInClass = typeof window.getStudentsForClass === 'function'
         ? window.getStudentsForClass(curLevel, curRoom, academicYear)
         : [];
     let totalStus = studentsInClass.length;
-    let femaleStus = studentsInClass.filter(s => s.gender === 'ស្រី').length;
-    
+    let femaleStus = studentsInClass.filter(s => s && (s.gender === 'ស្រី' || s.gender === 'F')).length;
+
     let ageStats = {
-        '6': { t: 0, f: 0 }, '7': { t: 0, f: 0 }, '8': { t: 0, f: 0 }, '9': { t: 0, f: 0 },
-        '10': { t: 0, f: 0 }, '11': { t: 0, f: 0 }, '12': { t: 0, f: 0 }, '13': { t: 0, f: 0 },
-        '14': { t: 0, f: 0 }, '15+': { t: 0, f: 0 }
+        '6': { newT: 0, newF: 0, repT: 0, repF: 0 },
+        '7': { newT: 0, newF: 0, repT: 0, repF: 0 },
+        '8': { newT: 0, newF: 0, repT: 0, repF: 0 },
+        '9': { newT: 0, newF: 0, repT: 0, repF: 0 },
+        '10': { newT: 0, newF: 0, repT: 0, repF: 0 },
+        '11': { newT: 0, newF: 0, repT: 0, repF: 0 },
+        '12': { newT: 0, newF: 0, repT: 0, repF: 0 },
+        '13': { newT: 0, newF: 0, repT: 0, repF: 0 },
+        '14': { newT: 0, newF: 0, repT: 0, repF: 0 },
+        '15+': { newT: 0, newF: 0, repT: 0, repF: 0 }
     };
 
-    let refYear = parseInt(academicYear.split('-')[0]) || new Date().getFullYear();
+    let refYear = parseInt(String(academicYear).split(/[-_]/)[0]) || new Date().getFullYear();
 
     studentsInClass.forEach(s => {
-        let age = 10; 
-        if (s.dob) {
+        if (!s) return;
+        let age = 10;
+        if (s.age && !isNaN(parseInt(s.age, 10))) {
+            age = parseInt(s.age, 10);
+        } else if (s.dob) {
             try {
-                let birthYear = parseInt(s.dob.split(/[-/]/)[0]);
+                let parts = String(s.dob).replace(/["']/g, '').split(/[-/T]/);
+                let birthYear = parseInt(parts[0], 10);
                 if (birthYear > 1900) { age = refYear - birthYear; }
-                else { age = refYear - parseInt(s.dob.split(/[-/]/)[2]); }
+                else if (parts[2]) { age = refYear - parseInt(parts[2], 10); }
             } catch(e) {}
         }
         
-        let ageKey = age >= 15 ? '15+' : age.toString();
-        if (ageStats[ageKey]) {
-            ageStats[ageKey].t++;
-            if (s.gender === 'ស្រី') ageStats[ageKey].f++;
-        } else if (age < 6) {
-            ageStats['6'].t++; if (s.gender === 'ស្រី') ageStats['6'].f++;
+        let ageKey = age >= 15 ? '15+' : (age < 6 ? '6' : age.toString());
+        if (!ageStats[ageKey]) ageKey = '15+';
+
+        const isFem = s.gender === 'ស្រី' || s.gender === 'F';
+        const isRepeater = String(s.status || s.academic_status || '').includes('ត្រួត') || s.is_repeater;
+
+        if (isRepeater) {
+            ageStats[ageKey].repT++;
+            if (isFem) ageStats[ageKey].repF++;
+        } else {
+            ageStats[ageKey].newT++;
+            if (isFem) ageStats[ageKey].newF++;
         }
     });
 
+    // ផលបូកសរុបអាយុ
+    let sumNewT = 0, sumNewF = 0, sumRepT = 0, sumRepF = 0;
+    Object.values(ageStats).forEach(v => {
+        sumNewT += v.newT; sumNewF += v.newF;
+        sumRepT += v.repT; sumRepF += v.repF;
+    });
+
     let ageRowsHtml = "";
-    Object.keys(ageStats).forEach(key => {
-        let tVal = ageStats[key].t === 0 ? "0" : ageStats[key].t;
-        let fVal = ageStats[key].f === 0 ? "0" : ageStats[key].f;
-        
-        ageRowsHtml += `<tr>
-            <td class="text-center">${key}</td>
-            <td><div class="box-input" contenteditable="true">${tVal}</div></td>
-            <td><div class="box-input text-red-600" contenteditable="true">${fVal}</div></td>
-            <td><div class="box-input" contenteditable="true">0</div></td>
-            <td><div class="box-input text-red-600" contenteditable="true">0</div></td>
-            <td class="bg-slate-50 font-bold">${tVal}</td>
-            <td class="bg-slate-50 font-bold text-red-600">${fVal}</td>
-        </tr>`;
+    ['6', '7', '8', '9', '10', '11', '12', '13', '14', '15+'].forEach(key => {
+        const item = ageStats[key];
+        const rowTotT = item.newT + item.repT;
+        const rowTotF = item.newF + item.repF;
+        ageRowsHtml += `
+            <tr style="height: 19px;">
+                <td class="font-bold text-center">${key}</td>
+                <td contenteditable="true" class="text-center font-mono">${item.newT}</td>
+                <td contenteditable="true" class="text-center font-mono">${item.newF}</td>
+                <td contenteditable="true" class="text-center font-mono">${item.repT}</td>
+                <td contenteditable="true" class="text-center font-mono">${item.repF}</td>
+                <td contenteditable="true" class="text-center font-mono font-bold bg-slate-50">${rowTotT}</td>
+                <td contenteditable="true" class="text-center font-mono font-bold bg-slate-50">${rowTotF}</td>
+            </tr>
+        `;
     });
 
     container.innerHTML = `
-        <div id="studentStatsPrintArea" class="bg-white p-6 md:p-10 w-full shadow-[0_10px_40px_rgba(0,0,0,0.08)] rounded-xl border border-slate-200 text-slate-800" style="max-width: 210mm; min-height: 297mm; font-family: 'Khmer OS Siemreap', sans-serif;">
+        <div id="studentStatsPrintArea" class="bg-white p-6 md:p-10 w-full shadow-[0_10px_40px_rgba(0,0,0,0.08)] rounded-xl border border-slate-300 text-blue-950 font-siemreap" style="max-width: 210mm; min-height: 297mm; margin: 0 auto; box-sizing: border-box; color: #002b66;">
             
             <style>
-                .form-table { width: 100%; border-collapse: collapse; font-size: 11.5px; }
-                .form-table th, .form-table td { border: 1px solid #94a3b8; padding: 4px; text-align: center; vertical-align: middle; }
-                .form-table th { color: #1e3a8a; font-weight: bold; font-family: 'Siemreap', sans-serif; background-color: #f8fafc; }
-                
-                .form-section { margin-bottom: 15px; }
-                .form-header { 
-                    background-color: #1e3a8a; 
-                    color: white; 
-                    padding: 6px 10px; 
-                    border-radius: 6px 6px 0 0; 
-                    font-family: 'Moul', serif; 
-                    font-size: 12.5px; 
-                    border: 1px solid #1e3a8a;
-                    display: flex;
-                    flex-direction: column;
+                .moeys-table {
+                    width: 100%;
+                    border-collapse: collapse;
+                    font-size: 10.5px;
+                    border: 1.5px solid #002b66;
                 }
-                .form-header .sub-text {
-                    font-family: 'Siemreap', sans-serif;
-                    font-size: 10px;
-                    font-weight: normal;
-                    color: #cbd5e1;
-                    margin-top: 2px;
+                .moeys-table th, .moeys-table td {
+                    border: 1px solid #002b66;
+                    padding: 2.5px 3.5px;
+                    vertical-align: middle;
                 }
-                .form-wrapper { 
-                    border: 1px solid #1e3a8a; 
-                    border-top: none; 
-                    border-radius: 0 0 6px 6px; 
-                    overflow: hidden; 
-                }
-
-                .box-input {
-                    border: 1px solid #cbd5e1;
-                    border-radius: 2px;
-                    display: inline-block;
-                    padding: 1px 4px;
-                    min-width: 20px;
+                .moeys-table th {
+                    font-family: 'Siemreap', 'Khmer OS Siemreap', sans-serif;
+                    font-weight: bold;
+                    background-color: #ffffff;
                     text-align: center;
-                    font-family: 'Arial', sans-serif;
+                    color: #002b66;
+                }
+                .moeys-header-blue {
+                    font-family: 'Moul', 'Khmer OS Moul', serif;
+                    color: #002b66;
+                }
+                .moeys-lavender-row {
+                    background-color: #e0e7ff;
                     font-weight: bold;
-                    color: #475569;
-                    outline: none;
-                    background: #ffffff;
                 }
-                .box-input-text {
-                    border: 1px solid #cbd5e1;
-                    border-radius: 2px;
-                    display: inline-block;
-                    padding: 2px 6px;
-                    min-width: 100px;
-                    text-align: left;
-                    font-family: 'Khmer OS Siemreap', 'Siemreap', sans-serif;
-                    font-weight: bold;
-                    color: #1e3a8a;
-                    outline: none;
-                    background: #ffffff;
+                [contenteditable="true"]:focus {
+                    outline: 1.5px solid #2563eb;
+                    background-color: #eff6ff;
                 }
-                .box-input:focus, .box-input-text:focus {
-                    border-color: #3b82f6;
-                    background: #eff6ff;
+                @media print {
+                    @page { size: A4 portrait; margin: 6mm; }
+                    body * { visibility: hidden !important; }
+                    #studentStatsPrintArea, #studentStatsPrintArea * { visibility: visible !important; }
+                    #studentStatsPrintArea {
+                        position: absolute !important;
+                        left: 0 !important;
+                        top: 0 !important;
+                        width: 100% !important;
+                        max-width: 210mm !important;
+                        padding: 0mm !important;
+                        box-shadow: none !important;
+                        border: none !important;
+                    }
                 }
-                
-                .table-1 td { padding: 5px 10px; border: 1px solid #cbd5e1; }
-                .table-1 td:first-child { text-align: right; width: 45%; color: #475569; }
-                .table-1 td:last-child { text-align: left; }
             </style>
 
-            <div class="flex justify-between items-start mb-6">
-                <div class="text-left leading-relaxed pt-6">
-                    <p class="font-moul text-slate-900 text-[12px] mb-1">ការិយាល័យ អប់រំ យុវជន និងកីឡានៃរដ្ឋបាលស្រុក ${districtName}</p>
-                    <p class="font-moul text-slate-900 text-[12px]">${schoolName}</p>
+            <!-- 🏛️ ក្បាលទម្រង់ផ្លូវការ (Official Form Header with PRI Circle) 🏛️ -->
+            <div class="relative mb-3">
+                <!-- PRI Top Right Badge -->
+                <div class="absolute right-0 top-0 w-11 h-11 rounded-full border border-blue-900 flex items-center justify-center font-bold text-xs text-blue-950">
+                    PRI
                 </div>
-                <div class="text-center">
-                    <p class="font-moul text-slate-900 text-[13px] mb-1">ព្រះរាជាណាចក្រកម្ពុជា</p>
-                    <p class="font-moul text-slate-900 text-[13px]">ជាតិ សាសនា ព្រះមហាក្សត្រ</p>
-                    <div class="flex items-center justify-center mt-1 mx-auto">
-                        <img src="${window.CMS_HEADER_SYMBOL_B64 || 'assets/images/header-flourish.png'}" class="header-flourish-symbol" alt="symbol" style="display: block; margin: 2px auto 0 auto; width: 135px; height: 11px; object-fit: contain;" />
+
+                <!-- ចំណងជើងកណ្តាល (Centered Moul Titles) -->
+                <div class="text-center pt-1">
+                    <h1 class="moeys-header-blue text-base sm:text-lg mb-0.5 tracking-wide">តារាងចំនួនសិស្សតាមថ្នាក់ (សម្រាប់គ្រូ)</h1>
+                    <h2 class="moeys-header-blue text-sm sm:text-base">ឆ្នាំសិក្សា ${window.toKhmerNum(academicYear.replace('-', '_'))}</h2>
+                </div>
+
+                <!-- ព័ត៌មានទីតាំង (Location & Class Info Bar) -->
+                <div class="mt-3 text-xs leading-relaxed space-y-1">
+                    <div class="flex justify-between items-center px-1">
+                        <div>
+                            <span class="font-bold">រាជធានី/ខេត្ត:</span>
+                            <span contenteditable="true" class="moeys-header-blue text-[13px] ml-4 font-bold">${provinceName}</span>
+                        </div>
+                        <div class="pr-16">
+                            <span class="font-bold">ស្រុក/ខណ្ឌ:</span>
+                            <span contenteditable="true" class="moeys-header-blue text-[13px] ml-4 font-bold">${districtName}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="flex justify-between items-center px-1">
+                        <div>
+                            <span class="font-bold">សាលា:</span>
+                            <span contenteditable="true" class="moeys-header-blue text-[13px] ml-6 font-bold">${schoolName}</span>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-between items-center px-1 pt-0.5">
+                        <div class="font-bold text-[11px] text-blue-950">
+                            ១. ព័ត៌មានសង្ខេបគ្រូទទួលបន្ទុក
+                        </div>
+                        <div class="pr-20">
+                            <span contenteditable="true" class="moeys-header-blue text-sm font-bold text-blue-900">${gradeFull}</span>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <div class="text-center mb-6">
-                <h1 class="font-moul text-xl text-blue-900 mb-2">តារាងចំនួនសិស្សតាមថ្នាក់ (សម្រាប់គ្រូ)</h1>
-                <h2 class="font-moul text-sm text-red-600">${gradeFull} | ឆ្នាំសិក្សា ${window.toKhmerNum(academicYear)}</h2>
-            </div>
-
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-x-6 gap-y-0 items-start">
+            <!-- 📊 តួទម្រង់ចែកជា ២ ជួរឈរ (Exact Two-Column Grid of Image 2) 📊 -->
+            <div class="grid grid-cols-2 gap-4 items-start">
                 
-                <!-- ជួរខាងឆ្វេង (Left Column) -->
-                <div class="flex flex-col gap-0">
+                <!-- 👈 ជួរខាងឆ្វេង (LEFT COLUMN) -->
+                <div class="space-y-3">
                     
-                    <div class="form-section">
-                        <div class="form-header">១. ព័ត៌មានគ្រូបន្ទុកថ្នាក់ទី ${gradeFull.replace('ថ្នាក់ទី ', '')}</div>
-                        <div class="form-wrapper">
-                            <table class="form-table table-1 !border-0">
-                                <tr><td>ឈ្មោះគ្រូបន្ទុកថ្នាក់</td><td><div class="box-input-text font-moul" contenteditable="true">${teacherName}</div></td></tr>
-                                <tr><td>ភេទ</td><td><div class="box-input-text font-moul" contenteditable="true">${teacherGender}</div></td></tr>
-                                <tr><td>អាយុ</td><td><div class="box-input-text font-moul" contenteditable="true">${teacherAge}</div></td></tr>
-                                <tr><td>ជនជាតិដើមភាគតិច</td><td><div class="box-input-text font-moul" contenteditable="true">${teacherEthnicity}</div></td></tr>
-                                <tr><td>កម្រិតវប្បធម៌</td><td><div class="box-input-text font-moul" contenteditable="true">${teacherEducation}</div></td></tr>
-                                <tr><td>រយៈពេលបម្រើការងារ</td><td><div class="box-input-text font-moul" contenteditable="true">${teacherExperience}</div></td></tr>
-                                <tr><td>កម្រិតថ្នាក់បង្រៀន</td><td><div class="box-input-text font-moul" contenteditable="true">${gradeFull.replace('ថ្នាក់ទី ', '')}</div></td></tr>
-                            </table>
+                    <!-- តារាងទី ១: ព័ត៌មានសង្ខេបគ្រូទទួលបន្ទុក -->
+                    <table class="moeys-table">
+                        <tr>
+                            <td class="w-[58%]">ឈ្មោះជាអក្សរខ្មែរ</td>
+                            <td contenteditable="true" class="font-bold text-center">${teacherName}</td>
+                        </tr>
+                        <tr>
+                            <td>ភេទ(សូមគូសរង្វង់)</td>
+                            <td contenteditable="true" class="text-center">${teacherGender}</td>
+                        </tr>
+                        <tr>
+                            <td>អាយុ(សូមគូសរង្វង់)</td>
+                            <td contenteditable="true" class="text-center font-mono">${teacherAge}</td>
+                        </tr>
+                        <tr>
+                            <td>ជនជាតិដើមភាគតិច</td>
+                            <td contenteditable="true" class="text-center font-bold text-emerald-800">${teacherEthnicity}</td>
+                        </tr>
+                        <tr>
+                            <td>កម្រិតវប្បធម៌</td>
+                            <td contenteditable="true" class="text-center font-bold text-emerald-800">${teacherEducation}</td>
+                        </tr>
+                        <tr>
+                            <td>រយៈពេលបម្រើការងារអប់រំ</td>
+                            <td contenteditable="true" class="text-center font-bold font-mono">${teacherExperience}</td>
+                        </tr>
+                        <tr>
+                            <td>កម្រិតកាតក្របខ័ណ្ឌ</td>
+                            <td contenteditable="true" class="text-center font-bold">${teacherRank}</td>
+                        </tr>
+                    </table>
+
+                    <!-- តារាងទី ២.(ខ): សិស្សថ្មី សិស្សឡើងថ្នាក់ និង សិស្សត្រួតថ្នាក់ -->
+                    <div>
+                        <div class="text-[10px] font-bold leading-tight mb-1">
+                            ២.(ខ) សិស្សថ្មី សិស្សឡើងថ្នាក់ និង សិស្សត្រួតថ្នាក់<br>
+                            ក្នុងឆ្នាំសិក្សា ${window.toKhmerNum(academicYear.replace('-', '_'))} គិតត្រឹមថ្ងៃទី...........................
                         </div>
+                        <table class="moeys-table">
+                            <thead>
+                                <tr>
+                                    <th rowspan="3" class="w-[14%]">អាយុ<br>(ឆ្នាំ)</th>
+                                    <th colspan="6">ចំនួនសិស្ស</th>
+                                </tr>
+                                <tr>
+                                    <th colspan="2" class="w-[28%]">សិស្សថ្មី</th>
+                                    <th colspan="2" class="w-[28%]">សិស្សត្រួតថ្នាក់</th>
+                                    <th colspan="2" class="w-[30%]">សរុប</th>
+                                </tr>
+                                <tr>
+                                    <th>សរុប</th><th>ស្រី</th>
+                                    <th>សរុប</th><th>ស្រី</th>
+                                    <th>សរុប</th><th>ស្រី</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${ageRowsHtml}
+                                <tr class="font-bold bg-slate-50" style="height: 22px;">
+                                    <td class="text-center">សរុប</td>
+                                    <td contenteditable="true" class="text-center font-mono font-bold">${sumNewT}</td>
+                                    <td contenteditable="true" class="text-center font-mono font-bold">${sumNewF}</td>
+                                    <td contenteditable="true" class="text-center font-mono font-bold">${sumRepT}</td>
+                                    <td contenteditable="true" class="text-center font-mono font-bold">${sumRepF}</td>
+                                    <td contenteditable="true" class="text-center font-mono font-bold text-blue-900">${totalStus}</td>
+                                    <td contenteditable="true" class="text-center font-mono font-bold text-blue-900">${femaleStus}</td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
 
-                    <div class="form-section">
-                        <div class="form-header">២.(ខ) សិស្សថ្មី សិស្សឡើងថ្នាក់ និង សិស្សត្រួតថ្នាក់</div>
-                        <div class="form-wrapper">
-                            <table class="form-table !border-0">
-                                <thead>
-                                    <tr>
-                                        <th rowspan="2" class="w-[15%]">អាយុ<br>(ឆ្នាំ)</th>
-                                        <th colspan="2">សិស្សថ្មី</th>
-                                        <th colspan="2">សិស្សត្រួតថ្នាក់</th>
-                                        <th colspan="2">សិស្សសរុប</th>
-                                    </tr>
-                                    <tr>
-                                        <th>សរុប</th><th>ស្រី</th>
-                                        <th>សរុប</th><th>ស្រី</th>
-                                        <th>សរុប</th><th>ស្រី</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    ${ageRowsHtml}
-                                    <tr class="font-bold bg-slate-100">
-                                        <td>សរុប</td>
-                                        <td><div class="box-input" contenteditable="true">${totalStus}</div></td>
-                                        <td><div class="box-input text-red-600" contenteditable="true">${femaleStus}</div></td>
-                                        <td><div class="box-input" contenteditable="true">0</div></td>
-                                        <td><div class="box-input text-red-600" contenteditable="true">0</div></td>
-                                        <td class="text-blue-800">${totalStus}</td><td class="text-pink-700">${femaleStus}</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                    
-                    <div class="form-section">
-                        <div class="form-header">៤. សិស្សជាជនជាតិដើមភាគតិច</div>
-                        <div class="form-wrapper">
-                            <table class="form-table !border-0">
-                                <thead>
-                                    <tr>
-                                        <th rowspan="2" class="bg-blue-50/50 w-1/3">ក្រុមអាយុ</th>
-                                        <th colspan="2">សិស្សជនជាតិដើមភាគតិច</th>
-                                    </tr>
-                                    <tr><th>សរុប</th><th>ស្រី</th></tr>
-                                </thead>
-                                <tbody>
-                                    <tr><td class="bg-slate-50">៦ឆ្នាំ</td><td><div class="box-input" contenteditable="true">0</div></td><td><div class="box-input text-red-600" contenteditable="true">0</div></td></tr>
-                                    <tr><td class="bg-slate-50">៧-១១ឆ្នាំ</td><td><div class="box-input" contenteditable="true">0</div></td><td><div class="box-input text-red-600" contenteditable="true">0</div></td></tr>
-                                    <tr><td class="bg-slate-50">១២+</td><td><div class="box-input" contenteditable="true">0</div></td><td><div class="box-input text-red-600" contenteditable="true">0</div></td></tr>
-                                    <tr class="font-bold bg-slate-100 text-blue-900"><td class="text-center">សរុប</td><td><div class="box-input" contenteditable="true">0</div></td><td><div class="box-input text-red-600" contenteditable="true">0</div></td></tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- ជួរខាងស្តាំ (Right Column) -->
-                <div class="flex flex-col gap-0">
-                    
-                    <div class="form-section">
-                        <div class="form-header">
-                            <div>២.(ក) ចំនួនសិស្សថ្នាក់ទី១ បន្តមកពីមត្តេយ្យ</div>
-                            <div class="sub-text">(ក្រៅពីថ្នាក់ទី១ មិនចាំបាច់បញ្ចូលតារាង ២.(ក)នេះទេ)</div>
-                        </div>
-                        <div class="form-wrapper">
-                            <table class="form-table !border-0">
-                                <thead>
-                                    <tr>
-                                        <th rowspan="3" class="text-center px-2">ប្រភេទ</th>
-                                        <th colspan="4">ថ្នាក់ទី១ (សិស្សម្នាក់អាចរាប់បានតែម្តង)</th>
-                                    </tr>
-                                    <tr>
-                                        <th colspan="2">សិស្សថ្មី</th>
-                                        <th colspan="2">សិស្សត្រួតថ្នាក់</th>
-                                    </tr>
-                                    <tr>
-                                        <th>សរុប</th><th>ស្រី</th>
-                                        <th>សរុប</th><th>ស្រី</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr><td class="text-left pl-3">មត្តេយ្យរដ្ឋ</td><td><div class="box-input" contenteditable="true">0</div></td><td><div class="box-input text-red-600" contenteditable="true">0</div></td><td><div class="box-input" contenteditable="true">0</div></td><td><div class="box-input text-red-600" contenteditable="true">0</div></td></tr>
-                                    <tr><td class="text-left pl-3">មត្តេយ្យឯកជន</td><td><div class="box-input" contenteditable="true">0</div></td><td><div class="box-input text-red-600" contenteditable="true">0</div></td><td><div class="box-input" contenteditable="true">0</div></td><td><div class="box-input text-red-600" contenteditable="true">0</div></td></tr>
-                                    <tr><td class="text-left pl-3">មត្តេយ្យសហគមន៍</td><td><div class="box-input" contenteditable="true">0</div></td><td><div class="box-input text-red-600" contenteditable="true">0</div></td><td><div class="box-input" contenteditable="true">0</div></td><td><div class="box-input text-red-600" contenteditable="true">0</div></td></tr>
-                                    <tr><td class="text-left pl-3">ការអប់រំតាមផ្ទះ</td><td><div class="box-input" contenteditable="true">0</div></td><td><div class="box-input text-red-600" contenteditable="true">0</div></td><td><div class="box-input" contenteditable="true">0</div></td><td><div class="box-input text-red-600" contenteditable="true">0</div></td></tr>
-                                    <tr><td class="text-left pl-3">កម្មវិធីត្រៀមថ្នាក់ទី១</td><td><div class="box-input" contenteditable="true">0</div></td><td><div class="box-input text-red-600" contenteditable="true">0</div></td><td><div class="box-input" contenteditable="true">0</div></td><td><div class="box-input text-red-600" contenteditable="true">0</div></td></tr>
-                                    <tr class="font-bold bg-slate-100"><td class="text-center">សរុប</td><td>0</td><td class="text-red-600">0</td><td>0</td><td class="text-red-600">0</td></tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-
-                    <div class="form-section">
-                        <div class="form-header">
-                            <div>៣. ចំនួនសិស្សជួបការលំបាកក្នុងថ្នាក់រៀន</div>
-                            <div class="sub-text">(សិស្សម្នាក់អាចរាប់ច្រើនដង តាមអាការៈពិបាកជាក់ស្តែង)</div>
-                        </div>
-                        <div class="form-wrapper">
-                            <table class="form-table !border-0 text-left">
-                                <thead>
-                                    <tr>
-                                        <th rowspan="2" class="text-center w-[60%]">បរិយាយ</th>
-                                        <th colspan="2">ចំណុចជួបការលំបាក</th>
-                                    </tr>
-                                    <tr>
-                                        <th class="w-[20%]">សរុប</th><th class="w-[20%]">ស្រី</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr><td class="pl-2 font-bold text-blue-900 bg-blue-50/30">សិស្សពិការ</td><td class="text-center"><div class="box-input" contenteditable="true">0</div></td><td class="text-center"><div class="box-input text-red-600" contenteditable="true">0</div></td></tr>
-                                    <tr><td class="pl-6 text-xs text-slate-600">ពិបាកក្នុងការមើលឃើញ</td><td class="text-center"><div class="box-input" contenteditable="true">0</div></td><td class="text-center"><div class="box-input text-red-600" contenteditable="true">0</div></td></tr>
-                                    <tr><td class="pl-6 text-xs text-slate-600">ពិបាកក្នុងការស្តាប់</td><td class="text-center"><div class="box-input" contenteditable="true">0</div></td><td class="text-center"><div class="box-input text-red-600" contenteditable="true">0</div></td></tr>
-                                    <tr><td class="pl-6 text-xs text-slate-600">ពិបាកក្នុងការនិយាយ</td><td class="text-center"><div class="box-input" contenteditable="true">0</div></td><td class="text-center"><div class="box-input text-red-600" contenteditable="true">0</div></td></tr>
-                                    <tr><td class="pl-6 text-xs text-slate-600">ពិបាកក្នុងការដើរ</td><td class="text-center"><div class="box-input" contenteditable="true">0</div></td><td class="text-center"><div class="box-input text-red-600" contenteditable="true">0</div></td></tr>
-                                    <tr><td class="pl-6 text-xs text-slate-600">ពិបាកខាងវិញ្ញាណ/ខួរក្បាល</td><td class="text-center"><div class="box-input" contenteditable="true">0</div></td><td class="text-center"><div class="box-input text-red-600" contenteditable="true">0</div></td></tr>
-                                    <tr><td class="pl-6 text-xs text-slate-600">ពិបាកក្នុងការចងចាំ</td><td class="text-center"><div class="box-input" contenteditable="true">0</div></td><td class="text-center"><div class="box-input text-red-600" contenteditable="true">0</div></td></tr>
-                                    <tr><td class="pl-6 text-xs text-slate-600">ពិការផ្សេងៗ (ក្រៅពីខាងលើ)</td><td class="text-center"><div class="box-input" contenteditable="true">0</div></td><td class="text-center"><div class="box-input text-red-600" contenteditable="true">0</div></td></tr>
-                                    
-                                    <tr><td class="pl-2 font-bold text-blue-900 bg-blue-50/30">សិស្សជួបការលំបាកផ្នែកសុខភាព</td><td class="text-center"><div class="box-input" contenteditable="true">0</div></td><td class="text-center"><div class="box-input text-red-600" contenteditable="true">0</div></td></tr>
-                                    <tr><td class="pl-6 text-xs text-slate-600">ខ្វះអាហារូបត្ថម្ភធ្ងន់ធ្ងរ</td><td class="text-center"><div class="box-input" contenteditable="true">0</div></td><td class="text-center"><div class="box-input text-red-600" contenteditable="true">0</div></td></tr>
-                                    <tr><td class="pl-6 text-xs text-slate-600">ជម្ងឺប្រចាំកាយ</td><td class="text-center"><div class="box-input" contenteditable="true">0</div></td><td class="text-center"><div class="box-input text-red-600" contenteditable="true">0</div></td></tr>
-                                    <tr><td class="pl-6 text-xs text-slate-600">កុមាររងគ្រោះដោយ HIV</td><td class="text-center"><div class="box-input" contenteditable="true">0</div></td><td class="text-center"><div class="box-input text-red-600" contenteditable="true">0</div></td></tr>
-
-                                    <tr><td class="pl-2 font-bold text-blue-900 bg-blue-50/30">សិស្សជួបការលំបាកទូទៅ</td><td class="text-center"><div class="box-input" contenteditable="true">0</div></td><td class="text-center"><div class="box-input text-red-600" contenteditable="true">0</div></td></tr>
-                                    <tr><td class="pl-6 text-xs text-slate-600">មកពីគ្រួសារក្រីក្រ</td><td class="text-center"><div class="box-input" contenteditable="true">0</div></td><td class="text-center"><div class="box-input text-red-600" contenteditable="true">0</div></td></tr>
-                                    <tr><td class="pl-6 text-xs text-slate-600">កុមារកំព្រា</td><td class="text-center"><div class="box-input" contenteditable="true">0</div></td><td class="text-center"><div class="box-input text-red-600" contenteditable="true">0</div></td></tr>
-                                    <tr><td class="pl-6 text-xs text-slate-600">កុមាររងគ្រោះដោយការជួញដូរ</td><td class="text-center"><div class="box-input" contenteditable="true">0</div></td><td class="text-center"><div class="box-input text-red-600" contenteditable="true">0</div></td></tr>
-                                    <tr><td class="pl-6 text-xs text-slate-600">កុមារមកពីគ្រួសារចំណាកស្រុក</td><td class="text-center"><div class="box-input" contenteditable="true">0</div></td><td class="text-center"><div class="box-input text-red-600" contenteditable="true">0</div></td></tr>
-                                </tbody>
-                            </table>
-                        </div>
+                    <!-- តារាងទី ៤: សិស្សតាមជនជាតិដើមភាគតិច -->
+                    <div>
+                        <div class="text-[10.5px] font-bold mb-1">៤. សិស្សតាមជនជាតិដើមភាគតិច</div>
+                        <table class="moeys-table">
+                            <thead>
+                                <tr>
+                                    <th rowspan="2" class="w-[45%]">ក្រោមអាយុ</th>
+                                    <th colspan="2">សិស្សជនជាតិដើមភាគតិច</th>
+                                </tr>
+                                <tr>
+                                    <th class="w-[27%]">សរុប</th>
+                                    <th class="w-[28%]">ស្រី</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="text-center font-bold">6</td>
+                                    <td contenteditable="true" class="text-center font-mono">0</td>
+                                    <td contenteditable="true" class="text-center font-mono">0</td>
+                                </tr>
+                                <tr>
+                                    <td class="text-center font-bold">7-11</td>
+                                    <td contenteditable="true" class="text-center font-mono">1</td>
+                                    <td contenteditable="true" class="text-center font-mono">1</td>
+                                </tr>
+                                <tr>
+                                    <td class="text-center font-bold">12+</td>
+                                    <td contenteditable="true" class="text-center font-mono">3</td>
+                                    <td contenteditable="true" class="text-center font-mono">0</td>
+                                </tr>
+                                <tr class="font-bold bg-slate-50">
+                                    <td class="text-center">សរុប</td>
+                                    <td contenteditable="true" class="text-center font-mono font-bold">4</td>
+                                    <td contenteditable="true" class="text-center font-mono font-bold">1</td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
 
                 </div>
-            </div> <!-- End Grid -->
 
-            <!-- ហត្ថលេខាខាងក្រោម -->
-            <div class="flex justify-between items-start mt-8 text-sm px-4">
-                <div class="text-center w-2/5">
-                    <p class="mb-1 text-slate-700">បានឃើញ និងឯកភាព</p>
-                    <p class="font-moul text-slate-900 mb-16">នាយក/នាយិកាសាលា</p>
-                    <p class="font-moul text-slate-900 text-sm" contenteditable="true">${principalName}</p>
+                <!-- 👉 ជួរខាងស្តាំ (RIGHT COLUMN) -->
+                <div class="space-y-3">
+                    
+                    <!-- តារាងទី ២.(ក): ចំនួនសិស្សថ្នាក់ទី១ បានឆ្លងកាត់កម្រិតមត្តេយ្យ -->
+                    <div>
+                        <div class="text-[10px] font-bold leading-tight mb-1">
+                            ២. (ក) ចំនួនសិស្សថ្នាក់ទី១ បានឆ្លងកាត់កម្រិតមត្តេយ្យ<br>
+                            <span class="font-normal text-[9.5px]">(ត្រូវតែថ្នាក់ទី១មិនបាច់បំពេញតារាង ២.(ក) នេះទេ)</span>
+                        </div>
+                        <table class="moeys-table">
+                            <thead>
+                                <tr>
+                                    <th rowspan="3" class="w-[36%]">ប្រភេទ</th>
+                                    <th colspan="4">ថ្នាក់ទី១ (សិស្សម្នាក់អាចរាប់បានតែមួយដង)</th>
+                                </tr>
+                                <tr>
+                                    <th colspan="2">សិស្សថ្មី</th>
+                                    <th colspan="2">សិស្សត្រួតថ្នាក់</th>
+                                </tr>
+                                <tr>
+                                    <th>សរុប</th><th>ស្រី</th>
+                                    <th>សរុប</th><th>ស្រី</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>មត្តេយ្យរដ្ឋ</td>
+                                    <td contenteditable="true" class="text-center font-mono">3</td>
+                                    <td contenteditable="true" class="text-center font-mono">1</td>
+                                    <td contenteditable="true" class="text-center font-mono">2</td>
+                                    <td contenteditable="true" class="text-center font-mono">1</td>
+                                </tr>
+                                <tr>
+                                    <td>មត្តេយ្យឯកជន</td>
+                                    <td contenteditable="true" class="text-center font-mono">0</td>
+                                    <td contenteditable="true" class="text-center font-mono">0</td>
+                                    <td contenteditable="true" class="text-center font-mono">0</td>
+                                    <td contenteditable="true" class="text-center font-mono">0</td>
+                                </tr>
+                                <tr>
+                                    <td>មត្តេយ្យសហគមន៍</td>
+                                    <td contenteditable="true" class="text-center font-mono">0</td>
+                                    <td contenteditable="true" class="text-center font-mono">0</td>
+                                    <td contenteditable="true" class="text-center font-mono">0</td>
+                                    <td contenteditable="true" class="text-center font-mono">0</td>
+                                </tr>
+                                <tr>
+                                    <td>ការអប់រំកុមារតូច/ខ្នងផ្ទះ</td>
+                                    <td contenteditable="true" class="text-center font-mono">0</td>
+                                    <td contenteditable="true" class="text-center font-mono">0</td>
+                                    <td contenteditable="true" class="text-center font-mono">1</td>
+                                    <td contenteditable="true" class="text-center font-mono">0</td>
+                                </tr>
+                                <tr>
+                                    <td>កម្មវិធីត្រៀមថ្នាក់ទី១</td>
+                                    <td contenteditable="true" class="text-center font-mono">0</td>
+                                    <td contenteditable="true" class="text-center font-mono">0</td>
+                                    <td contenteditable="true" class="text-center font-mono">1</td>
+                                    <td contenteditable="true" class="text-center font-mono">1</td>
+                                </tr>
+                                <tr class="font-bold bg-slate-50">
+                                    <td class="text-center">សរុប</td>
+                                    <td contenteditable="true" class="text-center font-mono font-bold">3</td>
+                                    <td contenteditable="true" class="text-center font-mono font-bold">1</td>
+                                    <td contenteditable="true" class="text-center font-mono font-bold">4</td>
+                                    <td contenteditable="true" class="text-center font-mono font-bold">2</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- តារាងទី ៣: ចំនួនសិស្សជួបការលំបាកតាមកម្រិតថ្នាក់ -->
+                    <div>
+                        <div class="text-[9.5px] font-bold leading-tight mb-1">
+                            ៣. ចំនួនសិស្សជួបការលំបាកតាមកម្រិតថ្នាក់(សិស្សម្នាក់អាចរាប់ច្រើនដងបាន<br>
+                            តាមភាពជាក់ស្តែង បើសិស្សនោះពិការ ឬមានប៉ះពាល់ចំណុចច្រើនក្នុងបរិយាយ)
+                        </div>
+                        <table class="moeys-table">
+                            <thead>
+                                <tr>
+                                    <th rowspan="2" class="w-[66%]">បរិយាយ</th>
+                                    <th colspan="2">ចំណុចជួបការលំបាក</th>
+                                </tr>
+                                <tr>
+                                    <th class="w-[17%]">សរុប</th>
+                                    <th class="w-[17%]">ស្រី</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- សិស្សពិការ* Header -->
+                                <tr class="moeys-lavender-row">
+                                    <td colspan="3" class="font-bold text-left pl-1.5 py-0.5">សិស្សពិការ*</td>
+                                </tr>
+                                <tr><td>ពិបាកក្នុងការធ្វើចលនា</td><td contenteditable="true" class="text-center font-mono">4</td><td contenteditable="true" class="text-center font-mono">2</td></tr>
+                                <tr><td>ពិបាកក្នុងការស្តាប់</td><td contenteditable="true" class="text-center font-mono">1</td><td contenteditable="true" class="text-center font-mono">0</td></tr>
+                                <tr><td>ពិបាកក្នុងការនិយាយ</td><td contenteditable="true" class="text-center font-mono">1</td><td contenteditable="true" class="text-center font-mono">0</td></tr>
+                                <tr><td>ពិបាកក្នុងការមើល</td><td contenteditable="true" class="text-center font-mono">1</td><td contenteditable="true" class="text-center font-mono">0</td></tr>
+                                <tr><td>ពិបាកក្នុងការយល់ដឹង</td><td contenteditable="true" class="text-center font-mono">1</td><td contenteditable="true" class="text-center font-mono">1</td></tr>
+                                <tr><td>ពិបាកសតិបញ្ញា</td><td contenteditable="true" class="text-center font-mono">1</td><td contenteditable="true" class="text-center font-mono">0</td></tr>
+                                <tr><td>ពិបាកខាងផ្លូវចិត្ត</td><td contenteditable="true" class="text-center font-mono">1</td><td contenteditable="true" class="text-center font-mono">0</td></tr>
+                                <tr><td>ពិបាកផ្សេងៗ (ក្រៅពីខាងលើ)</td><td contenteditable="true" class="text-center font-mono">1</td><td contenteditable="true" class="text-center font-mono">0</td></tr>
+
+                                <!-- សិស្សជួបការលំបាកផ្នែកសុខភាព* -->
+                                <tr class="moeys-lavender-row">
+                                    <td colspan="3" class="font-bold text-left pl-1.5 py-0.5">សិស្សជួបការលំបាកផ្នែកសុខភាព*</td>
+                                </tr>
+                                <tr><td>ខ្វះអាហារូបត្ថម្ភធ្ងន់ធ្ងរ</td><td contenteditable="true" class="text-center font-mono">1</td><td contenteditable="true" class="text-center font-mono">1</td></tr>
+                                <tr><td>សុខភាព/ជំងឺប្រចាំកាយ</td><td contenteditable="true" class="text-center font-mono">1</td><td contenteditable="true" class="text-center font-mono">0</td></tr>
+
+                                <!-- សិស្សជួបការលំបាក** -->
+                                <tr class="moeys-lavender-row">
+                                    <td colspan="3" class="font-bold text-left pl-1.5 py-0.5">សិស្សជួបការលំបាក**</td>
+                                </tr>
+                                <tr><td>មកពីគ្រួសារផ្លាស់ប្តូរទីលំនៅ</td><td contenteditable="true" class="text-center font-mono">1</td><td contenteditable="true" class="text-center font-mono">0</td></tr>
+                                <tr><td>កុមារកំព្រា</td><td contenteditable="true" class="text-center font-mono">1</td><td contenteditable="true" class="text-center font-mono">1</td></tr>
+                                <tr><td>កុមាររងគ្រោះដោយ HIV/AIDS</td><td contenteditable="true" class="text-center font-mono">1</td><td contenteditable="true" class="text-center font-mono">1</td></tr>
+                                <tr><td>កុមាររងអំពើហិង្សាក្នុងគ្រួសារ</td><td contenteditable="true" class="text-center font-mono">1</td><td contenteditable="true" class="text-center font-mono">1</td></tr>
+                                <tr><td>កុមាររងការកេងប្រវ័ញ្ចពលកម្ម</td><td contenteditable="true" class="text-center font-mono">1</td><td contenteditable="true" class="text-center font-mono">0</td></tr>
+                                <tr><td>កុមាររងគ្រោះផ្សេងៗ</td><td contenteditable="true" class="text-center font-mono">2</td><td contenteditable="true" class="text-center font-mono">0</td></tr>
+                            </tbody>
+                        </table>
+                        <div class="text-[8.5px] leading-tight text-blue-900 mt-1 space-y-0.5">
+                            <p>* សំដៅលើចំនួនសិស្ស (ដោយសិស្សម្នាក់អាចរាប់បានតែម្តង បើសិស្សនោះមានពិការភាពច្រើនប្រភេទក៏ដោយ)</p>
+                            <p>** សំដៅលើចំនួនសិស្សសរុបតាមប្រភេទ (ដោយសិស្សម្នាក់បានច្រើនដង តាមប្រភេទពិការភាពជាក់ស្តែងរបស់សិស្សនោះ ប្រសិនបើសិស្សនោះមានពិការភាពច្រើនប្រភេទ)</p>
+                        </div>
+                    </div>
+
                 </div>
-                <div class="text-center w-2/5">
-                    <p class="mb-1 text-slate-700">${lunarDateStr || 'ថ្ងៃ....................ខែ..................ឆ្នាំ...............ព.ស.២៥៧០'}</p>
-                    <p class="mb-1 text-slate-700">${solarDateStr}</p>
-                    <p class="font-moul text-slate-900 mb-16">គ្រូបន្ទុកថ្នាក់</p>
-                    <p class="font-moul text-slate-900 text-sm" contenteditable="true">${teacherName}</p>
+
+            </div> <!-- End Two-Column Grid -->
+
+            <!-- ✍️ ហត្ថលេខា និងកាលបរិច្ឆេទខាងក្រោម (Official Footer) ✍️ -->
+            <div class="mt-4 flex justify-between items-start text-xs pt-2">
+                <div class="w-1/3"></div>
+                <div class="text-center w-2/3 space-y-0.5">
+                    <p contenteditable="true" class="text-blue-950 font-bold">${lunarDateStr}</p>
+                    <p contenteditable="true" class="text-blue-950 font-bold">${solarDateStr}</p>
+                    <p class="font-bold text-blue-950 mt-1">ហត្ថលេខាគ្រូទទួលបន្ទុក</p>
+                    <div class="h-10 flex items-center justify-center text-slate-300 text-xs italic">
+                        (ហត្ថលេខា)
+                    </div>
+                    <p contenteditable="true" class="moeys-header-blue text-sm font-bold text-blue-950">${teacherName}</p>
                 </div>
             </div>
 
         </div>
     `;
 };
-
-// ៣. មុខងារ Print
 window.printStudentStatsReport = function() {
     const printArea = document.getElementById("studentStatsPrintArea");
     if (!printArea) return;
