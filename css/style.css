@@ -1,21 +1,44 @@
 /* ១. ទាញយក Web Fonts ពី Google Fonts (Khmer High-Legibility Typography Stack) */
 @import url('https://fonts.googleapis.com/css2?family=Battambang:wght@400;700&family=Kantumruy+Pro:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Moul&family=Siemreap&display=swap');
 
+/* កំណត់ Font Binding សម្រាប់ Khmer OS Siemreap & Khmer OS Muol Light (Local System + Web Fallback) */
+@font-face {
+  font-family: 'Khmer OS Siemreap';
+  src: local('Khmer OS Siemreap'), local('Siemreap'), url('https://fonts.gstatic.com/s/siemreap/v22/x3dgclbso4WP3v2iB2w6jL7Q.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Khmer OS Muol Light';
+  src: local('Khmer OS Muol Light'), local('KhmerOSMuolLight'), local('Khmer OS Muol'), local('Moul'), url('https://fonts.gstatic.com/s/moul/v20/v6T32PjZ3Y8e_1L6oW4.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
 /* បង្ខំឱ្យ class hidden បិទបាំងគ្រប់ករណី 100% */
 .hidden {
   display: none !important;
 }
 
-/* ២. កំណត់ Font សម្រាប់អត្ថបទ និងតួអក្សរទូទៅ (Body, Table, Input, Button) */
+/* ២. កំណត់ Font សម្រាប់អត្ថបទធម្មតាទូទាំងប្រព័ន្ធ (Regular Text: Khmer OS Siemreap) */
 body,
 input,
 select,
 button,
 textarea,
 p,
+span,
 td,
-th {
-  font-family: 'Kantumruy Pro', 'Khmer OS Siemreap', 'Siemreap', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+th,
+label,
+li,
+a,
+div,
+.font-siemreap {
+  font-family: 'Khmer OS Siemreap', 'Siemreap', 'Kantumruy Pro', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -62,25 +85,24 @@ i.fa-brands {
   font-weight: 400 !important;
 }
 
-/* ៣. កំណត់ Font សម្រាប់ចំណងជើងរាជការ ប័ណ្ណផ្លូវការ និងក្បាលលិខិតជាតិ (Official Ceremonial Headers ONLY) */
-.font-moul,
-.title-moul,
-.national-header,
-.cert-title {
-  font-family: 'Khmer OS Muol Light', 'Khmer OS Muol', 'Moul', 'Kantumruy Pro', serif !important;
-  line-height: 1.45;
-  letter-spacing: 0.02em;
-}
-
-/* ចំណងជើងទូទៅ (Modern Clean Heading Stack for Cards, Widgets, Modals) */
+/* ៣. កំណត់ Font សម្រាប់ចំណងជើងគ្រប់កម្រិតទូទាំងប្រព័ន្ធ (Headings & Titles: Khmer OS Muol Light) */
 h1, 
 h2, 
 h3, 
 h4, 
 h5, 
-h6 {
-  font-family: 'Kantumruy Pro', 'Khmer OS Siemreap', 'Siemreap', sans-serif;
-  line-height: 1.4;
+h6,
+.font-moul,
+.title-moul,
+.national-header,
+.cert-title,
+.report-title,
+.doc-title,
+.modal-title {
+  font-family: 'Khmer OS Muol Light', 'Khmer OS Muol', 'Moul', serif !important;
+  font-weight: normal !important; /* ការពារមិនឱ្យព្រាល ដោយសារ faux-bold របស់ browser */
+  line-height: 1.45;
+  letter-spacing: 0.02em;
 }
 
 /* ៤. ក្បាលតារាងបញ្ឈរសម្រាប់តារាងពិន្ទុ និងវត្តមាន */
@@ -94,11 +116,6 @@ h6 {
   font-weight: 500;
   text-align: left;
   font-family: 'Khmer OS Siemreap', 'Siemreap', sans-serif !important;
-}
-
-/* ៥. កំណត់ Font ពិសេសលើចំណងជើងប័ណ្ណសរសើរ និងក្បាលលិខិតជាតិ */
-.cert-title {
-  font-family: 'Khmer OS Muol Light', 'Khmer OS Muol', 'Moul', serif !important;
 }
 
 @font-face {
@@ -142,8 +159,13 @@ h6 {
     padding: 0 !important;
     background: white !important;
     color: black !important;
-    font-family: 'Siemreap', sans-serif !important;
+    font-family: 'Khmer OS Siemreap', 'Siemreap', sans-serif !important;
     overflow: visible !important;
+  }
+
+  h1, h2, h3, h4, h5, h6, .font-moul, .title-moul, .national-header, .cert-title {
+    font-family: 'Khmer OS Muol Light', 'Khmer OS Muol', 'Moul', serif !important;
+    font-weight: normal !important;
   }
 
   #appView, #dashboardView, #mainContentArea, #reportDetailContent {

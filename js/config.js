@@ -966,10 +966,10 @@ window.CMSPrintManager = {
                         padding: 0 !important;
                         background: white !important;
                         color: #0f172a !important;
-                        font-family: 'Siemreap', sans-serif !important;
+                        font-family: 'Khmer OS Siemreap', 'Siemreap', sans-serif !important;
                     }
-                    .font-moul { font-family: 'Moul', serif !important; }
-                    .font-siemreap { font-family: 'Siemreap', sans-serif !important; }
+                    h1, h2, h3, h4, h5, h6, .font-moul { font-family: 'Khmer OS Muol Light', 'Khmer OS Muol', 'Moul', serif !important; font-weight: normal !important; }
+                    .font-siemreap { font-family: 'Khmer OS Siemreap', 'Siemreap', sans-serif !important; }
                     .no-print { display: none !important; }
                     table {
                         width: 100% !important;

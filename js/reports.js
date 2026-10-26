@@ -553,14 +553,15 @@ window.renderStudentStatsReportHTML = function(container, targetGrade, targetRoo
                     vertical-align: middle;
                 }
                 .moeys-table th {
-                    font-family: 'Siemreap', 'Khmer OS Siemreap', sans-serif;
+                    font-family: 'Khmer OS Siemreap', 'Siemreap', sans-serif;
                     font-weight: bold;
                     background-color: #ffffff;
                     text-align: center;
                     color: #002b66;
                 }
                 .moeys-header-blue {
-                    font-family: 'Moul', 'Khmer OS Moul', serif;
+                    font-family: 'Khmer OS Muol Light', 'Khmer OS Muol', 'Moul', serif;
+                    font-weight: normal !important;
                     color: #002b66;
                 }
                 .moeys-lavender-row {
@@ -927,8 +928,8 @@ window.printStudentStatsReport = function() {
         @page { size: A4 portrait; margin: 5mm; }
         .moeys-table { width: 100% !important; border-collapse: collapse !important; font-size: 9.8px !important; border: 1.5px solid #002b66 !important; }
         .moeys-table th, .moeys-table td { border: 1px solid #002b66 !important; padding: 2px 3px !important; vertical-align: middle !important; }
-        .moeys-table th { font-family: 'Siemreap', sans-serif !important; font-weight: bold !important; background-color: #ffffff !important; text-align: center !important; color: #002b66 !important; }
-        .moeys-header-blue { font-family: 'Moul', serif !important; color: #002b66 !important; }
+        .moeys-table th { font-family: 'Khmer OS Siemreap', 'Siemreap', sans-serif !important; font-weight: bold !important; background-color: #ffffff !important; text-align: center !important; color: #002b66 !important; }
+        .moeys-header-blue { font-family: 'Khmer OS Muol Light', 'Khmer OS Muol', 'Moul', serif !important; font-weight: normal !important; color: #002b66 !important; }
         .moeys-lavender-row { background-color: #e0e7ff !important; font-weight: bold !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
         #studentStatsPrintArea { width: 100% !important; max-width: 100% !important; padding: 0 !important; margin: 0 auto !important; border: none !important; box-shadow: none !important; min-height: auto !important; }
     `;
@@ -958,9 +959,9 @@ window.printStudentStatsReport = function() {
         <link href="https://fonts.googleapis.com/css2?family=Moul&family=Siemreap&display=swap" rel="stylesheet">
         <style>
           @page { size: A4 portrait; margin: 5mm; }
-          * { box-sizing: border-box !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; font-family: 'Siemreap', sans-serif; }
+          * { box-sizing: border-box !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; font-family: 'Khmer OS Siemreap', 'Siemreap', sans-serif; }
           html, body { background: #fff; width: 100%; margin: 0; padding: 0; }
-          .font-moul { font-family: 'Moul', serif !important; }
+          .font-moul { font-family: 'Khmer OS Muol Light', 'Khmer OS Muol', 'Moul', serif !important; font-weight: normal !important; }
           ${extraMoeysStyles}
         </style>
       </head>
@@ -1957,9 +1958,9 @@ window.triggerAttendancePrint = function() {
         <style>
           @import url('https://fonts.googleapis.com/css2?family=Moul&family=Siemreap&display=swap');
           @page { size: A4 landscape; margin: 0mm; }
-          * { box-sizing: border-box !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; font-family: 'Siemreap', sans-serif; }
+          * { box-sizing: border-box !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; font-family: 'Khmer OS Siemreap', 'Siemreap', sans-serif; }
           html, body { background: #fff; width: 100%; height: 100%; color: #000; margin: 0; padding: 0; }
-          .font-moul { font-family: 'Moul', serif !important; }
+          .font-moul { font-family: 'Khmer OS Muol Light', 'Khmer OS Muol', 'Moul', serif !important; font-weight: normal !important; }
           .print-page-wrapper { page-break-after: always; }
           table { width: 100%; border-collapse: collapse; table-layout: fixed; }
           th, td { border: 0.5px solid #0f172a !important; color: #0f172a !important; }
@@ -2092,9 +2093,9 @@ window.printReportArea = function(areaId, orientation = 'portrait') {
         <style>
           @import url('https://fonts.googleapis.com/css2?family=Moul&family=Siemreap&display=swap');
           @page { size: A4 ${orientation}; margin: 8mm; }
-          * { box-sizing: border-box !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; font-family: 'Siemreap', sans-serif; }
+          * { box-sizing: border-box !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; font-family: 'Khmer OS Siemreap', 'Siemreap', sans-serif; }
           html, body { background: #fff; width: 100%; height: 100%; color: #000; }
-          .font-moul { font-family: 'Moul', serif !important; }
+          .font-moul { font-family: 'Khmer OS Muol Light', 'Khmer OS Muol', 'Moul', serif !important; font-weight: normal !important; }
         </style>
       </head>
       <body>

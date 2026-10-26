@@ -127,7 +127,7 @@ window.KrouDigital = {
         const khmerMonths = ["មករា", "កុម្ភៈ", "មីនា", "មេសា", "ឧសភា", "មិថុនា", "កក្កដា", "សីហា", "កញ្ញា", "តុលា", "វិច្ឆិកា", "ធ្នូ"];
 
         container.innerHTML = `
-            <div id="reportKaPrintArea" class="bg-white p-6 md:p-10 w-full shadow-2xl rounded-2xl border border-slate-200 text-slate-800" style="max-width: 297mm; min-height: 210mm; font-family: 'Siemreap', sans-serif;">
+            <div id="reportKaPrintArea" class="bg-white p-6 md:p-10 w-full shadow-2xl rounded-2xl border border-slate-200 text-slate-800" style="max-width: 297mm; min-height: 210mm; font-family: 'Khmer OS Siemreap', 'Siemreap', sans-serif;">
                 
                 <!-- Header តាមស្តង់ដារក្រសួង -->
                 <div class="flex justify-between items-start mb-6 text-xs">
@@ -318,7 +318,7 @@ window.KrouDigital = {
         const khmerMonths = ["មករា", "កុម្ភៈ", "មីនា", "មេសា", "ឧសភា", "មិថុនា", "កក្កដា", "សីហា", "កញ្ញា", "តុលា", "វិច្ឆិកា", "ធ្នូ"];
 
         container.innerHTML = `
-            <div id="reportKhaPrintArea" class="bg-gradient-to-b from-amber-50 via-white to-orange-50/40 p-8 md:p-12 w-full shadow-2xl rounded-2xl border-[10px] border-double border-amber-700 text-slate-900 relative overflow-hidden" style="max-width: 210mm; min-height: 297mm; font-family: 'Siemreap', sans-serif;">
+            <div id="reportKhaPrintArea" class="bg-gradient-to-b from-amber-50 via-white to-orange-50/40 p-8 md:p-12 w-full shadow-2xl rounded-2xl border-[10px] border-double border-amber-700 text-slate-900 relative overflow-hidden" style="max-width: 210mm; min-height: 297mm; font-family: 'Khmer OS Siemreap', 'Siemreap', sans-serif;">
                 
                 <!-- Border Decoration Icons -->
                 <div class="absolute top-4 left-4 text-amber-600 text-xl">❖</div>
@@ -466,7 +466,7 @@ window.KrouDigital = {
             });
 
         container.innerHTML = `
-            <div id="reportKoKhoPrintArea" class="bg-white p-6 md:p-10 w-full shadow-2xl rounded-2xl border border-slate-200 text-slate-800" style="max-width: 297mm; min-height: 210mm; font-family: 'Siemreap', sans-serif;">
+            <div id="reportKoKhoPrintArea" class="bg-white p-6 md:p-10 w-full shadow-2xl rounded-2xl border border-slate-200 text-slate-800" style="max-width: 297mm; min-height: 210mm; font-family: 'Khmer OS Siemreap', 'Siemreap', sans-serif;">
                 
                 <div class="flex justify-between items-start mb-6 text-xs">
                     <div class="text-left leading-relaxed pt-6">
@@ -623,7 +623,7 @@ window.KrouDigital = {
         }
 
         container.innerHTML = `
-            <div id="healthTrackerArea" class="bg-white p-6 md:p-8 w-full shadow-2xl rounded-2xl border border-slate-200 text-slate-800" style="max-width: 297mm; min-height: 210mm; font-family: 'Siemreap', sans-serif;">
+            <div id="healthTrackerArea" class="bg-white p-6 md:p-8 w-full shadow-2xl rounded-2xl border border-slate-200 text-slate-800" style="max-width: 297mm; min-height: 210mm; font-family: 'Khmer OS Siemreap', 'Siemreap', sans-serif;">
                 
                 <!-- MoEYS Official Standard Letterhead -->
                 <div class="flex justify-between items-start mb-6 text-xs">
@@ -1293,8 +1293,8 @@ window.KrouDigital = {
                         -webkit-print-color-adjust: exact !important;
                         print-color-adjust: exact !important;
                     }
-                    .font-moul { font-family: 'Khmer OS Muol Light', 'Moul', serif !important; }
-                    .font-siemreap { font-family: 'Siemreap', sans-serif !important; }
+                    .font-moul { font-family: 'Khmer OS Muol Light', 'Khmer OS Muol', 'Moul', serif !important; font-weight: normal !important; }
+                    .font-siemreap { font-family: 'Khmer OS Siemreap', 'Siemreap', sans-serif !important; }
                     .font-battambang { font-family: 'Battambang', sans-serif !important; }
                     .no-print, .drag-handle { display: none !important; }
                     
@@ -1306,7 +1306,7 @@ window.KrouDigital = {
                         display: flex;
                         justify-content: space-between;
                         align-items: center;
-                        font-family: 'Siemreap', sans-serif;
+                        font-family: 'Khmer OS Siemreap', 'Siemreap', sans-serif;
                         font-size: 13px;
                         border-bottom: 2px solid #3b82f6;
                         box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
