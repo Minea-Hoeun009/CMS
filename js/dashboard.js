@@ -189,6 +189,10 @@
             const dateNumKh = toKhNum(chosenDate.getDate());
             const monthKh = khmerMonths[chosenDate.getMonth()];
             const yearKh = toKhNum(chosenDate.getFullYear());
+            const solarDateStr = `ថ្ងៃទី ${dateNumKh} ខែ ${monthKh} ឆ្នាំ ${yearKh}`;
+            const lunarDateStr = typeof window.getKhmerLunarDate === 'function' 
+                ? window.getKhmerLunarDate(chosenDate)
+                : `ថ្ងៃចន្ទ ១៥កើត ខែអស្សុជ ឆ្នាំខាល អដ្ឋស័ក ព.ស.២៥៧០`;
             const fullKhmerDate = `ថ្ងៃ${dayName} ទី${dateNumKh} ខែ${monthKh} ឆ្នាំ${yearKh}`;
 
             // ៥. គណនាស្ថិតិសិស្សជាប់ និងធ្លាក់ (Pass / Fail Analytics)
@@ -241,67 +245,65 @@
                 <div class="w-full h-full overflow-y-auto overflow-x-hidden custom-scrollbar relative z-10">
                     <div class="flex flex-col font-siemreap text-slate-800 dark:text-slate-100 max-w-[1600px] mx-auto pb-16 space-y-6">
                         
-                        <!-- 🟢 ១. Executive Header Bar (ឈ្មោះគ្រូ ថ្នាក់ទី និងកាលបរិច្ឆេទ) 🟢 -->
-                        <div class="bg-gradient-to-r from-blue-900 via-indigo-900 to-indigo-800 rounded-3xl p-6 sm:p-7 text-white shadow-xl relative overflow-hidden border border-white/10">
-                            <div class="absolute -right-12 -bottom-12 w-64 h-64 bg-white/5 rounded-full blur-2xl pointer-events-none"></div>
-                            <div class="absolute -left-12 -top-12 w-48 h-48 bg-blue-500/10 rounded-full blur-2xl pointer-events-none"></div>
+                        <!-- 🟢 ១. Modern Executive Header Banner (Match Image 2) 🟢 -->
+                        <div class="bg-gradient-to-r from-blue-600 via-blue-600 to-indigo-600 rounded-[2.5rem] p-6 sm:p-8 text-white shadow-xl relative overflow-hidden border border-white/20">
+                            <!-- Subtle glowing background shapes -->
+                            <div class="absolute -right-12 -bottom-12 w-80 h-80 bg-white/10 rounded-full blur-3xl pointer-events-none"></div>
+                            <div class="absolute -left-12 -top-12 w-64 h-64 bg-indigo-400/20 rounded-full blur-3xl pointer-events-none"></div>
 
                             <div class="relative z-10 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
                                 
-                                <!-- Teacher Profile & Identity -->
-                                <div class="flex items-center gap-4 sm:gap-5">
-                                    <div class="relative shrink-0">
-                                        <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-white/15 backdrop-blur-md border border-white/25 flex items-center justify-center text-white text-3xl shadow-lg overflow-hidden">
-                                            ${teacherAvatar ? `<img src="${teacherAvatar}" class="w-full h-full object-cover">` : `<i class="fa-solid fa-chalkboard-user text-amber-300"></i>`}
-                                        </div>
-                                        <span class="absolute -bottom-1 -right-1 w-5 h-5 bg-emerald-500 border-2 border-indigo-900 rounded-full flex items-center justify-center text-[9px] text-white" title="អនឡាញ">
-                                            <i class="fa-solid fa-check"></i>
-                                        </span>
+                                <!-- Left Column: Greetings & Teacher Info -->
+                                <div class="space-y-3">
+                                    <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-white/15 backdrop-blur-md border border-white/20 text-xs font-bold text-white shadow-sm">
+                                        <i class="fa-solid fa-graduation-cap text-amber-300"></i>
+                                        <span>ឆ្នាំសិក្សា ${toKhNum(academicYear)}</span>
                                     </div>
 
-                                    <div class="space-y-1">
-                                        <div class="flex flex-wrap items-center gap-2">
-                                            <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-amber-400/20 text-amber-300 border border-amber-300/30 uppercase tracking-wider font-mono">
-                                                អត្តលេខ៖ ${teacherCode}
-                                            </span>
-                                            <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-white/10 text-blue-100 border border-white/15">
-                                                គ្រូបន្ទុកថ្នាក់
-                                            </span>
-                                        </div>
-                                        <h1 class="text-xl sm:text-2xl font-bold font-moul tracking-wide text-white drop-shadow-sm">
-                                            គ្រូបន្ទុកថ្នាក់៖ ${teacherName}
-                                        </h1>
-                                        <p class="text-xs text-blue-100 font-siemreap font-medium">
-                                            ${schoolName} • ឆ្នាំសិក្សា ${toKhNum(academicYear)}
-                                        </p>
+                                    <h1 class="text-2xl sm:text-3xl lg:text-4xl font-black font-moul tracking-wide text-white drop-shadow-md">
+                                        សួស្តី ${teacherName}! 👋
+                                    </h1>
+
+                                    <div class="flex flex-wrap items-center gap-3 pt-1 text-xs text-blue-100 font-medium">
+                                        <span class="flex items-center gap-2 text-white/95">
+                                            <i class="fa-solid fa-laptop-code text-blue-200"></i>
+                                            <span>លោកគ្រូអ្នកគ្រូកំពុងស្ថិតក្នុងទំព័រដើម</span>
+                                        </span>
+                                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-indigo-950/70 border border-white/20 font-bold font-moul text-amber-300 shadow-sm">
+                                            ${currentClassFull}
+                                        </span>
+                                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-white/10 border border-white/15 font-mono text-[11px] text-blue-100 font-bold">
+                                            ${teacherCode}
+                                        </span>
                                     </div>
                                 </div>
 
-                                <!-- Classroom Badge, Date & Live Clock -->
-                                <div class="flex flex-wrap items-center gap-3 w-full lg:w-auto justify-start lg:justify-end">
-                                    
-                                    <!-- Classroom Box -->
-                                    <div class="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl px-4 py-3 flex items-center gap-3 shadow-inner">
-                                        <div class="w-11 h-11 rounded-xl bg-amber-400/20 text-amber-300 flex items-center justify-center text-xl border border-amber-400/30">
-                                            <i class="fa-solid fa-graduation-cap"></i>
+                                <!-- Right Column: Modern Glass Card for Time & Dates (Exact Match Image 2) -->
+                                <div class="w-full lg:w-auto shrink-0">
+                                    <div class="bg-white/10 backdrop-blur-md border border-white/20 rounded-3xl p-5 shadow-inner space-y-3 min-w-[280px] sm:min-w-[340px]">
+                                        <!-- Realtime Digital Clock Row -->
+                                        <div class="flex items-center gap-3.5 pb-2.5 border-b border-white/15">
+                                            <div class="w-11 h-11 rounded-2xl bg-white/20 text-white flex items-center justify-center text-xl shrink-0 shadow-sm border border-white/25">
+                                                <i class="fa-regular fa-clock"></i>
+                                            </div>
+                                            <div>
+                                                <span class="text-[10px] text-blue-200 font-bold uppercase tracking-wider block">ម៉ោងបច្ចុប្បន្ន</span>
+                                                <span id="dashClock" class="text-2xl sm:text-3xl font-black font-mono tracking-wider text-amber-300 block leading-tight">--:--:--</span>
+                                            </div>
                                         </div>
-                                        <div>
-                                            <span class="text-[10px] text-blue-200 uppercase font-bold tracking-wider block">ថ្នាក់ទីទទួលបន្ទុក</span>
-                                            <span class="text-base sm:text-lg font-bold font-moul text-amber-300 leading-tight">${currentClassFull}</span>
+
+                                        <!-- Lunar Date Row -->
+                                        <div class="flex items-center gap-2.5 text-xs text-white/95 font-medium">
+                                            <i class="fa-solid fa-moon text-amber-300 text-sm shrink-0"></i>
+                                            <span class="truncate">${lunarDateStr}</span>
+                                        </div>
+
+                                        <!-- Solar Date Row -->
+                                        <div class="flex items-center gap-2.5 text-xs text-white/95 font-medium">
+                                            <i class="fa-regular fa-calendar-check text-blue-200 text-sm shrink-0"></i>
+                                            <span>${solarDateStr}</span>
                                         </div>
                                     </div>
-
-                                    <!-- Date & Realtime Clock Box -->
-                                    <div class="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl px-4 py-3 flex items-center gap-3 shadow-inner">
-                                        <div class="w-11 h-11 rounded-xl bg-white/20 text-white flex items-center justify-center text-xl">
-                                            <i class="fa-regular fa-calendar-check"></i>
-                                        </div>
-                                        <div>
-                                            <span class="text-[10px] text-blue-200 font-bold uppercase tracking-wider block">${fullKhmerDate}</span>
-                                            <span id="dashClock" class="text-base sm:text-lg font-black font-mono tracking-widest text-white leading-tight">--:--:--</span>
-                                        </div>
-                                    </div>
-
                                 </div>
 
                             </div>

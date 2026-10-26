@@ -457,6 +457,119 @@ window.TimetableHomeworkManager = {
     },
 
     /**
+     * បង្កើតផ្នែកខាងក្រោមនៃកាលវិភាគ (Footnote & Official MoEYS Signatures - Match Image 1)
+     */
+    getTimetableFootnoteHtml: function(isPrint = false) {
+        const now = new Date();
+        const khmerMonths = ["មករា", "កុម្ភៈ", "មីនា", "មេសា", "ឧសភា", "មិថុនា", "កក្កដា", "សីហា", "កញ្ញា", "តុលា", "វិច្ឆិកា", "ធ្នូ"];
+        const toKhNum = typeof window.toKhmerNum === 'function' ? window.toKhmerNum : String;
+        const solarDateStr = `ថ្ងៃទី ${toKhNum(now.getDate())} ខែ ${khmerMonths[now.getMonth()]} ឆ្នាំ ${toKhNum(now.getFullYear())}`;
+        const lunarDateStr = typeof window.getKhmerLunarDate === 'function' 
+            ? window.getKhmerLunarDate(now) 
+            : `ថ្ងៃចន្ទ ១៥កើត ខែអស្សុជ ឆ្នាំខាល អដ្ឋស័ក ព.ស.២៥៧០`;
+        const sInfo = window.appSettings || JSON.parse(localStorage.getItem('school_settings') || '{}');
+        const principalName = sInfo.principal_name || "នាយកសាលា";
+        const classTeacher = this.getClassTeacherInfo(this.currentGrade);
+        const teacherName = classTeacher ? classTeacher.name : (sInfo.teacher_name || "ហឿន មិនា");
+
+        if (isPrint) {
+            return `
+                <div class="timetable-print-footnote" style="margin-top: 14px; font-size: 9.5pt; line-height: 1.5; page-break-inside: avoid; font-family: 'Siemreap', sans-serif;">
+                    <p style="margin: 0 0 2px 0; font-weight: bold; font-family: 'Moul', cursive; font-size: 9.5pt;">សម្គាល់៖</p>
+                    <p style="margin: 0 0 4px 0; font-weight: bold;">- ក្នុង ១សប្ដាហ៍ គ្រូបង្រៀនត្រូវបង្រៀនឱ្យបាន៖</p>
+                    <table style="width: 100%; border: none; margin: 0 0 4px 0;">
+                        <tr style="border: none;">
+                            <td style="border: none; text-align: left; padding: 1px 0; width: 33%;">១) ភាសាខ្មែរ ១៤ម៉ោង</td>
+                            <td style="border: none; text-align: left; padding: 1px 0; width: 33%;">២) គណិតវិទ្យា ៨ម៉ោង</td>
+                            <td style="border: none; text-align: left; padding: 1px 0; width: 34%;">៣) វិទ្យាសាស្ត្រ ២ម៉ោង</td>
+                        </tr>
+                        <tr style="border: none;">
+                            <td style="border: none; text-align: left; padding: 1px 0;">៤) វិទ្យាសាស្ត្រសង្គម ២ម៉ោង</td>
+                            <td style="border: none; text-align: left; padding: 1px 0;">៥) ការអប់រំសីលធម៌ ២ម៉ោង</td>
+                            <td style="border: none; text-align: left; padding: 1px 0;">៦) អប់រំកាយ ២ម៉ោង</td>
+                        </tr>
+                        <tr style="border: none;">
+                            <td style="border: none; text-align: left; padding: 1px 0;">៧) អប់រំសុខភាព ១ម៉ោង</td>
+                            <td style="border: none; text-align: left; padding: 1px 0;">៨) អប់រំសិល្បៈ ១ម៉ោង</td>
+                            <td style="border: none; text-align: left; padding: 1px 0;">៩) អប់រំបរិស្ថាន ១ម៉ោង</td>
+                        </tr>
+                        <tr style="border: none;">
+                            <td style="border: none; text-align: left; padding: 1px 0;">១០) បំណិនជីវិត ២ម៉ោង</td>
+                            <td style="border: none; text-align: left; padding: 1px 0;">១១) បុរេកុំព្យូទ័រ ១ម៉ោង</td>
+                            <td style="border: none;"></td>
+                        </tr>
+                    </table>
+                    <div style="font-size: 9pt; margin-top: 4px; line-height: 1.5;">
+                        • ១ម៉ោងសិក្សាមានរយៈពេល៤០នាទី ពេលព្រឹកអនុវត្តតាមកាលវិភាគពេលសិក្សាពេលរសៀលសាលាត្រូវកំណត់សម្រាប់ទ្រទ្រង់ភាសាខ្មែរនិងគណិតវិទ្យា ។<br>
+                        • ថ្ងៃសៅរ៍ពេលរសៀលត្រូវរៀបចំក្លឹបសិក្សាសម្រាប់សិស្សរៀនយឺត និងសិស្សពូកែ ។
+                    </div>
+                </div>
+
+                <div class="footer-box" style="display: flex; justify-content: space-between; margin-top: 22px; padding: 0 40px; page-break-inside: avoid; font-family: 'Siemreap', sans-serif;">
+                    <div style="text-align: center; width: 250px;">
+                        <p style="margin: 0 0 3px 0;">បានឃើញ និងឯកភាព</p>
+                        <p class="font-moul" style="font-size: 10pt; margin: 0;">នាយកសាលា</p>
+                        <div style="height: 60px;"></div>
+                        <p style="margin: 0; font-family: 'Moul', cursive; font-size: 10pt;">${principalName}</p>
+                    </div>
+                    <div style="text-align: center; width: 290px;">
+                        <p style="margin: 0 0 2px 0; font-size: 9pt; color: #475569;">${lunarDateStr}</p>
+                        <p style="margin: 0 0 3px 0; font-size: 9.5pt;">${solarDateStr}</p>
+                        <p class="font-moul" style="font-size: 10pt; margin: 0;">គ្រូបន្ទុកថ្នាក់</p>
+                        <div style="height: 60px;"></div>
+                        <p style="margin: 0; font-family: 'Moul', cursive; font-size: 10pt;">${teacherName}</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Web View
+        return `
+            <div class="mt-6 p-5 sm:p-6 bg-slate-50/80 dark:bg-slate-700/40 rounded-2xl border border-slate-200 dark:border-slate-700 text-xs text-slate-700 dark:text-slate-300 font-siemreap space-y-4">
+                <div>
+                    <h4 class="font-moul text-sm text-slate-800 dark:text-white mb-2">សម្គាល់៖</h4>
+                    <p class="font-bold text-slate-700 dark:text-slate-200 mb-2.5">- ក្នុង ១សប្ដាហ៍ គ្រូបង្រៀនត្រូវបង្រៀនឱ្យបាន៖</p>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-2 text-xs text-slate-700 dark:text-slate-300 font-medium">
+                        <div class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span> ១) ភាសាខ្មែរ ១៤ម៉ោង</div>
+                        <div class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-purple-500"></span> ២) គណិតវិទ្យា ៨ម៉ោង</div>
+                        <div class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> ៣) វិទ្យាសាស្ត្រ ២ម៉ោង</div>
+                        <div class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span> ៤) វិទ្យាសាស្ត្រសង្គម ២ម៉ោង</div>
+                        <div class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-indigo-500"></span> ៥) ការអប់រំសីលធម៌ ២ម៉ោង</div>
+                        <div class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span> ៦) អប់រំកាយ ២ម៉ោង</div>
+                        <div class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-teal-500"></span> ៧) អប់រំសុខភាព ១ម៉ោង</div>
+                        <div class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-pink-500"></span> ៨) អប់រំសិល្បៈ ១ម៉ោង</div>
+                        <div class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-green-500"></span> ៩) អប់រំបរិស្ថាន ១ម៉ោង</div>
+                        <div class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-cyan-500"></span> ១០) បំណិនជីវិត ២ម៉ោង</div>
+                        <div class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-sky-500"></span> ១១) បុរេកុំព្យូទ័រ ១ម៉ោង</div>
+                    </div>
+                </div>
+
+                <ul class="list-disc list-inside space-y-1.5 text-slate-600 dark:text-slate-300 text-xs leading-relaxed pt-3 border-t border-slate-200/60 dark:border-slate-600/60">
+                    <li>១ម៉ោងសិក្សាមានរយៈពេល ៤០នាទី (ឬតាមម៉ោងកំណត់ជាក់ស្ដែង)។ ពេលព្រឹកអនុវត្តតាមកាលវិភាគពេលសិក្សា ពេលរសៀលសាលាត្រូវកំណត់សម្រាប់ទ្រទ្រង់ភាសាខ្មែរនិងគណិតវិទ្យា ។</li>
+                    <li>ថ្ងៃសៅរ៍ពេលរសៀលត្រូវរៀបចំក្លឹបសិក្សាសម្រាប់សិស្សរៀនយឺត និងសិស្សពូកែ ។</li>
+                </ul>
+
+                <!-- Official Signature Row -->
+                <div class="flex justify-between items-start pt-6 border-t border-slate-200 dark:border-slate-600 text-xs">
+                    <div class="text-center space-y-1">
+                        <p class="font-bold text-slate-700 dark:text-slate-300">បានឃើញ និងឯកភាព</p>
+                        <p class="font-moul text-xs text-slate-800 dark:text-white">នាយកសាលា</p>
+                        <div class="h-16"></div>
+                        <p class="font-moul text-xs text-slate-900 dark:text-white font-bold">${principalName}</p>
+                    </div>
+                    <div class="text-center space-y-1">
+                        <p class="text-[11px] text-slate-500 dark:text-slate-400">${lunarDateStr}</p>
+                        <p class="text-slate-600 dark:text-slate-300 font-medium">${solarDateStr}</p>
+                        <p class="font-moul text-xs text-slate-800 dark:text-white">គ្រូបន្ទុកថ្នាក់</p>
+                        <div class="h-16"></div>
+                        <p class="font-moul text-xs text-slate-900 dark:text-white font-bold">${teacherName}</p>
+                    </div>
+                </div>
+            </div>
+        `;
+    },
+
+    /**
      * បោះពុម្ពកាលវិភាគស្តង់ដារក្រសួងអប់រំ
      */
     printTimetable: function() {
@@ -532,9 +645,11 @@ window.TimetableHomeworkManager = {
                 </table>
         `;
 
+        const footnotePrintHtml = this.getTimetableFootnoteHtml(true);
+
         const timetableExtraStyles = `
-            table.timetable-main-table { width: 100%; border-collapse: collapse; margin-top: 5px; margin-bottom: 15px; }
-            .timetable-main-table th, .timetable-main-table td { border: 1px solid #111; padding: 7px 4px; text-align: center; }
+            table.timetable-main-table { width: 100%; border-collapse: collapse; margin-top: 5px; margin-bottom: 12px; }
+            .timetable-main-table th, .timetable-main-table td { border: 1px solid #111; padding: 6px 4px; text-align: center; }
             .timetable-main-table th { background-color: #f1f5f9; font-weight: bold; }
             .session-header { background-color: #e2e8f0; font-weight: bold; text-align: left; padding-left: 10px; }
             .sub-name { font-weight: bold; font-size: 10.5pt; color: #1e3a8a; }
@@ -552,7 +667,7 @@ window.TimetableHomeworkManager = {
                 paperSize: "A4",
                 orientation: "landscape",
                 defaultZoom: 1.0,
-                contentHtml: tableHtml,
+                contentHtml: tableHtml + footnotePrintHtml,
                 extraStyles: timetableExtraStyles
             });
             return;
@@ -663,20 +778,7 @@ window.TimetableHomeworkManager = {
                     </tbody>
                 </table>
 
-                <div class="footer-box">
-                    <div class="text-center">
-                        <p>បានឃើញ និងឯកភាព</p>
-                        <p class="font-moul" style="font-size: 10pt;">នាយកសាលា</p>
-                        <div class="signature-area"></div>
-                        <p><b>${principalName}</b></p>
-                    </div>
-                    <div class="text-center">
-                        <p>ថ្ងៃ....................ទី.........ខែ..............ឆ្នាំ២០២...</p>
-                        <p class="font-moul" style="font-size: 10pt;">គ្រូទទួលបន្ទុកថ្នាក់</p>
-                        <div class="signature-area"></div>
-                        <p><b>${teacherName}</b></p>
-                    </div>
-                </div>
+                ${footnotePrintHtml}
             </body>
             </html>
         `;
@@ -992,6 +1094,9 @@ window.TimetableHomeworkManager = {
                                 </tbody>
                             </table>
                         </div>
+
+                        <!-- 🟢 ផ្នែកខាងក្រោមនៃកាលវិភាគ៖ សម្គាល់ និងហត្ថលេខាផ្លូវការ (Match Image 1) 🟢 -->
+                        ${this.getTimetableFootnoteHtml(false)}
                     </div>
                 </div>
 
