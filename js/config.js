@@ -408,7 +408,7 @@ function getAuthCredentials() {
 /**
  * មុខងារសម្រាប់ហៅទិន្នន័យ (GET)
  */
-async function apiGet(action, params = {}) {
+async function apiGet(action, params = {}, forceRefresh = false) {
   // 🟢 បញ្ចូលអត្តសញ្ញាណគ្រូ ឆ្នាំសិក្សា និង Session Token ទៅក្នុងប៉ារ៉ាម៉ែត្រជានិច្ច 🟢
   const auth = getAuthCredentials();
   const sessionToken = (typeof window.getSessionToken === 'function' ? window.getSessionToken() : '') || (typeof sessionStorage !== 'undefined' ? sessionStorage.getItem('cms_session_token') : '') || '';
@@ -418,11 +418,12 @@ async function apiGet(action, params = {}) {
   }
   
   const cacheKey = `cache_${action}_${JSON.stringify(finalParams)}`;
-  const cachedData = localStorage.getItem(cacheKey);
-
-  if (cachedData) {
-    fetchDataFromAPI(action, finalParams, cacheKey).catch(e => console.warn("Background Sync API Get Error"));
-    return JSON.parse(cachedData);
+  if (!forceRefresh) {
+    const cachedData = localStorage.getItem(cacheKey);
+    if (cachedData) {
+      fetchDataFromAPI(action, finalParams, cacheKey).catch(e => console.warn("Background Sync API Get Error"));
+      return JSON.parse(cachedData);
+    }
   }
 
   return await fetchDataFromAPI(action, finalParams, cacheKey);

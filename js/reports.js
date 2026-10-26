@@ -1378,6 +1378,33 @@ window.renderAttendanceReportHTML = function(container, targetGrade, targetRoom)
     `;
     
     window.updateAttendanceReportPreview();
+
+    // 🟢 ព្យាយាមទាញយកទិន្នន័យវត្តមានស្រស់ពី Google Sheets ប្រសិនបើមាន 🟢
+    if (typeof window.apiGet === 'function') {
+        const yr = document.getElementById("globalAcademicYear")?.value || localStorage.getItem('selected_academic_year') || "2026-2027";
+        const gasParams = { academic_year: yr };
+        if (targetGrade && targetGrade !== 'all') gasParams.grade = targetGrade;
+        if (targetRoom && targetRoom !== 'all') gasParams.room = targetRoom;
+        window.apiGet('getAttendance', gasParams).then(res => {
+            if (res && res.status === 'success' && Array.isArray(res.data) && res.data.length > 0) {
+                try {
+                    let existingAll = [];
+                    try { existingAll = JSON.parse(localStorage.getItem('academic_attendance') || '[]'); } catch(e) {}
+                    const rowMap = new Map();
+                    existingAll.forEach(item => {
+                        if (item && item.student_id && item.date) rowMap.set(`${item.student_id}_${item.date}`, item);
+                    });
+                    res.data.forEach(item => {
+                        if (item && item.student_id && item.date) rowMap.set(`${item.student_id}_${item.date}`, item);
+                    });
+                    localStorage.setItem('academic_attendance', JSON.stringify(Array.from(rowMap.values())));
+                } catch(e) {}
+                if (typeof window.renderAttendanceContent === 'function') {
+                    window.renderAttendanceContent();
+                }
+            }
+        }).catch(err => console.warn("Attendance report sync note:", err));
+    }
 };
 
 window.updateAttendanceReportPreview = function() {
@@ -1533,7 +1560,7 @@ window.renderAttendanceContent = function() {
                     if (norm === "ច" || norm === "ច្ប" || norm.includes("ច្បាប់")) {
                         result.days[d] = "ច";
                         result.perm++;
-                    } else if (norm === "អ" || norm === "អច្ប" || norm.includes("ឥតច្បាប់")) {
+                    } else if (norm === "អ" || norm === "អច្ប" || norm.includes("ឥតច្បាប់") || norm.includes("អវត្តមាន") || norm.includes("អត់ច្បាប់")) {
                         result.days[d] = "អ";
                         result.unex++;
                     } else if (norm === "ឈ" || norm.includes("ឈឺ")) {
@@ -1575,7 +1602,7 @@ window.renderAttendanceContent = function() {
                                     if (norm === "ច" || norm === "ច្ប" || norm.includes("ច្បាប់")) {
                                         result.days[d] = "ច";
                                         result.perm++;
-                                    } else if (norm === "អ" || norm === "អច្ប" || norm.includes("ឥតច្បាប់")) {
+                                    } else if (norm === "អ" || norm === "អច្ប" || norm.includes("ឥតច្បាប់") || norm.includes("អវត្តមាន") || norm.includes("អត់ច្បាប់")) {
                                         result.days[d] = "អ";
                                         result.unex++;
                                     } else if (norm === "ឈ" || norm.includes("ឈឺ")) {
@@ -1651,7 +1678,7 @@ window.renderAttendanceContent = function() {
                             if (st === "ច" || st === "ច្ប" || st.includes("ច្បាប់")) {
                                 result.days[dayNum] = "ច";
                                 result.perm++;
-                            } else if (st === "អ" || st === "អច្ប" || st.includes("ឥតច្បាប់")) {
+                            } else if (st === "អ" || st === "អច្ប" || st.includes("ឥតច្បាប់") || st.includes("អវត្តមាន") || st.includes("អត់ច្បាប់")) {
                                 result.days[dayNum] = "អ";
                                 result.unex++;
                             } else if (st === "ឈ" || st.includes("ឈឺ")) {

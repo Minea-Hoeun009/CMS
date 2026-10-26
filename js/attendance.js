@@ -31,14 +31,19 @@ function normalizeGrade(str) {
 }
 
 function parseDayNumber(dateVal) {
-    if (!dateVal) return null;
+    if (!dateVal && dateVal !== 0) return null;
+    if (typeof dateVal === 'number' && dateVal >= 1 && dateVal <= 31) return dateVal;
     const s = String(dateVal).trim();
     const m1 = s.match(/(\d{4})[-/](\d{1,2})[-/](\d{1,2})/);
     if (m1) return parseInt(m1[3], 10);
     const m2 = s.match(/(\d{1,2})[-/](\d{1,2})[-/](\d{4})/);
-    if (m2) return parseInt(m2, 10);
+    if (m2) return parseInt(m2[1], 10);
     const m3 = s.match(/^(\d{1,2})$/);
-    if (m3) return parseInt(m3, 10);
+    if (m3) return parseInt(m3[1], 10);
+    const parsedDate = new Date(dateVal);
+    if (!isNaN(parsedDate.getTime())) {
+        return parsedDate.getDate();
+    }
     return null;
 }
 
@@ -77,12 +82,12 @@ function findMatchingStudent(r, studentList) {
 function normalizeStatus(statusRaw) {
     if (!statusRaw) return "";
     const v = String(statusRaw).trim();
-    if (v === "ច្បាប់" || v === "មានច្បាប់" || v === "ច" || v === "ច្ប" || v.toUpperCase() === "C") return "ច្ប";
-    if (v === "ឥតច្បាប់" || v === "អត់ច្បាប់" || v === "អ" || v === "អច្ប" || v.toUpperCase() === "A") return "អច្ប";
-    if (v === "ឈឺ" || v === "ឈឺមានច្បាប់" || v === "ឈ" || v.toUpperCase() === "S") return "ឈ";
-    if (v === "យឺត" || v === "មកយឺត" || v === "យ" || v.toUpperCase() === "L") return "យ";
-    if (v === "ឈប់សម្រាក" || v === "សម្រាក" || v === "៖" || v === ":") return "៖";
-    if (v === "វត្តមាន" || v.toUpperCase() === "P" || v === "វ") return "";
+    if (v === "ច្បាប់" || v === "មានច្បាប់" || v === "ច" || v === "ច្ប" || v.toUpperCase() === "C" || v.toUpperCase() === "LEAVE") return "ច្ប";
+    if (v === "ឥតច្បាប់" || v === "អត់ច្បាប់" || v === "អវត្តមាន" || v === "អ" || v === "អច្ប" || v.toUpperCase() === "A" || v.toUpperCase() === "ABSENT") return "អច្ប";
+    if (v === "ឈឺ" || v === "ឈឺមានច្បាប់" || v === "ឈ" || v.toUpperCase() === "S" || v.toUpperCase() === "SICK") return "ឈ";
+    if (v === "យឺត" || v === "មកយឺត" || v === "យ" || v.toUpperCase() === "L" || v.toUpperCase() === "LATE") return "យ";
+    if (v === "ឈប់សម្រាក" || v === "សម្រាក" || v === "៖" || v === ":" || v.toUpperCase() === "HOLIDAY") return "៖";
+    if (v === "វត្តមាន" || v === "មក" || v.toUpperCase() === "P" || v.toUpperCase() === "PRESENT" || v === "វ") return "";
     return v;
 }
 
@@ -211,6 +216,11 @@ window.loadAttendanceView = async function() {
                   <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-white/15 border border-white/20 text-xs text-white font-medium shadow-sm">
                     <i class="fa-solid fa-calendar-days text-amber-300"></i> ${currentMonthName} ${currentYear}
                   </span>
+                `,
+                extraActionsHtml: `
+                  <button onclick="window.fetchMonthlyAttendance(true)" title="ទាញយកទិន្នន័យវត្តមានស្រស់ពី Google Sheets" class="px-3.5 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-2 bg-white/20 hover:bg-white/30 text-white shadow-sm border border-white/25 transform hover:-translate-y-0.5">
+                    <i class="fa-solid fa-arrows-rotate text-amber-300"></i> ទាញយកពី Google Sheets
+                  </button>
                 `
               }) : ''}
 
@@ -459,7 +469,82 @@ window.fetchMonthlyAttendance = async function(forceRefresh = false) {
             monthlyAttendanceData = { ...cached };
         } catch(e) {}
 
-        // 🟢 ទាញយកទិន្នន័យវត្តមានពី Firestore Cloud (ប្រសិនបើមាន) ដើម្បីធានាទិន្នន័យមិនបាត់បង់ 🟢
+        // បង្ហាញទិន្នន័យពី Local Cache ភ្លាមៗដើម្បីកុំឱ្យអេក្រង់ទទេ
+        if (attRes && attRes.length > 0) {
+            attRes.forEach(r => {
+                if (!r || typeof r !== 'object') return;
+                if (!isRecordInMonth(r, month, monthNum, year)) return;
+
+                const day = typeof parseDayNumber === 'function' ? parseDayNumber(r.date || r.day) : parseInt(r.date || r.day, 10);
+                if (!day || day < 1 || day > daysInMonth) return;
+                
+                const stuId = String(r.student_id || r.studentId || r.id || "").trim();
+                if (stuId) {
+                    if (!monthlyAttendanceData[stuId]) monthlyAttendanceData[stuId] = {};
+                    monthlyAttendanceData[stuId][day] = typeof normalizeStatus === 'function' ? normalizeStatus(r.status || r.attendance || r['ស្ថានភាព']) : (r.status || r.attendance || r['ស្ថានភាព']);
+                }
+            });
+        }
+        window.monthlyAttendanceData = monthlyAttendanceData;
+        window.renderAttendanceRows(daysInMonth);
+
+        // 🟢 ១. ទាញយកទិន្នន័យស្រស់ភ្លាមៗពី Google Sheets (Google Apps Script API) 🟢
+        if (typeof window.apiGet === 'function') {
+            try {
+                const gasParams = {
+                    academic_year: currentAcademicYear
+                };
+                if (selectedGrade && selectedGrade !== 'all') gasParams.grade = selectedGrade;
+                if (selectedRoom && selectedRoom !== 'all') gasParams.room = selectedRoom;
+
+                const gasRes = await window.apiGet('getAttendance', gasParams, forceRefresh);
+                if (gasRes && gasRes.status === 'success' && Array.isArray(gasRes.data)) {
+                    const freshRows = gasRes.data;
+                    if (freshRows.length > 0) {
+                        // រក្សាទុកក្នុង Master academic_attendance
+                        try {
+                            let existingAll = [];
+                            try { existingAll = JSON.parse(localStorage.getItem('academic_attendance') || '[]'); } catch(e) {}
+                            const rowMap = new Map();
+                            existingAll.forEach(item => {
+                                if (item && item.student_id && item.date) {
+                                    rowMap.set(`${item.student_id}_${item.date}`, item);
+                                }
+                            });
+                            freshRows.forEach(item => {
+                                if (item && item.student_id && item.date) {
+                                    rowMap.set(`${item.student_id}_${item.date}`, item);
+                                }
+                            });
+                            localStorage.setItem('academic_attendance', JSON.stringify(Array.from(rowMap.values())));
+                        } catch(e) {}
+
+                        // បញ្ចូលកំណត់ត្រាវត្តមានថ្មីទៅក្នុង monthlyAttendanceData
+                        freshRows.forEach(r => {
+                            if (!r || typeof r !== 'object') return;
+                            if (!isRecordInMonth(r, month, monthNum, year)) return;
+
+                            const day = typeof parseDayNumber === 'function' ? parseDayNumber(r.date || r.day) : parseInt(r.date || r.day, 10);
+                            if (!day || day < 1 || day > daysInMonth) return;
+
+                            const stuId = String(r.student_id || r.studentId || r.id || "").trim();
+                            if (stuId) {
+                                if (!monthlyAttendanceData[stuId]) monthlyAttendanceData[stuId] = {};
+                                monthlyAttendanceData[stuId][day] = typeof normalizeStatus === 'function' ? normalizeStatus(r.status || r.attendance || r['ស្ថានភាព']) : (r.status || r.attendance || r['ស្ថានភាព']);
+                            }
+                        });
+
+                        if (forceRefresh && typeof showToast === 'function') {
+                            showToast(`✅ បានទាញយកទិន្នន័យវត្តមាន ${freshRows.length} កំណត់ត្រាពី Google Sheets ជោគជ័យ!`);
+                        }
+                    }
+                }
+            } catch(gasErr) {
+                console.warn("GAS Attendance fetch error:", gasErr);
+            }
+        }
+
+        // 🟢 ២. ទាញយកទិន្នន័យវត្តមានពី Firestore Cloud (ប្រសិនបើមាន) ដើម្បីធានាទិន្នន័យមិនបាត់បង់ 🟢
         if (window.db) {
             try {
                 const gradeKey = selectedGrade.replace(/\s+/g, '_');
@@ -478,28 +563,6 @@ window.fetchMonthlyAttendance = async function(forceRefresh = false) {
             } catch(fsLoadErr) {
                 console.warn("Could not fetch from Firestore, falling back to local cache:", fsLoadErr);
             }
-        }
-
-        if (attRes && attRes.length > 0) {
-            attRes.forEach(r => {
-                if (!r || typeof r !== 'object') return;
-                
-                // បើមានមុខងារ isRecordInMonth លោកគ្រូអាចបើកវិញបាន តែបើអត់ទេ ប្រើលក្ខខណ្ឌផ្ទាល់ខាងក្រោម
-                // if (typeof isRecordInMonth === 'function' && !isRecordInMonth(r, month, monthNum, year)) return;
-                
-                const rMonth = String(r.month || "").trim();
-                if (rMonth !== month) return;
-
-                const day = typeof parseDayNumber === 'function' ? parseDayNumber(r.date || r.day) : parseInt(r.date || r.day, 10);
-                if (!day || day < 1 || day > daysInMonth) return;
-                
-                const stuId = String(r.student_id || r.studentId || r.id || "").trim();
-
-                if (stuId) {
-                    if (!monthlyAttendanceData[stuId]) monthlyAttendanceData[stuId] = {};
-                    monthlyAttendanceData[stuId][day] = typeof normalizeStatus === 'function' ? normalizeStatus(r.status || r.attendance || r['ស្ថានភាព']) : (r.status || r.attendance || r['ស្ថានភាព']);
-                }
-            });
         }
 
         // បញ្ចូលថ្ងៃឈប់សម្រាក
@@ -637,8 +700,9 @@ window.renderAttendanceRows = function(daysInMonth) {
                 if (d <= daysInMonth) {
                     let val = studentData[d] || "";
                     if (val === "ច្បាប់" || val === "ច") val = "ច្ប";
-                    else if (val === "ឥតច្បាប់" || val === "អ") val = "អច្ប";
+                    else if (val === "ឥតច្បាប់" || val === "អ" || val === "អវត្តមាន" || val === "អត់ច្បាប់") val = "អច្ប";
                     else if (val === "ឈឺ") val = "ឈ";
+                    else if (val === "យឺត") val = "យ";
                     else if (val === "ឈប់សម្រាក") val = "៖";
 
                     const dateObj = new Date(year, monthIdx, d);
@@ -697,19 +761,20 @@ window.renderAttendanceRows = function(daysInMonth) {
 
 window.getColorClass = function(val) {
     const v = String(val || "").trim().toUpperCase();
-    if (v === "ច" || v === "ច្ប" || v === "C") return "text-blue-600 font-black bg-blue-100/80";
-    if (v === "អ" || v === "អច្ប" || v === "A") return "text-rose-600 font-black bg-rose-100/80";
-    if (v === "ឈ" || v === "S") return "text-purple-600 font-black bg-purple-100/80";
+    if (v === "ច" || v === "ច្ប" || v === "C" || v === "ច្បាប់") return "text-blue-600 font-black bg-blue-100/80";
+    if (v === "អ" || v === "អច្ប" || v === "A" || v === "អវត្តមាន" || v === "ឥតច្បាប់" || v === "អត់ច្បាប់") return "text-rose-600 font-black bg-rose-100/80";
+    if (v === "ឈ" || v === "S" || v === "ឈឺ") return "text-purple-600 font-black bg-purple-100/80";
     if (v === "យ" || v === "យឺត" || v === "L") return "text-amber-600 font-black bg-amber-100/80";
-    if (v === "៖" || v === ":") return "text-amber-800 font-black bg-amber-200/80";
+    if (v === "៖" || v === ":" || v === "ឈប់សម្រាក") return "text-amber-800 font-black bg-amber-200/80";
     return "text-slate-800 font-bold";
 };
 
 window.handleAttInput = function(inputEl, studentId, daysInMonth) {
     let cleanVal = inputEl.value.trim();
     if (cleanVal === "ច") cleanVal = "ច្ប";
-    else if (cleanVal === "អ") cleanVal = "អច្ប";
+    else if (cleanVal === "អ" || cleanVal === "អវត្តមាន" || cleanVal === "ឥតច្បាប់") cleanVal = "អច្ប";
     else if (cleanVal === "យឺត" || cleanVal.toUpperCase() === "L") cleanVal = "យ";
+    else if (cleanVal === "ឈឺ" || cleanVal.toUpperCase() === "S") cleanVal = "ឈ";
 
     inputEl.className = `att-input w-full h-[36px] text-center text-xs font-bold border-0 outline-none bg-transparent uppercase ${window.getColorClass(cleanVal)} transition-all cursor-text focus:bg-white`;
     
@@ -727,9 +792,9 @@ window.calculateStudentAbsence = function(studentId, daysInMonth) {
     let permission = 0, unexcused = 0, sick = 0, late = 0;
     for (let d = 1; d <= daysInMonth; d++) {
         const val = (document.getElementById(`att_${studentId}_${d}`)?.value || monthlyAttendanceData[studentId]?.[d] || "").trim().toUpperCase();
-        if (val === "ច" || val === "ច្ប" || val === "C") permission++;
-        else if (val === "អ" || val === "អច្ប" || val === "A") unexcused++;
-        else if (val === "ឈ" || val === "S") sick++;
+        if (val === "ច" || val === "ច្ប" || val === "C" || val === "ច្បាប់") permission++;
+        else if (val === "អ" || val === "អច្ប" || val === "A" || val === "អវត្តមាន" || val === "ឥតច្បាប់") unexcused++;
+        else if (val === "ឈ" || val === "S" || val === "ឈឺ") sick++;
         else if (val === "យ" || val === "យឺត" || val === "L") late++;
     }
 

@@ -125,6 +125,7 @@
             // ៣. គណនាទិន្នន័យវត្តមានសម្រាប់កាលបរិច្ឆេទជ្រើសរើស (Attendance Stats)
             const chosenDate = new Date(currentFilter.selectedDate);
             const todayDayNum = chosenDate.getDate();
+            const chosenDateStr = currentFilter.selectedDate;
             let attPresent = 0, attPerm = 0, attUnex = 0, attLate = 0;
             
             let monthAtt = window.monthlyAttendanceData || {};
@@ -132,15 +133,35 @@
                 try { monthAtt = JSON.parse(localStorage.getItem('academic_monthly_attendance') || '{}'); } catch(e) {}
             }
 
+            // ទាញយកកំណត់ត្រាពី academic_attendance (Google Sheets Master Table)
+            let gasAttendanceList = [];
+            try { gasAttendanceList = JSON.parse(localStorage.getItem('academic_attendance') || '[]'); } catch(e) {}
+
             let attendanceMarkedCount = 0;
             activeStudents.forEach(s => {
                 const stuAtt = monthAtt[s.id] || {};
-                const code = (stuAtt[todayDayNum] || "").trim().toUpperCase();
+                let code = (stuAtt[todayDayNum] || "").trim().toUpperCase();
+
+                // ប្រសិនបើគ្មានក្នុង monthAtt សូមស្វែងរកក្នុងកំណត់ត្រា Google Sheets តាមកាលបរិច្ឆេទ
+                if (!code && gasAttendanceList.length > 0) {
+                    const matchedGasRec = gasAttendanceList.find(r => {
+                        if (!r) return false;
+                        const rId = String(r.student_id || r.studentId || r.id || '').trim();
+                        if (rId !== String(s.id).trim()) return false;
+                        const rDate = String(r.date || '');
+                        return rDate.startsWith(chosenDateStr) || rDate === chosenDateStr;
+                    });
+                    if (matchedGasRec) {
+                        code = String(matchedGasRec.status || matchedGasRec.attendance || '').trim().toUpperCase();
+                    }
+                }
+
                 if (code) attendanceMarkedCount++;
-                if (code === "ច" || code === "ច្ប" || code === "C") attPerm++;
-                else if (code === "អ" || code === "អច្ប" || code === "A") attUnex++;
+                if (code === "ច" || code === "ច្ប" || code === "C" || code === "ច្បាប់") attPerm++;
+                else if (code === "អ" || code === "អច្ប" || code === "A" || code === "ឥតច្បាប់" || code === "អវត្តមាន" || code === "អត់ច្បាប់") attUnex++;
                 else if (code === "យ" || code === "យឺត" || code === "L") attLate++;
-                else if (code && code !== "៖" && code !== "-") attPresent++;
+                else if (code === "ឈ" || code === "S" || code === "ឈឺ") attPerm++;
+                else if (code && code !== "៖" && code !== "-" && code !== "ឈប់សម្រាក") attPresent++;
             });
 
             const attRate = attendanceMarkedCount > 0 
@@ -892,22 +913,32 @@
      * Sync ជាមួយ Backend API ដើម្បីទាញយកស្ថិតិស្រស់ (Selective Refresh)
      */
     window.refreshDashboardData = async function() {
-        if (typeof showToast === 'function') showToast("🔄 កំពុងទាញយកទិន្នន័យស្ថិតិស្រស់ពី Server...", "info");
+        if (typeof showToast === 'function') showToast("🔄 កំពុងទាញយកទិន្នន័យស្ថិតិ និងវត្តមានស្រស់ពី Server...", "info");
         try {
             if (typeof window.apiGet === 'function') {
-                const res = await window.apiGet('getDashboardStats', {
-                    academic_year: window.DashboardFilterState.academicYear,
-                    class: window.DashboardFilterState.selectedClass
-                });
+                const [res, attRes] = await Promise.all([
+                    window.apiGet('getDashboardStats', {
+                        academic_year: window.DashboardFilterState.academicYear,
+                        class: window.DashboardFilterState.selectedClass
+                    }, true),
+                    window.apiGet('getAttendance', {
+                        academic_year: window.DashboardFilterState.academicYear
+                    }, true)
+                ]);
                 if (res && res.status === 'success' && res.data) {
                     console.log("📊 Fresh dashboard stats received:", res.data);
+                }
+                if (attRes && attRes.status === 'success' && Array.isArray(attRes.data)) {
+                    try {
+                        localStorage.setItem('academic_attendance', JSON.stringify(attRes.data));
+                    } catch(e) {}
                 }
             }
         } catch(e) {
             console.warn("Backend dashboard stats sync note:", e);
         }
         window.loadDashboard();
-        if (typeof showToast === 'function') showToast("✅ ស្ថិតិ Dashboard ត្រូវបានធ្វើបច្ចុប្បន្នភាពរួចរាល់!");
+        if (typeof showToast === 'function') showToast("✅ ស្ថិតិ Dashboard និងវត្តមានត្រូវបានធ្វើបច្ចុប្បន្នភាពរួចរាល់!");
     };
 
     // Auto-listen to Central EventBus for reactive updates
