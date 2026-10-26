@@ -174,4 +174,25 @@ test('CMS Master Architecture Integration Suite (v4.0)', async (t) => {
     assert.strictEqual(mockScores[2].rank, 3);
     assert.strictEqual(mockScores[2].grade_letter, 'ល្អបង្គួរ (C)');
   });
+
+  // 7. Student Comprehensive 27-Column Import Template & Mapping
+  await t.test('7. Comprehensive Student Import Template & 27 Standard Fields Verification', () => {
+    const advReportsContent = fs.readFileSync(path.join(__dirname, '..', 'js', 'advanced-reports.js'), 'utf8');
+    
+    // Check template export in students.js
+    assert.ok(studentsJsContent.includes('Student_Import_Template_MoEYS.xlsx'), 'students.js must download standard MoEYS template');
+    assert.ok(studentsJsContent.includes('ទីកន្លែងកំណើត(ភូមិ)'), 'Template must include place of birth fields');
+    assert.ok(studentsJsContent.includes('ទីលំនៅបច្ចុប្បន្ន(ភូមិ)'), 'Template must include current address fields');
+    assert.ok(studentsJsContent.includes('ឈ្មោះឪពុក'), 'Template must include father info');
+    assert.ok(studentsJsContent.includes('ឈ្មោះម្ដាយ'), 'Template must include mother info');
+    assert.ok(studentsJsContent.includes('ឆ្នាំសិក្សា'), 'Template must include academic year');
+    assert.ok(studentsJsContent.includes('ប័ណ្ណក្រីក្រ'), 'Template must include poor ID flag');
+    assert.ok(studentsJsContent.includes('អាហារូបករណ៍'), 'Template must include scholarship flag');
+    assert.ok(studentsJsContent.includes('ពិការភាព'), 'Template must include disability flag');
+
+    // Check advanced-reports.js template consistency
+    assert.ok(advReportsContent.includes('downloadStudentTemplate'), 'advanced-reports.js must support downloadStudentTemplate');
+    assert.ok(advReportsContent.includes('Student_Import_Template_MoEYS.xlsx'), 'advanced-reports.js must use the comprehensive template');
+    assert.ok(advReportsContent.includes('stu_academic_year') || studentsJsContent.includes('stu_academic_year'), 'Modal form must support academic year');
+  });
 });

@@ -747,6 +747,9 @@ window.openStudentModal = function(id = null) {
             
             document.getElementById("stu_grade").value = normalizeGrade(stu.grade);
             document.getElementById("stu_room").value = stu.room || "«ក»";
+            if (document.getElementById("stu_academic_year")) {
+                document.getElementById("stu_academic_year").value = stu.academic_year || document.getElementById("globalAcademicYear")?.value || "2026-2027";
+            }
             document.getElementById("stu_contact").value = stu.parent_contact || "";
             document.getElementById("stu_status").value = stu.status || "Active";
             
@@ -767,6 +770,9 @@ window.openStudentModal = function(id = null) {
         // 🟢 កំណត់តម្លៃលំនាំដើមពី Settings 🟢
         document.getElementById("stu_grade").value = defaultGrade;
         document.getElementById("stu_room").value = defaultRoom;
+        if (document.getElementById("stu_academic_year")) {
+            document.getElementById("stu_academic_year").value = document.getElementById("globalAcademicYear")?.value || localStorage.getItem('selected_academic_year') || "2026-2027";
+        }
 
         document.getElementById("stuModalTitle").innerHTML = `<div class="w-10 h-10 rounded-2xl bg-indigo-50 text-indigo-600 flex justify-center items-center text-lg shadow-sm border border-indigo-100"><i class="fa-solid fa-user-plus"></i></div> ចុះឈ្មោះសិស្សថ្មី`;
     }
@@ -889,7 +895,7 @@ window.saveStudentData = async function(e) {
         id: studentId,
         school_id: schoolId,               // 🟢 Data Isolation (Chapter 4 & 6)
         teacher_id: currentTeacherId,       // 🟢 ចងភ្ជាប់ទិន្នន័យ
-        academic_year: currentYear,         // 🟢 ចងភ្ជាប់ទិន្នន័យ
+        academic_year: document.getElementById("stu_academic_year")?.value || currentYear,         // 🟢 ចងភ្ជាប់ទិន្នន័យ
         name: studentName,
         name_en: (document.getElementById("stu_name_en")?.value || "").trim().toUpperCase(),
         gender: document.getElementById("stu_gender").value,
@@ -1404,11 +1410,12 @@ window.renderStudentModalTemplate = function() {
                                         <div class="col-span-2 md:col-span-1"><label class="block text-[10px] font-bold text-slate-400 mb-1.5 uppercase tracking-wider">មុខរបរម្ដាយ</label><input type="text" id="stu_mother_job" placeholder="មុខរបរ" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-xs font-bold outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-400 focus:bg-white transition shadow-inner"></div>
                                     </div>
                                     
-                                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                                        <div><label class="block text-[10px] font-bold text-slate-400 mb-1.5 uppercase tracking-wider">ថ្នាក់រៀន</label><select id="stu_grade" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-xs font-bold outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-400 focus:bg-white transition cursor-pointer text-indigo-700 shadow-inner">${gradesOptions}</select></div>
-                                        <div><label class="block text-[10px] font-bold text-slate-400 mb-1.5 uppercase tracking-wider">បន្ទប់</label><select id="stu_room" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-xs font-bold outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-400 focus:bg-white transition cursor-pointer text-indigo-700 shadow-inner"><option value="«ក»">«ក»</option><option value="«ខ»">«ខ»</option><option value="«គ»">«គ»</option><option value="«ឃ»">«ឃ»</option></select></div>
-                                        <div><label class="block text-[10px] font-bold text-slate-400 mb-1.5 uppercase tracking-wider">លេខទូរស័ព្ទ</label><input type="text" id="stu_contact" placeholder="012 345 678" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-xs font-bold font-mono outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-400 focus:bg-white transition shadow-inner"></div>
-                                        <div><label class="block text-[10px] font-bold text-slate-400 mb-1.5 uppercase tracking-wider">ស្ថានភាព</label><select id="stu_status" class="w-full bg-emerald-50/50 border border-emerald-200 rounded-xl px-4 py-3 text-xs font-bold outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 focus:bg-white transition cursor-pointer shadow-inner text-emerald-700">
+                                    <div class="grid grid-cols-2 md:grid-cols-5 gap-3">
+                                        <div><label class="block text-[10px] font-bold text-slate-400 mb-1.5 uppercase tracking-wider">ថ្នាក់រៀន</label><select id="stu_grade" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-3 text-xs font-bold outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-400 focus:bg-white transition cursor-pointer text-indigo-700 shadow-inner">${gradesOptions}</select></div>
+                                        <div><label class="block text-[10px] font-bold text-slate-400 mb-1.5 uppercase tracking-wider">បន្ទប់</label><select id="stu_room" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-3 text-xs font-bold outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-400 focus:bg-white transition cursor-pointer text-indigo-700 shadow-inner"><option value="«ក»">«ក»</option><option value="«ខ»">«ខ»</option><option value="«គ»">«គ»</option><option value="«ឃ»">«ឃ»</option></select></div>
+                                        <div><label class="block text-[10px] font-bold text-slate-400 mb-1.5 uppercase tracking-wider">ឆ្នាំសិក្សា</label><select id="stu_academic_year" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-3 text-xs font-bold outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-400 focus:bg-white transition cursor-pointer text-indigo-700 shadow-inner"><option value="2026-2027">២០២៦-២០២៧</option><option value="2025-2026">២០២៥-២០២៦</option><option value="2024-2025">២០២៤-២០២៥</option></select></div>
+                                        <div><label class="block text-[10px] font-bold text-slate-400 mb-1.5 uppercase tracking-wider">ទូរស័ព្ទអាណាព្យាបាល</label><input type="text" id="stu_contact" placeholder="012 345 678" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-3 text-xs font-bold font-mono outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-400 focus:bg-white transition shadow-inner"></div>
+                                        <div><label class="block text-[10px] font-bold text-slate-400 mb-1.5 uppercase tracking-wider">ស្ថានភាព</label><select id="stu_status" class="w-full bg-emerald-50/50 border border-emerald-200 rounded-xl px-3 py-3 text-xs font-bold outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 focus:bg-white transition cursor-pointer shadow-inner text-emerald-700">
                                             <option value="Active">កំពុងសិក្សា (Active)</option>
                                             <option value="Transferred">បានផ្ទេរចេញ (Transferred)</option>
                                             <option value="Graduated">បានបញ្ចប់ការសិក្សា (Graduated)</option>
@@ -2115,21 +2122,57 @@ window.downloadStudentTemplate = function() {
     if (typeof XLSX === 'undefined') return alert("សូមភ្ជាប់ Library SheetJS ជាមុនសិន!");
     const headers = [
         "ល.រ", "អត្តលេខ", "គោត្តនាម និងនាម", "ឈ្មោះជាអក្សរឡាតាំង", "ភេទ", "ថ្ងៃខែឆ្នាំកំណើត", "ថ្ងៃចូលរៀន", 
-        "ទីកន្លែងកំណើត(ភូមិ)", "ទីកន្លែងកំណើត(ឃុំ)", "ទីកន្លែងកំណើត(ស្រុក)", "ទីកន្លែងកំណើត(ខេត្ត)", 
-        "ទីលំនៅ(ភូមិ)", "ទីលំនៅ(ឃុំ)", "ទីលំនៅ(ស្រុក)", "ទីលំនៅ(ខេត្ត)", 
-        "ឈ្មោះឪពុក", "មុខរបរឪពុក", "ឈ្មោះម្ដាយ", "មុខរបរម្ដាយ", 
-        "ថ្នាក់រៀន", "បន្ទប់", "ទំនាក់ទំនង", "ប័ណ្ណក្រីក្រ", "អាហារូបករណ៍", "ពិការភាព", "ស្ថានភាព"
+        "ទីកន្លែងកំណើត(ភូមិ)", "ទីកន្លែងកំណើត(ឃុំ/សង្កាត់)", "ទីកន្លែងកំណើត(ស្រុក/ក្រុង/ខណ្ឌ)", "ទីកន្លែងកំណើត(ខេត្ត/រាជធានី)", 
+        "ទីលំនៅបច្ចុប្បន្ន(ភូមិ)", "ទីលំនៅបច្ចុប្បន្ន(ឃុំ/សង្កាត់)", "ទីលំនៅបច្ចុប្បន្ន(ស្រុក/ក្រុង/ខណ្ឌ)", "ទីលំនៅបច្ចុប្បន្ន(ខេត្ត/រាជធានី)", 
+        "ឈ្មោះឪពុក", "មុខរបរឪពុក", "ឈ្មោះម្ដាយ", "មុខរបរម្ដាយ", "លេខទូរស័ព្ទអាណាព្យាបាល", 
+        "ថ្នាក់រៀន", "បន្ទប់", "ឆ្នាំសិក្សា", "ស្ថានភាព", "ប័ណ្ណក្រីក្រ", "អាហារូបករណ៍", "ពិការភាព"
     ];
     const sampleData1 = [
-        "1", "STU10200", "សុខ សាន្ត", "SOK SAN", "ប្រុស", "20/05/2010", "01/10/2026", 
-        "ព្រែកថ្មី", "ស្អាង", "ស្អាង", "កណ្តាល", 
-        "ព្រែកថ្មី", "ស្អាង", "ស្អាង", "កណ្តាល", 
-        "សាន សុខ", "កសិករ", "មាស ស្រី", "មេផ្ទះ", 
-        "ថ្នាក់ទី ១", "«ក»", "012 345 678", "គ្មាន", "គ្មាន", "គ្មាន", "កំពុងសិក្សា"
+        "1", "STU10201", "ស៊ុន វិបុល", "SUN VIBOL", "ប្រុស", "15/05/2012", "01/10/2026", 
+        "ព្រែកសំរោង", "តាខ្មៅ", "តាខ្មៅ", "កណ្តាល", 
+        "ព្រែកសំរោង", "តាខ្មៅ", "តាខ្មៅ", "កណ្តាល", 
+        "ស៊ុន សារ៉េត", "គ្រូបង្រៀន", "កែវ ធីតា", "អាជីវករ", "012 889 977", 
+        "ថ្នាក់ទី ៧", "«ក»", "2026-2027", "កំពុងសិក្សា", "គ្មាន", "គ្មាន", "គ្មាន"
     ];
-    const ws = XLSX.utils.aoa_to_sheet([headers, sampleData1]);
+    const sampleData2 = [
+        "2", "STU10202", "ចាន់ សុខា", "CHAN SOKHA", "ស្រី", "20/08/2012", "01/10/2026", 
+        "បឹងកេងកង", "បឹងកេងកងទី១", "បឹងកេងកង", "រាជធានីភ្នំពេញ", 
+        "បឹងកេងកង", "បឹងកេងកងទី១", "បឹងកេងកង", "រាជធានីភ្នំពេញ", 
+        "ចាន់ ពិសិដ្ឋ", "វិស្វករ", "អ៊ុំ សុភាព", "វេជ្ជបណ្ឌិត", "098 765 432", 
+        "ថ្នាក់ទី ៧", "«ក»", "2026-2027", "កំពុងសិក្សា", "មាន", "មាន", "គ្មាន"
+    ];
+    const ws = XLSX.utils.aoa_to_sheet([headers, sampleData1, sampleData2]);
+    ws['!cols'] = [
+        { wch: 6 },  // ល.រ
+        { wch: 14 }, // អត្តលេខ
+        { wch: 22 }, // គោត្តនាម និងនាម
+        { wch: 20 }, // ឈ្មោះជាអក្សរឡាតាំង
+        { wch: 10 }, // ភេទ
+        { wch: 16 }, // ថ្ងៃខែឆ្នាំកំណើត
+        { wch: 16 }, // ថ្ងៃចូលរៀន
+        { wch: 20 }, // ទីកន្លែងកំណើត(ភូមិ)
+        { wch: 22 }, // ទីកន្លែងកំណើត(ឃុំ/សង្កាត់)
+        { wch: 24 }, // ទីកន្លែងកំណើត(ស្រុក/ក្រុង/ខណ្ឌ)
+        { wch: 24 }, // ទីកន្លែងកំណើត(ខេត្ត/រាជធានី)
+        { wch: 20 }, // ទីលំនៅបច្ចុប្បន្ន(ភូមិ)
+        { wch: 22 }, // ទីលំនៅបច្ចុប្បន្ន(ឃុំ/សង្កាត់)
+        { wch: 24 }, // ទីលំនៅបច្ចុប្បន្ន(ស្រុក/ក្រុង/ខណ្ឌ)
+        { wch: 24 }, // ទីលំនៅបច្ចុប្បន្ន(ខេត្ត/រាជធានី)
+        { wch: 20 }, // ឈ្មោះឪពុក
+        { wch: 18 }, // មុខរបរឪពុក
+        { wch: 20 }, // ឈ្មោះម្ដាយ
+        { wch: 18 }, // មុខរបរម្ដាយ
+        { wch: 24 }, // លេខទូរស័ព្ទអាណាព្យាបាល
+        { wch: 14 }, // ថ្នាក់រៀន
+        { wch: 10 }, // បន្ទប់
+        { wch: 14 }, // ឆ្នាំសិក្សា
+        { wch: 16 }, // ស្ថានភាព
+        { wch: 14 }, // ប័ណ្ណក្រីក្រ
+        { wch: 14 }, // អាហារូបករណ៍
+        { wch: 14 }  // ពិការភាព
+    ];
     const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Students");
+    XLSX.utils.book_append_sheet(wb, ws, "បញ្ជីសិស្សគំរូ");
     XLSX.writeFile(wb, "Student_Import_Template_MoEYS.xlsx");
 };
 
@@ -2164,25 +2207,35 @@ window.importStudentsExcel = function(event) {
             const colId = findCol(["អត្តលេខ", "id", "student_id"], 1);
             const colNameKh = findCol(["គោត្តនាម", "ឈ្មោះ", "name_kh", "name"], 2);
             const colNameEn = findCol(["ឡាតាំង", "អង់គ្លេស", "latin", "english", "name_en"], 3);
-            const colGender = findCol(["ភេទ", "gender", "sex"], headerRow[3] && (headerRow[3].includes("ភេទ") || headerRow[3].includes("gender")) ? 3 : 4);
+            const colGender = findCol(["ភេទ", "gender", "sex"], 4);
             const colDob = findCol(["កំណើត", "dob", "birth"], 5);
-            const colEnroll = findCol(["ចូលរៀន", "enroll"], -1);
-            const colPobVil = findCol(["ភូមិ(កំណើត)", "ភូមិកំណើត"], 7);
-            const colPobCom = findCol(["ឃុំ(កំណើត)", "ឃុំកំណើត"], 8);
-            const colPobDis = findCol(["ស្រុក(កំណើត)", "ស្រុកកំណើត"], 9);
-            const colPobPro = findCol(["ខេត្ត(កំណើត)", "ខេត្តកំណើត"], 10);
-            const colCurVil = findCol(["ភូមិ(បច្ចុប្បន្ន)", "ទីលំនៅ(ភូមិ)"], 11);
-            const colCurCom = findCol(["ឃុំ(បច្ចុប្បន្ន)", "ទីលំនៅ(ឃុំ)"], 12);
-            const colCurDis = findCol(["ស្រុក(បច្ចុប្បន្ន)", "ទីលំនៅ(ស្រុក)"], 13);
-            const colCurPro = findCol(["ខេត្ត(បច្ចុប្បន្ន)", "ទីលំនៅ(ខេត្ត)"], 14);
-            const colFather = findCol(["ឪពុក", "father"], 15);
+            const colEnroll = findCol(["ចូលរៀន", "enroll"], 6);
+            const colPobVil = findCol(["ភូមិ(កំណើត)", "ភូមិកំណើត", "ទីកន្លែងកំណើត(ភូមិ)"], 7);
+            const colPobCom = findCol(["ឃុំ(កំណើត)", "ឃុំកំណើត", "ទីកន្លែងកំណើត(ឃុំ"], 8);
+            const colPobDis = findCol(["ស្រុក(កំណើត)", "ស្រុកកំណើត", "ទីកន្លែងកំណើត(ស្រុក"], 9);
+            const colPobPro = findCol(["ខេត្ត(កំណើត)", "ខេត្តកំណើត", "ទីកន្លែងកំណើត(ខេត្ត"], 10);
+            const colCurVil = findCol(["ភូមិ(បច្ចុប្បន្ន)", "ទីលំនៅ(ភូមិ)", "ទីលំនៅបច្ចុប្បន្ន(ភូមិ)"], 11);
+            const colCurCom = findCol(["ឃុំ(បច្ចុប្បន្ន)", "ទីលំនៅ(ឃុំ)", "ទីលំនៅបច្ចុប្បន្ន(ឃុំ"], 12);
+            const colCurDis = findCol(["ស្រុក(បច្ចុប្បន្ន)", "ទីលំនៅ(ស្រុក)", "ទីលំនៅបច្ចុប្បន្ន(ស្រុក"], 13);
+            const colCurPro = findCol(["ខេត្ត(បច្ចុប្បន្ន)", "ទីលំនៅ(ខេត្ត)", "ទីលំនៅបច្ចុប្បន្ន(ខេត្ត"], 14);
+            const colFather = findCol(["ឈ្មោះឪពុក", "ឪពុក", "father"], 15);
             const colFJob = findCol(["មុខរបរឪពុក", "father_job"], 16);
-            const colMother = findCol(["ម្ដាយ", "ម្តាយ", "mother"], 17);
+            const colMother = findCol(["ឈ្មោះម្ដាយ", "ឈ្មោះម្តាយ", "ម្ដាយ", "ម្តាយ", "mother"], 17);
             const colMJob = findCol(["មុខរបរម្ដាយ", "មុខរបរម្តាយ", "mother_job"], 18);
-            const colGrade = findCol(["ថ្នាក់", "grade"], 19);
-            const colRoom = findCol(["បន្ទប់", "room"], 20);
-            const colContact = findCol(["ទូរស័ព្ទ", "ទំនាក់ទំនង", "phone", "contact"], 21);
-            const colStatus = findCol(["ស្ថានភាព", "status"], 25);
+            const colContact = findCol(["ទូរស័ព្ទ", "ទំនាក់ទំនង", "phone", "contact"], 19);
+            const colGrade = findCol(["ថ្នាក់", "grade"], 20);
+            const colRoom = findCol(["បន្ទប់", "room"], 21);
+            const colYear = findCol(["ឆ្នាំសិក្សា", "academic_year", "year"], 22);
+            const colStatus = findCol(["ស្ថានភាព", "status"], 23);
+            const colPoor = findCol(["ប័ណ្ណក្រីក្រ", "ក្រីក្រ", "poor"], 24);
+            const colScholar = findCol(["អាហារូបករណ៍", "scholar"], 25);
+            const colDisability = findCol(["ពិការ", "disab"], 26);
+
+            const parseBool = (idx) => {
+                if (idx === -1) return false;
+                const v = String(rowData[idx] || '').trim().toLowerCase();
+                return v === 'មាន' || v === 'បាទ' || v === 'ចាស' || v === 'true' || v === 'yes' || v === '1';
+            };
 
             let newAdded = 0;
             let updatedCount = 0;
@@ -2214,12 +2267,14 @@ window.importStudentsExcel = function(event) {
                 else if (rawStatus.includes("មិនសកម្ម") || rawStatus.toLowerCase().includes("inactive")) normStatus = "Inactive";
                 else if (rawStatus.includes("ឈប់") || rawStatus.includes("បោះបង់") || rawStatus.toLowerCase().includes("drop") || rawStatus.toLowerCase().includes("withdrawn")) normStatus = "Withdrawn";
 
+                const stuYear = colYear > -1 && String(rowData[colYear] || '').trim() ? String(rowData[colYear]).trim() : currentYear;
                 const schoolId = window.AuthState?.school_id || localStorage.getItem('school_id') || 'SCH-001';
+
                 const newStu = {
                     id: id, 
                     school_id: schoolId,
                     teacher_id: currentTeacherId,
-                    academic_year: currentYear,
+                    academic_year: stuYear,
                     name: name,
                     name_en: colNameEn > -1 ? String(rowData[colNameEn] || "").trim().toUpperCase() : "",
                     gender: String(rowData[colGender] || "ប្រុស").trim(), 
@@ -2241,9 +2296,9 @@ window.importStudentsExcel = function(event) {
                     grade: normalizeGrade(String(rowData[colGrade] || "ថ្នាក់ទី ១")), 
                     room: String(rowData[colRoom] || "«ក»").trim(), 
                     parent_contact: String(rowData[colContact] || "").trim(),
-                    poor_id: JSON.stringify(rowData).includes("ប័ណ្ណក្រីក្រ") || JSON.stringify(rowData).includes("ក្រីក្រ"),
-                    scholarship: JSON.stringify(rowData).includes("អាហារូបករណ៍"),
-                    disability: JSON.stringify(rowData).includes("ពិការ"),
+                    poor_id: parseBool(colPoor),
+                    scholarship: parseBool(colScholar),
+                    disability: parseBool(colDisability),
                     status: normStatus,
                     updated_at: new Date().toISOString()
                 };

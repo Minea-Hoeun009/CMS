@@ -303,14 +303,20 @@ window.AdvancedReports = {
                 <!-- Preview Box -->
                 <div id="excelPreviewContainer" class="hidden space-y-3">
                     <h5 class="font-bold text-xs text-slate-700 dark:text-slate-200" id="excelPreviewCount">សិស្សដែលបានរកឃើញ៖ 0 នាក់</h5>
-                    <div class="max-h-48 overflow-y-auto custom-scrollbar border border-slate-200 dark:border-slate-700 rounded-xl">
-                        <table class="w-full text-xs text-left">
-                            <thead class="bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300">
+                    <div class="max-h-56 overflow-y-auto custom-scrollbar border border-slate-200 dark:border-slate-700 rounded-xl">
+                        <table class="w-full text-xs text-left whitespace-nowrap">
+                            <thead class="bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 sticky top-0">
                                 <tr>
+                                    <th class="p-2">ល.រ</th>
                                     <th class="p-2">អត្តលេខ</th>
                                     <th class="p-2">គោត្តនាម និងនាម</th>
-                                    <th class="p-2">ភេទ</th>
-                                    <th class="p-2">ថ្ងៃខែឆ្នាំកំណើត</th>
+                                    <th class="p-2">ឈ្មោះឡាតាំង</th>
+                                    <th class="p-2 text-center">ភេទ</th>
+                                    <th class="p-2 text-center">ថ្ងៃកំណើត</th>
+                                    <th class="p-2 text-center">ថ្នាក់រៀន</th>
+                                    <th class="p-2 text-center">បន្ទប់</th>
+                                    <th class="p-2">ទូរស័ព្ទ</th>
+                                    <th class="p-2 text-center">ស្ថានភាព</th>
                                 </tr>
                             </thead>
                             <tbody id="excelPreviewTbody"></tbody>
@@ -331,17 +337,65 @@ window.AdvancedReports = {
     },
 
     downloadStudentTemplate: function() {
+        if (typeof window.downloadStudentTemplate === 'function') {
+            return window.downloadStudentTemplate();
+        }
         if (typeof XLSX === 'undefined') return alert("SheetJS មិនទាន់ Load ទេ!");
 
-        const templateData = [
-            { "អត្តលេខ": "STU001", "គោត្តនាម_និងនាម": "សុខ វិបុល", "ឈ្មោះឡាតាំង": "Sok Vibol", "ភេទ": "ប្រុស", "ថ្ងៃខែឆ្នាំកំណើត": "2015-05-12", "ទូរស័ព្ទ": "012345678", "អាសយដ្ឋាន": "ភ្នំពេញ" },
-            { "អត្តលេខ": "STU002", "គោត្តនាម_និងនាម": "ចាន់ ធីតា", "ឈ្មោះឡាតាំង": "Chan Thida", "ភេទ": "ស្រី", "ថ្ងៃខែឆ្នាំកំណើត": "2015-08-20", "ទូរស័ព្ទ": "098765432", "អាសយដ្ឋាន": "ភ្នំពេញ" }
+        const headers = [
+            "ល.រ", "អត្តលេខ", "គោត្តនាម និងនាម", "ឈ្មោះជាអក្សរឡាតាំង", "ភេទ", "ថ្ងៃខែឆ្នាំកំណើត", "ថ្ងៃចូលរៀន", 
+            "ទីកន្លែងកំណើត(ភូមិ)", "ទីកន្លែងកំណើត(ឃុំ/សង្កាត់)", "ទីកន្លែងកំណើត(ស្រុក/ក្រុង/ខណ្ឌ)", "ទីកន្លែងកំណើត(ខេត្ត/រាជធានី)", 
+            "ទីលំនៅបច្ចុប្បន្ន(ភូមិ)", "ទីលំនៅបច្ចុប្បន្ន(ឃុំ/សង្កាត់)", "ទីលំនៅបច្ចុប្បន្ន(ស្រុក/ក្រុង/ខណ្ឌ)", "ទីលំនៅបច្ចុប្បន្ន(ខេត្ត/រាជធានី)", 
+            "ឈ្មោះឪពុក", "មុខរបរឪពុក", "ឈ្មោះម្ដាយ", "មុខរបរម្ដាយ", "លេខទូរស័ព្ទអាណាព្យាបាល", 
+            "ថ្នាក់រៀន", "បន្ទប់", "ឆ្នាំសិក្សា", "ស្ថានភាព", "ប័ណ្ណក្រីក្រ", "អាហារូបករណ៍", "ពិការភាព"
         ];
-
+        const sampleData1 = [
+            "1", "STU10201", "ស៊ុន វិបុល", "SUN VIBOL", "ប្រុស", "15/05/2012", "01/10/2026", 
+            "ព្រែកសំរោង", "តាខ្មៅ", "តាខ្មៅ", "កណ្តាល", 
+            "ព្រែកសំរោង", "តាខ្មៅ", "តាខ្មៅ", "កណ្តាល", 
+            "ស៊ុន សារ៉េត", "គ្រូបង្រៀន", "កែវ ធីតា", "អាជីវករ", "012 889 977", 
+            "ថ្នាក់ទី ៧", "«ក»", "2026-2027", "កំពុងសិក្សា", "គ្មាន", "គ្មាន", "គ្មាន"
+        ];
+        const sampleData2 = [
+            "2", "STU10202", "ចាន់ សុខា", "CHAN SOKHA", "ស្រី", "20/08/2012", "01/10/2026", 
+            "បឹងកេងកង", "បឹងកេងកងទី១", "បឹងកេងកង", "រាជធានីភ្នំពេញ", 
+            "បឹងកេងកង", "បឹងកេងកងទី១", "បឹងកេងកង", "រាជធានីភ្នំពេញ", 
+            "ចាន់ ពិសិដ្ឋ", "វិស្វករ", "អ៊ុំ សុភាព", "វេជ្ជបណ្ឌិត", "098 765 432", 
+            "ថ្នាក់ទី ៧", "«ក»", "2026-2027", "កំពុងសិក្សា", "មាន", "មាន", "គ្មាន"
+        ];
+        const ws = XLSX.utils.aoa_to_sheet([headers, sampleData1, sampleData2]);
+        ws['!cols'] = [
+            { wch: 6 },  // ល.រ
+            { wch: 14 }, // អត្តលេខ
+            { wch: 22 }, // គោត្តនាម និងនាម
+            { wch: 20 }, // ឈ្មោះជាអក្សរឡាតាំង
+            { wch: 10 }, // ភេទ
+            { wch: 16 }, // ថ្ងៃខែឆ្នាំកំណើត
+            { wch: 16 }, // ថ្ងៃចូលរៀន
+            { wch: 20 }, // ទីកន្លែងកំណើត(ភូមិ)
+            { wch: 22 }, // ទីកន្លែងកំណើត(ឃុំ/សង្កាត់)
+            { wch: 24 }, // ទីកន្លែងកំណើត(ស្រុក/ក្រុង/ខណ្ឌ)
+            { wch: 24 }, // ទីកន្លែងកំណើត(ខេត្ត/រាជធានី)
+            { wch: 20 }, // ទីលំនៅបច្ចុប្បន្ន(ភូមិ)
+            { wch: 22 }, // ទីលំនៅបច្ចុប្បន្ន(ឃុំ/សង្កាត់)
+            { wch: 24 }, // ទីលំនៅបច្ចុប្បន្ន(ស្រុក/ក្រុង/ខណ្ឌ)
+            { wch: 24 }, // ទីលំនៅបច្ចុប្បន្ន(ខេត្ត/រាជធានី)
+            { wch: 20 }, // ឈ្មោះឪពុក
+            { wch: 18 }, // មុខរបរឪពុក
+            { wch: 20 }, // ឈ្មោះម្ដាយ
+            { wch: 18 }, // មុខរបរម្ដាយ
+            { wch: 24 }, // លេខទូរស័ព្ទអាណាព្យាបាល
+            { wch: 14 }, // ថ្នាក់រៀន
+            { wch: 10 }, // បន្ទប់
+            { wch: 14 }, // ឆ្នាំសិក្សា
+            { wch: 16 }, // ស្ថានភាព
+            { wch: 14 }, // ប័ណ្ណក្រីក្រ
+            { wch: 14 }, // អាហារូបករណ៍
+            { wch: 14 }  // ពិការភាព
+        ];
         const wb = XLSX.utils.book_new();
-        const ws = XLSX.utils.json_to_sheet(templateData);
-        XLSX.utils.book_append_sheet(wb, ws, "ទម្រង់គំរូសិស្ស");
-        XLSX.writeFile(wb, "CMS_Student_Import_Template.xlsx");
+        XLSX.utils.book_append_sheet(wb, ws, "បញ្ជីសិស្សគំរូ");
+        XLSX.writeFile(wb, "Student_Import_Template_MoEYS.xlsx");
     },
 
     parsedExcelStudents: [],
@@ -357,18 +411,122 @@ window.AdvancedReports = {
                 const workbook = XLSX.read(data, { type: 'array' });
                 const firstSheetName = workbook.SheetNames[0];
                 const worksheet = workbook.Sheets[firstSheetName];
-                const rawJson = XLSX.utils.sheet_to_json(worksheet, { defval: "" });
+                const rows = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: "" });
 
-                this.parsedExcelStudents = rawJson.map((r, i) => ({
-                    id: String(r["អត្តលេខ"] || r["ID"] || r["StudentID"] || ("STU" + (Date.now() + i))).trim(),
-                    name: String(r["គោត្តនាម_និងនាម"] || r["គោត្តនាម និងនាម"] || r["Name"] || r["ឈ្មោះ"] || "សិស្សថ្មី").trim(),
-                    name_en: String(r["ឈ្មោះឡាតាំង"] || r["LatinName"] || "").trim(),
-                    gender: String(r["ភេទ"] || r["Gender"] || "ប្រុស").trim(),
-                    dob: String(r["ថ្ងៃខែឆ្នាំកំណើត"] || r["DOB"] || "").trim(),
-                    phone: String(r["ទូរស័ព្ទ"] || r["Phone"] || "").trim(),
-                    address: String(r["អាសយដ្ឋាន"] || r["Address"] || "").trim(),
-                    academic_year: document.getElementById("globalAcademicYear")?.value || "2026-2027"
-                }));
+                if (!rows || rows.length <= 1) {
+                    alert("⚠️ ឯកសារ Excel គ្មានទិន្នន័យទេ!");
+                    return;
+                }
+
+                const headerRow = rows[0].map(h => String(h || '').trim().toLowerCase());
+                const findCol = (keywords, defaultIdx) => {
+                    const idx = headerRow.findIndex(h => keywords.some(k => h.includes(k)));
+                    return idx > -1 ? idx : defaultIdx;
+                };
+
+                const colId = findCol(["អត្តលេខ", "id", "student_id"], 1);
+                const colNameKh = findCol(["គោត្តនាម", "ឈ្មោះ", "name_kh", "name"], 2);
+                const colNameEn = findCol(["ឡាតាំង", "អង់គ្លេស", "latin", "english", "name_en"], 3);
+                const colGender = findCol(["ភេទ", "gender", "sex"], 4);
+                const colDob = findCol(["កំណើត", "dob", "birth"], 5);
+                const colEnroll = findCol(["ចូលរៀន", "enroll"], 6);
+                const colPobVil = findCol(["ភូមិ(កំណើត)", "ភូមិកំណើត", "ទីកន្លែងកំណើត(ភូមិ)"], 7);
+                const colPobCom = findCol(["ឃុំ(កំណើត)", "ឃុំកំណើត", "ទីកន្លែងកំណើត(ឃុំ"], 8);
+                const colPobDis = findCol(["ស្រុក(កំណើត)", "ស្រុកកំណើត", "ទីកន្លែងកំណើត(ស្រុក"], 9);
+                const colPobPro = findCol(["ខេត្ត(កំណើត)", "ខេត្តកំណើត", "ទីកន្លែងកំណើត(ខេត្ត"], 10);
+                const colCurVil = findCol(["ភូមិ(បច្ចុប្បន្ន)", "ទីលំនៅ(ភូមិ)", "ទីលំនៅបច្ចុប្បន្ន(ភូមិ)"], 11);
+                const colCurCom = findCol(["ឃុំ(បច្ចុប្បន្ន)", "ទីលំនៅ(ឃុំ)", "ទីលំនៅបច្ចុប្បន្ន(ឃុំ"], 12);
+                const colCurDis = findCol(["ស្រុក(បច្ចុប្បន្ន)", "ទីលំនៅ(ស្រុក)", "ទីលំនៅបច្ចុប្បន្ន(ស្រុក"], 13);
+                const colCurPro = findCol(["ខេត្ត(បច្ចុប្បន្ន)", "ទីលំនៅ(ខេត្ត)", "ទីលំនៅបច្ចុប្បន្ន(ខេត្ត"], 14);
+                const colFather = findCol(["ឈ្មោះឪពុក", "ឪពុក", "father"], 15);
+                const colFJob = findCol(["មុខរបរឪពុក", "father_job"], 16);
+                const colMother = findCol(["ឈ្មោះម្ដាយ", "ឈ្មោះម្តាយ", "ម្ដាយ", "ម្តាយ", "mother"], 17);
+                const colMJob = findCol(["មុខរបរម្ដាយ", "មុខរបរម្តាយ", "mother_job"], 18);
+                const colContact = findCol(["ទូរស័ព្ទ", "ទំនាក់ទំនង", "phone", "contact"], 19);
+                const colGrade = findCol(["ថ្នាក់", "grade"], 20);
+                const colRoom = findCol(["បន្ទប់", "room"], 21);
+                const colYear = findCol(["ឆ្នាំសិក្សា", "academic_year", "year"], 22);
+                const colStatus = findCol(["ស្ថានភាព", "status"], 23);
+                const colPoor = findCol(["ប័ណ្ណក្រីក្រ", "ក្រីក្រ", "poor"], 24);
+                const colScholar = findCol(["អាហារូបករណ៍", "scholar"], 25);
+                const colDisability = findCol(["ពិការ", "disab"], 26);
+
+                const currentYear = document.getElementById("globalAcademicYear")?.value || localStorage.getItem('selected_academic_year') || "2026-2027";
+                const schoolId = window.AuthState?.school_id || localStorage.getItem('school_id') || 'SCH-001';
+                const currentTeacherId = window.AuthState ? window.AuthState.teacherId : localStorage.getItem('auth_teacher_id');
+
+                const parsed = [];
+                for (let r = 1; r < rows.length; r++) {
+                    const rowData = rows[r];
+                    const name = String(rowData[colNameKh] || "").trim();
+                    if (!name || name === "undefined") continue;
+
+                    const id = String(rowData[colId] || `STU${Math.floor(Math.random() * 900000 + 100000)}`).trim();
+                    let rawDob = String(rowData[colDob] || "").trim();
+                    if (rawDob && rawDob.includes('/')) {
+                        const p = rawDob.split('/');
+                        if (p.length === 3) rawDob = `${p[2]}-${p[1].padStart(2, '0')}-${p[0].padStart(2, '0')}`;
+                    }
+
+                    let rawEnroll = colEnroll > -1 ? String(rowData[colEnroll] || "").trim() : "";
+                    if (rawEnroll && rawEnroll.includes('/')) {
+                        const p = rawEnroll.split('/');
+                        if (p.length === 3) rawEnroll = `${p[2]}-${p[1].padStart(2, '0')}-${p[0].padStart(2, '0')}`;
+                    }
+
+                    const rawStatus = colStatus > -1 ? String(rowData[colStatus] || "Active").trim() : "Active";
+                    let normStatus = "Active";
+                    if (rawStatus.includes("ផ្ទេរ") || rawStatus.toLowerCase().includes("transfer")) normStatus = "Transferred";
+                    else if (rawStatus.includes("បញ្ចប់") || rawStatus.toLowerCase().includes("graduat")) normStatus = "Graduated";
+                    else if (rawStatus.includes("មិនសកម្ម") || rawStatus.toLowerCase().includes("inactive")) normStatus = "Inactive";
+                    else if (rawStatus.includes("ឈប់") || rawStatus.includes("បោះបង់") || rawStatus.toLowerCase().includes("drop") || rawStatus.toLowerCase().includes("withdrawn")) normStatus = "Withdrawn";
+
+                    const parseBool = (idx) => {
+                        if (idx === -1) return false;
+                        const v = String(rowData[idx] || '').trim().toLowerCase();
+                        return v === 'មាន' || v === 'បាទ' || v === 'ចាស' || v === 'true' || v === 'yes' || v === '1';
+                    };
+
+                    const stuYear = colYear > -1 && String(rowData[colYear] || '').trim() ? String(rowData[colYear]).trim() : currentYear;
+                    const normGrade = typeof window.normalizeGrade === 'function' 
+                        ? window.normalizeGrade(String(rowData[colGrade] || "ថ្នាក់ទី ១"))
+                        : String(rowData[colGrade] || "ថ្នាក់ទី ១");
+
+                    parsed.push({
+                        id: id,
+                        school_id: schoolId,
+                        teacher_id: currentTeacherId,
+                        academic_year: stuYear,
+                        name: name,
+                        name_en: colNameEn > -1 ? String(rowData[colNameEn] || "").trim().toUpperCase() : "",
+                        gender: String(rowData[colGender] || "ប្រុស").trim(),
+                        dob: rawDob,
+                        enrollment_date: rawEnroll || new Date().toISOString().split('T')[0],
+                        photo_url: "",
+                        pob_village: String(rowData[colPobVil] || "").trim(),
+                        pob_commune: String(rowData[colPobCom] || "").trim(),
+                        pob_district: String(rowData[colPobDis] || "").trim(),
+                        pob_province: String(rowData[colPobPro] || "").trim(),
+                        curr_village: String(rowData[colCurVil] || "").trim(),
+                        curr_commune: String(rowData[colCurCom] || "").trim(),
+                        curr_district: String(rowData[colCurDis] || "").trim(),
+                        curr_province: String(rowData[colCurPro] || "").trim(),
+                        father_name: String(rowData[colFather] || "").trim(),
+                        father_job: String(rowData[colFJob] || "").trim(),
+                        mother_name: String(rowData[colMother] || "").trim(),
+                        mother_job: String(rowData[colMJob] || "").trim(),
+                        grade: normGrade,
+                        room: String(rowData[colRoom] || "«ក»").trim(),
+                        parent_contact: String(rowData[colContact] || "").trim(),
+                        poor_id: parseBool(colPoor),
+                        scholarship: parseBool(colScholar),
+                        disability: parseBool(colDisability),
+                        status: normStatus,
+                        updated_at: new Date().toISOString()
+                    });
+                }
+
+                this.parsedExcelStudents = parsed;
 
                 const previewBox = document.getElementById("excelPreviewContainer");
                 const previewCount = document.getElementById("excelPreviewCount");
@@ -378,12 +536,18 @@ window.AdvancedReports = {
                 if (previewBox && previewTbody && confirmBtn) {
                     previewBox.classList.remove("hidden");
                     previewCount.textContent = `សិស្សដែលបានរកឃើញ៖ ${this.parsedExcelStudents.length} នាក់`;
-                    previewTbody.innerHTML = this.parsedExcelStudents.slice(0, 15).map(s => `
-                        <tr class="border-b border-slate-100 dark:border-slate-700">
-                            <td class="p-2 font-mono font-bold">${s.id}</td>
-                            <td class="p-2 font-bold">${s.name}</td>
-                            <td class="p-2">${s.gender}</td>
-                            <td class="p-2 font-mono">${s.dob}</td>
+                    previewTbody.innerHTML = this.parsedExcelStudents.slice(0, 15).map((s, idx) => `
+                        <tr class="border-b border-slate-100 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50">
+                            <td class="p-2 text-center text-slate-400 font-mono">${idx + 1}</td>
+                            <td class="p-2 font-mono font-bold text-indigo-600">${s.id}</td>
+                            <td class="p-2 font-bold font-moul text-xs">${s.name}</td>
+                            <td class="p-2 font-mono text-[11px] uppercase">${s.name_en || '-'}</td>
+                            <td class="p-2 text-center font-bold ${s.gender === 'ស្រី' ? 'text-pink-500' : 'text-blue-500'}">${s.gender}</td>
+                            <td class="p-2 text-center font-mono">${s.dob || '-'}</td>
+                            <td class="p-2 text-center font-bold text-slate-700">${s.grade}</td>
+                            <td class="p-2 text-center font-moul text-rose-500">${s.room}</td>
+                            <td class="p-2 font-mono">${s.parent_contact || '-'}</td>
+                            <td class="p-2 text-center"><span class="px-2 py-0.5 rounded-md text-[10px] font-bold ${s.status === 'Active' ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-100 text-slate-600'}">${s.status}</span></td>
                         </tr>
                     `).join("");
 
@@ -401,7 +565,12 @@ window.AdvancedReports = {
     confirmExcelImport: async function() {
         if (!this.parsedExcelStudents || this.parsedExcelStudents.length === 0) return;
 
-        let existing = window.allStudents || JSON.parse(localStorage.getItem('academic_students') || '[]');
+        let existing = [];
+        if (typeof window.getMasterStudents === 'function') {
+            existing = window.getMasterStudents();
+        } else {
+            existing = window.allStudents || JSON.parse(localStorage.getItem('academic_students') || '[]');
+        }
         const existingIds = new Set(existing.map(s => String(s.id)));
 
         let addedCount = 0;
@@ -410,10 +579,22 @@ window.AdvancedReports = {
         for (const stu of this.parsedExcelStudents) {
             if (existingIds.has(String(stu.id))) {
                 const idx = existing.findIndex(s => String(s.id) === String(stu.id));
-                if (idx !== -1) existing[idx] = { ...existing[idx], ...stu };
+                if (idx !== -1) {
+                    existing[idx] = { ...existing[idx], ...stu };
+                }
                 updatedCount++;
             } else {
-                existing.push(stu);
+                stu.enrollment_history = [{
+                    grade: stu.grade,
+                    room: stu.room,
+                    academic_year: stu.academic_year,
+                    date: stu.enrollment_date || new Date().toISOString().split('T')[0],
+                    status: stu.status || 'Active',
+                    reason: 'នាំចូលពី Excel',
+                    type: 'excel_import',
+                    created_at: new Date().toISOString()
+                }];
+                existing.unshift(stu);
                 existingIds.add(String(stu.id));
                 addedCount++;
             }
@@ -430,17 +611,31 @@ window.AdvancedReports = {
         }
 
         window.allStudents = existing;
-        localStorage.setItem('academic_students', JSON.stringify(existing));
+        if (typeof window.setMasterStudents === 'function') {
+            window.setMasterStudents(existing);
+        } else {
+            localStorage.setItem('academic_students', JSON.stringify(existing));
+        }
 
         if (typeof window.logAudit === 'function') {
             window.logAudit('IMPORT_EXCEL_STUDENTS', 'student', `បាននាំចូលសិស្សពី Excel (បន្ថែមថ្មី ${addedCount} នាក់, កែប្រែ ${updatedCount} នាក់)`);
+        }
+
+        // Emit EventBus notification
+        if (window.CMSEventBus && window.CMSEventTypes) {
+            window.CMSEventBus.emit(window.CMSEventTypes.STUDENT_ENROLLED, {
+                total_imported: this.parsedExcelStudents.length,
+                added: addedCount,
+                updated: updatedCount,
+                source: 'excel_import'
+            });
         }
 
         document.getElementById('excelImportModal')?.classList.add('hidden');
 
         if (typeof window.renderStudentsTable === 'function') window.renderStudentsTable();
         if (typeof window.filterStudents === 'function') window.filterStudents();
-        if (typeof showToast === 'function') showToast(`✅ នាំចូលបានជោគជ័យ៖ បន្ថែមថ្មី ${addedCount} នាក់, កែប្រែ ${updatedCount} នាក់!`);
+        if (typeof showToast === 'function') showToast(`✅ នាំចូលសិស្សបានជោគជ័យ៖ បន្ថែមថ្មី ${addedCount} នាក់, កែប្រែ ${updatedCount} នាក់!`);
     }
 };
 
