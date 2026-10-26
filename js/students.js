@@ -2487,50 +2487,235 @@ window.importStudentsExcel = function(event) {
 };
 
 window.exportStudentsExcel = function() {
-    if (!window.filteredStudents || window.filteredStudents.length === 0) return alert("គ្មានទិន្នន័យសម្រាប់ទាញយកទេ!");
-    let tableHtml = `<table border="1"><tr>
-        <th>ល.រ</th><th>អត្តលេខ</th><th>គោត្តនាម និងនាម (ខ្មែរ)</th><th>ឈ្មោះជាអក្សរឡាតាំង</th><th>ភេទ</th>
-        <th>ថ្ងៃខែឆ្នាំកំណើត</th><th>ថ្ងៃចូលរៀន</th>
-        <th>ទីកន្លែងកំណើត(ភូមិ)</th><th>ទីកន្លែងកំណើត(ឃុំ)</th><th>ទីកន្លែងកំណើត(ស្រុក)</th><th>ទីកន្លែងកំណើត(ខេត្ត)</th>
-        <th>ទីលំនៅ(ភូមិ)</th><th>ទីលំនៅ(ឃុំ)</th><th>ទីលំនៅ(ស្រុក)</th><th>ទីលំនៅ(ខេត្ត)</th>
-        <th>ឈ្មោះឪពុក</th><th>មុខរបរឪពុក</th><th>ឈ្មោះម្ដាយ</th><th>មុខរបរម្ដាយ</th>
-        <th>ថ្នាក់រៀន</th><th>បន្ទប់</th><th>ទំនាក់ទំនង</th>
-        <th>ប័ណ្ណក្រីក្រ</th><th>អាហារូបករណ៍</th><th>ពិការភាព</th><th>ស្ថានភាព</th>
-    </tr>`;
-    
-    window.filteredStudents.forEach((s, idx) => {
-        let dobExport = formatDate(s.dob);
-        let enrollExport = s.enrollment_date ? formatDate(s.enrollment_date) : "";
-        let statusKhmer = "កំពុងសិក្សា";
-        if (s.status === "Transferred") statusKhmer = "បានផ្ទេរចេញ";
-        else if (s.status === "Graduated") statusKhmer = "បានបញ្ចប់ការសិក្សា";
-        else if (s.status === "Inactive") statusKhmer = "មិនសកម្ម (ផ្អាក)";
-        else if (s.status === "Withdrawn" || s.status === "Dropped") statusKhmer = "បានឈប់រៀន";
+    const list = window.filteredStudents && window.filteredStudents.length > 0
+        ? window.filteredStudents
+        : ((typeof window.getMasterStudents === 'function' ? window.getMasterStudents() : null) || window.allStudents || []);
 
-        tableHtml += `<tr>
-            <td>${idx+1}</td>
-            <td>${s.id}</td>
-            <td>${s.name}</td>
-            <td>${s.name_en || s.name_latin || ''}</td>
-            <td>${s.gender}</td>
-            <td>${dobExport}</td>
-            <td>${enrollExport}</td>
-            <td>${s.pob_village||''}</td><td>${s.pob_commune||''}</td><td>${s.pob_district||''}</td><td>${s.pob_province||''}</td>
-            <td>${s.curr_village||''}</td><td>${s.curr_commune||''}</td><td>${s.curr_district||''}</td><td>${s.curr_province||''}</td>
-            <td>${s.father_name||''}</td><td>${s.father_job||''}</td><td>${s.mother_name||''}</td><td>${s.mother_job||''}</td>
-            <td>${normalizeGrade(s.grade)}</td><td>${s.room}</td><td>${s.parent_contact||''}</td>
-            <td>${s.poor_id ? 'មាន' : 'គ្មាន'}</td>
-            <td>${s.scholarship ? 'មាន' : 'គ្មាន'}</td>
-            <td>${s.disability ? 'មាន' : 'គ្មាន'}</td>
-            <td>${statusKhmer}</td>
+    if (!list || list.length === 0) return alert("⚠️ គ្មានទិន្នន័យសម្រាប់ទាញយកទេ!");
+
+    const sInfo = typeof appSettings !== 'undefined' ? appSettings : {};
+    const currentYear = document.getElementById("globalAcademicYear")?.value || localStorage.getItem('selected_academic_year') || sInfo.academic_year || "2026-2027";
+
+    // ១. ទាញយកបរិបទ និងកាលបរិច្ឆេទស្តង់ដារ MoEYS ពី CMSPrintManager
+    const ctx = (window.CMSPrintManager && typeof window.CMSPrintManager.getStandardContext === 'function')
+        ? window.CMSPrintManager.getStandardContext({ academicYear: currentYear })
+        : {
+            districtName: (sInfo.district || "កៀនស្វាយ").replace(/^ស្រុក\s*/, '').trim(),
+            schoolName: sInfo.school_name || "សាលាបឋមសិក្សា ខ្សុំ",
+            principalName: sInfo.principal_name || "",
+            teacherName: (window.AuthState ? window.AuthState.teacherName : null) || localStorage.getItem('auth_teacher_name') || sInfo.teacher_name || "",
+            academicYear: currentYear || "២០២៦-២០២៧",
+            grade: (sInfo.teacher_level && sInfo.teacher_room) ? `${sInfo.teacher_level} ${sInfo.teacher_room}`.trim() : "ថ្នាក់ទី ២ «ក»",
+            solarDateStr: "ធ្វើនៅ..., ថ្ងៃទី.......ខែ..........ឆ្នាំ២០២៦",
+            lunarDateStr: "ថ្ងៃ....................ខែ..................ឆ្នាំ...............ព.ស.២៥៧០"
+        };
+
+    const principalDisplayName = (ctx.principalName && ctx.principalName !== "នាយកសាលា") ? ctx.principalName : "";
+
+    // ២. គណនាស្ថិតិសង្ខេបសិស្ស (Summary Statistics)
+    const totalStudents = list.length;
+    const femaleStudents = list.filter(s => s.gender === 'ស្រី' || s.gender === 'F').length;
+    const maleStudents = totalStudents - femaleStudents;
+    const femalePercent = totalStudents > 0 ? ((femaleStudents / totalStudents) * 100).toFixed(1) : "0";
+
+    const poorCount = list.filter(s => s.poor_id && s.poor_id !== 'គ្មាន' && s.poor_id !== 'false' && s.poor_id !== false).length;
+    const scholarshipCount = list.filter(s => s.scholarship && s.scholarship !== 'គ្មាន' && s.scholarship !== 'false' && s.scholarship !== false).length;
+    const disabilityCount = list.filter(s => s.disability && s.disability !== 'គ្មាន' && s.disability !== 'false' && s.disability !== false).length;
+
+    const activeCount = list.filter(s => !s.status || s.status === 'Active' || s.status === 'កំពុងសិក្សា').length;
+    const transferredCount = list.filter(s => s.status === 'Transferred' || s.status === 'បានផ្ទេរចេញ').length;
+    const droppedCount = list.filter(s => s.status === 'Withdrawn' || s.status === 'Dropped' || s.status === 'បានឈប់រៀន').length;
+
+    const toKh = window.toKhmerNum || (n => n);
+
+    // ៣. បង្កើតជួរទិន្នន័យតារាងសិស្ស
+    let rowsHtml = '';
+    list.forEach((s, idx) => {
+        const isEven = idx % 2 === 1;
+        const rowBg = isEven ? '#f8fafc' : '#ffffff';
+        const dobExport = typeof formatDate === 'function' ? formatDate(s.dob) : (s.dob || '');
+        const enrollExport = s.enrollment_date ? (typeof formatDate === 'function' ? formatDate(s.enrollment_date) : s.enrollment_date) : "";
+        const pobStr = [s.pob_village, s.pob_commune, s.pob_district, s.pob_province].filter(Boolean).join(', ') || s.pob || '';
+        const currAddrStr = [s.curr_village, s.curr_commune, s.curr_district, s.curr_province].filter(Boolean).join(', ') || s.address || s.curr_address || '';
+
+        let statusKhmer = "កំពុងសិក្សា";
+        if (s.status === "Transferred" || s.status === "បានផ្ទេរចេញ") statusKhmer = "បានផ្ទេរចេញ";
+        else if (s.status === "Graduated" || s.status === "បានបញ្ចប់ការសិក្សា") statusKhmer = "បានបញ្ចប់ការសិក្សា";
+        else if (s.status === "Inactive" || s.status === "ផ្អាក") statusKhmer = "មិនសកម្ម (ផ្អាក)";
+        else if (s.status === "Withdrawn" || s.status === "Dropped" || s.status === "បានឈប់រៀន") statusKhmer = "បានឈប់រៀន";
+
+        const poorStr = (s.poor_id && s.poor_id !== 'គ្មាន' && s.poor_id !== 'false' && s.poor_id !== false) ? (s.poor_id === true ? 'មាន' : s.poor_id) : 'គ្មាន';
+        const scholarStr = (s.scholarship && s.scholarship !== 'គ្មាន' && s.scholarship !== 'false' && s.scholarship !== false) ? 'មាន' : 'គ្មាន';
+        const disabStr = (s.disability && s.disability !== 'គ្មាន' && s.disability !== 'false' && s.disability !== false) ? (s.disability === true ? 'មាន' : s.disability) : 'គ្មាន';
+
+        const genderColor = (s.gender === 'ស្រី' || s.gender === 'F') ? 'color: #e11d48; font-weight: bold;' : 'color: #1e3a8a;';
+        const gradeRoom = [typeof normalizeGrade === 'function' ? normalizeGrade(s.grade) : (s.grade || s.class || ctx.grade), s.room ? `«${s.room}»` : ''].filter(Boolean).join(' ');
+
+        rowsHtml += `
+        <tr style="background-color: ${rowBg};">
+            <td style="text-align: center; border: 1pt solid #94a3b8; padding: 5px;">${idx + 1}</td>
+            <td style="text-align: center; border: 1pt solid #94a3b8; padding: 5px; mso-number-format: '\\@'; font-weight: bold; color: #1e3a8a;">${s.id || ''}</td>
+            <td style="text-align: left; border: 1pt solid #94a3b8; padding: 5px 8px; font-weight: bold; white-space: nowrap;">${s.name || ''}</td>
+            <td style="text-align: left; border: 1pt solid #94a3b8; padding: 5px 8px; white-space: nowrap;">${s.name_en || s.name_latin || ''}</td>
+            <td style="text-align: center; border: 1pt solid #94a3b8; padding: 5px; ${genderColor}">${s.gender || 'ប្រុស'}</td>
+            <td style="text-align: center; border: 1pt solid #94a3b8; padding: 5px; mso-number-format: '\\@'; white-space: nowrap;">${dobExport}</td>
+            <td style="text-align: center; border: 1pt solid #94a3b8; padding: 5px; mso-number-format: '\\@'; white-space: nowrap;">${enrollExport}</td>
+            <td style="text-align: left; border: 1pt solid #94a3b8; padding: 5px 8px;">${pobStr}</td>
+            <td style="text-align: left; border: 1pt solid #94a3b8; padding: 5px 8px;">${currAddrStr}</td>
+            <td style="text-align: left; border: 1pt solid #94a3b8; padding: 5px 8px;">${s.father_name || ''}</td>
+            <td style="text-align: left; border: 1pt solid #94a3b8; padding: 5px 8px;">${s.father_job || ''}</td>
+            <td style="text-align: left; border: 1pt solid #94a3b8; padding: 5px 8px;">${s.mother_name || ''}</td>
+            <td style="text-align: left; border: 1pt solid #94a3b8; padding: 5px 8px;">${s.mother_job || ''}</td>
+            <td style="text-align: center; border: 1pt solid #94a3b8; padding: 5px;">${gradeRoom}</td>
+            <td style="text-align: center; border: 1pt solid #94a3b8; padding: 5px; mso-number-format: '\\@';">${s.parent_contact || s.phone || ''}</td>
+            <td style="text-align: center; border: 1pt solid #94a3b8; padding: 5px; ${poorStr !== 'គ្មាន' ? 'color: #d97706; font-weight: bold;' : ''}">${poorStr}</td>
+            <td style="text-align: center; border: 1pt solid #94a3b8; padding: 5px; ${scholarStr !== 'គ្មាន' ? 'color: #2563eb; font-weight: bold;' : ''}">${scholarStr}</td>
+            <td style="text-align: center; border: 1pt solid #94a3b8; padding: 5px; ${disabStr !== 'គ្មាន' ? 'color: #9333ea; font-weight: bold;' : ''}">${disabStr}</td>
+            <td style="text-align: center; border: 1pt solid #94a3b8; padding: 5px; font-weight: 500;">${statusKhmer}</td>
         </tr>`;
     });
-    tableHtml += `</table>`;
-    const finalHtml = `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="utf-8"></head><body>${tableHtml}</body></html>`;
-    const blob = new Blob(['\ufeff', finalHtml], { type: 'application/vnd.ms-excel' });
-    const link = document.createElement("a"); link.href = URL.createObjectURL(blob); 
+
+    const finalHtml = `
+    <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
+    <head>
+        <meta charset="utf-8">
+        <!--[if gte mso 9]>
+        <xml>
+            <x:ExcelWorkbook>
+                <x:ExcelWorksheets>
+                    <x:ExcelWorksheet>
+                        <x:Name>បញ្ជីសិស្ស</x:Name>
+                        <x:WorksheetOptions>
+                            <x:DisplayGridlines/>
+                            <x:Print><x:Orientation>Landscape</x:Orientation></x:Print>
+                        </x:WorksheetOptions>
+                    </x:ExcelWorksheet>
+                </x:ExcelWorksheets>
+            </x:ExcelWorkbook>
+        </xml>
+        <![endif]-->
+        <style>
+            body { font-family: "Khmer OS Siemreap", "Siemreap", Arial, sans-serif; font-size: 10pt; }
+            table { border-collapse: collapse; width: 100%; white-space: nowrap; }
+            th { background-color: #10489c; color: #ffffff; font-family: "Khmer OS Muol Light", "Moul", serif; font-size: 10pt; font-weight: bold; border: 1pt solid #0f172a; text-align: center; vertical-align: middle; padding: 6px 4px; height: 36px; }
+            td { border: 1pt solid #94a3b8; font-family: "Khmer OS Siemreap", "Siemreap", Arial, sans-serif; font-size: 9.5pt; vertical-align: middle; padding: 5px 6px; }
+        </style>
+    </head>
+    <body>
+        <table>
+            <!-- ក្បាលលិខិតផ្លូវការ (MoEYS Standard Letterhead) -->
+            <tr>
+                <td colspan="8" style="border: none; text-align: left; vertical-align: top; font-family: 'Khmer OS Muol Light', Moul, serif; font-size: 11pt; color: #1e3a8a; line-height: 1.6; padding-left: 10px;">
+                    ការិយាល័យអប់រំ យុវជន និងកីឡានៃរដ្ឋបាលស្រុក${ctx.districtName}<br>
+                    ${ctx.schoolName}<br>
+                    ${ctx.grade ? ctx.grade : ''}
+                </td>
+                <td colspan="3" style="border: none;"></td>
+                <td colspan="8" style="border: none; text-align: center; vertical-align: top; font-family: 'Khmer OS Muol Light', Moul, serif; font-size: 11.5pt; color: #1e3a8a; line-height: 1.6;">
+                    ព្រះរាជាណាចក្រកម្ពុជា<br>
+                    ជាតិ សាសនា ព្រះមហាក្សត្រ<br>
+                    <span style="color: #d97706; font-size: 11pt; letter-spacing: 3px;">❖ ❖ ❖</span>
+                </td>
+            </tr>
+
+            <tr><td colspan="19" style="border: none; height: 12px;"></td></tr>
+
+            <!-- ចំណងជើងរបាយការណ៍ (Document Title) -->
+            <tr>
+                <td colspan="19" style="border: none; text-align: center; font-family: 'Khmer OS Muol Light', Moul, serif; font-size: 15pt; color: #1e3a8a; font-weight: bold; padding: 6px 0;">
+                    បញ្ជីរាយនាមសិស្ស (Student List)
+                </td>
+            </tr>
+            <tr>
+                <td colspan="19" style="border: none; text-align: center; font-family: 'Khmer OS Siemreap', 'Kantumruy Pro', sans-serif; font-size: 11.5pt; font-weight: bold; color: #dc2626; padding-bottom: 8px;">
+                    ${ctx.grade ? ctx.grade + ' | ' : ''}ឆ្នាំសិក្សា ៖ ${toKh(ctx.academicYear)}
+                </td>
+            </tr>
+
+            <tr><td colspan="19" style="border: none; height: 8px;"></td></tr>
+
+            <!-- ប្រអប់ទិន្នន័យសង្ខេប (Summary Statistics Box) -->
+            <tr>
+                <td colspan="19" style="border: 1.5pt solid #1e40af; background-color: #1e40af; color: #ffffff; font-family: 'Khmer OS Muol Light', Moul, serif; font-size: 10.5pt; font-weight: bold; padding: 6px 12px; text-align: left;">
+                    📊 ទិន្នន័យសង្ខេបសិស្សរួម (Student Summary Statistics)
+                </td>
+            </tr>
+            <tr>
+                <td colspan="5" style="border: 1pt solid #bfdbfe; background-color: #eff6ff; font-family: 'Khmer OS Siemreap', sans-serif; font-size: 10pt; padding: 6px 10px;">• សិស្សសរុប៖ <b>${totalStudents}</b> នាក់</td>
+                <td colspan="5" style="border: 1pt solid #bfdbfe; background-color: #eff6ff; font-family: 'Khmer OS Siemreap', sans-serif; font-size: 10pt; padding: 6px 10px;">• ស្រី៖ <b style="color: #e11d48;">${femaleStudents}</b> នាក់ (${femalePercent}%)</td>
+                <td colspan="4" style="border: 1pt solid #bfdbfe; background-color: #eff6ff; font-family: 'Khmer OS Siemreap', sans-serif; font-size: 10pt; padding: 6px 10px;">• ប្រុស៖ <b style="color: #2563eb;">${maleStudents}</b> នាក់</td>
+                <td colspan="5" style="border: 1pt solid #bfdbfe; background-color: #eff6ff; font-family: 'Khmer OS Siemreap', sans-serif; font-size: 10pt; padding: 6px 10px;">• កំពុងសិក្សា៖ <b style="color: #16a34a;">${activeCount}</b> នាក់</td>
+            </tr>
+            <tr>
+                <td colspan="5" style="border: 1pt solid #bbf7d0; background-color: #f0fdf4; font-family: 'Khmer OS Siemreap', sans-serif; font-size: 10pt; padding: 6px 10px;">• ប័ណ្ណក្រីក្រ (ID Poor)៖ <b>${poorCount}</b> នាក់</td>
+                <td colspan="5" style="border: 1pt solid #bbf7d0; background-color: #f0fdf4; font-family: 'Khmer OS Siemreap', sans-serif; font-size: 10pt; padding: 6px 10px;">• អាហារូបករណ៍៖ <b>${scholarshipCount}</b> នាក់</td>
+                <td colspan="4" style="border: 1pt solid #bbf7d0; background-color: #f0fdf4; font-family: 'Khmer OS Siemreap', sans-serif; font-size: 10pt; padding: 6px 10px;">• ពិការភាព៖ <b>${disabilityCount}</b> នាក់</td>
+                <td colspan="5" style="border: 1pt solid #bbf7d0; background-color: #f0fdf4; font-family: 'Khmer OS Siemreap', sans-serif; font-size: 10pt; padding: 6px 10px;">• ផ្ទេរចេញ/ឈប់រៀន៖ <b>${transferredCount + droppedCount}</b> នាក់</td>
+            </tr>
+
+            <tr><td colspan="19" style="border: none; height: 12px;"></td></tr>
+
+            <!-- ក្បាលតារាងសិស្ស (Royal Blue Table Headers with 1pt Border) -->
+            <tr style="background-color: #10489c; color: #ffffff;">
+                <th style="border: 1pt solid #0f172a; padding: 6px; font-size: 10pt; font-family: 'Khmer OS Muol Light', Moul, serif;">ល.រ</th>
+                <th style="border: 1pt solid #0f172a; padding: 6px; font-size: 10pt; font-family: 'Khmer OS Muol Light', Moul, serif;">អត្តលេខ</th>
+                <th style="border: 1pt solid #0f172a; padding: 6px; font-size: 10pt; font-family: 'Khmer OS Muol Light', Moul, serif;">គោត្តនាម និងនាម</th>
+                <th style="border: 1pt solid #0f172a; padding: 6px; font-size: 10pt; font-family: 'Khmer OS Muol Light', Moul, serif;">ឈ្មោះឡាតាំង</th>
+                <th style="border: 1pt solid #0f172a; padding: 6px; font-size: 10pt; font-family: 'Khmer OS Muol Light', Moul, serif;">ភេទ</th>
+                <th style="border: 1pt solid #0f172a; padding: 6px; font-size: 10pt; font-family: 'Khmer OS Muol Light', Moul, serif;">ថ្ងៃខែឆ្នាំកំណើត</th>
+                <th style="border: 1pt solid #0f172a; padding: 6px; font-size: 10pt; font-family: 'Khmer OS Muol Light', Moul, serif;">ថ្ងៃចូលរៀន</th>
+                <th style="border: 1pt solid #0f172a; padding: 6px; font-size: 10pt; font-family: 'Khmer OS Muol Light', Moul, serif;">ទីកន្លែងកំណើត</th>
+                <th style="border: 1pt solid #0f172a; padding: 6px; font-size: 10pt; font-family: 'Khmer OS Muol Light', Moul, serif;">ទីលំនៅបច្ចុប្បន្ន</th>
+                <th style="border: 1pt solid #0f172a; padding: 6px; font-size: 10pt; font-family: 'Khmer OS Muol Light', Moul, serif;">ឈ្មោះឪពុក</th>
+                <th style="border: 1pt solid #0f172a; padding: 6px; font-size: 10pt; font-family: 'Khmer OS Muol Light', Moul, serif;">មុខរបរ</th>
+                <th style="border: 1pt solid #0f172a; padding: 6px; font-size: 10pt; font-family: 'Khmer OS Muol Light', Moul, serif;">ឈ្មោះម្ដាយ</th>
+                <th style="border: 1pt solid #0f172a; padding: 6px; font-size: 10pt; font-family: 'Khmer OS Muol Light', Moul, serif;">មុខរបរ</th>
+                <th style="border: 1pt solid #0f172a; padding: 6px; font-size: 10pt; font-family: 'Khmer OS Muol Light', Moul, serif;">ថ្នាក់/បន្ទប់</th>
+                <th style="border: 1pt solid #0f172a; padding: 6px; font-size: 10pt; font-family: 'Khmer OS Muol Light', Moul, serif;">លេខទូរស័ព្ទ</th>
+                <th style="border: 1pt solid #0f172a; padding: 6px; font-size: 10pt; font-family: 'Khmer OS Muol Light', Moul, serif;">ប័ណ្ណក្រីក្រ</th>
+                <th style="border: 1pt solid #0f172a; padding: 6px; font-size: 10pt; font-family: 'Khmer OS Muol Light', Moul, serif;">អាហារូបករណ៍</th>
+                <th style="border: 1pt solid #0f172a; padding: 6px; font-size: 10pt; font-family: 'Khmer OS Muol Light', Moul, serif;">ពិការភាព</th>
+                <th style="border: 1pt solid #0f172a; padding: 6px; font-size: 10pt; font-family: 'Khmer OS Muol Light', Moul, serif;">ស្ថានភាព</th>
+            </tr>
+
+            <!-- តួទិន្នន័យសិស្ស (Student Rows) -->
+            ${rowsHtml}
+
+            <tr><td colspan="19" style="border: none; height: 20px;"></td></tr>
+
+            <!-- កាលបរិច្ឆេទ និងហត្ថលេខាផ្លូវការ MoEYS (Standard Signatures & Dates) -->
+            <tr>
+                <td colspan="8" style="border: none; text-align: center; vertical-align: top; font-family: 'Khmer OS Siemreap', 'Siemreap', sans-serif; font-size: 10.5pt; line-height: 1.6;">
+                    បានឃើញ និងឯកភាព<br>
+                    <b style="font-family: 'Khmer OS Muol Light', Moul, serif; font-size: 11pt;">នាយក/នាយិកាសាលា</b><br><br><br><br><br>
+                    ${principalDisplayName ? `<b style="font-family: 'Khmer OS Muol Light', Moul, serif; font-size: 11pt;">${principalDisplayName}</b>` : ''}
+                </td>
+                <td colspan="3" style="border: none;"></td>
+                <td colspan="8" style="border: none; text-align: center; vertical-align: top; font-family: 'Khmer OS Siemreap', 'Siemreap', sans-serif; font-size: 10.5pt; line-height: 1.6;">
+                    ${ctx.lunarDateStr || 'ថ្ងៃ....................ខែ..................ឆ្នាំ...............ព.ស.២៥៧០'}<br>
+                    ${ctx.solarDateStr}<br>
+                    <b style="font-family: 'Khmer OS Muol Light', Moul, serif; font-size: 11pt;">គ្រូបន្ទុកថ្នាក់ / អ្នករៀបចំ</b><br><br><br><br><br>
+                    ${ctx.teacherName ? `<b style="font-family: 'Khmer OS Muol Light', Moul, serif; font-size: 11pt;">${ctx.teacherName}</b>` : ''}
+                </td>
+            </tr>
+        </table>
+    </body>
+    </html>`;
+
+    const blob = new Blob(['\ufeff', finalHtml], { type: 'application/vnd.ms-excel;charset=utf-8' });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob); 
     link.download = `Student_List_${new Date().toISOString().split('T')[0]}.xls`; 
+    document.body.appendChild(link);
     link.click();
+    setTimeout(() => {
+        document.body.removeChild(link);
+        URL.revokeObjectURL(link.href);
+    }, 150);
+
+    if (typeof showToast === 'function') {
+        showToast("✅ បាននាំចេញបញ្ជីរាយនាមសិស្សជា Excel តាមស្តង់ដារជោគជ័យ!");
+    }
 };
 
 

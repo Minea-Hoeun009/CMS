@@ -2313,6 +2313,15 @@ window.exportScoreEntryToExcel = function() {
     const solarDateStr = `${locationStr}, ${sDate}`;
     const lunarDateStr = rDates.showLunar !== false ? (rDates.lunarDate || "ថ្ងៃ......................... ខែ............ ឆ្នាំ............ ព.ស.២៥៧...") : "";
 
+    const ctx = (window.CMSPrintManager && typeof window.CMSPrintManager.getStandardContext === 'function')
+        ? window.CMSPrintManager.getStandardContext({ academicYear })
+        : null;
+
+    const principalDisplayName = (ctx && ctx.principalName && ctx.principalName !== "នាយកសាលា") ? ctx.principalName : ((sInfo.principal_name && sInfo.principal_name !== "នាយកសាលា") ? sInfo.principal_name : "");
+    const teacherDisplayName = (ctx && ctx.teacherName) ? ctx.teacherName : ((window.AuthState ? window.AuthState.teacherName : null) || localStorage.getItem('auth_teacher_name') || sInfo.teacher_name || "");
+    const finalSolarDate = (ctx && ctx.solarDateStr) ? ctx.solarDateStr : solarDateStr;
+    const finalLunarDate = (ctx && ctx.lunarDateStr) ? ctx.lunarDateStr : lunarDateStr;
+
     let htmlTable = window.getAdvancedScoreTableHtml(true, false);
 
     let excelContent = `
@@ -2330,6 +2339,22 @@ window.exportScoreEntryToExcel = function() {
                 <tr><td colspan="30" style="border: none; height: 10px;"></td></tr>
             </table>
             ${htmlTable}
+            <table style="width: 100%; margin-top: 25px; border-collapse: collapse; white-space: nowrap;">
+                <tr>
+                    <td colspan="12" style="border: none; text-align: center; vertical-align: top; font-family: 'Khmer OS Siemreap', 'Siemreap', sans-serif; font-size: 10.5pt; line-height: 1.6;">
+                        បានឃើញ និងឯកភាព<br>
+                        <b style="font-family: 'Khmer OS Muol Light', Moul, serif; font-size: 11pt;">នាយក/នាយិកាសាលា</b><br><br><br><br><br>
+                        ${principalDisplayName ? `<b style="font-family: 'Khmer OS Muol Light', Moul, serif; font-size: 11pt;">${principalDisplayName}</b>` : ''}
+                    </td>
+                    <td colspan="6" style="border: none;"></td>
+                    <td colspan="12" style="border: none; text-align: center; vertical-align: top; font-family: 'Khmer OS Siemreap', 'Siemreap', sans-serif; font-size: 10.5pt; line-height: 1.6;">
+                        ${finalLunarDate ? `${finalLunarDate}<br>` : ''}
+                        ${finalSolarDate}<br>
+                        <b style="font-family: 'Khmer OS Muol Light', Moul, serif; font-size: 11pt;">គ្រូបន្ទុកថ្នាក់</b><br><br><br><br><br>
+                        ${teacherDisplayName ? `<b style="font-family: 'Khmer OS Muol Light', Moul, serif; font-size: 11pt;">${teacherDisplayName}</b>` : ''}
+                    </td>
+                </tr>
+            </table>
         </body>
         </html>
     `;
@@ -2563,28 +2588,29 @@ window.downloadExcelTemplate = function() {
     else if (type === "annual") titleText = `ទម្រង់បញ្ចូលពិន្ទុប្រចាំឆ្នាំសិក្សា`;
 
     let headerTh = `
-        <th style="width: 50px; background-color: #f1f5f9; border: 1px solid #000000; padding: 6px; color: #1e3a8a; font-family: 'Khmer OS Muol Light', 'Moul', serif; font-size: 10pt; vertical-align: middle;">ល.រ</th>
-        <th style="width: 120px; background-color: #f1f5f9; border: 1px solid #000000; padding: 6px; color: #1e3a8a; font-family: 'Khmer OS Muol Light', 'Moul', serif; font-size: 10pt; vertical-align: middle;">អត្តលេខ (ID)</th>
-        <th style="width: 200px; background-color: #f1f5f9; border: 1px solid #000000; padding: 6px; color: #1e3a8a; font-family: 'Khmer OS Muol Light', 'Moul', serif; font-size: 10pt; vertical-align: middle;">ឈ្មោះសិស្ស</th>
-        <th style="width: 60px; background-color: #f1f5f9; border: 1px solid #000000; padding: 6px; color: #1e3a8a; font-family: 'Khmer OS Muol Light', 'Moul', serif; font-size: 10pt; vertical-align: middle;">ភេទ</th>
+        <th style="width: 50px; background-color: #10489c; border: 1px solid #0f172a; padding: 6px; color: #ffffff; font-family: 'Khmer OS Muol Light', 'Moul', serif; font-size: 10pt; vertical-align: middle;">ល.រ</th>
+        <th style="width: 120px; background-color: #10489c; border: 1px solid #0f172a; padding: 6px; color: #ffffff; font-family: 'Khmer OS Muol Light', 'Moul', serif; font-size: 10pt; vertical-align: middle;">អត្តលេខ (ID)</th>
+        <th style="width: 200px; background-color: #10489c; border: 1px solid #0f172a; padding: 6px; color: #ffffff; font-family: 'Khmer OS Muol Light', 'Moul', serif; font-size: 10pt; vertical-align: middle;">ឈ្មោះសិស្ស</th>
+        <th style="width: 60px; background-color: #10489c; border: 1px solid #0f172a; padding: 6px; color: #ffffff; font-family: 'Khmer OS Muol Light', 'Moul', serif; font-size: 10pt; vertical-align: middle;">ភេទ</th>
     `;
     
     window.activeSchema.forEach(g => {
         let subs = g.subs && g.subs.length > 0 ? g.subs : [{name: g.group, key: g.key}];
         subs.forEach(s => {
-            headerTh += `<th style="width: 100px; background-color: #f1f5f9; border: 1px solid #000000; padding: 6px; color: #1e3a8a; font-family: 'Khmer OS Muol Light', 'Moul', serif; font-size: 10pt; vertical-align: middle;">${s.name}<br><span style="font-size: 8pt; color: #64748b; font-family: 'Arial', sans-serif;">[${s.key}]</span></th>`;
+            headerTh += `<th style="width: 100px; background-color: #10489c; border: 1px solid #0f172a; padding: 6px; color: #ffffff; font-family: 'Khmer OS Muol Light', 'Moul', serif; font-size: 10pt; vertical-align: middle;">${s.name}<br><span style="font-size: 8pt; color: #bfdbfe; font-family: 'Arial', sans-serif;">[${s.key}]</span></th>`;
         });
     });
 
     let tbodyStr = "";
     window.scoresStudentList.forEach((s, idx) => {
-        let tr = `<tr style="height: 28px;">
-            <td style="border: 1px solid #000000; text-align: center; font-family: 'Times New Roman', serif; font-size: 11pt;">${idx + 1}</td>
-            <td style="border: 1px solid #000000; text-align: center; font-family: 'Times New Roman', serif; font-size: 11pt; font-weight: bold; color: #1e3a8a;">${s.id}</td>
-            <td style="border: 1px solid #000000; text-align: left; padding-left: 8px; font-family: 'Khmer OS Siemreap', 'Siemreap', sans-serif; font-size: 11pt;">${s.name}</td>
-            <td style="border: 1px solid #000000; text-align: center; font-family: 'Khmer OS Siemreap', 'Siemreap', sans-serif; font-size: 11pt; font-weight: bold; color: ${s.gender==='ស្រី'?'#e11d48':'#1e3a8a'};">${s.gender}</td>`;
+        const rowBg = idx % 2 === 1 ? '#f8fafc' : '#ffffff';
+        let tr = `<tr style="height: 28px; background-color: ${rowBg};">
+            <td style="border: 1px solid #94a3b8; text-align: center; font-family: 'Times New Roman', serif; font-size: 11pt;">${idx + 1}</td>
+            <td style="border: 1px solid #94a3b8; text-align: center; font-family: 'Times New Roman', serif; font-size: 11pt; font-weight: bold; color: #1e3a8a; mso-number-format: '\\@';">${s.id}</td>
+            <td style="border: 1px solid #94a3b8; text-align: left; padding-left: 8px; font-family: 'Khmer OS Siemreap', 'Siemreap', sans-serif; font-size: 11pt; font-weight: 600;">${s.name}</td>
+            <td style="border: 1px solid #94a3b8; text-align: center; font-family: 'Khmer OS Siemreap', 'Siemreap', sans-serif; font-size: 11pt; font-weight: bold; color: ${s.gender==='ស្រី'?'#e11d48':'#1e3a8a'};">${s.gender}</td>`;
         window.activeSubjectKeys.forEach(k => {
-            tr += `<td style="border: 1px solid #000000; text-align: center; font-family: 'Times New Roman', serif; font-weight: bold; font-size: 12pt;"></td>`;
+            tr += `<td style="border: 1px solid #94a3b8; text-align: center; font-family: 'Times New Roman', serif; font-weight: bold; font-size: 12pt;"></td>`;
         });
         tr += `</tr>`;
         tbodyStr += tr;
@@ -2593,6 +2619,15 @@ window.downloadExcelTemplate = function() {
     let totalCols = 4 + window.activeSubjectKeys.length;
     let leftCols = Math.floor(totalCols / 2);
     let rightCols = totalCols - leftCols;
+
+    const rankCtx = (window.CMSPrintManager && typeof window.CMSPrintManager.getStandardContext === 'function')
+        ? window.CMSPrintManager.getStandardContext({ academicYear })
+        : null;
+
+    const principalDisplayNameRank = (rankCtx && rankCtx.principalName && rankCtx.principalName !== "នាយកសាលា") ? rankCtx.principalName : ((sInfo.principal_name && sInfo.principal_name !== "នាយកសាលា") ? sInfo.principal_name : "");
+    const teacherDisplayNameRank = (rankCtx && rankCtx.teacherName) ? rankCtx.teacherName : ((window.AuthState ? window.AuthState.teacherName : null) || localStorage.getItem('auth_teacher_name') || sInfo.teacher_name || "");
+    const rankSolarDate = (rankCtx && rankCtx.solarDateStr) ? rankCtx.solarDateStr : "ធ្វើនៅ..., ថ្ងៃទី.......ខែ..........ឆ្នាំ២០២៦";
+    const rankLunarDate = (rankCtx && rankCtx.lunarDateStr) ? rankCtx.lunarDateStr : "ថ្ងៃ....................ខែ..................ឆ្នាំ...............ព.ស.២៥៧០";
 
     let html = `
     <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
@@ -2619,6 +2654,21 @@ window.downloadExcelTemplate = function() {
         <table border="1" cellpadding="4" cellspacing="0" style="border-collapse: collapse; width: 100%; border: 1px solid #000000;">
             <tr>${headerTh}</tr>
             ${tbodyStr}
+        </table>
+        <table style="width: 100%; margin-top: 25px; border-collapse: collapse; white-space: nowrap;">
+            <tr>
+                <td colspan="${leftCols}" style="border: none; text-align: center; vertical-align: top; font-family: 'Khmer OS Siemreap', 'Siemreap', sans-serif; font-size: 10.5pt; line-height: 1.6;">
+                    បានឃើញ និងឯកភាព<br>
+                    <b style="font-family: 'Khmer OS Muol Light', Moul, serif; font-size: 11pt;">នាយក/នាយិកាសាលា</b><br><br><br><br><br>
+                    ${principalDisplayNameRank ? `<b style="font-family: 'Khmer OS Muol Light', Moul, serif; font-size: 11pt;">${principalDisplayNameRank}</b>` : ''}
+                </td>
+                <td colspan="${rightCols}" style="border: none; text-align: center; vertical-align: top; font-family: 'Khmer OS Siemreap', 'Siemreap', sans-serif; font-size: 10.5pt; line-height: 1.6;">
+                    ${rankLunarDate ? `${rankLunarDate}<br>` : ''}
+                    ${rankSolarDate}<br>
+                    <b style="font-family: 'Khmer OS Muol Light', Moul, serif; font-size: 11pt;">គ្រូបន្ទុកថ្នាក់</b><br><br><br><br><br>
+                    ${teacherDisplayNameRank ? `<b style="font-family: 'Khmer OS Muol Light', Moul, serif; font-size: 11pt;">${teacherDisplayNameRank}</b>` : ''}
+                </td>
+            </tr>
         </table>
     </body>
     </html>`;
