@@ -955,28 +955,19 @@ window.TimetableHomeworkManager = {
             <div class="max-w-[1600px] mx-auto space-y-6 animate-fade-in font-siemreap pb-20">
                 
                 <!-- Header Banner -->
-                <div class="bg-gradient-to-r from-teal-900 via-indigo-950 to-slate-900 rounded-[2rem] p-6 md:p-8 text-white shadow-xl relative overflow-hidden border border-indigo-800/40 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
-                    <div class="absolute -right-10 -top-10 w-64 h-64 bg-indigo-500/20 rounded-full blur-3xl pointer-events-none"></div>
-                    
-                    <div class="relative z-10 space-y-2">
-                        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 text-xs font-bold border border-emerald-400/30">
-                            <i class="fa-solid fa-calendar-check"></i> កាលវិភាគសិក្សាផ្លូវការ (Study Timetable)
-                        </div>
-                        <h2 class="text-2xl md:text-3xl font-black font-moul tracking-wide drop-shadow-md">
-                            កាលវិភាគសិក្សា
-                        </h2>
-                        <p class="text-xs md:text-sm text-indigo-200 font-medium max-w-2xl">
-                            រៀបចំកាលវិភាគសិក្សាតាមថ្នាក់ កំណត់ម៉ោងសិក្សានីមួយៗដោយខ្លួនឯង ប្រើប្រាស់មុខងារស្វ័យប្រវត្តិតាមស្តង់ដារ និងត្រួតពិនិត្យភាពជាន់ម៉ោងបង្រៀន
-                        </p>
-                    </div>
-
-                    <!-- Action: Configure Study Periods -->
-                    <div class="flex items-center gap-2 relative z-10 shrink-0">
-                        <button onclick="window.TimetableHomeworkManager.openPeriodSettingsModal()" class="px-5 py-3 rounded-2xl text-xs font-bold transition flex items-center gap-2 bg-gradient-to-r from-teal-500 to-emerald-600 hover:from-teal-600 hover:to-emerald-700 text-white shadow-lg border border-white/20 transform hover:-translate-y-0.5">
+                ${typeof window.renderExecutiveHeaderHTML === 'function' ? window.renderExecutiveHeaderHTML({
+                    title: "កាលវិភាគសិក្សា",
+                    subtitle: "រៀបចំកាលវិភាគសិក្សាតាមថ្នាក់ និងកំណត់ម៉ោងសិក្សានីមួយៗដោយខ្លួនឯង",
+                    icon: "fa-solid fa-calendar-days",
+                    currentClass: this.currentGrade,
+                    academicYear: this.currentAcademicYear,
+                    clockId: "ttHeaderClock",
+                    extraActionsHtml: `
+                        <button onclick="window.TimetableHomeworkManager.openPeriodSettingsModal()" class="px-5 py-2.5 rounded-2xl text-xs font-bold transition flex items-center gap-2 bg-gradient-to-r from-teal-500 to-emerald-600 hover:from-teal-600 hover:to-emerald-700 text-white shadow-lg border border-white/20 transform hover:-translate-y-0.5">
                             <i class="fa-solid fa-clock text-amber-300 text-sm"></i> កំណត់ម៉ោងសិក្សា
                         </button>
-                    </div>
-                </div>
+                    `
+                }) : ''}
 
                 <!-- Control Bar for Admin (Class Selector, Smart Generator, Copy, Print) -->
                 <div class="bg-white dark:bg-slate-800 rounded-3xl p-5 shadow-sm border border-slate-200/80 dark:border-slate-700 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">

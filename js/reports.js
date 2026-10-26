@@ -47,35 +47,39 @@ window.loadReportsView = function() {
             
             <!-- ផ្ទាំងកាតជម្រើសរបាយការណ៍ (Reports Dashboard) -->
             <div id="reportsMainDashboard" class="block w-full">
-                <!-- Header -->
-                <div class="bg-white/80 backdrop-blur-xl p-6 lg:p-8 rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-white mb-8 flex flex-col sm:flex-row justify-between items-center gap-6">
-                    <div class="flex items-center gap-5">
-                        <div class="w-16 h-16 bg-gradient-to-br from-fuchsia-500 via-purple-500 to-indigo-500 text-white rounded-[1.2rem] flex items-center justify-center text-3xl shadow-lg shadow-purple-500/30">
-                            <i class="fa-solid fa-folder-open"></i>
-                        </div>
-                        <div>
-                            <h2 class="text-xl md:text-2xl font-moul text-slate-800 tracking-wide drop-shadow-sm">របាយការណ៍រដ្ឋបាលគ្រូ</h2>
-                            <div class="flex items-center gap-2 mt-1.5">
-                                <span class="bg-slate-100 text-slate-600 px-2.5 py-1 rounded-md text-xs font-bold flex items-center gap-1.5"><i class="fa-solid fa-chalkboard-user"></i> ថ្នាក់បន្ទុក៖</span>
-                                <strong id="reportHeaderGradeDisplay" class="text-purple-700 bg-purple-50 px-3 py-1 rounded-md border border-purple-100 text-sm font-moul shadow-sm">${gradeFull}</strong>
-                            </div>
-                        </div>
-                    </div>
+            <!-- 🟢 Executive Header 🟢 -->
+            ${typeof window.renderExecutiveHeaderHTML === 'function' ? window.renderExecutiveHeaderHTML({
+                title: "របាយការណ៍ផ្សេងៗ",
+                subtitle: "មជ្ឈមណ្ឌលរបាយការណ៍រដ្ឋបាលគ្រូ សៀវភៅតាមដាន និងលទ្ធផលសិក្សា",
+                icon: "fa-solid fa-folder-open",
+                currentClass: gradeFull,
+                clockId: "reportsHeaderClock",
+                extraBadgesHtml: `
+                    <span id="reportHeaderGradeDisplay" class="hidden">${gradeFull}</span>
+                `
+            }) : ''}
 
-                    <!-- ជ្រើសរើសថ្នាក់ និងបន្ទប់ សម្រាប់របាយការណ៍ -->
-                    <div class="flex flex-wrap items-center gap-3">
-                        <div class="flex items-center gap-1.5 bg-slate-50 border border-slate-200 rounded-[1.2rem] px-3 py-2 shadow-inner">
-                            <i class="fa-solid fa-graduation-cap text-purple-600 text-sm"></i>
-                            <select id="reportGradeSelect" onchange="window.handleReportClassChange()" class="border-none bg-transparent text-sm font-bold text-indigo-700 outline-none cursor-pointer font-siemreap py-0 pr-1">
-                                ${gradesOptions}
-                            </select>
-                            <span class="text-slate-300">|</span>
-                            <select id="reportRoomSelect" onchange="window.handleReportClassChange()" class="border-none bg-transparent text-sm font-bold text-rose-600 outline-none cursor-pointer font-moul py-0 pl-1">
-                                ${roomsOptions}
-                            </select>
-                        </div>
+            <!-- ជ្រើសរើសថ្នាក់ និងបន្ទប់ សម្រាប់របាយការណ៍ -->
+            <div class="bg-white dark:bg-slate-800 p-4 rounded-[1.8rem] shadow-sm border border-slate-200/80 dark:border-slate-700 mb-6 flex flex-wrap items-center justify-between gap-3 no-print">
+                <div class="flex items-center gap-2">
+                    <span class="text-xs font-bold text-slate-500 dark:text-slate-400"><i class="fa-solid fa-graduation-cap text-indigo-600"></i> ថ្នាក់ទទួលបន្ទុក៖</span>
+                    <div class="flex items-center gap-1.5 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl px-3 py-1.5 shadow-inner">
+                        <select id="reportGradeSelect" onchange="window.handleReportClassChange()" class="border-none bg-transparent text-xs sm:text-sm font-bold text-indigo-700 dark:text-indigo-300 outline-none cursor-pointer font-siemreap py-0 pr-1">
+                            ${gradesOptions}
+                        </select>
+                        <span class="text-slate-300 dark:text-slate-500">|</span>
+                        <select id="reportRoomSelect" onchange="window.handleReportClassChange()" class="border-none bg-transparent text-xs sm:text-sm font-bold text-rose-600 dark:text-rose-400 outline-none cursor-pointer font-moul py-0 pl-1">
+                            ${roomsOptions}
+                        </select>
                     </div>
                 </div>
+
+                <div class="flex items-center gap-2">
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-purple-50 text-purple-700 dark:bg-purple-950/60 dark:text-purple-300 border border-purple-200/60 dark:border-purple-800">
+                        <i class="fa-solid fa-file-invoice text-xs"></i> របាយការណ៍កម្រិតថ្នាក់
+                    </span>
+                </div>
+            </div>
 
                 <!-- Cards Grid - រចនាឡើងតាមស្តង់ដារ KrouDigital 4.0 -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 md:gap-6">

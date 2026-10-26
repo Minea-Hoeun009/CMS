@@ -201,24 +201,29 @@ window.loadAttendanceView = async function() {
           <div class="w-full h-full overflow-y-auto overflow-x-hidden custom-scrollbar bg-slate-50 relative">
             <div class="animate-fade-in flex flex-col font-siemreap max-w-[1680px] mx-auto space-y-5 pb-16 pt-1">
               
-              <div class="bg-white p-6 md:p-8 rounded-[2rem] shadow-sm border border-slate-200 shrink-0 relative overflow-hidden flex flex-col xl:flex-row justify-between items-center gap-6 transition-all no-print">
-                <div class="absolute -right-10 -top-10 w-40 h-40 bg-rose-50 rounded-full blur-3xl pointer-events-none hidden md:block"></div>
-                <div class="absolute -left-10 -bottom-10 w-32 h-32 bg-orange-50 rounded-full blur-3xl pointer-events-none hidden md:block"></div>
-                
-                <div class="flex items-center gap-5 relative z-10 w-full xl:w-auto">
-                    <div class="w-14 h-14 md:w-16 md:h-16 bg-gradient-to-br from-rose-500 to-orange-500 text-white rounded-2xl flex items-center justify-center text-2xl shadow-lg shadow-rose-200 shrink-0 transform -rotate-3">
-                      <i class="fa-solid fa-clipboard-user"></i>
-                    </div>
-                    <div>
-                        <h2 class="text-xl md:text-3xl font-black text-slate-800 font-moul mb-1">បញ្ជីវត្តមានសិស្ស</h2>
-                        <div class="flex flex-wrap gap-2 mt-2">
-                            <span class="text-[10px] md:text-xs font-bold bg-emerald-50 text-emerald-700 px-3 py-1 rounded-lg border border-emerald-100 flex items-center gap-1.5"><i class="fa-solid fa-circle text-[6px]"></i> វត្តមាន (វ)</span>
-                            <span class="text-[10px] md:text-xs font-bold bg-amber-50 text-amber-700 px-3 py-1 rounded-lg border border-amber-200 flex items-center gap-1.5"><i class="fa-solid fa-circle text-[6px]"></i> យឺត (យ)</span>
-                            <span class="text-[10px] md:text-xs font-bold bg-blue-50 text-blue-700 px-3 py-1 rounded-lg border border-blue-100 flex items-center gap-1.5"><i class="fa-solid fa-circle text-[6px]"></i> ច្បាប់ (ច្ប)</span>
-                            <span class="text-[10px] md:text-xs font-bold bg-rose-50 text-rose-700 px-3 py-1 rounded-lg border border-rose-100 flex items-center gap-1.5"><i class="fa-solid fa-circle text-[6px]"></i> អត់ច្បាប់ (អច្ប)</span>
-                            <span class="text-[10px] md:text-xs font-bold bg-purple-50 text-purple-700 px-3 py-1 rounded-lg border border-purple-100 flex items-center gap-1.5"><i class="fa-solid fa-circle text-[6px]"></i> ឈឺ (ឈ)</span>
-                            <span class="text-[10px] md:text-xs font-bold bg-slate-100 text-slate-700 px-3 py-1 rounded-lg border border-slate-200 flex items-center gap-1.5"><i class="fa-solid fa-circle text-[6px]"></i> សម្រាក (៖)</span>
-                        </div>
+              ${typeof window.renderExecutiveHeaderHTML === 'function' ? window.renderExecutiveHeaderHTML({
+                title: "កត់វត្តមានសិស្ស",
+                subtitle: "បញ្ជីវត្តមាន និងការតាមដានការសិក្សារបស់សិស្សក្នុងថ្នាក់",
+                icon: "fa-solid fa-clipboard-user",
+                currentClass: `${initialGrade} ${initialRoom}`.trim(),
+                clockId: "attHeaderClock",
+                extraBadgesHtml: `
+                  <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-white/15 border border-white/20 text-xs text-white font-medium shadow-sm">
+                    <i class="fa-solid fa-calendar-days text-amber-300"></i> ${currentMonthName} ${currentYear}
+                  </span>
+                `
+              }) : ''}
+
+              <!-- Filter & Presence Code Quick Bar -->
+              <div class="bg-white p-5 rounded-[2rem] shadow-sm border border-slate-200 shrink-0 relative overflow-hidden flex flex-col xl:flex-row justify-between items-center gap-4 transition-all no-print">
+                <div class="flex items-center gap-3 relative z-10 w-full xl:w-auto">
+                    <div class="flex flex-wrap gap-2">
+                        <span class="text-[10px] md:text-xs font-bold bg-emerald-50 text-emerald-700 px-3 py-1.5 rounded-xl border border-emerald-100 flex items-center gap-1.5"><i class="fa-solid fa-circle text-[6px]"></i> វត្តមាន (វ)</span>
+                        <span class="text-[10px] md:text-xs font-bold bg-amber-50 text-amber-700 px-3 py-1.5 rounded-xl border border-amber-200 flex items-center gap-1.5"><i class="fa-solid fa-circle text-[6px]"></i> យឺត (យ)</span>
+                        <span class="text-[10px] md:text-xs font-bold bg-blue-50 text-blue-700 px-3 py-1.5 rounded-xl border border-blue-100 flex items-center gap-1.5"><i class="fa-solid fa-circle text-[6px]"></i> ច្បាប់ (ច្ប)</span>
+                        <span class="text-[10px] md:text-xs font-bold bg-rose-50 text-rose-700 px-3 py-1.5 rounded-xl border border-rose-100 flex items-center gap-1.5"><i class="fa-solid fa-circle text-[6px]"></i> អត់ច្បាប់ (អច្ប)</span>
+                        <span class="text-[10px] md:text-xs font-bold bg-purple-50 text-purple-700 px-3 py-1.5 rounded-xl border border-purple-100 flex items-center gap-1.5"><i class="fa-solid fa-circle text-[6px]"></i> ឈឺ (ឈ)</span>
+                        <span class="text-[10px] md:text-xs font-bold bg-slate-100 text-slate-700 px-3 py-1.5 rounded-xl border border-slate-200 flex items-center gap-1.5"><i class="fa-solid fa-circle text-[6px]"></i> សម្រាក (៖)</span>
                     </div>
                 </div>
 

@@ -1436,21 +1436,22 @@ window.loadScoresView = async function() {
 
       <div class="w-full h-full overflow-y-auto overflow-x-hidden custom-scrollbar relative z-10">
           <div class="animate-fade-in custom-mixed-font flex flex-col font-siemreap max-w-[1600px] mx-auto pb-16 px-4 lg:px-8 pt-6 min-h-full">
-            <div class="flex flex-col 2xl:flex-row 2xl:items-center justify-between gap-6 bg-white/80 backdrop-blur-xl p-6 lg:p-8 rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-white relative overflow-visible mb-8 shrink-0 transition-all">
-              <div class="relative z-10 flex items-center gap-5">
-                <div class="w-16 h-16 bg-gradient-to-br from-indigo-500 via-blue-500 to-cyan-500 text-white rounded-[1.2rem] flex items-center justify-center text-3xl shadow-lg shadow-blue-500/30 animate-float"><i class="fa-solid fa-chart-pie"></i></div>
-                <div>
-                    <h2 class="text-xl md:text-2xl font-moul text-slate-800 tracking-wide drop-shadow-sm">ប្រព័ន្ធគ្រប់គ្រងពិន្ទុ</h2>
-                    <div class="flex items-center gap-2 mt-2">
-                        <span class="bg-slate-100 text-slate-600 px-2.5 py-1 rounded-md text-xs font-bold font-siemreap flex items-center gap-1.5"><i class="fa-solid fa-school"></i> បន្ទប់រៀន៖</span>
-                        <strong id="scoreHeaderGradeDisplay" class="text-indigo-700 bg-indigo-50 px-3 py-1 rounded-md border border-indigo-100 text-sm font-moul shadow-sm">${gradeFull}</strong>
-                    </div>
-                </div>
-              </div>
-              
-              <div class="flex flex-wrap items-center gap-3 relative z-10 w-full 2xl:w-auto bg-slate-50/80 p-2 md:p-3 rounded-[1.5rem] border border-slate-200/80 backdrop-blur-md">
+            <!-- 🟢 Executive Header 🟢 -->
+            ${typeof window.renderExecutiveHeaderHTML === 'function' ? window.renderExecutiveHeaderHTML({
+                title: "ពិន្ទុ និងលទ្ធផល",
+                subtitle: "ប្រព័ន្ធគ្រប់គ្រងពិន្ទុ មធ្យមភាគ និងចំណាត់ថ្នាក់សិស្ស",
+                icon: "fa-solid fa-chart-pie",
+                currentClass: gradeFull,
+                clockId: "scoresHeaderClock",
+                extraBadgesHtml: `
+                    <span id="scoreHeaderGradeDisplay" class="hidden">${gradeFull}</span>
+                `
+            }) : ''}
+
+            <div class="flex flex-wrap items-center justify-between gap-4 bg-white dark:bg-slate-800 p-4 lg:p-5 rounded-[2rem] shadow-sm border border-slate-200/80 dark:border-slate-700 relative overflow-visible mb-6 shrink-0 transition-all no-print">
+              <div class="flex flex-wrap items-center gap-3">
                 <!-- Single Classroom Locked Display -->
-                <div class="flex items-center gap-2 bg-white border border-slate-200 text-indigo-700 px-3.5 py-2 rounded-[1.2rem] text-xs font-bold shadow-sm">
+                <div class="flex items-center gap-2 bg-indigo-50 border border-indigo-200 text-indigo-700 px-3.5 py-2 rounded-xl text-xs font-bold shadow-sm">
                    <i class="fa-solid fa-chalkboard-user text-indigo-600 text-sm"></i>
                    <span>${gradeFull}</span>
                 </div>
@@ -1465,24 +1466,26 @@ window.loadScoresView = async function() {
                    </select>
                 </div>
                 
-                <div class="flex items-center gap-2 bg-white border border-slate-200 rounded-[1.2rem] px-3 py-2 shadow-sm flex-1 sm:flex-none transition-shadow hover:shadow-md">
-                   <div class="w-8 h-8 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 shadow-inner"><i class="fa-solid fa-calendar-check text-xs"></i></div>
+                <div class="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 shadow-inner flex-1 sm:flex-none">
+                   <div class="w-7 h-7 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center shrink-0"><i class="fa-solid fa-calendar-check text-xs"></i></div>
                    <div class="flex flex-col">
                        <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider leading-none mb-0.5 ml-1">កាលវិភាគវាយតម្លៃ</span>
                        <div class="flex items-center">
-                           <select id="globalPeriodType" onchange="window.updateGlobalPeriod(); window.updateGlobalSettings();" class="border-none bg-transparent text-sm font-bold text-slate-800 outline-none cursor-pointer font-siemreap py-0 pl-1 pr-2">
+                           <select id="globalPeriodType" onchange="window.updateGlobalPeriod(); window.updateGlobalSettings();" class="border-none bg-transparent text-xs font-bold text-slate-800 outline-none cursor-pointer font-siemreap py-0 pl-1 pr-2">
                               <option value="monthly">ប្រចាំខែ</option>
                               <option value="semester">ប្រចាំឆមាស</option>
                               <option value="annual">ប្រចាំឆ្នាំ</option>
                            </select>
                            <div class="w-px h-4 bg-slate-300 mx-1"></div>
-                           <select id="globalPeriodValue" onchange="window.updateGlobalSettings()" class="border-none bg-transparent text-sm font-black text-rose-600 outline-none cursor-pointer font-siemreap py-0 pl-1"></select>
+                           <select id="globalPeriodValue" onchange="window.updateGlobalSettings()" class="border-none bg-transparent text-xs font-black text-rose-600 outline-none cursor-pointer font-siemreap py-0 pl-1"></select>
                        </div>
                    </div>
                 </div>
+              </div>
 
-                <button id="btnGlobalSemesterConfig" onclick="window.openSemesterConfig()" class="flex px-4 py-3 bg-white hover:bg-purple-50 text-purple-600 border border-slate-200 hover:border-purple-300 rounded-[1.2rem] text-xs font-bold shadow-sm items-center justify-center gap-2 flex-1 sm:flex-none transition-all group"><i class="fa-solid fa-sliders group-hover:rotate-90 transition-transform"></i> កំណត់ខែឆមាស</button>
-                <button type="button" onclick="window.toggleSharedDatePanel()" class="flex px-4 py-3 bg-white hover:bg-amber-50 text-amber-600 border border-slate-200 hover:border-amber-300 rounded-[1.2rem] text-xs font-bold items-center gap-2 shadow-sm flex-1 sm:flex-none transition-all"><i class="fa-solid fa-calendar-day"></i> កាលបរិច្ឆេទប្រព័ន្ធ</button>
+              <div class="flex flex-wrap items-center gap-2.5">
+                <button id="btnGlobalSemesterConfig" onclick="window.openSemesterConfig()" class="flex px-4 py-2.5 bg-slate-100 hover:bg-purple-50 text-purple-700 border border-slate-200 hover:border-purple-300 rounded-xl text-xs font-bold shadow-sm items-center justify-center gap-2 transition-all group"><i class="fa-solid fa-sliders group-hover:rotate-90 transition-transform"></i> កំណត់ខែឆមាស</button>
+                <button type="button" onclick="window.toggleSharedDatePanel()" class="flex px-4 py-2.5 bg-slate-100 hover:bg-amber-50 text-amber-700 border border-slate-200 hover:border-amber-300 rounded-xl text-xs font-bold items-center gap-2 shadow-sm transition-all"><i class="fa-solid fa-calendar-day"></i> កាលបរិច្ឆេទប្រព័ន្ធ</button>
               </div>
             </div>
 

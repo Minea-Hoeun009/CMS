@@ -148,55 +148,53 @@ window.loadLibraryView = async function() {
       <div class="w-full h-full overflow-y-auto overflow-x-hidden custom-scrollbar bg-slate-50 relative rounded-3xl">
         <div class="animate-fade-in flex flex-col font-siemreap max-w-[1680px] mx-auto pb-32 px-1 md:px-4 pt-2 md:pt-4 min-h-full">
           
-          <!-- 🟢 Header App Style 🟢 -->
-          <div class="bg-indigo-900 text-white p-4 md:p-6 rounded-[1.5rem] md:rounded-[2rem] flex flex-col xl:flex-row items-start xl:items-center justify-between gap-4 shrink-0 shadow-md z-20 mb-4 relative overflow-hidden">
-             <div class="absolute -right-10 -bottom-10 w-32 h-32 bg-white/10 rounded-full blur-2xl"></div>
+          <!-- 🟢 Standardized Executive Header 🟢 -->
+          ${typeof window.renderExecutiveHeaderHTML === 'function' ? window.renderExecutiveHeaderHTML({
+             title: '<span id="libMainTitle">បញ្ជីខ្ចីសៀវភៅសិក្សាគោល</span>',
+             subtitle: '<span id="libSubTitle">លោកគ្រូអ្នកគ្រូកំពុងស្ថិតក្នុងទំព័របណ្ណាល័យសៀវភៅ</span>',
+             icon: "fa-solid fa-book-open-reader",
+             currentClass: window.currentGradeFull,
+             academicYear: academicYear,
+             clockId: "libHeaderClock"
+          }) : ''}
+
+          <!-- Library Controls & Mode Switcher Bar -->
+          <div class="bg-white p-4 md:p-5 rounded-[2rem] shadow-sm border border-slate-200 shrink-0 relative overflow-hidden flex flex-col xl:flex-row justify-between items-center gap-4 transition-all mb-4 no-print">
              
-             <div class="flex items-center gap-3 relative z-10 w-full xl:w-auto">
-                <div class="w-12 h-12 md:w-14 md:h-14 bg-white/10 rounded-2xl flex justify-center items-center text-xl md:text-2xl border border-white/20 shadow-inner shrink-0">
-                   <i class="fa-solid fa-book-open-reader"></i>
-                </div>
-                <div>
-                   <h1 id="libMainTitle" class="text-base md:text-xl font-moul tracking-wide drop-shadow-sm">បញ្ជីខ្ចីសៀវភៅសិក្សាគោល</h1>
-                   <p id="libSubTitle" class="text-[11px] md:text-xs text-indigo-200 mt-1 font-bold">ថ្នាក់ទី៖ <span class="text-white bg-white/20 px-2 py-0.5 rounded">${window.currentGradeFull}</span> | ឆ្នាំសិក្សា៖ ${toKhmerNum(academicYear)}</p>
+             <!-- Tab Mode Switcher (Borrow vs Return) -->
+             <div class="flex items-center gap-2 w-full xl:w-auto">
+                <div class="flex bg-slate-100 p-1 rounded-2xl border border-slate-200 shadow-inner w-full sm:w-auto">
+                   <button onclick="window.switchLibTab('borrow')" id="ltab-borrow" class="flex-1 sm:flex-none px-4 py-2 rounded-xl text-xs font-bold transition-all bg-white text-indigo-900 shadow-sm flex items-center justify-center gap-1.5 whitespace-nowrap">
+                      <i class="fa-solid fa-hand-holding-hand text-blue-600"></i> កត់ត្រាខ្ចី
+                   </button>
+                   <button onclick="window.switchLibTab('return')" id="ltab-return" class="flex-1 sm:flex-none px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:text-slate-900 transition-all flex items-center justify-center gap-1.5 whitespace-nowrap">
+                      <i class="fa-solid fa-box-archive text-amber-600"></i> កត់ត្រាសង
+                   </button>
                 </div>
              </div>
 
-             <!-- Tools & Tabs Selector -->
+             <!-- Tools & Classroom Selector -->
              <div class="flex flex-wrap items-center justify-start xl:justify-end gap-3 relative z-10 w-full xl:w-auto">
-                
                 <!-- ជម្រើសថ្នាក់ និងបន្ទប់ សម្រាប់បណ្ណាល័យ -->
-                <div class="flex items-center gap-1.5 bg-white/10 border border-white/20 rounded-xl px-3 py-1.5 shadow-inner">
-                    <i class="fa-solid fa-graduation-cap text-indigo-200 text-sm"></i>
-                    <select id="libGradeSelect" onchange="window.handleLibClassChange()" class="border-none bg-transparent text-xs md:text-sm font-bold text-white outline-none cursor-pointer font-siemreap py-0 pr-1 [&>option]:text-slate-900">
+                <div class="flex items-center gap-1.5 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 shadow-inner">
+                    <i class="fa-solid fa-graduation-cap text-indigo-600 text-sm"></i>
+                    <select id="libGradeSelect" onchange="window.handleLibClassChange()" class="border-none bg-transparent text-xs font-bold text-indigo-900 outline-none cursor-pointer font-siemreap py-0 pr-1">
                         ${gradesOptions}
                     </select>
-                    <span class="text-white/40">|</span>
-                    <select id="libRoomSelect" onchange="window.handleLibClassChange()" class="border-none bg-transparent text-xs md:text-sm font-bold text-amber-300 outline-none cursor-pointer font-moul py-0 pl-1 [&>option]:text-slate-900">
+                    <span class="text-slate-300">|</span>
+                    <select id="libRoomSelect" onchange="window.handleLibClassChange()" class="border-none bg-transparent text-xs font-bold text-amber-600 outline-none cursor-pointer font-moul py-0 pl-1">
                         ${roomsOptions}
                     </select>
                 </div>
 
-                <div class="flex bg-white/10 p-1 rounded-xl w-full sm:w-auto border border-white/20 shadow-inner">
-                   <button onclick="window.switchLibTab('borrow')" id="ltab-borrow" class="flex-1 sm:flex-none px-4 py-2 rounded-lg text-[11px] md:text-xs font-bold transition-all bg-white text-indigo-900 shadow-sm flex items-center justify-center gap-1.5 whitespace-nowrap">
-                      <i class="fa-solid fa-hand-holding-hand"></i> កត់ត្រាខ្ចី
-                   </button>
-                   <button onclick="window.switchLibTab('return')" id="ltab-return" class="flex-1 sm:flex-none px-4 py-2 rounded-lg text-[11px] md:text-xs font-bold text-indigo-100 hover:text-white transition-all flex items-center justify-center gap-1.5 whitespace-nowrap">
-                      <i class="fa-solid fa-box-archive"></i> កត់ត្រាសង
-                   </button>
-                </div>
-
-                <div class="w-px h-8 bg-indigo-700 mx-1 hidden sm:block"></div>
-
                 <div class="flex items-center gap-2">
-                   <button onclick="window.addCustomBookColumn()" class="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl text-xs font-bold transition shadow-sm flex items-center gap-1.5">
+                   <button onclick="window.addCustomBookColumn()" class="px-3.5 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 rounded-xl text-xs font-bold transition shadow-sm flex items-center gap-1.5">
                      <i class="fa-solid fa-plus"></i> សៀវភៅ
                    </button>
-                   <button onclick="window.removeCustomBookColumn()" class="px-4 py-2 bg-rose-500 hover:bg-rose-600 text-white rounded-xl text-xs font-bold transition shadow-sm flex items-center gap-1.5">
+                   <button onclick="window.removeCustomBookColumn()" class="px-3.5 py-2 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 rounded-xl text-xs font-bold transition shadow-sm flex items-center gap-1.5">
                      <i class="fa-solid fa-minus"></i> សៀវភៅ
                    </button>
                 </div>
-
              </div>
           </div>
 

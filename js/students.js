@@ -232,6 +232,43 @@ window.loadStudentsView = async function() {
 
         const sInfo = typeof appSettings !== 'undefined' ? appSettings : (JSON.parse(localStorage.getItem('school_settings') || '{}'));
         const academicYear = document.getElementById("globalAcademicYear")?.value || localStorage.getItem('selected_academic_year') || sInfo.academic_year || "2026-2027";
+        const currentClassFull = `${initialSelectedGrade || 'ថ្នាក់ទី ១'} ${initialSelectedRoom || '«ក»'}`.trim();
+
+        const execHeaderHtml = typeof window.renderExecutiveHeaderHTML === 'function' ? window.renderExecutiveHeaderHTML({
+            title: "គ្រប់គ្រងសិស្ស",
+            subtitle: "បញ្ជីឈ្មោះសិស្ស ព័ត៌មានលម្អិត និងកិច្ចការរដ្ឋបាលក្នុងថ្នាក់",
+            icon: "fa-solid fa-user-graduate",
+            currentClass: currentClassFull,
+            academicYear: academicYear,
+            clockId: "stuHeaderClock",
+            extraBadgesHtml: `
+                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-white/15 border border-white/20 text-xs text-white font-medium shadow-sm">
+                    សរុប៖ <b id="hdrTotal" class="font-mono text-amber-300">0</b> នាក់
+                </span>
+                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-emerald-500/20 border border-emerald-400/30 text-xs text-emerald-200 font-medium shadow-sm">
+                    បង្ហាញ៖ <b id="hdrActive" class="font-mono text-emerald-300">0</b> នាក់
+                </span>
+            `,
+            extraActionsHtml: `
+                <div class="flex flex-wrap items-center gap-2 justify-start lg:justify-end">
+                    <button onclick="if(typeof window.printStudentList === 'function') window.printStudentList();" class="w-10 h-10 flex items-center justify-center bg-white/15 hover:bg-white/25 text-white rounded-xl transition border border-white/20 shadow-sm" title="បោះពុម្ពបញ្ជីសង្ខេប">
+                        <i class="fa-solid fa-print text-sm"></i>
+                    </button>
+                    <button onclick="if(typeof window.printFullStudentList === 'function') window.printFullStudentList();" class="w-10 h-10 flex items-center justify-center bg-white/15 hover:bg-white/25 text-white rounded-xl transition border border-white/20 shadow-sm" title="បោះពុម្ពបញ្ជីលម្អិត">
+                        <i class="fa-solid fa-list-check text-sm"></i>
+                    </button>
+                    <input type="file" id="stuExcelInput" accept=".xlsx, .xls" class="hidden" onchange="if(typeof window.importStudentsExcel === 'function') window.importStudentsExcel(event)">
+                    <div class="flex bg-white/15 p-1 rounded-xl border border-white/20">
+                        <button onclick="if(typeof window.downloadStudentTemplate === 'function') window.downloadStudentTemplate(); else if(window.AdvancedReports) window.AdvancedReports.downloadStudentTemplate();" class="px-2.5 py-1.5 text-blue-100 hover:text-white hover:bg-white/20 rounded-lg text-xs font-bold transition" title="ទាញយកគំរូ Excel"><i class="fa-solid fa-download"></i></button>
+                        <button onclick="if(typeof window.openExcelImportWizard === 'function') window.openExcelImportWizard(); else document.getElementById('stuExcelInput').click();" class="px-2.5 py-1.5 text-blue-100 hover:text-white hover:bg-white/20 rounded-lg text-xs font-bold transition" title="នាំចូលពី Excel"><i class="fa-solid fa-file-import"></i></button>
+                        <button onclick="if(typeof window.exportMasterExcel === 'function') window.exportMasterExcel(); else if(typeof window.exportStudentsExcel === 'function') window.exportStudentsExcel();" class="px-2.5 py-1.5 text-blue-100 hover:text-white hover:bg-white/20 rounded-lg text-xs font-bold transition" title="ទាញយកជា Excel"><i class="fa-solid fa-file-excel"></i></button>
+                    </div>
+                    <button onclick="if(typeof window.openStudentModal === 'function') window.openStudentModal();" class="px-4 py-2 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-slate-900 font-bold rounded-xl text-xs shadow-md border border-amber-300/40 transition flex items-center gap-1.5 transform hover:-translate-y-0.5">
+                        <i class="fa-solid fa-user-plus"></i> <span>ចុះឈ្មោះថ្មី</span>
+                    </button>
+                </div>
+            `
+        }) : '';
         
         container.className = "p-2 md:p-6 transition duration-500 h-full w-full flex flex-col min-h-0 bg-slate-50";
         container.innerHTML = `
@@ -247,45 +284,7 @@ window.loadStudentsView = async function() {
             <div class="w-full h-full overflow-y-auto overflow-x-hidden custom-scrollbar bg-slate-50 relative">
                 <div class="flex animate-fade-in flex-col font-siemreap text-slate-800 max-w-[1680px] mx-auto pb-16 pt-1 min-h-full">
                     
-                    <div class="bg-white p-6 md:p-8 rounded-[2rem] shadow-sm border border-slate-200 shrink-0 mb-6 no-print relative overflow-hidden flex flex-col xl:flex-row justify-between items-center gap-6 transition-all">
-                        <div class="absolute -right-10 -top-10 w-40 h-40 bg-indigo-50 rounded-full blur-3xl pointer-events-none hidden md:block"></div>
-                        <div class="absolute -left-10 -bottom-10 w-32 h-32 bg-blue-50 rounded-full blur-3xl pointer-events-none hidden md:block"></div>
-                        
-                        <div class="flex items-center gap-5 relative z-10 w-full xl:w-auto">
-                            <div class="w-14 h-14 md:w-16 md:h-16 bg-gradient-to-br from-indigo-500 to-blue-600 text-white rounded-2xl flex items-center justify-center text-2xl shadow-lg shadow-indigo-200 shrink-0 transform -rotate-3"><i class="fa-solid fa-users"></i></div>
-                            <div>
-                                <h2 class="text-xl md:text-3xl font-black text-slate-800 font-moul mb-1">បញ្ជីឈ្មោះសិស្ស</h2>
-                                <p class="text-[11px] md:text-sm text-slate-500 font-bold flex gap-3 items-center">
-                                    <span class="bg-indigo-50 text-indigo-700 px-3 py-1 rounded-lg border border-indigo-100">សរុប: <span id="hdrTotal" class="font-mono text-sm">0</span> នាក់</span>
-                                    <span class="bg-emerald-50 text-emerald-700 px-3 py-1 rounded-lg border border-emerald-100">បង្ហាញ: <span id="hdrActive" class="font-mono text-sm">0</span> នាក់</span>
-                                </p>
-                            </div>
-                        </div>
-                        
-                        <div class="flex flex-wrap items-center gap-3 w-full xl:w-auto justify-start xl:justify-end relative z-10">
-                            <div class="h-8 w-px bg-slate-200 hidden lg:block mx-1"></div>
-                            
-                            <button onclick="if(typeof window.printStudentList === 'function') window.printStudentList();" class="w-10 h-10 flex items-center justify-center bg-white hover:bg-slate-50 text-slate-700 rounded-xl transition border border-slate-200 shadow-sm hover:shadow" title="បោះពុម្ពបញ្ជីសង្ខេប">
-                                <i class="fa-solid fa-print text-lg"></i>
-                            </button>
-                            <button onclick="if(typeof window.printFullStudentList === 'function') window.printFullStudentList();" class="w-10 h-10 flex items-center justify-center bg-white hover:bg-slate-50 text-slate-700 rounded-xl transition border border-slate-200 shadow-sm hover:shadow" title="បោះពុម្ពបញ្ជីលម្អិត">
-                                <i class="fa-solid fa-list-check text-lg"></i>
-                            </button>
-
-                            <div class="h-8 w-px bg-slate-200 hidden lg:block mx-1"></div>
-                            
-                            <input type="file" id="stuExcelInput" accept=".xlsx, .xls" class="hidden" onchange="if(typeof window.importStudentsExcel === 'function') window.importStudentsExcel(event)">
-                            <div class="flex bg-slate-100 p-1 rounded-xl">
-                                <button onclick="if(typeof window.downloadStudentTemplate === 'function') window.downloadStudentTemplate(); else if(window.AdvancedReports) window.AdvancedReports.downloadStudentTemplate();" class="px-3 py-2 text-slate-600 hover:text-indigo-600 hover:bg-white rounded-lg text-[13px] font-bold transition" title="ទាញយកគំរូ Excel"><i class="fa-solid fa-download"></i></button>
-                                <button onclick="if(typeof window.openExcelImportWizard === 'function') window.openExcelImportWizard(); else document.getElementById('stuExcelInput').click();" class="px-3 py-2 text-slate-600 hover:text-amber-600 hover:bg-white rounded-lg text-[13px] font-bold transition" title="នាំចូលពី Excel"><i class="fa-solid fa-file-import"></i></button>
-                                <button onclick="if(typeof window.exportMasterExcel === 'function') window.exportMasterExcel(); else if(typeof window.exportStudentsExcel === 'function') window.exportStudentsExcel();" class="px-3 py-2 text-slate-600 hover:text-emerald-600 hover:bg-white rounded-lg text-[13px] font-bold transition" title="ទាញយកជា Excel"><i class="fa-solid fa-file-excel"></i></button>
-                            </div>
-                            
-                            <button onclick="if(typeof window.openStudentModal === 'function') window.openStudentModal();" class="w-full sm:w-auto mt-2 sm:mt-0 px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-[13px] font-bold shadow-md shadow-indigo-200 transition flex items-center justify-center gap-2 transform hover:-translate-y-0.5 sm:ml-2">
-                                <i class="fa-solid fa-user-plus"></i> ចុះឈ្មោះថ្មី
-                            </button>
-                        </div>
-                    </div>
+                    ${execHeaderHtml}
 
                     <div class="bg-white p-5 rounded-[2rem] border border-slate-200 shadow-sm mb-6 shrink-0 no-print relative z-20">
                         <div class="flex items-center justify-between mb-3 px-1">

@@ -932,22 +932,17 @@ window.loadSettingsView = function() {
       <div class="max-w-6xl mx-auto space-y-6 animate-fade-in font-siemreap pb-20">
         
         <!-- Header Banner -->
-        <div class="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 rounded-[2rem] p-6 md:p-8 text-white shadow-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 relative overflow-hidden border border-slate-700">
-           <div class="absolute -right-10 -top-10 w-64 h-64 bg-indigo-500/20 rounded-full blur-3xl"></div>
-           <div class="absolute -left-10 -bottom-10 w-40 h-40 bg-blue-500/20 rounded-full blur-2xl"></div>
-           <div class="relative z-10">
-             <div class="flex items-center gap-2 mb-2">
-                <span class="px-3 py-1 bg-indigo-500/30 border border-indigo-400/40 text-indigo-200 rounded-full text-xs font-bold font-mono">
-                    ${isAdmin ? '👑 អ្នកគ្រប់គ្រងប្រព័ន្ធ (Admin)' : '👨‍🏫 គ្រូបន្ទុកថ្នាក់បឋមសិក្សា'}
-                </span>
-             </div>
-             <h2 class="text-2xl md:text-3xl font-black font-moul mb-2 tracking-wide drop-shadow-md">ការកំណត់ព័ត៌មានគ្រូ និងសាលារៀន</h2>
-             <p class="text-xs md:text-sm text-indigo-200 font-medium">គ្រប់គ្រងព័ត៌មានគ្រូបង្រៀន ថ្នាក់រៀនទទួលបន្ទុកបឋមសិក្សា និងព័ត៌មានទូទៅនៃសាលារៀន</p>
-           </div>
-           <div class="w-14 h-14 md:w-16 md:h-16 bg-white/10 border border-white/20 rounded-2xl flex items-center justify-center text-2xl md:text-3xl shadow-inner relative z-10 backdrop-blur-md shrink-0">
-             <i class="fa-solid fa-gears text-indigo-200"></i>
-           </div>
-        </div>
+        ${typeof window.renderExecutiveHeaderHTML === 'function' ? window.renderExecutiveHeaderHTML({
+           title: "ការកំណត់ប្រព័ន្ធ",
+           subtitle: "គ្រប់គ្រងព័ត៌មានគ្រូបង្រៀន ថ្នាក់រៀនទទួលបន្ទុក និងព័ត៌មានទូទៅនៃសាលារៀន",
+           icon: "fa-solid fa-gears",
+           clockId: "settingsHeaderClock",
+           extraBadgesHtml: `
+              <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-white/10 border border-white/15 text-xs text-white font-medium shadow-sm">
+                 ${isAdmin ? '👑 អ្នកគ្រប់គ្រងប្រព័ន្ធ (Admin)' : '👨‍🏫 គ្រូបន្ទុកថ្នាក់បឋមសិក្សា'}
+              </span>
+           `
+        }) : ''}
 
         <!-- Tab Navigation Bar (Hidden - Unified Settings Page) -->
         <div class="hidden" aria-hidden="true">

@@ -1788,3 +1788,197 @@ window.addEventListener('DOMContentLoaded', () => {
       setTimeout(() => { syncDataToServer(true); }, 3000);
   }
 });
+
+// =========================================================================
+// ៥. មុខងារ Executive Header ស្តង់ដាររួម (Unified Modern Executive Header)
+// ធានាថារចនាបថ Header គ្រប់ផ្នែកទាំងអស់ (Dashboard, Students, Attendance,
+// Scores, Timetable, Library, Reports, Settings) មានទម្រង់ដូចគ្នាបេះបិទ
+// =========================================================================
+
+if (typeof window.getKhmerLunarDate !== 'function') {
+    window.getKhmerLunarDate = function(dateObj = new Date()) {
+        try {
+            let solarYear = dateObj.getFullYear();
+            let solarMonth = dateObj.getMonth() + 1;
+            let solarDay = dateObj.getDate();
+            const khmerDays = ["អាទិត្យ", "ចន្ទ", "អង្គារ", "ពុធ", "ព្រហស្បតិ៍", "សុក្រ", "សៅរ៍"];
+            let dayName = khmerDays[dateObj.getDay()];
+            const toKh = typeof window.toKhmerNum === 'function' ? window.toKhmerNum : String;
+
+            if (solarYear === 2026 && solarMonth === 10) {
+                let lunarDayNum = solarDay + 4;
+                let phase = "រោច";
+                let monthName = "ភទ្របទ";
+                if (solarDay >= 12) {
+                    lunarDayNum = solarDay - 11;
+                    phase = lunarDayNum > 15 ? "រោច" : "កើត";
+                    if (lunarDayNum > 15) lunarDayNum -= 15;
+                    monthName = "អស្សុជ";
+                }
+                return `ថ្ងៃ${dayName} ${toKh(lunarDayNum)}${phase} ខែ${monthName} ឆ្នាំមមី អដ្ឋស័ក ព.ស.២៥៧០`;
+            }
+
+            let isNewYearPassed = (solarMonth > 4) || (solarMonth === 4 && solarDay >= 14);
+            let beYear = solarYear + 543;
+            if (solarMonth > 5 || (solarMonth === 5 && solarDay >= 15)) beYear += 1;
+
+            const animals = ["ជូត", "ឆ្លូវ", "ខាល", "ថោះ", "រោង", "ម្សាញ់", "មមី", "មមែ", "វក", "រកា", "ច", "កុរ"];
+            let animalYear = solarYear + 8;
+            if (!isNewYearPassed) animalYear -= 1;
+            
+            return `ថ្ងៃ${dayName} ........... ខែ........... ឆ្នាំ${animals[animalYear % 12]} ........... ព.ស.${toKh(beYear)}`;
+        } catch(e) {
+            return "ថ្ងៃ......................... ខែ............ ឆ្នាំ............ ព.ស.២៥៧...";
+        }
+    };
+}
+
+window.startHeaderClock = function(clockId = 'dashClock') {
+    const clockEl = document.getElementById(clockId);
+    if (!clockEl) return;
+    if (!window._headerClockIntervals) window._headerClockIntervals = {};
+    if (window._headerClockIntervals[clockId]) {
+        clearInterval(window._headerClockIntervals[clockId]);
+    }
+    const update = () => {
+        const el = document.getElementById(clockId);
+        if (!el) {
+            if (window._headerClockIntervals[clockId]) {
+                clearInterval(window._headerClockIntervals[clockId]);
+                delete window._headerClockIntervals[clockId];
+            }
+            return;
+        }
+        const now = new Date();
+        const h = String(now.getHours()).padStart(2, '0');
+        const m = String(now.getMinutes()).padStart(2, '0');
+        const s = String(now.getSeconds()).padStart(2, '0');
+        el.textContent = `${h}:${m}:${s}`;
+    };
+    update();
+    window._headerClockIntervals[clockId] = setInterval(update, 1000);
+};
+
+window.renderExecutiveHeaderHTML = function(options = {}) {
+    const toKhNum = typeof window.toKhmerNum === 'function' ? window.toKhmerNum : String;
+    
+    // Academic Year
+    const sInfo = window.appSettings || JSON.parse(localStorage.getItem('school_settings') || '{}');
+    const academicYear = options.academicYear || localStorage.getItem('selected_academic_year') || sInfo.academic_year || '2026-2027';
+    
+    // Title & Subtitle
+    const title = options.title || 'ផ្ទាំងគ្រប់គ្រងទិន្នន័យ';
+    const subtitle = options.subtitle || 'លោកគ្រូអ្នកគ្រូកំពុងស្ថិតក្នុងទំព័រនេះ';
+    const icon = options.icon || 'fa-solid fa-laptop-code';
+
+    // Teacher & Class Info
+    const activeClass = typeof window.getCurrentSelectedClass === 'function' 
+        ? window.getCurrentSelectedClass() 
+        : { level: localStorage.getItem('selected_level') || "ថ្នាក់ទី ១", room: localStorage.getItem('selected_room') || "«ក»" };
+    const curLevel = options.level || activeClass.level || localStorage.getItem('selected_level') || sInfo.teacher_level || "ថ្នាក់ទី ១";
+    const curRoom = options.room || activeClass.room || localStorage.getItem('selected_room') || sInfo.teacher_room || "«ក»";
+    const currentClassFull = options.currentClass || `${curLevel} ${curRoom}`.trim();
+
+    const teacherName = options.teacherName || window.AuthState?.teacherName || window.AppAuth?.state?.teacherName || localStorage.getItem('auth_teacher_name') || sInfo.teacher_name || "ហឿន មិនា";
+    const teacherCode = options.teacherCode || localStorage.getItem('auth_teacher_id') || window.AuthState?.teacherId || window.AppAuth?.state?.teacherId || "TCH-013";
+
+    // Date computation
+    const now = new Date();
+    const dayNames = ["អាទិត្យ", "ចន្ទ", "អង្គារ", "ពុធ", "ព្រហស្បតិ៍", "សុក្រ", "សៅរ៍"];
+    const khmerMonths = ["មករា", "កុម្ភៈ", "មីនា", "មេសា", "ឧសភា", "មិថុនា", "កក្កដា", "សីហា", "កញ្ញា", "តុលា", "វិច្ឆិកា", "ធ្នូ"];
+    const dayName = dayNames[now.getDay()];
+    const dateNumKh = toKhNum(now.getDate());
+    const monthKh = khmerMonths[now.getMonth()];
+    const yearKh = toKhNum(now.getFullYear());
+    const solarDateStr = options.solarDateStr || `ថ្ងៃទី ${dateNumKh} ខែ ${monthKh} ឆ្នាំ ${yearKh}`;
+    
+    let lunarDateStr = options.lunarDateStr;
+    if (!lunarDateStr) {
+        if (typeof window.getKhmerLunarDate === 'function') {
+            lunarDateStr = window.getKhmerLunarDate(now);
+        } else {
+            lunarDateStr = `ថ្ងៃ${dayName} ១៥កើត ខែអស្សុជ ឆ្នាំមមី អដ្ឋស័ក ព.ស.២៥៧០`;
+        }
+    }
+
+    const clockId = options.clockId || ('headerClock_' + Math.random().toString(36).substr(2, 9));
+    const extraBadgesHtml = options.extraBadgesHtml || '';
+    const extraActionsHtml = options.extraActionsHtml || '';
+    const customBottomBarHtml = options.customBottomBarHtml || '';
+
+    // Schedule live clock start automatically
+    setTimeout(() => {
+        if (typeof window.startHeaderClock === 'function') {
+            window.startHeaderClock(clockId);
+        }
+    }, 50);
+
+    return `
+        <!-- 🟢 Standardized Modern Executive Header (Image 2 Aligned) 🟢 -->
+        <div class="bg-gradient-to-r from-blue-600 via-blue-600 to-indigo-600 rounded-[2.5rem] p-6 sm:p-8 text-white shadow-xl relative overflow-hidden border border-white/20 mb-6 shrink-0 no-print">
+            <!-- Subtle glowing background shapes -->
+            <div class="absolute -right-12 -bottom-12 w-80 h-80 bg-white/10 rounded-full blur-3xl pointer-events-none"></div>
+            <div class="absolute -left-12 -top-12 w-64 h-64 bg-indigo-400/20 rounded-full blur-3xl pointer-events-none"></div>
+
+            <div class="relative z-10 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
+                
+                <!-- Left Column: Greetings & Teacher Info -->
+                <div class="space-y-3">
+                    <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-white/15 backdrop-blur-md border border-white/20 text-xs font-bold text-white shadow-sm">
+                        <i class="fa-solid fa-graduation-cap text-amber-300"></i>
+                        <span>ឆ្នាំសិក្សា ${toKhNum(academicYear)}</span>
+                    </div>
+
+                    <h1 class="text-2xl sm:text-3xl lg:text-4xl font-black font-moul tracking-wide text-white drop-shadow-md">
+                        ${title}
+                    </h1>
+
+                    <div class="flex flex-wrap items-center gap-3 pt-1 text-xs text-blue-100 font-medium">
+                        <span class="flex items-center gap-2 text-white/95">
+                            <i class="${icon} text-blue-200"></i>
+                            <span>${subtitle}</span>
+                        </span>
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-indigo-950/70 border border-white/20 font-bold font-moul text-amber-300 shadow-sm">
+                            ${currentClassFull}
+                        </span>
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-white/10 border border-white/15 font-mono text-[11px] text-blue-100 font-bold">
+                            ${teacherCode}
+                        </span>
+                        ${extraBadgesHtml}
+                    </div>
+                </div>
+
+                <!-- Right Column: Modern Glass Card for Time & Dates (Exact Match Image 2) -->
+                <div class="w-full lg:w-auto shrink-0 flex flex-col sm:flex-row lg:flex-col gap-3 items-stretch lg:items-end">
+                    ${extraActionsHtml ? `<div class="flex flex-wrap items-center gap-2 justify-start lg:justify-end">${extraActionsHtml}</div>` : ''}
+                    <div class="bg-white/10 backdrop-blur-md border border-white/20 rounded-3xl p-5 shadow-inner space-y-3 min-w-[280px] sm:min-w-[340px]">
+                        <!-- Realtime Digital Clock Row -->
+                        <div class="flex items-center gap-3.5 pb-2.5 border-b border-white/15">
+                            <div class="w-11 h-11 rounded-2xl bg-white/20 text-white flex items-center justify-center text-xl shrink-0 shadow-sm border border-white/25">
+                                <i class="fa-regular fa-clock"></i>
+                            </div>
+                            <div>
+                                <span class="text-[10px] text-blue-200 font-bold uppercase tracking-wider block">ម៉ោងបច្ចុប្បន្ន</span>
+                                <span id="${clockId}" class="text-2xl sm:text-3xl font-black font-mono tracking-wider text-amber-300 block leading-tight">--:--:--</span>
+                            </div>
+                        </div>
+
+                        <!-- Lunar Date Row -->
+                        <div class="flex items-center gap-2.5 text-xs text-white/95 font-medium">
+                            <i class="fa-solid fa-moon text-amber-300 text-sm shrink-0"></i>
+                            <span class="truncate">${lunarDateStr}</span>
+                        </div>
+
+                        <!-- Solar Date Row -->
+                        <div class="flex items-center gap-2.5 text-xs text-white/95 font-medium">
+                            <i class="fa-regular fa-calendar-check text-blue-200 text-sm shrink-0"></i>
+                            <span>${solarDateStr}</span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            ${customBottomBarHtml}
+        </div>
+    `;
+};
