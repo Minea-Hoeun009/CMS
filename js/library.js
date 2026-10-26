@@ -175,17 +175,19 @@ window.loadLibraryView = async function() {
 
              <!-- Tools & Classroom Selector -->
              <div class="flex flex-wrap items-center justify-start xl:justify-end gap-3 relative z-10 w-full xl:w-auto">
-                <!-- ជម្រើសថ្នាក់ និងបន្ទប់ សម្រាប់បណ្ណាល័យ -->
-                <div class="flex items-center gap-1.5 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 shadow-inner">
+                <!-- ថ្នាក់ទទួលបន្ទុកកំណត់ដោយស្វ័យប្រវត្តិតាមគ្រូផ្ទាល់ -->
+                <div class="flex items-center gap-2 bg-gradient-to-r from-indigo-50 to-blue-50 border border-indigo-200/80 rounded-xl px-3.5 py-2 shadow-sm">
                     <i class="fa-solid fa-graduation-cap text-indigo-600 text-sm"></i>
-                    <select id="libGradeSelect" onchange="window.handleLibClassChange()" class="border-none bg-transparent text-xs font-bold text-indigo-900 outline-none cursor-pointer font-siemreap py-0 pr-1">
-                        ${gradesOptions}
-                    </select>
-                    <span class="text-slate-300">|</span>
-                    <select id="libRoomSelect" onchange="window.handleLibClassChange()" class="border-none bg-transparent text-xs font-bold text-amber-600 outline-none cursor-pointer font-moul py-0 pl-1">
-                        ${roomsOptions}
-                    </select>
+                    <span class="text-xs font-bold text-slate-600 font-siemreap">ថ្នាក់ទទួលបន្ទុក៖</span>
+                    <span id="libDocGradeDisplay" class="text-xs font-bold text-indigo-700 font-moul">${window.currentGradeFull}</span>
                 </div>
+                <!-- Hidden selects to maintain internal data binding and backward compatibility -->
+                <select id="libGradeSelect" onchange="window.handleLibClassChange()" class="hidden">
+                    ${gradesOptions}
+                </select>
+                <select id="libRoomSelect" onchange="window.handleLibClassChange()" class="hidden">
+                    ${roomsOptions}
+                </select>
 
                 <div class="flex items-center gap-2">
                    <button onclick="window.addCustomBookColumn()" class="px-3.5 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 rounded-xl text-xs font-bold transition shadow-sm flex items-center gap-1.5">

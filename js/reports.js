@@ -85,29 +85,29 @@ window.loadReportsView = function() {
                 <!-- Cards Grid - រចនាឡើងតាមស្តង់ដារ KrouDigital 4.0 -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 md:gap-6">
                     
-                    <!-- KrouDigital Card 1: តារាងស្រង់ពិន្ទុ និងការវាយតម្លៃលទ្ធផលសិក្សា -->
-                    <div onclick="window.openReportDetail('report_ka')" class="bg-white/90 backdrop-blur-md rounded-[2rem] p-6 shadow-sm hover:shadow-[0_20px_40px_rgb(79,70,229,0.18)] hover:-translate-y-1.5 transition-all duration-300 cursor-pointer border-2 border-indigo-100 hover:border-indigo-400 group flex flex-col justify-between h-[210px] relative overflow-hidden">
-                        <div class="absolute -right-4 -top-4 w-24 h-24 bg-indigo-50 rounded-full group-hover:scale-150 transition-transform duration-500 ease-out pointer-events-none"></div>
+                    <!-- KrouDigital Card 1: ប័ណ្ណសរសើរ / វិញ្ញាបនបត្រ -->
+                    <div onclick="window.KrouDigital && window.KrouDigital.renderCertificateModal()" class="bg-white/90 backdrop-blur-md rounded-[2rem] p-6 shadow-sm hover:shadow-[0_20px_40px_rgb(217,119,6,0.18)] hover:-translate-y-1.5 transition-all duration-300 cursor-pointer border-2 border-amber-100 hover:border-amber-400 group flex flex-col justify-between h-[210px] relative overflow-hidden">
+                        <div class="absolute -right-4 -top-4 w-24 h-24 bg-amber-50 rounded-full group-hover:scale-150 transition-transform duration-500 ease-out pointer-events-none"></div>
                         <div class="flex items-center justify-between relative z-10">
-                            <div class="w-14 h-14 bg-gradient-to-br from-indigo-500 to-purple-600 text-white rounded-2xl flex items-center justify-center text-2xl shadow-md shadow-indigo-500/30 group-hover:scale-110 transition-transform"><i class="fa-solid fa-file-lines"></i></div>
-                            <span class="text-[10px] bg-indigo-100 text-indigo-800 font-bold px-2 py-0.5 rounded-full uppercase">KrouDigital 4.0</span>
+                            <div class="w-14 h-14 bg-gradient-to-br from-amber-500 to-yellow-600 text-white rounded-2xl flex items-center justify-center text-2xl shadow-md shadow-amber-500/30 group-hover:scale-110 transition-transform"><i class="fa-solid fa-certificate"></i></div>
+                            <span class="text-[10px] bg-amber-100 text-amber-800 font-bold px-2 py-0.5 rounded-full uppercase">Print Certificate</span>
                         </div>
                         <div class="relative z-10">
-                            <h3 class="font-moul text-[15px] text-slate-900 mb-1.5 group-hover:text-indigo-600">តារាងស្រង់ពិន្ទុ និងការវាយតម្លៃលទ្ធផល</h3>
-                            <p class="text-slate-500 text-[11px] leading-relaxed">តារាងស្រង់ពិន្ទុ មធ្យមភាគ ចំណាត់ថ្នាក់ និងនិទ្ទេសប្រចាំខែ/ឆមាស។</p>
+                            <h3 class="font-moul text-[15px] text-slate-900 mb-1.5 group-hover:text-amber-600">ប័ណ្ណសរសើរផ្លូវការ</h3>
+                            <p class="text-slate-500 text-[11px] leading-relaxed">បង្កើតប័ណ្ណសរសើរសិស្សពូកែ និងវិន័យល្អ ជ្រើសរើសស៊ុមបានច្រើនម៉ូដ និងកែប្រែបាន។</p>
                         </div>
                     </div>
 
-                    <!-- KrouDigital Card 2: តារាងកិត្តិយសសិស្សឆ្នើម Top 5 -->
-                    <div onclick="window.openReportDetail('report_kha')" class="bg-white/90 backdrop-blur-md rounded-[2rem] p-6 shadow-sm hover:shadow-[0_20px_40px_rgb(245,158,11,0.18)] hover:-translate-y-1.5 transition-all duration-300 cursor-pointer border-2 border-amber-100 hover:border-amber-400 group flex flex-col justify-between h-[210px] relative overflow-hidden">
-                        <div class="absolute -right-4 -top-4 w-24 h-24 bg-amber-50 rounded-full group-hover:scale-150 transition-transform duration-500 ease-out pointer-events-none"></div>
+                    <!-- KrouDigital Card 2: របាយការណ៍វត្តមាន -->
+                    <div onclick="window.openReportDetail('attendance')" class="bg-white/90 backdrop-blur-md rounded-[2rem] p-6 shadow-sm hover:shadow-[0_20px_40px_rgb(16,185,129,0.18)] hover:-translate-y-1.5 transition-all duration-300 cursor-pointer border-2 border-emerald-100 hover:border-emerald-400 group flex flex-col justify-between h-[210px] relative overflow-hidden">
+                        <div class="absolute -right-4 -top-4 w-24 h-24 bg-emerald-50 rounded-full group-hover:scale-150 transition-transform duration-500 ease-out pointer-events-none"></div>
                         <div class="flex items-center justify-between relative z-10">
-                            <div class="w-14 h-14 bg-gradient-to-br from-amber-400 to-orange-500 text-white rounded-2xl flex items-center justify-center text-2xl shadow-md shadow-amber-500/30 group-hover:scale-110 transition-transform"><i class="fa-solid fa-trophy"></i></div>
-                            <span class="text-[10px] bg-amber-100 text-amber-800 font-bold px-2 py-0.5 rounded-full uppercase">Honor Roll</span>
+                            <div class="w-14 h-14 bg-gradient-to-br from-emerald-500 to-teal-600 text-white rounded-2xl flex items-center justify-center text-2xl shadow-md shadow-emerald-500/30 group-hover:scale-110 transition-transform"><i class="fa-solid fa-calendar-check"></i></div>
+                            <span class="text-[10px] bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded-full uppercase">Attendance</span>
                         </div>
                         <div class="relative z-10">
-                            <h3 class="font-moul text-[15px] text-slate-900 mb-1.5 group-hover:text-amber-600">តារាងកិត្តិយសសិស្សឆ្នើម (Top 5)</h3>
-                            <p class="text-slate-500 text-[11px] leading-relaxed">តារាងកិត្តិយសសិស្សឆ្នើម Top 5 ជាមួយរូបថតសម្រាប់បិទផ្សាយ។</p>
+                            <h3 class="font-moul text-[15px] text-slate-900 mb-1.5 group-hover:text-emerald-600">របាយការណ៍វត្តមាន</h3>
+                            <p class="text-slate-500 text-[11px] leading-relaxed">ស្ថិតិវត្តមាន-អវត្តមានសិស្សប្រចាំខែ ឆមាស និងប្រចាំឆ្នាំ ដោយទាញទិន្នន័យជាក់ស្តែង។</p>
                         </div>
                     </div>
 
@@ -129,7 +129,7 @@ window.loadReportsView = function() {
                         <div class="absolute -right-4 -top-4 w-24 h-24 bg-rose-50 rounded-full group-hover:scale-150 transition-transform duration-500 ease-out pointer-events-none"></div>
                         <div class="flex items-center justify-between relative z-10">
                             <div class="w-14 h-14 bg-gradient-to-br from-rose-500 to-pink-600 text-white rounded-2xl flex items-center justify-center text-2xl shadow-md shadow-rose-500/30 group-hover:scale-110 transition-transform"><i class="fa-solid fa-heart-pulse"></i></div>
-                            <span class="text-[10px] bg-rose-100 text-rose-800 font-bold px-2 py-0.5 rounded-full uppercase">Health &amp; BMI</span>
+                            <span class="text-[10px] bg-rose-100 text-rose-800 font-bold px-2 py-0.5 rounded-full uppercase">Health & BMI</span>
                         </div>
                         <div class="relative z-10">
                             <h3 class="font-moul text-[15px] text-slate-900 mb-1.5 group-hover:text-rose-600">របាយការណ៍សុខភាព</h3>
@@ -137,51 +137,21 @@ window.loadReportsView = function() {
                         </div>
                     </div>
 
-                    <!-- KrouDigital Card 5: ប័ណ្ណសរសើរ / វិញ្ញាបនបត្រ -->
-                    <div onclick="window.KrouDigital && window.KrouDigital.renderCertificateModal()" class="bg-white/90 backdrop-blur-md rounded-[2rem] p-6 shadow-sm hover:shadow-[0_20px_40px_rgb(217,119,6,0.18)] hover:-translate-y-1.5 transition-all duration-300 cursor-pointer border-2 border-amber-100 hover:border-amber-400 group flex flex-col justify-between h-[210px] relative overflow-hidden">
-                        <div class="absolute -right-4 -top-4 w-24 h-24 bg-amber-50 rounded-full group-hover:scale-150 transition-transform duration-500 ease-out pointer-events-none"></div>
-                        <div class="flex items-center justify-between relative z-10">
-                            <div class="w-14 h-14 bg-gradient-to-br from-amber-500 to-yellow-600 text-white rounded-2xl flex items-center justify-center text-2xl shadow-md shadow-amber-500/30 group-hover:scale-110 transition-transform"><i class="fa-solid fa-certificate"></i></div>
-                            <span class="text-[10px] bg-amber-100 text-amber-800 font-bold px-2 py-0.5 rounded-full uppercase">Print Certificate</span>
-                        </div>
-                        <div class="relative z-10">
-                            <h3 class="font-moul text-[15px] text-slate-900 mb-1.5 group-hover:text-amber-600">ប័ណ្ណសរសើរផ្លូវការ</h3>
-                            <p class="text-slate-500 text-[11px] leading-relaxed">បង្កើតប័ណ្ណសរសើរសិស្សពូកែ និងវិន័យល្អ បោះពុម្ពជាក្រដាស A4។</p>
-                        </div>
-                    </div>
-
-                    <!-- KrouDigital Card 6: សៀវភៅតាមដានការសិក្សា -->
-                    <div onclick="window.openTrackingBookModal ? window.openTrackingBookModal() : alert('Tracking book')" class="bg-white/90 backdrop-blur-md rounded-[2rem] p-6 shadow-sm hover:shadow-[0_20px_40px_rgb(99,102,241,0.18)] hover:-translate-y-1.5 transition-all duration-300 cursor-pointer border border-slate-100 group flex flex-col justify-between h-[210px] relative overflow-hidden">
-                        <div class="absolute -right-4 -top-4 w-24 h-24 bg-indigo-50 rounded-full group-hover:scale-150 transition-transform duration-500 ease-out pointer-events-none"></div>
-                        <div class="w-14 h-14 bg-gradient-to-br from-indigo-500 to-blue-600 text-white rounded-2xl flex items-center justify-center text-2xl shadow-md shadow-indigo-500/30 group-hover:scale-110 transition-transform relative z-10"><i class="fa-solid fa-book-open-reader"></i></div>
-                        <div class="relative z-10">
-                            <h3 class="font-moul text-[15px] text-slate-900 mb-1.5 group-hover:text-indigo-600">សៀវភៅតាមដាន</h3>
-                            <p class="text-slate-500 text-[11px] leading-relaxed">សៀវភៅតាមដានការសិក្សា (មួយសន្លឹកក្នុងសិស្សម្នាក់) ពេញមួយឆ្នាំ។</p>
-                        </div>
-                    </div>
-
-                    <!-- Card 7: ស្ថិតិសិស្ស -->
+                    <!-- Card 5: ស្ថិតិសិស្ស -->
                     <div onclick="window.openReportDetail('stats')" class="bg-white/90 backdrop-blur-md rounded-[2rem] p-6 shadow-sm hover:shadow-[0_20px_40px_rgb(59,130,246,0.15)] hover:-translate-y-1.5 transition-all duration-300 cursor-pointer border border-slate-100 group flex flex-col justify-between h-[210px] relative overflow-hidden">
                         <div class="absolute -right-4 -top-4 w-24 h-24 bg-blue-50 rounded-full group-hover:scale-150 transition-transform duration-500 ease-out pointer-events-none"></div>
                         <div class="w-14 h-14 bg-gradient-to-br from-blue-500 to-indigo-600 text-white rounded-2xl flex items-center justify-center text-2xl shadow-md shadow-blue-500/30 group-hover:scale-110 transition-transform relative z-10"><i class="fa-solid fa-chart-pie"></i></div>
                         <div class="relative z-10"><h3 class="font-moul text-[15px] text-slate-800 mb-1.5 group-hover:text-blue-700">តារាងស្ថិតិសិស្ស</h3><p class="text-slate-500 text-[11px] leading-relaxed">របាយការណ៍ចំនួនសិស្សដើមឆ្នាំ/ចុងឆ្នាំ បែងចែកតាមអាយុ និងភេទ។</p></div>
                     </div>
 
-                    <!-- Card 8: វត្តមានប្រចាំខែ -->
-                    <div onclick="window.openReportDetail('attendance')" class="bg-white/90 backdrop-blur-md rounded-[2rem] p-6 shadow-sm hover:shadow-[0_20px_40px_rgb(16,185,129,0.15)] hover:-translate-y-1.5 transition-all duration-300 cursor-pointer border border-slate-100 group flex flex-col justify-between h-[210px] relative overflow-hidden">
-                        <div class="absolute -right-4 -top-4 w-24 h-24 bg-emerald-50 rounded-full group-hover:scale-150 transition-transform duration-500 ease-out pointer-events-none"></div>
-                        <div class="w-14 h-14 bg-gradient-to-br from-emerald-400 to-teal-600 text-white rounded-2xl flex items-center justify-center text-2xl shadow-md shadow-emerald-500/30 group-hover:scale-110 transition-transform relative z-10"><i class="fa-solid fa-calendar-check"></i></div>
-                        <div class="relative z-10"><h3 class="font-moul text-[15px] text-slate-800 mb-1.5 group-hover:text-emerald-600">របាយការណ៍វត្តមាន</h3><p class="text-slate-500 text-[11px] leading-relaxed">សរុបស្ថិតិអវត្តមានសិស្សប្រចាំខែ មានច្បាប់ និងឥតច្បាប់។</p></div>
-                    </div>
-
-                    <!-- Card 9: នាំចេញ Master Excel -->
+                    <!-- Card 6: នាំចេញ Master Excel -->
                     <div onclick="window.AdvancedReports && window.AdvancedReports.exportMasterExcelWorkbook ? window.AdvancedReports.exportMasterExcelWorkbook() : alert('Export Master Excel')" class="bg-white/90 backdrop-blur-md rounded-[2rem] p-6 shadow-sm hover:shadow-[0_20px_40px_rgb(16,185,129,0.15)] hover:-translate-y-1.5 transition-all duration-300 cursor-pointer border border-slate-100 group flex flex-col justify-between h-[210px] relative overflow-hidden">
                         <div class="absolute -right-4 -top-4 w-24 h-24 bg-teal-50 rounded-full group-hover:scale-150 transition-transform duration-500 ease-out pointer-events-none"></div>
                         <div class="w-14 h-14 bg-gradient-to-br from-teal-400 to-emerald-600 text-white rounded-2xl flex items-center justify-center text-2xl shadow-md shadow-emerald-500/30 group-hover:scale-110 transition-transform relative z-10"><i class="fa-solid fa-file-excel"></i></div>
                         <div class="relative z-10"><h3 class="font-moul text-[15px] text-slate-800 mb-1.5 group-hover:text-teal-600">Master Excel</h3><p class="text-slate-500 text-[11px] leading-relaxed">នាំចេញឯកសារ Excel ច្រើន Sheet រួមមាន បញ្ជីសិស្ស និងពិន្ទុ។</p></div>
                     </div>
 
-                    <!-- Card 10: ច្រកពិនិត្យលទ្ធផលមាតាបិតា -->
+                    <!-- Card 7: ច្រកពិនិត្យលទ្ធផលមាតាបិតា -->
                     <div onclick="window.KrouDigital && window.KrouDigital.openParentPortalModal()" class="bg-white/90 backdrop-blur-md rounded-[2rem] p-6 shadow-sm hover:shadow-[0_20px_40px_rgb(14,165,233,0.18)] hover:-translate-y-1.5 transition-all duration-300 cursor-pointer border-2 border-sky-100 hover:border-sky-400 group flex flex-col justify-between h-[210px] relative overflow-hidden">
                         <div class="absolute -right-4 -top-4 w-24 h-24 bg-sky-50 rounded-full group-hover:scale-150 transition-transform duration-500 ease-out pointer-events-none"></div>
                         <div class="flex items-center justify-between relative z-10">
@@ -189,11 +159,10 @@ window.loadReportsView = function() {
                             <span class="text-[10px] bg-sky-100 text-sky-800 font-bold px-2 py-0.5 rounded-full uppercase">Parent Portal</span>
                         </div>
                         <div class="relative z-10">
-                            <h3 class="font-moul text-[15px] text-slate-900 mb-1.5 group-hover:text-sky-600">ច្រកមាតាបិតា &amp; សិស្ស</h3>
+                            <h3 class="font-moul text-[15px] text-slate-900 mb-1.5 group-hover:text-sky-600">ច្រកមាតាបិតា & សិស្ស</h3>
                             <p class="text-slate-500 text-[11px] leading-relaxed">ស្វែងរកពិន្ទុ និងទាញយកព្រឹត្តិបត្រពិន្ទុសម្រាប់មាតាបិតា។</p>
                         </div>
                     </div>
-
                 </div>
             </div>
 
@@ -1417,20 +1386,167 @@ window.renderAttendanceContent = function() {
     // 🔴 មុខងារជំនួយសម្រាប់ទាញយកទិន្នន័យវត្តមានពី LocalStorage
     // លោកគ្រូអាចកែប្រែ Key (ឧទាហរណ៍ 'attendance_records') ទៅតាម Key ជាក់ស្តែងដែលកម្មវិធីលោកគ្រូប្រើប្រាស់
     const fetchAttendanceData = function(studentId, monthStr) {
-        try {
-            // សាកល្បងអានពី attendance_records ដែលរក្សាទុកទិន្នន័យ (បើមាន)
-            let attRecords = JSON.parse(localStorage.getItem('attendance_records')) || {};
-            let monthData = attRecords[monthStr] || {};
-            let stuData = monthData[studentId] || {};
-            
-            return {
-                days: stuData.days || {}, // { "1": "ច", "15": "អ" }
-                perm: stuData.perm || 0,  // ចំនួនច្បាប់សរុប
-                unex: stuData.unex || 0   // ចំនួនឥតច្បាប់សរុប
-            };
-        } catch(e) {
-            return { days: {}, perm: 0, unex: 0 };
+        const result = { days: {}, perm: 0, unex: 0 };
+        if (!studentId) return result;
+        const sIdStr = String(studentId).trim();
+
+        // ១. ពិនិត្យមើលពី window.monthlyAttendanceData ប្រសិនបើកំពុងស្ថិតក្នុងខែនោះ
+        if (window.monthlyAttendanceData && window.monthlyAttendanceData[sIdStr]) {
+            const stuMap = window.monthlyAttendanceData[sIdStr];
+            for (let d = 1; d <= 31; d++) {
+                const rawVal = stuMap[d] || stuMap[String(d)];
+                if (rawVal) {
+                    const norm = String(rawVal).trim();
+                    if (norm === "ច" || norm === "ច្ប" || norm.includes("ច្បាប់")) {
+                        result.days[d] = "ច";
+                        result.perm++;
+                    } else if (norm === "អ" || norm === "អច្ប" || norm.includes("ឥតច្បាប់")) {
+                        result.days[d] = "អ";
+                        result.unex++;
+                    } else if (norm === "ឈ" || norm.includes("ឈឺ")) {
+                        result.days[d] = "ឈ";
+                        result.perm++;
+                    } else if (norm === "៖") {
+                        result.days[d] = "៖";
+                    }
+                }
+            }
         }
+
+        // ២. ស្វែងរកក្នុង cache តាមសោ att_${grade}_${month}_${year}
+        try {
+            const activeClass = typeof window.getCurrentSelectedClass === 'function' ? window.getCurrentSelectedClass() : { level: "ថ្នាក់ទី ៤", room: "«ក»" };
+            const lvl = window.currentReportTargetGrade || activeClass.level || "";
+            const rm = window.currentReportTargetRoom || activeClass.room || "";
+            const yr = document.getElementById("globalAcademicYear")?.value || localStorage.getItem('academic_year') || "2026-2027";
+            const fullG = (lvl + rm).replace(/\s+/g, '');
+
+            const possibleKeys = [
+                'att_' + lvl + ' ' + rm + '_' + monthStr + '_' + yr,
+                'att_' + fullG + '_' + monthStr + '_' + yr,
+                'att_' + lvl + '_' + monthStr + '_' + yr,
+                'academic_monthly_attendance'
+            ];
+
+            for (const key of possibleKeys) {
+                const cachedRaw = localStorage.getItem(key);
+                if (cachedRaw) {
+                    const cached = JSON.parse(cachedRaw);
+                    const stuCached = cached[sIdStr];
+                    if (stuCached && typeof stuCached === 'object') {
+                        for (let d = 1; d <= 31; d++) {
+                            if (!result.days[d]) {
+                                const rawVal = stuCached[d] || stuCached[String(d)];
+                                if (rawVal) {
+                                    const norm = String(rawVal).trim();
+                                    if (norm === "ច" || norm === "ច្ប" || norm.includes("ច្បាប់")) {
+                                        result.days[d] = "ច";
+                                        result.perm++;
+                                    } else if (norm === "អ" || norm === "អច្ប" || norm.includes("ឥតច្បាប់")) {
+                                        result.days[d] = "អ";
+                                        result.unex++;
+                                    } else if (norm === "ឈ" || norm.includes("ឈឺ")) {
+                                        result.days[d] = "ឈ";
+                                        result.perm++;
+                                    } else if (norm === "៖") {
+                                        result.days[d] = "៖";
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        } catch(e) {}
+
+        // ៣. ស្វែងរក និងទាញយកពី academic_attendance (Array នៃកំណត់ត្រាវត្តមានពី Google Sheet & System Sync)
+        try {
+            const rawArray = localStorage.getItem('academic_attendance');
+            let attRecordsArray = [];
+            if (rawArray) {
+                attRecordsArray = JSON.parse(rawArray);
+            }
+            if (!Array.isArray(attRecordsArray) && Array.isArray(window.attendanceData)) {
+                attRecordsArray = window.attendanceData;
+            }
+
+            if (Array.isArray(attRecordsArray) && attRecordsArray.length > 0) {
+                const khmerMonths = ["មករា", "កុម្ភៈ", "មីនា", "មេសា", "ឧសភា", "មិថុនា", "កក្កដា", "សីហា", "កញ្ញា", "តុលា", "វិច្ឆិកា", "ធ្នូ"];
+                const targetMonthIdx = khmerMonths.indexOf(monthStr);
+
+                attRecordsArray.forEach(rec => {
+                    if (!rec) return;
+                    const recStuId = String(rec.student_id || rec.studentId || rec.id || "").trim();
+                    if (recStuId !== sIdStr) return;
+
+                    let isSameMonth = false;
+                    const recMonth = String(rec.month || "").trim();
+                    if (recMonth && (recMonth === monthStr || recMonth.includes(monthStr))) {
+                        isSameMonth = true;
+                    } else if (rec.date) {
+                        try {
+                            const dObj = new Date(rec.date);
+                            if (!isNaN(dObj.getTime()) && targetMonthIdx >= 0) {
+                                if (dObj.getMonth() === targetMonthIdx) isSameMonth = true;
+                            }
+                        } catch(err) {}
+                    }
+
+                    if (!isSameMonth) return;
+
+                    let dayNum = null;
+                    if (rec.day) {
+                        dayNum = parseInt(rec.day, 10);
+                    } else if (rec.date) {
+                        if (typeof rec.date === 'string') {
+                            const mMatch = rec.date.match(/T|\s/);
+                            const dateOnly = mMatch ? rec.date.split(mMatch[0])[0] : rec.date;
+                            const parts = dateOnly.split('-');
+                            if (parts.length === 3) {
+                                dayNum = parseInt(parts[2], 10);
+                            }
+                        }
+                        if (!dayNum) {
+                            const dObj = new Date(rec.date);
+                            if (!isNaN(dObj.getTime())) dayNum = dObj.getDate();
+                        }
+                    }
+
+                    if (dayNum && dayNum >= 1 && dayNum <= 31) {
+                        const st = String(rec.status || rec.attendance || "").trim();
+                        if (!result.days[dayNum]) {
+                            if (st === "ច" || st === "ច្ប" || st.includes("ច្បាប់")) {
+                                result.days[dayNum] = "ច";
+                                result.perm++;
+                            } else if (st === "អ" || st === "អច្ប" || st.includes("ឥតច្បាប់")) {
+                                result.days[dayNum] = "អ";
+                                result.unex++;
+                            } else if (st === "ឈ" || st.includes("ឈឺ")) {
+                                result.days[dayNum] = "ឈ";
+                                result.perm++;
+                            }
+                        }
+                    }
+                });
+            }
+        } catch(e) {}
+
+        // ៤. Fallback attendance_records
+        try {
+            const rawFallback = localStorage.getItem('attendance_records');
+            if (rawFallback) {
+                const fb = JSON.parse(rawFallback);
+                const mData = fb[monthStr] || {};
+                const sData = mData[sIdStr] || {};
+                if (sData.perm && !result.perm) result.perm = sData.perm;
+                if (sData.unex && !result.unex) result.unex = sData.unex;
+                if (sData.days && Object.keys(result.days).length === 0) {
+                    result.days = { ...sData.days };
+                }
+            }
+        } catch(e) {}
+
+        return result;
     };
 
     pages.forEach((pageStus, pageIdx) => {
