@@ -220,13 +220,15 @@ window.loadAttendanceView = async function() {
                              class="pl-10 pr-4 py-2.5 border border-slate-200 rounded-xl text-[13px] font-bold focus:ring-2 focus:ring-rose-500/30 focus:border-rose-400 focus:bg-white outline-none w-full sm:w-44 bg-slate-50 transition shadow-inner font-siemreap">
                     </div>
 
-                    <!-- 🟢 ATT-01: ជ្រើសរើសថ្នាក់ និងបន្ទប់ (Interactive Class & Room Selection) 🟢 -->
+                    <!-- 🟢 ATT-01: ជ្រើសរើសបន្ទប់ (Interactive Room Selection) 🟢 -->
                     <div class="flex items-center gap-1.5 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 shadow-inner">
-                      <i class="fa-solid fa-graduation-cap text-rose-500 text-[13px]"></i>
-                      <select id="attGradeSelect" onchange="if(typeof window.fetchMonthlyAttendance === 'function') window.fetchMonthlyAttendance();" class="border-none bg-transparent text-[13px] font-bold text-indigo-700 outline-none cursor-pointer font-siemreap focus:ring-0">
-                        ${gradesOptions}
-                      </select>
-                      <span class="text-slate-300">|</span>
+                      <div class="hidden" aria-hidden="true">
+                        <select id="attGradeSelect" onchange="if(typeof window.fetchMonthlyAttendance === 'function') window.fetchMonthlyAttendance();">
+                          ${gradesOptions}
+                        </select>
+                      </div>
+                      <i class="fa-solid fa-chalkboard-user text-rose-500 text-[13px]"></i>
+                      <span class="text-xs font-bold text-slate-600">បន្ទប់</span>
                       <select id="attRoomSelect" onchange="if(typeof window.fetchMonthlyAttendance === 'function') window.fetchMonthlyAttendance();" class="border-none bg-transparent text-[13px] font-bold text-rose-600 outline-none cursor-pointer font-moul focus:ring-0">
                         ${roomsOptions}
                       </select>
@@ -314,7 +316,7 @@ window.loadAttendanceView = async function() {
                        <i class="fa-solid fa-list-check text-rose-500 text-lg"></i> បញ្ជីវត្តមានប្រចាំខែ <span id="lblMonthTitle" class="text-rose-600">${currentMonthName}</span>
                     </h3>
                     <p class="text-[13px] font-bold text-slate-500">
-                      ថ្នាក់ទី <span id="attHeaderGrade" class="text-indigo-700 mx-1 font-moul bg-indigo-50 px-2.5 py-1 rounded-lg border border-indigo-100 shadow-sm">${defaultGrade.replace('ថ្នាក់ទី', '').trim()}</span> 
+                      បន្ទប់ <span id="attHeaderGrade" class="text-indigo-700 mx-1 font-moul bg-indigo-50 px-2.5 py-1 rounded-lg border border-indigo-100 shadow-sm">«ក»</span> 
                       | ឆ្នាំសិក្សា <span id="lblAcademicYearTitle" class="ml-1 font-siemreap">${academicYear}</span>
                     </p>
                 </div>
@@ -411,9 +413,9 @@ window.fetchMonthlyAttendance = async function(forceRefresh = false) {
     const attHeaderGrade = document.getElementById("attHeaderGrade");
     if (attHeaderGrade) {
         if (selectedGrade === 'all') {
-            attHeaderGrade.textContent = selectedRoom === 'all' ? 'គ្រប់ថ្នាក់ទាំងអស់' : `គ្រប់ថ្នាក់ (បន្ទប់ ${selectedRoom})`;
+            attHeaderGrade.textContent = selectedRoom === 'all' ? 'គ្រប់បន្ទប់' : `បន្ទប់ ${selectedRoom}`;
         } else {
-            attHeaderGrade.textContent = `${selectedGrade.replace('ថ្នាក់ទី', '').trim()} ${selectedRoom}`;
+            attHeaderGrade.textContent = selectedRoom === 'all' ? 'គ្រប់បន្ទប់' : `បន្ទប់ ${selectedRoom}`;
         }
     }
 

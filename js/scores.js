@@ -1326,7 +1326,7 @@ window.handleScoreClassChange = async function() {
     const levelStr = document.getElementById("globalLevelSelect")?.value || "";
     const roomStr = document.getElementById("globalRoomSelect")?.value || "";
     const lbl = document.getElementById("scoreHeaderGradeDisplay");
-    if (lbl) lbl.textContent = `${levelStr} ${roomStr}`;
+    if (lbl) lbl.textContent = roomStr ? `បន្ទប់ ${roomStr}` : 'បន្ទប់រៀន';
     
     if (typeof window.updateAssessmentLockUI === 'function') window.updateAssessmentLockUI();
     
@@ -1344,7 +1344,7 @@ window.loadScoresView = async function() {
     const teacherGradeInfo = typeof window.getTeacherGradeInfo === 'function' ? window.getTeacherGradeInfo() : { level: "ថ្នាក់ទី ១", room: "«ក»" };
     const levelStr = teacherGradeInfo.level || sInfo.teacher_level || "ថ្នាក់ទី ១";
     const roomStr = teacherGradeInfo.room || sInfo.teacher_room || "«ក»";
-    const gradeFull = `${levelStr} ${roomStr}`;
+    const gradeFull = roomStr ? `បន្ទប់ ${roomStr}` : 'បន្ទប់រៀន';
 
     const struct = window.academicStructure || window.defaultAcademicStructure || {};
     const structGrades = Array.isArray(struct.grades) ? struct.grades.map(g => (typeof g === 'object' ? g.name : g)).filter(Boolean) : [];
@@ -1420,20 +1420,22 @@ window.loadScoresView = async function() {
                 <div>
                     <h2 class="text-xl md:text-2xl font-moul text-slate-800 tracking-wide drop-shadow-sm">ប្រព័ន្ធគ្រប់គ្រងពិន្ទុ</h2>
                     <div class="flex items-center gap-2 mt-2">
-                        <span class="bg-slate-100 text-slate-600 px-2.5 py-1 rounded-md text-xs font-bold font-siemreap flex items-center gap-1.5"><i class="fa-solid fa-school"></i> ថ្នាក់ទី៖</span>
+                        <span class="bg-slate-100 text-slate-600 px-2.5 py-1 rounded-md text-xs font-bold font-siemreap flex items-center gap-1.5"><i class="fa-solid fa-school"></i> បន្ទប់រៀន៖</span>
                         <strong id="scoreHeaderGradeDisplay" class="text-indigo-700 bg-indigo-50 px-3 py-1 rounded-md border border-indigo-100 text-sm font-moul shadow-sm">${gradeFull}</strong>
                     </div>
                 </div>
               </div>
               
               <div class="flex flex-wrap items-center gap-3 relative z-10 w-full 2xl:w-auto bg-slate-50/80 p-2 md:p-3 rounded-[1.5rem] border border-slate-200/80 backdrop-blur-md">
-                <!-- 🟢 SCR-02: ជ្រើសរើសថ្នាក់ និងបន្ទប់ (Interactive Class & Room Selection) 🟢 -->
+                <!-- 🟢 SCR-02: ជ្រើសរើសបន្ទប់ (Interactive Room Selection) 🟢 -->
                 <div class="flex items-center gap-1.5 bg-white border border-slate-200 rounded-[1.2rem] px-3 py-2 shadow-sm">
-                   <i class="fa-solid fa-graduation-cap text-indigo-600 text-sm"></i>
-                   <select id="globalLevelSelect" onchange="window.handleScoreClassChange()" class="border-none bg-transparent text-sm font-bold text-indigo-700 outline-none cursor-pointer font-siemreap py-0 pr-1">
-                      ${gradesOptions}
-                   </select>
-                   <span class="text-slate-300">|</span>
+                   <div class="hidden" aria-hidden="true">
+                     <select id="globalLevelSelect" onchange="window.handleScoreClassChange()">
+                        ${gradesOptions}
+                     </select>
+                   </div>
+                   <i class="fa-solid fa-chalkboard-user text-indigo-600 text-sm"></i>
+                   <span class="text-xs font-bold text-slate-600">បន្ទប់</span>
                    <select id="globalRoomSelect" onchange="window.handleScoreClassChange()" class="border-none bg-transparent text-sm font-bold text-rose-600 outline-none cursor-pointer font-moul py-0 pl-1">
                       ${roomsOptions}
                    </select>
@@ -2574,7 +2576,7 @@ window.downloadExcelTemplate = function() {
                 <td colspan="${leftCols}" style="text-align: left; vertical-align: top;"><br>
                     <b style="font-family: 'Khmer OS Muol Light', 'Moul', serif; font-size: 11pt; color: #1e3a8a;">ការិយាល័យអប់រំ យុវជន និងកីឡានៃរដ្ឋបាលស្រុក${districtName}</b><br>
                     <b style="font-family: 'Khmer OS Muol Light', 'Moul', serif; font-size: 12pt; color: #1e3a8a;">${schoolName}</b><br>
-                    <b style="font-family: 'Khmer OS Muol Light', 'Moul', serif; font-size: 12pt; color: #1e3a8a;">ថ្នាក់ទី ${grade}</b>
+                    <b style="font-family: 'Khmer OS Muol Light', 'Moul', serif; font-size: 12pt; color: #1e3a8a;">បន្ទប់ ${sInfo.teacher_room || '«ក»'}</b>
                 </td>
                 <td colspan="${rightCols}" style="text-align: right; vertical-align: top;">
                     <b style="font-family: 'Khmer OS Muol Light', 'Moul', serif; font-size: 12pt; color: #1e3a8a;">ព្រះរាជាណាចក្រកម្ពុជា</b><br>
@@ -3952,7 +3954,7 @@ window.generateCoverAndProfileHTML = function(stu) {
               </div>
               <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; font-size: 12.5px; text-align: center;">
                  <div style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 8px 6px; border-radius: 10px;"><div style="font-size: 10.5px; color: #64748b; font-weight: bold; margin-bottom: 2px;">អត្តលេខសិស្ស</div><div style="font-family: monospace; font-weight: bold; font-size: 15px; color: #0f172a;">${fullStu.id || '........'}</div></div>
-                 <div style="background: #fdf2f8; border: 1px solid #fbcfe8; padding: 8px 6px; border-radius: 10px;"><div style="font-size: 10.5px; color: #db2777; font-weight: bold; margin-bottom: 2px;">ថ្នាក់រៀន</div><div style="font-family: 'Moul', serif; font-size: 13.5px; color: #be123c;">${levelStr.replace('ថ្នាក់ទី ', '')} ${room}</div></div>
+                 <div style="background: #fdf2f8; border: 1px solid #fbcfe8; padding: 8px 6px; border-radius: 10px;"><div style="font-size: 10.5px; color: #db2777; font-weight: bold; margin-bottom: 2px;">បន្ទប់រៀន</div><div style="font-family: 'Moul', serif; font-size: 13.5px; color: #be123c;">បន្ទប់ ${room || '«ក»'}</div></div>
                  <div style="background: #f0fdf4; border: 1px solid #bbf7d0; padding: 8px 6px; border-radius: 10px;"><div style="font-size: 10.5px; color: #16a34a; font-weight: bold; margin-bottom: 2px;">ឆ្នាំសិក្សា</div><div style="font-family: monospace; font-weight: bold; font-size: 14.5px; color: #15803d;">${academicYear}</div></div>
               </div>
               <div style="margin-top: 10px; padding-top: 8px; border-top: 1px dashed #e2e8f0; display: flex; justify-content: space-between; align-items: center; font-size: 11.5px; color: #64748b;">
@@ -3978,7 +3980,7 @@ window.generateCoverAndProfileHTML = function(stu) {
               <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 14px; margin-bottom: 3mm; background: #f8fafc; padding: 10px 14px; border-radius: 12px; border: 1px solid #e2e8f0;">
                  <div style="flex: 1; font-size: 13px; line-height: 2.1;">
                     <div style="display: flex; gap: 16px; align-items: baseline;"><span>ឈ្មោះសិស្ស ៖ <b style="font-family: 'Moul', serif; font-size: 15px; color: #1e3a8a;">${fullStu.name}</b></span><span>ភេទ ៖ <b>${fullStu.gender || 'ប្រុស'}</b></span><span>អត្តលេខ ៖ <b style="font-family: monospace; font-size: 14px; color: #1e3a8a;">${fullStu.id || '........'}</b></span></div>
-                    <div>ថ្នាក់ទី ៖ <b style="color: #be123c;">${levelStr.replace('ថ្នាក់ទី ', '')} ${room}</b>&nbsp;&nbsp;&nbsp;&nbsp; ឆ្នាំសិក្សា ៖ <b style="font-family: monospace; color: #1e3a8a;">${academicYear}</b></div>
+                    <div>បន្ទប់ ៖ <b style="color: #be123c;">បន្ទប់ ${room || '«ក»'}</b>&nbsp;&nbsp;&nbsp;&nbsp; ឆ្នាំសិក្សា ៖ <b style="font-family: monospace; color: #1e3a8a;">${academicYear}</b></div>
                     <div>សាលារៀន ៖ <span style="font-weight: bold; color: #334155;">${schoolName}</span>&nbsp;&nbsp;&nbsp;&nbsp; កម្រង ៖ <span>${renderField(clusterName, ".....................")}</span></div>
                  </div>
                  <div style="width: 28mm; height: 36mm; border: 2px dashed #93c5fd; border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; background-color: #ffffff; flex-shrink: 0; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
@@ -4334,7 +4336,7 @@ function renderTop5HonorBoard() {
                     <p contenteditable="true" spellcheck="false" class="font-bold text-[14px] text-amber-950 bg-white/90 inline-block px-6 py-1.5 rounded-full border border-amber-200 backdrop-blur-md shadow-sm outline-none">${periodTitleText}</p>
                 </div>
                 <div class="canva-el cursor-grab hover:ring-2 hover:ring-dashed hover:ring-blue-400 p-2 rounded-xl transition-colors hover:bg-white/40 z-20">
-                    <p class="text-amber-900 font-bold text-[13px]">ថ្នាក់រៀន ៖ <span contenteditable="true" class="text-[14px] outline-none font-moul text-rose-700 bg-white/50 px-2 rounded">${level.replace('ថ្នាក់ទី ', '')} ${room}</span> <span class="mx-2 text-slate-400">|</span> ឆ្នាំសិក្សា ៖ <span contenteditable="true" class="font-bold outline-none font-mono text-[14px] bg-white/50 px-2 rounded">${window.toKhmerNum(academic_year)}</span></p>
+                    <p class="text-amber-900 font-bold text-[13px]">បន្ទប់រៀន ៖ <span contenteditable="true" class="text-[14px] outline-none font-moul text-rose-700 bg-white/50 px-2 rounded">បន្ទប់ ${room || '«ក»'}</span> <span class="mx-2 text-slate-400">|</span> ឆ្នាំសិក្សា ៖ <span contenteditable="true" class="font-bold outline-none font-mono text-[14px] bg-white/50 px-2 rounded">${window.toKhmerNum(academic_year)}</span></p>
                 </div>
             </div>
 

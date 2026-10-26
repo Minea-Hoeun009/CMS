@@ -375,7 +375,7 @@ window.renderPersonalSettingsTab = function() {
                     <p class="text-xs text-indigo-200 mt-1 flex flex-wrap items-center gap-2 font-bold">
                         <span>អត្តលេខគ្រូ៖ <strong class="font-mono text-white">${personal.teacher_id}</strong></span>
                         <span class="text-white/40">•</span>
-                        <span>ថ្នាក់បង្រៀន៖ <strong class="text-amber-300 font-moul">${personal.teacher_level} ${personal.teacher_room}</strong></span>
+                        <span>បន្ទប់ទទួលបន្ទុក៖ <strong class="text-amber-300 font-moul">បន្ទប់ ${personal.teacher_room || '«ក»'}</strong></span>
                     </p>
                 </div>
             </div>
@@ -388,7 +388,7 @@ window.renderPersonalSettingsTab = function() {
 
         <form id="personalSettingsForm" onsubmit="window.handleSavePersonalTeacherSettings(event)" class="space-y-6">
             
-            <!-- ផ្នែកទី ១៖ ព័ត៌មានគ្រូ និងថ្នាក់រៀនបន្ទុក (Teacher Profile & My Classroom) -->
+            <!-- ផ្នែកទី ១៖ ព័ត៌មានគ្រូ និងបន្ទប់ទទួលបន្ទុក (Teacher Profile & My Classroom) -->
             <div class="bg-white dark:bg-slate-800 p-6 md:p-8 rounded-[2rem] shadow-sm border border-slate-200 dark:border-slate-700 space-y-6">
                 <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-700 pb-4">
                     <div class="flex items-center gap-3">
@@ -396,8 +396,8 @@ window.renderPersonalSettingsTab = function() {
                             <i class="fa-solid fa-chalkboard-user"></i>
                         </div>
                         <div>
-                            <h4 class="font-moul text-base text-slate-800 dark:text-white">១. ព័ត៌មានគ្រូ និងថ្នាក់រៀនបន្ទុក (My Classroom)</h4>
-                            <p class="text-xs text-slate-500 dark:text-slate-400">កំណត់ឈ្មោះ ថ្នាក់ និងបន្ទប់ដែលលោកគ្រូអ្នកគ្រូទទួលបន្ទុកបង្រៀនផ្ទាល់</p>
+                            <h4 class="font-moul text-base text-slate-800 dark:text-white">១. ព័ត៌មានគ្រូ និងបន្ទប់ទទួលបន្ទុក (My Classroom)</h4>
+                            <p class="text-xs text-slate-500 dark:text-slate-400">កំណត់ឈ្មោះ និងបន្ទប់ដែលលោកគ្រូអ្នកគ្រូទទួលបន្ទុកបង្រៀនផ្ទាល់</p>
                         </div>
                     </div>
                 </div>
@@ -421,9 +421,8 @@ window.renderPersonalSettingsTab = function() {
                         <input type="text" id="pers_teacher_phone" value="${personal.teacher_phone || ''}" placeholder="012 345 678" class="w-full bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl px-4 py-2.5 font-mono font-bold outline-none focus:ring-2 focus:ring-indigo-400 text-slate-800 dark:text-white">
                     </div>
 
-                    <div>
-                        <label class="block font-bold text-indigo-700 dark:text-indigo-400 mb-2">ថ្នាក់ទទួលបន្ទុក (My Grade Level) *</label>
-                        <select id="pers_teacher_level" class="w-full bg-indigo-50/50 dark:bg-slate-700 border-2 border-indigo-200 dark:border-indigo-500/40 rounded-xl px-4 py-2.5 font-bold text-indigo-900 dark:text-indigo-200 outline-none focus:ring-2 focus:ring-indigo-500">
+                    <div class="hidden" aria-hidden="true">
+                        <select id="pers_teacher_level">
                             ${gradesOpts}
                         </select>
                     </div>
@@ -820,7 +819,7 @@ window.loadSettingsView = function() {
                             <h3 id="display_teacher_name" class="font-moul text-lg text-slate-800 uppercase">${window.appSettings.teacher_name || 'លោកគ្រូ អ្នកគ្រូ'}</h3>
                             <div class="flex flex-wrap items-center justify-center sm:justify-start gap-2 mt-1">
                                 <span class="px-2.5 py-0.5 bg-indigo-50 text-indigo-700 border border-indigo-100 rounded-full text-xs font-bold font-mono">ID: ${localStorage.getItem('auth_teacher_id') || 'TCH-001'}</span>
-                                <span class="px-2.5 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-100 rounded-full text-xs font-bold">${window.appSettings.teacher_level || 'ថ្នាក់ទី ១'} ${window.appSettings.teacher_room || '«ក»'}</span>
+                                <span class="px-2.5 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-100 rounded-full text-xs font-bold">បន្ទប់ ${window.appSettings.teacher_room || '«ក»'}</span>
                             </div>
                         </div>
                     </div>
@@ -2193,7 +2192,7 @@ window.renderUserAccountsTab = async function() {
                                                 ${roleBadgesHtml}
                                             </div>
                                         </td>
-                                        <td class="p-3 font-bold text-slate-700">${t.assigned_grade || 'ថ្នាក់ទី ១'} ${t.assigned_room || ''}</td>
+                                        <td class="p-3 font-bold text-slate-700">${t.assigned_room ? 'បន្ទប់ ' + t.assigned_room : 'គ្រូបន្ទុកថ្នាក់'}</td>
                                         <td class="p-3">
                                             ${isLocked ? 
                                                 `<button ${(canManageUsers && !isSelf && t.teacher_id !== 'TCH-ADMIN' && t.teacher_id !== 'TCH-SYSADMIN') ? `onclick="window.toggleUserAccountStatus('${t.teacher_id}', '${t.status || 'inactive'}')"` : 'disabled'} class="px-2 py-0.5 bg-rose-50 text-rose-600 hover:bg-rose-100 border border-rose-200 rounded-md text-[10px] font-bold flex items-center gap-1 transition" title="ចុចដើម្បីបើកដំណើរការឡើងវិញ">

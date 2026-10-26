@@ -1235,34 +1235,31 @@ window.renderAccountModal = function() {
                             </div>
                         </div>
 
-                        <!-- ថ្នាក់ និងបន្ទប់ទទួលបន្ទុកបឋមសិក្សា (Primary School Classroom Assignment) -->
+                        <!-- បន្ទប់ទទួលបន្ទុកបឋមសិក្សា (Primary School Room Assignment) -->
                         <div class="p-3.5 bg-indigo-50/70 dark:bg-slate-700/60 rounded-2xl border border-indigo-100 dark:border-slate-600 space-y-2">
                             <div class="flex items-center justify-between text-indigo-900 dark:text-indigo-300 font-bold text-xs">
-                                <span class="flex items-center gap-1.5"><i class="fa-solid fa-chalkboard-user"></i> ថ្នាក់ និងបន្ទប់ទទួលបន្ទុកបឋមសិក្សា</span>
+                                <span class="flex items-center gap-1.5"><i class="fa-solid fa-chalkboard-user"></i> បន្ទប់រៀនទទួលបន្ទុក</span>
                                 <span class="text-[10px] text-indigo-500">កម្រិតបឋមសិក្សា</span>
                             </div>
-                            <div class="grid grid-cols-2 gap-3">
-                                <div>
-                                    <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-400 mb-1">កម្រិតថ្នាក់</label>
-                                    <select id="acc_grade" class="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-xl text-xs font-bold text-slate-800 dark:text-white outline-none focus:ring-2 focus:ring-indigo-500">
-                                        <option value="ថ្នាក់ទី ១">ថ្នាក់ទី ១</option>
-                                        <option value="ថ្នាក់ទី ២">ថ្នាក់ទី ២</option>
-                                        <option value="ថ្នាក់ទី ៣">ថ្នាក់ទី ៣</option>
-                                        <option value="ថ្នាក់ទី ៤">ថ្នាក់ទី ៤</option>
-                                        <option value="ថ្នាក់ទី ៥">ថ្នាក់ទី ៥</option>
-                                        <option value="ថ្នាក់ទី ៦">ថ្នាក់ទី ៦</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-400 mb-1">បន្ទប់</label>
-                                    <select id="acc_room" class="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-xl text-xs font-bold text-slate-800 dark:text-white outline-none focus:ring-2 focus:ring-indigo-500 font-moul">
-                                        <option value="«ក»">«ក»</option>
-                                        <option value="«ខ»">«ខ»</option>
-                                        <option value="«គ»">«គ»</option>
-                                        <option value="«ឃ»">«ឃ»</option>
-                                        <option value="«ង»">«ង»</option>
-                                    </select>
-                                </div>
+                            <div class="hidden" aria-hidden="true">
+                                <select id="acc_grade">
+                                    <option value="ថ្នាក់ទី ១">ថ្នាក់ទី ១</option>
+                                    <option value="ថ្នាក់ទី ២">ថ្នាក់ទី ២</option>
+                                    <option value="ថ្នាក់ទី ៣">ថ្នាក់ទី ៣</option>
+                                    <option value="ថ្នាក់ទី ៤">ថ្នាក់ទី ៤</option>
+                                    <option value="ថ្នាក់ទី ៥">ថ្នាក់ទី ៥</option>
+                                    <option value="ថ្នាក់ទី ៦">ថ្នាក់ទី ៦</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-400 mb-1">បន្ទប់រៀនទទួលបន្ទុក</label>
+                                <select id="acc_room" class="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-xl text-xs font-bold text-slate-800 dark:text-white outline-none focus:ring-2 focus:ring-indigo-500 font-moul">
+                                    <option value="«ក»">«ក»</option>
+                                    <option value="«ខ»">«ខ»</option>
+                                    <option value="«គ»">«គ»</option>
+                                    <option value="«ឃ»">«ឃ»</option>
+                                    <option value="«ង»">«ង»</option>
+                                </select>
                             </div>
                         </div>
 
@@ -1513,9 +1510,9 @@ window.handleUpdateAccount = async function(e) {
         const nameEl = document.getElementById("navUserName");
         if (nameEl) nameEl.textContent = newName;
         const idEl = document.getElementById("navUserId");
-        if (idEl) idEl.textContent = `${newGrade} ${newRoom}`;
+        if (idEl) idEl.textContent = newRoom ? `បន្ទប់ ${newRoom}` : 'គ្រូបន្ទុកថ្នាក់';
         const badgeEl = document.getElementById("headerActiveClassBadge");
-        if (badgeEl) badgeEl.textContent = `${newGrade} ${newRoom}`;
+        if (badgeEl) badgeEl.textContent = newRoom ? `បន្ទប់ ${newRoom}` : 'គ្រូបន្ទុកថ្នាក់';
 
         document.getElementById('accountProfileModal')?.classList.replace('flex','hidden');
         if (typeof showToast === 'function') showToast("✅ បានកែប្រែព័ត៌មានគ្រូ និងថ្នាក់រៀនជោគជ័យ!");

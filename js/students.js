@@ -258,14 +258,14 @@ window.loadStudentsView = async function() {
                         </div>
                         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3">
                             <!-- ស្វែងរក -->
-                            <div class="relative col-span-1 sm:col-span-2 lg:col-span-2 group">
+                            <div class="relative col-span-1 sm:col-span-2 lg:col-span-3 group">
                                 <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-500 transition-colors"><i class="fa-solid fa-magnifying-glass text-[14px]"></i></span>
                                 <input type="text" id="stuSearchInput" oninput="if(typeof window.filterStudents === 'function') window.filterStudents();" placeholder="ស្វែងរកឈ្មោះ ឬ អត្តលេខ..." class="pl-11 pr-4 py-3 w-full border border-slate-200 rounded-2xl text-[13px] font-bold outline-none bg-slate-50 focus:bg-white focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400 transition-all shadow-inner">
                             </div>
 
-                            <!-- ជម្រើសកម្រិតថ្នាក់ (Class/Grade) -->
-                            <div class="relative col-span-1">
-                                <select id="stuFilterGrade" onchange="if(typeof window.filterStudents === 'function') window.filterStudents();" class="w-full border border-slate-200 rounded-2xl px-3 py-3 text-[13px] font-bold text-indigo-700 bg-slate-50 outline-none cursor-pointer focus:bg-white focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400 transition shadow-inner font-siemreap">
+                            <!-- Hidden Grade Filter for Single Classroom Mode -->
+                            <div class="hidden" aria-hidden="true">
+                                <select id="stuFilterGrade" onchange="if(typeof window.filterStudents === 'function') window.filterStudents();">
                                     ${gradesOptions}
                                 </select>
                             </div>
@@ -311,7 +311,7 @@ window.loadStudentsView = async function() {
                                         <th class="p-4 border-b border-slate-200 font-moul text-slate-700">គោត្តនាម និងនាម</th>
                                         <th class="p-4 border-b border-slate-200 text-center w-16">ភេទ</th>
                                         <th class="p-4 border-b border-slate-200 w-32 text-center">ថ្ងៃខែឆ្នាំកំណើត</th>
-                                        <th class="p-4 border-b border-slate-200 w-32 text-center">ថ្នាក់រៀន</th>
+                                        <th class="p-4 border-b border-slate-200 w-32 text-center">បន្ទប់រៀន</th>
                                         <th class="p-4 border-b border-slate-200 w-40">ទីលំនៅ (ភូមិ/ឃុំ)</th>
                                         <th class="p-4 border-b border-slate-200 text-center w-36 no-print">សកម្មភាព</th>
                                     </tr>
@@ -615,7 +615,7 @@ window.renderStudentsTable = function() {
                 <td class="p-3 text-center font-Siemreap text-[14px]">${genBadge}</td>
                 <td class="p-3 text-center text-slate-600 font-Siemreap text-[14px] whitespace-nowrap">${formatDate(stu.dob)} ${ageHtml}</td>
                 <td class="p-3 text-center text-slate-700">
-                   <span class="border border-slate-200 px-3 py-1.5 rounded-xl text-[12px] bg-white shadow-sm text-slate-700 whitespace-nowrap">${window.escapeHtml(displayGrade)} <span class="text-rose-500 ml-1 font-moul">${window.escapeHtml(stu.room) || ''}</span></span> 
+                   <span class="border border-slate-200 px-3 py-1.5 rounded-xl text-[12px] bg-white shadow-sm text-slate-700 whitespace-nowrap"><span class="text-indigo-600 font-moul">បន្ទប់ ${window.escapeHtml(stu.room) || '«ក»'}</span></span> 
                 </td>
                 <td class="p-3 text-slate-500 text-[12px]"><i class="fa-solid fa-map-pin text-slate-300 mr-1.5"></i> ${window.escapeHtml(addrText)}</td>
                 <td class="p-3 text-center no-print">
@@ -1410,9 +1410,9 @@ window.renderStudentModalTemplate = function() {
                                         <div class="col-span-2 md:col-span-1"><label class="block text-[10px] font-bold text-slate-400 mb-1.5 uppercase tracking-wider">មុខរបរម្ដាយ</label><input type="text" id="stu_mother_job" placeholder="មុខរបរ" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-xs font-bold outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-400 focus:bg-white transition shadow-inner"></div>
                                     </div>
                                     
-                                    <div class="grid grid-cols-2 md:grid-cols-5 gap-3">
-                                        <div><label class="block text-[10px] font-bold text-slate-400 mb-1.5 uppercase tracking-wider">ថ្នាក់រៀន</label><select id="stu_grade" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-3 text-xs font-bold outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-400 focus:bg-white transition cursor-pointer text-indigo-700 shadow-inner">${gradesOptions}</select></div>
-                                        <div><label class="block text-[10px] font-bold text-slate-400 mb-1.5 uppercase tracking-wider">បន្ទប់</label><select id="stu_room" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-3 text-xs font-bold outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-400 focus:bg-white transition cursor-pointer text-indigo-700 shadow-inner"><option value="«ក»">«ក»</option><option value="«ខ»">«ខ»</option><option value="«គ»">«គ»</option><option value="«ឃ»">«ឃ»</option></select></div>
+                                    <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                                        <div class="hidden" aria-hidden="true"><select id="stu_grade">${gradesOptions}</select></div>
+                                        <div><label class="block text-[10px] font-bold text-slate-400 mb-1.5 uppercase tracking-wider">បន្ទប់រៀន</label><select id="stu_room" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-3 text-xs font-bold outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-400 focus:bg-white transition cursor-pointer text-indigo-700 shadow-inner"><option value="«ក»">«ក»</option><option value="«ខ»">«ខ»</option><option value="«គ»">«គ»</option><option value="«ឃ»">«ឃ»</option></select></div>
                                         <div><label class="block text-[10px] font-bold text-slate-400 mb-1.5 uppercase tracking-wider">ឆ្នាំសិក្សា</label><select id="stu_academic_year" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-3 text-xs font-bold outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-400 focus:bg-white transition cursor-pointer text-indigo-700 shadow-inner"><option value="2026-2027">២០២៦-២០២៧</option><option value="2025-2026">២០២៥-២០២៦</option><option value="2024-2025">២០២៤-២០២៥</option></select></div>
                                         <div><label class="block text-[10px] font-bold text-slate-400 mb-1.5 uppercase tracking-wider">ទូរស័ព្ទអាណាព្យាបាល</label><input type="text" id="stu_contact" placeholder="012 345 678" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-3 text-xs font-bold font-mono outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-400 focus:bg-white transition shadow-inner"></div>
                                         <div><label class="block text-[10px] font-bold text-slate-400 mb-1.5 uppercase tracking-wider">ស្ថានភាព</label><select id="stu_status" class="w-full bg-emerald-50/50 border border-emerald-200 rounded-xl px-3 py-3 text-xs font-bold outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 focus:bg-white transition cursor-pointer shadow-inner text-emerald-700">

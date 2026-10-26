@@ -1453,7 +1453,7 @@ window.openManageClassModal = function() {
     if (!modal) return;
     const cur = window.getCurrentSelectedClass();
     const display = document.getElementById("modalCurClassDisplay");
-    if (display) display.textContent = `${cur.level} ${cur.room}`;
+    if (display) display.textContent = `បន្ទប់ ${cur.room || '«ក»'}`;
 
     const selGrade = document.getElementById("selManageGrade");
     const selRoom = document.getElementById("selManageRoom");
