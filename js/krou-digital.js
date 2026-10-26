@@ -227,7 +227,7 @@ window.KrouDigital = {
                     <div class="text-center w-2/5">
                         <p class="mb-1 text-slate-700">បានឃើញ និងឯកភាព</p>
                         <p class="font-moul text-slate-900 mb-16">នាយក/នាយិកាសាលា</p>
-                        <p class="font-moul text-slate-900 text-sm">${principalName}</p>
+                        ${principalName ? `<p class="font-moul text-slate-900 text-sm">${principalName}</p>` : ""}
                     </div>
                     <div class="text-center w-2/5">
                         <p class="mb-1 text-slate-700">${lunarDateStr || 'ថ្ងៃ....................ខែ..................ឆ្នាំ...............ព.ស.២៥៧០'}</p>
@@ -563,7 +563,7 @@ window.KrouDigital = {
         const districtName = (sInfo.district_name || sInfo.district || sInfo.cluster || "កៀនស្វាយ").replace(/^ស្រុក\s*/, '').trim();
         const schoolName = sInfo.school_name || "សាលាបឋមសិក្សា ខ្សុំ";
         const teacherName = (window.AuthState ? window.AuthState.teacherName : null) || localStorage.getItem('auth_teacher_name') || sInfo.teacher_name || "ហឿន មិនា";
-        const principalName = sInfo.principal_name || "នាយកសាលា";
+        const principalName = (sInfo.principal_name && sInfo.principal_name !== "នាយកសាលា") ? sInfo.principal_name : "";
         const rawAcademicYear = document.getElementById("globalAcademicYear")?.value || localStorage.getItem('selected_academic_year') || sInfo.academic_year || "២០២៦-២០២៧";
         const academicYear = typeof window.toKhmerNum === 'function' ? window.toKhmerNum(rawAcademicYear) : rawAcademicYear;
         const healthRecords = JSON.parse(localStorage.getItem('student_health_records') || '{}');
@@ -1438,7 +1438,7 @@ window.KrouDigital = {
         const districtName = (sInfo.district || "អង្គរជ័យ").replace(/^ស្រុក\s*/, '').trim(); 
         const provinceName = sInfo.province || "កំពត";
         const schoolName = sInfo.school_name || "វិទ្យាល័យ សម្តេច ជា ស៊ីម អង្គរជ័យ";
-        const principalName = sInfo.principal_name || "គឹម ទ្រី";
+        const principalName = (sInfo.principal_name && sInfo.principal_name !== "នាយកសាលា") ? sInfo.principal_name : "";
         const teacherName = (window.AuthState ? window.AuthState.teacherName : null) || localStorage.getItem('auth_teacher_name') || sInfo.teacher_name || "លុយ សុផល";
 
         let locShort = "";
@@ -2017,7 +2017,7 @@ window.KrouDigital = {
                                             <i class="fa-solid fa-up-down-left-right"></i> អូស
                                         </div>
                                         <p contenteditable="true" class="cert-editable text-slate-700 text-[11px] font-bold">បានឃើញ និងឯកភាព</p>
-                                        <p contenteditable="true" class="cert-editable font-moul text-blue-950 text-xs mt-0.5">នាយករងបច្ចេកទេស</p>
+                                        <p contenteditable="true" class="cert-editable font-moul text-blue-950 text-xs mt-0.5">នាយក/នាយិកាសាលា</p>
                                         
                                         <!-- Stamp & Signature Holder -->
                                         <div class="h-16 flex items-center justify-center relative my-1">
@@ -2026,7 +2026,7 @@ window.KrouDigital = {
                                             </div>
                                         </div>
 
-                                        <p contenteditable="true" class="cert-editable font-moul text-red-600 text-sm font-bold mt-1">${principalName}</p>
+                                        ${principalName ? `<p contenteditable="true" class="cert-editable font-moul text-red-600 text-sm font-bold mt-1">${principalName}</p>` : ''}
                                     </div>
 
                                     <!-- Right side: Lunar Date, Solar Date, Teacher Signature -->

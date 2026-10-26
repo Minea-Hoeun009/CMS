@@ -682,7 +682,7 @@ window.TimetableHomeworkManager = {
             ? window.getKhmerLunarDate(now) 
             : `ថ្ងៃចន្ទ ១៥កើត ខែអស្សុជ ឆ្នាំខាល អដ្ឋស័ក ព.ស.២៥៧០`;
         const sInfo = window.appSettings || JSON.parse(localStorage.getItem('school_settings') || '{}');
-        const principalName = sInfo.principal_name || "នាយកសាលា";
+        const principalName = (sInfo.principal_name && sInfo.principal_name !== "នាយកសាលា") ? sInfo.principal_name : "";
         const classTeacher = this.getClassTeacherInfo(this.currentGrade);
         const teacherName = classTeacher ? classTeacher.name : (sInfo.teacher_name || "ហឿន មិនា");
 
@@ -722,7 +722,7 @@ window.TimetableHomeworkManager = {
                 <div class="footer-box" style="display: flex; justify-content: space-between; margin-top: 22px; padding: 0 40px; page-break-inside: avoid; font-family: 'Siemreap', sans-serif;">
                     <div style="text-align: center; width: 250px;">
                         <p style="margin: 0 0 3px 0;">បានឃើញ និងឯកភាព</p>
-                        <p class="font-moul" style="font-size: 10pt; margin: 0;">នាយកសាលា</p>
+                        <p class="font-moul" style="font-size: 10pt; margin: 0;">នាយក/នាយិកាសាលា</p>
                         <div style="height: 60px;"></div>
                         <p style="margin: 0; font-family: 'Moul', cursive; font-size: 10pt;">${principalName}</p>
                     </div>
@@ -767,7 +767,7 @@ window.TimetableHomeworkManager = {
                 <div class="flex justify-between items-start pt-6 border-t border-slate-200 dark:border-slate-600 text-xs">
                     <div class="text-center space-y-1">
                         <p class="font-bold text-slate-700 dark:text-slate-300">បានឃើញ និងឯកភាព</p>
-                        <p class="font-moul text-xs text-slate-800 dark:text-white">នាយកសាលា</p>
+                        <p class="font-moul text-xs text-slate-800 dark:text-white">នាយក/នាយិកាសាលា</p>
                         <div class="h-16"></div>
                         <p class="font-moul text-xs text-slate-900 dark:text-white font-bold">${principalName}</p>
                     </div>
@@ -789,7 +789,7 @@ window.TimetableHomeworkManager = {
     printTimetable: function() {
         const sInfo = window.appSettings || JSON.parse(localStorage.getItem('school_settings') || '{}');
         const schoolName = sInfo.school_name || "សាលាបឋមសិក្សា";
-        const principalName = sInfo.principal_name || "នាយកសាលា";
+        const principalName = (sInfo.principal_name && sInfo.principal_name !== "នាយកសាលា") ? sInfo.principal_name : "";
         const classTeacher = this.getClassTeacherInfo(this.currentGrade);
         const teacherName = classTeacher ? classTeacher.name : (sInfo.teacher_name || "គ្រូទទួលបន្ទុកថ្នាក់");
         const academicYear = this.currentAcademicYear;
@@ -1154,7 +1154,7 @@ window.TimetableHomeworkManager = {
                 <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-top: 35px; font-size: 9.5pt;">
                     <div style="text-align: center;">
                         <p style="font-family: 'Moul', serif; margin-bottom: 50px;">បានឃើញ និងឯកភាព</p>
-                        <p style="font-family: 'Moul', serif; margin: 0;">នាយកសាលា</p>
+                        <p style="font-family: 'Moul', serif; margin: 0;">នាយក/នាយិកាសាលា</p>
                     </div>
                     <div style="text-align: center;">
                         <p style="margin: 0; color: #64748b;">ថ្ងៃទី.......... ខែ.......... ឆ្នាំ២០២....</p>

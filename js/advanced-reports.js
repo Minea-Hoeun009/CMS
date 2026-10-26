@@ -151,8 +151,8 @@ window.AdvancedReports = {
                     <!-- Signatures Section -->
                     <div class="grid grid-cols-3 gap-6 text-center text-xs pt-4">
                         <div>
-                            <p class="font-bold text-slate-700 mb-16">បានឃើញ និងឯកភាព<br>នាយកសាលា</p>
-                            <p class="font-moul text-[11px] text-slate-800">${sInfo.principal_name || 'នាយកសាលា'}</p>
+                            <p class="font-bold text-slate-700 mb-16">បានឃើញ និងឯកភាព<br>នាយក/នាយិកាសាលា</p>
+                            <p class="font-moul text-[11px] text-slate-800">${(sInfo.principal_name && sInfo.principal_name !== 'នាយកសាលា') ? sInfo.principal_name : ''}</p>
                         </div>
                         <div>
                             <p class="font-bold text-slate-700 mb-16">មតិអាណាព្យាបាលសិស្ស<br>&nbsp;</p>

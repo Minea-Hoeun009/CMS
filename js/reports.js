@@ -1034,7 +1034,7 @@ window.updateStudentListContent = function() {
     const gradeFull = `${curLevel} ${curRoom}`.trim();
     const districtName = (sInfo.district || "កៀនស្វាយ").replace(/^ស្រុក\s*/, '').trim(); 
     const schoolName = sInfo.school_name || "សាលាបឋមសិក្សា ខ្សុំ";
-    const principalName = sInfo.principal_name || "";
+    const principalName = (sInfo.principal_name && sInfo.principal_name !== "នាយកសាលា") ? sInfo.principal_name : "";
     const teacherName = (window.AuthState ? window.AuthState.teacherName : null) || localStorage.getItem('auth_teacher_name') || sInfo.teacher_name || "";
 
     const rDates = window.reportDateSettings || {};
@@ -1222,7 +1222,7 @@ window.updateStudentListContent = function() {
                     <div class="text-center w-2/5">
                         <p class="mb-1 text-slate-700">បានឃើញ និងឯកភាព</p>
                         <p class="font-moul text-slate-900 mb-16">នាយក/នាយិកាសាលា</p>
-                        <p class="font-moul text-slate-900 text-sm">${principalName}</p>
+                        ${principalName ? `<p class="font-moul text-slate-900 text-sm">${principalName}</p>` : ""}
                     </div>
                     <div class="text-center w-2/5">
                         <p class="mb-1 text-slate-700">${lunarDateStr || 'ថ្ងៃ....................ខែ..................ឆ្នាំ...............ព.ស.២៥៧០'}</p>
@@ -1415,7 +1415,7 @@ window.renderAttendanceContent = function() {
     const gradeFull = `${curLevel} ${curRoom}`.trim();
     const districtName = (sInfo.district || "កៀនស្វាយ").replace(/^ស្រុក\s*/, '').trim(); 
     const schoolName = sInfo.school_name || "សាលាបឋមសិក្សា ខ្សុំ";
-    const principalName = sInfo.principal_name || "";
+    const principalName = (sInfo.principal_name && sInfo.principal_name !== "នាយកសាលា") ? sInfo.principal_name : "";
     const teacherName = (window.AuthState ? window.AuthState.teacherName : null) || localStorage.getItem('auth_teacher_name') || sInfo.teacher_name || "";
 
     const rDates = window.reportDateSettings || {};

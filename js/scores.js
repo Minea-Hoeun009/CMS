@@ -4264,7 +4264,7 @@ function renderTop5HonorBoard() {
     const districtName = (sInfo.district_name || sInfo.district || sInfo.cluster || "កៀនស្វាយ").replace(/^ស្រុក\s*/, '').trim();
     const school_name = sInfo.school_name || "សាលាបឋមសិក្សា ខ្សុំ";
     const teacher_name = sInfo.teacher_name || "គ្រូបន្ទុកថ្នាក់";
-    const principal_name = sInfo.principal_name || "នាយកសាលា";
+    const principal_name = (sInfo.principal_name && sInfo.principal_name !== "នាយកសាលា") ? sInfo.principal_name : "";
     const academic_year = sInfo.academic_year || "២០២៦-២០២៧";
     const current_year = new Date().getFullYear();
 

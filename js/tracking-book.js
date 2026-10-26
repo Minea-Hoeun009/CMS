@@ -319,7 +319,7 @@ function renderTrackingBookPreview() {
            <span class="mr-4">ថ្ងៃទី.......ខែ..........ឆ្នាំ២០.......</span>
          </div>
          <div class="flex justify-between font-moul text-center mt-2 px-1">
-           <span class="text-[9px]">បានឃើញ និង ឯកភាព<br>នាយកសាលា</span>
+           <span class="text-[9px]">បានឃើញ និងឯកភាព<br>នាយក/នាយិកាសាលា</span>
            <span class="text-[9px] mt-1">មតិរបស់មាតាបិតា ឬអាណាព្យាបាលសិស្ស</span>
            <span class="text-[9px]">គ្រូប្រចាំថ្នាក់</span>
          </div>

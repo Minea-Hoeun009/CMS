@@ -349,7 +349,7 @@ window.CMSValidator = {
 let appSettings = {
   school_name: "សាលាបឋមសិក្សា",
   academic_year: "២០២៦-២០២៧",
-  principal_name: "នាយកសាលា",
+  principal_name: "",
   teacher_name: "គ្រូបង្រៀន",
   district: ".......",
   school_logo: "",
@@ -1206,12 +1206,13 @@ window.CMSPrintManager = {
 
     // ៧. ទម្រង់ហត្ថលេខា និងកាលបរិច្ឆេទខាងក្រោមស្តង់ដារ (Standard Signatures & Dates ដូចរូបគំរូ)
     getFooterHtml: function(ctx, customRoleLeft = "នាយក/នាយិកាសាលា", customRoleRight = "គ្រូបន្ទុកថ្នាក់", middleColHtml = "") {
+        const pName = (ctx.principalName && ctx.principalName !== "នាយកសាលា") ? ctx.principalName : "";
         return `
             <div class="bottom-sig-container" style="display: flex; justify-content: space-between; align-items: flex-start; width: 100%; page-break-inside: avoid; padding: 0 20px; margin-top: 15px;">
                 <div class="sig-box-left" style="width: 40%; text-align: center;">
                     <p style="margin: 0 0 4px 0; font-size: 11pt; font-family: 'Siemreap', sans-serif; color: #000;">បានឃើញ និងឯកភាព</p>
                     <p style="margin: 0 0 55px 0; font-size: 11pt; font-family: 'Khmer OS Muol Light', 'Moul', serif; color: #000;">${customRoleLeft}</p>
-                    <p style="margin: 0; font-size: 11pt; font-family: 'Khmer OS Muol Light', 'Moul', serif; color: #000;">${ctx.principalName || ''}</p>
+                    ${pName ? `<p style="margin: 0; font-size: 11pt; font-family: 'Khmer OS Muol Light', 'Moul', serif; color: #000;">${pName}</p>` : ''}
                 </div>
                 ${middleColHtml}
                 <div class="sig-box-right" style="width: 40%; text-align: center;">

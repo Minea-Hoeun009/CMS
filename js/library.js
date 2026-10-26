@@ -252,8 +252,8 @@ window.loadLibraryView = async function() {
                 </div>
                 <div class="text-center">
                    <p class="mb-2 text-slate-600">ធ្វើនៅ...................., ថ្ងៃទី........ខែ........ឆ្នាំ២០២...</p>
-                   <p class="mb-14">បានឃើញ និងឯកភាព<br>នាយកសាលា</p>
-                   <p class="font-moul text-slate-800">${sInfo.principal_name || '.......................'}</p>
+                   <p class="mb-14">បានឃើញ និងឯកភាព<br>នាយក/នាយិកាសាលា</p>
+                   <p class="font-moul text-slate-800">${(sInfo.principal_name && sInfo.principal_name !== 'នាយកសាលា') ? sInfo.principal_name : ''}</p>
                 </div>
              </div>
 
@@ -774,7 +774,7 @@ window.printLibraryReport = function() {
             schoolName: schoolName,
             principalName: principalName,
             teacherName: teacherName,
-            roleLeft: "នាយកសាលា",
+            roleLeft: "នាយក/នាយិកាសាលា",
             roleRight: "គ្រូប្រចាំថ្នាក់",
             middleColHtml: middleSignHtml,
             paperSize: "A4",
@@ -882,8 +882,8 @@ window.printLibraryReport = function() {
                 <td>
                     <p class="ps-date" style="color: transparent;">.</p>
                     <p class="ps-date">បានឃើញ និងឯកភាព</p>
-                    <p class="ps-role">នាយកសាលា</p>
-                    <p class="ps-name">${principalName}</p>
+                    <p class="ps-role">នាយក/នាយិកាសាលា</p>
+                    <p class="ps-name">${(principalName && principalName !== 'នាយកសាលា') ? principalName : ''}</p>
                 </td>
                 <td>
                     <p class="ps-date" style="color: transparent;">.</p>
