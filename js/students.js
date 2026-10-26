@@ -147,9 +147,10 @@ window.loadStudentsView = async function() {
         const teacherScope = typeof window.getAssignedScope === 'function' ? window.getAssignedScope() : {};
         const isSchoolOrSysAdmin = typeof window.isSchoolAdmin === 'function' ? window.isSchoolAdmin() : false;
         
-        let initialSelectedGrade = "all";
-        let initialSelectedRoom = "all";
-        if (!isSchoolOrSysAdmin && teacherScope.grade) {
+        const curClass = typeof window.getCurrentSelectedClass === 'function' ? window.getCurrentSelectedClass() : { level: "ថ្នាក់ទី ១", room: "«ក»" };
+        let initialSelectedGrade = curClass.level || "ថ្នាក់ទី ១";
+        let initialSelectedRoom = curClass.room || "«ក»";
+        if (teacherScope.grade && !curClass.level) {
             initialSelectedGrade = normalizeGrade(teacherScope.grade) || teacherScope.grade;
             if (teacherScope.room) initialSelectedRoom = teacherScope.room;
         }
@@ -258,21 +259,17 @@ window.loadStudentsView = async function() {
                         </div>
                         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3">
                             <!-- ស្វែងរក -->
-                            <div class="relative col-span-1 sm:col-span-2 lg:col-span-3 group">
+                            <div class="relative col-span-1 sm:col-span-2 lg:col-span-4 group">
                                 <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-500 transition-colors"><i class="fa-solid fa-magnifying-glass text-[14px]"></i></span>
                                 <input type="text" id="stuSearchInput" oninput="if(typeof window.filterStudents === 'function') window.filterStudents();" placeholder="ស្វែងរកឈ្មោះ ឬ អត្តលេខ..." class="pl-11 pr-4 py-3 w-full border border-slate-200 rounded-2xl text-[13px] font-bold outline-none bg-slate-50 focus:bg-white focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400 transition-all shadow-inner">
                             </div>
 
-                            <!-- Hidden Grade Filter for Single Classroom Mode -->
+                            <!-- Hidden Grade & Room Selectors for Single Classroom Mode -->
                             <div class="hidden" aria-hidden="true">
                                 <select id="stuFilterGrade" onchange="if(typeof window.filterStudents === 'function') window.filterStudents();">
                                     ${gradesOptions}
                                 </select>
-                            </div>
-
-                            <!-- ជម្រើសបន្ទប់ (Room) -->
-                            <div class="relative col-span-1">
-                                <select id="stuFilterRoom" onchange="if(typeof window.filterStudents === 'function') window.filterStudents();" class="w-full border border-slate-200 rounded-2xl px-3 py-3 text-[13px] font-bold text-rose-600 bg-slate-50 outline-none cursor-pointer focus:bg-white focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400 transition shadow-inner font-siemreap">
+                                <select id="stuFilterRoom" onchange="if(typeof window.filterStudents === 'function') window.filterStudents();">
                                     ${roomsOptions}
                                 </select>
                             </div>
@@ -432,9 +429,10 @@ window.resetStudentFilters = function() {
     const sRoom = document.getElementById("stuFilterRoom");
     const sGen = document.getElementById("stuFilterGender");
     const sStat = document.getElementById("stuFilterStatus");
+    const curClass = typeof window.getCurrentSelectedClass === 'function' ? window.getCurrentSelectedClass() : null;
     if (sInput) sInput.value = "";
-    if (sGrade) sGrade.value = "all";
-    if (sRoom) sRoom.value = "all";
+    if (sGrade) sGrade.value = curClass?.level || "all";
+    if (sRoom) sRoom.value = curClass?.room || "all";
     if (sGen) sGen.value = "all";
     if (sStat) sStat.value = "Active";
     if (typeof window.filterStudents === 'function') window.filterStudents();

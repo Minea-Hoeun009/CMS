@@ -1326,7 +1326,7 @@ window.handleScoreClassChange = async function() {
     const levelStr = document.getElementById("globalLevelSelect")?.value || "";
     const roomStr = document.getElementById("globalRoomSelect")?.value || "";
     const lbl = document.getElementById("scoreHeaderGradeDisplay");
-    if (lbl) lbl.textContent = roomStr ? `បន្ទប់ ${roomStr}` : 'បន្ទប់រៀន';
+    if (lbl) lbl.textContent = `${levelStr} ${roomStr}`.trim() || 'បន្ទប់រៀន';
     
     if (typeof window.updateAssessmentLockUI === 'function') window.updateAssessmentLockUI();
     
@@ -1341,10 +1341,10 @@ window.loadScoresView = async function() {
     if (!container) return;
 
     const sInfo = typeof appSettings !== 'undefined' ? appSettings : {};
-    const teacherGradeInfo = typeof window.getTeacherGradeInfo === 'function' ? window.getTeacherGradeInfo() : { level: "ថ្នាក់ទី ១", room: "«ក»" };
-    const levelStr = teacherGradeInfo.level || sInfo.teacher_level || "ថ្នាក់ទី ១";
-    const roomStr = teacherGradeInfo.room || sInfo.teacher_room || "«ក»";
-    const gradeFull = roomStr ? `បន្ទប់ ${roomStr}` : 'បន្ទប់រៀន';
+    const curClass = typeof window.getCurrentSelectedClass === 'function' ? window.getCurrentSelectedClass() : { level: "ថ្នាក់ទី ១", room: "«ក»" };
+    const levelStr = curClass.level || sInfo.teacher_level || "ថ្នាក់ទី ១";
+    const roomStr = curClass.room || sInfo.teacher_room || "«ក»";
+    const gradeFull = `${levelStr} ${roomStr}`;
 
     const struct = window.academicStructure || window.defaultAcademicStructure || {};
     const structGrades = Array.isArray(struct.grades) ? struct.grades.map(g => (typeof g === 'object' ? g.name : g)).filter(Boolean) : [];
@@ -1427,16 +1427,18 @@ window.loadScoresView = async function() {
               </div>
               
               <div class="flex flex-wrap items-center gap-3 relative z-10 w-full 2xl:w-auto bg-slate-50/80 p-2 md:p-3 rounded-[1.5rem] border border-slate-200/80 backdrop-blur-md">
-                <!-- 🟢 SCR-02: ជ្រើសរើសបន្ទប់ (Interactive Room Selection) 🟢 -->
-                <div class="flex items-center gap-1.5 bg-white border border-slate-200 rounded-[1.2rem] px-3 py-2 shadow-sm">
-                   <div class="hidden" aria-hidden="true">
-                     <select id="globalLevelSelect" onchange="window.handleScoreClassChange()">
-                        ${gradesOptions}
-                     </select>
-                   </div>
+                <!-- Single Classroom Locked Display -->
+                <div class="flex items-center gap-2 bg-white border border-slate-200 text-indigo-700 px-3.5 py-2 rounded-[1.2rem] text-xs font-bold shadow-sm">
                    <i class="fa-solid fa-chalkboard-user text-indigo-600 text-sm"></i>
-                   <span class="text-xs font-bold text-slate-600">បន្ទប់</span>
-                   <select id="globalRoomSelect" onchange="window.handleScoreClassChange()" class="border-none bg-transparent text-sm font-bold text-rose-600 outline-none cursor-pointer font-moul py-0 pl-1">
+                   <span>${gradeFull}</span>
+                </div>
+
+                <!-- Hidden Grade and Room Selectors for Single Classroom Mode -->
+                <div class="hidden" aria-hidden="true">
+                   <select id="globalLevelSelect" onchange="window.handleScoreClassChange()">
+                      ${gradesOptions}
+                   </select>
+                   <select id="globalRoomSelect" onchange="window.handleScoreClassChange()">
                       ${roomsOptions}
                    </select>
                 </div>
@@ -2294,7 +2296,7 @@ window.exportScoreEntryToExcel = function() {
         <body>
             <table>
                 <tr>
-                    <td colspan="15" style="border: none; text-align: left; vertical-align: top; font-family: 'Khmer OS Muol Light', Moul, serif; font-size: 11pt; padding-left: 10px;">ការិយាល័យអប់រំ យុវជន និងកីឡានៃរដ្ឋបាលស្រុក${districtName}<br>${schoolName}<br>${grade}</td>
+                    <td colspan="15" style="border: none; text-align: left; vertical-align: top; font-family: 'Khmer OS Muol Light', Moul, serif; font-size: 11pt; padding-left: 10px;">ការិយាល័យអប់រំ យុវជន និងកីឡានៃរដ្ឋបាលស្រុក${districtName}<br><br>${schoolName}<br>${grade}</td>
                     <td colspan="15" style="border: none; text-align: center; vertical-align: top; font-family: 'Khmer OS Muol Light', Moul, serif; font-size: 12pt;">ព្រះរាជាណាចក្រកម្ពុជា<br>ជាតិ សាសនា ព្រះមហាក្សត្រ<br><div style="color: #d97706; font-size: 11px;">❖ ❖ ❖</div></td>
                 </tr>
                 <tr><td colspan="30" style="border: none; height: 15px;"></td></tr>
@@ -2574,7 +2576,7 @@ window.downloadExcelTemplate = function() {
         <table border="0" style="width: 100%; margin-bottom: 20px;">
             <tr>
                 <td colspan="${leftCols}" style="text-align: left; vertical-align: top;"><br>
-                    <b style="font-family: 'Khmer OS Muol Light', 'Moul', serif; font-size: 11pt; color: #1e3a8a;">ការិយាល័យអប់រំ យុវជន និងកីឡានៃរដ្ឋបាលស្រុក${districtName}</b><br>
+                    <b style="font-family: 'Khmer OS Muol Light', 'Moul', serif; font-size: 11pt; color: #1e3a8a;">ការិយាល័យអប់រំ យុវជន និងកីឡានៃរដ្ឋបាលស្រុក${districtName}</b><br><br>
                     <b style="font-family: 'Khmer OS Muol Light', 'Moul', serif; font-size: 12pt; color: #1e3a8a;">${schoolName}</b><br>
                     <b style="font-family: 'Khmer OS Muol Light', 'Moul', serif; font-size: 12pt; color: #1e3a8a;">បន្ទប់ ${sInfo.teacher_room || '«ក»'}</b>
                 </td>
@@ -3037,6 +3039,7 @@ window.printScoreList = function() {
             <div class="header-box" style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; width: 100%;">
               <div class="header-left" style="text-align: left; line-height: 1.6;">
                 <p style="margin: 0 0 4px 0; font-size: 10.5pt; font-family: 'Khmer OS Muol Light', 'Moul', serif; color: #0f172a;">ការិយាល័យ អប់រំ យុវជននិងកីឡានៃរដ្ឋបាលស្រុក ${districtName}</p>
+                <br><br>
                 <p style="margin: 0; font-size: 10.5pt; font-family: 'Khmer OS Muol Light', 'Moul', serif; color: #0f172a;">${schoolName}</p>
               </div>
               <div class="header-right" style="text-align: center; line-height: 1.6;">
@@ -3346,6 +3349,7 @@ window.printRankingTable = function() {
             <div class="header-box" style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; width: 100%;">
               <div class="header-left" style="text-align: left; line-height: 1.6;">
                 <p style="margin: 0 0 4px 0; font-size: 10.5pt; font-family: 'Khmer OS Muol Light', 'Moul', serif; color: #0f172a;">ការិយាល័យ អប់រំ យុវជននិងកីឡានៃរដ្ឋបាលស្រុក ${districtName}</p>
+                <br><br>
                 <p style="margin: 0; font-size: 10.5pt; font-family: 'Khmer OS Muol Light', 'Moul', serif; color: #0f172a;">${schoolName}</p>
               </div>
               <div class="header-right" style="text-align: center; line-height: 1.6;">

@@ -294,15 +294,23 @@ window.handleSavePersonalTeacherSettings = async function(event) {
     const academicYear = document.getElementById("pers_academic_year")?.value.trim() || "2026-2027";
     const gradingScale = document.getElementById("pers_grading_scale")?.value || "primary";
 
+    // School settings fields (Combined into single settings section)
+    const schoolName = document.getElementById("set_school_name")?.value.trim() || "";
+    const schoolEn = document.getElementById("set_school_en")?.value.trim() || "";
+    const districtName = document.getElementById("set_cluster")?.value.trim() || "";
+    const principalName = document.getElementById("set_principal_name")?.value.trim() || "";
+    const schoolPhone = document.getElementById("set_school_phone")?.value.trim() || "";
+    const schoolEmail = document.getElementById("set_school_email")?.value.trim() || "";
+
     const features = {
-        attendance: document.getElementById("pers_feat_attendance")?.checked !== false,
-        scores: document.getElementById("pers_feat_scores")?.checked !== false,
-        library: document.getElementById("pers_feat_library")?.checked !== false,
-        timetable: document.getElementById("pers_feat_timetable")?.checked !== false,
-        tracking_book: document.getElementById("pers_feat_tracking_book")?.checked !== false,
-        reports: document.getElementById("pers_feat_reports")?.checked !== false,
-        parent_portal: document.getElementById("pers_feat_parent_portal")?.checked !== false,
-        auto_sync: document.getElementById("pers_feat_auto_sync")?.checked !== false
+        attendance: document.getElementById("pers_feat_attendance") ? document.getElementById("pers_feat_attendance").checked : true,
+        scores: document.getElementById("pers_feat_scores") ? document.getElementById("pers_feat_scores").checked : true,
+        library: document.getElementById("pers_feat_library") ? document.getElementById("pers_feat_library").checked : true,
+        timetable: document.getElementById("pers_feat_timetable") ? document.getElementById("pers_feat_timetable").checked : true,
+        tracking_book: document.getElementById("pers_feat_tracking_book") ? document.getElementById("pers_feat_tracking_book").checked : true,
+        reports: document.getElementById("pers_feat_reports") ? document.getElementById("pers_feat_reports").checked : true,
+        parent_portal: document.getElementById("pers_feat_parent_portal") ? document.getElementById("pers_feat_parent_portal").checked : true,
+        auto_sync: document.getElementById("pers_feat_auto_sync") ? document.getElementById("pers_feat_auto_sync").checked : true
     };
 
     const payload = {
@@ -321,7 +329,13 @@ window.handleSavePersonalTeacherSettings = async function(event) {
         grading_scale: gradingScale,
         features: features,
         avatar_url: document.getElementById("val_profile_avatar")?.value || "",
-        signature_url: document.getElementById("val_sig")?.value || ""
+        signature_url: document.getElementById("val_sig")?.value || "",
+        school_name: schoolName,
+        school_en: schoolEn,
+        district_name: districtName,
+        principal_name: principalName,
+        school_phone: schoolPhone,
+        school_email: schoolEmail
     };
 
     const btn = document.getElementById("btnSavePersonalSettings");
@@ -334,10 +348,53 @@ window.handleSavePersonalTeacherSettings = async function(event) {
     try {
         await window.saveTeacherPersonalSettings(tId, payload);
 
+        // Update school_settings
+        window.appSettings = window.appSettings || {};
+        if (schoolName) window.appSettings.school_name = schoolName;
+        if (schoolEn) window.appSettings.school_en = schoolEn;
+        if (districtName) {
+            window.appSettings.cluster = districtName;
+            window.appSettings.district_name = districtName;
+        }
+        if (principalName) window.appSettings.principal_name = principalName;
+        if (schoolPhone) window.appSettings.school_phone = schoolPhone;
+        if (schoolEmail) window.appSettings.school_email = schoolEmail;
+        window.appSettings.teacher_name = payload.teacher_name;
+        window.appSettings.teacher_level = level;
+        window.appSettings.teacher_room = room;
+        window.appSettings.academic_year = academicYear;
+        localStorage.setItem('school_settings', JSON.stringify(window.appSettings));
+
+        // Set classroom across the whole system
+        if (typeof window.setSelectedClass === 'function') {
+            window.setSelectedClass(level, room);
+        }
+        localStorage.setItem('auth_teacher_grade', level);
+        localStorage.setItem('auth_teacher_room', room);
+        localStorage.setItem('selected_level', level);
+        localStorage.setItem('selected_room', room);
+
+        // Update UI Header and Sidebar
+        const navId = document.getElementById('navUserId');
+        if (navId) navId.textContent = `${level} ${room}`;
+        const headerBadge = document.getElementById('headerActiveClassBadge');
+        if (headerBadge) headerBadge.textContent = `${level} ${room}`;
+
+        // Reload views dynamically with newly configured classroom
+        if (typeof window.filterStudents === 'function') {
+            try { window.filterStudents(); } catch(e) {}
+        }
+        if (typeof window.fetchMonthlyAttendance === 'function') {
+            try { window.fetchMonthlyAttendance(); } catch(e) {}
+        }
+        if (typeof window.handleScoreClassChange === 'function') {
+            try { window.handleScoreClassChange(); } catch(e) {}
+        }
+
         if (typeof showToast === 'function') {
-            showToast("🎉 បានរក្សាទុកការកំណត់ផ្ទាល់ខ្លួនរបស់លោកគ្រូ/អ្នកគ្រូដោយជោគជ័យ!");
+            showToast("🎉 បានរក្សាទុកព័ត៌មានគ្រូ និងព័ត៌មានសាលារៀនដោយជោគជ័យ!");
         } else {
-            alert("✅ បានរក្សាទុកការកំណត់ផ្ទាល់ខ្លួនរបស់លោកគ្រូ/អ្នកគ្រូដោយជោគជ័យ!");
+            alert("✅ បានរក្សាទុកព័ត៌មានគ្រូ និងព័ត៌មានសាលារៀនដោយជោគជ័យ!");
         }
 
     } catch(err) {
@@ -388,7 +445,7 @@ window.renderPersonalSettingsTab = function() {
 
         <form id="personalSettingsForm" onsubmit="window.handleSavePersonalTeacherSettings(event)" class="space-y-6">
             
-            <!-- ផ្នែកទី ១៖ ព័ត៌មានគ្រូ និងបន្ទប់ទទួលបន្ទុក (Teacher Profile & My Classroom) -->
+            <!-- ផ្នែកទី ១៖ ព័ត៌មានគ្រូ និងថ្នាក់រៀនទទួលបន្ទុក (Teacher Profile & My Classroom) -->
             <div class="bg-white dark:bg-slate-800 p-6 md:p-8 rounded-[2rem] shadow-sm border border-slate-200 dark:border-slate-700 space-y-6">
                 <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-700 pb-4">
                     <div class="flex items-center gap-3">
@@ -396,8 +453,8 @@ window.renderPersonalSettingsTab = function() {
                             <i class="fa-solid fa-chalkboard-user"></i>
                         </div>
                         <div>
-                            <h4 class="font-moul text-base text-slate-800 dark:text-white">១. ព័ត៌មានគ្រូ និងបន្ទប់ទទួលបន្ទុក (My Classroom)</h4>
-                            <p class="text-xs text-slate-500 dark:text-slate-400">កំណត់ឈ្មោះ និងបន្ទប់ដែលលោកគ្រូអ្នកគ្រូទទួលបន្ទុកបង្រៀនផ្ទាល់</p>
+                            <h4 class="font-moul text-base text-slate-800 dark:text-white">១. ព័ត៌មានគ្រូ និងថ្នាក់រៀនទទួលបន្ទុក (Homeroom Teacher & Classroom)</h4>
+                            <p class="text-xs text-slate-500 dark:text-slate-400">កំណត់ឈ្មោះ ថ្នាក់ និងបន្ទប់ដែលលោកគ្រូអ្នកគ្រូទទួលបន្ទុកបង្រៀន (កំណត់តែម្ដង ប្រព័ន្ធស្គាល់គ្រប់ផ្នែក)</p>
                         </div>
                     </div>
                 </div>
@@ -421,8 +478,9 @@ window.renderPersonalSettingsTab = function() {
                         <input type="text" id="pers_teacher_phone" value="${personal.teacher_phone || ''}" placeholder="012 345 678" class="w-full bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl px-4 py-2.5 font-mono font-bold outline-none focus:ring-2 focus:ring-indigo-400 text-slate-800 dark:text-white">
                     </div>
 
-                    <div class="hidden" aria-hidden="true">
-                        <select id="pers_teacher_level">
+                    <div>
+                        <label class="block font-bold text-indigo-700 dark:text-indigo-400 mb-2">កម្រិតថ្នាក់ទទួលបន្ទុក (Grade Level) *</label>
+                        <select id="pers_teacher_level" class="w-full bg-indigo-50/50 dark:bg-slate-700 border-2 border-indigo-200 dark:border-indigo-500/40 rounded-xl px-4 py-2.5 font-bold text-indigo-900 dark:text-indigo-200 outline-none focus:ring-2 focus:ring-indigo-500">
                             ${gradesOpts}
                         </select>
                     </div>
@@ -451,7 +509,54 @@ window.renderPersonalSettingsTab = function() {
                 </div>
             </div>
 
-            <!-- ផ្នែកទី ២៖ ភ្ជាប់គណនី Gmail & Telegram (auth.telegram.org) -->
+            <!-- ផ្នែកទី ២៖ ព័ត៌មានទូទៅនៃសាលារៀន (School Information) -->
+            <div class="bg-white dark:bg-slate-800 p-6 md:p-8 rounded-[2rem] shadow-sm border border-slate-200 dark:border-slate-700 space-y-6">
+                <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-700 pb-4">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400 rounded-xl flex items-center justify-center text-lg shadow-inner">
+                            <i class="fa-solid fa-school"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-moul text-base text-slate-800 dark:text-white">២. ព័ត៌មានទូទៅនៃសាលារៀន (School Information)</h4>
+                            <p class="text-xs text-slate-500 dark:text-slate-400">កំណត់ព័ត៌មានសាលារៀនសម្រាប់បង្ហាញលើក្បាលលិខិតផ្លូវការ និងរបាយការណ៍</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-5 text-xs">
+                    <div>
+                        <label class="block font-bold text-slate-700 dark:text-slate-300 mb-2">ឈ្មោះសាលារៀន (ខ្មែរ) *</label>
+                        <input type="text" id="set_school_name" required value="${window.appSettings?.school_name || personal.school_name || ''}" placeholder="ឧ. សាលាបឋមសិក្សា..." class="w-full bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl px-4 py-2.5 font-moul text-indigo-700 dark:text-indigo-300 outline-none focus:ring-2 focus:ring-indigo-400">
+                    </div>
+
+                    <div>
+                        <label class="block font-bold text-slate-700 dark:text-slate-300 mb-2">ឈ្មោះសាលារៀន (អង់គ្លេស)</label>
+                        <input type="text" id="set_school_en" value="${window.appSettings?.school_en || ''}" placeholder="ឧ. Primary School" class="w-full bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl px-4 py-2.5 font-bold outline-none focus:ring-2 focus:ring-indigo-400 text-slate-800 dark:text-white">
+                    </div>
+
+                    <div>
+                        <label class="block font-bold text-slate-700 dark:text-slate-300 mb-2">ការិយាល័យអប់រំ យុវជន និងកីឡានៃរដ្ឋបាលស្រុក *</label>
+                        <input type="text" id="set_cluster" value="${window.appSettings?.cluster || window.appSettings?.district_name || 'កៀនស្វាយ'}" placeholder="ឧ. កៀនស្វាយ" class="w-full bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl px-4 py-2.5 font-bold outline-none focus:ring-2 focus:ring-indigo-400 text-slate-800 dark:text-white">
+                    </div>
+
+                    <div>
+                        <label class="block font-bold text-slate-700 dark:text-slate-300 mb-2">នាយក / នាយិកាសាលា *</label>
+                        <input type="text" id="set_principal_name" value="${window.appSettings?.principal_name || ''}" placeholder="ឈ្មោះនាយកសាលា" class="w-full bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl px-4 py-2.5 font-moul outline-none focus:ring-2 focus:ring-indigo-400 text-slate-800 dark:text-white">
+                    </div>
+
+                    <div>
+                        <label class="block font-bold text-slate-700 dark:text-slate-300 mb-2">លេខទូរស័ព្ទផ្លូវការសាលា</label>
+                        <input type="text" id="set_school_phone" value="${window.appSettings?.school_phone || ''}" placeholder="012 345 678" class="w-full bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl px-4 py-2.5 font-mono font-bold outline-none focus:ring-2 focus:ring-indigo-400 text-slate-800 dark:text-white">
+                    </div>
+
+                    <div>
+                        <label class="block font-bold text-slate-700 dark:text-slate-300 mb-2">អ៊ីមែលផ្លូវការសាលា</label>
+                        <input type="email" id="set_school_email" value="${window.appSettings?.school_email || ''}" placeholder="school@moeys.gov.kh" class="w-full bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl px-4 py-2.5 font-mono font-bold outline-none focus:ring-2 focus:ring-indigo-400 text-slate-800 dark:text-white">
+                    </div>
+                </div>
+            </div>
+
+            <!-- ផ្នែកទី ៣៖ ភ្ជាប់គណនី Gmail & Telegram (auth.telegram.org) -->
             <div class="bg-white dark:bg-slate-800 p-6 md:p-8 rounded-[2rem] shadow-sm border border-slate-200 dark:border-slate-700 space-y-6">
                 <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-700 pb-4">
                     <div class="flex items-center gap-3">
@@ -459,7 +564,7 @@ window.renderPersonalSettingsTab = function() {
                             <i class="fa-solid fa-link"></i>
                         </div>
                         <div>
-                            <h4 class="font-moul text-base text-slate-800 dark:text-white">២. ភ្ជាប់គណនី Gmail & Telegram (auth.telegram.org)</h4>
+                            <h4 class="font-moul text-base text-slate-800 dark:text-white">៣. ភ្ជាប់គណនី Gmail & Telegram (auth.telegram.org)</h4>
                             <p class="text-xs text-slate-500 dark:text-slate-400">ភ្ជាប់ជាមួយគណនី Gmail ឬ Telegram ដើម្បីចូលប្រើប្រាស់ និងគ្រប់គ្រងថ្នាក់រៀនដោយផ្ទាល់</p>
                         </div>
                     </div>
@@ -540,117 +645,7 @@ window.renderPersonalSettingsTab = function() {
                 </div>
             </div>
 
-            <!-- ផ្នែកទី ៣៖ ការកំណត់មុខងារផ្សេងៗដោយខ្លួនឯង (Individual Feature Toggles) -->
-            <div class="bg-white dark:bg-slate-800 p-6 md:p-8 rounded-[2rem] shadow-sm border border-slate-200 dark:border-slate-700 space-y-6">
-                <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-700 pb-4">
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 rounded-xl flex items-center justify-center text-lg shadow-inner">
-                            <i class="fa-solid fa-toggle-on"></i>
-                        </div>
-                        <div>
-                            <h4 class="font-moul text-base text-slate-800 dark:text-white">៣. បើក ឬបិទមុខងារប្រើប្រាស់សម្រាប់គ្រូផ្ទាល់ខ្លួន (Feature Preferences)</h4>
-                            <p class="text-xs text-slate-500 dark:text-slate-400">ជ្រើសរើសមុខងារដែលលោកគ្រូអ្នកគ្រូចង់បង្ហាញ ឬលាក់នៅលើ Sidebar និង Navigation</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-xs">
-                    <!-- Attendance -->
-                    <label class="p-4 rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-700/30 hover:border-emerald-400 cursor-pointer flex items-start gap-3 transition">
-                        <input type="checkbox" id="pers_feat_attendance" ${personal.features.attendance ? 'checked' : ''} class="w-4 h-4 text-emerald-600 rounded mt-0.5 accent-emerald-600">
-                        <div>
-                            <span class="block font-bold text-slate-800 dark:text-white"><i class="fa-solid fa-clipboard-user text-rose-500 mr-1"></i> កត់វត្តមានសិស្ស</span>
-                            <span class="text-[11px] text-slate-500 dark:text-slate-400">ស្រង់វត្តមានប្រចាំថ្ងៃ និងបូកសរុបប្រចាំខែ</span>
-                        </div>
-                    </label>
-
-                    <!-- Scores -->
-                    <label class="p-4 rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-700/30 hover:border-emerald-400 cursor-pointer flex items-start gap-3 transition">
-                        <input type="checkbox" id="pers_feat_scores" ${personal.features.scores ? 'checked' : ''} class="w-4 h-4 text-emerald-600 rounded mt-0.5 accent-emerald-600">
-                        <div>
-                            <span class="block font-bold text-slate-800 dark:text-white"><i class="fa-solid fa-award text-amber-500 mr-1"></i> បញ្ចូលពិន្ទុ & និទ្ទេស</span>
-                            <span class="text-[11px] text-slate-500 dark:text-slate-400">គណនាចំណាត់ថ្នាក់ និងព្រឹត្តិបត្រពិន្ទុ</span>
-                        </div>
-                    </label>
-
-                    <!-- Timetable -->
-                    <label class="p-4 rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-700/30 hover:border-emerald-400 cursor-pointer flex items-start gap-3 transition">
-                        <input type="checkbox" id="pers_feat_timetable" ${personal.features.timetable ? 'checked' : ''} class="w-4 h-4 text-emerald-600 rounded mt-0.5 accent-emerald-600">
-                        <div>
-                            <span class="block font-bold text-slate-800 dark:text-white"><i class="fa-solid fa-calendar-days text-teal-500 mr-1"></i> កាលវិភាគ & កិច្ចការ</span>
-                            <span class="text-[11px] text-slate-500 dark:text-slate-400">កាលវិភាគបង្រៀន និងកិច្ចការផ្ទះ</span>
-                        </div>
-                    </label>
-
-                    <!-- Library -->
-                    <label class="p-4 rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-700/30 hover:border-emerald-400 cursor-pointer flex items-start gap-3 transition">
-                        <input type="checkbox" id="pers_feat_library" ${personal.features.library ? 'checked' : ''} class="w-4 h-4 text-emerald-600 rounded mt-0.5 accent-emerald-600">
-                        <div>
-                            <span class="block font-bold text-slate-800 dark:text-white"><i class="fa-solid fa-book-bookmark text-fuchsia-500 mr-1"></i> បណ្ណាល័យសៀវភៅ</span>
-                            <span class="text-[11px] text-slate-500 dark:text-slate-400">គ្រប់គ្រងការខ្ចី និងសងសៀវភៅសិក្សាគោល</span>
-                        </div>
-                    </label>
-
-                    <!-- Tracking Book -->
-                    <label class="p-4 rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-700/30 hover:border-emerald-400 cursor-pointer flex items-start gap-3 transition">
-                        <input type="checkbox" id="pers_feat_tracking_book" ${personal.features.tracking_book ? 'checked' : ''} class="w-4 h-4 text-emerald-600 rounded mt-0.5 accent-emerald-600">
-                        <div>
-                            <span class="block font-bold text-slate-800 dark:text-white"><i class="fa-solid fa-book-open-reader text-blue-500 mr-1"></i> សៀវភៅតាមដាន</span>
-                            <span class="text-[11px] text-slate-500 dark:text-slate-400">តាមដានវិន័យ និងកិច្ចការរបស់សិស្ស</span>
-                        </div>
-                    </label>
-
-                    <!-- Reports -->
-                    <label class="p-4 rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-700/30 hover:border-emerald-400 cursor-pointer flex items-start gap-3 transition">
-                        <input type="checkbox" id="pers_feat_reports" ${personal.features.reports ? 'checked' : ''} class="w-4 h-4 text-emerald-600 rounded mt-0.5 accent-emerald-600">
-                        <div>
-                            <span class="block font-bold text-slate-800 dark:text-white"><i class="fa-solid fa-file-invoice text-indigo-500 mr-1"></i> របាយការណ៍ & បោះពុម្ព</span>
-                            <span class="text-[11px] text-slate-500 dark:text-slate-400">របាយការណ៍ ក, ខ, គ, ឃ និងស្ថិតិ</span>
-                        </div>
-                    </label>
-
-                    <!-- Parent Portal -->
-                    <label class="p-4 rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-700/30 hover:border-emerald-400 cursor-pointer flex items-start gap-3 transition">
-                        <input type="checkbox" id="pers_feat_parent_portal" ${personal.features.parent_portal ? 'checked' : ''} class="w-4 h-4 text-emerald-600 rounded mt-0.5 accent-emerald-600">
-                        <div>
-                            <span class="block font-bold text-slate-800 dark:text-white"><i class="fa-solid fa-users-viewfinder text-purple-500 mr-1"></i> ផ្ទាំងមាតាបិតា (Portal)</span>
-                            <span class="text-[11px] text-slate-500 dark:text-slate-400">អនុញ្ញាតឱ្យអាណាព្យាបាលឆែកពិន្ទុ</span>
-                        </div>
-                    </label>
-
-                    <!-- Auto Sync -->
-                    <label class="p-4 rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-700/30 hover:border-emerald-400 cursor-pointer flex items-start gap-3 transition">
-                        <input type="checkbox" id="pers_feat_auto_sync" ${personal.features.auto_sync ? 'checked' : ''} class="w-4 h-4 text-emerald-600 rounded mt-0.5 accent-emerald-600">
-                        <div>
-                            <span class="block font-bold text-slate-800 dark:text-white"><i class="fa-solid fa-cloud-arrow-up text-emerald-500 mr-1"></i> ស្វ័យប្រវត្តិសមកាលកម្ម</span>
-                            <span class="text-[11px] text-slate-500 dark:text-slate-400">Sync ទិន្នន័យស្វ័យប្រវត្តិក្លោដ</span>
-                        </div>
-                    </label>
-                </div>
-            </div>
-
-            <!-- ផ្នែកទី ៤៖ ខ្នាតពិន្ទុ និងការវាយតម្លៃ (Grading Scale) -->
-            <div class="bg-white dark:bg-slate-800 p-6 md:p-8 rounded-[2rem] shadow-sm border border-slate-200 dark:border-slate-700 space-y-4">
-                <div class="flex items-center gap-3 border-b border-slate-100 dark:border-slate-700 pb-3">
-                    <div class="w-10 h-10 bg-amber-50 dark:bg-amber-950/50 text-amber-600 dark:text-amber-400 rounded-xl flex items-center justify-center text-lg shadow-inner">
-                        <i class="fa-solid fa-scale-balanced"></i>
-                    </div>
-                    <div>
-                        <h4 class="font-moul text-base text-slate-800 dark:text-white">៤. ខ្នាតពិន្ទុ និងការវាយតម្លៃលទ្ធផលសិក្សា</h4>
-                        <p class="text-xs text-slate-500 dark:text-slate-400">កំណត់ប្រព័ន្ធដាក់ពិន្ទុសម្រាប់ថ្នាក់រៀនរបស់លោកគ្រូអ្នកគ្រូ</p>
-                    </div>
-                </div>
-
-                <div class="max-w-md text-xs">
-                    <label class="block font-bold text-slate-700 dark:text-slate-300 mb-2">ខ្នាតពិន្ទុវាយតម្លៃ (Grading Standard) *</label>
-                    <select id="pers_grading_scale" class="w-full bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl px-4 py-2.5 font-bold outline-none focus:ring-2 focus:ring-indigo-400 text-slate-800 dark:text-white">
-                        <option value="primary" ${personal.grading_scale === 'primary' ? 'selected' : ''}>បឋមសិក្សា (ពិន្ទុអតិបរមា ១០ | និទ្ទេស ល្អប្រសើរ, ល្អ, ល្អបង្គួរ, មធ្យម, ខ្សោយ)</option>
-                        <option value="secondary" ${personal.grading_scale === 'secondary' ? 'selected' : ''}>អនុវិទ្យាល័យ / វិទ្យាល័យ (ពិន្ទុអតិបរមា ៥០ ឬ ១០០ | និទ្ទេស A, B, C, D, E, F)</option>
-                    </select>
-                </div>
-            </div>
-
-            <!-- ផ្នែកទី ៥៖ សមកាលកម្មទិន្នន័យផ្ទាល់ជាមួយ Google Sheets (Google Sheets Live Sync & Storage) -->
+            <!-- ផ្នែកទី ៤៖ សមកាលកម្មទិន្នន័យផ្ទាល់ជាមួយ Google Sheets (Google Sheets Live Sync & Storage) -->
             <div class="bg-gradient-to-br from-emerald-50 to-teal-50/50 dark:from-slate-800 dark:to-slate-850 p-6 md:p-8 rounded-[2rem] shadow-sm border border-emerald-200 dark:border-emerald-800/40 space-y-4">
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-emerald-200/60 dark:border-slate-700 pb-4">
                     <div class="flex items-center gap-3">
@@ -658,7 +653,7 @@ window.renderPersonalSettingsTab = function() {
                             <i class="fa-solid fa-file-excel"></i>
                         </div>
                         <div>
-                            <h4 class="font-moul text-base text-slate-800 dark:text-white">៥. សមកាលកម្មទិន្នន័យជាមួយ Google Sheets (Live Sheets Storage)</h4>
+                            <h4 class="font-moul text-base text-slate-800 dark:text-white">៤. សមកាលកម្មទិន្នន័យជាមួយ Google Sheets (Live Sheets Storage)</h4>
                             <p class="text-xs text-slate-500 dark:text-slate-400">ទិន្នន័យសិស្ស វត្តមាន ពិន្ទុ បណ្ណាល័យ និងថ្នាក់រៀន ត្រូវបានបញ្ជូន និងរក្សាទុកក្នុង Google Sheet ដោយស្វ័យប្រវត្តិ</p>
                         </div>
                     </div>
@@ -699,7 +694,7 @@ window.renderPersonalSettingsTab = function() {
             <!-- Save Action Bar -->
             <div class="pt-4 flex justify-end">
                 <button type="submit" id="btnSavePersonalSettings" class="px-8 py-3.5 bg-gradient-to-r from-indigo-600 via-blue-600 to-indigo-700 hover:from-indigo-700 hover:to-blue-800 text-white rounded-2xl font-bold text-sm shadow-xl shadow-indigo-500/25 transition active:scale-95 flex items-center gap-2">
-                    <i class="fa-solid fa-cloud-arrow-up"></i> <span>រក្សាទុកការកំណត់ផ្ទាល់ខ្លួន (Save Workspace)</span>
+                    <i class="fa-solid fa-cloud-arrow-up"></i> <span>រក្សាទុកព័ត៌មានទាំងអស់ (Save All Settings)</span>
                 </button>
             </div>
         </form>
@@ -774,15 +769,11 @@ window.loadSettingsView = function() {
            </div>
         </div>
 
-        <!-- Tab Navigation Bar: ព័ត៌មានគ្រូ & ព័ត៌មានសាលារៀន -->
-        <div class="bg-slate-100 dark:bg-slate-800 p-1.5 rounded-2xl border border-slate-200 dark:border-slate-700 flex flex-wrap gap-1 shadow-sm">
-            <button id="tabBtn_personal" onclick="window.switchSettingsTab('personal')" class="flex-1 min-w-[140px] px-4 py-2.5 rounded-xl font-bold text-xs md:text-sm transition flex items-center justify-center gap-2 bg-white text-indigo-700 shadow-sm border border-indigo-200">
-                <i class="fa-solid fa-chalkboard-user"></i> <span>ព័ត៌មានគ្រូ និងថ្នាក់រៀនបន្ទុក</span>
-            </button>
-            <button id="tabBtn_school" onclick="window.switchSettingsTab('school')" class="flex-1 min-w-[140px] px-4 py-2.5 rounded-xl font-bold text-xs md:text-sm transition flex items-center justify-center gap-2 text-slate-500 hover:text-slate-700">
-                <i class="fa-solid fa-school"></i> <span>ព័ត៌មានសាលារៀន</span>
-            </button>
-            <button id="tabBtn_backup" onclick="window.switchSettingsTab('backup')" class="hidden" aria-hidden="true"></button>
+        <!-- Tab Navigation Bar (Hidden - Unified Settings Page) -->
+        <div class="hidden" aria-hidden="true">
+            <button id="tabBtn_personal" onclick="window.switchSettingsTab('personal')">ព័ត៌មានគ្រូ</button>
+            <button id="tabBtn_school" onclick="window.switchSettingsTab('school')">ព័ត៌មានសាលារៀន</button>
+            <button id="tabBtn_backup" onclick="window.switchSettingsTab('backup')">បម្រុងទុក</button>
         </div>
 
         <!-- ============================================================= -->

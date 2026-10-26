@@ -130,10 +130,9 @@ window.loadAttendanceView = async function() {
         const sInfo = typeof appSettings !== 'undefined' ? appSettings : (JSON.parse(localStorage.getItem('school_settings') || '{}'));
         const academicYear = document.getElementById("globalAcademicYear")?.value || localStorage.getItem('selected_academic_year') || sInfo.academic_year || "2026-2027";
         
-        const isSchoolOrSysAdmin = typeof window.isSchoolAdmin === 'function' ? window.isSchoolAdmin() : false;
-        const teacherGradeInfo = typeof window.getTeacherGradeInfo === 'function' ? window.getTeacherGradeInfo() : { level: "ថ្នាក់ទី ១", room: "«ក»" };
-        const initialGrade = isSchoolOrSysAdmin ? "all" : normalizeGrade(teacherGradeInfo.level || "ថ្នាក់ទី ១");
-        const initialRoom = isSchoolOrSysAdmin ? "all" : (teacherGradeInfo.room || "«ក»");
+        const curClass = typeof window.getCurrentSelectedClass === 'function' ? window.getCurrentSelectedClass() : { level: "ថ្នាក់ទី ១", room: "«ក»" };
+        const initialGrade = normalizeGrade(curClass.level || "ថ្នាក់ទី ១");
+        const initialRoom = curClass.room || "«ក»";
 
         const struct = window.academicStructure || window.defaultAcademicStructure || {};
         const structGrades = Array.isArray(struct.grades) ? struct.grades.map(g => (typeof g === 'object' ? g.name : g)).filter(Boolean) : [];
@@ -220,16 +219,18 @@ window.loadAttendanceView = async function() {
                              class="pl-10 pr-4 py-2.5 border border-slate-200 rounded-xl text-[13px] font-bold focus:ring-2 focus:ring-rose-500/30 focus:border-rose-400 focus:bg-white outline-none w-full sm:w-44 bg-slate-50 transition shadow-inner font-siemreap">
                     </div>
 
-                    <!-- 🟢 ATT-01: ជ្រើសរើសបន្ទប់ (Interactive Room Selection) 🟢 -->
-                    <div class="flex items-center gap-1.5 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 shadow-inner">
-                      <div class="hidden" aria-hidden="true">
-                        <select id="attGradeSelect" onchange="if(typeof window.fetchMonthlyAttendance === 'function') window.fetchMonthlyAttendance();">
-                          ${gradesOptions}
-                        </select>
-                      </div>
-                      <i class="fa-solid fa-chalkboard-user text-rose-500 text-[13px]"></i>
-                      <span class="text-xs font-bold text-slate-600">បន្ទប់</span>
-                      <select id="attRoomSelect" onchange="if(typeof window.fetchMonthlyAttendance === 'function') window.fetchMonthlyAttendance();" class="border-none bg-transparent text-[13px] font-bold text-rose-600 outline-none cursor-pointer font-moul focus:ring-0">
+                    <!-- Single Classroom Locked Display -->
+                    <div class="flex items-center gap-2 bg-rose-50 border border-rose-200 text-rose-700 px-3.5 py-2 rounded-xl text-xs font-bold shadow-sm">
+                      <i class="fa-solid fa-chalkboard-user text-rose-500"></i>
+                      <span>${initialGrade} ${initialRoom}</span>
+                    </div>
+
+                    <!-- Hidden Grade and Room Selectors for Single Classroom Mode -->
+                    <div class="hidden" aria-hidden="true">
+                      <select id="attGradeSelect" onchange="if(typeof window.fetchMonthlyAttendance === 'function') window.fetchMonthlyAttendance();">
+                        ${gradesOptions}
+                      </select>
+                      <select id="attRoomSelect" onchange="if(typeof window.fetchMonthlyAttendance === 'function') window.fetchMonthlyAttendance();">
                         ${roomsOptions}
                       </select>
                     </div>
@@ -412,11 +413,7 @@ window.fetchMonthlyAttendance = async function(forceRefresh = false) {
 
     const attHeaderGrade = document.getElementById("attHeaderGrade");
     if (attHeaderGrade) {
-        if (selectedGrade === 'all') {
-            attHeaderGrade.textContent = selectedRoom === 'all' ? 'គ្រប់បន្ទប់' : `បន្ទប់ ${selectedRoom}`;
-        } else {
-            attHeaderGrade.textContent = selectedRoom === 'all' ? 'គ្រប់បន្ទប់' : `បន្ទប់ ${selectedRoom}`;
-        }
+        attHeaderGrade.textContent = `${selectedGrade} ${selectedRoom}`;
     }
 
     // រៀបចំប្រតិទិន

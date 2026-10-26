@@ -1119,6 +1119,7 @@ window.CMSPrintManager = {
             <div class="header-box" style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; width: 100%;">
               <div class="header-left" style="text-align: left; line-height: 1.6;">
                 <p style="margin: 0 0 4px 0; font-size: 10.5pt; font-family: 'Khmer OS Muol Light', 'Moul', serif; color: #0f172a;">ការិយាល័យ អប់រំ យុវជននិងកីឡានៃរដ្ឋបាលស្រុក ${ctx.districtName}</p>
+                <br><br>
                 <p style="margin: 0; font-size: 10.5pt; font-family: 'Khmer OS Muol Light', 'Moul', serif; color: #0f172a;">${ctx.schoolName}</p>
               </div>
               <div class="header-right" style="text-align: center; line-height: 1.6;">

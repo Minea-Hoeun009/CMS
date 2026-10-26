@@ -133,6 +133,7 @@ window.KrouDigital = {
                 <div class="flex justify-between items-start mb-6 text-xs">
                     <div class="text-left leading-relaxed">
                         <p class="font-moul text-slate-900 text-[12px] mb-1">ការិយាល័យ អប់រំ យុវជននិងកីឡានៃរដ្ឋបាលស្រុក ${districtName}</p>
+                        <br><br>
                         <p class="font-moul text-slate-900 text-[12px]">${schoolName}</p>
                     </div>
                     <div class="text-center">
@@ -330,6 +331,7 @@ window.KrouDigital = {
                 <div class="flex justify-between items-start mb-6 text-xs">
                     <div class="text-left leading-relaxed">
                         <p class="font-moul text-slate-900 text-[12px] mb-1">ការិយាល័យ អប់រំ យុវជននិងកីឡានៃរដ្ឋបាលស្រុក ${districtName}</p>
+                        <br><br>
                         <p class="font-moul text-slate-900 text-[12px]">${schoolName}</p>
                     </div>
                     <div class="text-center">
@@ -471,6 +473,7 @@ window.KrouDigital = {
                 <div class="flex justify-between items-start mb-6 text-xs">
                     <div class="text-left leading-relaxed">
                         <p class="font-moul text-slate-900 text-[12px] mb-1">ការិយាល័យ អប់រំ យុវជននិងកីឡានៃរដ្ឋបាលស្រុក ${districtName}</p>
+                        <br><br>
                         <p class="font-moul text-slate-900 text-[12px]">${schoolName}</p>
                     </div>
                     <div class="text-center">
