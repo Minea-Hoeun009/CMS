@@ -6,6 +6,12 @@
       "src": "800px-MoEYS_(Cambodia).svg.png",
       "type": "image/png",
       "sizes": "512x512"
+    },
+    {
+      "src": "assets/cms-icon.svg",
+      "type": "image/svg+xml",
+      "sizes": "any",
+      "purpose": "any maskable"
     }
   ],
   "start_url": "./index.html",
