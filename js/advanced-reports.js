@@ -190,9 +190,101 @@ window.AdvancedReports = {
     },
 
     // =====================================================================
-    // ២. ការនាំចេញ Excel ស្តង់ដារក្រសួង MoEYS (CMS Master Report with Letterhead, Borders, Colors, Summary & Signatures)
+    // ២. ការនាំចេញ Excel ស្តង់ដារក្រសួង MoEYS ច្រើន Sheet (CMS Master Report with 3 Separate Sheets)
     // =====================================================================
-    exportMasterExcelWorkbook: function() {
+    // ផ្ទាំងជ្រើសរើសទម្រង់ Multi-Sheet Excel Export Modal
+    openMasterExportModal: function() {
+        let modal = document.getElementById("masterExportChoiceModal");
+        if (!modal) {
+            modal = document.createElement("div");
+            modal.id = "masterExportChoiceModal";
+            modal.className = "fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 font-siemreap";
+            document.body.appendChild(modal);
+        }
+
+        const currentYear = document.getElementById("globalAcademicYear")?.value || localStorage.getItem('selected_academic_year') || "2026-2027";
+        const students = (typeof window.getMasterStudents === 'function' ? window.getMasterStudents() : null)
+            || window.allStudents
+            || (window.filteredStudents && window.filteredStudents.length > 0 ? window.filteredStudents : null)
+            || JSON.parse(localStorage.getItem('academic_students') || '[]');
+
+        modal.innerHTML = `
+            <div class="bg-white dark:bg-slate-800 rounded-3xl w-full max-w-lg p-6 md:p-7 shadow-2xl border border-slate-200 dark:border-slate-700 animate-scale-up space-y-5">
+                <!-- Header -->
+                <div class="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-700">
+                    <div class="flex items-center gap-3">
+                        <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-teal-500 to-emerald-600 text-white flex items-center justify-center text-xl shadow-md shadow-emerald-500/20">
+                            <i class="fa-solid fa-file-excel"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-moul text-base text-slate-800 dark:text-white">នាំចេញ CMS Master Report</h3>
+                            <p class="text-xs text-slate-400">ឆ្នាំសិក្សា ${currentYear} (ឯកសារចែកជា ៣ Sheet ដាច់ដោយឡែក)</p>
+                        </div>
+                    </div>
+                    <button onclick="document.getElementById('masterExportChoiceModal').classList.add('hidden')" class="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-700 text-slate-400 hover:text-slate-600 dark:hover:text-white flex items-center justify-center transition">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+
+                <!-- Sheets Overview Info -->
+                <div class="space-y-2.5">
+                    <div class="p-3 bg-blue-50/80 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800 rounded-2xl flex items-start gap-3">
+                        <span class="w-6 h-6 rounded-lg bg-blue-600 text-white flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">១</span>
+                        <div>
+                            <b class="text-blue-900 dark:text-blue-200 text-xs font-bold block">Sheet ១៖ បញ្ជីរាយនាមសិស្ស (Student List)</b>
+                            <p class="text-[11px] text-slate-600 dark:text-slate-400 leading-relaxed mt-0.5">ព័ត៌មានលម្អិតសិស្ស ១៨ ជួរឈរ, ស្ថិតិសង្ខេប (សរុប ស្រី ក្រីក្រ អាហារូបករណ៍), ក្បាលលិខិត និងហត្ថលេខា។</p>
+                        </div>
+                    </div>
+
+                    <div class="p-3 bg-emerald-50/80 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 rounded-2xl flex items-start gap-3">
+                        <span class="w-6 h-6 rounded-lg bg-emerald-600 text-white flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">២</span>
+                        <div>
+                            <b class="text-emerald-900 dark:text-emerald-200 text-xs font-bold block">Sheet ២៖ តារាងស្រង់ពិន្ទុ (Score Sheet)</b>
+                            <p class="text-[11px] text-slate-600 dark:text-slate-400 leading-relaxed mt-0.5">ពិន្ទុគ្រប់មុខវិជ្ជា តម្រៀបតាមអក្ខរក្រមខ្មែរ (ក-អ) ជាមួយមធ្យមភាគ និទ្ទេស និងស្ថិតិអត្រាជាប់/ធ្លាក់។</p>
+                        </div>
+                    </div>
+
+                    <div class="p-3 bg-amber-50/80 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 rounded-2xl flex items-start gap-3">
+                        <span class="w-6 h-6 rounded-lg bg-amber-600 text-white flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">៣</span>
+                        <div>
+                            <b class="text-amber-900 dark:text-amber-200 text-xs font-bold block">Sheet ៣៖ តារាងចំណាត់ថ្នាក់ (Rankings Sheet)</b>
+                            <p class="text-[11px] text-slate-600 dark:text-slate-400 leading-relaxed mt-0.5">តារាងចំណាត់ថ្នាក់សិស្សឆ្នើម តម្រៀបពីលេខ ១ ដល់ចុងក្រោយ ជាមួយ Top 3 (🥇🥈🥉) និងលទ្ធផលសិក្សា។</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Download Buttons -->
+                <div class="space-y-2.5 pt-2">
+                    <button onclick="window.AdvancedReports.executeMultiSheetExport('xlsx')" class="w-full py-3 px-4 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl font-bold text-xs shadow-md transition flex items-center justify-center gap-2 group">
+                        <i class="fa-solid fa-file-arrow-down text-base group-hover:translate-y-0.5 transition-transform"></i>
+                        <span>ទាញយកជា Excel (.xlsx) - មាន ៣ Sheet ស្តង់ដារ (ណែនាំ)</span>
+                    </button>
+
+                    <button onclick="window.AdvancedReports.executeMultiSheetExport('xls')" class="w-full py-3 px-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl font-bold text-xs shadow-md transition flex items-center justify-center gap-2 group">
+                        <i class="fa-solid fa-palette text-base group-hover:scale-110 transition-transform"></i>
+                        <span>ទាញយកជា Excel ចាក់ពណ៌ (.xls) - មាន ៣ Sheet + Royal Blue</span>
+                    </button>
+                </div>
+            </div>
+        `;
+
+        modal.classList.remove("hidden");
+    },
+
+    // មុខងារចម្បង៖ បើក Modal ឬនាំចេញផ្ទាល់តាម Format
+    exportMasterExcelWorkbook: function(format) {
+        if (!format) {
+            this.openMasterExportModal();
+            return;
+        }
+        this.executeMultiSheetExport(format);
+    },
+
+    // ដំណើរការនាំចេញ Multi-Sheet Workbook ជាក់ស្តែង (Separate Sheets for Students, Scores & Rankings)
+    executeMultiSheetExport: function(format = 'xlsx') {
+        const modal = document.getElementById("masterExportChoiceModal");
+        if (modal) modal.classList.add("hidden");
+
         const students = (typeof window.getMasterStudents === 'function' ? window.getMasterStudents() : null)
             || window.allStudents
             || (window.filteredStudents && window.filteredStudents.length > 0 ? window.filteredStudents : null)
@@ -204,13 +296,19 @@ window.AdvancedReports = {
             return;
         }
 
-        const scores = (window.rankingsDataList && window.rankingsDataList.length > 0 ? window.rankingsDataList : null)
-            || JSON.parse(localStorage.getItem('academic_scores') || '[]');
+        // គណនាពិន្ទុថ្មីៗស្រស់ៗ
+        if (typeof window.calculateAllScores === 'function') {
+            try { window.calculateAllScores(); } catch(e) { console.warn("calculateAllScores error:", e); }
+        }
+
+        let rawScores = (window.rankingsDataList && window.rankingsDataList.length > 0)
+            ? [...window.rankingsDataList]
+            : JSON.parse(localStorage.getItem('academic_scores') || '[]');
 
         const sInfo = window.appSettings || JSON.parse(localStorage.getItem('school_settings') || '{}');
         const currentYear = document.getElementById("globalAcademicYear")?.value || localStorage.getItem('selected_academic_year') || sInfo.academic_year || "2026-2027";
 
-        // ១. ទាញយកបរិបទ និងកាលបរិច្ឆេទស្តង់ដារ MoEYS ពី CMSPrintManager
+        // ១. បរិបទ និងកាលបរិច្ឆេទ MoEYS
         const ctx = (window.CMSPrintManager && typeof window.CMSPrintManager.getStandardContext === 'function')
             ? window.CMSPrintManager.getStandardContext({ academicYear: currentYear })
             : {
@@ -225,8 +323,9 @@ window.AdvancedReports = {
             };
 
         const principalDisplayName = (ctx.principalName && ctx.principalName !== "នាយកសាលា") ? ctx.principalName : "";
+        const toKh = window.toKhmerNum || (n => n);
 
-        // ២. គណនាស្ថិតិសង្ខេបសិស្ស (Summary Statistics)
+        // ២. ស្ថិតិសង្ខេបសិស្ស
         const totalStudents = students.length;
         const femaleStudents = students.filter(s => s.gender === 'ស្រី' || s.gender === 'F').length;
         const maleStudents = totalStudents - femaleStudents;
@@ -240,13 +339,284 @@ window.AdvancedReports = {
         const transferredCount = students.filter(s => s.status === 'Transferred' || s.status === 'បានផ្ទេរចេញ').length;
         const droppedCount = students.filter(s => s.status === 'Withdrawn' || s.status === 'Dropped' || s.status === 'បានឈប់រៀន').length;
 
-        const toKh = window.toKhmerNum || (n => n);
+        // បំពេញសិស្សទៅក្នុង Scores បើមិនទាន់មាន
+        let scoresMap = {};
+        rawScores.forEach(sc => { scoresMap[String(sc.id || sc.student_id)] = sc; });
+        let fullScoresList = students.map((s, idx) => {
+            const sc = scoresMap[String(s.id)] || {};
+            return {
+                id: s.id,
+                name: s.name,
+                gender: s.gender || 'ប្រុស',
+                grade: s.grade || s.class || ctx.grade,
+                room: s.room || '',
+                khmer: sc.khmer !== undefined ? sc.khmer : '',
+                math: sc.math !== undefined ? sc.math : '',
+                science: sc.science !== undefined ? sc.science : '',
+                social: sc.social !== undefined ? sc.social : '',
+                english: sc.english !== undefined ? sc.english : '',
+                total_score: sc.total_score || sc.total || '',
+                avg: sc.avg || sc.average || '',
+                rank: sc.rank !== undefined ? sc.rank : (idx + 1),
+                grade_letter: sc.grade_letter || sc.gradeLetter || ''
+            };
+        });
 
-        // ៣. បង្កើតជួរទិន្នន័យតារាងសិស្ស (Data Rows with Zebra Striping & Borders)
-        let rowsHtml = '';
+        // ៣. បែងចែកជា ២ បញ្ជីពិន្ទុ និងចំណាត់ថ្នាក់ដាច់ដោយឡែក
+        // Sheet 2 Data: តម្រៀបតាមអក្ខរក្រម (Alphabetical ก-អ)
+        const scoreStudents = [...fullScoresList].sort((a, b) => String(a.name || "").localeCompare(String(b.name || ""), 'km'));
+
+        // Sheet 3 Data: តម្រៀបតាមចំណាត់ថ្នាក់ (Rank 1st..N)
+        const rankingStudents = [...fullScoresList].sort((a, b) => {
+            const rA = parseFloat(a.rank) || (a.rank === '-' ? 9999 : 999);
+            const rB = parseFloat(b.rank) || (b.rank === '-' ? 9999 : 999);
+            if (rA !== rB) return rA - rB;
+            return (parseFloat(b.avg) || 0) - (parseFloat(a.avg) || 0);
+        });
+
+        // ស្ថិតិពិន្ទុរួម
+        const evaluatedScores = fullScoresList.filter(s => s.avg !== '' && !isNaN(parseFloat(s.avg)));
+        const evaluatedCount = evaluatedScores.length;
+        const passedCount = evaluatedScores.filter(s => parseFloat(s.avg) >= 5.0).length;
+        const failedCount = evaluatedCount - passedCount;
+        const passRate = evaluatedCount > 0 ? ((passedCount / evaluatedCount) * 100).toFixed(1) : "0";
+
+        let maxAvg = evaluatedCount > 0 ? Math.max(...evaluatedScores.map(s => parseFloat(s.avg))).toFixed(2) : "0.00";
+        let minAvg = evaluatedCount > 0 ? Math.min(...evaluatedScores.map(s => parseFloat(s.avg))).toFixed(2) : "0.00";
+        let overallAvg = evaluatedCount > 0 ? (evaluatedScores.reduce((acc, s) => acc + parseFloat(s.avg), 0) / evaluatedCount).toFixed(2) : "0.00";
+
+        const top1 = rankingStudents[0] || {};
+        const top2 = rankingStudents[1] || {};
+        const top3 = rankingStudents[2] || {};
+
+        // ==============================================================
+        // ជម្រើស A: នាំចេញជា OpenXML (.xlsx) តាមរយៈ SheetJS
+        // ==============================================================
+        if (format === 'xlsx') {
+            if (typeof XLSX === 'undefined') {
+                alert("⚠️ SheetJS (XLSX) Library មិនទាន់ត្រូវបាន Load ទេ!");
+                return;
+            }
+
+            const wb = XLSX.utils.book_new();
+
+            // ----------------------------------------------------------
+            // 📑 Sheet 1: ១. បញ្ជីរាយនាមសិស្ស (Student List Master)
+            // ----------------------------------------------------------
+            const ws1Data = [
+                ["ការិយាល័យអប់រំ យុវជន និងកីឡានៃរដ្ឋបាលស្រុក " + ctx.districtName, "", "", "", "", "", "", "", "", "", "", "", "", "", "ព្រះរាជាណាចក្រកម្ពុជា"],
+                [ctx.schoolName, "", "", "", "", "", "", "", "", "", "", "", "", "", "ជាតិ សាសនា ព្រះមហាក្សត្រ"],
+                [ctx.grade, "", "", "", "", "", "", "", "", "", "", "", "", "", "❖ ❖ ❖"],
+                [""],
+                ["បញ្ជីរាយនាមសិស្ស (CMS Master Student Report)"],
+                [(ctx.grade ? ctx.grade + " | " : "") + "ឆ្នាំសិក្សា ៖ " + toKh(ctx.academicYear)],
+                ["ទិន្នន័យសង្ខេប៖ សិស្សសរុប " + totalStudents + " នាក់ (ស្រី " + femaleStudents + " នាក់, " + femalePercent + "%), ប្រុស " + maleStudents + " នាក់, កំពុងសិក្សា " + activeCount + " នាក់, ក្រីក្រ " + poorCount + " នាក់, អាហារូបករណ៍ " + scholarshipCount + " នាក់, ពិការភាព " + disabilityCount + " នាក់, ផ្ទេរចេញ/ឈប់ " + (transferredCount + droppedCount) + " នាក់"],
+                [""],
+                ["ល.រ", "អត្តលេខ", "គោត្តនាម និងនាម", "ឈ្មោះឡាតាំង", "ភេទ", "ថ្ងៃខែឆ្នាំកំណើត", "ទីកន្លែងកំណើត", "ទីលំនៅបច្ចុប្បន្ន", "ឈ្មោះឪពុក", "មុខរបរ", "ឈ្មោះម្ដាយ", "មុខរបរ", "ថ្នាក់/បន្ទប់", "លេខទូរស័ព្ទ", "ប័ណ្ណក្រីក្រ", "អាហារូបករណ៍", "ពិការភាព", "ស្ថានភាព"]
+            ];
+
+            students.forEach((s, idx) => {
+                const dobStr = typeof window.formatDate === 'function' ? window.formatDate(s.dob) : (s.dob || '');
+                const pobStr = [s.pob_village, s.pob_commune, s.pob_district, s.pob_province].filter(Boolean).join(', ') || s.pob || '';
+                const currAddrStr = [s.curr_village, s.curr_commune, s.curr_district, s.curr_province].filter(Boolean).join(', ') || s.address || s.curr_address || '';
+
+                let statusKhmer = "កំពុងសិក្សា";
+                if (s.status === "Transferred" || s.status === "បានផ្ទេរចេញ") statusKhmer = "បានផ្ទេរចេញ";
+                else if (s.status === "Graduated" || s.status === "បានបញ្ចប់ការសិក្សា") statusKhmer = "បានបញ្ចប់ការសិក្សា";
+                else if (s.status === "Inactive" || s.status === "ផ្អាក") statusKhmer = "មិនសកម្ម (ផ្អាក)";
+                else if (s.status === "Withdrawn" || s.status === "Dropped" || s.status === "បានឈប់រៀន") statusKhmer = "បានឈប់រៀន";
+
+                const poorStr = (s.poor_id && s.poor_id !== 'គ្មាន' && s.poor_id !== 'false' && s.poor_id !== false) ? (s.poor_id === true ? 'មាន' : s.poor_id) : 'គ្មាន';
+                const scholarStr = (s.scholarship && s.scholarship !== 'គ្មាន' && s.scholarship !== 'false' && s.scholarship !== false) ? 'មាន' : 'គ្មាន';
+                const disabStr = (s.disability && s.disability !== 'គ្មាន' && s.disability !== 'false' && s.disability !== false) ? (s.disability === true ? 'មាន' : s.disability) : 'គ្មាន';
+                const gradeRoom = [s.grade || s.class || ctx.grade, s.room ? `«${s.room}»` : ''].filter(Boolean).join(' ');
+
+                ws1Data.push([
+                    idx + 1,
+                    s.id || '',
+                    s.name || '',
+                    s.name_en || s.name_latin || '',
+                    s.gender || 'ប្រុស',
+                    dobStr,
+                    pobStr,
+                    currAddrStr,
+                    s.father_name || '',
+                    s.father_job || '',
+                    s.mother_name || '',
+                    s.mother_job || '',
+                    gradeRoom,
+                    s.phone || s.parent_contact || '',
+                    poorStr,
+                    scholarStr,
+                    disabStr,
+                    statusKhmer
+                ]);
+            });
+
+            ws1Data.push([""]);
+            ws1Data.push(["បានឃើញ និងឯកភាព", "", "", "", "", "", "", "", "", "", "", "", ctx.lunarDateStr || '']);
+            ws1Data.push(["នាយក/នាយិកាសាលា", "", "", "", "", "", "", "", "", "", "", "", ctx.solarDateStr || '']);
+            ws1Data.push(["", "", "", "", "", "", "", "", "", "", "", "", "គ្រូបន្ទុកថ្នាក់ / អ្នករៀបចំ"]);
+            ws1Data.push([""]);
+            ws1Data.push([""]);
+            ws1Data.push([principalDisplayName, "", "", "", "", "", "", "", "", "", "", "", ctx.teacherName || '']);
+
+            const ws1 = XLSX.utils.aoa_to_sheet(ws1Data);
+            ws1['!cols'] = [
+                { wch: 6 }, { wch: 14 }, { wch: 24 }, { wch: 20 }, { wch: 8 },
+                { wch: 16 }, { wch: 22 }, { wch: 22 }, { wch: 18 }, { wch: 16 },
+                { wch: 18 }, { wch: 16 }, { wch: 14 }, { wch: 15 }, { wch: 12 },
+                { wch: 14 }, { wch: 12 }, { wch: 15 }
+            ];
+            ws1['!merges'] = [
+                { s: { r: 4, c: 0 }, e: { r: 4, c: 17 } },
+                { s: { r: 5, c: 0 }, e: { r: 5, c: 17 } },
+                { s: { r: 6, c: 0 }, e: { r: 6, c: 17 } }
+            ];
+            XLSX.utils.book_append_sheet(wb, ws1, "១. បញ្ជីរាយនាមសិស្ស");
+
+            // ----------------------------------------------------------
+            // 📑 Sheet 2: ២. តារាងស្រង់ពិន្ទុ (Score Sheet - Sorted Alphabetically)
+            // ----------------------------------------------------------
+            const ws2Data = [
+                ["ការិយាល័យអប់រំ យុវជន និងកីឡានៃរដ្ឋបាលស្រុក " + ctx.districtName, "", "", "", "", "", "", "", "", "", "", "ព្រះរាជាណាចក្រកម្ពុជា"],
+                [ctx.schoolName, "", "", "", "", "", "", "", "", "", "", "ជាតិ សាសនា ព្រះមហាក្សត្រ"],
+                [ctx.grade, "", "", "", "", "", "", "", "", "", "", "❖ ❖ ❖"],
+                [""],
+                ["តារាងស្រង់ពិន្ទុសិស្ស (Score Sheet - តម្រៀបតាមអក្ខរក្រម)"],
+                [(ctx.grade ? ctx.grade + " | " : "") + "ឆ្នាំសិក្សា ៖ " + toKh(ctx.academicYear)],
+                ["ស្ថិតិពិន្ទុ៖ សិស្សមានពិន្ទុ " + evaluatedCount + " នាក់ | ជាប់ " + passedCount + " នាក់ (" + passRate + "%) | ធ្លាក់ " + failedCount + " នាក់ | មធ្យមភាគខ្ពស់បំផុត " + maxAvg + " | មធ្យមភាគទាបបំផុត " + minAvg + " | មធ្យមភាគរួម " + overallAvg],
+                [""],
+                ["ល.រ", "អត្តលេខ", "គោត្តនាម និងនាម", "ភេទ", "ថ្នាក់", "ភាសាខ្មែរ", "គណិតវិទ្យា", "វិទ្យាសាស្ត្រ", "សិក្សាសង្គម", "ភាសាអង់គ្លេស", "ពិន្ទុសរុប", "មធ្យមភាគ", "ចំណាត់ថ្នាក់", "និទ្ទេស", "លទ្ធផល"]
+            ];
+
+            scoreStudents.forEach((sc, idx) => {
+                const avgNum = parseFloat(sc.avg);
+                const outcome = isNaN(avgNum) ? "-" : (avgNum >= 5.0 ? "ជាប់" : "ធ្លាក់");
+                ws2Data.push([
+                    idx + 1,
+                    sc.id || '',
+                    sc.name || '',
+                    sc.gender || 'ប្រុស',
+                    sc.grade || ctx.grade,
+                    sc.khmer !== '' ? parseFloat(sc.khmer) || sc.khmer : '',
+                    sc.math !== '' ? parseFloat(sc.math) || sc.math : '',
+                    sc.science !== '' ? parseFloat(sc.science) || sc.science : '',
+                    sc.social !== '' ? parseFloat(sc.social) || sc.social : '',
+                    sc.english !== '' ? parseFloat(sc.english) || sc.english : '',
+                    sc.total_score !== '' ? parseFloat(sc.total_score) || sc.total_score : '',
+                    sc.avg !== '' ? parseFloat(sc.avg) || sc.avg : '',
+                    sc.rank || '',
+                    sc.grade_letter || '',
+                    outcome
+                ]);
+            });
+
+            ws2Data.push([""]);
+            ws2Data.push(["បានឃើញ និងឯកភាព", "", "", "", "", "", "", "", "", "", ctx.lunarDateStr || '']);
+            ws2Data.push(["នាយក/នាយិកាសាលា", "", "", "", "", "", "", "", "", "", ctx.solarDateStr || '']);
+            ws2Data.push(["", "", "", "", "", "", "", "", "", "", "គ្រូបន្ទុកថ្នាក់ / អ្នករៀបចំ"]);
+            ws2Data.push([""]);
+            ws2Data.push([""]);
+            ws2Data.push([principalDisplayName, "", "", "", "", "", "", "", "", "", ctx.teacherName || '']);
+
+            const ws2 = XLSX.utils.aoa_to_sheet(ws2Data);
+            ws2['!cols'] = [
+                { wch: 6 }, { wch: 14 }, { wch: 24 }, { wch: 8 }, { wch: 14 },
+                { wch: 12 }, { wch: 12 }, { wch: 12 }, { wch: 12 }, { wch: 12 },
+                { wch: 14 }, { wch: 14 }, { wch: 12 }, { wch: 10 }, { wch: 14 }
+            ];
+            ws2['!merges'] = [
+                { s: { r: 4, c: 0 }, e: { r: 4, c: 14 } },
+                { s: { r: 5, c: 0 }, e: { r: 5, c: 14 } },
+                { s: { r: 6, c: 0 }, e: { r: 6, c: 14 } }
+            ];
+            XLSX.utils.book_append_sheet(wb, ws2, "២. តារាងស្រង់ពិន្ទុ");
+
+            // ----------------------------------------------------------
+            // 📑 Sheet 3: ៣. តារាងចំណាត់ថ្នាក់ (Rankings Sheet - Sorted by Rank 1..N)
+            // ----------------------------------------------------------
+            const ws3Data = [
+                ["ការិយាល័យអប់រំ យុវជន និងកីឡានៃរដ្ឋបាលស្រុក " + ctx.districtName, "", "", "", "", "", "", "ព្រះរាជាណាចក្រកម្ពុជា"],
+                [ctx.schoolName, "", "", "", "", "", "", "ជាតិ សាសនា ព្រះមហាក្សត្រ"],
+                [ctx.grade, "", "", "", "", "", "", "❖ ❖ ❖"],
+                [""],
+                ["តារាងចំណាត់ថ្នាក់ និងកិត្តិយសសិស្ស (Student Rankings & Honors)"],
+                [(ctx.grade ? ctx.grade + " | " : "") + "ឆ្នាំសិក្សា ៖ " + toKh(ctx.academicYear)],
+                ["សិស្សឆ្នើម Top 3៖ 🥇លេខ ១៖ " + (top1.name || '-') + " (ម.ភាគ " + (top1.avg || '-') + ") | 🥈លេខ ២៖ " + (top2.name || '-') + " (ម.ភាគ " + (top2.avg || '-') + ") | 🥉លេខ ៣៖ " + (top3.name || '-') + " (ម.ភាគ " + (top3.avg || '-') + ")"],
+                [""],
+                ["ចំណាត់ថ្នាក់", "អត្តលេខ", "គោត្តនាម និងនាម", "ភេទ", "ថ្នាក់", "ពិន្ទុសរុប", "មធ្យមភាគ", "និទ្ទេស", "កិត្តិយស / លទ្ធផល", "ផ្សេងៗ / សម្គាល់"]
+            ];
+
+            rankingStudents.forEach((sc) => {
+                const avgNum = parseFloat(sc.avg);
+                const rNum = parseInt(sc.rank);
+                let rankLabel = sc.rank || '-';
+                let honorLabel = "ជាប់";
+                if (rNum === 1) { rankLabel = "🥇 លេខ ១"; honorLabel = "🏆 សិស្សឆ្នើមលេខ ១"; }
+                else if (rNum === 2) { rankLabel = "🥈 លេខ ២"; honorLabel = "🥈 សិស្សឆ្នើមលេខ ២"; }
+                else if (rNum === 3) { rankLabel = "🥉 លេខ ៣"; honorLabel = "🥉 សិស្សឆ្នើមលេខ ៣"; }
+                else if (rNum <= 5) { honorLabel = "🌟 កិត្តិយស Top 5"; }
+                else if (avgNum < 5.0) { honorLabel = "ត្រួតថ្នាក់"; }
+                else { honorLabel = "ឡើងថ្នាក់"; }
+
+                ws3Data.push([
+                    rankLabel,
+                    sc.id || '',
+                    sc.name || '',
+                    sc.gender || 'ប្រុស',
+                    sc.grade || ctx.grade,
+                    sc.total_score !== '' ? parseFloat(sc.total_score) || sc.total_score : '',
+                    sc.avg !== '' ? parseFloat(sc.avg) || sc.avg : '',
+                    sc.grade_letter || '',
+                    honorLabel,
+                    ""
+                ]);
+            });
+
+            ws3Data.push([""]);
+            ws3Data.push(["បានឃើញ និងឯកភាព", "", "", "", "", "", ctx.lunarDateStr || '']);
+            ws3Data.push(["នាយក/នាយិកាសាលា", "", "", "", "", "", ctx.solarDateStr || '']);
+            ws3Data.push(["", "", "", "", "", "", "គ្រូបន្ទុកថ្នាក់ / អ្នករៀបចំ"]);
+            ws3Data.push([""]);
+            ws3Data.push([""]);
+            ws3Data.push([principalDisplayName, "", "", "", "", "", ctx.teacherName || '']);
+
+            const ws3 = XLSX.utils.aoa_to_sheet(ws3Data);
+            ws3['!cols'] = [
+                { wch: 15 }, { wch: 14 }, { wch: 24 }, { wch: 8 }, { wch: 14 },
+                { wch: 14 }, { wch: 14 }, { wch: 10 }, { wch: 22 }, { wch: 18 }
+            ];
+            ws3['!merges'] = [
+                { s: { r: 4, c: 0 }, e: { r: 4, c: 9 } },
+                { s: { r: 5, c: 0 }, e: { r: 5, c: 9 } },
+                { s: { r: 6, c: 0 }, e: { r: 6, c: 9 } }
+            ];
+            XLSX.utils.book_append_sheet(wb, ws3, "៣. តារាងចំណាត់ថ្នាក់");
+
+            const fileName = `CMS_Master_Report_${currentYear}.xlsx`;
+            XLSX.writeFile(wb, fileName);
+
+            if (typeof window.logAudit === 'function') {
+                window.logAudit('EXPORT_EXCEL', 'reports', `បាននាំចេញឯកសារ CMS Master Report XLSX (${students.length} សិស្ស, ៣ Sheet ដាច់ដោយឡែក)`);
+            }
+            if (typeof showToast === 'function') {
+                showToast("✅ បាននាំចេញ CMS Master Report (.xlsx) ចំនួន ៣ Sheet ជោគជ័យ!");
+            }
+            return;
+        }
+
+        // ==============================================================
+        // ជម្រើស B: នាំចេញជា SpreadsheetML Multi-Sheet (.xls) មានចាក់ពណ៌ និង Border
+        // ==============================================================
+        const esc = (s) => (s === null || s === undefined ? '' : String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&apos;'));
+
+        // Sheet 1 XML Rows (Students)
+        let s1RowsXml = '';
         students.forEach((s, idx) => {
             const isEven = idx % 2 === 1;
-            const rowBg = isEven ? '#f8fafc' : '#ffffff';
+            const styleC = isEven ? "CellCenterEven" : "CellCenter";
+            const styleL = isEven ? "CellLeftEven" : "CellLeft";
             const dobStr = typeof window.formatDate === 'function' ? window.formatDate(s.dob) : (s.dob || '');
             const pobStr = [s.pob_village, s.pob_commune, s.pob_district, s.pob_province].filter(Boolean).join(', ') || s.pob || '';
             const currAddrStr = [s.curr_village, s.curr_commune, s.curr_district, s.curr_province].filter(Boolean).join(', ') || s.address || s.curr_address || '';
@@ -260,224 +630,454 @@ window.AdvancedReports = {
             const poorStr = (s.poor_id && s.poor_id !== 'គ្មាន' && s.poor_id !== 'false' && s.poor_id !== false) ? (s.poor_id === true ? 'មាន' : s.poor_id) : 'គ្មាន';
             const scholarStr = (s.scholarship && s.scholarship !== 'គ្មាន' && s.scholarship !== 'false' && s.scholarship !== false) ? 'មាន' : 'គ្មាន';
             const disabStr = (s.disability && s.disability !== 'គ្មាន' && s.disability !== 'false' && s.disability !== false) ? (s.disability === true ? 'មាន' : s.disability) : 'គ្មាន';
-
-            const genderColor = (s.gender === 'ស្រី' || s.gender === 'F') ? 'color: #e11d48; font-weight: bold;' : 'color: #1e3a8a;';
             const gradeRoom = [s.grade || s.class || ctx.grade, s.room ? `«${s.room}»` : ''].filter(Boolean).join(' ');
 
-            rowsHtml += `
-            <tr style="background-color: ${rowBg};">
-                <td style="text-align: center; border: 1pt solid #94a3b8; padding: 5px;">${idx + 1}</td>
-                <td style="text-align: center; border: 1pt solid #94a3b8; padding: 5px; mso-number-format: '\\@'; font-weight: bold; color: #1e3a8a;">${s.id || ''}</td>
-                <td style="text-align: left; border: 1pt solid #94a3b8; padding: 5px 8px; font-weight: bold; white-space: nowrap;">${s.name || ''}</td>
-                <td style="text-align: left; border: 1pt solid #94a3b8; padding: 5px 8px; white-space: nowrap;">${s.name_en || s.name_latin || ''}</td>
-                <td style="text-align: center; border: 1pt solid #94a3b8; padding: 5px; ${genderColor}">${s.gender || 'ប្រុស'}</td>
-                <td style="text-align: center; border: 1pt solid #94a3b8; padding: 5px; mso-number-format: '\\@'; white-space: nowrap;">${dobStr}</td>
-                <td style="text-align: left; border: 1pt solid #94a3b8; padding: 5px 8px;">${pobStr}</td>
-                <td style="text-align: left; border: 1pt solid #94a3b8; padding: 5px 8px;">${currAddrStr}</td>
-                <td style="text-align: left; border: 1pt solid #94a3b8; padding: 5px 8px;">${s.father_name || ''}</td>
-                <td style="text-align: left; border: 1pt solid #94a3b8; padding: 5px 8px;">${s.father_job || ''}</td>
-                <td style="text-align: left; border: 1pt solid #94a3b8; padding: 5px 8px;">${s.mother_name || ''}</td>
-                <td style="text-align: left; border: 1pt solid #94a3b8; padding: 5px 8px;">${s.mother_job || ''}</td>
-                <td style="text-align: center; border: 1pt solid #94a3b8; padding: 5px;">${gradeRoom}</td>
-                <td style="text-align: center; border: 1pt solid #94a3b8; padding: 5px; mso-number-format: '\\@'; font-weight: 500;">${s.phone || s.parent_contact || ''}</td>
-                <td style="text-align: center; border: 1pt solid #94a3b8; padding: 5px; ${poorStr !== 'គ្មាន' ? 'color: #d97706; font-weight: bold;' : ''}">${poorStr}</td>
-                <td style="text-align: center; border: 1pt solid #94a3b8; padding: 5px; ${scholarStr !== 'គ្មាន' ? 'color: #2563eb; font-weight: bold;' : ''}">${scholarStr}</td>
-                <td style="text-align: center; border: 1pt solid #94a3b8; padding: 5px; ${disabStr !== 'គ្មាន' ? 'color: #9333ea; font-weight: bold;' : ''}">${disabStr}</td>
-                <td style="text-align: center; border: 1pt solid #94a3b8; padding: 5px; font-weight: 500;">${statusKhmer}</td>
-            </tr>`;
+            s1RowsXml += `
+            <Row ss:Height="22">
+                <Cell ss:StyleID="${styleC}"><Data ss:Type="Number">${idx + 1}</Data></Cell>
+                <Cell ss:StyleID="${styleC}"><Data ss:Type="String">${esc(s.id)}</Data></Cell>
+                <Cell ss:StyleID="${styleL}"><Data ss:Type="String">${esc(s.name)}</Data></Cell>
+                <Cell ss:StyleID="${styleL}"><Data ss:Type="String">${esc(s.name_en || s.name_latin)}</Data></Cell>
+                <Cell ss:StyleID="${styleC}"><Data ss:Type="String">${esc(s.gender || 'ប្រុស')}</Data></Cell>
+                <Cell ss:StyleID="${styleC}"><Data ss:Type="String">${esc(dobStr)}</Data></Cell>
+                <Cell ss:StyleID="${styleL}"><Data ss:Type="String">${esc(pobStr)}</Data></Cell>
+                <Cell ss:StyleID="${styleL}"><Data ss:Type="String">${esc(currAddrStr)}</Data></Cell>
+                <Cell ss:StyleID="${styleL}"><Data ss:Type="String">${esc(s.father_name)}</Data></Cell>
+                <Cell ss:StyleID="${styleL}"><Data ss:Type="String">${esc(s.father_job)}</Data></Cell>
+                <Cell ss:StyleID="${styleL}"><Data ss:Type="String">${esc(s.mother_name)}</Data></Cell>
+                <Cell ss:StyleID="${styleL}"><Data ss:Type="String">${esc(s.mother_job)}</Data></Cell>
+                <Cell ss:StyleID="${styleC}"><Data ss:Type="String">${esc(gradeRoom)}</Data></Cell>
+                <Cell ss:StyleID="${styleC}"><Data ss:Type="String">${esc(s.phone || s.parent_contact)}</Data></Cell>
+                <Cell ss:StyleID="${styleC}"><Data ss:Type="String">${esc(poorStr)}</Data></Cell>
+                <Cell ss:StyleID="${styleC}"><Data ss:Type="String">${esc(scholarStr)}</Data></Cell>
+                <Cell ss:StyleID="${styleC}"><Data ss:Type="String">${esc(disabStr)}</Data></Cell>
+                <Cell ss:StyleID="${styleC}"><Data ss:Type="String">${esc(statusKhmer)}</Data></Cell>
+            </Row>`;
         });
 
-        // ៤. បង្កើតតារាងស្រង់ពិន្ទុរួម (បើមានទិន្នន័យពិន្ទុ)
-        let scoreSectionHtml = '';
-        if (scores && scores.length > 0) {
-            let scoreRowsHtml = '';
-            scores.forEach((sc, sidx) => {
-                const sRowBg = sidx % 2 === 1 ? '#f8fafc' : '#ffffff';
-                const sName = sc.student_name || sc.name || '';
-                const sGender = sc.gender || 'ប្រុស';
-                const sGenderColor = (sGender === 'ស្រី' || sGender === 'F') ? 'color: #e11d48; font-weight: bold;' : 'color: #1e3a8a;';
+        // Sheet 2 XML Rows (Score Sheet Alphabetical)
+        let s2RowsXml = '';
+        scoreStudents.forEach((sc, idx) => {
+            const isEven = idx % 2 === 1;
+            const styleC = isEven ? "CellCenterEven" : "CellCenter";
+            const styleL = isEven ? "CellLeftEven" : "CellLeft";
+            const avgNum = parseFloat(sc.avg);
+            const outcome = isNaN(avgNum) ? "-" : (avgNum >= 5.0 ? "ជាប់" : "ធ្លាក់");
 
-                scoreRowsHtml += `
-                <tr style="background-color: ${sRowBg};">
-                    <td style="text-align: center; border: 1pt solid #94a3b8; padding: 5px;">${sidx + 1}</td>
-                    <td style="text-align: center; border: 1pt solid #94a3b8; padding: 5px; mso-number-format: '\\@'; font-weight: bold; color: #1e3a8a;">${sc.student_id || sc.id || ''}</td>
-                    <td style="text-align: left; border: 1pt solid #94a3b8; padding: 5px 8px; font-weight: bold; white-space: nowrap;">${sName}</td>
-                    <td style="text-align: center; border: 1pt solid #94a3b8; padding: 5px; ${sGenderColor}">${sGender}</td>
-                    <td style="text-align: center; border: 1pt solid #94a3b8; padding: 5px;">${sc.grade || ctx.grade}</td>
-                    <td style="text-align: center; border: 1pt solid #94a3b8; padding: 5px; mso-number-format: '0.00';">${sc.khmer || ''}</td>
-                    <td style="text-align: center; border: 1pt solid #94a3b8; padding: 5px; mso-number-format: '0.00';">${sc.math || ''}</td>
-                    <td style="text-align: center; border: 1pt solid #94a3b8; padding: 5px; mso-number-format: '0.00';">${sc.science || ''}</td>
-                    <td style="text-align: center; border: 1pt solid #94a3b8; padding: 5px; mso-number-format: '0.00';">${sc.social || ''}</td>
-                    <td style="text-align: center; border: 1pt solid #94a3b8; padding: 5px; mso-number-format: '0.00';">${sc.english || ''}</td>
-                    <td style="text-align: center; border: 1pt solid #94a3b8; padding: 5px; mso-number-format: '0.00'; font-weight: bold; color: #1e3a8a;">${sc.total_score || sc.total || ''}</td>
-                    <td style="text-align: center; border: 1pt solid #94a3b8; padding: 5px; mso-number-format: '0.00'; font-weight: bold; color: #b91c1c;">${sc.average || sc.avg || ''}</td>
-                    <td style="text-align: center; border: 1pt solid #94a3b8; padding: 5px; font-weight: bold; color: #047857;">${sc.rank || ''}</td>
-                    <td style="text-align: center; border: 1pt solid #94a3b8; padding: 5px; font-weight: bold;">${sc.grade_letter || sc.gradeLetter || ''}</td>
-                </tr>`;
-            });
+            s2RowsXml += `
+            <Row ss:Height="22">
+                <Cell ss:StyleID="${styleC}"><Data ss:Type="Number">${idx + 1}</Data></Cell>
+                <Cell ss:StyleID="${styleC}"><Data ss:Type="String">${esc(sc.id)}</Data></Cell>
+                <Cell ss:StyleID="${styleL}"><Data ss:Type="String">${esc(sc.name)}</Data></Cell>
+                <Cell ss:StyleID="${styleC}"><Data ss:Type="String">${esc(sc.gender || 'ប្រុស')}</Data></Cell>
+                <Cell ss:StyleID="${styleC}"><Data ss:Type="String">${esc(sc.grade || ctx.grade)}</Data></Cell>
+                <Cell ss:StyleID="${styleC}"><Data ss:Type="${sc.khmer !== '' ? 'Number' : 'String'}">${esc(sc.khmer)}</Data></Cell>
+                <Cell ss:StyleID="${styleC}"><Data ss:Type="${sc.math !== '' ? 'Number' : 'String'}">${esc(sc.math)}</Data></Cell>
+                <Cell ss:StyleID="${styleC}"><Data ss:Type="${sc.science !== '' ? 'Number' : 'String'}">${esc(sc.science)}</Data></Cell>
+                <Cell ss:StyleID="${styleC}"><Data ss:Type="${sc.social !== '' ? 'Number' : 'String'}">${esc(sc.social)}</Data></Cell>
+                <Cell ss:StyleID="${styleC}"><Data ss:Type="${sc.english !== '' ? 'Number' : 'String'}">${esc(sc.english)}</Data></Cell>
+                <Cell ss:StyleID="${styleC}"><Data ss:Type="${sc.total_score !== '' ? 'Number' : 'String'}">${esc(sc.total_score)}</Data></Cell>
+                <Cell ss:StyleID="${styleC}"><Data ss:Type="${sc.avg !== '' ? 'Number' : 'String'}">${esc(sc.avg)}</Data></Cell>
+                <Cell ss:StyleID="${styleC}"><Data ss:Type="String">${esc(sc.rank)}</Data></Cell>
+                <Cell ss:StyleID="${styleC}"><Data ss:Type="String">${esc(sc.grade_letter)}</Data></Cell>
+                <Cell ss:StyleID="${styleC}"><Data ss:Type="String">${esc(outcome)}</Data></Cell>
+            </Row>`;
+        });
 
-            scoreSectionHtml = `
-            <tr><td colspan="18" style="border: none; height: 25px;"></td></tr>
-            <tr>
-                <td colspan="18" style="border: 1.5pt solid #10489c; background-color: #10489c; color: #ffffff; font-family: 'Khmer OS Muol Light', Moul, serif; font-size: 11pt; font-weight: bold; padding: 8px 10px; text-align: center;">
-                    តារាងស្រង់ពិន្ទុ និងចំណាត់ថ្នាក់សិស្សរួម (Master Score Table) ឆ្នាំសិក្សា ${toKh(ctx.academicYear)}
-                </td>
-            </tr>
-            <tr style="background-color: #1e3a8a; color: #ffffff;">
-                <th style="border: 1pt solid #0f172a; padding: 6px; font-size: 10pt; font-family: 'Khmer OS Muol Light', Moul, serif;">ល.រ</th>
-                <th style="border: 1pt solid #0f172a; padding: 6px; font-size: 10pt; font-family: 'Khmer OS Muol Light', Moul, serif;">អត្តលេខ</th>
-                <th style="border: 1pt solid #0f172a; padding: 6px; font-size: 10pt; font-family: 'Khmer OS Muol Light', Moul, serif;">គោត្តនាម និងនាម</th>
-                <th style="border: 1pt solid #0f172a; padding: 6px; font-size: 10pt; font-family: 'Khmer OS Muol Light', Moul, serif;">ភេទ</th>
-                <th style="border: 1pt solid #0f172a; padding: 6px; font-size: 10pt; font-family: 'Khmer OS Muol Light', Moul, serif;">ថ្នាក់</th>
-                <th style="border: 1pt solid #0f172a; padding: 6px; font-size: 10pt; font-family: 'Khmer OS Muol Light', Moul, serif;">ភាសាខ្មែរ</th>
-                <th style="border: 1pt solid #0f172a; padding: 6px; font-size: 10pt; font-family: 'Khmer OS Muol Light', Moul, serif;">គណិតវិទ្យា</th>
-                <th style="border: 1pt solid #0f172a; padding: 6px; font-size: 10pt; font-family: 'Khmer OS Muol Light', Moul, serif;">វិទ្យាសាស្ត្រ</th>
-                <th style="border: 1pt solid #0f172a; padding: 6px; font-size: 10pt; font-family: 'Khmer OS Muol Light', Moul, serif;">សិក្សាសង្គម</th>
-                <th style="border: 1pt solid #0f172a; padding: 6px; font-size: 10pt; font-family: 'Khmer OS Muol Light', Moul, serif;">ភាសាអង់គ្លេស</th>
-                <th style="border: 1pt solid #0f172a; padding: 6px; font-size: 10pt; font-family: 'Khmer OS Muol Light', Moul, serif;">ពិន្ទុសរុប</th>
-                <th style="border: 1pt solid #0f172a; padding: 6px; font-size: 10pt; font-family: 'Khmer OS Muol Light', Moul, serif;">មធ្យមភាគ</th>
-                <th style="border: 1pt solid #0f172a; padding: 6px; font-size: 10pt; font-family: 'Khmer OS Muol Light', Moul, serif;">ចំណាត់ថ្នាក់</th>
-                <th style="border: 1pt solid #0f172a; padding: 6px; font-size: 10pt; font-family: 'Khmer OS Muol Light', Moul, serif;">និទ្ទេស</th>
-                <th colspan="4" style="border: 1pt solid #0f172a; padding: 6px; font-size: 10pt; font-family: 'Khmer OS Muol Light', Moul, serif;">សម្គាល់</th>
-            </tr>
-            ${scoreRowsHtml}
-            `;
-        }
+        // Sheet 3 XML Rows (Rankings Sheet)
+        let s3RowsXml = '';
+        rankingStudents.forEach((sc) => {
+            const isEven = false;
+            const avgNum = parseFloat(sc.avg);
+            const rNum = parseInt(sc.rank);
+            let rankLabel = sc.rank || '-';
+            let honorLabel = "ជាប់";
+            let rowStyle = "CellCenter";
+            if (rNum === 1) { rankLabel = "🥇 លេខ ១"; honorLabel = "🏆 សិស្សឆ្នើមលេខ ១"; }
+            else if (rNum === 2) { rankLabel = "🥈 លេខ ២"; honorLabel = "🥈 សិស្សឆ្នើមលេខ ២"; }
+            else if (rNum === 3) { rankLabel = "🥉 លេខ ៣"; honorLabel = "🥉 សិស្សឆ្នើមលេខ ៣"; }
+            else if (rNum <= 5) { honorLabel = "🌟 កិត្តិយស Top 5"; }
+            else if (avgNum < 5.0) { honorLabel = "ត្រួតថ្នាក់"; }
+            else { honorLabel = "ឡើងថ្នាក់"; }
 
-        // ៥. បង្កើតតារាង Excel ពេញលេញតាមស្តង់ដារផ្លូវការ MoEYS
-        const excelContent = `
-        <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
-        <head>
-            <meta charset="utf-8">
-            <!--[if gte mso 9]>
-            <xml>
-                <x:ExcelWorkbook>
-                    <x:ExcelWorksheets>
-                        <x:ExcelWorksheet>
-                            <x:Name>CMS_Master_Report</x:Name>
-                            <x:WorksheetOptions>
-                                <x:DisplayGridlines/>
-                                <x:Print>
-                                    <x:Orientation>Landscape</x:Orientation>
-                                </x:Print>
-                            </x:WorksheetOptions>
-                        </x:ExcelWorksheet>
-                    </x:ExcelWorksheets>
-                </x:ExcelWorkbook>
-            </xml>
-            <![endif]-->
-            <style>
-                body { font-family: "Khmer OS Siemreap", "Siemreap", Arial, sans-serif; font-size: 10pt; }
-                table { border-collapse: collapse; width: 100%; white-space: nowrap; }
-                th { background-color: #10489c; color: #ffffff; font-family: "Khmer OS Muol Light", "Moul", serif; font-size: 10pt; font-weight: bold; border: 1pt solid #0f172a; text-align: center; vertical-align: middle; padding: 6px 4px; height: 36px; }
-                td { border: 1pt solid #94a3b8; font-family: "Khmer OS Siemreap", "Siemreap", Arial, sans-serif; font-size: 9.5pt; vertical-align: middle; padding: 5px 6px; }
-            </style>
-        </head>
-        <body>
-            <table>
-                <!-- ក្បាលលិខិតផ្លូវការ (MoEYS Standard Letterhead) -->
-                <tr>
-                    <td colspan="8" style="border: none; text-align: left; vertical-align: top; font-family: 'Khmer OS Muol Light', Moul, serif; font-size: 11pt; color: #1e3a8a; line-height: 1.6; padding-left: 10px;">
-                        ការិយាល័យអប់រំ យុវជន និងកីឡានៃរដ្ឋបាលស្រុក${ctx.districtName}<br>
-                        ${ctx.schoolName}<br>
-                        ${ctx.grade ? ctx.grade : ''}
-                    </td>
-                    <td colspan="2" style="border: none;"></td>
-                    <td colspan="8" style="border: none; text-align: center; vertical-align: top; font-family: 'Khmer OS Muol Light', Moul, serif; font-size: 11.5pt; color: #1e3a8a; line-height: 1.6;">
-                        ព្រះរាជាណាចក្រកម្ពុជា<br>
-                        ជាតិ សាសនា ព្រះមហាក្សត្រ<br>
-                        <span style="color: #d97706; font-size: 11pt; letter-spacing: 3px;">❖ ❖ ❖</span>
-                    </td>
-                </tr>
+            s3RowsXml += `
+            <Row ss:Height="22">
+                <Cell ss:StyleID="CellCenter"><Data ss:Type="String">${esc(rankLabel)}</Data></Cell>
+                <Cell ss:StyleID="CellCenter"><Data ss:Type="String">${esc(sc.id)}</Data></Cell>
+                <Cell ss:StyleID="CellLeft"><Data ss:Type="String">${esc(sc.name)}</Data></Cell>
+                <Cell ss:StyleID="CellCenter"><Data ss:Type="String">${esc(sc.gender || 'ប្រុស')}</Data></Cell>
+                <Cell ss:StyleID="CellCenter"><Data ss:Type="String">${esc(sc.grade || ctx.grade)}</Data></Cell>
+                <Cell ss:StyleID="CellCenter"><Data ss:Type="${sc.total_score !== '' ? 'Number' : 'String'}">${esc(sc.total_score)}</Data></Cell>
+                <Cell ss:StyleID="CellCenter"><Data ss:Type="${sc.avg !== '' ? 'Number' : 'String'}">${esc(sc.avg)}</Data></Cell>
+                <Cell ss:StyleID="CellCenter"><Data ss:Type="String">${esc(sc.grade_letter)}</Data></Cell>
+                <Cell ss:StyleID="CellCenter"><Data ss:Type="String">${esc(honorLabel)}</Data></Cell>
+                <Cell ss:StyleID="CellCenter"><Data ss:Type="String"></Data></Cell>
+            </Row>`;
+        });
 
-                <tr><td colspan="18" style="border: none; height: 12px;"></td></tr>
+        // សាងសង់ SpreadsheetML XML Workbook ពេញលេញ
+        const xmlContent = `<?xml version="1.0"?>
+<?mso-application progid="Excel.Sheet"?>
+<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"
+ xmlns:o="urn:schemas-microsoft-com:office:office"
+ xmlns:x="urn:schemas-microsoft-com:office:excel"
+ xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet"
+ xmlns:html="http://www.w3.org/TR/REC-html40">
+ <DocumentProperties xmlns="urn:schemas-microsoft-com:office:office">
+  <Author>KrouDigital CMS</Author>
+ </DocumentProperties>
+ <Styles>
+  <Style ss:ID="Default" ss:Name="Normal">
+   <Alignment ss:Vertical="Center"/>
+   <Font ss:FontName="Khmer OS Siemreap" ss:Size="10" ss:Color="#000000"/>
+  </Style>
+  <Style ss:ID="HeaderLeft">
+   <Alignment ss:Horizontal="Left" ss:Vertical="Top" ss:WrapText="1"/>
+   <Font ss:FontName="Khmer OS Muol Light" ss:Size="10.5" ss:Color="#1E3A8A"/>
+  </Style>
+  <Style ss:ID="HeaderRight">
+   <Alignment ss:Horizontal="Center" ss:Vertical="Top" ss:WrapText="1"/>
+   <Font ss:FontName="Khmer OS Muol Light" ss:Size="11" ss:Color="#1E3A8A"/>
+  </Style>
+  <Style ss:ID="TitleMain">
+   <Alignment ss:Horizontal="Center" ss:Vertical="Center"/>
+   <Font ss:FontName="Khmer OS Muol Light" ss:Size="15" ss:Color="#1E3A8A"/>
+  </Style>
+  <Style ss:ID="TitleSub">
+   <Alignment ss:Horizontal="Center" ss:Vertical="Center"/>
+   <Font ss:FontName="Khmer OS Siemreap" ss:Size="11" ss:Bold="1" ss:Color="#DC2626"/>
+  </Style>
+  <Style ss:ID="SummaryHeader">
+   <Alignment ss:Horizontal="Left" ss:Vertical="Center"/>
+   <Font ss:FontName="Khmer OS Muol Light" ss:Size="10.5" ss:Color="#FFFFFF"/>
+   <Interior ss:Color="#1E40AF" ss:Pattern="Solid"/>
+  </Style>
+  <Style ss:ID="SummaryBlue">
+   <Alignment ss:Horizontal="Left" ss:Vertical="Center"/>
+   <Borders>
+    <Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#BFDBFE"/>
+    <Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#BFDBFE"/>
+    <Border ss:Position="Right" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#BFDBFE"/>
+    <Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#BFDBFE"/>
+   </Borders>
+   <Font ss:FontName="Khmer OS Siemreap" ss:Size="9.5" ss:Color="#000000"/>
+   <Interior ss:Color="#EFF6FF" ss:Pattern="Solid"/>
+  </Style>
+  <Style ss:ID="SummaryGreen">
+   <Alignment ss:Horizontal="Left" ss:Vertical="Center"/>
+   <Borders>
+    <Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#BBF7D0"/>
+    <Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#BBF7D0"/>
+    <Border ss:Position="Right" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#BBF7D0"/>
+    <Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#BBF7D0"/>
+   </Borders>
+   <Font ss:FontName="Khmer OS Siemreap" ss:Size="9.5" ss:Color="#000000"/>
+   <Interior ss:Color="#F0FDF4" ss:Pattern="Solid"/>
+  </Style>
+  <Style ss:ID="TableHeader">
+   <Alignment ss:Horizontal="Center" ss:Vertical="Center" ss:WrapText="1"/>
+   <Borders>
+    <Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#0F172A"/>
+    <Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#0F172A"/>
+    <Border ss:Position="Right" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#0F172A"/>
+    <Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#0F172A"/>
+   </Borders>
+   <Font ss:FontName="Khmer OS Muol Light" ss:Size="10" ss:Color="#FFFFFF"/>
+   <Interior ss:Color="#10489C" ss:Pattern="Solid"/>
+  </Style>
+  <Style ss:ID="CellCenter">
+   <Alignment ss:Horizontal="Center" ss:Vertical="Center"/>
+   <Borders>
+    <Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#94A3B8"/>
+    <Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#94A3B8"/>
+    <Border ss:Position="Right" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#94A3B8"/>
+    <Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#94A3B8"/>
+   </Borders>
+   <Font ss:FontName="Khmer OS Siemreap" ss:Size="9.5" ss:Color="#000000"/>
+  </Style>
+  <Style ss:ID="CellLeft">
+   <Alignment ss:Horizontal="Left" ss:Vertical="Center"/>
+   <Borders>
+    <Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#94A3B8"/>
+    <Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#94A3B8"/>
+    <Border ss:Position="Right" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#94A3B8"/>
+    <Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#94A3B8"/>
+   </Borders>
+   <Font ss:FontName="Khmer OS Siemreap" ss:Size="9.5" ss:Color="#000000"/>
+  </Style>
+  <Style ss:ID="CellCenterEven">
+   <Alignment ss:Horizontal="Center" ss:Vertical="Center"/>
+   <Borders>
+    <Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#94A3B8"/>
+    <Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#94A3B8"/>
+    <Border ss:Position="Right" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#94A3B8"/>
+    <Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#94A3B8"/>
+   </Borders>
+   <Font ss:FontName="Khmer OS Siemreap" ss:Size="9.5" ss:Color="#000000"/>
+   <Interior ss:Color="#F8FAFC" ss:Pattern="Solid"/>
+  </Style>
+  <Style ss:ID="CellLeftEven">
+   <Alignment ss:Horizontal="Left" ss:Vertical="Center"/>
+   <Borders>
+    <Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#94A3B8"/>
+    <Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#94A3B8"/>
+    <Border ss:Position="Right" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#94A3B8"/>
+    <Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#94A3B8"/>
+   </Borders>
+   <Font ss:FontName="Khmer OS Siemreap" ss:Size="9.5" ss:Color="#000000"/>
+   <Interior ss:Color="#F8FAFC" ss:Pattern="Solid"/>
+  </Style>
+  <Style ss:ID="SigText">
+   <Alignment ss:Horizontal="Center" ss:Vertical="Top"/>
+   <Font ss:FontName="Khmer OS Siemreap" ss:Size="10.5" ss:Color="#000000"/>
+  </Style>
+  <Style ss:ID="SigTitle">
+   <Alignment ss:Horizontal="Center" ss:Vertical="Top"/>
+   <Font ss:FontName="Khmer OS Muol Light" ss:Size="11" ss:Color="#000000"/>
+  </Style>
+ </Styles>
 
-                <!-- ចំណងជើងរបាយការណ៍ (Document Title) -->
-                <tr>
-                    <td colspan="18" style="border: none; text-align: center; font-family: 'Khmer OS Muol Light', Moul, serif; font-size: 15pt; color: #1e3a8a; font-weight: bold; padding: 6px 0;">
-                        បញ្ជីរាយនាមសិស្ស និងរបាយការណ៍ទិន្នន័យរួម (CMS Master Report)
-                    </td>
-                </tr>
-                <tr>
-                    <td colspan="18" style="border: none; text-align: center; font-family: 'Khmer OS Siemreap', 'Kantumruy Pro', sans-serif; font-size: 11.5pt; font-weight: bold; color: #dc2626; padding-bottom: 8px;">
-                        ${ctx.grade ? ctx.grade + ' | ' : ''}ឆ្នាំសិក្សា ៖ ${toKh(ctx.academicYear)}
-                    </td>
-                </tr>
+ <!-- ១. WORKSHEET បញ្ជីរាយនាមសិស្ស -->
+ <Worksheet ss:Name="១. បញ្ជីរាយនាមសិស្ស">
+  <Table ss:DefaultColumnWidth="65" ss:DefaultRowHeight="20">
+   <Column ss:Index="1" ss:Width="35"/>
+   <Column ss:Index="2" ss:Width="95"/>
+   <Column ss:Index="3" ss:Width="160"/>
+   <Column ss:Index="4" ss:Width="140"/>
+   <Column ss:Index="5" ss:Width="55"/>
+   <Column ss:Index="6" ss:Width="110"/>
+   <Column ss:Index="7" ss:Width="150"/>
+   <Column ss:Index="8" ss:Width="150"/>
+   <Column ss:Index="9" ss:Width="120"/>
+   <Column ss:Index="10" ss:Width="110"/>
+   <Column ss:Index="11" ss:Width="120"/>
+   <Column ss:Index="12" ss:Width="110"/>
+   <Column ss:Index="13" ss:Width="95"/>
+   <Column ss:Index="14" ss:Width="105"/>
+   <Column ss:Index="15" ss:Width="80"/>
+   <Column ss:Index="16" ss:Width="90"/>
+   <Column ss:Index="17" ss:Width="80"/>
+   <Column ss:Index="18" ss:Width="100"/>
+   
+   <Row ss:Height="55">
+    <Cell ss:MergeAcross="7" ss:StyleID="HeaderLeft"><Data ss:Type="String">ការិយាល័យអប់រំ យុវជន និងកីឡានៃរដ្ឋបាលស្រុក${esc(ctx.districtName)}&#10;${esc(ctx.schoolName)}&#10;${esc(ctx.grade)}</Data></Cell>
+    <Cell ss:Index="9" ss:MergeAcross="1" ss:StyleID="Default"/>
+    <Cell ss:Index="11" ss:MergeAcross="7" ss:StyleID="HeaderRight"><Data ss:Type="String">ព្រះរាជាណាចក្រកម្ពុជា&#10;ជាតិ សាសនា ព្រះមហាក្សត្រ&#10;❖ ❖ ❖</Data></Cell>
+   </Row>
+   <Row ss:Height="12"><Cell ss:StyleID="Default"/></Row>
+   <Row ss:Height="25">
+    <Cell ss:MergeAcross="17" ss:StyleID="TitleMain"><Data ss:Type="String">បញ្ជីរាយនាមសិស្ស (CMS Master Student Report)</Data></Cell>
+   </Row>
+   <Row ss:Height="20">
+    <Cell ss:MergeAcross="17" ss:StyleID="TitleSub"><Data ss:Type="String">${esc(ctx.grade ? ctx.grade + ' | ' : '')}ឆ្នាំសិក្សា ៖ ${esc(toKh(ctx.academicYear))}</Data></Cell>
+   </Row>
+   <Row ss:Height="10"><Cell ss:StyleID="Default"/></Row>
+   <Row ss:Height="22">
+    <Cell ss:MergeAcross="17" ss:StyleID="SummaryHeader"><Data ss:Type="String">📊 ទិន្នន័យសង្ខេបសិស្សរួម (Student Summary Statistics)</Data></Cell>
+   </Row>
+   <Row ss:Height="22">
+    <Cell ss:MergeAcross="3" ss:StyleID="SummaryBlue"><Data ss:Type="String">• សិស្សសរុប៖ ${totalStudents} នាក់</Data></Cell>
+    <Cell ss:Index="5" ss:MergeAcross="4" ss:StyleID="SummaryBlue"><Data ss:Type="String">• ស្រី៖ ${femaleStudents} នាក់ (${femalePercent}%)</Data></Cell>
+    <Cell ss:Index="10" ss:MergeAcross="3" ss:StyleID="SummaryBlue"><Data ss:Type="String">• ប្រុស៖ ${maleStudents} នាក់</Data></Cell>
+    <Cell ss:Index="14" ss:MergeAcross="4" ss:StyleID="SummaryBlue"><Data ss:Type="String">• កំពុងសិក្សា៖ ${activeCount} នាក់</Data></Cell>
+   </Row>
+   <Row ss:Height="22">
+    <Cell ss:MergeAcross="3" ss:StyleID="SummaryGreen"><Data ss:Type="String">• ប័ណ្ណក្រីក្រ (ID Poor)៖ ${poorCount} នាក់</Data></Cell>
+    <Cell ss:Index="5" ss:MergeAcross="4" ss:StyleID="SummaryGreen"><Data ss:Type="String">• អាហារូបករណ៍៖ ${scholarshipCount} នាក់</Data></Cell>
+    <Cell ss:Index="10" ss:MergeAcross="3" ss:StyleID="SummaryGreen"><Data ss:Type="String">• ពិការភាព៖ ${disabilityCount} នាក់</Data></Cell>
+    <Cell ss:Index="14" ss:MergeAcross="4" ss:StyleID="SummaryGreen"><Data ss:Type="String">• ផ្ទេរចេញ/ឈប់រៀន៖ ${transferredCount + droppedCount} នាក់</Data></Cell>
+   </Row>
+   <Row ss:Height="12"><Cell ss:StyleID="Default"/></Row>
+   <Row ss:Height="28">
+    <Cell ss:StyleID="TableHeader"><Data ss:Type="String">ល.រ</Data></Cell>
+    <Cell ss:StyleID="TableHeader"><Data ss:Type="String">អត្តលេខ</Data></Cell>
+    <Cell ss:StyleID="TableHeader"><Data ss:Type="String">គោត្តនាម និងនាម</Data></Cell>
+    <Cell ss:StyleID="TableHeader"><Data ss:Type="String">ឈ្មោះឡាតាំង</Data></Cell>
+    <Cell ss:StyleID="TableHeader"><Data ss:Type="String">ភេទ</Data></Cell>
+    <Cell ss:StyleID="TableHeader"><Data ss:Type="String">ថ្ងៃខែឆ្នាំកំណើត</Data></Cell>
+    <Cell ss:StyleID="TableHeader"><Data ss:Type="String">ទីកន្លែងកំណើត</Data></Cell>
+    <Cell ss:StyleID="TableHeader"><Data ss:Type="String">ទីលំនៅបច្ចុប្បន្ន</Data></Cell>
+    <Cell ss:StyleID="TableHeader"><Data ss:Type="String">ឈ្មោះឪពុក</Data></Cell>
+    <Cell ss:StyleID="TableHeader"><Data ss:Type="String">មុខរបរ</Data></Cell>
+    <Cell ss:StyleID="TableHeader"><Data ss:Type="String">ឈ្មោះម្ដាយ</Data></Cell>
+    <Cell ss:StyleID="TableHeader"><Data ss:Type="String">មុខរបរ</Data></Cell>
+    <Cell ss:StyleID="TableHeader"><Data ss:Type="String">ថ្នាក់/បន្ទប់</Data></Cell>
+    <Cell ss:StyleID="TableHeader"><Data ss:Type="String">លេខទូរស័ព្ទ</Data></Cell>
+    <Cell ss:StyleID="TableHeader"><Data ss:Type="String">ប័ណ្ណក្រីក្រ</Data></Cell>
+    <Cell ss:StyleID="TableHeader"><Data ss:Type="String">អាហារូបករណ៍</Data></Cell>
+    <Cell ss:StyleID="TableHeader"><Data ss:Type="String">ពិការភាព</Data></Cell>
+    <Cell ss:StyleID="TableHeader"><Data ss:Type="String">ស្ថានភាព</Data></Cell>
+   </Row>
+   ${s1RowsXml}
+   <Row ss:Height="20"><Cell ss:StyleID="Default"/></Row>
+   <Row ss:Height="22">
+    <Cell ss:MergeAcross="7" ss:StyleID="SigText"><Data ss:Type="String">បានឃើញ និងឯកភាព</Data></Cell>
+    <Cell ss:Index="9" ss:MergeAcross="1" ss:StyleID="Default"/>
+    <Cell ss:Index="11" ss:MergeAcross="7" ss:StyleID="SigText"><Data ss:Type="String">${esc(ctx.lunarDateStr || 'ថ្ងៃ....................ខែ..................ឆ្នាំ...............ព.ស.២៥៧០')}</Data></Cell>
+   </Row>
+   <Row ss:Height="22">
+    <Cell ss:MergeAcross="7" ss:StyleID="SigTitle"><Data ss:Type="String">នាយក/នាយិកាសាលា</Data></Cell>
+    <Cell ss:Index="9" ss:MergeAcross="1" ss:StyleID="Default"/>
+    <Cell ss:Index="11" ss:MergeAcross="7" ss:StyleID="SigText"><Data ss:Type="String">${esc(ctx.solarDateStr)}</Data></Cell>
+   </Row>
+   <Row ss:Height="22">
+    <Cell ss:Index="11" ss:MergeAcross="7" ss:StyleID="SigTitle"><Data ss:Type="String">គ្រូបន្ទុកថ្នាក់ / អ្នករៀបចំ</Data></Cell>
+   </Row>
+   <Row ss:Height="35"><Cell ss:StyleID="Default"/></Row>
+   <Row ss:Height="25">
+    <Cell ss:MergeAcross="7" ss:StyleID="SigTitle"><Data ss:Type="String">${esc(principalDisplayName)}</Data></Cell>
+    <Cell ss:Index="9" ss:MergeAcross="1" ss:StyleID="Default"/>
+    <Cell ss:Index="11" ss:MergeAcross="7" ss:StyleID="SigTitle"><Data ss:Type="String">${esc(ctx.teacherName)}</Data></Cell>
+   </Row>
+  </Table>
+ </Worksheet>
 
-                <tr><td colspan="18" style="border: none; height: 8px;"></td></tr>
+ <!-- ២. WORKSHEET តារាងស្រង់ពិន្ទុ (SCORE SHEET) -->
+ <Worksheet ss:Name="២. តារាងស្រង់ពិន្ទុ">
+  <Table ss:DefaultColumnWidth="65" ss:DefaultRowHeight="20">
+   <Column ss:Index="1" ss:Width="35"/>
+   <Column ss:Index="2" ss:Width="95"/>
+   <Column ss:Index="3" ss:Width="160"/>
+   <Column ss:Index="4" ss:Width="55"/>
+   <Column ss:Index="5" ss:Width="95"/>
+   <Column ss:Index="6" ss:Width="80"/>
+   <Column ss:Index="7" ss:Width="80"/>
+   <Column ss:Index="8" ss:Width="80"/>
+   <Column ss:Index="9" ss:Width="80"/>
+   <Column ss:Index="10" ss:Width="80"/>
+   <Column ss:Index="11" ss:Width="95"/>
+   <Column ss:Index="12" ss:Width="95"/>
+   <Column ss:Index="13" ss:Width="85"/>
+   <Column ss:Index="14" ss:Width="70"/>
+   <Column ss:Index="15" ss:Width="95"/>
+   
+   <Row ss:Height="55">
+    <Cell ss:MergeAcross="6" ss:StyleID="HeaderLeft"><Data ss:Type="String">ការិយាល័យអប់រំ យុវជន និងកីឡានៃរដ្ឋបាលស្រុក${esc(ctx.districtName)}&#10;${esc(ctx.schoolName)}&#10;${esc(ctx.grade)}</Data></Cell>
+    <Cell ss:Index="8" ss:MergeAcross="1" ss:StyleID="Default"/>
+    <Cell ss:Index="10" ss:MergeAcross="5" ss:StyleID="HeaderRight"><Data ss:Type="String">ព្រះរាជាណាចក្រកម្ពុជា&#10;ជាតិ សាសនា ព្រះមហាក្សត្រ&#10;❖ ❖ ❖</Data></Cell>
+   </Row>
+   <Row ss:Height="12"><Cell ss:StyleID="Default"/></Row>
+   <Row ss:Height="25">
+    <Cell ss:MergeAcross="14" ss:StyleID="TitleMain"><Data ss:Type="String">តារាងស្រង់ពិន្ទុសិស្ស (Score Sheet - តម្រៀបតាមអក្ខរក្រម)</Data></Cell>
+   </Row>
+   <Row ss:Height="20">
+    <Cell ss:MergeAcross="14" ss:StyleID="TitleSub"><Data ss:Type="String">${esc(ctx.grade ? ctx.grade + ' | ' : '')}ឆ្នាំសិក្សា ៖ ${esc(toKh(ctx.academicYear))}</Data></Cell>
+   </Row>
+   <Row ss:Height="10"><Cell ss:StyleID="Default"/></Row>
+   <Row ss:Height="22">
+    <Cell ss:MergeAcross="14" ss:StyleID="SummaryHeader"><Data ss:Type="String">📈 ស្ថិតិពិន្ទុ៖ សិស្សមានពិន្ទុ ${evaluatedCount} នាក់ | ជាប់ ${passedCount} នាក់ (${passRate}%) | ធ្លាក់ ${failedCount} នាក់ | មធ្យមភាគខ្ពស់ ${maxAvg} | មធ្យមភាគទាប ${minAvg}</Data></Cell>
+   </Row>
+   <Row ss:Height="12"><Cell ss:StyleID="Default"/></Row>
+   <Row ss:Height="28">
+    <Cell ss:StyleID="TableHeader"><Data ss:Type="String">ល.រ</Data></Cell>
+    <Cell ss:StyleID="TableHeader"><Data ss:Type="String">អត្តលេខ</Data></Cell>
+    <Cell ss:StyleID="TableHeader"><Data ss:Type="String">គោត្តនាម និងនាម</Data></Cell>
+    <Cell ss:StyleID="TableHeader"><Data ss:Type="String">ភេទ</Data></Cell>
+    <Cell ss:StyleID="TableHeader"><Data ss:Type="String">ថ្នាក់</Data></Cell>
+    <Cell ss:StyleID="TableHeader"><Data ss:Type="String">ភាសាខ្មែរ</Data></Cell>
+    <Cell ss:StyleID="TableHeader"><Data ss:Type="String">គណិតវិទ្យា</Data></Cell>
+    <Cell ss:StyleID="TableHeader"><Data ss:Type="String">វិទ្យាសាស្ត្រ</Data></Cell>
+    <Cell ss:StyleID="TableHeader"><Data ss:Type="String">សិក្សាសង្គម</Data></Cell>
+    <Cell ss:StyleID="TableHeader"><Data ss:Type="String">ភាសាអង់គ្លេស</Data></Cell>
+    <Cell ss:StyleID="TableHeader"><Data ss:Type="String">ពិន្ទុសរុប</Data></Cell>
+    <Cell ss:StyleID="TableHeader"><Data ss:Type="String">មធ្យមភាគ</Data></Cell>
+    <Cell ss:StyleID="TableHeader"><Data ss:Type="String">ចំណាត់ថ្នាក់</Data></Cell>
+    <Cell ss:StyleID="TableHeader"><Data ss:Type="String">និទ្ទេស</Data></Cell>
+    <Cell ss:StyleID="TableHeader"><Data ss:Type="String">លទ្ធផល</Data></Cell>
+   </Row>
+   ${s2RowsXml}
+   <Row ss:Height="20"><Cell ss:StyleID="Default"/></Row>
+   <Row ss:Height="22">
+    <Cell ss:MergeAcross="6" ss:StyleID="SigText"><Data ss:Type="String">បានឃើញ និងឯកភាព</Data></Cell>
+    <Cell ss:Index="8" ss:MergeAcross="1" ss:StyleID="Default"/>
+    <Cell ss:Index="10" ss:MergeAcross="5" ss:StyleID="SigText"><Data ss:Type="String">${esc(ctx.lunarDateStr || 'ថ្ងៃ....................ខែ..................ឆ្នាំ...............ព.ស.២៥៧០')}</Data></Cell>
+   </Row>
+   <Row ss:Height="22">
+    <Cell ss:MergeAcross="6" ss:StyleID="SigTitle"><Data ss:Type="String">នាយក/នាយិកាសាលា</Data></Cell>
+    <Cell ss:Index="8" ss:MergeAcross="1" ss:StyleID="Default"/>
+    <Cell ss:Index="10" ss:MergeAcross="5" ss:StyleID="SigText"><Data ss:Type="String">${esc(ctx.solarDateStr)}</Data></Cell>
+   </Row>
+   <Row ss:Height="22">
+    <Cell ss:Index="10" ss:MergeAcross="5" ss:StyleID="SigTitle"><Data ss:Type="String">គ្រូបន្ទុកថ្នាក់ / អ្នករៀបចំ</Data></Cell>
+   </Row>
+   <Row ss:Height="35"><Cell ss:StyleID="Default"/></Row>
+   <Row ss:Height="25">
+    <Cell ss:MergeAcross="6" ss:StyleID="SigTitle"><Data ss:Type="String">${esc(principalDisplayName)}</Data></Cell>
+    <Cell ss:Index="8" ss:MergeAcross="1" ss:StyleID="Default"/>
+    <Cell ss:Index="10" ss:MergeAcross="5" ss:StyleID="SigTitle"><Data ss:Type="String">${esc(ctx.teacherName)}</Data></Cell>
+   </Row>
+  </Table>
+ </Worksheet>
 
-                <!-- ប្រអប់ទិន្នន័យសង្ខេប (Summary Statistics Box) -->
-                <tr>
-                    <td colspan="18" style="border: 1.5pt solid #1e40af; background-color: #1e40af; color: #ffffff; font-family: 'Khmer OS Muol Light', Moul, serif; font-size: 10.5pt; font-weight: bold; padding: 6px 12px; text-align: left;">
-                        📊 ទិន្នន័យសង្ខេបសិស្សរួម (Student Summary Statistics)
-                    </td>
-                </tr>
-                <tr>
-                    <td colspan="4" style="border: 1pt solid #bfdbfe; background-color: #eff6ff; font-family: 'Khmer OS Siemreap', sans-serif; font-size: 10pt; padding: 6px 10px;">• សិស្សសរុប៖ <b>${totalStudents}</b> នាក់</td>
-                    <td colspan="5" style="border: 1pt solid #bfdbfe; background-color: #eff6ff; font-family: 'Khmer OS Siemreap', sans-serif; font-size: 10pt; padding: 6px 10px;">• ស្រី៖ <b style="color: #e11d48;">${femaleStudents}</b> នាក់ (${femalePercent}%)</td>
-                    <td colspan="4" style="border: 1pt solid #bfdbfe; background-color: #eff6ff; font-family: 'Khmer OS Siemreap', sans-serif; font-size: 10pt; padding: 6px 10px;">• ប្រុស៖ <b style="color: #2563eb;">${maleStudents}</b> នាក់</td>
-                    <td colspan="5" style="border: 1pt solid #bfdbfe; background-color: #eff6ff; font-family: 'Khmer OS Siemreap', sans-serif; font-size: 10pt; padding: 6px 10px;">• កំពុងសិក្សា៖ <b style="color: #16a34a;">${activeCount}</b> នាក់</td>
-                </tr>
-                <tr>
-                    <td colspan="4" style="border: 1pt solid #bbf7d0; background-color: #f0fdf4; font-family: 'Khmer OS Siemreap', sans-serif; font-size: 10pt; padding: 6px 10px;">• ប័ណ្ណក្រីក្រ (ID Poor)៖ <b>${poorCount}</b> នាក់</td>
-                    <td colspan="5" style="border: 1pt solid #bbf7d0; background-color: #f0fdf4; font-family: 'Khmer OS Siemreap', sans-serif; font-size: 10pt; padding: 6px 10px;">• អាហារូបករណ៍៖ <b>${scholarshipCount}</b> នាក់</td>
-                    <td colspan="4" style="border: 1pt solid #bbf7d0; background-color: #f0fdf4; font-family: 'Khmer OS Siemreap', sans-serif; font-size: 10pt; padding: 6px 10px;">• ពិការភាព៖ <b>${disabilityCount}</b> នាក់</td>
-                    <td colspan="5" style="border: 1pt solid #bbf7d0; background-color: #f0fdf4; font-family: 'Khmer OS Siemreap', sans-serif; font-size: 10pt; padding: 6px 10px;">• ផ្ទេរចេញ/ឈប់រៀន៖ <b>${transferredCount + droppedCount}</b> នាក់</td>
-                </tr>
+ <!-- ៣. WORKSHEET តារាងចំណាត់ថ្នាក់ (RANKINGS SHEET) -->
+ <Worksheet ss:Name="៣. តារាងចំណាត់ថ្នាក់">
+  <Table ss:DefaultColumnWidth="65" ss:DefaultRowHeight="20">
+   <Column ss:Index="1" ss:Width="105"/>
+   <Column ss:Index="2" ss:Width="95"/>
+   <Column ss:Index="3" ss:Width="160"/>
+   <Column ss:Index="4" ss:Width="55"/>
+   <Column ss:Index="5" ss:Width="95"/>
+   <Column ss:Index="6" ss:Width="95"/>
+   <Column ss:Index="7" ss:Width="95"/>
+   <Column ss:Index="8" ss:Width="70"/>
+   <Column ss:Index="9" ss:Width="150"/>
+   <Column ss:Index="10" ss:Width="120"/>
+   
+   <Row ss:Height="55">
+    <Cell ss:MergeAcross="4" ss:StyleID="HeaderLeft"><Data ss:Type="String">ការិយាល័យអប់រំ យុវជន និងកីឡានៃរដ្ឋបាលស្រុក${esc(ctx.districtName)}&#10;${esc(ctx.schoolName)}&#10;${esc(ctx.grade)}</Data></Cell>
+    <Cell ss:Index="6" ss:StyleID="Default"/>
+    <Cell ss:Index="7" ss:MergeAcross="3" ss:StyleID="HeaderRight"><Data ss:Type="String">ព្រះរាជាណាចក្រកម្ពុជា&#10;ជាតិ សាសនា ព្រះមហាក្សត្រ&#10;❖ ❖ ❖</Data></Cell>
+   </Row>
+   <Row ss:Height="12"><Cell ss:StyleID="Default"/></Row>
+   <Row ss:Height="25">
+    <Cell ss:MergeAcross="9" ss:StyleID="TitleMain"><Data ss:Type="String">តារាងចំណាត់ថ្នាក់ និងកិត្តិយសសិស្ស (Student Rankings &amp; Honors)</Data></Cell>
+   </Row>
+   <Row ss:Height="20">
+    <Cell ss:MergeAcross="9" ss:StyleID="TitleSub"><Data ss:Type="String">${esc(ctx.grade ? ctx.grade + ' | ' : '')}ឆ្នាំសិក្សា ៖ ${esc(toKh(ctx.academicYear))}</Data></Cell>
+   </Row>
+   <Row ss:Height="10"><Cell ss:StyleID="Default"/></Row>
+   <Row ss:Height="22">
+    <Cell ss:MergeAcross="9" ss:StyleID="SummaryHeader"><Data ss:Type="String">🏆 សិស្សឆ្នើម Top 3៖ 🥇លេខ ១៖ ${esc(top1.name || '-')} (${esc(top1.avg || '-')}) | 🥈លេខ ២៖ ${esc(top2.name || '-')} (${esc(top2.avg || '-')}) | 🥉លេខ ៣៖ ${esc(top3.name || '-')} (${esc(top3.avg || '-')})</Data></Cell>
+   </Row>
+   <Row ss:Height="12"><Cell ss:StyleID="Default"/></Row>
+   <Row ss:Height="28">
+    <Cell ss:StyleID="TableHeader"><Data ss:Type="String">ចំណាត់ថ្នាក់</Data></Cell>
+    <Cell ss:StyleID="TableHeader"><Data ss:Type="String">អត្តលេខ</Data></Cell>
+    <Cell ss:StyleID="TableHeader"><Data ss:Type="String">គោត្តនាម និងនាម</Data></Cell>
+    <Cell ss:StyleID="TableHeader"><Data ss:Type="String">ភេទ</Data></Cell>
+    <Cell ss:StyleID="TableHeader"><Data ss:Type="String">ថ្នាក់</Data></Cell>
+    <Cell ss:StyleID="TableHeader"><Data ss:Type="String">ពិន្ទុសរុប</Data></Cell>
+    <Cell ss:StyleID="TableHeader"><Data ss:Type="String">មធ្យមភាគ</Data></Cell>
+    <Cell ss:StyleID="TableHeader"><Data ss:Type="String">និទ្ទេស</Data></Cell>
+    <Cell ss:StyleID="TableHeader"><Data ss:Type="String">កិត្តិយស / លទ្ធផល</Data></Cell>
+    <Cell ss:StyleID="TableHeader"><Data ss:Type="String">ផ្សេងៗ / សម្គាល់</Data></Cell>
+   </Row>
+   ${s3RowsXml}
+   <Row ss:Height="20"><Cell ss:StyleID="Default"/></Row>
+   <Row ss:Height="22">
+    <Cell ss:MergeAcross="4" ss:StyleID="SigText"><Data ss:Type="String">បានឃើញ និងឯកភាព</Data></Cell>
+    <Cell ss:Index="6" ss:StyleID="Default"/>
+    <Cell ss:Index="7" ss:MergeAcross="3" ss:StyleID="SigText"><Data ss:Type="String">${esc(ctx.lunarDateStr || 'ថ្ងៃ....................ខែ..................ឆ្នាំ...............ព.ស.២៥៧០')}</Data></Cell>
+   </Row>
+   <Row ss:Height="22">
+    <Cell ss:MergeAcross="4" ss:StyleID="SigTitle"><Data ss:Type="String">នាយក/នាយិកាសាលា</Data></Cell>
+    <Cell ss:Index="6" ss:StyleID="Default"/>
+    <Cell ss:Index="7" ss:MergeAcross="3" ss:StyleID="SigText"><Data ss:Type="String">${esc(ctx.solarDateStr)}</Data></Cell>
+   </Row>
+   <Row ss:Height="22">
+    <Cell ss:Index="7" ss:MergeAcross="3" ss:StyleID="SigTitle"><Data ss:Type="String">គ្រូបន្ទុកថ្នាក់ / អ្នករៀបចំ</Data></Cell>
+   </Row>
+   <Row ss:Height="35"><Cell ss:StyleID="Default"/></Row>
+   <Row ss:Height="25">
+    <Cell ss:MergeAcross="4" ss:StyleID="SigTitle"><Data ss:Type="String">${esc(principalDisplayName)}</Data></Cell>
+    <Cell ss:Index="6" ss:StyleID="Default"/>
+    <Cell ss:Index="7" ss:MergeAcross="3" ss:StyleID="SigTitle"><Data ss:Type="String">${esc(ctx.teacherName)}</Data></Cell>
+   </Row>
+  </Table>
+ </Worksheet>
+</Workbook>`;
 
-                <tr><td colspan="18" style="border: none; height: 12px;"></td></tr>
-
-                <!-- ក្បាលតារាងសិស្ស (Royal Blue Table Headers with 1pt Border) -->
-                <tr style="background-color: #10489c; color: #ffffff;">
-                    <th style="border: 1pt solid #0f172a; padding: 6px; font-size: 10pt; font-family: 'Khmer OS Muol Light', Moul, serif;">ល.រ</th>
-                    <th style="border: 1pt solid #0f172a; padding: 6px; font-size: 10pt; font-family: 'Khmer OS Muol Light', Moul, serif;">អត្តលេខ</th>
-                    <th style="border: 1pt solid #0f172a; padding: 6px; font-size: 10pt; font-family: 'Khmer OS Muol Light', Moul, serif;">គោត្តនាម និងនាម</th>
-                    <th style="border: 1pt solid #0f172a; padding: 6px; font-size: 10pt; font-family: 'Khmer OS Muol Light', Moul, serif;">ឈ្មោះឡាតាំង</th>
-                    <th style="border: 1pt solid #0f172a; padding: 6px; font-size: 10pt; font-family: 'Khmer OS Muol Light', Moul, serif;">ភេទ</th>
-                    <th style="border: 1pt solid #0f172a; padding: 6px; font-size: 10pt; font-family: 'Khmer OS Muol Light', Moul, serif;">ថ្ងៃខែឆ្នាំកំណើត</th>
-                    <th style="border: 1pt solid #0f172a; padding: 6px; font-size: 10pt; font-family: 'Khmer OS Muol Light', Moul, serif;">ទីកន្លែងកំណើត</th>
-                    <th style="border: 1pt solid #0f172a; padding: 6px; font-size: 10pt; font-family: 'Khmer OS Muol Light', Moul, serif;">ទីលំនៅបច្ចុប្បន្ន</th>
-                    <th style="border: 1pt solid #0f172a; padding: 6px; font-size: 10pt; font-family: 'Khmer OS Muol Light', Moul, serif;">ឈ្មោះឪពុក</th>
-                    <th style="border: 1pt solid #0f172a; padding: 6px; font-size: 10pt; font-family: 'Khmer OS Muol Light', Moul, serif;">មុខរបរ</th>
-                    <th style="border: 1pt solid #0f172a; padding: 6px; font-size: 10pt; font-family: 'Khmer OS Muol Light', Moul, serif;">ឈ្មោះម្ដាយ</th>
-                    <th style="border: 1pt solid #0f172a; padding: 6px; font-size: 10pt; font-family: 'Khmer OS Muol Light', Moul, serif;">មុខរបរ</th>
-                    <th style="border: 1pt solid #0f172a; padding: 6px; font-size: 10pt; font-family: 'Khmer OS Muol Light', Moul, serif;">ថ្នាក់/បន្ទប់</th>
-                    <th style="border: 1pt solid #0f172a; padding: 6px; font-size: 10pt; font-family: 'Khmer OS Muol Light', Moul, serif;">លេខទូរស័ព្ទ</th>
-                    <th style="border: 1pt solid #0f172a; padding: 6px; font-size: 10pt; font-family: 'Khmer OS Muol Light', Moul, serif;">ប័ណ្ណក្រីក្រ</th>
-                    <th style="border: 1pt solid #0f172a; padding: 6px; font-size: 10pt; font-family: 'Khmer OS Muol Light', Moul, serif;">អាហារូបករណ៍</th>
-                    <th style="border: 1pt solid #0f172a; padding: 6px; font-size: 10pt; font-family: 'Khmer OS Muol Light', Moul, serif;">ពិការភាព</th>
-                    <th style="border: 1pt solid #0f172a; padding: 6px; font-size: 10pt; font-family: 'Khmer OS Muol Light', Moul, serif;">ស្ថានភាព</th>
-                </tr>
-
-                <!-- តួទិន្នន័យសិស្ស (Student Rows) -->
-                ${rowsHtml}
-
-                <!-- តារាងពិន្ទុរួម (Optional Score Section) -->
-                ${scoreSectionHtml}
-
-                <tr><td colspan="18" style="border: none; height: 20px;"></td></tr>
-
-                <!-- កាលបរិច្ឆេទ និងហត្ថលេខាផ្លូវការ MoEYS (Standard Signatures & Dates) -->
-                <tr>
-                    <td colspan="8" style="border: none; text-align: center; vertical-align: top; font-family: 'Khmer OS Siemreap', 'Siemreap', sans-serif; font-size: 10.5pt; line-height: 1.6;">
-                        បានឃើញ និងឯកភាព<br>
-                        <b style="font-family: 'Khmer OS Muol Light', Moul, serif; font-size: 11pt;">នាយក/នាយិកាសាលា</b><br><br><br><br><br>
-                        ${principalDisplayName ? `<b style="font-family: 'Khmer OS Muol Light', Moul, serif; font-size: 11pt;">${principalDisplayName}</b>` : ''}
-                    </td>
-                    <td colspan="2" style="border: none;"></td>
-                    <td colspan="8" style="border: none; text-align: center; vertical-align: top; font-family: 'Khmer OS Siemreap', 'Siemreap', sans-serif; font-size: 10.5pt; line-height: 1.6;">
-                        ${ctx.lunarDateStr || 'ថ្ងៃ....................ខែ..................ឆ្នាំ...............ព.ស.២៥៧០'}<br>
-                        ${ctx.solarDateStr}<br>
-                        <b style="font-family: 'Khmer OS Muol Light', Moul, serif; font-size: 11pt;">គ្រូបន្ទុកថ្នាក់ / អ្នករៀបចំ</b><br><br><br><br><br>
-                        ${ctx.teacherName ? `<b style="font-family: 'Khmer OS Muol Light', Moul, serif; font-size: 11pt;">${ctx.teacherName}</b>` : ''}
-                    </td>
-                </tr>
-            </table>
-        </body>
-        </html>`;
-
-        // ៦. ដំណើរការទាញយកឯកសារ Excel (.xls)
-        const blob = new Blob(['\ufeff' + excelContent], { type: 'application/vnd.ms-excel;charset=utf-8' });
+        const blob = new Blob([xmlContent], { type: 'application/vnd.ms-excel;charset=utf-8' });
         const fileName = `CMS_Master_Report_${currentYear}.xls`;
         const link = document.createElement("a");
         link.href = URL.createObjectURL(blob);
@@ -489,13 +1089,11 @@ window.AdvancedReports = {
             URL.revokeObjectURL(link.href);
         }, 150);
 
-        // ៧. កត់ត្រាក្នុង Audit Log និងបង្ហាញ Toast
         if (typeof window.logAudit === 'function') {
-            window.logAudit('EXPORT_EXCEL', 'reports', `បាននាំចេញឯកសារ Master Report MoEYS (${students.length} សិស្ស, ស្ថិតិសង្ខេប, ក្បាលលិខិត, និងហត្ថលេខា)`);
+            window.logAudit('EXPORT_EXCEL', 'reports', `បាននាំចេញឯកសារ CMS Master Report XLS (${students.length} សិស្ស, ៣ Sheet ដាច់ដោយឡែក)`);
         }
-
         if (typeof showToast === 'function') {
-            showToast("✅ បាននាំចេញឯកសារ CMS Master Report តាមស្តង់ដារផ្លូវការជោគជ័យ!");
+            showToast("✅ បាននាំចេញ CMS Master Report (.xls) ចំនួន ៣ Sheet ចាក់ពណ៌ស្អាតជោគជ័យ!");
         }
     },
 
