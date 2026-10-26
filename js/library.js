@@ -17,6 +17,8 @@ function toKhmerNum(str) {
     const khmerNumbers = ['០', '១', '២', '៣', '៤', '៥', '៦', '៧', '៨', '៩'];
     return String(str).split('').map(n => (n >= '0' && n <= '9') ? khmerNumbers[parseInt(n)] : n).join('');
 }
+window.toKhmerNum = window.toKhmerNum || toKhmerNum;
+const toKhNum = typeof window.toKhmerNum === 'function' ? window.toKhmerNum : toKhmerNum;
 
 function formatKhmerDate(dateStr) {
     if (!dateStr) return '';
@@ -100,6 +102,7 @@ window.handleLibClassChange = async function() {
 };
 
 window.loadLibraryView = async function() {
+    const toKhNum = typeof window.toKhmerNum === 'function' ? window.toKhmerNum : toKhmerNum;
     const container = document.getElementById("libraryView") || document.getElementById("mainContentArea");
     if (!container) return;
 
