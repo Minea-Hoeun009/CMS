@@ -153,7 +153,7 @@ window.getTeacherPersonalSettings = function(teacherId) {
         },
         grading_scale: (saved && saved.grading_scale) || "primary",
         signature_url: (saved && saved.signature_url) || s.signature_url || "",
-        avatar_url: (saved && saved.avatar_url) || s.profile_avatar || ""
+        avatar_url: (saved && saved.avatar_url) || s.profile_avatar || localStorage.getItem('auth_teacher_avatar') || ""
     };
 };
 
@@ -252,6 +252,11 @@ window.saveTeacherPersonalSettings = async function(teacherId, settings) {
     if (payload.telegram_id) localStorage.setItem('auth_telegram_id', payload.telegram_id);
     if (payload.teacher_level) localStorage.setItem('auth_teacher_grade', payload.teacher_level);
     if (payload.teacher_room) localStorage.setItem('auth_teacher_room', payload.teacher_room);
+    if (payload.avatar_url) {
+        localStorage.setItem('auth_teacher_avatar', payload.avatar_url);
+    } else {
+        localStorage.removeItem('auth_teacher_avatar');
+    }
 
     window.loadAndApplyTeacherSettings(tId);
 
@@ -375,6 +380,13 @@ window.handleSavePersonalTeacherSettings = async function(event) {
         window.appSettings.teacher_level = level;
         window.appSettings.teacher_room = room;
         window.appSettings.academic_year = academicYear;
+        if (payload.avatar_url) {
+            window.appSettings.profile_avatar = payload.avatar_url;
+            localStorage.setItem('auth_teacher_avatar', payload.avatar_url);
+        } else {
+            delete window.appSettings.profile_avatar;
+            localStorage.removeItem('auth_teacher_avatar');
+        }
         localStorage.setItem('school_settings', JSON.stringify(window.appSettings));
         if (academicYear) {
             localStorage.setItem('selected_academic_year', academicYear);
@@ -505,6 +517,48 @@ window.renderPersonalSettingsTab = function() {
                             <h4 class="font-moul text-base text-slate-800 dark:text-white">១. ព័ត៌មានគ្រូ និងថ្នាក់រៀនទទួលបន្ទុក (Homeroom Teacher & Classroom)</h4>
                             <p class="text-xs text-slate-500 dark:text-slate-400">កំណត់ឈ្មោះ ថ្នាក់ និងបន្ទប់ដែលលោកគ្រូអ្នកគ្រូទទួលបន្ទុកបង្រៀន (កំណត់តែម្ដង ប្រព័ន្ធស្គាល់គ្រប់ផ្នែក)</p>
                         </div>
+                    </div>
+                </div>
+
+                <!-- Teacher Photo Upload Card -->
+                <div class="p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-slate-50 via-indigo-50/40 to-slate-50 dark:from-slate-700/60 dark:via-slate-700/40 dark:to-slate-700/60 border border-slate-200 dark:border-slate-600 flex flex-col sm:flex-row items-center sm:items-start gap-5">
+                    <!-- Photo Preview Box -->
+                    <div class="relative group shrink-0">
+                        <div class="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl overflow-hidden border-2 border-indigo-200 dark:border-indigo-500/50 shadow-md bg-white dark:bg-slate-800 flex items-center justify-center">
+                            <img id="pers_avatar_form_preview" 
+                                 src="${personal.avatar_url || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(personal.teacher_name || 'Teacher') + '&background=6366f1&color=fff&size=200'}" 
+                                 alt="រូបថតគ្រូ" 
+                                 class="w-full h-full object-cover">
+                        </div>
+                        <label for="pers_teacher_photo_input" class="absolute -bottom-2 -right-2 w-9 h-9 rounded-full bg-indigo-600 hover:bg-indigo-700 text-white flex items-center justify-center cursor-pointer shadow-lg hover:scale-110 active:scale-95 transition-all border-2 border-white dark:border-slate-800" title="ជ្រើសរើសរូបថត">
+                            <i class="fa-solid fa-camera text-sm"></i>
+                        </label>
+                    </div>
+
+                    <!-- Upload Controls & Guidance -->
+                    <div class="flex-1 text-center sm:text-left space-y-2">
+                        <div>
+                            <h5 class="text-sm font-bold text-slate-800 dark:text-white flex items-center justify-center sm:justify-start gap-2">
+                                <i class="fa-solid fa-id-badge text-indigo-600 dark:text-indigo-400"></i>
+                                <span>រូបថតផ្ទាល់ខ្លួនរបស់គ្រូបង្រៀន (Teacher Profile Photo)</span>
+                            </h5>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                                សូមបញ្ចូលរូបថតផ្ទាល់ខ្លួនរបស់លោកគ្រូអ្នកគ្រូ (JPG, PNG, WebP)។ ប្រព័ន្ធនឹងបង្រួមទំហំរូបភាពដោយស្វ័យប្រវត្តិដើម្បីរក្សាទុកក្នុង Google Sheet និងគណនីបានលឿនរហ័ស។
+                            </p>
+                        </div>
+
+                        <div class="flex flex-wrap items-center justify-center sm:justify-start gap-2.5 pt-1">
+                            <input type="file" id="pers_teacher_photo_input" accept="image/png, image/jpeg, image/jpg, image/webp" onchange="window.handleTeacherPhotoUpload(this)" class="hidden">
+                            <label for="pers_teacher_photo_input" class="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold cursor-pointer shadow-sm hover:shadow active:scale-95 transition-all">
+                                <i class="fa-solid fa-arrow-up-from-bracket"></i>
+                                <span>ជ្រើសរើសរូបថតថ្មី</span>
+                            </label>
+                            <button type="button" onclick="window.removeTeacherPhoto()" class="inline-flex items-center gap-2 px-3.5 py-2 bg-slate-200 hover:bg-rose-100 hover:text-rose-600 dark:bg-slate-600 dark:hover:bg-rose-900/40 dark:hover:text-rose-300 text-slate-700 dark:text-slate-200 rounded-xl text-xs font-bold transition-all">
+                                <i class="fa-solid fa-trash-can"></i>
+                                <span>ដករូបថតចេញ</span>
+                            </button>
+                        </div>
+                        <input type="hidden" id="val_profile_avatar" value="${personal.avatar_url || ''}">
                     </div>
                 </div>
 
@@ -2821,6 +2875,139 @@ window.processSettingsImage = function(inputEl, previewImgId, hiddenInputId, ico
     reader.readAsDataURL(file);
 };
 
+window.handleTeacherPhotoUpload = function(inputEl) {
+    if (!inputEl || !inputEl.files || !inputEl.files[0]) return;
+    const file = inputEl.files[0];
+
+    const allowedTypes = ["image/png", "image/jpeg", "image/jpg", "image/webp"];
+    if (!allowedTypes.includes(file.type.toLowerCase())) {
+        alert("⚠️ ប្រភេទឯកសារមិនត្រឹមត្រូវ! សូមជ្រើសរើសឯកសាររូបភាពប្រភេទ PNG, JPEG ឬ WebP ប៉ុណ្ណោះ។");
+        inputEl.value = "";
+        return;
+    }
+
+    if (file.size > 10 * 1024 * 1024) { // 10MB input limit
+        alert("⚠️ ទំហំរូបភាពធំពេក (លើសពី 10MB)! សូមជ្រើសរើសរូបភាពដែលមានទំហំតូចជាងនេះ។");
+        inputEl.value = "";
+        return;
+    }
+
+    const formPreview = document.getElementById("pers_avatar_form_preview");
+    const bannerPreview = document.getElementById("pers_avatar_preview");
+    const hiddenInput = document.getElementById("val_profile_avatar");
+    const accAvatar = document.getElementById("acc_avatar_img");
+
+    if (formPreview) formPreview.classList.add("opacity-50", "animate-pulse");
+    if (bannerPreview) bannerPreview.classList.add("opacity-50", "animate-pulse");
+    if (accAvatar) accAvatar.classList.add("opacity-50", "animate-pulse");
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        const img = new Image();
+        img.onload = function() {
+            // Compress and scale to max 220px to stay safely within Google Sheet cell limit
+            const MAX_DIM = 220;
+            let width = img.width;
+            let height = img.height;
+
+            if (width > height) {
+                if (width > MAX_DIM) {
+                    height = Math.round((height * MAX_DIM) / width);
+                    width = MAX_DIM;
+                }
+            } else {
+                if (height > MAX_DIM) {
+                    width = Math.round((width * MAX_DIM) / height);
+                    height = MAX_DIM;
+                }
+            }
+
+            const canvas = document.createElement("canvas");
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext("2d");
+            ctx.clearRect(0, 0, width, height);
+            ctx.drawImage(img, 0, 0, width, height);
+
+            const compressedBase64 = canvas.toDataURL("image/jpeg", 0.8);
+
+            if (hiddenInput) hiddenInput.value = compressedBase64;
+            localStorage.setItem('auth_teacher_avatar', compressedBase64);
+            if (window.appSettings) window.appSettings.profile_avatar = compressedBase64;
+
+            if (formPreview) {
+                formPreview.src = compressedBase64;
+                formPreview.classList.remove("opacity-50", "animate-pulse");
+            }
+            if (bannerPreview) {
+                bannerPreview.src = compressedBase64;
+                bannerPreview.classList.remove("opacity-50", "animate-pulse");
+            }
+            if (accAvatar) {
+                accAvatar.src = compressedBase64;
+                accAvatar.classList.remove("opacity-50", "animate-pulse");
+            }
+
+            const headerAvatar = document.getElementById("headerUserAvatarImg");
+            const headerIcon = document.getElementById("headerUserAvatarIcon");
+            if (headerAvatar) {
+                headerAvatar.src = compressedBase64;
+                headerAvatar.classList.remove('hidden');
+                if (headerIcon) headerIcon.classList.add('hidden');
+            }
+
+            if (typeof window.showToast === 'function') {
+                window.showToast("📸 បានជ្រើសរូបថតរួចរាល់! សូមចុច «រក្សាទុកការកំណត់» ដើម្បី Sync ទៅកាន់ Google Sheet។");
+            }
+        };
+        img.onerror = function() {
+            alert("⚠️ មិនអាចដំណើរការរូបភាពនេះបានទេ! សូមជ្រើសរើសរូបភាពផ្សេងទៀត។");
+            if (formPreview) formPreview.classList.remove("opacity-50", "animate-pulse");
+            if (bannerPreview) bannerPreview.classList.remove("opacity-50", "animate-pulse");
+            if (accAvatar) accAvatar.classList.remove("opacity-50", "animate-pulse");
+        };
+        img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+};
+
+window.removeTeacherPhoto = function() {
+    const inputEl = document.getElementById("pers_teacher_photo_input");
+    if (inputEl) inputEl.value = "";
+    const accInput = document.getElementById("acc_avatar_upload_input");
+    if (accInput) accInput.value = "";
+
+    const hiddenInput = document.getElementById("val_profile_avatar");
+    if (hiddenInput) hiddenInput.value = "";
+
+    localStorage.removeItem('auth_teacher_avatar');
+    if (window.appSettings) delete window.appSettings.profile_avatar;
+
+    const teacherName = document.getElementById("pers_teacher_name")?.value || localStorage.getItem('auth_teacher_name') || "Teacher";
+    const defaultAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(teacherName)}&background=6366f1&color=fff&size=200`;
+
+    const formPreview = document.getElementById("pers_avatar_form_preview");
+    if (formPreview) formPreview.src = defaultAvatar;
+
+    const bannerPreview = document.getElementById("pers_avatar_preview");
+    if (bannerPreview) bannerPreview.src = defaultAvatar;
+
+    const accAvatar = document.getElementById("acc_avatar_img");
+    if (accAvatar) accAvatar.src = defaultAvatar;
+
+    const headerAvatar = document.getElementById("headerUserAvatarImg");
+    const headerIcon = document.getElementById("headerUserAvatarIcon");
+    if (headerAvatar) {
+        headerAvatar.src = "";
+        headerAvatar.classList.add('hidden');
+        if (headerIcon) headerIcon.classList.remove('hidden');
+    }
+
+    if (typeof window.showToast === 'function') {
+        window.showToast("🗑️ បានដករូបថតចេញ! សូមចុច «រក្សាទុកការកំណត់»។");
+    }
+};
+
 window.handleSaveSettings = async function(event) {
     event.preventDefault();
 
@@ -3010,6 +3197,22 @@ window.updateUIWithSettings = function() {
         sidebarLogo.src = s.logo_url;
         sidebarLogo.classList.remove('hidden');
         if(sidebarLogo.nextElementSibling) sidebarLogo.nextElementSibling.classList.add('hidden');
+    }
+
+    // Teacher Avatar in Header & UI
+    const avatarUrl = s.profile_avatar || (typeof window.getTeacherPersonalSettings === 'function' ? window.getTeacherPersonalSettings()?.avatar_url : "") || localStorage.getItem('auth_teacher_avatar');
+    const headerAvatar = document.getElementById("headerUserAvatarImg");
+    const headerIcon = document.getElementById("headerUserAvatarIcon");
+    if (headerAvatar) {
+        if (avatarUrl) {
+            headerAvatar.src = avatarUrl;
+            headerAvatar.classList.remove('hidden');
+            if (headerIcon) headerIcon.classList.add('hidden');
+        } else {
+            headerAvatar.src = "";
+            headerAvatar.classList.add('hidden');
+            if (headerIcon) headerIcon.classList.remove('hidden');
+        }
     }
 };
 

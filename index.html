@@ -765,8 +765,9 @@
             </button>
 
             <!-- User Quick Avatar Pill -->
-            <div onclick="window.openAccountModal()" class="w-8 h-8 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 text-white font-bold flex items-center justify-center text-xs shadow-sm cursor-pointer hover:scale-105 transition-all" title="គណនីរបស់ខ្ញុំ">
-               <i class="fa-solid fa-user"></i>
+            <div onclick="window.openAccountModal()" id="userQuickAvatarPill" class="w-8 h-8 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 text-white font-bold flex items-center justify-center text-xs shadow-sm cursor-pointer hover:scale-105 transition-all overflow-hidden border border-white/20" title="គណនីរបស់ខ្ញុំ">
+               <img id="headerUserAvatarImg" src="" class="w-full h-full object-cover hidden" alt="Avatar">
+               <i id="headerUserAvatarIcon" class="fa-solid fa-user"></i>
             </div>
          </div>
       </header>

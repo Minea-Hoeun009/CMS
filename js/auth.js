@@ -1209,8 +1209,14 @@ window.renderAccountModal = function() {
                 <!-- Modal Header Banner -->
                 <div class="px-6 md:px-8 pt-6 pb-5 bg-gradient-to-r from-blue-700 via-indigo-700 to-indigo-900 text-white relative">
                     <div class="flex items-center gap-4">
-                        <div class="w-16 h-16 rounded-2xl bg-white/15 border-2 border-white/20 p-1 flex items-center justify-center shadow-lg shrink-0">
-                            <img id="acc_avatar_img" src="https://ui-avatars.com/api/?name=Teacher&background=4338ca&color=fff&size=150" class="w-full h-full object-cover rounded-xl bg-indigo-950" alt="Teacher Avatar">
+                        <div class="relative group shrink-0">
+                            <div class="w-16 h-16 rounded-2xl bg-white/15 border-2 border-white/20 p-1 flex items-center justify-center shadow-lg overflow-hidden">
+                                <img id="acc_avatar_img" src="https://ui-avatars.com/api/?name=Teacher&background=4338ca&color=fff&size=150" class="w-full h-full object-cover rounded-xl bg-indigo-950" alt="Teacher Avatar">
+                            </div>
+                            <label for="acc_avatar_upload_input" class="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-amber-400 hover:bg-amber-500 text-slate-900 flex items-center justify-center cursor-pointer shadow-md hover:scale-110 active:scale-95 transition-all border border-white" title="ប្ដូររូបថត">
+                                <i class="fa-solid fa-camera text-[10px]"></i>
+                            </label>
+                            <input type="file" id="acc_avatar_upload_input" accept="image/png, image/jpeg, image/jpg, image/webp" onchange="window.handleTeacherPhotoUpload(this)" class="hidden">
                         </div>
                         <div>
                             <span class="px-2.5 py-0.5 rounded-full bg-white/20 text-blue-100 text-[10px] font-bold uppercase tracking-wider font-mono">
@@ -1463,6 +1469,7 @@ window.handleUpdateAccount = async function(e) {
     }
 
     try {
+        const currentAvatar = localStorage.getItem('auth_teacher_avatar') || (document.getElementById("val_profile_avatar") ? document.getElementById("val_profile_avatar").value : "") || "";
         const updateData = {
             teacher_id: teacherId,
             name: newName,
@@ -1474,6 +1481,7 @@ window.handleUpdateAccount = async function(e) {
             assigned_room: newRoom,
             school_name: newSchool,
             academic_year: newYear,
+            avatar_url: currentAvatar,
             last_updated: new Date().toISOString(),
             updated_at: new Date().toISOString()
         };
@@ -1512,7 +1520,8 @@ window.handleUpdateAccount = async function(e) {
                 teacher_level: newGrade,
                 teacher_room: newRoom,
                 school_name: newSchool,
-                academic_year: newYear
+                academic_year: newYear,
+                avatar_url: currentAvatar
             });
         }
 
