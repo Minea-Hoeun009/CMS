@@ -608,34 +608,34 @@
       <!-- Navigation Area (8 Core Primary School Khmer Modules) -->
       <nav class="flex-1 overflow-y-auto custom-scrollbar p-3 space-y-1.5 text-[13px] font-semibold" aria-label="ការរុករកចម្បង">
         
-        <!-- ១. ផ្ទាំងគ្រប់គ្រង (Dashboard) -->
+        <!-- ១. ទំព័រដើម (Dashboard) -->
         <button onclick="switchView('dashboard')" class="w-full flex items-center px-3 py-2.5 rounded-xl text-white/85 hover:text-white transition-all text-left group nav-btn sidebar-btn-active touch-target sidebar-khmer-btn" id="nav-dashboard" aria-current="page">
           <span class="w-8 h-8 rounded-lg bg-white/15 text-white flex items-center justify-center shrink-0 text-sm group-hover:scale-105 transition-all shadow-sm"><i class="fa-solid fa-chart-pie"></i></span>
-          <span class="sidebar-text ml-3 whitespace-nowrap" data-i18n="dashboard">ផ្ទាំងគ្រប់គ្រង</span>
+          <span class="sidebar-text ml-3 whitespace-nowrap" data-i18n="dashboard">ទំព័រដើម</span>
         </button>
         
-        <!-- ២. សិស្សក្នុងថ្នាក់ (Students in Class) -->
+        <!-- ២. គ្រប់គ្រងសិស្ស (Students Management) -->
         <button onclick="switchView('students')" class="w-full flex items-center px-3 py-2.5 rounded-xl text-white/85 hover:text-white transition-all text-left group nav-btn touch-target sidebar-khmer-btn" id="nav-students">
           <span class="w-8 h-8 rounded-lg bg-white/10 text-white flex items-center justify-center shrink-0 text-sm group-hover:scale-105 transition-all shadow-sm"><i class="fa-solid fa-user-graduate"></i></span>
-          <span class="sidebar-text ml-3 whitespace-nowrap" data-i18n="students">សិស្សក្នុងថ្នាក់</span>
+          <span class="sidebar-text ml-3 whitespace-nowrap" data-i18n="students">គ្រប់គ្រងសិស្ស</span>
         </button>
         
-        <!-- ៣. វត្តមាន (Attendance) -->
+        <!-- ៣. កត់វត្តមាន (Attendance) -->
         <button onclick="switchView('attendance')" class="w-full flex items-center px-3 py-2.5 rounded-xl text-white/85 hover:text-white transition-all text-left group nav-btn touch-target sidebar-khmer-btn" id="nav-attendance">
           <span class="w-8 h-8 rounded-lg bg-white/10 text-white flex items-center justify-center shrink-0 text-sm group-hover:scale-105 transition-all shadow-sm"><i class="fa-solid fa-clipboard-user"></i></span>
-          <span class="sidebar-text ml-3 whitespace-nowrap" data-i18n="attendance">វត្តមាន</span>
+          <span class="sidebar-text ml-3 whitespace-nowrap" data-i18n="attendance">កត់វត្តមាន</span>
         </button>
         
-        <!-- ៤. ស្រង់ពិន្ទុ និងលទ្ធផល (Scores & Results) -->
+        <!-- ៤. ពិន្ទុ និងលទ្ធផល (Scores & Results) -->
         <button onclick="switchView('scores')" class="w-full flex items-center px-3 py-2.5 rounded-xl text-white/85 hover:text-white transition-all text-left group nav-btn touch-target sidebar-khmer-btn" id="nav-scores">
           <span class="w-8 h-8 rounded-lg bg-white/10 text-white flex items-center justify-center shrink-0 text-sm group-hover:scale-105 transition-all shadow-sm"><i class="fa-solid fa-award"></i></span>
-          <span class="sidebar-text ml-3 whitespace-nowrap" data-i18n="grades">ស្រង់ពិន្ទុ និងលទ្ធផល</span>
+          <span class="sidebar-text ml-3 whitespace-nowrap" data-i18n="grades">ពិន្ទុ និងលទ្ធផល</span>
         </button>
 
-        <!-- ៥. កាលវិភាគ (Timetable) -->
+        <!-- ៥. កាលវិភាគសិក្សា (Timetable) -->
         <button onclick="switchView('timetable-homework')" class="w-full flex items-center px-3 py-2.5 rounded-xl text-white/85 hover:text-white transition-all text-left group nav-btn touch-target sidebar-khmer-btn" id="nav-timetable-homework">
           <span class="w-8 h-8 rounded-lg bg-white/10 text-white flex items-center justify-center shrink-0 text-sm group-hover:scale-105 transition-all shadow-sm"><i class="fa-solid fa-calendar-days"></i></span>
-          <span class="sidebar-text ml-3 whitespace-nowrap" data-i18n="timetable">កាលវិភាគ</span>
+          <span class="sidebar-text ml-3 whitespace-nowrap" data-i18n="timetable">កាលវិភាគសិក្សា</span>
         </button>
 
         <!-- ៦. បណ្ណាល័យ (Library) -->
@@ -644,10 +644,10 @@
           <span class="sidebar-text ml-3 whitespace-nowrap" data-i18n="library">បណ្ណាល័យ</span>
         </button>
 
-        <!-- ៧. របាយការណ៍ (Reports) -->
+        <!-- ៧. របាយការណ៍ផ្សេងៗ (Reports) -->
         <button onclick="switchView('reports')" class="w-full flex items-center px-3 py-2.5 rounded-xl text-white/85 hover:text-white transition-all text-left group nav-btn touch-target sidebar-khmer-btn" id="nav-reports">
           <span class="w-8 h-8 rounded-lg bg-white/10 text-white flex items-center justify-center shrink-0 text-sm group-hover:scale-105 transition-all shadow-sm"><i class="fa-solid fa-file-invoice"></i></span>
-          <span class="sidebar-text ml-3 whitespace-nowrap" data-i18n="reports">របាយការណ៍</span>
+          <span class="sidebar-text ml-3 whitespace-nowrap" data-i18n="reports">របាយការណ៍ផ្សេងៗ</span>
         </button>
 
         <!-- ៨. ការកំណត់ (Settings) -->
@@ -1063,17 +1063,17 @@
         }
 
         const titleMap = {
-            'dashboard': 'ផ្ទាំងគ្រប់គ្រង (Dashboard)',
+            'dashboard': 'ទំព័រដើម (Dashboard)',
             'analytics': 'វិភាគសមត្ថភាពសិក្សាសិស្ស (Analytics)',
-            'students': 'បញ្ជីរាយនាមសិស្ស',
-            'attendance': 'ស្រង់វត្តមានសិស្ស',
-            'scores': 'បញ្ចូលពិន្ទុ និងនិទ្ទេស',
-            'timetable-homework': 'កាលវិភាគបង្រៀន & កិច្ចការផ្ទះ',
+            'students': 'គ្រប់គ្រងសិស្ស',
+            'attendance': 'កត់វត្តមាន',
+            'scores': 'ពិន្ទុ និងលទ្ធផល',
+            'timetable-homework': 'កាលវិភាគសិក្សា',
             'rankings': 'តារាងចំណាត់ថ្នាក់សិស្ស',
-            'library': 'បណ្ណាល័យ និងទ្រព្យសកម្ម',
+            'library': 'បណ្ណាល័យ',
             'tracking-book': 'សៀវភៅតាមដានការសិក្សា',
-            'settings': 'ការកំណត់ទូទៅ (Settings)',
-            'reports': 'របាយការណ៍រដ្ឋបាល'
+            'settings': 'ការកំណត់',
+            'reports': 'របាយការណ៍ផ្សេងៗ'
         };
         const iconMap = {
             'dashboard': 'fa-chart-pie',

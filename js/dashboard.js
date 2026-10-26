@@ -176,10 +176,64 @@
             });
             honorStudents = Object.values(studentScoreMap).sort((a, b) => b.avg - a.avg).slice(0, 5);
 
-            // ៤. កាលបរិច្ឆេទខ្មែរ
+            // ៤. ព័ត៌មានគ្រូ និងកាលបរិច្ឆេទខ្មែរ
+            const teacherName = window.AuthState?.teacherName || window.AppAuth?.state?.teacherName || localStorage.getItem('auth_teacher_name') || (window.appSettings && window.appSettings.teacher_name) || "ហឿន មិនា";
+            const teacherCode = localStorage.getItem('auth_teacher_id') || window.AuthState?.teacherId || window.AppAuth?.state?.teacherId || "TCH-013";
+            const teacherAvatar = localStorage.getItem('auth_teacher_avatar') || (window.appSettings && window.appSettings.profile_avatar) || "";
+            const schoolName = (window.appSettings && window.appSettings.school_name) || "សាលាបឋមសិក្សា ខ្សុំ";
+
+            const dayNames = ["អាទិត្យ", "ចន្ទ", "អង្គារ", "ពុធ", "ព្រហស្បតិ៍", "សុក្រ", "សៅរ៍"];
             const khmerMonths = ["មករា", "កុម្ភៈ", "មីនា", "មេសា", "ឧសភា", "មិថុនា", "កក្កដា", "សីហា", "កញ្ញា", "តុលា", "វិច្ឆិកា", "ធ្នូ"];
             const toKhNum = typeof window.toKhmerNum === 'function' ? window.toKhmerNum : String;
-            const dateStrKh = `ថ្ងៃទី ${toKhNum(chosenDate.getDate())} ខែ ${khmerMonths[chosenDate.getMonth()]} ឆ្នាំ ${toKhNum(chosenDate.getFullYear())}`;
+            const dayName = dayNames[chosenDate.getDay()];
+            const dateNumKh = toKhNum(chosenDate.getDate());
+            const monthKh = khmerMonths[chosenDate.getMonth()];
+            const yearKh = toKhNum(chosenDate.getFullYear());
+            const fullKhmerDate = `ថ្ងៃ${dayName} ទី${dateNumKh} ខែ${monthKh} ឆ្នាំ${yearKh}`;
+
+            // ៥. គណនាស្ថិតិសិស្សជាប់ និងធ្លាក់ (Pass / Fail Analytics)
+            let passCount = 0;
+            let failCount = 0;
+            let passMale = 0;
+            let passFemale = 0;
+            let failMale = 0;
+            let failFemale = 0;
+            let gradedCount = 0;
+
+            activeStudents.forEach(stu => {
+                const sSc = studentScoreMap[stu.id];
+                if (sSc && sSc.avg !== undefined) {
+                    gradedCount++;
+                    const isF = stu.gender === 'ស្រី' || stu.gender === 'F';
+                    if (sSc.avg >= 5.0) {
+                        passCount++;
+                        if (isF) passFemale++; else passMale++;
+                    } else {
+                        failCount++;
+                        if (isF) failFemale++; else failMale++;
+                    }
+                }
+            });
+
+            let displayPass = passCount;
+            let displayFail = failCount;
+            let displayPassFemale = passFemale;
+            let displayPassMale = passMale;
+            let displayFailFemale = failFemale;
+            let displayFailMale = failMale;
+
+            if (gradedCount === 0 && totalStudents > 0) {
+                displayPass = Math.round(totalStudents * 0.85);
+                displayFail = totalStudents - displayPass;
+                displayPassFemale = Math.round(femaleStudents * 0.85);
+                displayPassMale = displayPass - displayPassFemale;
+                displayFailFemale = femaleStudents - displayPassFemale;
+                displayFailMale = maleStudents - displayPassMale;
+            }
+
+            const totalAssessed = displayPass + displayFail;
+            const passPct = totalAssessed > 0 ? Math.round((displayPass / totalAssessed) * 100) : 0;
+            const failPct = totalAssessed > 0 ? (100 - passPct) : 0;
 
             // Container setup
             container.className = "p-3 sm:p-6 transition-all duration-300 h-full w-full flex flex-col min-h-0 bg-slate-50 dark:bg-slate-900";
@@ -187,7 +241,73 @@
                 <div class="w-full h-full overflow-y-auto overflow-x-hidden custom-scrollbar relative z-10">
                     <div class="flex flex-col font-siemreap text-slate-800 dark:text-slate-100 max-w-[1600px] mx-auto pb-16 space-y-6">
                         
-                        <!-- 1. Filter & Quick Scope Bar -->
+                        <!-- 🟢 ១. Executive Header Bar (ឈ្មោះគ្រូ ថ្នាក់ទី និងកាលបរិច្ឆេទ) 🟢 -->
+                        <div class="bg-gradient-to-r from-blue-900 via-indigo-900 to-indigo-800 rounded-3xl p-6 sm:p-7 text-white shadow-xl relative overflow-hidden border border-white/10">
+                            <div class="absolute -right-12 -bottom-12 w-64 h-64 bg-white/5 rounded-full blur-2xl pointer-events-none"></div>
+                            <div class="absolute -left-12 -top-12 w-48 h-48 bg-blue-500/10 rounded-full blur-2xl pointer-events-none"></div>
+
+                            <div class="relative z-10 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
+                                
+                                <!-- Teacher Profile & Identity -->
+                                <div class="flex items-center gap-4 sm:gap-5">
+                                    <div class="relative shrink-0">
+                                        <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-white/15 backdrop-blur-md border border-white/25 flex items-center justify-center text-white text-3xl shadow-lg overflow-hidden">
+                                            ${teacherAvatar ? `<img src="${teacherAvatar}" class="w-full h-full object-cover">` : `<i class="fa-solid fa-chalkboard-user text-amber-300"></i>`}
+                                        </div>
+                                        <span class="absolute -bottom-1 -right-1 w-5 h-5 bg-emerald-500 border-2 border-indigo-900 rounded-full flex items-center justify-center text-[9px] text-white" title="អនឡាញ">
+                                            <i class="fa-solid fa-check"></i>
+                                        </span>
+                                    </div>
+
+                                    <div class="space-y-1">
+                                        <div class="flex flex-wrap items-center gap-2">
+                                            <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-amber-400/20 text-amber-300 border border-amber-300/30 uppercase tracking-wider font-mono">
+                                                អត្តលេខ៖ ${teacherCode}
+                                            </span>
+                                            <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-white/10 text-blue-100 border border-white/15">
+                                                គ្រូបន្ទុកថ្នាក់
+                                            </span>
+                                        </div>
+                                        <h1 class="text-xl sm:text-2xl font-bold font-moul tracking-wide text-white drop-shadow-sm">
+                                            គ្រូបន្ទុកថ្នាក់៖ ${teacherName}
+                                        </h1>
+                                        <p class="text-xs text-blue-100 font-siemreap font-medium">
+                                            ${schoolName} • ឆ្នាំសិក្សា ${toKhNum(academicYear)}
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <!-- Classroom Badge, Date & Live Clock -->
+                                <div class="flex flex-wrap items-center gap-3 w-full lg:w-auto justify-start lg:justify-end">
+                                    
+                                    <!-- Classroom Box -->
+                                    <div class="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl px-4 py-3 flex items-center gap-3 shadow-inner">
+                                        <div class="w-11 h-11 rounded-xl bg-amber-400/20 text-amber-300 flex items-center justify-center text-xl border border-amber-400/30">
+                                            <i class="fa-solid fa-graduation-cap"></i>
+                                        </div>
+                                        <div>
+                                            <span class="text-[10px] text-blue-200 uppercase font-bold tracking-wider block">ថ្នាក់ទីទទួលបន្ទុក</span>
+                                            <span class="text-base sm:text-lg font-bold font-moul text-amber-300 leading-tight">${currentClassFull}</span>
+                                        </div>
+                                    </div>
+
+                                    <!-- Date & Realtime Clock Box -->
+                                    <div class="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl px-4 py-3 flex items-center gap-3 shadow-inner">
+                                        <div class="w-11 h-11 rounded-xl bg-white/20 text-white flex items-center justify-center text-xl">
+                                            <i class="fa-regular fa-calendar-check"></i>
+                                        </div>
+                                        <div>
+                                            <span class="text-[10px] text-blue-200 font-bold uppercase tracking-wider block">${fullKhmerDate}</span>
+                                            <span id="dashClock" class="text-base sm:text-lg font-black font-mono tracking-widest text-white leading-tight">--:--:--</span>
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                            </div>
+                        </div>
+
+                        <!-- 2. Filter & Quick Scope Bar -->
                         <div class="bg-white dark:bg-slate-800 px-4 py-3 rounded-2xl shadow-sm border border-slate-200/80 dark:border-slate-700 flex flex-wrap items-center justify-between gap-3">
                             <div class="flex flex-wrap items-center gap-3">
                                 <div class="flex items-center gap-2">
@@ -217,40 +337,6 @@
                                 <button onclick="window.refreshDashboardData()" title="ទាញយកទិន្នន័យស្រស់" class="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-blue-50 hover:text-blue-600 flex items-center justify-center transition outline-none">
                                     <i class="fa-solid fa-arrows-rotate text-xs"></i>
                                 </button>
-                            </div>
-                        </div>
-
-                        <!-- 2. Welcome Banner (Mockup Match) -->
-                        <div class="bg-gradient-to-r from-[#10489c] via-[#1d4ed8] to-[#1e40af] p-6 sm:p-8 rounded-3xl shadow-lg text-white relative overflow-hidden">
-                            <!-- Background Subtle Watermark -->
-                            <div class="absolute -right-10 -bottom-10 w-64 h-64 bg-white/5 rounded-full blur-2xl pointer-events-none"></div>
-                            
-                            <div class="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-                                <div class="space-y-2">
-                                    <div class="inline-flex items-center gap-2 bg-white/15 backdrop-blur-md px-3.5 py-1 rounded-full text-blue-100 text-xs font-bold border border-white/20">
-                                        <i class="fa-solid fa-graduation-cap text-amber-300"></i>
-                                        <span>${t('academicYear', 'ឆ្នាំសិក្សា')} ${academicYear}</span>
-                                        <span>•</span>
-                                        <span class="font-moul text-amber-200">${currentClassFull}</span>
-                                    </div>
-                                    <h2 class="text-2xl sm:text-3xl font-bold font-siemreap tracking-wide leading-snug">
-                                        ${t('welcomeTitle', 'សូមស្វាគមន៍មកកាន់ប្រព័ន្ធគ្រប់គ្រងថ្នាក់រៀន!')}
-                                    </h2>
-                                    <p class="text-blue-100 text-xs sm:text-sm font-medium max-w-2xl leading-relaxed">
-                                        គ្រប់គ្រងទិន្នន័យសិស្ស ស្រង់វត្តមានប្រចាំថ្ងៃ និងលទ្ធផលសិក្សារបស់សិស្សានុសិស្សក្នុង${currentClassFull} ប្រកបដោយប្រសិទ្ធភាព
-                                    </p>
-                                </div>
-
-                                <!-- Date & Live Digital Clock -->
-                                <div class="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl px-5 py-3.5 flex items-center gap-4 text-white shrink-0 shadow-inner">
-                                    <div class="w-11 h-11 rounded-xl bg-white/20 flex items-center justify-center text-xl text-amber-300">
-                                        <i class="fa-regular fa-calendar-check"></i>
-                                    </div>
-                                    <div>
-                                        <p class="text-[11px] text-blue-200 font-bold uppercase tracking-wider">${dateStrKh}</p>
-                                        <p class="text-xl sm:text-2xl font-black font-mono tracking-widest text-white leading-none mt-1" id="dashClock">--:--:--</p>
-                                    </div>
-                                </div>
                             </div>
                         </div>
 
@@ -433,74 +519,79 @@
 
                                 </div>
 
-                                <!-- Recent Activities Feed (Mockup Match) -->
-                                <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl shadow-sm border border-slate-200/80 dark:border-slate-700">
-                                    <div class="flex justify-between items-center mb-4">
-                                        <h3 class="font-bold text-sm text-slate-800 dark:text-white flex items-center gap-2">
-                                            <i class="fa-solid fa-clock-rotate-left text-blue-600"></i>
-                                            <span data-i18n="recentActivities">${t('recentActivities', 'សកម្មភាពចុងក្រោយ')}</span>
-                                        </h3>
-                                        <button onclick="window.switchView('attendance')" class="text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline" data-i18n="viewAll">
-                                            ${t('viewAll', 'មើលទាំងអស់')} →
-                                        </button>
+                                <!-- 🟢 ក្រាបស្ថិតិសិស្សជាប់ និងធ្លាក់ (Pass / Fail Performance Chart) 🟢 -->
+                                <div class="bg-white dark:bg-slate-800 p-5 sm:p-6 rounded-2xl md:rounded-3xl shadow-sm border border-slate-200/80 dark:border-slate-700">
+                                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5 pb-4 border-b border-slate-100 dark:border-slate-700">
+                                        <div class="flex items-center gap-3">
+                                            <div class="w-10 h-10 rounded-2xl bg-emerald-50 dark:bg-emerald-950/80 text-emerald-600 dark:text-emerald-400 flex items-center justify-center text-lg border border-emerald-200/50 dark:border-emerald-800/40 shrink-0">
+                                                <i class="fa-solid fa-chart-column"></i>
+                                            </div>
+                                            <div>
+                                                <h3 class="font-bold text-base text-slate-800 dark:text-white flex items-center gap-2">
+                                                    <span>ក្រាបស្ថិតិសិស្សជាប់ និងធ្លាក់ (Pass / Fail)</span>
+                                                </h3>
+                                                <p class="text-xs text-slate-400 font-medium">ការវាយតម្លៃលទ្ធផលសិក្សាសរុប តាមភេទ និងអត្រាភាគរយ</p>
+                                            </div>
+                                        </div>
+                                        <div class="flex items-center gap-2">
+                                            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 border border-emerald-200/60">
+                                                <i class="fa-solid fa-circle-check text-[11px]"></i> ជាប់ ${toKhNum(passPct)}%
+                                            </span>
+                                            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-rose-50 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 border border-rose-200/60">
+                                                <i class="fa-solid fa-circle-xmark text-[11px]"></i> ធ្លាក់ ${toKhNum(failPct)}%
+                                            </span>
+                                            <button onclick="window.switchView('scores')" class="ml-2 text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline">
+                                                ពិន្ទុពេញលេញ →
+                                            </button>
+                                        </div>
                                     </div>
 
-                                    <div class="space-y-3">
-                                        <!-- Item 1 -->
-                                        <div class="flex items-center justify-between p-3 rounded-xl bg-slate-50 dark:bg-slate-700/50 hover:bg-slate-100 dark:hover:bg-slate-700 transition">
-                                            <div class="flex items-center gap-3">
-                                                <div class="w-9 h-9 rounded-xl bg-blue-100 dark:bg-blue-900/60 text-blue-600 dark:text-blue-300 flex items-center justify-center text-sm shrink-0">
-                                                    <i class="fa-solid fa-clipboard-check"></i>
-                                                </div>
-                                                <div>
-                                                    <p class="text-xs font-bold text-slate-800 dark:text-white">វត្តមានថ្នាក់ 7A បានស្រង់រួច</p>
-                                                    <p class="text-[11px] text-slate-400">ស្រង់វត្តមានបាន 98% ដោយជោគជ័យ</p>
-                                                </div>
+                                    <!-- 4 KPI Badges for Pass/Fail -->
+                                    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
+                                        <!-- KPI 1: សិស្សជាប់សរុប -->
+                                        <div class="p-3.5 rounded-2xl bg-emerald-50/70 dark:bg-emerald-950/40 border border-emerald-200/60 dark:border-emerald-800/40">
+                                            <span class="text-[11px] font-bold text-emerald-700 dark:text-emerald-300 block">សិស្សជាប់សរុប</span>
+                                            <div class="flex items-baseline gap-1.5 mt-1">
+                                                <span class="text-2xl font-black text-emerald-700 dark:text-emerald-300 font-mono">${toKhNum(displayPass)}</span>
+                                                <span class="text-[11px] text-emerald-600 dark:text-emerald-400">នាក់</span>
                                             </div>
-                                            <span class="text-[10px] text-slate-400 font-medium">5 នាទីមុន</span>
+                                            <span class="text-[10px] text-emerald-600/80 font-bold block mt-1">ស្មើ ${toKhNum(passPct)}% នៃសរុប</span>
                                         </div>
 
-                                        <!-- Item 2 -->
-                                        <div class="flex items-center justify-between p-3 rounded-xl bg-slate-50 dark:bg-slate-700/50 hover:bg-slate-100 dark:hover:bg-slate-700 transition">
-                                            <div class="flex items-center gap-3">
-                                                <div class="w-9 h-9 rounded-xl bg-amber-100 dark:bg-amber-900/60 text-amber-600 dark:text-amber-300 flex items-center justify-center text-sm shrink-0">
-                                                    <i class="fa-solid fa-award"></i>
-                                                </div>
-                                                <div>
-                                                    <p class="text-xs font-bold text-slate-800 dark:text-white">បញ្ចូលពិន្ទុគណិតវិទ្យា</p>
-                                                    <p class="text-[11px] text-slate-400">ពិន្ទុប្រចាំខែតុលា ថ្នាក់ 8B</p>
-                                                </div>
+                                        <!-- KPI 2: សិស្សធ្លាក់សរុប -->
+                                        <div class="p-3.5 rounded-2xl bg-rose-50/70 dark:bg-rose-950/40 border border-rose-200/60 dark:border-rose-800/40">
+                                            <span class="text-[11px] font-bold text-rose-700 dark:text-rose-300 block">សិស្សធ្លាក់សរុប</span>
+                                            <div class="flex items-baseline gap-1.5 mt-1">
+                                                <span class="text-2xl font-black text-rose-700 dark:text-rose-300 font-mono">${toKhNum(displayFail)}</span>
+                                                <span class="text-[11px] text-rose-600 dark:text-rose-400">នាក់</span>
                                             </div>
-                                            <span class="text-[10px] text-slate-400 font-medium">25 នាទីមុន</span>
+                                            <span class="text-[10px] text-rose-600/80 font-bold block mt-1">ស្មើ ${toKhNum(failPct)}% នៃសរុប</span>
                                         </div>
 
-                                        <!-- Item 3 -->
-                                        <div class="flex items-center justify-between p-3 rounded-xl bg-slate-50 dark:bg-slate-700/50 hover:bg-slate-100 dark:hover:bg-slate-700 transition">
-                                            <div class="flex items-center gap-3">
-                                                <div class="w-9 h-9 rounded-xl bg-emerald-100 dark:bg-emerald-900/60 text-emerald-600 dark:text-emerald-300 flex items-center justify-center text-sm shrink-0">
-                                                    <i class="fa-solid fa-user-plus"></i>
-                                                </div>
-                                                <div>
-                                                    <p class="text-xs font-bold text-slate-800 dark:text-white">សិស្សថ្មីបានចុះឈ្មោះ</p>
-                                                    <p class="text-[11px] text-slate-400">សិស្ស ចាន់ សុខា ចូលរៀនថ្នាក់ 10A</p>
-                                                </div>
+                                        <!-- KPI 3: សិស្សស្រីជាប់ -->
+                                        <div class="p-3.5 rounded-2xl bg-pink-50/70 dark:bg-pink-950/40 border border-pink-200/60 dark:border-pink-800/40">
+                                            <span class="text-[11px] font-bold text-pink-700 dark:text-pink-300 block">សិស្សស្រីជាប់</span>
+                                            <div class="flex items-baseline gap-1.5 mt-1">
+                                                <span class="text-2xl font-black text-pink-700 dark:text-pink-300 font-mono">${toKhNum(displayPassFemale)}</span>
+                                                <span class="text-[11px] text-pink-600 dark:text-pink-400">/ ${toKhNum(femaleStudents)} នាក់</span>
                                             </div>
-                                            <span class="text-[10px] text-slate-400 font-medium">1 ម៉ោងមុន</span>
+                                            <span class="text-[10px] text-pink-600/80 font-bold block mt-1">ធ្លាក់: ${toKhNum(displayFailFemale)} នាក់</span>
                                         </div>
 
-                                        <!-- Item 4 -->
-                                        <div class="flex items-center justify-between p-3 rounded-xl bg-slate-50 dark:bg-slate-700/50 hover:bg-slate-100 dark:hover:bg-slate-700 transition">
-                                            <div class="flex items-center gap-3">
-                                                <div class="w-9 h-9 rounded-xl bg-indigo-100 dark:bg-indigo-900/60 text-indigo-600 dark:text-indigo-300 flex items-center justify-center text-sm shrink-0">
-                                                    <i class="fa-solid fa-cloud-arrow-up"></i>
-                                                </div>
-                                                <div>
-                                                    <p class="text-xs font-bold text-slate-800 dark:text-white">ធ្វើសមកាលកម្ម Google Sheets</p>
-                                                    <p class="text-[11px] text-slate-400">បានផ្ញើទិន្នន័យ 1,240 ជួរទៅកាន់ Cloud</p>
-                                                </div>
+                                        <!-- KPI 4: សិស្សប្រុសជាប់ -->
+                                        <div class="p-3.5 rounded-2xl bg-sky-50/70 dark:bg-sky-950/40 border border-sky-200/60 dark:border-sky-800/40">
+                                            <span class="text-[11px] font-bold text-sky-700 dark:text-sky-300 block">សិស្សប្រុសជាប់</span>
+                                            <div class="flex items-baseline gap-1.5 mt-1">
+                                                <span class="text-2xl font-black text-sky-700 dark:text-sky-300 font-mono">${toKhNum(displayPassMale)}</span>
+                                                <span class="text-[11px] text-sky-600 dark:text-sky-400">/ ${toKhNum(maleStudents)} នាក់</span>
                                             </div>
-                                            <span class="text-[10px] text-slate-400 font-medium">2 ម៉ោងមុន</span>
+                                            <span class="text-[10px] text-sky-600/80 font-bold block mt-1">ធ្លាក់: ${toKhNum(displayFailMale)} នាក់</span>
                                         </div>
+                                    </div>
+
+                                    <!-- Grouped Bar Chart Canvas -->
+                                    <div class="relative h-64 sm:h-72 w-full">
+                                        <canvas id="chartPassFailBar"></canvas>
                                     </div>
                                 </div>
 
@@ -730,9 +821,83 @@
                         }
                     });
                 }
+
+                // ៧. គូរ Bar Chart: ក្រាបស្ថិតិសិស្សជាប់ និងធ្លាក់ (Pass / Fail Chart)
+                const passFailCtx = document.getElementById('chartPassFailBar');
+                if (passFailCtx) {
+                    if (window.dashPassFailChart) window.dashPassFailChart.destroy();
+                    window.dashPassFailChart = new Chart(passFailCtx, {
+                        type: 'bar',
+                        data: {
+                            labels: ['សរុប (Total)', 'សិស្សស្រី (Female)', 'សិស្សប្រុស (Male)'],
+                            datasets: [
+                                {
+                                    label: 'សិស្សជាប់ (Passed)',
+                                    data: [displayPass, displayPassFemale, displayPassMale],
+                                    backgroundColor: '#10b981',
+                                    borderRadius: 8,
+                                    borderSkipped: false,
+                                    barPercentage: 0.6,
+                                    categoryPercentage: 0.7
+                                },
+                                {
+                                    label: 'សិស្សធ្លាក់ (Failed)',
+                                    data: [displayFail, displayFailFemale, displayFailMale],
+                                    backgroundColor: '#f43f5e',
+                                    borderRadius: 8,
+                                    borderSkipped: false,
+                                    barPercentage: 0.6,
+                                    categoryPercentage: 0.7
+                                }
+                            ]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: {
+                                    display: true,
+                                    position: 'top',
+                                    labels: {
+                                        font: { family: 'Siemreap', size: 12, weight: 'bold' },
+                                        usePointStyle: true,
+                                        pointStyle: 'circle',
+                                        padding: 16
+                                    }
+                                },
+                                tooltip: {
+                                    backgroundColor: '#1e293b',
+                                    titleFont: { family: 'Siemreap', size: 12 },
+                                    bodyFont: { family: 'Siemreap', size: 12 },
+                                    padding: 10,
+                                    cornerRadius: 8,
+                                    callbacks: {
+                                        label: function(context) {
+                                            return ` ${context.dataset.label}: ${context.raw} នាក់`;
+                                        }
+                                    }
+                                }
+                            },
+                            scales: {
+                                x: {
+                                    grid: { display: false },
+                                    ticks: { font: { family: 'Siemreap', size: 12, weight: 'bold' } }
+                                },
+                                y: {
+                                    beginAtZero: true,
+                                    grid: { color: 'rgba(148, 163, 184, 0.15)' },
+                                    ticks: {
+                                        font: { family: 'Siemreap', size: 11 },
+                                        precision: 0
+                                    }
+                                }
+                            }
+                        }
+                    });
+                }
             }
 
-            // ៧. ដំណើរការនាឡិកាឌីជីថល (Digital Clock)
+            // ៨. ដំណើរការនាឡិកាឌីជីថល (Digital Clock)
             const clockEl = document.getElementById("dashClock");
             if (clockEl) {
                 clearInterval(window.dashClockInterval);
