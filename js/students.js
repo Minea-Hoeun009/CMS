@@ -148,12 +148,8 @@ window.loadStudentsView = async function() {
         const isSchoolOrSysAdmin = typeof window.isSchoolAdmin === 'function' ? window.isSchoolAdmin() : false;
         
         const curClass = typeof window.getCurrentSelectedClass === 'function' ? window.getCurrentSelectedClass() : { level: "ថ្នាក់ទី ១", room: "«ក»" };
-        let initialSelectedGrade = curClass.level || "ថ្នាក់ទី ១";
-        let initialSelectedRoom = curClass.room || "«ក»";
-        if (teacherScope.grade && !curClass.level) {
-            initialSelectedGrade = normalizeGrade(teacherScope.grade) || teacherScope.grade;
-            if (teacherScope.room) initialSelectedRoom = teacherScope.room;
-        }
+        let initialSelectedGrade = "all";
+        let initialSelectedRoom = "all";
 
         const toKhNum = typeof window.toKhmerNum === 'function' ? window.toKhmerNum : String;
         const struct = window.academicStructure || window.defaultAcademicStructure || {};
@@ -357,9 +353,59 @@ window.fetchStudentsData = function() {
         tbody.innerHTML = `<tr><td colspan="9" class="p-20 text-center"><i class="fa-solid fa-circle-notch fa-spin text-3xl text-indigo-500 mb-2"></i><br>កំពុងភ្ជាប់ទិន្នន័យពី Cloud...</td></tr>`;
     }
 
-    // 🔴 ធានាថា db (Firestore) ពិតជាត្រូវបានភ្ជាប់រួចរាល់ 🔴
-    if (typeof db === 'undefined') {
-        console.warn("បាត់ការភ្ជាប់ជាមួយ Firebase (db is undefined)។");
+    // 1. ទាញទិន្នន័យពី Google Apps Script (REST API) ពេលប្រើ Google Sheets
+    if (typeof window.apiGet === 'function') {
+        window.apiGet("getStudents").then(res => {
+            if (res && res.status === "success" && Array.isArray(res.data) && res.data.length > 0) {
+                if (typeof window.setMasterStudents === 'function') {
+                    window.setMasterStudents(res.data);
+                } else {
+                    window.allStudents = res.data;
+                    localStorage.setItem('academic_students', JSON.stringify(res.data));
+                }
+                if (typeof window.filterStudents === 'function') {
+                    window.filterStudents();
+                }
+            }
+        }).catch(err => console.warn("Google Sheets fetchStudents error:", err));
+    }
+
+    // 2. ទាញទិន្នន័យពី Firebase Firestore បើបានភ្ជាប់ Firestore
+    if (typeof db !== 'undefined') {
+        try {
+            db.collection("students")
+              .onSnapshot((snapshot) => {
+                  let stus = [];
+                  snapshot.forEach((doc) => {
+                      stus.push({ fb_id: doc.id, id: doc.id, ...doc.data() });
+                  });
+
+                  if (stus.length > 0) {
+                      if (typeof window.setMasterStudents === 'function') {
+                          window.setMasterStudents(stus);
+                      } else {
+                          window.allStudents = stus;
+                          localStorage.setItem('academic_students', JSON.stringify(stus));
+                      }
+                  }
+
+                  if (typeof window.filterStudents === 'function') {
+                      window.filterStudents();
+                  }
+              }, (error) => {
+                  console.warn("កំហុសក្នុងការស្តាប់ទិន្នន័យ Firebase (ប្រើ Cached Data):", error);
+                  try {
+                      const cached = JSON.parse(localStorage.getItem('academic_students') || '[]');
+                      if (cached.length > 0) {
+                          window.allStudents = cached;
+                          if (typeof window.filterStudents === 'function') window.filterStudents();
+                      }
+                  } catch(e) {}
+              });
+        } catch (e) {
+            console.error("កំហុសក្នុងការហៅ Firebase:", e);
+        }
+    } else {
         try {
             const cached = JSON.parse(localStorage.getItem('academic_students') || '[]');
             if (cached.length > 0) {
@@ -367,42 +413,6 @@ window.fetchStudentsData = function() {
                 if (typeof window.filterStudents === 'function') window.filterStudents();
             }
         } catch(e) {}
-        return;
-    }
-
-    try {
-        db.collection("students")
-          .onSnapshot((snapshot) => {
-              let stus = [];
-              snapshot.forEach((doc) => {
-                  stus.push({ fb_id: doc.id, id: doc.id, ...doc.data() });
-              });
-
-              if (stus.length > 0) {
-                  if (typeof window.setMasterStudents === 'function') {
-                      window.setMasterStudents(stus);
-                  } else {
-                      window.allStudents = stus;
-                      localStorage.setItem('academic_students', JSON.stringify(stus));
-                  }
-              }
-
-              // 🔴 ធ្វើបច្ចុប្បន្នភាពតារាងភ្លាមៗ ពេលមានការផ្លាស់ប្តូរទិន្នន័យ 🔴
-              if (typeof window.filterStudents === 'function') {
-                  window.filterStudents();
-              }
-          }, (error) => {
-              console.warn("កំហុសក្នុងការស្តាប់ទិន្នន័យ Firebase (ប្រើ Cached Data):", error);
-              try {
-                  const cached = JSON.parse(localStorage.getItem('academic_students') || '[]');
-                  if (cached.length > 0) {
-                      window.allStudents = cached;
-                      if (typeof window.filterStudents === 'function') window.filterStudents();
-                  }
-              } catch(e) {}
-          });
-    } catch (e) {
-        console.error("កំហុសក្នុងការហៅ Firebase:", e);
     }
 };
 
@@ -429,10 +439,9 @@ window.resetStudentFilters = function() {
     const sRoom = document.getElementById("stuFilterRoom");
     const sGen = document.getElementById("stuFilterGender");
     const sStat = document.getElementById("stuFilterStatus");
-    const curClass = typeof window.getCurrentSelectedClass === 'function' ? window.getCurrentSelectedClass() : null;
     if (sInput) sInput.value = "";
-    if (sGrade) sGrade.value = curClass?.level || "all";
-    if (sRoom) sRoom.value = curClass?.room || "all";
+    if (sGrade) sGrade.value = "all";
+    if (sRoom) sRoom.value = "all";
     if (sGen) sGen.value = "all";
     if (sStat) sStat.value = "Active";
     if (typeof window.filterStudents === 'function') window.filterStudents();
@@ -461,32 +470,47 @@ window.filterStudents = function() {
     }
     const baseStudents = window.allStudents || [];
 
+    const cleanRoom = (r) => String(r || '').replace(/[«»\s]/g, '');
+    const inactiveStatuses = ["transferred", "បានផ្ទេរចេញ", "ផ្ទេរចេញ", "graduated", "បានបញ្ចប់ការសិក្សា", "បញ្ចប់ការសិក្សា", "inactive", "មិនសកម្ម", "ផ្អាក", "withdrawn", "dropped", "បោះបង់", "ឈប់រៀន"];
+
     window.filteredStudents = baseStudents.filter(s => {
         if (!s || typeof s !== 'object') return false;
 
         // Year check: match if academic_year matches currentYear, or if student doesn't have an academic_year set
         const sYear = String(s.academic_year || "").trim();
         if (currentYear && currentYear !== "all" && sYear && sYear !== "undefined" && !sYear.includes(currentYear) && !currentYear.includes(sYear)) {
-            // For admin viewing all classes and not explicitly filtering, show all students
-            if (!isSchoolOrSysAdmin || (grade !== "all")) {
+            const hasMatchingYearStudents = baseStudents.some(st => {
+                const y = String(st.academic_year || '').trim();
+                return y && (y.includes(currentYear) || currentYear.includes(y));
+            });
+            if (hasMatchingYearStudents && (!isSchoolOrSysAdmin || (grade !== "all"))) {
                 return false;
             }
         }
 
-        const normGrade = normalizeGrade(s.grade);
-        const safeRoom = String(s.room || "").trim();
+        const normGrade = typeof window.normalizeGrade === 'function' ? window.normalizeGrade(s.grade) : String(s.grade || "").trim();
+        const safeRoom = cleanRoom(s.room);
 
         // ត្រួតពិនិត្យវិសាលភាពទទួលខុសត្រូវ (Scope Enforcement) សម្រាប់គ្រូតាមកម្រិតថ្នាក់
         if (!isSchoolOrSysAdmin && !isReportViewer) {
             const rawAssigned = (scope.grade || "").trim();
             if (rawAssigned && rawAssigned !== "all" && rawAssigned !== "គ្រប់ថ្នាក់") {
-                const assignedGrade = normalizeGrade(rawAssigned);
-                if (assignedGrade && normGrade !== assignedGrade) {
-                    return false;
+                const assignedGrade = typeof window.normalizeGrade === 'function' ? window.normalizeGrade(rawAssigned) : rawAssigned;
+                if (assignedGrade && normGrade && normGrade !== assignedGrade) {
+                    const hasAssignedGradeStudents = baseStudents.some(st => (typeof window.normalizeGrade === 'function' ? window.normalizeGrade(st.grade) : st.grade) === assignedGrade);
+                    if (hasAssignedGradeStudents) {
+                        return false;
+                    }
                 }
             }
-            if (scope.room && scope.room !== "all" && scope.room !== "គ្រប់បន្ទប់" && scope.room !== "ទូទៅ" && safeRoom && safeRoom !== scope.room.trim()) {
-                return false;
+            const cleanScopeRoom = cleanRoom(scope.room);
+            if (cleanScopeRoom && cleanScopeRoom !== "all" && cleanScopeRoom !== "គ្រប់បន្ទប់" && cleanScopeRoom !== "ទូទៅ") {
+                if (safeRoom && safeRoom !== cleanScopeRoom) {
+                    const hasAssignedRoomStudents = baseStudents.some(st => cleanRoom(st.room) === cleanScopeRoom);
+                    if (hasAssignedRoomStudents) {
+                        return false;
+                    }
+                }
             }
         }
 
@@ -501,13 +525,14 @@ window.filterStudents = function() {
         
         let matchGrade = true;
         if (grade !== "all") {
-            const selectedNorm = normalizeGrade(grade);
-            matchGrade = (normGrade === selectedNorm) || (s.grade === grade);
+            const selectedNorm = typeof window.normalizeGrade === 'function' ? window.normalizeGrade(grade) : String(grade).trim();
+            matchGrade = !selectedNorm || (normGrade === selectedNorm) || (String(s.grade || "").trim() === String(grade).trim());
         }
 
         let matchRoom = true;
         if (room !== "all") {
-            matchRoom = safeRoom === room || (room === "«ក»" && safeRoom === "");
+            const targetRoomClean = cleanRoom(room);
+            matchRoom = !targetRoomClean || (safeRoom === targetRoomClean) || (targetRoomClean === "ក" && (!safeRoom || safeRoom === ""));
         }
 
         let matchGender = true;
@@ -519,7 +544,7 @@ window.filterStudents = function() {
         if (status === "all") {
             matchStatus = true;
         } else if (status === "Active") {
-            matchStatus = safeStatus === "active" || safeStatus === "កំពុងសិក្សា" || safeStatus === "";
+            matchStatus = !inactiveStatuses.includes(safeStatus);
         } else if (status === "Transferred") {
             matchStatus = safeStatus === "transferred" || safeStatus === "បានផ្ទេរចេញ" || safeStatus === "ផ្ទេរចេញ";
         } else if (status === "Graduated") {
@@ -534,6 +559,15 @@ window.filterStudents = function() {
 
         return matchSearch && matchGrade && matchRoom && matchGender && matchStatus;
     });
+
+    // 🟢 Single-Classroom UX Guard: បើគ្មានពាក្យស្វែងរក ហើយតម្រងទូទៅមិនត្រូវគ្នាដោយសារ format ត្រូវបង្ហាញសិស្សសកម្មទាំងអស់ភ្លាមៗ
+    if (window.filteredStudents.length === 0 && baseStudents.length > 0 && search === "" && gender === "all") {
+        const activeList = baseStudents.filter(s => {
+            const st = String(s?.status || '').toLowerCase().trim();
+            return !inactiveStatuses.includes(st);
+        });
+        window.filteredStudents = activeList.length > 0 ? activeList : [...baseStudents];
+    }
 
     if (document.getElementById("hdrTotal")) document.getElementById("hdrTotal").innerText = baseStudents.length;
     if (document.getElementById("hdrActive")) document.getElementById("hdrActive").innerText = window.filteredStudents.length;
