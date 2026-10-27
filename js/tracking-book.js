@@ -6,7 +6,7 @@ function openTrackingBookModal() {
   let modal = document.getElementById("trackingBookModal");
   if (!modal) {
     const modalHtml = `
-      <div id="trackingBookModal" class="fixed inset-0 z-[6000] bg-slate-900/80 backdrop-blur-sm hidden flex-col items-center justify-center p-2 md:p-4 font-siemreap fade-in no-print">
+      <div id="trackingBookModal" class="fixed inset-0 z-[6000] bg-black/60 hidden flex-col items-center justify-center p-2 md:p-4 font-siemreap fade-in no-print" style="backdrop-filter: none !important;">
         <div class="bg-slate-200 rounded-3xl shadow-2xl w-full max-w-[1200px] h-[95vh] flex flex-col overflow-hidden border border-slate-300">
           
           <div class="p-4 md:p-5 border-b border-slate-300 bg-white flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 shrink-0 shadow-sm z-10">

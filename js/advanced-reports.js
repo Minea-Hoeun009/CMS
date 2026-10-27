@@ -377,9 +377,20 @@ window.AdvancedReports = {
         // ស្ថិតិពិន្ទុរួម
         const evaluatedScores = fullScoresList.filter(s => s.avg !== '' && !isNaN(parseFloat(s.avg)));
         const evaluatedCount = evaluatedScores.length;
-        const passedCount = evaluatedScores.filter(s => parseFloat(s.avg) >= 5.0).length;
-        const failedCount = evaluatedCount - passedCount;
+        const passedScores = evaluatedScores.filter(s => parseFloat(s.avg) >= 5.0);
+        const passedCount = passedScores.length;
+        const passedFemaleCount = passedScores.filter(s => s.gender === 'ស្រី' || s.gender === 'ស' || s.gender === 'F').length;
+        const passedMaleCount = passedCount - passedFemaleCount;
+
+        const failedScores = evaluatedScores.filter(s => parseFloat(s.avg) < 5.0);
+        const failedCount = failedScores.length;
+        const failedFemaleCount = failedScores.filter(s => s.gender === 'ស្រី' || s.gender === 'ស' || s.gender === 'F').length;
+        const failedMaleCount = failedCount - failedFemaleCount;
+
         const passRate = evaluatedCount > 0 ? ((passedCount / evaluatedCount) * 100).toFixed(1) : "0";
+        const failRate = evaluatedCount > 0 ? ((failedCount / evaluatedCount) * 100).toFixed(1) : "0";
+        const passedFemalePercent = femaleStudents > 0 ? ((passedFemaleCount / femaleStudents) * 100).toFixed(1) : "0";
+        const failedFemalePercent = femaleStudents > 0 ? ((failedFemaleCount / femaleStudents) * 100).toFixed(1) : "0";
 
         let maxAvg = evaluatedCount > 0 ? Math.max(...evaluatedScores.map(s => parseFloat(s.avg))).toFixed(2) : "0.00";
         let minAvg = evaluatedCount > 0 ? Math.min(...evaluatedScores.map(s => parseFloat(s.avg))).toFixed(2) : "0.00";
@@ -512,6 +523,18 @@ window.AdvancedReports = {
                 ]);
             });
 
+            // ស្ថិតិសង្ខេបក្រោមតារាងពិន្ទុ
+            ws2Data.push([""]);
+            ws2Data.push(["📊 ស្ថិតិសង្ខេបលទ្ធផល ៖"]);
+            ws2Data.push(["• សិស្សសរុប ៖ " + totalStudents + " នាក់ (ស្រី " + femaleStudents + " នាក់, ប្រុស " + maleStudents + " នាក់)"]);
+            ws2Data.push(["• សិស្សជាប់មធ្យមភាគ ៖ " + passedCount + " នាក់ គិតជាភាគរយ " + passRate + "% (ស្រី " + passedFemaleCount + " នាក់ គិតជាភាគរយ " + passedFemalePercent + "%, ប្រុស " + passedMaleCount + " នាក់)"]);
+            ws2Data.push(["• សិស្សធ្លាក់មធ្យមភាគ ៖ " + failedCount + " នាក់ គិតជាភាគរយ " + failRate + "% (ស្រី " + failedFemaleCount + " នាក់ គិតជាភាគរយ " + failedFemalePercent + "%, ប្រុស " + failedMaleCount + " នាក់)"]);
+            ws2Data.push([""]);
+            ws2Data.push(["លទ្ធផល", "សរុប", "ស្រី", "ប្រុស", "ភាគរយសរុប (%)", "ភាគរយស្រី (%)"]);
+            ws2Data.push(["សិស្សសរុប", totalStudents + " នាក់", femaleStudents + " នាក់", maleStudents + " នាក់", "100%", femalePercent + "%"]);
+            ws2Data.push(["សិស្សជាប់មធ្យមភាគ", passedCount + " នាក់", passedFemaleCount + " នាក់", passedMaleCount + " នាក់", passRate + "%", passedFemalePercent + "%"]);
+            ws2Data.push(["សិស្សធ្លាក់មធ្យមភាគ", failedCount + " នាក់", failedFemaleCount + " នាក់", failedMaleCount + " នាក់", failRate + "%", failedFemalePercent + "%"]);
+
             ws2Data.push([""]);
             ws2Data.push(["បានឃើញ និងឯកភាព", "", "", "", "", "", "", "", "", "", ctx.lunarDateStr || '']);
             ws2Data.push(["នាយក/នាយិកាសាលា", "", "", "", "", "", "", "", "", "", ctx.solarDateStr || '']);
@@ -573,6 +596,18 @@ window.AdvancedReports = {
                     ""
                 ]);
             });
+
+            // ស្ថិតិសង្ខេបក្រោមតារាងចំណាត់ថ្នាក់
+            ws3Data.push([""]);
+            ws3Data.push(["📊 ស្ថិតិសង្ខេបលទ្ធផល ៖"]);
+            ws3Data.push(["• សិស្សសរុប ៖ " + totalStudents + " នាក់ (ស្រី " + femaleStudents + " នាក់, ប្រុស " + maleStudents + " នាក់)"]);
+            ws3Data.push(["• សិស្សជាប់មធ្យមភាគ ៖ " + passedCount + " នាក់ គិតជាភាគរយ " + passRate + "% (ស្រី " + passedFemaleCount + " នាក់ គិតជាភាគរយ " + passedFemalePercent + "%, ប្រុស " + passedMaleCount + " នាក់)"]);
+            ws3Data.push(["• សិស្សធ្លាក់មធ្យមភាគ ៖ " + failedCount + " នាក់ គិតជាភាគរយ " + failRate + "% (ស្រី " + failedFemaleCount + " នាក់ គិតជាភាគរយ " + failedFemalePercent + "%, ប្រុស " + failedMaleCount + " នាក់)"]);
+            ws3Data.push([""]);
+            ws3Data.push(["លទ្ធផល", "សរុប", "ស្រី", "ប្រុស", "ភាគរយសរុប (%)", "ភាគរយស្រី (%)"]);
+            ws3Data.push(["សិស្សសរុប", totalStudents + " នាក់", femaleStudents + " នាក់", maleStudents + " នាក់", "100%", femalePercent + "%"]);
+            ws3Data.push(["សិស្សជាប់មធ្យមភាគ", passedCount + " នាក់", passedFemaleCount + " នាក់", passedMaleCount + " នាក់", passRate + "%", passedFemalePercent + "%"]);
+            ws3Data.push(["សិស្សធ្លាក់មធ្យមភាគ", failedCount + " នាក់", failedFemaleCount + " នាក់", failedMaleCount + " នាក់", failRate + "%", failedFemalePercent + "%"]);
 
             ws3Data.push([""]);
             ws3Data.push(["បានឃើញ និងឯកភាព", "", "", "", "", "", ctx.lunarDateStr || '']);
@@ -986,6 +1021,42 @@ window.AdvancedReports = {
     <Cell ss:StyleID="TableHeader"><Data ss:Type="String">លទ្ធផល</Data></Cell>
    </Row>
    ${s2RowsXml}
+   <Row ss:Height="15"><Cell ss:StyleID="Default"/></Row>
+   <Row ss:Height="22">
+    <Cell ss:MergeAcross="14" ss:StyleID="SummaryBlue"><Data ss:Type="String">📊 ស្ថិតិសង្ខេបលទ្ធផល ៖ សិស្សសរុប ${totalStudents} នាក់ (ស្រី ${femaleStudents} នាក់, ប្រុស ${maleStudents} នាក់) | ជាប់ ${passedCount} នាក់ គិតជាភាគរយ ${passRate}% (ស្រី ${passedFemaleCount} នាក់ គិតជាភាគរយ ${passedFemalePercent}%) | ធ្លាក់ ${failedCount} នាក់ គិតជាភាគរយ ${failRate}% (ស្រី ${failedFemaleCount} នាក់ គិតជាភាគរយ ${failedFemalePercent}%)</Data></Cell>
+   </Row>
+   <Row ss:Height="22">
+    <Cell ss:MergeAcross="2" ss:StyleID="TableHeader"><Data ss:Type="String">លទ្ធផល</Data></Cell>
+    <Cell ss:MergeAcross="1" ss:StyleID="TableHeader"><Data ss:Type="String">សរុប</Data></Cell>
+    <Cell ss:MergeAcross="1" ss:StyleID="TableHeader"><Data ss:Type="String">ស្រី</Data></Cell>
+    <Cell ss:MergeAcross="1" ss:StyleID="TableHeader"><Data ss:Type="String">ប្រុស</Data></Cell>
+    <Cell ss:MergeAcross="2" ss:StyleID="TableHeader"><Data ss:Type="String">ភាគរយសរុប (%)</Data></Cell>
+    <Cell ss:MergeAcross="2" ss:StyleID="TableHeader"><Data ss:Type="String">ភាគរយស្រី (%)</Data></Cell>
+   </Row>
+   <Row ss:Height="20">
+    <Cell ss:MergeAcross="2" ss:StyleID="CellLeft"><Data ss:Type="String">សិស្សសរុប</Data></Cell>
+    <Cell ss:MergeAcross="1" ss:StyleID="CellCenter"><Data ss:Type="String">${totalStudents} នាក់</Data></Cell>
+    <Cell ss:MergeAcross="1" ss:StyleID="CellCenter"><Data ss:Type="String">${femaleStudents} នាក់</Data></Cell>
+    <Cell ss:MergeAcross="1" ss:StyleID="CellCenter"><Data ss:Type="String">${maleStudents} នាក់</Data></Cell>
+    <Cell ss:MergeAcross="2" ss:StyleID="CellCenter"><Data ss:Type="String">100%</Data></Cell>
+    <Cell ss:MergeAcross="2" ss:StyleID="CellCenter"><Data ss:Type="String">${femalePercent}%</Data></Cell>
+   </Row>
+   <Row ss:Height="20">
+    <Cell ss:MergeAcross="2" ss:StyleID="CellLeft"><Data ss:Type="String">សិស្សជាប់មធ្យមភាគ</Data></Cell>
+    <Cell ss:MergeAcross="1" ss:StyleID="CellCenter"><Data ss:Type="String">${passedCount} នាក់</Data></Cell>
+    <Cell ss:MergeAcross="1" ss:StyleID="CellCenter"><Data ss:Type="String">${passedFemaleCount} នាក់</Data></Cell>
+    <Cell ss:MergeAcross="1" ss:StyleID="CellCenter"><Data ss:Type="String">${passedMaleCount} នាក់</Data></Cell>
+    <Cell ss:MergeAcross="2" ss:StyleID="CellCenter"><Data ss:Type="String">${passRate}%</Data></Cell>
+    <Cell ss:MergeAcross="2" ss:StyleID="CellCenter"><Data ss:Type="String">${passedFemalePercent}%</Data></Cell>
+   </Row>
+   <Row ss:Height="20">
+    <Cell ss:MergeAcross="2" ss:StyleID="CellLeft"><Data ss:Type="String">សិស្សធ្លាក់មធ្យមភាគ</Data></Cell>
+    <Cell ss:MergeAcross="1" ss:StyleID="CellCenter"><Data ss:Type="String">${failedCount} នាក់</Data></Cell>
+    <Cell ss:MergeAcross="1" ss:StyleID="CellCenter"><Data ss:Type="String">${failedFemaleCount} នាក់</Data></Cell>
+    <Cell ss:MergeAcross="1" ss:StyleID="CellCenter"><Data ss:Type="String">${failedMaleCount} នាក់</Data></Cell>
+    <Cell ss:MergeAcross="2" ss:StyleID="CellCenter"><Data ss:Type="String">${failRate}%</Data></Cell>
+    <Cell ss:MergeAcross="2" ss:StyleID="CellCenter"><Data ss:Type="String">${failedFemalePercent}%</Data></Cell>
+   </Row>
    <Row ss:Height="20"><Cell ss:StyleID="Default"/></Row>
    <Row ss:Height="22">
     <Cell ss:MergeAcross="6" ss:StyleID="SigText"><Data ss:Type="String">បានឃើញ និងឯកភាព</Data></Cell>
@@ -1053,6 +1124,42 @@ window.AdvancedReports = {
     <Cell ss:StyleID="TableHeader"><Data ss:Type="String">ផ្សេងៗ / សម្គាល់</Data></Cell>
    </Row>
    ${s3RowsXml}
+   <Row ss:Height="15"><Cell ss:StyleID="Default"/></Row>
+   <Row ss:Height="22">
+    <Cell ss:MergeAcross="9" ss:StyleID="SummaryBlue"><Data ss:Type="String">📊 ស្ថិតិសង្ខេបលទ្ធផល ៖ សិស្សសរុប ${totalStudents} នាក់ (ស្រី ${femaleStudents} នាក់, ប្រុស ${maleStudents} នាក់) | ជាប់ ${passedCount} នាក់ គិតជាភាគរយ ${passRate}% (ស្រី ${passedFemaleCount} នាក់ គិតជាភាគរយ ${passedFemalePercent}%) | ធ្លាក់ ${failedCount} នាក់ គិតជាភាគរយ ${failRate}% (ស្រី ${failedFemaleCount} នាក់ គិតជាភាគរយ ${failedFemalePercent}%)</Data></Cell>
+   </Row>
+   <Row ss:Height="22">
+    <Cell ss:MergeAcross="1" ss:StyleID="TableHeader"><Data ss:Type="String">លទ្ធផល</Data></Cell>
+    <Cell ss:StyleID="TableHeader"><Data ss:Type="String">សរុប</Data></Cell>
+    <Cell ss:StyleID="TableHeader"><Data ss:Type="String">ស្រី</Data></Cell>
+    <Cell ss:StyleID="TableHeader"><Data ss:Type="String">ប្រុស</Data></Cell>
+    <Cell ss:MergeAcross="1" ss:StyleID="TableHeader"><Data ss:Type="String">ភាគរយសរុប (%)</Data></Cell>
+    <Cell ss:MergeAcross="2" ss:StyleID="TableHeader"><Data ss:Type="String">ភាគរយស្រី (%)</Data></Cell>
+   </Row>
+   <Row ss:Height="20">
+    <Cell ss:MergeAcross="1" ss:StyleID="CellLeft"><Data ss:Type="String">សិស្សសរុប</Data></Cell>
+    <Cell ss:StyleID="CellCenter"><Data ss:Type="String">${totalStudents} នាក់</Data></Cell>
+    <Cell ss:StyleID="CellCenter"><Data ss:Type="String">${femaleStudents} នាក់</Data></Cell>
+    <Cell ss:StyleID="CellCenter"><Data ss:Type="String">${maleStudents} នាក់</Data></Cell>
+    <Cell ss:MergeAcross="1" ss:StyleID="CellCenter"><Data ss:Type="String">100%</Data></Cell>
+    <Cell ss:MergeAcross="2" ss:StyleID="CellCenter"><Data ss:Type="String">${femalePercent}%</Data></Cell>
+   </Row>
+   <Row ss:Height="20">
+    <Cell ss:MergeAcross="1" ss:StyleID="CellLeft"><Data ss:Type="String">សិស្សជាប់មធ្យមភាគ</Data></Cell>
+    <Cell ss:StyleID="CellCenter"><Data ss:Type="String">${passedCount} នាក់</Data></Cell>
+    <Cell ss:StyleID="CellCenter"><Data ss:Type="String">${passedFemaleCount} នាក់</Data></Cell>
+    <Cell ss:StyleID="CellCenter"><Data ss:Type="String">${passedMaleCount} នាក់</Data></Cell>
+    <Cell ss:MergeAcross="1" ss:StyleID="CellCenter"><Data ss:Type="String">${passRate}%</Data></Cell>
+    <Cell ss:MergeAcross="2" ss:StyleID="CellCenter"><Data ss:Type="String">${passedFemalePercent}%</Data></Cell>
+   </Row>
+   <Row ss:Height="20">
+    <Cell ss:MergeAcross="1" ss:StyleID="CellLeft"><Data ss:Type="String">សិស្សធ្លាក់មធ្យមភាគ</Data></Cell>
+    <Cell ss:StyleID="CellCenter"><Data ss:Type="String">${failedCount} នាក់</Data></Cell>
+    <Cell ss:StyleID="CellCenter"><Data ss:Type="String">${failedFemaleCount} នាក់</Data></Cell>
+    <Cell ss:StyleID="CellCenter"><Data ss:Type="String">${failedMaleCount} នាក់</Data></Cell>
+    <Cell ss:MergeAcross="1" ss:StyleID="CellCenter"><Data ss:Type="String">${failRate}%</Data></Cell>
+    <Cell ss:MergeAcross="2" ss:StyleID="CellCenter"><Data ss:Type="String">${failedFemalePercent}%</Data></Cell>
+   </Row>
    <Row ss:Height="20"><Cell ss:StyleID="Default"/></Row>
    <Row ss:Height="22">
     <Cell ss:MergeAcross="4" ss:StyleID="SigText"><Data ss:Type="String">បានឃើញ និងឯកភាព</Data></Cell>

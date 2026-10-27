@@ -85,7 +85,59 @@ window.loadReportsView = function() {
                 <!-- Cards Grid - រចនាឡើងតាមស្តង់ដារ KrouDigital 4.0 -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 md:gap-6">
                     
-                    <!-- KrouDigital Card 1: ប័ណ្ណសរសើរ / វិញ្ញាបនបត្រ -->
+                    <!-- Card 1: សៀវភៅសិក្ខាគារិក (MoEYS Official Cumulative Booklet) -->
+                    <div onclick="window.openReportDetail('sikhakarik')" class="bg-white/90 backdrop-blur-md rounded-[2rem] p-6 shadow-sm hover:shadow-[0_20px_40px_rgb(30,58,138,0.22)] hover:-translate-y-1.5 transition-all duration-300 cursor-pointer border-2 border-blue-200 hover:border-blue-600 group flex flex-col justify-between h-[210px] relative overflow-hidden">
+                        <div class="absolute -right-4 -top-4 w-24 h-24 bg-blue-50 rounded-full group-hover:scale-150 transition-transform duration-500 ease-out pointer-events-none"></div>
+                        <div class="flex items-center justify-between relative z-10">
+                            <div class="w-14 h-14 bg-gradient-to-br from-blue-700 to-indigo-900 text-white rounded-2xl flex items-center justify-center text-2xl shadow-md shadow-blue-700/30 group-hover:scale-110 transition-transform"><i class="fa-solid fa-book-bookmark"></i></div>
+                            <span class="text-[10px] bg-blue-100 text-blue-900 font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">MoEYS Standard</span>
+                        </div>
+                        <div class="relative z-10">
+                            <h3 class="font-moul text-[15px] text-slate-900 mb-1.5 group-hover:text-blue-700">សៀវភៅសិក្ខាគារិក</h3>
+                            <p class="text-slate-500 text-[11px] leading-relaxed">សៀវភៅសិក្ខាគារិកផ្លូវការក្រសួងអប់រំ រួមមាន ក្របមុខ សេចក្តីណែនាំ ប្រវត្តិរូប និងលទ្ធផលប្រឡងឆមាស។</p>
+                        </div>
+                    </div>
+
+                    <!-- Card 2: សៀវភៅតាមដានការសិក្សា -->
+                    <div onclick="if(typeof window.openTrackingBookModal === 'function'){ window.openTrackingBookModal(); } else if (typeof window.loadTrackingBookView === 'function'){ window.loadTrackingBookView(); }" class="bg-white/90 backdrop-blur-md rounded-[2rem] p-6 shadow-sm hover:shadow-[0_20px_40px_rgb(99,102,241,0.2)] hover:-translate-y-1.5 transition-all duration-300 cursor-pointer border-2 border-indigo-100 hover:border-indigo-500 group flex flex-col justify-between h-[210px] relative overflow-hidden">
+                        <div class="absolute -right-4 -top-4 w-24 h-24 bg-indigo-50 rounded-full group-hover:scale-150 transition-transform duration-500 ease-out pointer-events-none"></div>
+                        <div class="flex items-center justify-between relative z-10">
+                            <div class="w-14 h-14 bg-gradient-to-br from-indigo-500 to-purple-600 text-white rounded-2xl flex items-center justify-center text-2xl shadow-md shadow-indigo-500/30 group-hover:scale-110 transition-transform"><i class="fa-solid fa-book-open-reader"></i></div>
+                            <span class="text-[10px] bg-indigo-100 text-indigo-800 font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">Tracking Book</span>
+                        </div>
+                        <div class="relative z-10">
+                            <h3 class="font-moul text-[15px] text-slate-900 mb-1.5 group-hover:text-indigo-600">សៀវភៅតាមដានការសិក្សា</h3>
+                            <p class="text-slate-500 text-[11px] leading-relaxed">តាមដានការសិក្សា និងវិន័យសិស្សប្រចាំខែ ឆមាស និងប្រចាំឆ្នាំតាមស្តង់ដារក្រសួង។</p>
+                        </div>
+                    </div>
+
+                    <!-- Card 3: តារាងកិត្តិយស (Honor Board Top 5) -->
+                    <div onclick="if(typeof window.openHonorBoardModal === 'function'){ window.openHonorBoardModal(); } else if(typeof window.openScoreModal === 'function'){ window.openScoreModal('modal-honorboard', window.renderHonorBoardContent); }" class="bg-white/90 backdrop-blur-md rounded-[2rem] p-6 shadow-sm hover:shadow-[0_20px_40px_rgb(245,158,11,0.2)] hover:-translate-y-1.5 transition-all duration-300 cursor-pointer border-2 border-amber-100 hover:border-amber-400 group flex flex-col justify-between h-[210px] relative overflow-hidden">
+                        <div class="absolute -right-4 -top-4 w-24 h-24 bg-amber-50 rounded-full group-hover:scale-150 transition-transform duration-500 ease-out pointer-events-none"></div>
+                        <div class="flex items-center justify-between relative z-10">
+                            <div class="w-14 h-14 bg-gradient-to-br from-amber-400 to-orange-500 text-white rounded-2xl flex items-center justify-center text-2xl shadow-md shadow-amber-500/30 group-hover:scale-110 transition-transform"><i class="fa-solid fa-crown"></i></div>
+                            <span class="text-[10px] bg-amber-100 text-amber-800 font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">Honor Board</span>
+                        </div>
+                        <div class="relative z-10">
+                            <h3 class="font-moul text-[15px] text-slate-900 mb-1.5 group-hover:text-amber-600">តារាងកិត្តិយស</h3>
+                            <p class="text-slate-500 text-[11px] leading-relaxed">តារាងកិត្តិយស និងប័ណ្ណសរសើរសម្រាប់សិស្សឆ្នើមប្រចាំខែ និងឆមាស (Top 5)។</p>
+                        </div>
+                    </div>
+
+                    <!-- Card 4: ព្រឹត្តិបត្រពិន្ទុបុគ្គល -->
+                    <div onclick="if(typeof window.openReportCardsModal === 'function'){ window.openReportCardsModal(); } else if(typeof window.openScoreModal === 'function'){ window.openScoreModal('modal-reportcards', window.renderReportCardsTab); }" class="bg-white/90 backdrop-blur-md rounded-[2rem] p-6 shadow-sm hover:shadow-[0_20px_40px_rgb(16,185,129,0.18)] hover:-translate-y-1.5 transition-all duration-300 cursor-pointer border-2 border-emerald-100 hover:border-emerald-400 group flex flex-col justify-between h-[210px] relative overflow-hidden">
+                        <div class="absolute -right-4 -top-4 w-24 h-24 bg-emerald-50 rounded-full group-hover:scale-150 transition-transform duration-500 ease-out pointer-events-none"></div>
+                        <div class="flex items-center justify-between relative z-10">
+                            <div class="w-14 h-14 bg-gradient-to-br from-emerald-500 to-teal-600 text-white rounded-2xl flex items-center justify-center text-2xl shadow-md shadow-emerald-500/30 group-hover:scale-110 transition-transform"><i class="fa-solid fa-file-invoice"></i></div>
+                            <span class="text-[10px] bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">Report Cards</span>
+                        </div>
+                        <div class="relative z-10">
+                            <h3 class="font-moul text-[15px] text-slate-900 mb-1.5 group-hover:text-emerald-600">ព្រឹត្តិបត្រពិន្ទុ</h3>
+                            <p class="text-slate-500 text-[11px] leading-relaxed">បោះពុម្ពសៀវភៅតាមដានលទ្ធផលសិក្សា និងព្រឹត្តិបត្រពិន្ទុបុគ្គលសម្រាប់សិស្សម្នាក់ៗ។</p>
+                        </div>
+                    </div>
+
+                    <!-- KrouDigital Card 5: ប័ណ្ណសរសើរ / វិញ្ញាបនបត្រ -->
                     <div onclick="window.KrouDigital && window.KrouDigital.renderCertificateModal()" class="bg-white/90 backdrop-blur-md rounded-[2rem] p-6 shadow-sm hover:shadow-[0_20px_40px_rgb(217,119,6,0.18)] hover:-translate-y-1.5 transition-all duration-300 cursor-pointer border-2 border-amber-100 hover:border-amber-400 group flex flex-col justify-between h-[210px] relative overflow-hidden">
                         <div class="absolute -right-4 -top-4 w-24 h-24 bg-amber-50 rounded-full group-hover:scale-150 transition-transform duration-500 ease-out pointer-events-none"></div>
                         <div class="flex items-center justify-between relative z-10">
@@ -98,7 +150,7 @@ window.loadReportsView = function() {
                         </div>
                     </div>
 
-                    <!-- KrouDigital Card 2: របាយការណ៍វត្តមាន -->
+                    <!-- KrouDigital Card 6: របាយការណ៍វត្តមាន -->
                     <div onclick="window.openReportDetail('attendance')" class="bg-white/90 backdrop-blur-md rounded-[2rem] p-6 shadow-sm hover:shadow-[0_20px_40px_rgb(16,185,129,0.18)] hover:-translate-y-1.5 transition-all duration-300 cursor-pointer border-2 border-emerald-100 hover:border-emerald-400 group flex flex-col justify-between h-[210px] relative overflow-hidden">
                         <div class="absolute -right-4 -top-4 w-24 h-24 bg-emerald-50 rounded-full group-hover:scale-150 transition-transform duration-500 ease-out pointer-events-none"></div>
                         <div class="flex items-center justify-between relative z-10">
@@ -111,7 +163,7 @@ window.loadReportsView = function() {
                         </div>
                     </div>
 
-                    <!-- KrouDigital Card 3: លទ្ធផលសិក្សាប្រចាំឆមាស និងប្រចាំឆ្នាំ -->
+                    <!-- KrouDigital Card 7: លទ្ធផលសិក្សាប្រចាំឆមាស និងប្រចាំឆ្នាំ -->
                     <div onclick="window.openReportDetail('report_ko_kho')" class="bg-white/90 backdrop-blur-md rounded-[2rem] p-6 shadow-sm hover:shadow-[0_20px_40px_rgb(16,185,129,0.18)] hover:-translate-y-1.5 transition-all duration-300 cursor-pointer border-2 border-emerald-100 hover:border-emerald-400 group flex flex-col justify-between h-[210px] relative overflow-hidden">
                         <div class="absolute -right-4 -top-4 w-24 h-24 bg-emerald-50 rounded-full group-hover:scale-150 transition-transform duration-500 ease-out pointer-events-none"></div>
                         <div class="flex items-center justify-between relative z-10">
@@ -124,7 +176,7 @@ window.loadReportsView = function() {
                         </div>
                     </div>
 
-                    <!-- KrouDigital Card 4: របាយការណ៍សុខភាព (BMI) -->
+                    <!-- KrouDigital Card 8: របាយការណ៍សុខភាព (BMI) -->
                     <div onclick="window.openReportDetail('health')" class="bg-white/90 backdrop-blur-md rounded-[2rem] p-6 shadow-sm hover:shadow-[0_20px_40px_rgb(244,63,94,0.18)] hover:-translate-y-1.5 transition-all duration-300 cursor-pointer border-2 border-rose-100 hover:border-rose-400 group flex flex-col justify-between h-[210px] relative overflow-hidden">
                         <div class="absolute -right-4 -top-4 w-24 h-24 bg-rose-50 rounded-full group-hover:scale-150 transition-transform duration-500 ease-out pointer-events-none"></div>
                         <div class="flex items-center justify-between relative z-10">
@@ -137,21 +189,21 @@ window.loadReportsView = function() {
                         </div>
                     </div>
 
-                    <!-- Card 5: ស្ថិតិសិស្ស -->
+                    <!-- Card 9: ស្ថិតិសិស្ស -->
                     <div onclick="window.openReportDetail('stats')" class="bg-white/90 backdrop-blur-md rounded-[2rem] p-6 shadow-sm hover:shadow-[0_20px_40px_rgb(59,130,246,0.15)] hover:-translate-y-1.5 transition-all duration-300 cursor-pointer border border-slate-100 group flex flex-col justify-between h-[210px] relative overflow-hidden">
                         <div class="absolute -right-4 -top-4 w-24 h-24 bg-blue-50 rounded-full group-hover:scale-150 transition-transform duration-500 ease-out pointer-events-none"></div>
                         <div class="w-14 h-14 bg-gradient-to-br from-blue-500 to-indigo-600 text-white rounded-2xl flex items-center justify-center text-2xl shadow-md shadow-blue-500/30 group-hover:scale-110 transition-transform relative z-10"><i class="fa-solid fa-chart-pie"></i></div>
                         <div class="relative z-10"><h3 class="font-moul text-[15px] text-slate-800 mb-1.5 group-hover:text-blue-700">តារាងស្ថិតិសិស្ស</h3><p class="text-slate-500 text-[11px] leading-relaxed">របាយការណ៍ចំនួនសិស្សដើមឆ្នាំ/ចុងឆ្នាំ បែងចែកតាមអាយុ និងភេទ។</p></div>
                     </div>
 
-                    <!-- Card 6: នាំចេញ Master Excel -->
+                    <!-- Card 10: នាំចេញ Master Excel -->
                     <div onclick="window.AdvancedReports && window.AdvancedReports.exportMasterExcelWorkbook ? window.AdvancedReports.exportMasterExcelWorkbook() : alert('Export Master Excel')" class="bg-white/90 backdrop-blur-md rounded-[2rem] p-6 shadow-sm hover:shadow-[0_20px_40px_rgb(16,185,129,0.15)] hover:-translate-y-1.5 transition-all duration-300 cursor-pointer border border-slate-100 group flex flex-col justify-between h-[210px] relative overflow-hidden">
                         <div class="absolute -right-4 -top-4 w-24 h-24 bg-teal-50 rounded-full group-hover:scale-150 transition-transform duration-500 ease-out pointer-events-none"></div>
                         <div class="w-14 h-14 bg-gradient-to-br from-teal-400 to-emerald-600 text-white rounded-2xl flex items-center justify-center text-2xl shadow-md shadow-emerald-500/30 group-hover:scale-110 transition-transform relative z-10"><i class="fa-solid fa-file-excel"></i></div>
                         <div class="relative z-10"><h3 class="font-moul text-[15px] text-slate-800 mb-1.5 group-hover:text-teal-600">Master Excel</h3><p class="text-slate-500 text-[11px] leading-relaxed">នាំចេញឯកសារ Excel ច្រើន Sheet រួមមាន បញ្ជីសិស្ស និងពិន្ទុ។</p></div>
                     </div>
 
-                    <!-- Card 7: ច្រកពិនិត្យលទ្ធផលមាតាបិតា -->
+                    <!-- Card 11: ច្រកពិនិត្យលទ្ធផលមាតាបិតា -->
                     <div onclick="window.KrouDigital && window.KrouDigital.openParentPortalModal()" class="bg-white/90 backdrop-blur-md rounded-[2rem] p-6 shadow-sm hover:shadow-[0_20px_40px_rgb(14,165,233,0.18)] hover:-translate-y-1.5 transition-all duration-300 cursor-pointer border-2 border-sky-100 hover:border-sky-400 group flex flex-col justify-between h-[210px] relative overflow-hidden">
                         <div class="absolute -right-4 -top-4 w-24 h-24 bg-sky-50 rounded-full group-hover:scale-150 transition-transform duration-500 ease-out pointer-events-none"></div>
                         <div class="flex items-center justify-between relative z-10">
@@ -243,7 +295,39 @@ window.openReportDetail = function(reportType) {
     const curMonth = localStorage.getItem('selected_assessment_month') || "មករា";
 
     setTimeout(() => {
-        if (reportType === 'report_ka') {
+        if (reportType === 'sikhakarik') {
+            titleEl.textContent = `សៀវភៅសិក្ខាគារិក (${gradeFull})`;
+            const allStus = (typeof window.getStudentsForClass === 'function')
+                ? window.getStudentsForClass(curLevel, curRoom)
+                : (window.allStudents || []);
+            const selectedStuId = window.currentSikhaStudentId || (allStus[0] ? (allStus[0].id || allStus[0].student_id) : '');
+            const selectedPage = window.currentSikhaPageMode || 'all';
+
+            if (extraControls) {
+                extraControls.classList.remove("hidden");
+                extraControls.innerHTML = `
+                    <div class="flex items-center gap-1.5 bg-indigo-50 dark:bg-slate-700 border border-indigo-200 dark:border-slate-600 rounded-xl px-2.5 py-1 text-xs">
+                        <span class="font-bold text-indigo-900 dark:text-indigo-300"><i class="fa-solid fa-user-graduate mr-1"></i>សិស្ស ៖</span>
+                        <select id="sikhaStudentSelect" onchange="window.currentSikhaStudentId = this.value; window.renderSikhaKarikBooklet(document.getElementById('reportPaperArea'), '${curLevel}', '${curRoom}', this.value, document.getElementById('sikhaPageSelect')?.value);" class="bg-transparent font-bold text-indigo-700 dark:text-indigo-300 outline-none cursor-pointer max-w-[170px] truncate">
+                            ${allStus.map((s, idx) => `<option value="${s.id || s.student_id}" ${(String(s.id) === String(selectedStuId) || String(s.student_id) === String(selectedStuId)) ? 'selected' : ''}>${idx + 1}. ${s.name} (${s.gender || ''})</option>`).join('')}
+                        </select>
+                    </div>
+                    <div class="flex items-center gap-1.5 bg-blue-50 dark:bg-slate-700 border border-blue-200 dark:border-slate-600 rounded-xl px-2.5 py-1 text-xs">
+                        <span class="font-bold text-blue-900 dark:text-blue-300"><i class="fa-solid fa-book-open mr-1"></i>ទំព័រ ៖</span>
+                        <select id="sikhaPageSelect" onchange="window.currentSikhaPageMode = this.value; window.renderSikhaKarikBooklet(document.getElementById('reportPaperArea'), '${curLevel}', '${curRoom}', document.getElementById('sikhaStudentSelect')?.value, this.value);" class="bg-transparent font-bold text-blue-700 dark:text-blue-300 outline-none cursor-pointer">
+                            <option value="all" ${selectedPage === 'all' ? 'selected' : ''}>ទំព័រទាំងអស់ (សៀវភៅទាំងមូល)</option>
+                            <option value="cover" ${selectedPage === 'cover' ? 'selected' : ''}>ទំព័រទី១ ៖ ក្របមុខ</option>
+                            <option value="instructions_bio" ${selectedPage === 'instructions_bio' ? 'selected' : ''}>ទំព័រទី២ & ៣ ៖ សេចក្តីណែនាំ និងប្រវត្តិរូប</option>
+                            <option value="scores_eval" ${selectedPage === 'scores_eval' ? 'selected' : ''}>ទំព័រទី៤ & ៥ ៖ លទ្ធផលប្រឡងឆមាស និងការវាយតម្លៃ</option>
+                        </select>
+                    </div>
+                `;
+            }
+            if (window.CMSPrintManager) window.CMSPrintManager.updateToolbarDefaults('reportPaperArea', 'landscape', 'A4', 100);
+            if (typeof window.renderSikhaKarikBooklet === 'function') {
+                window.renderSikhaKarikBooklet(paperArea, curLevel, curRoom, selectedStuId, selectedPage);
+            }
+        } else if (reportType === 'report_ka') {
             titleEl.textContent = `តារាងស្រង់ពិន្ទុ និងការវាយតម្លៃលទ្ធផលសិក្សា (${gradeFull})`;
             if (extraControls) {
                 extraControls.classList.remove("hidden");
@@ -2290,7 +2374,6 @@ window.saveCurrentReportToGoogleSheets = async function(btnElement) {
         }
     }
 };
-
 window.syncReportsToGoogleSheets = async function(btnElement) {
     const btn = btnElement || document.getElementById('btnSyncReportsGAS');
     const origHtml = btn ? btn.innerHTML : '';
@@ -2374,4 +2457,570 @@ window.syncReportsToGoogleSheets = async function(btnElement) {
             btn.disabled = false;
         }
     }
+};
+
+// ============================================================================
+// មុខងារ ៖ សៀវភៅសិក្ខាគារិកផ្លូវការ ក្រសួងអប់រំ យុវជន និងកីឡា (MoEYS Sikha-karik Booklet)
+// រចនាតាមស្តង់ដារ A4 Landscape ចែកជា ២ ទំព័រ (A5) ស្អាតឥតខ្ចោះ ដូចទម្រង់ផ្លូវការក្រសួង
+// ============================================================================
+window.renderSikhaKarikBooklet = function(container, targetGrade, targetRoom, studentId, pageMode) {
+    if (!container) return;
+
+    const activeClass = typeof window.getCurrentSelectedClass === 'function' 
+        ? window.getCurrentSelectedClass() 
+        : { level: "ថ្នាក់ទី ៤", room: "«ក»" };
+    const curLevel = targetGrade || activeClass.level;
+    const curRoom = targetRoom || activeClass.room;
+    const gradeFull = `${curLevel} ${curRoom}`.trim();
+
+    const ctx = (window.CMSPrintManager && typeof window.CMSPrintManager.getStandardContext === 'function')
+        ? window.CMSPrintManager.getStandardContext({ grade: gradeFull })
+        : {};
+
+    const schoolName = ctx.schoolName || localStorage.getItem('cms_school_name') || 'សាលាបឋមសិក្សា................................';
+    const academicYear = ctx.academicYear || localStorage.getItem('selected_academic_year') || '២០២៦-២០២៧';
+    const communeName = ctx.communeName || localStorage.getItem('cms_school_commune') || '................';
+    const districtName = ctx.districtName || localStorage.getItem('cms_school_district') || '................';
+    const provinceName = ctx.provinceName || localStorage.getItem('cms_school_province') || '................';
+    const teacherName = ctx.teacherName || '';
+    const principalName = ctx.principalName || '';
+
+    // ទាញបញ្ជីសិស្សទាំងអស់ក្នុងថ្នាក់
+    const allStus = (typeof window.getStudentsForClass === 'function')
+        ? window.getStudentsForClass(curLevel, curRoom)
+        : (window.allStudents || []);
+
+    const totalStudentsInClass = allStus.length || 0;
+
+    let student = null;
+    if (studentId) {
+        student = allStus.find(s => String(s.id) === String(studentId) || String(s.student_id) === String(studentId));
+    }
+    if (!student && allStus.length > 0) {
+        student = allStus[0];
+    }
+
+    if (!student) {
+        container.innerHTML = `
+            <div class="text-center p-12 bg-white rounded-3xl border border-slate-200 text-slate-700 font-siemreap max-w-md mx-auto my-10 shadow-sm">
+                <i class="fa-solid fa-user-slash text-4xl mb-3 text-amber-500"></i>
+                <h4 class="font-moul text-base mb-2">មិនមានសិស្សក្នុងថ្នាក់ ${gradeFull} ទេ</h4>
+                <p class="text-xs text-slate-500">សូមបញ្ចូលសិស្សក្នុងបញ្ជីវត្តមាន ឬជ្រើសរើសថ្នាក់ផ្សេងដើម្បីពិនិត្យសៀវភៅសិក្ខាគារិក។</p>
+            </div>
+        `;
+        return;
+    }
+
+    window.currentSikhaStudentId = student.id || student.student_id;
+    const mode = pageMode || window.currentSikhaPageMode || 'all';
+    window.currentSikhaPageMode = mode;
+
+    // ទិន្នន័យសិស្ស
+    const stuName = student.name || student.name_khmer || '................................';
+    const stuGender = student.gender || '...';
+    const stuDob = student.dob || '........................';
+    const stuPob = student.pob || student.birthplace || '...................................................';
+    const stuFather = student.father_name || '................................';
+    const stuFatherJob = student.father_job || '................';
+    const stuMother = student.mother_name || '................................';
+    const stuMotherJob = student.mother_job || '................';
+    const stuAddress = student.address || student.current_address || '...........................................................................';
+    const stuIdNum = student.student_id || student.id || '';
+    const stuPhoto = student.photo || student.avatar || '';
+
+    // ទាញពិន្ទុពី localStorage
+    let allScores = [];
+    try {
+        allScores = JSON.parse(localStorage.getItem('academic_scores') || '[]');
+    } catch(e) { allScores = []; }
+    const stuScores = allScores.filter(s => 
+        (s.student_id && (String(s.student_id) === String(student.id) || String(s.student_id) === String(student.student_id))) ||
+        (s.name && s.name.trim() === stuName.trim())
+    );
+
+    // មុខវិជ្ជាទាំង ១២ ផ្លូវការរបស់ក្រសួងអប់រំ
+    const officialSubjects = [
+        "សុជីវធម៌ និងពលរដ្ឋវិជ្ជា",
+        "រៀនអាន និងមេសូត្រ",
+        "គណិតវិទ្យា",
+        "អក្ខរាវិរុទ្ធ",
+        "គំនូរ និង ហត្ថកម្ម",
+        "សរសេរតាមអាន និងសំណួរ",
+        "តែងសេចក្តី",
+        "វិទ្យាសាស្ត្រអនុវត្ត",
+        "ភូមិវិទ្យា",
+        "ប្រវត្តិវិទ្យា",
+        "អប់រំកាយ និងកីឡា",
+        "ភាសាបរទេស"
+    ];
+
+    // រៀបចំតារាងពិន្ទុមុខវិជ្ជាទាំង ១២
+    const subjectRowsHtml = officialSubjects.map(subName => {
+        // រកពិន្ទុដែលត្រូវនឹងមុខវិជ្ជានេះ
+        const s1ScoreObj = stuScores.find(s => (s.subject === subName || (s.subject_khmer && s.subject_khmer === subName)) && (s.semester === '1' || s.semester === 1 || s.term === 's1'));
+        const s2ScoreObj = stuScores.find(s => (s.subject === subName || (s.subject_khmer && s.subject_khmer === subName)) && (s.semester === '2' || s.semester === 2 || s.term === 's2'));
+        
+        const s1Val = s1ScoreObj ? (s1ScoreObj.score || s1ScoreObj.val || '') : '';
+        const s1Rank = s1ScoreObj ? (s1ScoreObj.rank || '') : '';
+        const s2Val = s2ScoreObj ? (s2ScoreObj.score || s2ScoreObj.val || '') : '';
+        const s2Rank = s2ScoreObj ? (s2ScoreObj.rank || '') : '';
+
+        return `
+            <tr>
+                <td style="border: 1px solid #1e3a8a; padding: 3px 6px; text-align: left; font-size: 9pt;">${subName}</td>
+                <td style="border: 1px solid #1e3a8a; padding: 3px 4px; text-align: center; font-size: 9pt; width: 50px;">${s1Val}</td>
+                <td style="border: 1px solid #1e3a8a; padding: 3px 4px; text-align: center; font-size: 9pt; width: 50px;">${s1Rank}</td>
+                <td style="border: 1px solid #1e3a8a; padding: 3px 4px; text-align: center; font-size: 9pt; width: 50px;">${s2Val}</td>
+                <td style="border: 1px solid #1e3a8a; padding: 3px 4px; text-align: center; font-size: 9pt; width: 50px;">${s2Rank}</td>
+            </tr>
+        `;
+    }).join('');
+
+    // ទាញទិន្នន័យអវត្តមាន
+    let s1Permit = 0, s1Unpermit = 0, s2Permit = 0, s2Unpermit = 0;
+    try {
+        const attRecords = JSON.parse(localStorage.getItem('attendance_records') || '[]');
+        attRecords.forEach(rec => {
+            if (String(rec.student_id) === String(student.id) || String(rec.student_id) === String(student.student_id) || rec.name === stuName) {
+                const monthNum = parseInt(rec.month, 10);
+                const isS1 = (monthNum >= 10 || monthNum <= 1);
+                if (rec.status === 'P' || rec.status === 'ច' || rec.status === 'មានច្បាប់') {
+                    if (isS1) s1Permit++; else s2Permit++;
+                } else if (rec.status === 'A' || rec.status === 'អ' || rec.status === 'ឥតច្បាប់') {
+                    if (isS1) s1Unpermit++; else s2Unpermit++;
+                }
+            }
+        });
+    } catch(e) {}
+    const totalAbsences = s1Permit + s1Unpermit + s2Permit + s2Unpermit;
+    const absTotalStr = totalAbsences > 0 ? String(totalAbsences) : '';
+
+    // ================= SPREAD 1: ក្របមុខ (Cover Page - Image 1) =================
+    const spread1Html = `
+        <div class="sikha-spread" style="width: 297mm; min-height: 210mm; background: white; margin: 0 auto 30px auto; padding: 10mm 10mm; box-sizing: border-box; display: flex; gap: 8mm; box-shadow: 0 4px 25px rgba(0,0,0,0.08); font-family: 'Khmer OS Siemreap', 'Siemreap', sans-serif; position: relative;">
+            
+            <!-- ទំព័រឆ្វេង៖ ក្របក្រោយ (Back Cover) -->
+            <div class="sikha-page-left" style="flex: 1; border: 1.5px solid #94a3b8; border-radius: 4px; padding: 14px; position: relative; display: flex; flex-direction: column; justify-content: center; align-items: center; box-sizing: border-box; background: #fafafa;">
+                <div style="text-align: center; color: #94a3b8; opacity: 0.6;">
+                    <i class="fa-solid fa-book-bookmark text-6xl mb-4 text-blue-900/30"></i>
+                    <p class="font-moul text-sm text-blue-950/40">ក្រសួងអប់រំ យុវជន និងកីឡា</p>
+                    <p class="text-xs text-slate-400 mt-1 font-siemreap">សៀវភៅសិក្ខាគារិកផ្លូវការ</p>
+                </div>
+            </div>
+
+            <!-- ទំព័រស្តាំ៖ ក្របមុខផ្លូវការ (Front Cover - Exact Match to Image 1) -->
+            <div class="sikha-page-right" style="flex: 1; border: 2.5px solid #1e3a8a; border-radius: 4px; padding: 18px 22px; position: relative; display: flex; flex-direction: column; justify-content: space-between; box-sizing: border-box; background: white;">
+                
+                <!-- Inner border -->
+                <div style="position: absolute; inset: 4px; border: 1px solid #1e3a8a; pointer-events: none;"></div>
+
+                <!-- ផ្កាបួនជ្រុង ពណ៌បៃតង (Four Green Corner Florets) -->
+                <div style="position: absolute; top: 6px; left: 8px; color: #16a34a; font-size: 18px; line-height: 1;">✿</div>
+                <div style="position: absolute; top: 6px; right: 8px; color: #16a34a; font-size: 18px; line-height: 1;">✿</div>
+                <div style="position: absolute; bottom: 6px; left: 8px; color: #16a34a; font-size: 18px; line-height: 1;">✿</div>
+                <div style="position: absolute; bottom: 6px; right: 8px; color: #16a34a; font-size: 18px; line-height: 1;">✿</div>
+
+                <!-- ផ្នែកក្បាលលិខិតជាតិ -->
+                <div style="text-align: center; margin-top: 15px;">
+                    <div style="font-family: 'Khmer OS Muol Light', serif; font-size: 11pt; color: #1e3a8a; line-height: 1.6;">ព្រះរាជាណាចក្រកម្ពុជា</div>
+                    <div style="font-family: 'Khmer OS Muol Light', serif; font-size: 10.5pt; color: #1e3a8a; line-height: 1.6;">ជាតិ សាសនា ព្រះមហាក្សត្រ</div>
+                    <div style="color: #1e3a8a; font-size: 10pt; letter-spacing: 2px; margin-top: 2px;">*** 📖 ***</div>
+                </div>
+
+                <!-- ឈ្មោះក្រសួង -->
+                <div style="text-align: center; margin-top: 20px;">
+                    <h2 style="font-family: 'Khmer OS Muol Light', serif; font-size: 14pt; color: #1e3a8a; margin: 0; letter-spacing: 0.5px;">ក្រសួងអប់រំ យុវជន និងកីឡា</h2>
+                </div>
+
+                <!-- ចំណងជើងធំ៖ សៀវភៅសិក្ខាគារិក -->
+                <div style="text-align: center; margin: 25px 0;">
+                    <h1 style="font-family: 'Khmer OS Muol Light', serif; font-size: 24pt; color: #1e3a8a; margin: 0; text-shadow: 0 1px 1px rgba(30,58,138,0.15);">សៀវភៅសិក្ខាគារិក</h1>
+                </div>
+
+                <!-- ឈ្មោះសាលា -->
+                <div style="text-align: center; margin-bottom: 25px;">
+                    <div style="font-family: 'Khmer OS Muol Light', serif; font-size: 12pt; color: #1e3a8a; line-height: 1.6;">សាលាបឋមសិក្សា ${schoolName.replace(/^សាលាបឋមសិក្សា\s*/, '')}</div>
+                    <div style="width: 140px; height: 1.5px; background: #1e3a8a; margin: 6px auto 0 auto;"></div>
+                </div>
+
+                <!-- ទម្រង់បំពេញព័ត៌មានផ្ទាល់ខ្លួនសិស្ស (Fillable Form Lines) -->
+                <div style="font-size: 9.5pt; color: #0f172a; line-height: 2.3; padding: 0 10px; margin-bottom: 15px;">
+                    <div>សាលាបឋមសិក្សា៖ <span style="font-weight: bold; border-bottom: 1px dotted #1e3a8a; display: inline-block; width: 68%;">${schoolName}</span></div>
+                    <div>ឃុំ/សង្កាត់ <span style="font-weight: bold; border-bottom: 1px dotted #1e3a8a; display: inline-block; width: 20%; text-align: center;">${communeName}</span> ស្រុក/ខ័ណ្ឌ <span style="font-weight: bold; border-bottom: 1px dotted #1e3a8a; display: inline-block; width: 20%; text-align: center;">${districtName}</span> ខេត្ត/ក្រុង <span style="font-weight: bold; border-bottom: 1px dotted #1e3a8a; display: inline-block; width: 20%; text-align: center;">${provinceName}</span></div>
+                    <div>នាមត្រកូល និងនាមខ្លួន <span style="font-family: 'Khmer OS Muol Light', serif; color: #1e3a8a; border-bottom: 1px dotted #1e3a8a; display: inline-block; width: 65%; font-size: 10pt;">${stuName}</span></div>
+                    <div>ថ្ងៃ ខែ ឆ្នាំកំណើត <span style="font-weight: bold; border-bottom: 1px dotted #1e3a8a; display: inline-block; width: 73%;">${stuDob}</span></div>
+                    <div>ទីកន្លែងកំណើត <span style="font-weight: bold; border-bottom: 1px dotted #1e3a8a; display: inline-block; width: 75%;">${stuPob}</span></div>
+                </div>
+
+                <!-- ក្បូរក្បាច់បាតទំព័រ -->
+                <div style="text-align: center; color: #1e3a8a; font-size: 12pt; letter-spacing: 4px; margin-bottom: 5px;">
+                    ~~~ ✿ ~~~
+                </div>
+            </div>
+        </div>
+    `;
+
+    // ================= SPREAD 2: សេចក្តីណែនាំ & ប្រវត្តិរូប (Instructions & Bio - Image 2) =================
+    const spread2Html = `
+        <div class="sikha-spread" style="width: 297mm; min-height: 210mm; background: white; margin: 0 auto 30px auto; padding: 10mm 10mm; box-sizing: border-box; display: flex; gap: 8mm; box-shadow: 0 4px 25px rgba(0,0,0,0.08); font-family: 'Khmer OS Siemreap', 'Siemreap', sans-serif; position: relative;">
+            
+            <!-- ទំព័រឆ្វេង៖ សេចក្តីណែនាំ ៧ ចំណុច (Exact text from Image 2) -->
+            <div class="sikha-page-left" style="flex: 1; border: 2px solid #1e3a8a; border-radius: 4px; padding: 14px 18px; position: relative; display: flex; flex-direction: column; justify-content: space-between; box-sizing: border-box;">
+                
+                <div>
+                    <h3 style="font-family: 'Khmer OS Muol Light', serif; font-size: 13pt; color: #1e3a8a; text-align: center; text-decoration: underline; margin: 0 0 8px 0;">សេចក្តីណែនាំ</h3>
+                    <p style="font-size: 8.5pt; text-align: justify; line-height: 1.6; margin-bottom: 6px; font-weight: bold; color: #0f172a;">
+                        នាយកសាលាត្រូវចេញ និងគ្រប់គ្រងសៀវភៅសិក្ខាគារិក ហើយត្រូវអនុវត្តតាមចំណុចខាងក្រោម៖
+                    </p>
+                    
+                    <ol style="font-size: 8pt; line-height: 1.5; color: #0f172a; margin: 0; padding-left: 14px; text-align: justify;">
+                        <li style="margin-bottom: 4px;"><b>១.</b> ចាប់ពីថ្នាក់ទី៣ ឡើងទៅសិស្សត្រូវមានសៀវភៅសិក្ខាគារិកដែលចេញឱ្យដោយនាយកសាលា។</li>
+                        <li style="margin-bottom: 4px;"><b>២.</b> ត្រូវចុះនាមត្រកូល និងនាមខ្លួន ភេទ ថ្ងៃ ខែ ឆ្នាំកំណើត ទីកន្លែងកំណើតឈ្មោះ និងមុខរបររបស់ឪពុក/ម្តាយឱ្យបានច្បាស់លាស់។</li>
+                        <li style="margin-bottom: 4px;"><b>៣.</b> នៅបញ្ចប់ឆមាសនីមួយៗ និងបញ្ចប់ឆ្នាំសិក្សា គ្រូទទួលបន្ទុកថ្នាក់ត្រូវចុះពិន្ទុ ចំណាត់ថ្នាក់ និងមូលវិចារឱ្យបានត្រឹមត្រូវ។ ចំណែកនាយកសាលាក៏ត្រូវចុះមូលវិចារ ការសរសើរ ឬកែលម្អ នៅចុងឆ្នាំសិក្សានីមួយៗដែរ។</li>
+                        <li style="margin-bottom: 4px;"><b>៤.</b> ចំពោះសិស្សផ្ទេរការសិក្សា នាយកសាលាត្រូវបូកសរុបលទ្ធផលនៃការសិក្សារបស់សិស្ស ឱ្យបានសព្វគ្រប់រួចចុះហត្ថលេខាវាយត្រាដាក់ឈ្មោះ រួចផ្ញើមកសាលារៀនថ្មីតាមសំបុត្រសម្ងាត់។</li>
+                        <li style="margin-bottom: 4px;"><b>៥.</b> ហាមដាច់ខាតមិនឱ្យកោសលុប ឬសរសេរបន្ថែម។ ក្នុងករណីមានកំហុសត្រូវចុះហត្ថលេខា និងមានបញ្ជាក់បន្ថែមពីនាយកសាលា ដោយមានហត្ថលេខា និងចុះឈ្មោះផង។</li>
+                        <li style="margin-bottom: 4px;"><b>៦.</b> របៀបរកមធ្យមភាគប្រចាំឆមាស និងចំណាត់ថ្នាក់សិក្សា ៖
+                            <div style="padding-left: 10px; margin-top: 2px;">
+                                <b>ក. ឆមាសទី១ ៖</b><br>
+                                មធ្យមភាគពិន្ទុខែក្នុងឆមាស ( ៤ ខែ ) បូកនិងមធ្យមភាគពិន្ទុប្រឡងក្នុងឆមាសទី១ ចែកនឹង ២ ។<br>
+                                <b>ខ. ឆមាសទី២ ៖</b><br>
+                                មធ្យមភាគពិន្ទុខែក្នុងឆមាស ( ៤ ខែ ) បូកនិងមធ្យមភាគពិន្ទុប្រឡងក្នុងឆមាសទី២ ចែកនឹង ២ ។
+                                <div style="text-align: center; margin: 4px 0;">
+                                    <span style="border-bottom: 1px solid #1e3a8a; padding: 0 10px; display: inline-block; font-weight: bold;">មធ្យមភាគឆមាសទី១ + ( មធ្យមភាគឆមាសទី ២ × ២ )</span><br>
+                                    <span style="font-weight: bold;">៣</span>
+                                </div>
+                            </div>
+                        </li>
+                        <li style="margin-bottom: 4px;"><b>៧.</b> មធ្យមភាគឆមាសទី១ ទី២ និងចំណាត់ថ្នាក់ ដែលលោកគ្រូ/អ្នកគ្រូ រកឃើញ ហើយត្រូវស្រង់យកជាក់ត្រង់លទ្ធផលនៃការប្រឡងឆមាស ត្រង់ខ្ទង់ឆមាស និងចំណាត់ថ្នាក់។</li>
+                    </ol>
+
+                    <div style="font-size: 7.5pt; margin-top: 6px; padding: 4px 6px; background: #f8fafc; border-left: 3px solid #1e3a8a; line-height: 1.5;">
+                        <b>កំណត់សម្គាល់ ៖</b> - ក្នុង ១ ឆមាស មាន ៤ ខែ<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- នាយកសាលាត្រូវចុះហត្ថលេខាលើរូបថតសិស្ស។
+                    </div>
+                </div>
+
+                <div style="text-align: center; color: #1e3a8a; font-size: 11pt; letter-spacing: 4px; margin-top: 4px;">
+                    ~~~ ✿ ~~~
+                </div>
+            </div>
+
+            <!-- ទំព័រស្តាំ៖ រូបថត ប្រវត្តិរូប និងប្រវត្តិការសិក្សា (Exact match to Image 2) -->
+            <div class="sikha-page-right" style="flex: 1; border: 2px solid #1e3a8a; border-radius: 4px; padding: 14px 18px; position: relative; display: flex; flex-direction: column; justify-content: space-between; box-sizing: border-box;">
+                
+                <!-- ផ្នែកខាងលើ៖ ប្រអប់រូបថត និងចំណងជើង -->
+                <div>
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px;">
+                        <!-- ប្រអប់រូបថត ៤ × ៦ -->
+                        <div style="width: 3.2cm; height: 4.2cm; border: 2px solid #1e3a8a; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 10.5pt; color: #1e3a8a; background: #f8fafc; shrink-0;">
+                            ${stuPhoto ? `<img src="${stuPhoto}" style="width: 100%; height: 100%; object-fit: cover;">` : `
+                                <div style="font-family: 'Khmer OS Muol Light', serif; font-size: 10pt;">រូបថត</div>
+                                <div style="font-size: 9.5pt; font-weight: bold; margin-top: 4px;">៤ × ៦</div>
+                            `}
+                        </div>
+
+                        <!-- ចំណងជើងសៀវភៅសិក្ខាគារិក -->
+                        <div style="flex: 1; text-align: center; padding-top: 15px;">
+                            <h3 style="font-family: 'Khmer OS Muol Light', serif; font-size: 16pt; color: #1e3a8a; margin: 0;">សៀវភៅសិក្ខាគារិក</h3>
+                            <div style="color: #1e3a8a; font-size: 9pt; letter-spacing: 2px; margin-top: 6px;">*** 📖 ***</div>
+                        </div>
+                    </div>
+
+                    <!-- ព័ត៌មានផ្ទាល់ខ្លួនសិស្ស -->
+                    <div style="font-size: 8.5pt; color: #0f172a; line-height: 2.1; margin-top: 5px;">
+                        <div>នាមត្រកូល និងនាមខ្លួន ៖ <span style="font-family: 'Khmer OS Muol Light', serif; color: #1e3a8a; border-bottom: 1px dotted #1e3a8a; display: inline-block; width: 64%; font-size: 9pt;">${stuName}</span></div>
+                        <div>ថ្ងៃ ខែ ឆ្នាំកំណើត ៖ <span style="font-weight: bold; border-bottom: 1px dotted #1e3a8a; display: inline-block; width: 73%;">${stuDob}</span></div>
+                        <div>ឈ្មោះ និងមុខរបរឪពុក ៖ <span style="font-weight: bold; border-bottom: 1px dotted #1e3a8a; display: inline-block; width: 68%;">${stuFather} (${stuFatherJob})</span></div>
+                        <div>ឈ្មោះ និងមុខរបរម្តាយ ៖ <span style="font-weight: bold; border-bottom: 1px dotted #1e3a8a; display: inline-block; width: 68%;">${stuMother} (${stuMotherJob})</span></div>
+                        <div>អាសយដ្ឋានបច្ចុប្បន្ន ៖ <span style="font-weight: bold; border-bottom: 1px dotted #1e3a8a; display: inline-block; width: 72%;">${stuAddress}</span></div>
+                    </div>
+
+                    <!-- ហត្ថលេខានាយកសាលា -->
+                    <div style="text-align: right; margin-top: 6px; padding-right: 15px; font-size: 8pt;">
+                        <div>${ctx.solarDateStr || 'ថ្ងៃទី..........ខែ...........ឆ្នាំ២០..........'}</div>
+                        <div style="font-family: 'Khmer OS Muol Light', serif; color: #1e3a8a; margin-top: 3px; font-size: 9pt;">នាយកសាលា</div>
+                        <div style="height: 20px;"></div>
+                        <div style="font-family: 'Khmer OS Muol Light', serif; font-size: 8pt; color: #1e3a8a;">${principalName}</div>
+                    </div>
+                </div>
+
+                <!-- តារាងប្រវត្តិការសិក្សា (Academic History Table) -->
+                <div>
+                    <table style="width: 100%; border-collapse: collapse; border: 1.5px solid #1e3a8a; font-size: 7.5pt; text-align: center;">
+                        <thead>
+                            <tr style="background: #f1f5f9; color: #1e3a8a; font-family: 'Khmer OS Muol Light', serif;">
+                                <th style="border: 1px solid #1e3a8a; padding: 4px 2px; width: 14%;">ឆ្នាំសិក្សា</th>
+                                <th style="border: 1px solid #1e3a8a; padding: 4px 2px; width: 13%;">ថ្នាក់ទី</th>
+                                <th style="border: 1px solid #1e3a8a; padding: 4px 2px; width: 28%;">គ្រឹះស្ថានសិក្សា</th>
+                                <th style="border: 1px solid #1e3a8a; padding: 4px 2px; width: 17%;">ថ្ងៃ ខែ ឆ្នាំចូលរៀន</th>
+                                <th style="border: 1px solid #1e3a8a; padding: 4px 2px; width: 15%;">ថ្ងៃ ខែ ឆ្នាំ ចេញ</th>
+                                <th style="border: 1px solid #1e3a8a; padding: 4px 2px; width: 13%;">អត្តលេខ</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- ជួរទី១៖ ឆ្នាំសិក្សាបច្ចុប្បន្ន -->
+                            <tr>
+                                <td style="border: 1px solid #1e3a8a; padding: 3px 2px; font-weight: bold;">${academicYear}</td>
+                                <td style="border: 1px solid #1e3a8a; padding: 3px 2px; font-weight: bold;">${curLevel} ${curRoom}</td>
+                                <td style="border: 1px solid #1e3a8a; padding: 3px 2px; text-align: left; padding-left: 4px;">${schoolName}</td>
+                                <td style="border: 1px solid #1e3a8a; padding: 3px 2px;">០១/១១/${academicYear.split('-')[0] || '២០២៦'}</td>
+                                <td style="border: 1px solid #1e3a8a; padding: 3px 2px;">........</td>
+                                <td style="border: 1px solid #1e3a8a; padding: 3px 2px; font-weight: bold;">${stuIdNum}</td>
+                            </tr>
+                            <!-- ជួរទី២ ដល់ ទី៦៖ ទំនេរសម្រាប់ចុះកំណត់ត្រា -->
+                            ${[1, 2, 3, 4, 5].map(() => `
+                                <tr>
+                                    <td style="border: 1px solid #1e3a8a; padding: 4px 2px;">&nbsp;</td>
+                                    <td style="border: 1px solid #1e3a8a; padding: 4px 2px;"></td>
+                                    <td style="border: 1px solid #1e3a8a; padding: 4px 2px;"></td>
+                                    <td style="border: 1px solid #1e3a8a; padding: 4px 2px;"></td>
+                                    <td style="border: 1px solid #1e3a8a; padding: 4px 2px;"></td>
+                                    <td style="border: 1px solid #1e3a8a; padding: 4px 2px;"></td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    `;
+
+    // ================= SPREAD 3: លទ្ធផលប្រឡងឆមាស & ការវាយតម្លៃ (Scores & Evaluation - Images 3, 4, 5) =================
+    const spread3Html = `
+        <div class="sikha-spread" style="width: 297mm; min-height: 210mm; background: white; margin: 0 auto 30px auto; padding: 10mm 10mm; box-sizing: border-box; display: flex; gap: 8mm; box-shadow: 0 4px 25px rgba(0,0,0,0.08); font-family: 'Khmer OS Siemreap', 'Siemreap', sans-serif; position: relative;">
+            
+            <!-- ទំព័រឆ្វេង៖ ក- លទ្ធផលប្រឡងឆមាស និង ខ- អវត្តមាន (Exact match to Image 3) -->
+            <div class="sikha-page-left" style="flex: 1; border: 2px solid #1e3a8a; border-radius: 4px; padding: 10px 14px; position: relative; display: flex; flex-direction: column; justify-content: space-between; box-sizing: border-box;">
+                
+                <!-- ក្បាលទំព័រខាងឆ្វេង -->
+                <div style="font-size: 8.5pt; color: #0f172a; margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center;">
+                    <div>នាមត្រកូល និងនាមខ្លួន ៖ <b style="font-family: 'Khmer OS Muol Light', serif; color: #1e3a8a; font-size: 9pt;">${stuName}</b></div>
+                    <div>ថ្នាក់ទី ៖ <b>${curLevel} ${curRoom}</b> &nbsp;&nbsp;|&nbsp;&nbsp; ចំនួនសិស្ស ៖ <b>${totalStudentsInClass}</b> នាក់</div>
+                </div>
+
+                <!-- ក- តារាងលទ្ធផលនៃការប្រឡងឆមាស (12 Subjects Table) -->
+                <div>
+                    <table style="width: 100%; border-collapse: collapse; border: 1.5px solid #1e3a8a; font-size: 8.5pt; text-align: center;">
+                        <thead>
+                            <tr style="background: #f1f5f9; color: #1e3a8a; font-family: 'Khmer OS Muol Light', serif;">
+                                <th colspan="5" style="border: 1px solid #1e3a8a; padding: 4px; font-size: 9.5pt;">ក- លទ្ធផលនៃការប្រឡងឆមាស</th>
+                            </tr>
+                            <tr style="background: #f8fafc; color: #1e3a8a; font-family: 'Khmer OS Muol Light', serif; font-size: 8pt;">
+                                <th rowspan="2" style="border: 1px solid #1e3a8a; padding: 4px 6px; text-align: left;">មុខវិជ្ជា</th>
+                                <th colspan="2" style="border: 1px solid #1e3a8a; padding: 3px; width: 100px;">ឆមាសទី១</th>
+                                <th colspan="2" style="border: 1px solid #1e3a8a; padding: 3px; width: 100px;">ឆមាសទី២</th>
+                            </tr>
+                            <tr style="background: #f8fafc; color: #1e3a8a; font-size: 7.5pt;">
+                                <th style="border: 1px solid #1e3a8a; padding: 2px;">ពិន្ទុ</th>
+                                <th style="border: 1px solid #1e3a8a; padding: 2px;">ចំណាត់ថ្នាក់</th>
+                                <th style="border: 1px solid #1e3a8a; padding: 2px;">ពិន្ទុ</th>
+                                <th style="border: 1px solid #1e3a8a; padding: 2px;">ចំណាត់ថ្នាក់</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${subjectRowsHtml}
+                            
+                            <!-- ជួរបូកសរុបពិន្ទុ -->
+                            <tr style="font-weight: bold; background: #fdfefe;">
+                                <td style="border: 1px solid #1e3a8a; padding: 3px 6px; text-align: left;">សរុបពិន្ទុ</td>
+                                <td style="border: 1px solid #1e3a8a; padding: 3px 4px;"></td>
+                                <td style="border: 1px solid #1e3a8a; padding: 3px 4px;"></td>
+                                <td style="border: 1px solid #1e3a8a; padding: 3px 4px;"></td>
+                                <td style="border: 1px solid #1e3a8a; padding: 3px 4px;"></td>
+                            </tr>
+                            <tr style="font-weight: bold;">
+                                <td style="border: 1px solid #1e3a8a; padding: 3px 6px; text-align: left;">មធ្យមភាគ</td>
+                                <td style="border: 1px solid #1e3a8a; padding: 3px 4px;"></td>
+                                <td style="border: 1px solid #1e3a8a; padding: 3px 4px;"></td>
+                                <td style="border: 1px solid #1e3a8a; padding: 3px 4px;"></td>
+                                <td style="border: 1px solid #1e3a8a; padding: 3px 4px;"></td>
+                            </tr>
+                            <tr>
+                                <td style="border: 1px solid #1e3a8a; padding: 3px 6px; text-align: left;">មធ្យមភាគប្រចាំខែ</td>
+                                <td style="border: 1px solid #1e3a8a; padding: 3px 4px;"></td>
+                                <td style="border: 1px solid #1e3a8a; padding: 3px 4px;"></td>
+                                <td style="border: 1px solid #1e3a8a; padding: 3px 4px;"></td>
+                                <td style="border: 1px solid #1e3a8a; padding: 3px 4px;"></td>
+                            </tr>
+                            <tr style="font-weight: bold; background: #f8fafc;">
+                                <td style="border: 1px solid #1e3a8a; padding: 3px 6px; text-align: left;">មធ្យមភាគប្រចាំឆមាស</td>
+                                <td style="border: 1px solid #1e3a8a; padding: 3px 4px;"></td>
+                                <td style="border: 1px solid #1e3a8a; padding: 3px 4px;"></td>
+                                <td style="border: 1px solid #1e3a8a; padding: 3px 4px;"></td>
+                                <td style="border: 1px solid #1e3a8a; padding: 3px 4px;"></td>
+                            </tr>
+                            <tr style="font-weight: bold; background: #eff6ff; color: #1e3a8a;">
+                                <td colspan="5" style="border: 1px solid #1e3a8a; padding: 4px; text-align: center; font-size: 8pt;">
+                                    លទ្ធផលចំណាត់ថ្នាក់ ( មធ្យមភាគ - ចំណាត់ថ្នាក់ ) ៖ .............................................
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- ខ- ចំនួនពេលអវត្តមាន (Absences Table) -->
+                <div style="margin-top: 8px;">
+                    <table style="width: 100%; border-collapse: collapse; border: 1.5px solid #1e3a8a; font-size: 8pt; text-align: center;">
+                        <thead>
+                            <tr style="background: #f1f5f9; color: #1e3a8a; font-family: 'Khmer OS Muol Light', serif;">
+                                <th colspan="5" style="border: 1px solid #1e3a8a; padding: 3px 4px;">ខ- ចំនួនពេលអវត្តមាន</th>
+                            </tr>
+                            <tr style="background: #f8fafc; font-size: 7.5pt;">
+                                <th colspan="2" style="border: 1px solid #1e3a8a; padding: 2px; width: 40%;">ឆមាសទី១</th>
+                                <th colspan="2" style="border: 1px solid #1e3a8a; padding: 2px; width: 40%;">ឆមាសទី២</th>
+                                <th rowspan="2" style="border: 1px solid #1e3a8a; padding: 2px; width: 20%; font-weight: bold;">សរុប</th>
+                            </tr>
+                            <tr style="background: #f8fafc; font-size: 7.5pt;">
+                                <th style="border: 1px solid #1e3a8a; padding: 2px;">មានច្បាប់</th>
+                                <th style="border: 1px solid #1e3a8a; padding: 2px;">គ្មានច្បាប់</th>
+                                <th style="border: 1px solid #1e3a8a; padding: 2px;">មានច្បាប់</th>
+                                <th style="border: 1px solid #1e3a8a; padding: 2px;">គ្មានច្បាប់</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td style="border: 1px solid #1e3a8a; padding: 5px 2px; font-weight: bold;">${s1Permit > 0 ? s1Permit : ''}</td>
+                                <td style="border: 1px solid #1e3a8a; padding: 5px 2px; font-weight: bold; color: #dc2626;">${s1Unpermit > 0 ? s1Unpermit : ''}</td>
+                                <td style="border: 1px solid #1e3a8a; padding: 5px 2px; font-weight: bold;">${s2Permit > 0 ? s2Permit : ''}</td>
+                                <td style="border: 1px solid #1e3a8a; padding: 5px 2px; font-weight: bold; color: #dc2626;">${s2Unpermit > 0 ? s2Unpermit : ''}</td>
+                                <td style="border: 1px solid #1e3a8a; padding: 5px 2px; font-weight: bold; background: #f8fafc;">${absTotalStr}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- ទំព័រស្តាំ៖ គ- វាយតម្លៃ, ឃ- លទ្ធផលប្រចាំឆ្នាំ, ង- ការសរសើរ/កែលម្អ, ច- មូលវិចារនាយក (Exact match to Images 3, 4, 5) -->
+            <div class="sikha-page-right" style="flex: 1; border: 2px solid #1e3a8a; border-radius: 4px; padding: 10px 14px; position: relative; display: flex; flex-direction: column; justify-content: space-between; box-sizing: border-box;">
+                
+                <!-- ក្បាលទំព័រខាងស្តាំ -->
+                <div style="font-size: 8.5pt; color: #0f172a; margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center;">
+                    <div>សាលា ៖ <b>${schoolName}</b></div>
+                    <div>ឆ្នាំសិក្សា ៖ <b>${academicYear}</b></div>
+                </div>
+
+                <!-- គ- វាយតម្លៃសិស្សលើការសិក្សា -->
+                <div>
+                    <table style="width: 100%; border-collapse: collapse; border: 1.5px solid #1e3a8a; font-size: 8pt; text-align: center;">
+                        <thead>
+                            <tr style="background: #f1f5f9; color: #1e3a8a; font-family: 'Khmer OS Muol Light', serif;">
+                                <th colspan="3" style="border: 1px solid #1e3a8a; padding: 3px 4px; font-size: 9pt;">គ- វាយតម្លៃសិស្សលើការសិក្សា</th>
+                            </tr>
+                            <tr style="background: #f8fafc; font-size: 8pt; font-family: 'Khmer OS Muol Light', serif; color: #1e3a8a;">
+                                <th style="border: 1px solid #1e3a8a; padding: 3px; width: 33%;">ឆមាសទី១</th>
+                                <th style="border: 1px solid #1e3a8a; padding: 3px; width: 33%;">ឆមាសទី២</th>
+                                <th style="border: 1px solid #1e3a8a; padding: 3px; width: 34%;">ប្រចាំឆ្នាំ</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td style="border: 1px solid #1e3a8a; padding: 6px 4px; height: 38px; vertical-align: top; text-align: left; font-size: 7.5pt; line-height: 1.4;">
+                                    ............................................<br>
+                                    ............................................
+                                </td>
+                                <td style="border: 1px solid #1e3a8a; padding: 6px 4px; height: 38px; vertical-align: top; text-align: left; font-size: 7.5pt; line-height: 1.4;">
+                                    ............................................<br>
+                                    ............................................
+                                </td>
+                                <td style="border: 1px solid #1e3a8a; padding: 6px 4px; height: 38px; vertical-align: top; text-align: left; font-size: 7.5pt; line-height: 1.4;">
+                                    ............................................<br>
+                                    ............................................
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- ឃ- លទ្ធផលប្រចាំឆ្នាំ (Annual Outcome) -->
+                <div style="border: 1.5px solid #1e3a8a; border-radius: 2px; padding: 6px 8px; font-size: 8pt; line-height: 1.8; color: #0f172a; margin-top: 6px;">
+                    <div style="font-family: 'Khmer OS Muol Light', serif; color: #1e3a8a; font-size: 8.5pt; text-align: center; margin-bottom: 2px;">ឃ- លទ្ធផលប្រចាំឆ្នាំ</div>
+                    <div>ត្រូវបានឡើងថ្នាក់ទី <span style="border-bottom: 1px dotted #1e3a8a; display: inline-block; width: 73%;">&nbsp;</span></div>
+                    <div>ត្រូវប្រឡងឡើងថ្នាក់ ៖ មុខវិជ្ជាដែលត្រូវប្រឡង <span style="border-bottom: 1px dotted #1e3a8a; display: inline-block; width: 45%;">&nbsp;</span></div>
+                    <div><span style="border-bottom: 1px dotted #1e3a8a; display: inline-block; width: 98%;">&nbsp;</span></div>
+                    <div>ត្រូវបានឡើងថ្នាក់ទី <span style="border-bottom: 1px dotted #1e3a8a; display: inline-block; width: 28%;">&nbsp;</span> ត្រូវរៀនត្រួតថ្នាក់ទី <span style="border-bottom: 1px dotted #1e3a8a; display: inline-block; width: 28%;">&nbsp;</span></div>
+                </div>
+
+                <!-- ង- ការសរសើរ និងកែលម្អ (Teacher Remarks & Signature) -->
+                <div style="border: 1.5px solid #1e3a8a; border-radius: 2px; padding: 6px 8px; font-size: 8pt; margin-top: 6px;">
+                    <div style="font-family: 'Khmer OS Muol Light', serif; color: #1e3a8a; font-size: 8.5pt; text-align: center; margin-bottom: 2px;">ង- ការសរសើរ និងកែលម្អ</div>
+                    <div style="display: flex; justify-content: space-between; gap: 10px; font-size: 7.5pt; line-height: 1.6;">
+                        <div style="flex: 1;">
+                            <div style="font-weight: bold; color: #1e3a8a; text-align: center;">ការសរសើរ</div>
+                            <div style="border-bottom: 1px dotted #1e3a8a; height: 16px;"></div>
+                            <div style="border-bottom: 1px dotted #1e3a8a; height: 16px;"></div>
+                        </div>
+                        <div style="flex: 1;">
+                            <div style="font-weight: bold; color: #1e3a8a; text-align: center;">កែលម្អ</div>
+                            <div style="border-bottom: 1px dotted #1e3a8a; height: 16px;"></div>
+                            <div style="border-bottom: 1px dotted #1e3a8a; height: 16px;"></div>
+                        </div>
+                    </div>
+                    <div style="text-align: right; margin-top: 6px; padding-right: 15px; font-size: 7.5pt;">
+                        <div>${ctx.solarDateStr || 'ថ្ងៃទី..........ខែ...........ឆ្នាំ២០..........'}</div>
+                        <div style="font-family: 'Khmer OS Muol Light', serif; color: #1e3a8a; margin-top: 2px;">គ្រូបន្ទុកថ្នាក់</div>
+                        <div style="height: 18px;"></div>
+                        <div style="font-family: 'Khmer OS Muol Light', serif; color: #1e3a8a;">${teacherName}</div>
+                    </div>
+                </div>
+
+                <!-- ច- មូលវិចាររបស់នាយកសាលា (Principal Remarks & Signature) -->
+                <div style="border: 1.5px solid #1e3a8a; border-radius: 2px; padding: 6px 8px; font-size: 8pt; margin-top: 6px;">
+                    <div style="font-family: 'Khmer OS Muol Light', serif; color: #1e3a8a; font-size: 8.5pt; text-align: center; margin-bottom: 2px;">ច- មូលវិចាររបស់នាយកសាលា</div>
+                    <div style="border-bottom: 1px dotted #1e3a8a; height: 15px;"></div>
+                    <div style="border-bottom: 1px dotted #1e3a8a; height: 15px;"></div>
+                    <div style="text-align: right; margin-top: 6px; padding-right: 15px; font-size: 7.5pt;">
+                        <div>${ctx.solarDateStr || 'ថ្ងៃទី..........ខែ...........ឆ្នាំ២០..........'}</div>
+                        <div style="font-family: 'Khmer OS Muol Light', serif; color: #1e3a8a; margin-top: 2px;">នាយកសាលា</div>
+                        <div style="height: 18px;"></div>
+                        <div style="font-family: 'Khmer OS Muol Light', serif; color: #1e3a8a;">${principalName}</div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    `;
+
+    // ជ្រើសរើសទំព័រតាម mode
+    let outputHtml = '';
+    if (mode === 'cover') {
+        outputHtml = spread1Html;
+    } else if (mode === 'instructions_bio') {
+        outputHtml = spread2Html;
+    } else if (mode === 'scores_eval') {
+        outputHtml = spread3Html;
+    } else {
+        // 'all' - បង្ហាញសៀវភៅទាំងមូល (3 សន្លឹក A4 Landscape)
+        outputHtml = spread1Html + spread2Html + spread3Html;
+    }
+
+    container.innerHTML = `
+        <style>
+            @media print {
+                @page {
+                    size: A4 landscape;
+                    margin: 0;
+                }
+                body {
+                    background: white !important;
+                    margin: 0 !important;
+                    padding: 0 !important;
+                }
+                .sikha-spread {
+                    width: 297mm !important;
+                    height: 209mm !important;
+                    margin: 0 auto !important;
+                    padding: 6mm 8mm !important;
+                    box-shadow: none !important;
+                    page-break-after: always !important;
+                    break-after: page !important;
+                }
+                .no-print {
+                    display: none !important;
+                }
+            }
+        </style>
+        <div class="w-full flex flex-col items-center font-siemreap animate-fade-in py-2">
+            ${outputHtml}
+        </div>
+    `;
 };

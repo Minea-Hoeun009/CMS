@@ -1489,7 +1489,7 @@ window.loadScoresView = async function() {
               </div>
             </div>
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5 md:gap-6 flex-1 no-print">
+            <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5 md:gap-6 flex-1 no-print">
               <div onclick="window.openScoreModal('modal-entry', window.renderScoreEntryContent)" class="bg-white/90 backdrop-blur-md rounded-[2rem] p-6 shadow-sm hover:shadow-[0_20px_40px_rgb(59,130,246,0.15)] hover:-translate-y-1.5 transition-all duration-300 cursor-pointer border border-slate-100 group flex flex-col justify-between h-[220px] relative overflow-hidden">
                   <div class="absolute -right-4 -top-4 w-24 h-24 bg-blue-50 rounded-full group-hover:scale-150 transition-transform duration-500 ease-out pointer-events-none"></div>
                   <div class="w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-600 text-white rounded-2xl flex items-center justify-center text-3xl shadow-md shadow-blue-500/30 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300 relative z-10"><i class="fa-solid fa-pen-to-square"></i></div>
@@ -1500,15 +1500,16 @@ window.loadScoresView = async function() {
                   <div class="w-16 h-16 bg-gradient-to-br from-rose-400 to-rose-600 text-white rounded-2xl flex items-center justify-center text-3xl shadow-md shadow-rose-500/30 group-hover:scale-110 group-hover:-rotate-3 transition-transform duration-300 relative z-10"><i class="fa-solid fa-ranking-star"></i></div>
                   <div class="relative z-10"><h3 class="font-moul text-[16px] text-slate-800 mb-1.5 group-hover:text-rose-600 transition-colors">តារាងចំណាត់ថ្នាក់</h3><p class="text-slate-500 text-xs font-siemreap leading-relaxed">មើលចំណាត់ថ្នាក់ និងទាញយកជា Excel។</p></div>
               </div>
-              <div onclick="window.openScoreModal('modal-reportcards', window.renderReportCardsTab)" class="bg-white/90 backdrop-blur-md rounded-[2rem] p-6 shadow-sm hover:shadow-[0_20px_40px_rgb(16,185,129,0.15)] hover:-translate-y-1.5 transition-all duration-300 cursor-pointer border border-slate-100 group flex flex-col justify-between h-[220px] relative overflow-hidden">
-                  <div class="absolute -right-4 -top-4 w-24 h-24 bg-emerald-50 rounded-full group-hover:scale-150 transition-transform duration-500 ease-out pointer-events-none"></div>
-                  <div class="w-16 h-16 bg-gradient-to-br from-emerald-400 to-teal-600 text-white rounded-2xl flex items-center justify-center text-3xl shadow-md shadow-emerald-500/30 group-hover:scale-110 transition-transform duration-300 relative z-10"><i class="fa-solid fa-file-invoice"></i></div>
-                  <div class="relative z-10"><h3 class="font-moul text-[16px] text-slate-800 mb-1.5 group-hover:text-emerald-600 transition-colors">ព្រឹត្តិបត្រពិន្ទុ</h3><p class="text-slate-500 text-xs font-siemreap leading-relaxed">បោះពុម្ពសៀវភៅតាមដានការសិក្សាបុគ្គល។</p></div>
-              </div>
-              <div onclick="window.openScoreModal('modal-honorboard', window.renderHonorBoardContent)" class="bg-white/90 backdrop-blur-md rounded-[2rem] p-6 shadow-sm hover:shadow-[0_20px_40px_rgb(245,158,11,0.15)] hover:-translate-y-1.5 transition-all duration-300 cursor-pointer border border-slate-100 group flex flex-col justify-between h-[220px] relative overflow-hidden">
-                  <div class="absolute -right-4 -top-4 w-24 h-24 bg-amber-50 rounded-full group-hover:scale-150 transition-transform duration-500 ease-out pointer-events-none"></div>
-                  <div class="w-16 h-16 bg-gradient-to-br from-amber-400 to-orange-500 text-white rounded-2xl flex items-center justify-center text-4xl mb-5 shadow-lg shadow-amber-500/30 group-hover:scale-110 transition-transform duration-300 relative z-10"><i class="fa-solid fa-crown"></i></div>
-                  <div class="relative z-10"><h3 class="font-moul text-[16px] text-slate-800 mb-1.5 group-hover:text-amber-600 transition-colors">តារាងកិត្តិយស</h3><p class="text-slate-500 text-xs font-siemreap leading-relaxed">ប័ណ្ណសរសើរសម្រាប់សិស្សឆ្នើម (Top 5)។</p></div>
+              <div onclick="if(typeof switchView === 'function') { switchView('reports'); } else if (typeof window.loadReportsView === 'function') { window.loadReportsView(); }" class="bg-white/90 backdrop-blur-md rounded-[2rem] p-6 shadow-sm hover:shadow-[0_20px_40px_rgb(99,102,241,0.18)] hover:-translate-y-1.5 transition-all duration-300 cursor-pointer border-2 border-indigo-100 hover:border-indigo-400 group flex flex-col justify-between h-[220px] relative overflow-hidden">
+                  <div class="absolute -right-4 -top-4 w-24 h-24 bg-indigo-50 rounded-full group-hover:scale-150 transition-transform duration-500 ease-out pointer-events-none"></div>
+                  <div class="flex items-center justify-between relative z-10">
+                      <div class="w-16 h-16 bg-gradient-to-br from-indigo-500 to-purple-600 text-white rounded-2xl flex items-center justify-center text-3xl shadow-md shadow-indigo-500/30 group-hover:scale-110 transition-transform duration-300"><i class="fa-solid fa-folder-open"></i></div>
+                      <span class="text-[10px] bg-indigo-100 text-indigo-700 font-bold px-2 py-0.5 rounded-full uppercase">Reports & Records</span>
+                  </div>
+                  <div class="relative z-10">
+                      <h3 class="font-moul text-[16px] text-slate-800 mb-1.5 group-hover:text-indigo-600 transition-colors">របាយការណ៍ & សៀវភៅតាមដាន</h3>
+                      <p class="text-slate-500 text-xs font-siemreap leading-relaxed">សៀវភៅសិក្ខាគារិក សៀវភៅតាមដាន តារាងកិត្តិយស និងព្រឹត្តិបត្រពិន្ទុ។</p>
+                  </div>
               </div>
             </div>
           </div>
@@ -1663,6 +1664,12 @@ window.updateGlobalSettings = async function() {
 };
 
 window.openScoreModal = function(id, callback) {
+    if (!document.getElementById(id) && typeof window.loadScoresView === 'function') {
+        const scoresDiv = document.getElementById('scoresView');
+        if (scoresDiv && scoresDiv.innerHTML.trim() === '') {
+            window.loadScoresView();
+        }
+    }
     const modal = document.getElementById(id);
     if(modal) {
         modal.classList.remove('hidden');
@@ -1672,6 +1679,14 @@ window.openScoreModal = function(id, callback) {
     if(modalContainer) setTimeout(() => modalContainer.setAttribute('data-open', 'true'), 10);
     // ធានាថា Callback ដើរជានិច្ច ដើម្បី Render ទិន្នន័យពេលបើក Modal
     if(typeof callback === 'function') callback();
+};
+
+window.openHonorBoardModal = function() {
+    window.openScoreModal('modal-honorboard', window.renderHonorBoardContent);
+};
+
+window.openReportCardsModal = function() {
+    window.openScoreModal('modal-reportcards', window.renderReportCardsTab);
 };
 
 window.closeScoreModal = function(id) {
@@ -2324,6 +2339,43 @@ window.exportScoreEntryToExcel = function() {
 
     let htmlTable = window.getAdvancedScoreTableHtml(true, false);
 
+    // ស្ថិតិសង្ខេបលទ្ធផលពិន្ទុ (Student Summary Statistics)
+    const stus = [...window.rankingsDataList];
+    const totalStus = stus.length;
+    const femaleStus = stus.filter(s => s.gender === 'ស្រី' || s.gender === 'ស' || s.gender === 'F').length;
+    const maleStus = totalStus - femaleStus;
+
+    let passMark = 5.0; 
+    if (window.activeSchema && window.activeSchema.length > 0) {
+        let totalMax = 0, subjCount = 0;
+        window.activeSchema.forEach(item => {
+            if (item.subs) { item.subs.forEach(s => { totalMax += window.schemaMaxMap[s.key]||10; subjCount++; }); }
+            else { totalMax += window.schemaMaxMap[item.key]||10; subjCount++; }
+        });
+        if(subjCount > 0) passMark = (totalMax / subjCount) / 2;
+    }
+
+    const passedList = stus.filter(s => parseFloat(s.avg) >= passMark);
+    const passed = passedList.length;
+    const passedF = passedList.filter(s => s.gender === 'ស្រី' || s.gender === 'ស' || s.gender === 'F').length;
+    const passedM = passed - passedF;
+
+    const failedList = stus.filter(s => !s.avg || isNaN(parseFloat(s.avg)) || parseFloat(s.avg) < passMark);
+    const failed = failedList.length;
+    const failedF = failedList.filter(s => s.gender === 'ស្រី' || s.gender === 'ស' || s.gender === 'F').length;
+    const failedM = failed - failedF;
+
+    const passPct = totalStus > 0 ? ((passed / totalStus) * 100).toFixed(2) : "0.00";
+    const failPct = totalStus > 0 ? ((failed / totalStus) * 100).toFixed(2) : "0.00";
+    const femalePct = totalStus > 0 ? ((femaleStus / totalStus) * 100).toFixed(2) : "0.00";
+    const malePct = totalStus > 0 ? ((maleStus / totalStus) * 100).toFixed(2) : "0.00";
+
+    const passFPct = femaleStus > 0 ? ((passedF / femaleStus) * 100).toFixed(2) : "0.00";
+    const failFPct = femaleStus > 0 ? ((failedF / femaleStus) * 100).toFixed(2) : "0.00";
+
+    let passLabel = type === "annual" ? "សិស្សឡើងថ្នាក់ (ជាប់មធ្យមភាគ)" : "សិស្សជាប់មធ្យមភាគ";
+    let failLabel = type === "annual" ? "សិស្សត្រួតថ្នាក់ (ធ្លាក់មធ្យមភាគ)" : "សិស្សធ្លាក់មធ្យមភាគ";
+
     let excelContent = `
         <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
         <head><meta charset="utf-8"><style>table { border-collapse: collapse; white-space: nowrap; font-family: "Khmer OS Siemreap", sans-serif; }</style></head>
@@ -2339,6 +2391,256 @@ window.exportScoreEntryToExcel = function() {
                 <tr><td colspan="30" style="border: none; height: 10px;"></td></tr>
             </table>
             ${htmlTable}
+
+            <!-- ស្ថិតិសង្ខេបក្រោមតារាងពិន្ទុ -->
+            <table style="width: 100%; margin-top: 15px; border-collapse: collapse; font-family: 'Khmer OS Siemreap', sans-serif;">
+                <tr>
+                    <td colspan="20" style="border: none; padding: 6px 0 3px 0; font-family: 'Khmer OS Muol Light', Moul, serif; font-size: 11pt; color: #1e3a8a;">
+                        ❖ ស្ថិតិសង្ខេបលទ្ធផល ៖
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="20" style="border: none; padding: 3px 0; font-size: 10.5pt; line-height: 1.8;">
+                        • <b>សិស្សសរុប ៖</b> <b>${totalStus}</b> នាក់ &nbsp;|&nbsp; ស្រី <b>${femaleStus}</b> នាក់ (${femalePct}%) &nbsp;|&nbsp; ប្រុស <b>${maleStus}</b> នាក់ (${malePct}%)
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="20" style="border: none; padding: 3px 0; font-size: 10.5pt; line-height: 1.8;">
+                        • <b>${passLabel} ៖</b> <b>${passed}</b> នាក់ គិតជាភាគរយ <b>${passPct}%</b> &nbsp;|&nbsp; ស្រី <b>${passedF}</b> នាក់ គិតជាភាគរយ <b>${passFPct}%</b> (នៃសិស្សស្រី) &nbsp;|&nbsp; ប្រុស <b>${passedM}</b> នាក់
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="20" style="border: none; padding: 3px 0; font-size: 10.5pt; line-height: 1.8;">
+                        • <b>${failLabel} ៖</b> <b>${failed}</b> នាក់ គិតជាភាគរយ <b>${failPct}%</b> &nbsp;|&nbsp; ស្រី <b>${failedF}</b> នាក់ គិតជាភាគរយ <b>${failFPct}%</b> (នៃសិស្សស្រី) &nbsp;|&nbsp; ប្រុស <b>${failedM}</b> នាក់
+                    </td>
+                </tr>
+                <tr><td colspan="20" style="border: none; height: 10px;"></td></tr>
+            </table>
+
+            <!-- តារាងក្រឡាស្ថិតិសង្ខេប (Structured Grid Table) -->
+            <table style="border-collapse: collapse; font-family: 'Khmer OS Siemreap', sans-serif; font-size: 10pt; text-align: center; margin-bottom: 20px;">
+                <thead>
+                    <tr style="background-color: #1e40af; color: #ffffff;">
+                        <th style="border: 1pt solid #000; padding: 6px 14px; font-family: 'Khmer OS Muol Light', Moul, serif; font-size: 10pt; text-align: center;">លទ្ធផល</th>
+                        <th style="border: 1pt solid #000; padding: 6px 14px; font-family: 'Khmer OS Muol Light', Moul, serif; font-size: 10pt; text-align: center;">សរុប</th>
+                        <th style="border: 1pt solid #000; padding: 6px 14px; font-family: 'Khmer OS Muol Light', Moul, serif; font-size: 10pt; text-align: center; color: #ffe4e6;">ស្រី</th>
+                        <th style="border: 1pt solid #000; padding: 6px 14px; font-family: 'Khmer OS Muol Light', Moul, serif; font-size: 10pt; text-align: center;">ប្រុស</th>
+                        <th style="border: 1pt solid #000; padding: 6px 14px; font-family: 'Khmer OS Muol Light', Moul, serif; font-size: 10pt; text-align: center;">ភាគរយសរុប (%)</th>
+                        <th style="border: 1pt solid #000; padding: 6px 14px; font-family: 'Khmer OS Muol Light', Moul, serif; font-size: 10pt; text-align: center; color: #ffe4e6;">ភាគរយស្រី (%)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr style="background-color: #f8fafc;">
+                        <td style="border: 0.5pt solid #000; padding: 5px 12px; font-family: 'Khmer OS Muol Light', Moul, serif; font-size: 9.5pt; text-align: left;">សិស្សសរុប</td>
+                        <td style="border: 0.5pt solid #000; padding: 5px 10px; font-weight: bold;">${totalStus} នាក់</td>
+                        <td style="border: 0.5pt solid #000; padding: 5px 10px; font-weight: bold; color: #be123c;">${femaleStus} នាក់</td>
+                        <td style="border: 0.5pt solid #000; padding: 5px 10px; font-weight: bold;">${maleStus} នាក់</td>
+                        <td style="border: 0.5pt solid #000; padding: 5px 10px; font-weight: bold;">100%</td>
+                        <td style="border: 0.5pt solid #000; padding: 5px 10px; font-weight: bold; color: #be123c;">${femalePct}%</td>
+                    </tr>
+                    <tr style="background-color: #ecfdf5;">
+                        <td style="border: 0.5pt solid #000; padding: 5px 12px; font-family: 'Khmer OS Muol Light', Moul, serif; font-size: 9.5pt; text-align: left; color: #166534;">${passLabel}</td>
+                        <td style="border: 0.5pt solid #000; padding: 5px 10px; font-weight: bold; color: #166534;">${passed} នាក់</td>
+                        <td style="border: 0.5pt solid #000; padding: 5px 10px; font-weight: bold; color: #be123c;">${passedF} នាក់</td>
+                        <td style="border: 0.5pt solid #000; padding: 5px 10px; font-weight: bold; color: #166534;">${passedM} នាក់</td>
+                        <td style="border: 0.5pt solid #000; padding: 5px 10px; font-weight: bold; color: #166534;">${passPct}%</td>
+                        <td style="border: 0.5pt solid #000; padding: 5px 10px; font-weight: bold; color: #be123c;">${passFPct}%</td>
+                    </tr>
+                    <tr style="background-color: #fff1f2;">
+                        <td style="border: 0.5pt solid #000; padding: 5px 12px; font-family: 'Khmer OS Muol Light', Moul, serif; font-size: 9.5pt; text-align: left; color: #9f1239;">${failLabel}</td>
+                        <td style="border: 0.5pt solid #000; padding: 5px 10px; font-weight: bold; color: #9f1239;">${failed} នាក់</td>
+                        <td style="border: 0.5pt solid #000; padding: 5px 10px; font-weight: bold; color: #be123c;">${failedF} នាក់</td>
+                        <td style="border: 0.5pt solid #000; padding: 5px 10px; font-weight: bold; color: #9f1239;">${failedM} នាក់</td>
+                        <td style="border: 0.5pt solid #000; padding: 5px 10px; font-weight: bold; color: #9f1239;">${failPct}%</td>
+                        <td style="border: 0.5pt solid #000; padding: 5px 10px; font-weight: bold; color: #be123c;">${failFPct}%</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <table style="width: 100%; margin-top: 25px; border-collapse: collapse; white-space: nowrap;">
+                <tr>
+                    <td colspan="12" style="border: none; text-align: center; vertical-align: top; font-family: 'Khmer OS Siemreap', 'Siemreap', sans-serif; font-size: 10.5pt; line-height: 1.6;">
+                        បានឃើញ និងឯកភាព<br>
+                        <b style="font-family: 'Khmer OS Muol Light', Moul, serif; font-size: 11pt;">នាយក/នាយិកាសាលា</b><br><br><br><br><br>
+                        ${principalDisplayName ? `<b style="font-family: 'Khmer OS Muol Light', Moul, serif; font-size: 11pt;">${principalDisplayName}</b>` : ''}
+                    </td>
+                    <td colspan="6" style="border: none;"></td>
+                    <td colspan="12" style="border: none; text-align: center; vertical-align: top; font-family: 'Khmer OS Siemreap', 'Siemreap', sans-serif; font-size: 10.5pt; line-height: 1.6;">
+                        ${finalLunarDate ? `${finalLunarDate}<br>` : ''}
+                        ${finalSolarDate}<br>
+                        <b style="font-family: 'Khmer OS Muol Light', Moul, serif; font-size: 11pt;">គ្រូបន្ទុកថ្នាក់</b><br><br><br><br><br>
+                        ${teacherDisplayName ? `<b style="font-family: 'Khmer OS Muol Light', Moul, serif; font-size: 11pt;">${teacherDisplayName}</b>` : ''}
+                    </td>
+                </tr>
+            </table>
+        </body>
+        </html>
+    `;
+
+    const blob = new Blob(['\ufeff' + excelContent], { type: 'application/vnd.ms-excel' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 100);
+};
+
+window.exportRankingsToExcel = function() {
+    if(!window.rankingsDataList || window.rankingsDataList.length === 0) {
+        if(typeof window.calculateAllScores === 'function') window.calculateAllScores();
+        if(!window.rankingsDataList || window.rankingsDataList.length === 0) return alert("គ្មានទិន្នន័យដើម្បីទាញយកទេ!");
+    }
+
+    const type = document.getElementById("globalPeriodType")?.value || "monthly";
+    const month = document.getElementById("globalPeriodValue")?.value || "មករា";
+    const sInfo = typeof appSettings !== 'undefined' ? appSettings : {};
+    const grade = (sInfo.teacher_level && sInfo.teacher_room) ? `${sInfo.teacher_level} ${sInfo.teacher_room}`.trim() : "ថ្នាក់ទី";
+    const districtName = (sInfo.district || "ស្រុកកៀនស្វាយ").replace('ស្រុក', '').trim(); 
+    const schoolName = sInfo.school_name || "សាលាបឋមសិក្សា.....................";
+    const academicYear = document.getElementById("globalAcademicYear")?.value || "2026-2027";
+    const filename = `តារាងចំណាត់ថ្នាក់_${grade.replace(/ /g, '_')}_${month}.xls`;
+
+    let titleText = `តារាងចំណាត់ថ្នាក់សិស្សប្រចាំខែ${month}`;
+    if (type === "semester") titleText = month.includes("ឆមាសទី១") ? "តារាងចំណាត់ថ្នាក់សិស្សប្រឡងឆមាសលើកទី១" : (month.includes("ឆមាសទី២") ? "តារាងចំណាត់ថ្នាក់សិស្សប្រឡងឆមាសលើកទី២" : `តារាងចំណាត់ថ្នាក់សិស្សប្រឡង${month}`);
+    else if (type === "annual") titleText = `តារាងចំណាត់ថ្នាក់សិស្សប្រចាំឆ្នាំសិក្សា`;
+
+    const rDates = window.reportCardDateSettings || {};
+    let locationStr = (rDates.location || "ធ្វើនៅ.........................").trim().replace(/,+$/, '');
+    let sDate = (rDates.solarDate || "ថ្ងៃទី....... ខែ....... ឆ្នាំ២០....").trim();
+    if (sDate.includes("ថ្ងៃទី")) sDate = sDate.substring(sDate.indexOf("ថ្ងៃទី"));
+    const solarDateStr = `${locationStr}, ${sDate}`;
+    const lunarDateStr = rDates.showLunar !== false ? (rDates.lunarDate || "ថ្ងៃ......................... ខែ............ ឆ្នាំ............ ព.ស.២៥៧...") : "";
+
+    const ctx = (window.CMSPrintManager && typeof window.CMSPrintManager.getStandardContext === 'function')
+        ? window.CMSPrintManager.getStandardContext({ academicYear })
+        : null;
+
+    const principalDisplayName = (ctx && ctx.principalName && ctx.principalName !== "នាយកសាលា") ? ctx.principalName : ((sInfo.principal_name && sInfo.principal_name !== "នាយកសាលា") ? sInfo.principal_name : "");
+    const teacherDisplayName = (ctx && ctx.teacherName) ? ctx.teacherName : ((window.AuthState ? window.AuthState.teacherName : null) || localStorage.getItem('auth_teacher_name') || sInfo.teacher_name || "");
+    const finalSolarDate = (ctx && ctx.solarDateStr) ? ctx.solarDateStr : solarDateStr;
+    const finalLunarDate = (ctx && ctx.lunarDateStr) ? ctx.lunarDateStr : lunarDateStr;
+
+    let htmlTable = window.getAdvancedScoreTableHtml(true, true);
+
+    const stus = [...window.rankingsDataList];
+    const totalStus = stus.length;
+    const femaleStus = stus.filter(s => s.gender === 'ស្រី' || s.gender === 'ស' || s.gender === 'F').length;
+    const maleStus = totalStus - femaleStus;
+
+    let passMark = 5.0; 
+    if (window.activeSchema && window.activeSchema.length > 0) {
+        let totalMax = 0, subjCount = 0;
+        window.activeSchema.forEach(item => {
+            if (item.subs) { item.subs.forEach(s => { totalMax += window.schemaMaxMap[s.key]||10; subjCount++; }); }
+            else { totalMax += window.schemaMaxMap[item.key]||10; subjCount++; }
+        });
+        if(subjCount > 0) passMark = (totalMax / subjCount) / 2;
+    }
+
+    const passedList = stus.filter(s => parseFloat(s.avg) >= passMark);
+    const passed = passedList.length;
+    const passedF = passedList.filter(s => s.gender === 'ស្រី' || s.gender === 'ស' || s.gender === 'F').length;
+    const passedM = passed - passedF;
+
+    const failedList = stus.filter(s => !s.avg || isNaN(parseFloat(s.avg)) || parseFloat(s.avg) < passMark);
+    const failed = failedList.length;
+    const failedF = failedList.filter(s => s.gender === 'ស្រី' || s.gender === 'ស' || s.gender === 'F').length;
+    const failedM = failed - failedF;
+
+    const passPct = totalStus > 0 ? ((passed / totalStus) * 100).toFixed(2) : "0.00";
+    const failPct = totalStus > 0 ? ((failed / totalStus) * 100).toFixed(2) : "0.00";
+    const femalePct = totalStus > 0 ? ((femaleStus / totalStus) * 100).toFixed(2) : "0.00";
+    const malePct = totalStus > 0 ? ((maleStus / totalStus) * 100).toFixed(2) : "0.00";
+
+    const passFPct = femaleStus > 0 ? ((passedF / femaleStus) * 100).toFixed(2) : "0.00";
+    const failFPct = femaleStus > 0 ? ((failedF / femaleStus) * 100).toFixed(2) : "0.00";
+
+    let passLabel = type === "annual" ? "សិស្សឡើងថ្នាក់ (ជាប់មធ្យមភាគ)" : "សិស្សជាប់មធ្យមភាគ";
+    let failLabel = type === "annual" ? "សិស្សត្រួតថ្នាក់ (ធ្លាក់មធ្យមភាគ)" : "សិស្សធ្លាក់មធ្យមភាគ";
+
+    let excelContent = `
+        <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
+        <head><meta charset="utf-8"><style>table { border-collapse: collapse; white-space: nowrap; font-family: "Khmer OS Siemreap", sans-serif; }</style></head>
+        <body>
+            <table>
+                <tr>
+                    <td colspan="15" style="border: none; text-align: left; vertical-align: top; font-family: 'Khmer OS Muol Light', Moul, serif; font-size: 11pt; padding-left: 10px;">ការិយាល័យអប់រំ យុវជន និងកីឡានៃរដ្ឋបាលស្រុក${districtName}<br>${schoolName}<br>${grade}</td>
+                    <td colspan="15" style="border: none; text-align: center; vertical-align: top; font-family: 'Khmer OS Muol Light', Moul, serif; font-size: 12pt;">ព្រះរាជាណាចក្រកម្ពុជា<br>ជាតិ សាសនា ព្រះមហាក្សត្រ<br><div style="color: #d97706; font-size: 11px;">❖ ❖ ❖</div></td>
+                </tr>
+                <tr><td colspan="30" style="border: none; height: 15px;"></td></tr>
+                <tr><td colspan="30" style="border: none; text-align: center; font-family: 'Khmer OS Muol Light', Moul, serif; font-size: 14pt; color: #1e3a8a;">${titleText}</td></tr>
+                <tr><td colspan="30" style="border: none; text-align: center; font-family: 'Khmer OS Siemreap', sans-serif; font-size: 11pt; font-weight: bold;">ឆ្នាំសិក្សា ៖ ${academicYear}</td></tr>
+                <tr><td colspan="30" style="border: none; height: 10px;"></td></tr>
+            </table>
+            ${htmlTable}
+
+            <!-- ស្ថិតិសង្ខេបក្រោមតារាងពិន្ទុ -->
+            <table style="width: 100%; margin-top: 15px; border-collapse: collapse; font-family: 'Khmer OS Siemreap', sans-serif;">
+                <tr>
+                    <td colspan="20" style="border: none; padding: 6px 0 3px 0; font-family: 'Khmer OS Muol Light', Moul, serif; font-size: 11pt; color: #1e3a8a;">
+                        ❖ ស្ថិតិសង្ខេបលទ្ធផល ៖
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="20" style="border: none; padding: 3px 0; font-size: 10.5pt; line-height: 1.8;">
+                        • <b>សិស្សសរុប ៖</b> <b>${totalStus}</b> នាក់ &nbsp;|&nbsp; ស្រី <b>${femaleStus}</b> នាក់ (${femalePct}%) &nbsp;|&nbsp; ប្រុស <b>${maleStus}</b> នាក់ (${malePct}%)
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="20" style="border: none; padding: 3px 0; font-size: 10.5pt; line-height: 1.8;">
+                        • <b>${passLabel} ៖</b> <b>${passed}</b> នាក់ គិតជាភាគរយ <b>${passPct}%</b> &nbsp;|&nbsp; ស្រី <b>${passedF}</b> នាក់ គិតជាភាគរយ <b>${passFPct}%</b> (នៃសិស្សស្រី) &nbsp;|&nbsp; ប្រុស <b>${passedM}</b> នាក់
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="20" style="border: none; padding: 3px 0; font-size: 10.5pt; line-height: 1.8;">
+                        • <b>${failLabel} ៖</b> <b>${failed}</b> នាក់ គិតជាភាគរយ <b>${failPct}%</b> &nbsp;|&nbsp; ស្រី <b>${failedF}</b> នាក់ គិតជាភាគរយ <b>${failFPct}%</b> (នៃសិស្សស្រី) &nbsp;|&nbsp; ប្រុស <b>${failedM}</b> នាក់
+                    </td>
+                </tr>
+                <tr><td colspan="20" style="border: none; height: 10px;"></td></tr>
+            </table>
+
+            <!-- តារាងក្រឡាស្ថិតិសង្ខេប (Structured Grid Table) -->
+            <table style="border-collapse: collapse; font-family: 'Khmer OS Siemreap', sans-serif; font-size: 10pt; text-align: center; margin-bottom: 20px;">
+                <thead>
+                    <tr style="background-color: #1e40af; color: #ffffff;">
+                        <th style="border: 1pt solid #000; padding: 6px 14px; font-family: 'Khmer OS Muol Light', Moul, serif; font-size: 10pt; text-align: center;">លទ្ធផល</th>
+                        <th style="border: 1pt solid #000; padding: 6px 14px; font-family: 'Khmer OS Muol Light', Moul, serif; font-size: 10pt; text-align: center;">សរុប</th>
+                        <th style="border: 1pt solid #000; padding: 6px 14px; font-family: 'Khmer OS Muol Light', Moul, serif; font-size: 10pt; text-align: center; color: #ffe4e6;">ស្រី</th>
+                        <th style="border: 1pt solid #000; padding: 6px 14px; font-family: 'Khmer OS Muol Light', Moul, serif; font-size: 10pt; text-align: center;">ប្រុស</th>
+                        <th style="border: 1pt solid #000; padding: 6px 14px; font-family: 'Khmer OS Muol Light', Moul, serif; font-size: 10pt; text-align: center;">ភាគរយសរុប (%)</th>
+                        <th style="border: 1pt solid #000; padding: 6px 14px; font-family: 'Khmer OS Muol Light', Moul, serif; font-size: 10pt; text-align: center; color: #ffe4e6;">ភាគរយស្រី (%)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr style="background-color: #f8fafc;">
+                        <td style="border: 0.5pt solid #000; padding: 5px 12px; font-family: 'Khmer OS Muol Light', Moul, serif; font-size: 9.5pt; text-align: left;">សិស្សសរុប</td>
+                        <td style="border: 0.5pt solid #000; padding: 5px 10px; font-weight: bold;">${totalStus} នាក់</td>
+                        <td style="border: 0.5pt solid #000; padding: 5px 10px; font-weight: bold; color: #be123c;">${femaleStus} នាក់</td>
+                        <td style="border: 0.5pt solid #000; padding: 5px 10px; font-weight: bold;">${maleStus} នាក់</td>
+                        <td style="border: 0.5pt solid #000; padding: 5px 10px; font-weight: bold;">100%</td>
+                        <td style="border: 0.5pt solid #000; padding: 5px 10px; font-weight: bold; color: #be123c;">${femalePct}%</td>
+                    </tr>
+                    <tr style="background-color: #ecfdf5;">
+                        <td style="border: 0.5pt solid #000; padding: 5px 12px; font-family: 'Khmer OS Muol Light', Moul, serif; font-size: 9.5pt; text-align: left; color: #166534;">${passLabel}</td>
+                        <td style="border: 0.5pt solid #000; padding: 5px 10px; font-weight: bold; color: #166534;">${passed} នាក់</td>
+                        <td style="border: 0.5pt solid #000; padding: 5px 10px; font-weight: bold; color: #be123c;">${passedF} នាក់</td>
+                        <td style="border: 0.5pt solid #000; padding: 5px 10px; font-weight: bold; color: #166534;">${passedM} នាក់</td>
+                        <td style="border: 0.5pt solid #000; padding: 5px 10px; font-weight: bold; color: #166534;">${passPct}%</td>
+                        <td style="border: 0.5pt solid #000; padding: 5px 10px; font-weight: bold; color: #be123c;">${passFPct}%</td>
+                    </tr>
+                    <tr style="background-color: #fff1f2;">
+                        <td style="border: 0.5pt solid #000; padding: 5px 12px; font-family: 'Khmer OS Muol Light', Moul, serif; font-size: 9.5pt; text-align: left; color: #9f1239;">${failLabel}</td>
+                        <td style="border: 0.5pt solid #000; padding: 5px 10px; font-weight: bold; color: #9f1239;">${failed} នាក់</td>
+                        <td style="border: 0.5pt solid #000; padding: 5px 10px; font-weight: bold; color: #be123c;">${failedF} នាក់</td>
+                        <td style="border: 0.5pt solid #000; padding: 5px 10px; font-weight: bold; color: #9f1239;">${failedM} នាក់</td>
+                        <td style="border: 0.5pt solid #000; padding: 5px 10px; font-weight: bold; color: #9f1239;">${failPct}%</td>
+                        <td style="border: 0.5pt solid #000; padding: 5px 10px; font-weight: bold; color: #be123c;">${failFPct}%</td>
+                    </tr>
+                </tbody>
+            </table>
+
             <table style="width: 100%; margin-top: 25px; border-collapse: collapse; white-space: nowrap;">
                 <tr>
                     <td colspan="12" style="border: none; text-align: center; vertical-align: top; font-family: 'Khmer OS Siemreap', 'Siemreap', sans-serif; font-size: 10.5pt; line-height: 1.6;">
@@ -2970,6 +3272,7 @@ window.printScoreList = function() {
 
     let totalStus = window.rankingsDataList.length;
     let femaleStus = window.rankingsDataList.filter(s => s.gender === 'ស្រី').length;
+    let maleStus = totalStus - femaleStus;
     
     // គណនាពិន្ទុជាប់ធ្លាក់ដោយស្វ័យប្រវត្តិ (Dynamic Pass Threshold)
     let passMark = 5.0; 
@@ -3130,9 +3433,9 @@ window.printScoreList = function() {
             ${htmlTable}
             
             <table class="summary-table">
-                <tr><td style="width: 100%;">❖ បញ្ឈប់បញ្ជីត្រឹមលេខរៀង <b>${totalStus}</b> សិស្សសរុប <b>${totalStus}</b> នាក់ ស្រី <b>${femaleStus}</b> នាក់</td></tr>
-                <tr><td style="width: 100%;">❖ ${passLabel} <b>${passed}</b> នាក់ (<b>${passPct}%</b>) ស្រី <b>${passedF}</b> នាក់ (<b>${passFPct}%</b>)</td></tr>
-                <tr><td style="width: 100%;">❖ ${failLabel} <b>${failed}</b> នាក់ (<b>${failPct}%</b>) ស្រី <b>${failedF}</b> នាក់ (<b>${failFPct}%</b>)</td></tr>
+                <tr><td style="width: 100%;">❖ បញ្ឈប់បញ្ជីត្រឹមលេខរៀង <b>${totalStus}</b> &nbsp;|&nbsp; សិស្សសរុប <b>${totalStus}</b> នាក់ ស្រី <b>${femaleStus}</b> នាក់ ប្រុស <b>${maleStus}</b> នាក់</td></tr>
+                <tr><td style="width: 100%;">❖ ${passLabel} <b>${passed}</b> នាក់ គិតជាភាគរយ <b>${passPct}%</b> (ស្រី <b>${passedF}</b> នាក់ គិតជាភាគរយ <b>${passFPct}%</b>)</td></tr>
+                <tr><td style="width: 100%;">❖ ${failLabel} <b>${failed}</b> នាក់ គិតជាភាគរយ <b>${failPct}%</b> (ស្រី <b>${failedF}</b> នាក់ គិតជាភាគរយ <b>${failFPct}%</b>)</td></tr>
             </table>
             <div class="bottom-sig-container" style="display: flex; justify-content: space-between; align-items: flex-start; width: 100%; page-break-inside: avoid; padding: 0 20px; margin-top: 15px;">
                 <div class="sig-box-left" style="width: 40%; text-align: center;">
@@ -3256,6 +3559,7 @@ window.printRankingTable = function() {
 
     let totalStus = stus.length;
     let femaleStus = stus.filter(s => s.gender === 'ស្រី').length;
+    let maleStus = totalStus - femaleStus;
     let passMark = ((type === "semester" || type === "annual") && window.rankingsDataList.some(s => s.avg > 15)) ? 25.0 : 5.0;
     
     let passed = stus.filter(s => s.avg >= passMark).length;
@@ -3439,9 +3743,9 @@ window.printRankingTable = function() {
             <table class="rnk-table"><thead>${headerHtml}</thead><tbody>${rowsHtml}</tbody></table>
             
             <table class="summary-table">
-                <tr><td style="width: 100%;">❖ បញ្ឈប់បញ្ជីត្រឹមលេខរៀង <b>${totalStus}</b> សិស្សសរុប <b>${totalStus}</b> នាក់ ស្រី <b>${femaleStus}</b> នាក់</td></tr>
-                <tr><td style="width: 100%;">❖ ${passLabel} <b>${passed}</b> នាក់ (<b>${passPct}%</b>) ស្រី <b>${passedF}</b> នាក់ (<b>${passFPct}%</b>)</td></tr>
-                <tr><td style="width: 100%;">❖ ${failLabel} <b>${failed}</b> នាក់ (<b>${failPct}%</b>) ស្រី <b>${failedF}</b> នាក់ (<b>${failFPct}%</b>)</td></tr>
+                <tr><td style="width: 100%;">❖ បញ្ឈប់បញ្ជីត្រឹមលេខរៀង <b>${totalStus}</b> &nbsp;|&nbsp; សិស្សសរុប <b>${totalStus}</b> នាក់ ស្រី <b>${femaleStus}</b> នាក់ ប្រុស <b>${maleStus}</b> នាក់</td></tr>
+                <tr><td style="width: 100%;">❖ ${passLabel} <b>${passed}</b> នាក់ គិតជាភាគរយ <b>${passPct}%</b> (ស្រី <b>${passedF}</b> នាក់ គិតជាភាគរយ <b>${passFPct}%</b>)</td></tr>
+                <tr><td style="width: 100%;">❖ ${failLabel} <b>${failed}</b> នាក់ គិតជាភាគរយ <b>${failPct}%</b> (ស្រី <b>${failedF}</b> នាក់ គិតជាភាគរយ <b>${failFPct}%</b>)</td></tr>
             </table>
             <div class="bottom-sig-container" style="display: flex; justify-content: space-between; align-items: flex-start; width: 100%; page-break-inside: avoid; padding: 0 20px; margin-top: 15px;">
                 <div class="sig-box-left" style="width: 40%; text-align: center;">
