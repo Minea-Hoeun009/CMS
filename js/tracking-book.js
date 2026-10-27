@@ -74,6 +74,11 @@ function openTrackingBookModal() {
 
   modal.classList.remove("hidden");
   modal.classList.add("flex");
+  const curClass = typeof window.getCurrentSelectedClass === 'function' ? window.getCurrentSelectedClass() : { level: "ថ្នាក់ទី ១", room: "«ក»" };
+  const lvlEl = document.getElementById("tbLevelSelect");
+  const rmEl = document.getElementById("tbRoomSelect");
+  if (lvlEl && curClass.level) lvlEl.value = curClass.level;
+  if (rmEl && curClass.room) rmEl.value = curClass.room;
   updateTbStudentSelect();
 }
 
@@ -455,4 +460,5 @@ function executeTrackingBookPrint(actionType) {
 
 window.loadTrackingBookView = openTrackingBookModal;
 window.openTrackingBookModal = openTrackingBookModal;
+window.openReportCardsModal = openTrackingBookModal;
 window.closeTrackingBookModal = closeTrackingBookModal;

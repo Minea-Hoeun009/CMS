@@ -98,7 +98,7 @@ window.loadReportsView = function() {
                         </div>
                     </div>
 
-                    <!-- Card 2: សៀវភៅតាមដានការសិក្សា -->
+                    <!-- Card 2: សៀវភៅតាមដានការសិក្សា (ព្រឹត្តិបត្រពិន្ទុរួម) -->
                     <div onclick="if(typeof window.openTrackingBookModal === 'function'){ window.openTrackingBookModal(); } else if (typeof window.loadTrackingBookView === 'function'){ window.loadTrackingBookView(); }" class="bg-white/90 backdrop-blur-md rounded-[2rem] p-6 shadow-sm hover:shadow-[0_20px_40px_rgb(99,102,241,0.2)] hover:-translate-y-1.5 transition-all duration-300 cursor-pointer border-2 border-indigo-100 hover:border-indigo-500 group flex flex-col justify-between h-[210px] relative overflow-hidden">
                         <div class="absolute -right-4 -top-4 w-24 h-24 bg-indigo-50 rounded-full group-hover:scale-150 transition-transform duration-500 ease-out pointer-events-none"></div>
                         <div class="flex items-center justify-between relative z-10">
@@ -107,33 +107,20 @@ window.loadReportsView = function() {
                         </div>
                         <div class="relative z-10">
                             <h3 class="font-moul text-[15px] text-slate-900 mb-1.5 group-hover:text-indigo-600">សៀវភៅតាមដានការសិក្សា</h3>
-                            <p class="text-slate-500 text-[11px] leading-relaxed">តាមដានការសិក្សា និងវិន័យសិស្សប្រចាំខែ ឆមាស និងប្រចាំឆ្នាំតាមស្តង់ដារក្រសួង។</p>
+                            <p class="text-slate-500 text-[11px] leading-relaxed">តាមដានការសិក្សា វិន័យ និងព្រឹត្តិបត្រពិន្ទុសិស្សប្រចាំខែ ឆមាស និងប្រចាំឆ្នាំតាមស្តង់ដារក្រសួង។</p>
                         </div>
                     </div>
 
                     <!-- Card 3: តារាងកិត្តិយស (Honor Board Top 5) -->
-                    <div onclick="if(typeof window.openHonorBoardModal === 'function'){ window.openHonorBoardModal(); } else if(typeof window.openScoreModal === 'function'){ window.openScoreModal('modal-honorboard', window.renderHonorBoardContent); }" class="bg-white/90 backdrop-blur-md rounded-[2rem] p-6 shadow-sm hover:shadow-[0_20px_40px_rgb(245,158,11,0.2)] hover:-translate-y-1.5 transition-all duration-300 cursor-pointer border-2 border-amber-100 hover:border-amber-400 group flex flex-col justify-between h-[210px] relative overflow-hidden">
+                    <div onclick="window.openReportDetail('report_kha')" class="bg-white/90 backdrop-blur-md rounded-[2rem] p-6 shadow-sm hover:shadow-[0_20px_40px_rgb(245,158,11,0.2)] hover:-translate-y-1.5 transition-all duration-300 cursor-pointer border-2 border-amber-100 hover:border-amber-400 group flex flex-col justify-between h-[210px] relative overflow-hidden">
                         <div class="absolute -right-4 -top-4 w-24 h-24 bg-amber-50 rounded-full group-hover:scale-150 transition-transform duration-500 ease-out pointer-events-none"></div>
                         <div class="flex items-center justify-between relative z-10">
                             <div class="w-14 h-14 bg-gradient-to-br from-amber-400 to-orange-500 text-white rounded-2xl flex items-center justify-center text-2xl shadow-md shadow-amber-500/30 group-hover:scale-110 transition-transform"><i class="fa-solid fa-crown"></i></div>
-                            <span class="text-[10px] bg-amber-100 text-amber-800 font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">Honor Board</span>
+                            <span class="text-[10px] bg-amber-100 text-amber-800 font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">Top 5 Honor Board</span>
                         </div>
                         <div class="relative z-10">
                             <h3 class="font-moul text-[15px] text-slate-900 mb-1.5 group-hover:text-amber-600">តារាងកិត្តិយស</h3>
                             <p class="text-slate-500 text-[11px] leading-relaxed">តារាងកិត្តិយស និងប័ណ្ណសរសើរសម្រាប់សិស្សឆ្នើមប្រចាំខែ និងឆមាស (Top 5)។</p>
-                        </div>
-                    </div>
-
-                    <!-- Card 4: ព្រឹត្តិបត្រពិន្ទុបុគ្គល -->
-                    <div onclick="if(typeof window.openReportCardsModal === 'function'){ window.openReportCardsModal(); } else if(typeof window.openScoreModal === 'function'){ window.openScoreModal('modal-reportcards', window.renderReportCardsTab); }" class="bg-white/90 backdrop-blur-md rounded-[2rem] p-6 shadow-sm hover:shadow-[0_20px_40px_rgb(16,185,129,0.18)] hover:-translate-y-1.5 transition-all duration-300 cursor-pointer border-2 border-emerald-100 hover:border-emerald-400 group flex flex-col justify-between h-[210px] relative overflow-hidden">
-                        <div class="absolute -right-4 -top-4 w-24 h-24 bg-emerald-50 rounded-full group-hover:scale-150 transition-transform duration-500 ease-out pointer-events-none"></div>
-                        <div class="flex items-center justify-between relative z-10">
-                            <div class="w-14 h-14 bg-gradient-to-br from-emerald-500 to-teal-600 text-white rounded-2xl flex items-center justify-center text-2xl shadow-md shadow-emerald-500/30 group-hover:scale-110 transition-transform"><i class="fa-solid fa-file-invoice"></i></div>
-                            <span class="text-[10px] bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">Report Cards</span>
-                        </div>
-                        <div class="relative z-10">
-                            <h3 class="font-moul text-[15px] text-slate-900 mb-1.5 group-hover:text-emerald-600">ព្រឹត្តិបត្រពិន្ទុ</h3>
-                            <p class="text-slate-500 text-[11px] leading-relaxed">បោះពុម្ពសៀវភៅតាមដានលទ្ធផលសិក្សា និងព្រឹត្តិបត្រពិន្ទុបុគ្គលសម្រាប់សិស្សម្នាក់ៗ។</p>
                         </div>
                     </div>
 
@@ -355,6 +342,9 @@ window.openReportDetail = function(reportType) {
                             ${khmerMonths.map(m => `<option value="${m}" ${m === curMonth ? 'selected' : ''}>${m}</option>`).join('')}
                         </select>
                     </div>
+                    <button onclick="if(typeof window.openHonorBoardModal === 'function'){ window.openHonorBoardModal(); } else if(typeof window.openScoreModal === 'function'){ window.openScoreModal('modal-honorboard', window.renderHonorBoardContent); }" class="px-3 py-1 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white rounded-xl text-xs font-bold shadow flex items-center gap-1.5 transition active:scale-95">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i> <span>ម៉ូត Canva សម្រាប់ចែករំលែក</span>
+                    </button>
                 `;
             }
             if (window.CMSPrintManager) window.CMSPrintManager.updateToolbarDefaults('reportPaperArea', 'portrait', 'A4', 100);

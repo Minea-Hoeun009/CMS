@@ -188,15 +188,16 @@ describe('MoEYS Sikha-karik Booklet & Centralized Reports Suite', () => {
         assert.ok(!container.innerHTML.includes('នាយកសាលាត្រូវចេញ និងគ្រប់គ្រងសៀវភៅសិក្ខាគារិក'));
     });
 
-    test('3. Reports View includes cards for Sikha-karik, Tracking Book, Honor Board, and Report Cards', () => {
+    test('3. Reports View includes cards for Sikha-karik, unified Tracking Book, and Honor Board', () => {
         const reportsContainer = context.document.getElementById('reportsContainer');
         context.window.loadReportsView();
         const html = reportsContainer.innerHTML;
 
         assert.ok(html.includes('sikhakarik'), 'Reports view should contain Sikha-karik card');
-        assert.ok(html.includes('openTrackingBookModal'), 'Reports view should contain Tracking Book trigger');
-        assert.ok(html.includes('openHonorBoardModal') || html.includes('modal-honorboard'), 'Reports view should contain Honor Board trigger');
-        assert.ok(html.includes('openReportCardsModal') || html.includes('modal-reportcards'), 'Reports view should contain Report Cards trigger');
+        assert.ok(html.includes('openTrackingBookModal') || html.includes('loadTrackingBookView'), 'Reports view should contain unified Tracking Book trigger');
+        assert.ok(html.includes('report_kha') || html.includes('openHonorBoardModal'), 'Reports view should contain Honor Board trigger');
+        // Verified: redundant separate reportcards card was merged into tracking book as requested
+        assert.ok(!html.includes('openReportCardsModal'), 'Redundant separate report cards card should not be present in reports view');
     });
 
     test('4. window.openHonorBoardModal and window.openReportCardsModal exist globally', () => {

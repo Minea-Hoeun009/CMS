@@ -1516,7 +1516,7 @@ window.loadScoresView = async function() {
       </div>
 
       <!-- MODALS ទី១៖ បញ្ចូលពិន្ទុ -->
-      <div id="modal-entry" class="fixed inset-0 z-[2000] hidden bg-slate-900/60 backdrop-blur-md p-2 md:p-6 transition-all duration-300 font-siemreap">
+      <div id="modal-entry" class="fixed inset-0 z-[2000] hidden bg-slate-900/60" style="backdrop-filter: none !important;" p-2 md:p-6 transition-all duration-300 font-siemreap">
           <div id="modal-entry-container" class="bg-slate-50 w-full h-full rounded-2xl md:rounded-[2.5rem] flex flex-col overflow-hidden shadow-2xl relative border border-white/40 transform scale-95 opacity-0 transition-all duration-300 data-[open=true]:scale-100 data-[open=true]:opacity-100">
               
               <div class="bg-white p-3 md:p-4 border-b border-slate-200/80 flex flex-col xl:flex-row justify-between items-center gap-4 shrink-0 z-20">
@@ -1557,7 +1557,7 @@ window.loadScoresView = async function() {
       </div>
 
       <!-- Modal ទី២៖ តារាងចំណាត់ថ្នាក់ -->
-      <div id="modal-rankings" class="fixed inset-0 z-[2000] hidden bg-slate-900/60 backdrop-blur-md p-3 md:p-6 transition-all duration-300 font-siemreap">
+      <div id="modal-rankings" class="fixed inset-0 z-[2000] hidden bg-slate-900/60" style="backdrop-filter: none !important;" p-3 md:p-6 transition-all duration-300 font-siemreap">
           <div id="modal-rankings-container" class="bg-slate-50 w-full h-full rounded-[2.5rem] flex flex-col overflow-hidden shadow-2xl relative border border-white/40 transform scale-95 opacity-0 transition-all duration-300 data-[open=true]:scale-100 data-[open=true]:opacity-100">
               <div class="bg-white/90 backdrop-blur-xl p-4 md:p-5 border-b border-slate-200/60 flex flex-col xl:flex-row justify-between items-center gap-4 shrink-0 shadow-sm z-20">
                   <div class="flex items-center gap-4 w-full xl:w-auto">
@@ -1586,7 +1586,7 @@ window.loadScoresView = async function() {
       </div>
 
       <!-- Modal ទី៣៖ ព្រឹត្តិបត្រពិន្ទុ -->
-      <div id="modal-reportcards" class="fixed inset-0 z-[2000] hidden bg-slate-900/60 backdrop-blur-md p-3 md:p-6 transition-all duration-300 font-siemreap">
+      <div id="modal-reportcards" class="fixed inset-0 z-[2000] hidden bg-slate-900/60" style="backdrop-filter: none !important;" p-3 md:p-6 transition-all duration-300 font-siemreap">
           <div id="modal-reportcards-container" class="bg-slate-50 w-full h-full rounded-[2.5rem] flex flex-col overflow-hidden shadow-2xl relative border border-white/40 transform scale-95 opacity-0 transition-all duration-300 data-[open=true]:scale-100 data-[open=true]:opacity-100">
               <div class="bg-white/90 backdrop-blur-xl p-4 md:p-5 border-b border-slate-200/60 flex flex-wrap justify-between items-center gap-4 shrink-0 shadow-sm z-20">
                   <div class="flex items-center gap-4">
@@ -1602,7 +1602,7 @@ window.loadScoresView = async function() {
       </div>
 
       <!-- Modal ទី៤៖ តារាងកិត្តិយស -->
-      <div id="modal-honorboard" class="fixed inset-0 z-[2000] hidden bg-slate-900/60 backdrop-blur-md p-3 md:p-6 transition-all duration-300 font-siemreap">
+      <div id="modal-honorboard" class="fixed inset-0 z-[2000] hidden bg-slate-900/60" style="backdrop-filter: none !important;" p-3 md:p-6 transition-all duration-300 font-siemreap">
           <div id="modal-honorboard-container" class="bg-slate-50 w-full h-full rounded-[2.5rem] flex flex-col overflow-hidden shadow-2xl relative border border-white/40 transform scale-95 opacity-0 transition-all duration-300 data-[open=true]:scale-100 data-[open=true]:opacity-100">
               <div class="bg-white/90 backdrop-blur-xl p-4 md:p-5 border-b border-slate-200/60 flex justify-between items-center shrink-0 shadow-sm z-20">
                   <div class="flex items-center gap-4">
@@ -1665,13 +1665,16 @@ window.updateGlobalSettings = async function() {
 
 window.openScoreModal = function(id, callback) {
     if (!document.getElementById(id) && typeof window.loadScoresView === 'function') {
-        const scoresDiv = document.getElementById('scoresView');
+        const scoresDiv = document.getElementById('scores') || document.getElementById('scoresView');
         if (scoresDiv && scoresDiv.innerHTML.trim() === '') {
             window.loadScoresView();
         }
     }
     const modal = document.getElementById(id);
     if(modal) {
+        if (modal.parentElement && modal.parentElement !== document.body) {
+            document.body.appendChild(modal);
+        }
         modal.classList.remove('hidden');
         modal.classList.add('flex');
     }
@@ -1686,7 +1689,19 @@ window.openHonorBoardModal = function() {
 };
 
 window.openReportCardsModal = function() {
-    window.openScoreModal('modal-reportcards', window.renderReportCardsTab);
+    if (typeof window.openTrackingBookModal === 'function') {
+        window.openTrackingBookModal();
+    } else {
+        window.openScoreModal('modal-reportcards', window.renderReportCardsTab);
+    }
+};
+
+window.openTrackingBookModal = function() {
+    if (typeof openTrackingBookModal === 'function' && openTrackingBookModal !== window.openTrackingBookModal) {
+        openTrackingBookModal();
+    } else {
+        window.openScoreModal('modal-reportcards', window.renderReportCardsTab);
+    }
 };
 
 window.closeScoreModal = function(id) {
@@ -3955,6 +3970,40 @@ window.renderReportCardsTab = function() {
     if (!c) return;
     
     if (!window.rankingsDataList || window.rankingsDataList.length === 0) {
+        try {
+            const allScores = JSON.parse(localStorage.getItem('academic_scores') || '[]');
+            const curClass = typeof window.getCurrentSelectedClass === 'function' ? window.getCurrentSelectedClass() : { level: "ថ្នាក់ទី ១", room: "«ក»" };
+            const curLevel = curClass.level || "ថ្នាក់ទី ១";
+            const curRoom = curClass.room || "«ក»";
+            const curYear = window.currentAcademicYear || (typeof appSettings !== 'undefined' ? appSettings.academic_year : "") || "2026-2027";
+            const stus = typeof window.getStudentsForClass === 'function' 
+                ? window.getStudentsForClass(curLevel, curRoom, curYear) 
+                : (window.allStudents || []);
+            const selMonth = localStorage.getItem('selected_assessment_month') || "មករា";
+
+            if (stus && stus.length > 0) {
+                const evaluated = stus.map((s, idx) => {
+                    const sc = allScores.find(item => String(item.student_id) === String(s.id) && (item.month === selMonth || !item.month)) || {};
+                    const avg = parseFloat(sc.average || sc.avg || 0);
+                    const tot = parseFloat(sc.total_score || sc.total || 0);
+                    return {
+                        ...s,
+                        avg: avg,
+                        total_score: tot,
+                        total_exam: tot,
+                        hasScore: avg > 0,
+                        rank: idx + 1,
+                        gradeLetter: sc.grade_letter || (avg >= 8.5 ? 'A' : (avg >= 8 ? 'B' : (avg >= 7 ? 'C' : 'D')))
+                    };
+                });
+                if (evaluated.length > 0) {
+                    window.rankingsDataList = evaluated;
+                }
+            }
+        } catch(e) {}
+    }
+
+    if (!window.rankingsDataList || window.rankingsDataList.length === 0) {
         c.innerHTML = `
           <div class="flex flex-col items-center justify-center h-full text-slate-500 font-bold p-16 bg-white rounded-3xl border border-slate-200 shadow-sm font-siemreap">
               <div class="w-20 h-20 bg-indigo-50 text-indigo-500 rounded-3xl flex items-center justify-center text-4xl mb-4 shadow-inner"><i class="fa-solid fa-book-open"></i></div>
@@ -4503,6 +4552,42 @@ window.renderHonorBoardContent = function() {
     window.calculateAllScores();
     const container = document.getElementById("modal-content-honorboard") || document.getElementById("scoreTabContent-honorboard");
     if (!container) return;
+
+    if (!window.rankingsDataList || window.rankingsDataList.length === 0) {
+        try {
+            const allScores = JSON.parse(localStorage.getItem('academic_scores') || '[]');
+            const curClass = typeof window.getCurrentSelectedClass === 'function' ? window.getCurrentSelectedClass() : { level: "ថ្នាក់ទី ១", room: "«ក»" };
+            const curLevel = curClass.level || "ថ្នាក់ទី ១";
+            const curRoom = curClass.room || "«ក»";
+            const curYear = window.currentAcademicYear || (typeof appSettings !== 'undefined' ? appSettings.academic_year : "") || "2026-2027";
+            const stus = typeof window.getStudentsForClass === 'function' 
+                ? window.getStudentsForClass(curLevel, curRoom, curYear) 
+                : (window.allStudents || []);
+            const selMonth = localStorage.getItem('selected_assessment_month') || "មករា";
+
+            if (stus && stus.length > 0) {
+                const evaluated = stus.map(s => {
+                    const sc = allScores.find(item => String(item.student_id) === String(s.id) && (item.month === selMonth || !item.month)) || {};
+                    const avg = parseFloat(sc.average || sc.avg || 0);
+                    const tot = parseFloat(sc.total_score || sc.total || 0);
+                    return {
+                        ...s,
+                        avg: avg,
+                        total_score: tot,
+                        total_exam: tot,
+                        hasScore: avg > 0,
+                        gradeLetter: sc.grade_letter || (avg >= 8.5 ? 'A' : (avg >= 8 ? 'B' : (avg >= 7 ? 'C' : 'D')))
+                    };
+                }).filter(s => s.avg > 0);
+
+                evaluated.sort((a, b) => b.avg - a.avg);
+                evaluated.forEach((s, idx) => { s.rank = idx + 1; });
+                if (evaluated.length > 0) {
+                    window.rankingsDataList = evaluated;
+                }
+            }
+        } catch(e) {}
+    }
 
     if (!window.rankingsDataList || window.rankingsDataList.length === 0) {
         container.innerHTML = `
