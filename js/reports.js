@@ -112,7 +112,7 @@ window.loadReportsView = function() {
                     </div>
 
                     <!-- Card 3: តារាងកិត្តិយស (Honor Board Top 5) -->
-                    <div onclick="window.openReportDetail('report_kha')" class="bg-white/90 backdrop-blur-md rounded-[2rem] p-6 shadow-sm hover:shadow-[0_20px_40px_rgb(245,158,11,0.2)] hover:-translate-y-1.5 transition-all duration-300 cursor-pointer border-2 border-amber-100 hover:border-amber-400 group flex flex-col justify-between h-[210px] relative overflow-hidden">
+                    <div onclick="if(typeof window.openHonorBoardModal === 'function'){ window.openHonorBoardModal(); } else if(typeof window.openScoreModal === 'function'){ window.openScoreModal('modal-honorboard', window.renderHonorBoardContent); } else { window.openReportDetail('report_kha'); }" class="bg-white/90 backdrop-blur-md rounded-[2rem] p-6 shadow-sm hover:shadow-[0_20px_40px_rgb(245,158,11,0.2)] hover:-translate-y-1.5 transition-all duration-300 cursor-pointer border-2 border-amber-100 hover:border-amber-400 group flex flex-col justify-between h-[210px] relative overflow-hidden">
                         <div class="absolute -right-4 -top-4 w-24 h-24 bg-amber-50 rounded-full group-hover:scale-150 transition-transform duration-500 ease-out pointer-events-none"></div>
                         <div class="flex items-center justify-between relative z-10">
                             <div class="w-14 h-14 bg-gradient-to-br from-amber-400 to-orange-500 text-white rounded-2xl flex items-center justify-center text-2xl shadow-md shadow-amber-500/30 group-hover:scale-110 transition-transform"><i class="fa-solid fa-crown"></i></div>
@@ -120,7 +120,7 @@ window.loadReportsView = function() {
                         </div>
                         <div class="relative z-10">
                             <h3 class="font-moul text-[15px] text-slate-900 mb-1.5 group-hover:text-amber-600">តារាងកិត្តិយស</h3>
-                            <p class="text-slate-500 text-[11px] leading-relaxed">តារាងកិត្តិយស និងប័ណ្ណសរសើរសម្រាប់សិស្សឆ្នើមប្រចាំខែ និងឆមាស (Top 5)។</p>
+                            <p class="text-slate-500 text-[11px] leading-relaxed">តារាងកិត្តិយសសិស្សឆ្នើម Top 3 / Top 5 អាចកែសម្រួលអត្ថបទ រូបថត និងរចនាដោយដៃបានភ្លាមៗ។</p>
                         </div>
                     </div>
 
@@ -208,10 +208,10 @@ window.loadReportsView = function() {
             <!-- ផ្ទាំងបង្ហាញរបាយការណ៍លម្អិត (Report Detail View) -->
             <div id="reportDetailContent" class="hidden w-full h-full flex-col relative z-20 space-y-3">
                 <!-- ផ្នែកទី ១៖ របារចំណងជើងរបាយការណ៍ (Section 1: Report Title Header Bar) -->
-                <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 flex flex-wrap justify-between items-center gap-3 z-40 sticky top-0 no-print">
+                <div class="bg-white dark:bg-slate-800 p-3 sm:p-4 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 flex flex-wrap justify-between items-center gap-3 z-40 sticky top-0 no-print">
                     <div class="flex items-center gap-3">
-                        <button onclick="window.closeReportDetail()" class="w-10 h-10 rounded-xl bg-slate-100 hover:bg-rose-100 text-slate-600 hover:text-rose-600 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-rose-600 dark:hover:text-white flex items-center justify-center transition-all shadow-inner active:scale-90 shrink-0" title="ត្រឡប់ក្រោយ (Back)">
-                            <i class="fa-solid fa-arrow-left text-lg"></i>
+                        <button onclick="window.closeReportDetail()" class="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-slate-700 dark:text-slate-200 flex items-center gap-2 font-bold text-xs transition shadow-sm active:scale-95 shrink-0" title="ត្រឡប់ក្រោយ (Back)">
+                            <i class="fa-solid fa-arrow-left text-sm"></i> <span>ត្រឡប់ក្រោយ</span>
                         </button>
                         <div>
                             <h2 id="reportDetailTitle" class="font-moul text-slate-800 dark:text-white text-sm sm:text-base md:text-lg leading-snug">ចំណងជើងរបាយការណ៍</h2>
@@ -219,9 +219,12 @@ window.loadReportsView = function() {
                         </div>
                     </div>
                     <div class="flex items-center gap-2">
-                        <span class="px-3 py-1 bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 rounded-full text-xs font-bold border border-indigo-200 dark:border-indigo-800 flex items-center gap-1.5 shadow-sm">
+                        <span class="hidden sm:flex px-3 py-1 bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 rounded-full text-xs font-bold border border-indigo-200 dark:border-indigo-800 items-center gap-1.5 shadow-sm">
                             <i class="fa-solid fa-file-lines"></i> <span>ឯកសាររដ្ឋបាល</span>
                         </span>
+                        <button onclick="window.closeReportDetail()" class="w-10 h-10 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 dark:bg-slate-700 dark:text-rose-400 flex items-center justify-center transition shadow-sm active:scale-95 shrink-0" title="បិទ (Close)">
+                            <i class="fa-solid fa-xmark text-lg"></i>
+                        </button>
                     </div>
                 </div>
 
