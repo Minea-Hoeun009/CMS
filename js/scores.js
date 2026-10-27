@@ -1359,6 +1359,12 @@ window.handleScoreClassChange = async function() {
 };
 
 window.loadScoresView = async function() {
+    ['modal-entry', 'modal-rankings', 'modal-reportcards', 'modal-honorboard'].forEach(mId => {
+        const existing = document.getElementById(mId);
+        if (existing && existing.parentElement === document.body) {
+            existing.remove();
+        }
+    });
     const container = document.getElementById("scores") || document.getElementById("mainContentArea");
     if (!container) return;
 
@@ -1524,9 +1530,10 @@ window.loadScoresView = async function() {
                   <div class="flex items-center justify-between w-full xl:w-auto gap-3">
                       <div class="flex items-center gap-3">
                           <button onclick="window.closeScoreModal('modal-entry')" class="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 flex items-center gap-2 font-bold text-xs transition shadow-sm active:scale-95 shrink-0" title="ថយក្រោយ"><i class="fa-solid fa-arrow-left text-sm"></i> <span>ថយក្រោយ</span></button>
-                      <div class="hidden md:flex items-center gap-3 border-r border-slate-200 pr-4">
-                          <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 text-white flex items-center justify-center shadow-md"><i class="fa-solid fa-pen-to-square"></i></div>
-                          <div><h2 class="font-moul text-[15px] text-slate-800 leading-tight">បញ្ជីស្រង់ពិន្ទុ</h2><p class="text-[10px] text-slate-500 font-bold tracking-wide">សិស្សសរុប <span id="entryStudentCountLbl" class="text-blue-600 text-xs">...</span> នាក់ <span id="assessmentLockBadge" class="hidden ml-2 px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-50 text-rose-600 border border-rose-200"><i class="fa-solid fa-lock mr-1"></i>បានចាក់សោ</span></p></div>
+                          <div class="hidden md:flex items-center gap-3 border-r border-slate-200 pr-4">
+                              <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 text-white flex items-center justify-center shadow-md"><i class="fa-solid fa-pen-to-square"></i></div>
+                              <div><h2 class="font-moul text-[15px] text-slate-800 leading-tight">បញ្ជីស្រង់ពិន្ទុ</h2><p class="text-[10px] text-slate-500 font-bold tracking-wide">សិស្សសរុប <span id="entryStudentCountLbl" class="text-blue-600 text-xs">...</span> នាក់ <span id="assessmentLockBadge" class="hidden ml-2 px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-50 text-rose-600 border border-rose-200"><i class="fa-solid fa-lock mr-1"></i>បានចាក់សោ</span></p></div>
+                          </div>
                       </div>
                       <div class="relative flex-1 md:w-64 md:flex-none">
                           <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
@@ -1559,7 +1566,7 @@ window.loadScoresView = async function() {
       </div>
 
       <!-- Modal ទី២៖ តារាងចំណាត់ថ្នាក់ -->
-      <div id="modal-rankings" class="fixed inset-0 z-[2000] hidden bg-slate-900/60" style="backdrop-filter: none !important;" p-3 md:p-6 transition-all duration-300 font-siemreap">
+      <div id="modal-rankings" class="fixed inset-0 z-[2000] hidden bg-slate-900/60 p-3 md:p-6 transition-all duration-300 font-siemreap" style="backdrop-filter: none !important;">
           <div id="modal-rankings-container" class="bg-slate-50 w-full h-full rounded-[2.5rem] flex flex-col overflow-hidden shadow-2xl relative border border-white/40 transform scale-95 opacity-0 transition-all duration-300 data-[open=true]:scale-100 data-[open=true]:opacity-100">
               <div class="bg-white/90 backdrop-blur-xl p-4 md:p-5 border-b border-slate-200/60 flex flex-col xl:flex-row justify-between items-center gap-4 shrink-0 shadow-sm z-20">
                   <div class="flex items-center gap-4 w-full xl:w-auto">
