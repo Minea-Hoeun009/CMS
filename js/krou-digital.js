@@ -2019,12 +2019,8 @@ window.KrouDigital = {
                                         <p contenteditable="true" class="cert-editable text-slate-700 text-[11px] font-bold">បានឃើញ និងឯកភាព</p>
                                         <p contenteditable="true" class="cert-editable font-moul text-blue-950 text-xs mt-0.5">នាយក/នាយិកាសាលា</p>
                                         
-                                        <!-- Stamp & Signature Holder -->
-                                        <div class="h-16 flex items-center justify-center relative my-1">
-                                            <div class="w-16 h-16 rounded-full border border-dashed border-rose-400/80 flex items-center justify-center text-[9px] text-rose-500 select-none">
-                                                (ត្រាក្រហម)
-                                            </div>
-                                        </div>
+                                        <!-- Stamp & Signature Space -->
+                                        <div class="h-16 flex items-center justify-center relative my-1"></div>
 
                                         ${principalName ? `<p contenteditable="true" class="cert-editable font-moul text-red-600 text-sm font-bold mt-1">${principalName}</p>` : ''}
                                     </div>
@@ -2038,10 +2034,8 @@ window.KrouDigital = {
                                         <p contenteditable="true" class="cert-editable text-slate-700 text-[11px] font-bold">${solarDateStr}</p>
                                         <p contenteditable="true" class="cert-editable font-moul text-blue-950 text-xs mt-1">គ្រូទទួលបន្ទុកថ្នាក់</p>
                                         
-                                        <!-- Teacher Signature Holder -->
-                                        <div class="h-14 flex items-center justify-center text-slate-400 text-xs italic">
-                                            (ហត្ថលេខា)
-                                        </div>
+                                        <!-- Teacher Signature Space -->
+                                        <div class="h-14 flex items-center justify-center"></div>
 
                                         <p contenteditable="true" class="cert-editable font-moul text-blue-950 text-sm font-bold">${teacherName}</p>
                                     </div>
