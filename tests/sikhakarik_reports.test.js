@@ -205,4 +205,52 @@ describe('MoEYS Sikha-karik Booklet & Centralized Reports Suite', () => {
         assert.strictEqual(typeof context.window.openReportCardsModal, 'function');
         assert.strictEqual(typeof context.window.openTrackingBookModal, 'function');
     });
+
+    test('5. Tracking Book renders fully populated demographics, place of birth, parents, absences, paper adjustment controls, and Khmer font styles', () => {
+        assert.strictEqual(typeof context.window.openTrackingBookModal, 'function');
+        assert.strictEqual(typeof context.window.renderTrackingBookPreview, 'function');
+        assert.strictEqual(typeof context.window.applyTbPaperSettings, 'function');
+
+        context.window.openTrackingBookModal();
+        const modal = context.document.getElementById('trackingBookModal');
+        assert.ok(modal, 'trackingBookModal should exist in DOM');
+
+        const studentSelect = context.document.getElementById('tbStudentSelect');
+        studentSelect.value = 'STU-001';
+        studentSelect.options = [{ text: 'សុខ ចាន់ដារ៉ា (ប្រុស)', value: 'STU-001' }];
+        studentSelect.selectedIndex = 0;
+
+        const periodSelect = context.document.getElementById('tbPeriodSelect');
+        if (periodSelect) periodSelect.value = 'ខែ មករា';
+
+        const previewContainer = context.document.getElementById('tbPreviewContainer');
+        context.window.renderTrackingBookPreview();
+
+        const previewHtml = previewContainer.innerHTML;
+
+        // 1. Demographics & Place of Birth
+        assert.ok(previewHtml.includes('សុខ ចាន់ដារ៉ា'), 'Should contain student name');
+        assert.ok(previewHtml.includes('សុខ គឹមហុង'), 'Should contain father name');
+        assert.ok(previewHtml.includes('អ៊ុំ ស្រីមុំ'), 'Should contain mother name');
+        assert.ok(previewHtml.includes('សៀវភៅតាមដានការសិក្សា'), 'Should contain Tracking Book title');
+        assert.ok(previewHtml.includes('ភ្នំពេញ'), 'Should contain place of birth info');
+        assert.ok(previewHtml.includes('ផ្សារថ្មី'), 'Should contain address commune info');
+        assert.ok(previewHtml.includes('ដូនពេញ'), 'Should contain address district info');
+
+        // 2. Results & Absences & Signatures
+        assert.ok(previewHtml.includes('អវត្តមានមានច្បាប់'), 'Should contain excused absence field');
+        assert.ok(previewHtml.includes('អត់ច្បាប់'), 'Should contain unexcused absence field');
+        assert.ok(previewHtml.includes('បានឃើញ និងឯកភាព'), 'Should contain principal endorsement');
+        assert.ok(previewHtml.includes('គ្រូបន្ទុកថ្នាក់'), 'Should contain teacher signature label');
+        assert.ok(previewHtml.includes('មតិមាតាបិតា'), 'Should contain parent feedback section');
+
+        // 3. Paper adjustment & fonts
+        const paperSelect = context.document.getElementById('tbPaperSize');
+        const orientSelect = context.document.getElementById('tbOrientation');
+        assert.ok(paperSelect, 'Paper size selector should exist');
+        assert.ok(orientSelect, 'Orientation selector should exist');
+
+        assert.ok(previewHtml.includes('font-moul'), 'Should preserve Moul font styling');
+        assert.ok(previewHtml.includes('font-siemreap'), 'Should preserve Siemreap font styling');
+    });
 });
