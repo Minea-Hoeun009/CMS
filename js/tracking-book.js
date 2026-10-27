@@ -1,3 +1,27 @@
+
+window.currentTbZoom = 85;
+window.setTbZoom = function(val) {
+  const z = Math.max(40, Math.min(180, parseInt(val, 10) || 85));
+  window.currentTbZoom = z;
+  const wrapper = document.getElementById("tbPagesWrapper");
+  if (wrapper) {
+    wrapper.style.transform = "scale(" + (z / 100) + ")";
+    wrapper.style.transformOrigin = "top center";
+  }
+  const label = document.getElementById("tbZoomDisplay");
+  if (label) label.textContent = z + "%";
+};
+window.tbZoomIn = function() {
+  window.setTbZoom((window.currentTbZoom || 85) + 10);
+};
+window.tbZoomOut = function() {
+  window.setTbZoom((window.currentTbZoom || 85) - 10);
+};
+window.tbZoomFit = function() {
+  const isMobile = window.innerWidth < 768;
+  window.setTbZoom(isMobile ? 55 : 85);
+};
+
 // ==========================================================
 // ឯកសារ js/tracking-book.js - សៀវភៅតាមដានការសិក្សា (Update ថ្មី: ទាញទិន្នន័យផ្ទាល់ និងទម្រង់ប្រចាំឆ្នាំ)
 // ==========================================================
@@ -46,6 +70,14 @@ function openTrackingBookModal() {
                 </select>
               </div>
 
+              <!-- Zoom Controls -->
+              <div class="flex items-center gap-1 bg-white border border-slate-200 rounded-xl px-2 py-1 shadow-sm">
+                <button type="button" onclick="window.tbZoomOut()" class="w-6 h-6 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold flex items-center justify-center transition active:scale-95" title="បង្រួម"><i class="fa-solid fa-minus text-[10px]"></i></button>
+                <span id="tbZoomDisplay" class="text-xs font-bold text-slate-700 min-w-[42px] text-center">85%</span>
+                <button type="button" onclick="window.tbZoomIn()" class="w-6 h-6 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold flex items-center justify-center transition active:scale-95" title="ពង្រីក"><i class="fa-solid fa-plus text-[10px]"></i></button>
+                <button type="button" onclick="window.tbZoomFit()" class="px-1.5 py-0.5 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-[10px] font-bold ml-1 transition" title="កំណត់ទំហំសមរម្យ">Fit</button>
+              </div>
+
               <div class="w-px h-6 bg-slate-300 mx-1 hidden md:block"></div>
 
               <button onclick="executeTrackingBookPrint('print')" class="px-4 py-2 bg-slate-800 hover:bg-slate-900 text-white rounded-xl text-xs font-bold shadow transition flex items-center gap-2">
@@ -61,7 +93,7 @@ function openTrackingBookModal() {
             </button>
           </div>
 
-          <div class="flex-1 overflow-y-auto p-4 md:p-8 bg-slate-300 custom-scrollbar flex flex-col items-center gap-8" id="tbPreviewContainer">
+          <div class="w-full flex-1 overflow-auto p-4 md:p-8 bg-slate-300 custom-scrollbar flex flex-col items-center" id="tbPreviewContainer">
             <div class="text-slate-500 font-bold mt-20 flex flex-col items-center">
                <i class="fa-solid fa-spinner fa-spin text-4xl mb-3 opacity-50"></i>
                <p>កំពុងរៀបចំទិន្នន័យសៀវភៅតាមដាន...</p>
@@ -148,10 +180,15 @@ function renderTrackingBookPreview() {
   const khmerNumbers = ['០', '១', '២', '៣', '៤', '៥', '៦', '៧', '៨', '៩'];
   const toKhmerNum = (str) => String(str).split('').map(n => khmerNumbers[n] || n).join('');
   
-  let dobStr = student.dob || "....................";
-  if (dobStr.includes("-")) {
-      const p = dobStr.split("-");
-      if(p.length === 3) dobStr = `${p[2]}/${p[1]}/${p[0]}`;
+  let dobStr = "....................";
+  if (student.dob) {
+    let cleanDob = String(student.dob).trim();
+    if (cleanDob.includes("T")) cleanDob = cleanDob.split("T")[0];
+    if (cleanDob.includes("-")) {
+      const p = cleanDob.split("-");
+      if (p.length === 3) cleanDob = `${p[2]}/${p[1]}/${p[0]}`;
+    }
+    dobStr = toKhmerNum(cleanDob);
   }
 
   const avgStr = student.avg ? student.avg.toFixed(2) : "";
@@ -186,10 +223,19 @@ function renderTrackingBookPreview() {
 
         <h1 class="font-moul text-[28px] mt-10 leading-snug">សៀវភៅតាមដានការសិក្សា</h1>
         
-        <div class="mt-10 text-left px-6 text-[15px] leading-[2.5]">
-           របស់សិស្សឈ្មោះ៖ <span class="border-b border-dotted border-[#0000ff] inline-block w-[150px] text-center font-moul hover:bg-blue-50 outline-none cursor-text" contenteditable="true">${student.name}</span> អត្តលេខ៖ <span class="border-b border-dotted border-[#0000ff] inline-block w-[40px] text-center hover:bg-blue-50 outline-none cursor-text" contenteditable="true">${toKhmerNum(student.id)}</span><br>
-           <div class="flex items-center mt-2">
-              <span class="w-[60px]">ថ្នាក់ទី៖</span> <br>
+        <div class="mt-8 text-left px-4 text-[14px] leading-loose">
+           <div class="flex items-center justify-between gap-2 mb-2">
+             <div class="flex items-center flex-1 min-w-0">
+               <span class="whitespace-nowrap shrink-0">របស់សិស្សឈ្មោះ៖</span>
+               <span class="border-b border-dotted border-[#0000ff] flex-1 text-center font-moul truncate px-1 hover:bg-blue-50 outline-none cursor-text" contenteditable="true">${student.name}</span>
+             </div>
+             <div class="flex items-center shrink-0">
+               <span class="whitespace-nowrap shrink-0 ml-2">អត្តលេខ៖</span>
+               <span class="border-b border-dotted border-[#0000ff] min-w-[70px] text-center font-bold px-1 hover:bg-blue-50 outline-none cursor-text" contenteditable="true">${toKhmerNum(student.id)}</span>
+             </div>
+           </div>
+           <div class="flex items-center gap-2">
+              <span class="whitespace-nowrap shrink-0">ថ្នាក់ទី៖</span>
               <span class="border-b border-dotted border-[#0000ff] flex-1 text-center font-moul hover:bg-blue-50 outline-none cursor-text" contenteditable="true">${grade}</span>
            </div>
         </div>
@@ -240,18 +286,81 @@ function renderTrackingBookPreview() {
         <h1 class="font-moul text-[22px] mt-6 leading-snug">សៀវភៅតាមដានការសិក្សា</h1>
         <h2 class="font-moul text-[14px] mt-6">សាលាបឋមសិក្សាចំណេះទូទៅ</h2>
 
-        <div class="mt-6 text-left px-2 text-[12px] leading-[2.4]">
-           សាលាបឋមសិក្សា៖ <span class="border-b border-dotted border-[#0000ff] inline-block w-[160px] font-moul text-center hover:bg-blue-50 outline-none cursor-text" contenteditable="true">${schoolName}</span> កម្រងសាលា៖ <span class="border-b border-dotted border-[#0000ff] inline-block w-[80px] text-center hover:bg-blue-50 outline-none cursor-text" contenteditable="true"></span><br>
-           ឈ្មោះសិស្ស៖ <span class="border-b border-dotted border-[#0000ff] inline-block w-[140px] font-moul text-center hover:bg-blue-50 outline-none cursor-text" contenteditable="true">${student.name}</span> ភេទ៖ <span class="border-b border-dotted border-[#0000ff] inline-block w-[40px] text-center hover:bg-blue-50 outline-none cursor-text" contenteditable="true">${student.gender}</span> រៀនថ្នាក់ទី៖ <span class="border-b border-dotted border-[#0000ff] inline-block w-[60px] text-center hover:bg-blue-50 outline-none cursor-text" contenteditable="true">${grade}</span> អត្តលេខ៖ <span class="border-b border-dotted border-[#0000ff] inline-block w-[40px] text-center hover:bg-blue-50 outline-none cursor-text" contenteditable="true">${toKhmerNum(student.id)}</span><br>
-           កើតថ្ងៃទី៖ <span class="border-b border-dotted border-[#0000ff] inline-block w-[100px] text-center hover:bg-blue-50 outline-none cursor-text" contenteditable="true">${dobStr}</span> នៅភូមិ/ក្រុម៖ <span class="border-b border-dotted border-[#0000ff] inline-block w-[140px] truncate text-center hover:bg-blue-50 outline-none cursor-text" contenteditable="true">${student.pob || ''}</span> ឃុំ/សង្កាត់៖ <span class="border-b border-dotted border-[#0000ff] inline-block w-[90px] text-center hover:bg-blue-50 outline-none cursor-text" contenteditable="true"></span><br>
-           ស្រុក/ខណ្ឌ៖ <span class="border-b border-dotted border-[#0000ff] inline-block w-[130px] text-center hover:bg-blue-50 outline-none cursor-text" contenteditable="true"></span> ខេត្ត/ក្រុង៖ <span class="border-b border-dotted border-[#0000ff] inline-block w-[130px] text-center hover:bg-blue-50 outline-none cursor-text" contenteditable="true"></span><br>
-           ឪពុកឈ្មោះ៖ <span class="border-b border-dotted border-[#0000ff] inline-block w-[160px] text-center hover:bg-blue-50 outline-none cursor-text" contenteditable="true">${student.father_name || ''}</span> មុខរបរ៖ <span class="border-b border-dotted border-[#0000ff] inline-block w-[120px] text-center hover:bg-blue-50 outline-none cursor-text" contenteditable="true">${student.father_job || ''}</span><br>
-           ម្តាយឈ្មោះ៖ <span class="border-b border-dotted border-[#0000ff] inline-block w-[160px] text-center hover:bg-blue-50 outline-none cursor-text" contenteditable="true">${student.mother_name || ''}</span> មុខរបរ៖ <span class="border-b border-dotted border-[#0000ff] inline-block w-[120px] text-center hover:bg-blue-50 outline-none cursor-text" contenteditable="true">${student.mother_job || ''}</span><br>
-           អាណាព្យាបាលឈ្មោះ៖ <span class="border-b border-dotted border-[#0000ff] inline-block w-[140px] hover:bg-blue-50 outline-none cursor-text" contenteditable="true"></span> មុខរបរ៖ <span class="border-b border-dotted border-[#0000ff] inline-block w-[100px] hover:bg-blue-50 outline-none cursor-text" contenteditable="true"></span><br>
-           ស្នាក់នៅផ្ទះលេខ៖ <span class="border-b border-dotted border-[#0000ff] inline-block w-[50px] text-center hover:bg-blue-50 outline-none cursor-text" contenteditable="true"></span> ផ្លូវ៖ <span class="border-b border-dotted border-[#0000ff] inline-block w-[50px] text-center hover:bg-blue-50 outline-none cursor-text" contenteditable="true"></span> ភូមិ/ក្រុម៖ <span class="border-b border-dotted border-[#0000ff] inline-block w-[110px] text-center hover:bg-blue-50 outline-none cursor-text" contenteditable="true">${student.address || ''}</span> ឃុំ/សង្កាត់៖ <span class="border-b border-dotted border-[#0000ff] inline-block w-[80px] text-center hover:bg-blue-50 outline-none cursor-text" contenteditable="true"></span><br>
-           ស្រុក/ខណ្ឌ៖ <span class="border-b border-dotted border-[#0000ff] inline-block w-[130px] hover:bg-blue-50 outline-none cursor-text" contenteditable="true"></span> ខេត្ត/ក្រុង៖ <span class="border-b border-dotted border-[#0000ff] inline-block w-[130px] hover:bg-blue-50 outline-none cursor-text" contenteditable="true"></span><br>
-           <div class="mt-4 text-center">
-             ឆ្នាំសិក្សា៖ ២០<span class="border-b border-dotted border-[#0000ff] inline-block w-[40px] text-center hover:bg-blue-50 outline-none cursor-text" contenteditable="true">${toKhmerNum(academicYear.substring(2, 4))}</span> - ២០<span class="border-b border-dotted border-[#0000ff] inline-block w-[40px] text-center hover:bg-blue-50 outline-none cursor-text" contenteditable="true">${toKhmerNum(academicYear.substring(7, 9))}</span>
+        <div class="mt-4 text-left px-2 text-[11.5px] leading-[2.1] space-y-1">
+           <div class="flex items-center gap-2">
+             <span class="whitespace-nowrap shrink-0">សាលាបឋមសិក្សា៖</span>
+             <span class="border-b border-dotted border-[#0000ff] flex-1 font-moul text-center truncate hover:bg-blue-50 outline-none cursor-text" contenteditable="true">${schoolName}</span>
+             <span class="whitespace-nowrap shrink-0 ml-1">កម្រងសាលា៖</span>
+             <span class="border-b border-dotted border-[#0000ff] w-[90px] text-center hover:bg-blue-50 outline-none cursor-text" contenteditable="true"></span>
+           </div>
+
+           <div class="flex items-center gap-2">
+             <span class="whitespace-nowrap shrink-0">ឈ្មោះសិស្ស៖</span>
+             <span class="border-b border-dotted border-[#0000ff] flex-1 font-moul text-center truncate hover:bg-blue-50 outline-none cursor-text" contenteditable="true">${student.name}</span>
+             <span class="whitespace-nowrap shrink-0 ml-1">ភេទ៖</span>
+             <span class="border-b border-dotted border-[#0000ff] w-[45px] text-center hover:bg-blue-50 outline-none cursor-text" contenteditable="true">${student.gender || 'ប្រុស'}</span>
+           </div>
+
+           <div class="flex items-center gap-2">
+             <span class="whitespace-nowrap shrink-0">រៀនថ្នាក់ទី៖</span>
+             <span class="border-b border-dotted border-[#0000ff] flex-1 text-center font-bold hover:bg-blue-50 outline-none cursor-text" contenteditable="true">${grade}</span>
+             <span class="whitespace-nowrap shrink-0 ml-1">អត្តលេខ៖</span>
+             <span class="border-b border-dotted border-[#0000ff] min-w-[70px] text-center font-bold hover:bg-blue-50 outline-none cursor-text" contenteditable="true">${toKhmerNum(student.id)}</span>
+           </div>
+
+           <div class="flex items-center gap-2">
+             <span class="whitespace-nowrap shrink-0">កើតថ្ងៃទី៖</span>
+             <span class="border-b border-dotted border-[#0000ff] min-w-[110px] text-center hover:bg-blue-50 outline-none cursor-text" contenteditable="true">${dobStr}</span>
+             <span class="whitespace-nowrap shrink-0 ml-1">នៅភូមិ/ក្រុម៖</span>
+             <span class="border-b border-dotted border-[#0000ff] flex-1 truncate text-center hover:bg-blue-50 outline-none cursor-text" contenteditable="true">${student.pob || ''}</span>
+           </div>
+
+           <div class="flex items-center gap-2">
+             <span class="whitespace-nowrap shrink-0">ឃុំ/សង្កាត់៖</span>
+             <span class="border-b border-dotted border-[#0000ff] flex-1 text-center hover:bg-blue-50 outline-none cursor-text" contenteditable="true"></span>
+             <span class="whitespace-nowrap shrink-0 ml-1">ស្រុក/ខណ្ឌ៖</span>
+             <span class="border-b border-dotted border-[#0000ff] flex-1 text-center hover:bg-blue-50 outline-none cursor-text" contenteditable="true"></span>
+             <span class="whitespace-nowrap shrink-0 ml-1">ខេត្ត/ក្រុង៖</span>
+             <span class="border-b border-dotted border-[#0000ff] flex-1 text-center hover:bg-blue-50 outline-none cursor-text" contenteditable="true"></span>
+           </div>
+
+           <div class="flex items-center gap-2">
+             <span class="whitespace-nowrap shrink-0">ឪពុកឈ្មោះ៖</span>
+             <span class="border-b border-dotted border-[#0000ff] flex-1 text-center truncate hover:bg-blue-50 outline-none cursor-text" contenteditable="true">${student.father_name || ''}</span>
+             <span class="whitespace-nowrap shrink-0 ml-1">មុខរបរ៖</span>
+             <span class="border-b border-dotted border-[#0000ff] w-[120px] text-center truncate hover:bg-blue-50 outline-none cursor-text" contenteditable="true">${student.father_job || ''}</span>
+           </div>
+
+           <div class="flex items-center gap-2">
+             <span class="whitespace-nowrap shrink-0">ម្តាយឈ្មោះ៖</span>
+             <span class="border-b border-dotted border-[#0000ff] flex-1 text-center truncate hover:bg-blue-50 outline-none cursor-text" contenteditable="true">${student.mother_name || ''}</span>
+             <span class="whitespace-nowrap shrink-0 ml-1">មុខរបរ៖</span>
+             <span class="border-b border-dotted border-[#0000ff] w-[120px] text-center truncate hover:bg-blue-50 outline-none cursor-text" contenteditable="true">${student.mother_job || ''}</span>
+           </div>
+
+           <div class="flex items-center gap-2">
+             <span class="whitespace-nowrap shrink-0">អាណាព្យាបាល៖</span>
+             <span class="border-b border-dotted border-[#0000ff] flex-1 text-center truncate hover:bg-blue-50 outline-none cursor-text" contenteditable="true"></span>
+             <span class="whitespace-nowrap shrink-0 ml-1">មុខរបរ៖</span>
+             <span class="border-b border-dotted border-[#0000ff] w-[120px] text-center truncate hover:bg-blue-50 outline-none cursor-text" contenteditable="true"></span>
+           </div>
+
+           <div class="flex items-center gap-2">
+             <span class="whitespace-nowrap shrink-0">ស្នាក់នៅភូមិ/ក្រុម៖</span>
+             <span class="border-b border-dotted border-[#0000ff] flex-1 text-center truncate hover:bg-blue-50 outline-none cursor-text" contenteditable="true">${student.address || ''}</span>
+             <span class="whitespace-nowrap shrink-0 ml-1">ឃុំ/សង្កាត់៖</span>
+             <span class="border-b border-dotted border-[#0000ff] w-[110px] text-center hover:bg-blue-50 outline-none cursor-text" contenteditable="true"></span>
+           </div>
+
+           <div class="flex items-center gap-2">
+             <span class="whitespace-nowrap shrink-0">ស្រុក/ខណ្ឌ៖</span>
+             <span class="border-b border-dotted border-[#0000ff] flex-1 text-center hover:bg-blue-50 outline-none cursor-text" contenteditable="true"></span>
+             <span class="whitespace-nowrap shrink-0 ml-1">ខេត្ត/ក្រុង៖</span>
+             <span class="border-b border-dotted border-[#0000ff] flex-1 text-center hover:bg-blue-50 outline-none cursor-text" contenteditable="true"></span>
+           </div>
+
+           <div class="pt-2 text-center text-[12px]">
+             ឆ្នាំសិក្សា៖ ២០<span class="border-b border-dotted border-[#0000ff] inline-block w-[35px] text-center hover:bg-blue-50 outline-none cursor-text" contenteditable="true">${toKhmerNum(academicYear.substring(2, 4))}</span> - ២០<span class="border-b border-dotted border-[#0000ff] inline-block w-[35px] text-center hover:bg-blue-50 outline-none cursor-text" contenteditable="true">${toKhmerNum(academicYear.substring(7, 9))}</span>
            </div>
         </div>
 
@@ -280,9 +389,42 @@ function renderTrackingBookPreview() {
     return ["", "", "", "✔"];
   };
 
+  const subjectKeyAliases = {
+    "អាន": ["k_read", "read", "reading", "អាន", "ភាសាខ្មែរ-អាន"],
+    "សរសេរតាមអាន": ["k_write", "dictation", "dict", "សរសេរតាមអាន", "សរសេរ"],
+    "តែងសេចក្តី": ["k_compose", "compose", "composition", "តែងសេចក្តី", "តែងសេចក្ដី"],
+    "មេសូត្រ": ["k_recite", "recite", "poem", "មេសូត្រ"],
+    "អក្សរផ្ចង់": ["k_calligraphy", "calligraphy", "អក្សរផ្ចង់"],
+    "គណិតវិទ្យា": ["math", "m_num", "m_alg", "m_geo", "គណិតវិទ្យា", "គណិត"],
+    "វិទ្យាសាស្ត្រអនុវត្ត": ["s_bio", "s_phy", "s_chem", "science", "វិទ្យាសាស្ត្រ", "វិទ្យាសាស្ត្រអនុវត្ត"],
+    "ប្រវត្តិវិទ្យា": ["ss_hist", "history", "ប្រវត្តិវិទ្យា", "ប្រវត្តិ"],
+    "ភូមិវិទ្យា": ["ss_geo", "geography", "ភូមិវិទ្យា", "ភូមិ"],
+    "សីលធម៌ ពលរដ្ឋវិជ្ជា": ["ss_moral", "moral", "សីលធម៌-ពលរដ្ឋ", "សីលធម៌", "ពលរដ្ឋ"],
+    "គំនូរ": ["art", "drawing", "គំនូរ", "គំនូរ និង ហត្ថកម្ម"],
+    "កិច្ចការ-ផ្ទះ": ["homework", "life_skill", "កិច្ចការ-ផ្ទះ", "កិច្ចការផ្ទះ"],
+    "អប់រំកាយ-កីឡា": ["pe_sport", "sport", "pe", "អប់រំកាយ", "កីឡា", "អប់រំកាយ-កីឡា"],
+    "សិល្បៈបំណិនសិល្បៈ": ["life_skill", "art", "បំណិនជីវិត", "សិល្បៈបំណិនសិល្បៈ"],
+    "សីលធម៌រស់នៅ": ["morality", "living_moral", "សីលធម៌រស់នៅ"],
+    "សុខភាព-អនាម័យ": ["pe_health", "health", "hygiene", "សុខភាព", "សុខភាព-អនាម័យ"]
+  };
+
+  const findSubScore = (sub) => {
+    const aliases = subjectKeyAliases[sub] || [sub];
+    const sources = [student.scores, studentScore.scores, studentScore.subject_scores, studentScore];
+    for (const src of sources) {
+      if (!src || typeof src !== 'object') continue;
+      for (const al of aliases) {
+        if (src[al] !== undefined && src[al] !== null && src[al] !== '') {
+          return src[al];
+        }
+      }
+    }
+    return null;
+  };
+
   const buildResultTable = (title, isAnnual) => {
     let tbody = subjects.map(sub => {
-      let scoreVal = (student.scores && student.scores[sub] !== undefined) ? student.scores[sub] : null;
+      let scoreVal = findSubScore(sub);
       let ticks = getTickMark(scoreVal);
 
       // បន្ថែម onclick សម្រាប់ Tick ដូរចុះឡើង និង contenteditable សម្រាប់វាយអក្សរ
@@ -371,8 +513,15 @@ function renderTrackingBookPreview() {
     `;
   }
 
-  // បញ្ចូល HTML ទំព័រទាំង ៣ ទៅក្នុង Preview Container
-  container.innerHTML = coverHtml + rulesHtml + resultsHtml;
+  // បញ្ចូល HTML ទំព័រទាំង ៣ ទៅក្នុង Preview Container ដោយភ្ជាប់ជាមួយ Zoom Wrapper
+  const zoomScale = (window.currentTbZoom || 85) / 100;
+  container.innerHTML = `
+    <div id="tbPagesWrapper" class="transition-transform duration-200 flex flex-col items-center gap-8 py-4" style="transform: scale(${zoomScale}); transform-origin: top center;">
+      ${coverHtml}
+      ${rulesHtml}
+      ${resultsHtml}
+    </div>
+  `;
 }
 
 // មុខងារសម្រាប់ចុច Tick (✔) ដោយផ្ទាល់លើតារាង

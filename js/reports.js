@@ -245,7 +245,7 @@ window.loadReportsView = function() {
                 </div>
 
                 <!-- ផ្នែកទី ៣៖ ផ្ទាំងការងារក្រដាសរបាយការណ៍ (Section 3: Realistic Paper Canvas) -->
-                <div class="w-full flex-1 overflow-x-auto custom-scrollbar flex justify-center pb-16 pt-2">
+                <div class="w-full flex-1 overflow-auto custom-scrollbar flex justify-center pb-16 pt-2">
                     <div id="reportPaperArea" class="transition-all relative flex justify-center items-start">
                         <!-- Content goes here -->
                     </div>
@@ -2511,7 +2511,17 @@ window.renderSikhaKarikBooklet = function(container, targetGrade, targetRoom, st
     // ទិន្នន័យសិស្ស
     const stuName = student.name || student.name_khmer || '................................';
     const stuGender = student.gender || '...';
-    const stuDob = student.dob || '........................';
+    let stuDob = '........................';
+    if (student.dob) {
+        let cleanDob = String(student.dob).trim();
+        if (cleanDob.includes("T")) cleanDob = cleanDob.split("T")[0];
+        if (cleanDob.includes("-")) {
+            const p = cleanDob.split("-");
+            if (p.length === 3) cleanDob = `${p[2]}/${p[1]}/${p[0]}`;
+        }
+        const khmerNums = ['០', '១', '២', '៣', '៤', '៥', '៦', '៧', '៨', '៩'];
+        stuDob = cleanDob.split('').map(n => khmerNums[n] || n).join('');
+    }
     const stuPob = student.pob || student.birthplace || '...................................................';
     const stuFather = student.father_name || '................................';
     const stuFatherJob = student.father_job || '................';
@@ -2547,16 +2557,51 @@ window.renderSikhaKarikBooklet = function(container, targetGrade, targetRoom, st
         "ភាសាបរទេស"
     ];
 
+    const officialSubjectAliases = {
+        "សុជីវធម៌ និងពលរដ្ឋវិជ្ជា": ["សុជីវធម៌ និងពលរដ្ឋវិជ្ជា", "សីលធម៌-ពលរដ្ឋ", "ss_moral", "moral"],
+        "រៀនអាន និងមេសូត្រ": ["រៀនអាន និងមេសូត្រ", "អាន", "មេសូត្រ", "k_read", "k_recite", "read"],
+        "គណិតវិទ្យា": ["គណិតវិទ្យា", "គណិត", "math", "m_num", "m_alg", "m_geo"],
+        "អក្ខរាវិរុទ្ធ": ["អក្ខរាវិរុទ្ធ", "អក្សរផ្ចង់", "k_calligraphy", "spelling"],
+        "គំនូរ និង ហត្ថកម្ម": ["គំនូរ និង ហត្ថកម្ម", "គំនូរ", "art", "drawing"],
+        "សរសេរតាមអាន និងសំណួរ": ["សរសេរតាមអាន និងសំណួរ", "សរសេរតាមអាន", "សរសេរ", "k_write", "dictation"],
+        "តែងសេចក្តី": ["តែងសេចក្តី", "តែងសេចក្ដី", "k_compose", "compose"],
+        "វិទ្យាសាស្ត្រអនុវត្ត": ["វិទ្យាសាស្ត្រអនុវត្ត", "វិទ្យាសាស្ត្រ", "science", "s_bio", "s_phy", "s_chem"],
+        "ភូមិវិទ្យា": ["ភូមិវិទ្យា", "ភូមិ", "geography", "ss_geo"],
+        "ប្រវត្តិវិទ្យា": ["ប្រវត្តិវិទ្យា", "ប្រវត្តិ", "history", "ss_hist"],
+        "អប់រំកាយ និងកីឡា": ["អប់រំកាយ និងកីឡា", "អប់រំកាយ-កីឡា", "កីឡា", "sport", "pe_sport"],
+        "ភាសាបរទេស": ["ភាសាបរទេស", "អង់គ្លេស", "english", "foreign_lang"]
+    };
+
+    const getScoreForSubject = (subName, sem) => {
+        const aliases = officialSubjectAliases[subName] || [subName];
+        // 1. Check in stuScores where subject matches alias
+        for (const s of stuScores) {
+            const isSem = sem === 1 ? (s.semester === '1' || s.semester === 1 || s.term === 's1' || !s.semester) : (s.semester === '2' || s.semester === 2 || s.term === 's2');
+            if (!isSem) continue;
+            for (const al of aliases) {
+                if (s.subject === al || s.subject_khmer === al) {
+                    return { val: s.score || s.val || '', rank: s.rank || '' };
+                }
+                if (s.scores && s.scores[al] !== undefined) {
+                    return { val: s.scores[al], rank: s.rank || '' };
+                }
+                if (s[al] !== undefined && s[al] !== null && typeof s[al] !== 'object') {
+                    return { val: s[al], rank: s.rank || '' };
+                }
+            }
+        }
+        return { val: '', rank: '' };
+    };
+
     // រៀបចំតារាងពិន្ទុមុខវិជ្ជាទាំង ១២
     const subjectRowsHtml = officialSubjects.map(subName => {
-        // រកពិន្ទុដែលត្រូវនឹងមុខវិជ្ជានេះ
-        const s1ScoreObj = stuScores.find(s => (s.subject === subName || (s.subject_khmer && s.subject_khmer === subName)) && (s.semester === '1' || s.semester === 1 || s.term === 's1'));
-        const s2ScoreObj = stuScores.find(s => (s.subject === subName || (s.subject_khmer && s.subject_khmer === subName)) && (s.semester === '2' || s.semester === 2 || s.term === 's2'));
+        const s1 = getScoreForSubject(subName, 1);
+        const s2 = getScoreForSubject(subName, 2);
         
-        const s1Val = s1ScoreObj ? (s1ScoreObj.score || s1ScoreObj.val || '') : '';
-        const s1Rank = s1ScoreObj ? (s1ScoreObj.rank || '') : '';
-        const s2Val = s2ScoreObj ? (s2ScoreObj.score || s2ScoreObj.val || '') : '';
-        const s2Rank = s2ScoreObj ? (s2ScoreObj.rank || '') : '';
+        const s1Val = s1.val;
+        const s1Rank = s1.rank;
+        const s2Val = s2.val;
+        const s2Rank = s2.rank;
 
         return `
             <tr>
