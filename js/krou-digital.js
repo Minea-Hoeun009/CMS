@@ -1586,10 +1586,10 @@ window.KrouDigital = {
             <div class="bg-slate-900 border border-slate-700/80 rounded-3xl w-full max-w-7xl shadow-2xl relative my-3 text-slate-100 flex flex-col overflow-hidden max-h-[96vh]">
                 
                 <!-- 🎨 CANVA-STYLE TOP STUDIO HEADER 🎨 -->
-                <div class="bg-gradient-to-r from-slate-900 via-slate-850 to-slate-900 px-4 py-3 border-b border-slate-700/80 flex flex-wrap justify-between items-center gap-3 no-print">
+                <div class="bg-gradient-to-r from-slate-900 via-slate-850 to-slate-900 px-3 py-2 border-b border-slate-700/80 flex items-center gap-2 sm:gap-3 no-print overflow-x-auto custom-scrollbar flex-nowrap whitespace-nowrap w-full shrink-0">
                     
                     <!-- Left: Studio Logo & Title -->
-                    <div class="flex items-center gap-2.5">
+                    <div class="flex items-center gap-2 shrink-0">
                         <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-amber-500 via-rose-500 to-indigo-600 flex items-center justify-center text-white shadow-md shadow-indigo-500/20">
                             <i class="fa-solid fa-wand-magic-sparkles text-sm"></i>
                         </div>
@@ -1603,7 +1603,7 @@ window.KrouDigital = {
                     </div>
 
                     <!-- Center: Zoom In / Zoom Out Controls -->
-                    <div class="flex items-center gap-1.5 bg-slate-800/90 border border-slate-700 px-2.5 py-1 rounded-xl text-xs">
+                    <div class="flex items-center gap-1.5 bg-slate-800/90 border border-slate-700 px-2.5 py-1 rounded-xl text-xs shrink-0">
                         <span class="text-slate-400 text-[11px] mr-1"><i class="fa-solid fa-magnifying-glass"></i> Zoom:</span>
                         <button onclick="window.KrouDigital.zoomOut()" class="w-6 h-6 rounded-lg bg-slate-700 hover:bg-slate-600 text-white flex items-center justify-center font-bold text-xs transition" title="Zoom Out (-10%)">-</button>
                         <input type="range" id="certZoomSlider" min="50" max="150" value="${studioZoom}" oninput="window.KrouDigital.setZoom(this.value)" class="w-20 accent-indigo-500 cursor-pointer">
@@ -1613,7 +1613,7 @@ window.KrouDigital = {
                     </div>
 
                     <!-- Right: Page Size & Action Buttons -->
-                    <div class="flex items-center gap-2">
+                    <div class="flex items-center gap-1.5 shrink-0 ml-auto">
                         <!-- Set Page Size Dropdown -->
                         <div class="flex items-center gap-1 bg-slate-800 border border-slate-700 rounded-xl px-2.5 py-1.5 text-xs">
                             <i class="fa-solid fa-file-invoice text-indigo-400 text-xs"></i>
@@ -1645,9 +1645,9 @@ window.KrouDigital = {
                 </div>
 
                 <!-- 🎛️ CANVA CATEGORY TABS BAR 🎛️ -->
-                <div class="bg-slate-850 px-4 py-2 border-b border-slate-700/60 flex flex-wrap items-center justify-between gap-2 text-xs no-print">
+                <div class="bg-slate-850 px-3 py-1.5 sm:py-2 border-b border-slate-700/60 flex items-center justify-between gap-2 text-xs no-print overflow-x-auto custom-scrollbar flex-nowrap whitespace-nowrap w-full shrink-0">
                     <!-- Tab Switcher Buttons -->
-                    <div class="flex items-center gap-1.5">
+                    <div class="flex items-center gap-1.5 shrink-0 flex-nowrap">
                         <button id="certTabBtn_design" onclick="window.KrouDigital.setActiveTab('design')" class="${activeTab === 'design' ? 'px-3.5 py-1.5 rounded-xl font-bold text-xs bg-indigo-600 text-white shadow-md shadow-indigo-500/30 flex items-center gap-1.5 transition' : 'px-3.5 py-1.5 rounded-xl font-bold text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center gap-1.5 transition'}">
                             <i class="fa-solid fa-border-all text-amber-400"></i>
                             <span>ស៊ុម & ផ្ទៃ (Borders)</span>
@@ -1667,7 +1667,7 @@ window.KrouDigital = {
                     </div>
 
                     <!-- Reset & Help badges -->
-                    <div class="flex items-center gap-2">
+                    <div class="flex items-center gap-2 shrink-0 flex-nowrap ml-auto">
                         <button onclick="window.KrouDigital.resetCertPositions()" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-amber-300 rounded-lg text-[11px] font-bold border border-slate-700 flex items-center gap-1" title="កំណត់ទីតាំង និងទំហំទាំងអស់ឡើងវិញ">
                             <i class="fa-solid fa-rotate-left"></i>
                             <span>Reset ទីតាំងដើម</span>
@@ -1677,12 +1677,12 @@ window.KrouDigital = {
                 </div>
 
                 <!-- 🛠️ TAB CONTENT TOOLBAR PANES 🛠️ -->
-                <div class="bg-slate-900 px-4 py-2.5 border-b border-slate-700/60 text-xs no-print">
+                <div class="bg-slate-900 px-3 py-2 border-b border-slate-700/60 text-xs no-print overflow-x-auto custom-scrollbar w-full shrink-0">
                     
                     <!-- PANE 1: DESIGN & BORDERS -->
-                    <div id="certTabPane_design" class="${activeTab === 'design' ? 'flex flex-wrap items-center gap-3' : 'hidden'}">
+                    <div id="certTabPane_design" class="${activeTab === 'design' ? 'flex items-center gap-2.5 flex-nowrap whitespace-nowrap' : 'hidden'}">
                         <!-- Frame Selector -->
-                        <div class="flex items-center gap-1.5 bg-slate-800 border border-slate-700 rounded-xl px-2.5 py-1.5">
+                        <div class="flex items-center gap-1.5 bg-slate-800 border border-slate-700 rounded-xl px-2.5 py-1.5 shrink-0">
                             <span class="text-slate-400">ម៉ូដស៊ុម៖</span>
                             <select id="certFrameSelect" onchange="window.KrouDigital.renderCertificateModal(document.getElementById('certStudentSelect')?.value, document.getElementById('certRankSelect')?.value, document.getElementById('certGradeSelect')?.value, this.value)" class="bg-transparent text-amber-200 outline-none cursor-pointer font-bold">
                                 ${Object.entries(frameStylesMap).map(([key, item]) => `
@@ -1692,14 +1692,14 @@ window.KrouDigital = {
                         </div>
 
                         <!-- Frame Padding Slider -->
-                        <div class="flex items-center gap-2 bg-slate-800 border border-slate-700 rounded-xl px-3 py-1.5 text-slate-300">
+                        <div class="flex items-center gap-2 bg-slate-800 border border-slate-700 rounded-xl px-3 py-1.5 text-slate-300 shrink-0">
                             <span>គម្លាតស៊ុម៖</span>
                             <input type="range" min="10" max="95" value="${certPadding}" oninput="window.KrouDigital.updateCertPadding(this.value)" class="w-20 accent-amber-500 cursor-pointer">
                             <span id="certPaddingDisplay" class="font-mono text-amber-400 font-bold">${certPadding}px</span>
                         </div>
 
                         <!-- Background Color -->
-                        <div class="flex items-center gap-1.5 bg-slate-800 border border-slate-700 rounded-xl px-2.5 py-1.5">
+                        <div class="flex items-center gap-1.5 bg-slate-800 border border-slate-700 rounded-xl px-2.5 py-1.5 shrink-0">
                             <span class="text-slate-400">ពណ៌ផ្ទៃ៖</span>
                             <button onclick="window.KrouDigital.updateCertBgColor('#ffffff')" class="w-4 h-4 rounded-full bg-white border border-slate-400 hover:scale-110 transition" title="ស (White)"></button>
                             <button onclick="window.KrouDigital.updateCertBgColor('#fefcf3')" class="w-4 h-4 rounded-full bg-[#fefcf3] border border-amber-300 hover:scale-110 transition" title="ក្រដាសចាស់ (Ivory)"></button>
@@ -1708,16 +1708,16 @@ window.KrouDigital = {
                         </div>
 
                         <!-- Watermark Romduol Pattern Switch -->
-                        <label class="flex items-center gap-2 bg-slate-800 border border-slate-700 rounded-xl px-3 py-1.5 cursor-pointer text-slate-300 hover:text-white transition">
+                        <label class="flex items-center gap-2 bg-slate-800 border border-slate-700 rounded-xl px-3 py-1.5 cursor-pointer text-slate-300 hover:text-white transition shrink-0">
                             <input type="checkbox" ${watermarkEnabled ? 'checked' : ''} onchange="window.KrouDigital.toggleWatermark(this.checked)" class="accent-indigo-500 w-3.5 h-3.5 cursor-pointer">
                             <span>Watermark ផ្កាក្បាច់</span>
                         </label>
                     </div>
 
                     <!-- PANE 2: UPLOADS (LOGO, FRAME, PICTURES) -->
-                    <div id="certTabPane_uploads" class="${activeTab === 'uploads' ? 'flex flex-wrap items-center gap-3' : 'hidden'}">
+                    <div id="certTabPane_uploads" class="${activeTab === 'uploads' ? 'flex items-center gap-2.5 flex-nowrap whitespace-nowrap' : 'hidden'}">
                         <!-- Upload Custom Frame -->
-                        <label class="cursor-pointer px-3 py-1.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white rounded-xl font-bold shadow transition flex items-center gap-1.5 active:scale-95" title="ផ្ទុកឡើងស៊ុមរូបភាព (JPG/PNG)">
+                        <label class="cursor-pointer px-3 py-1.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white rounded-xl font-bold shadow transition flex items-center gap-1.5 active:scale-95 shrink-0" title="ផ្ទុកឡើងស៊ុមរូបភាព (JPG/PNG)">
                             <i class="fa-solid fa-image text-amber-300"></i>
                             <span>Upload Frame (ផ្ទុកស៊ុមផ្ទាល់ខ្លួន)</span>
                             <input type="file" accept="image/*" class="hidden" onchange="window.KrouDigital.handleUploadFrame(event)">
@@ -1729,7 +1729,7 @@ window.KrouDigital = {
                         ` : ''}
 
                         <!-- Upload Logo -->
-                        <label class="cursor-pointer px-3 py-1.5 bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white rounded-xl font-bold shadow transition flex items-center gap-1.5 active:scale-95" title="ផ្ទុកឡើងឡូហ្គោសាលា/ក្រសួង">
+                        <label class="cursor-pointer px-3 py-1.5 bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white rounded-xl font-bold shadow transition flex items-center gap-1.5 active:scale-95 shrink-0" title="ផ្ទុកឡើងឡូហ្គោសាលា/ក្រសួង">
                             <i class="fa-solid fa-certificate text-white"></i>
                             <span>Upload Logo (ក្បាលប័ណ្ណ)</span>
                             <input type="file" accept="image/*" class="hidden" onchange="window.KrouDigital.handleUploadLogo(event)">
@@ -1741,7 +1741,7 @@ window.KrouDigital = {
                         ` : ''}
 
                         <!-- Upload Picture / Stamp / Signature / Photo -->
-                        <label class="cursor-pointer px-3 py-1.5 bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700 text-white rounded-xl font-bold shadow transition flex items-center gap-1.5 active:scale-95" title="Upload រូបភាពបន្ថែម ដូចជាត្រាក្រហម ហត្ថលេខា ឬរូបសិស្ស">
+                        <label class="cursor-pointer px-3 py-1.5 bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700 text-white rounded-xl font-bold shadow transition flex items-center gap-1.5 active:scale-95 shrink-0" title="Upload រូបភាពបន្ថែម ដូចជាត្រាក្រហម ហត្ថលេខា ឬរូបសិស្ស">
                             <i class="fa-solid fa-stamp text-amber-300"></i>
                             <span>Upload Picture (ត្រា/ហត្ថលេខា/Logo)</span>
                             <input type="file" accept="image/*" class="hidden" onchange="window.KrouDigital.handleUploadPicture(event)">
@@ -1764,15 +1764,15 @@ window.KrouDigital = {
                     </div>
 
                     <!-- PANE 3: TEXT & FONTS & DRAGGABLE TEXT -->
-                    <div id="certTabPane_text" class="${activeTab === 'text' ? 'flex flex-wrap items-center gap-3' : 'hidden'}">
+                    <div id="certTabPane_text" class="${activeTab === 'text' ? 'flex items-center gap-2.5 flex-nowrap whitespace-nowrap' : 'hidden'}">
                         <!-- Add Text Box Button -->
-                        <button onclick="window.KrouDigital.addCustomText()" class="px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold shadow transition flex items-center gap-1.5 active:scale-95" title="បន្ថែមអត្ថបទថ្មីដែលអាចអូសទីតាំងបានសេរី">
+                        <button onclick="window.KrouDigital.addCustomText()" class="px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold shadow transition flex items-center gap-1.5 active:scale-95 shrink-0" title="បន្ថែមអត្ថបទថ្មីដែលអាចអូសទីតាំងបានសេរី">
                             <i class="fa-solid fa-plus text-amber-300"></i>
                             <span>+ Add Text (បន្ថែមអត្ថបទអូសបាន)</span>
                         </button>
 
                         <!-- Font Family -->
-                        <div class="flex items-center gap-1.5 bg-slate-800 border border-slate-700 rounded-xl px-2.5 py-1.5">
+                        <div class="flex items-center gap-1.5 bg-slate-800 border border-slate-700 rounded-xl px-2.5 py-1.5 shrink-0">
                             <span class="text-slate-400">ពុម្ពអក្សរ៖</span>
                             <select onchange="window.KrouDigital.updateCertFontFamily(this.value)" class="bg-transparent text-indigo-300 outline-none cursor-pointer font-bold">
                                 <option value="font-moul" ${certFontFamily === 'font-moul' ? 'selected' : ''} class="bg-slate-900 text-white">Khmer OS Muol Light</option>
@@ -1782,7 +1782,7 @@ window.KrouDigital = {
                         </div>
 
                         <!-- Font Scale Slider -->
-                        <div class="flex items-center gap-2 bg-slate-800 border border-slate-700 rounded-xl px-3 py-1.5 text-slate-300">
+                        <div class="flex items-center gap-2 bg-slate-800 border border-slate-700 rounded-xl px-3 py-1.5 text-slate-300 shrink-0">
                             <i class="fa-solid fa-text-height text-indigo-400"></i>
                             <span>ទំហំអក្សរ៖</span>
                             <input type="range" min="80" max="135" value="${certFontScale}" oninput="window.KrouDigital.updateCertFontScale(this.value)" class="w-20 accent-indigo-500 cursor-pointer">
@@ -1790,7 +1790,7 @@ window.KrouDigital = {
                         </div>
 
                         <!-- Text Formatting (Bold, Italic, Align) -->
-                        <div class="flex items-center gap-1 bg-slate-800 border border-slate-700 rounded-xl px-2 py-1">
+                        <div class="flex items-center gap-1 bg-slate-800 border border-slate-700 rounded-xl px-2 py-1 shrink-0">
                             <button onclick="window.KrouDigital.execTextCmd('bold')" class="w-6 h-6 rounded bg-slate-700 hover:bg-slate-600 font-bold text-white transition" title="Bold">B</button>
                             <button onclick="window.KrouDigital.execTextCmd('italic')" class="w-6 h-6 rounded bg-slate-700 hover:bg-slate-600 italic text-white transition" title="Italic">I</button>
                             <button onclick="window.KrouDigital.execTextCmd('underline')" class="w-6 h-6 rounded bg-slate-700 hover:bg-slate-600 underline text-white transition" title="Underline">U</button>
@@ -1801,7 +1801,7 @@ window.KrouDigital = {
                         </div>
 
                         <!-- Text Color Swatches & Picker -->
-                        <div class="flex items-center gap-1.5 bg-slate-800 border border-slate-700 rounded-xl px-2.5 py-1">
+                        <div class="flex items-center gap-1.5 bg-slate-800 border border-slate-700 rounded-xl px-2.5 py-1 shrink-0">
                             <span class="text-slate-400 text-[11px]">ពណ៌៖</span>
                             <button onclick="window.KrouDigital.updateCertColor('#dc2626')" class="w-4 h-4 rounded-full bg-red-600 hover:scale-110 transition border border-white/40" title="ក្រហម (ដូចរូបគំរូ)"></button>
                             <button onclick="window.KrouDigital.updateCertColor('#b45309')" class="w-4 h-4 rounded-full bg-amber-600 hover:scale-110 transition border border-white/40" title="មាស"></button>
@@ -1812,9 +1812,9 @@ window.KrouDigital = {
                     </div>
 
                     <!-- PANE 4: DATA & AUTO-FILL -->
-                    <div id="certTabPane_data" class="${activeTab === 'data' ? 'flex flex-wrap items-center gap-3' : 'hidden'}">
+                    <div id="certTabPane_data" class="${activeTab === 'data' ? 'flex items-center gap-2.5 flex-nowrap whitespace-nowrap' : 'hidden'}">
                         <!-- Grade Select -->
-                        <div class="flex items-center gap-1.5 bg-slate-800 border border-slate-700 rounded-xl px-2.5 py-1.5">
+                        <div class="flex items-center gap-1.5 bg-slate-800 border border-slate-700 rounded-xl px-2.5 py-1.5 shrink-0">
                             <span class="text-slate-400">ថ្នាក់៖</span>
                             <select id="certGradeSelect" onchange="window.KrouDigital.renderCertificateModal(null, document.getElementById('certRankSelect')?.value, this.value, '${frameStyle}')" class="bg-transparent text-indigo-300 font-bold outline-none cursor-pointer">
                                 <option value="all" class="bg-slate-900 text-white">គ្រប់ថ្នាក់</option>
@@ -1823,7 +1823,7 @@ window.KrouDigital = {
                         </div>
 
                         <!-- Student Select -->
-                        <div class="flex items-center gap-1.5 bg-slate-800 border border-slate-700 rounded-xl px-2.5 py-1.5">
+                        <div class="flex items-center gap-1.5 bg-slate-800 border border-slate-700 rounded-xl px-2.5 py-1.5 shrink-0">
                             <span class="text-slate-400">សិស្ស៖</span>
                             <select id="certStudentSelect" onchange="window.KrouDigital.renderCertificateModal(this.value, document.getElementById('certRankSelect')?.value, '${curLevel}', '${frameStyle}')" class="bg-transparent text-white font-bold outline-none cursor-pointer max-w-[170px] truncate">
                                 ${selectableStudents.map(s => `
@@ -1833,7 +1833,7 @@ window.KrouDigital = {
                         </div>
 
                         <!-- Title Type (លិខិតសរសើរ vs ប័ណ្ណសរសើរ) -->
-                        <div class="flex items-center gap-1.5 bg-slate-800 border border-slate-700 rounded-xl px-2.5 py-1.5">
+                        <div class="flex items-center gap-1.5 bg-slate-800 border border-slate-700 rounded-xl px-2.5 py-1.5 shrink-0">
                             <span class="text-slate-400">ចំណងជើង៖</span>
                             <select onchange="localStorage.setItem('cert_title_type', this.value); document.getElementById('certMainTitle').innerText = this.value;" class="bg-transparent text-amber-300 font-bold outline-none cursor-pointer">
                                 <option value="លិខិតសរសើរ" ${titleType === 'លិខិតសរសើរ' ? 'selected' : ''} class="bg-slate-900 text-white">លិខិតសរសើរ (ដូចរូបគំរូ)</option>
@@ -1843,7 +1843,7 @@ window.KrouDigital = {
                         </div>
 
                         <!-- Rank Select -->
-                        <div class="flex items-center gap-1.5 bg-slate-800 border border-slate-700 rounded-xl px-2.5 py-1.5">
+                        <div class="flex items-center gap-1.5 bg-slate-800 border border-slate-700 rounded-xl px-2.5 py-1.5 shrink-0">
                             <span class="text-slate-400">កិត្តិយស៖</span>
                             <select id="certRankSelect" onchange="window.KrouDigital.renderCertificateModal('${student.id}', this.value, '${curLevel}', '${frameStyle}')" class="bg-transparent text-amber-400 font-bold outline-none cursor-pointer">
                                 <option value="1" ${activeRank == 1 ? 'selected' : ''} class="bg-slate-900 text-white">ចំណាត់ថ្នាក់លេខ ១</option>
