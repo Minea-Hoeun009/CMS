@@ -1526,40 +1526,38 @@ window.loadScoresView = async function() {
       <div id="modal-entry" class="fixed inset-0 z-[2000] hidden bg-slate-900/60 p-2 md:p-6 transition-all duration-300 font-siemreap" style="backdrop-filter: none !important;">
           <div id="modal-entry-container" class="bg-slate-50 w-full h-full rounded-2xl md:rounded-[2.5rem] flex flex-col overflow-hidden shadow-2xl relative border border-white/40 transform scale-95 opacity-0 transition-all duration-300 data-[open=true]:scale-100 data-[open=true]:opacity-100">
               
-              <div class="bg-white p-3 md:p-4 border-b border-slate-200/80 flex flex-col xl:flex-row justify-between items-center gap-4 shrink-0 z-20">
-                  <div class="flex items-center justify-between w-full xl:w-auto gap-3">
-                      <div class="flex items-center gap-3">
-                          <button onclick="window.closeScoreModal('modal-entry')" class="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 flex items-center gap-2 font-bold text-xs transition shadow-sm active:scale-95 shrink-0" title="ថយក្រោយ"><i class="fa-solid fa-arrow-left text-sm"></i> <span>ថយក្រោយ</span></button>
-                          <div class="hidden md:flex items-center gap-3 border-r border-slate-200 pr-4">
-                              <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 text-white flex items-center justify-center shadow-md"><i class="fa-solid fa-pen-to-square"></i></div>
-                              <div><h2 class="font-moul text-[15px] text-slate-800 leading-tight">បញ្ជីស្រង់ពិន្ទុ</h2><p class="text-[10px] text-slate-500 font-bold tracking-wide">សិស្សសរុប <span id="entryStudentCountLbl" class="text-blue-600 text-xs">...</span> នាក់ <span id="assessmentLockBadge" class="hidden ml-2 px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-50 text-rose-600 border border-rose-200"><i class="fa-solid fa-lock mr-1"></i>បានចាក់សោ</span></p></div>
-                          </div>
-                      </div>
-                      <div class="relative flex-1 md:w-64 md:flex-none">
-                          <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
-                          <input type="text" id="scoreSearchInput" oninput="window.filterScoreTable()" placeholder="ស្វែងរកឈ្មោះសិស្ស..." class="pl-10 pr-4 py-2.5 bg-slate-100 border border-transparent rounded-xl text-sm font-semibold w-full outline-none focus:bg-white focus:border-blue-400 focus:ring-4 focus:ring-blue-500/10 transition-all">
-                      </div>
+              <div class="bg-white p-2 sm:p-2.5 md:p-3 border-b border-slate-200/80 flex items-center gap-2 shrink-0 z-20 overflow-x-auto custom-scrollbar flex-nowrap whitespace-nowrap w-full">
+                  <button onclick="window.closeScoreModal('modal-entry')" class="px-3 py-1.5 sm:py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 flex items-center gap-1.5 font-bold text-xs transition shadow-sm active:scale-95 shrink-0" title="ថយក្រោយ"><i class="fa-solid fa-arrow-left text-sm"></i> <span>ថយក្រោយ</span></button>
+                  
+                  <div class="hidden lg:flex items-center gap-2 border-r border-slate-200 pr-3 shrink-0">
+                      <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 text-white flex items-center justify-center shadow-sm text-xs"><i class="fa-solid fa-pen-to-square"></i></div>
+                      <div class="leading-tight"><h2 class="font-moul text-xs text-slate-800">បញ្ជីស្រង់ពិន្ទុ</h2><p class="text-[9px] text-slate-500 font-bold"><span id="entryStudentCountLbl" class="text-blue-600">...</span> នាក់ <span id="assessmentLockBadge" class="hidden ml-1 px-1.5 py-0.5 rounded-full text-[9px] font-bold bg-rose-50 text-rose-600 border border-rose-200"><i class="fa-solid fa-lock mr-0.5"></i>សោ</span></p></div>
                   </div>
                   
-                  <div class="flex items-center justify-start xl:justify-end gap-2 overflow-x-auto w-full xl:w-auto pb-2 xl:pb-0 custom-scrollbar pr-2">
-                      <button onclick="window.openSubjectManagerModal()" class="px-4 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 rounded-xl text-xs font-bold transition flex items-center gap-2 shrink-0 shadow-sm"><i class="fa-solid fa-layer-group"></i> គ្រប់គ្រងមុខវិជ្ជា</button>
-                      <div class="w-px h-6 bg-slate-200 mx-1 shrink-0"></div>
-                      <button onclick="window.openMobileScoreModal(0)" class="px-4 py-2 bg-white text-slate-700 hover:text-amber-600 border border-slate-200 hover:border-amber-300 rounded-xl text-xs font-bold transition flex items-center gap-2 shrink-0 shadow-sm"><i class="fa-solid fa-bolt text-amber-500"></i> បញ្ចូលរហ័ស</button>
-                      
-                      <div class="flex items-center bg-slate-50 border border-slate-200 rounded-xl p-1 shrink-0 shadow-sm">
-                          <button onclick="window.openImportExcelModal()" class="px-3 py-1.5 hover:bg-white text-slate-600 hover:text-cyan-600 rounded-lg text-xs font-bold transition flex items-center gap-1.5" title="ទាញចូលពី Excel"><i class="fa-solid fa-file-import"></i> Import</button>
-                          <div class="w-px h-4 bg-slate-300 mx-0.5"></div>
-                          <button onclick="window.exportScoreEntryToExcel()" class="px-3 py-1.5 hover:bg-white text-slate-600 hover:text-emerald-600 rounded-lg text-xs font-bold transition flex items-center gap-1.5" title="ទាញយកជា Excel"><i class="fa-solid fa-file-excel text-[13px]"></i> Export</button>
-                      </div>
-                      
-                      <button onclick="window.printScoreList()" class="w-10 h-10 bg-white text-slate-600 hover:text-blue-600 border border-slate-200 hover:border-blue-300 rounded-xl text-sm font-bold transition flex items-center justify-center shrink-0 shadow-sm" title="បោះពុម្ពតារាង"><i class="fa-solid fa-print"></i></button>
-                      <div class="w-px h-6 bg-slate-200 mx-1 shrink-0"></div>
-                      
-                      <button onclick="window.calculateAllScores()" class="px-4 py-2 bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 rounded-xl text-xs font-bold transition flex items-center gap-2 shrink-0 shadow-sm active:scale-95"><i class="fa-solid fa-calculator"></i> គណនា</button>
-                      <button onclick="window.autoRankStudents()" class="px-4 py-2 bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 rounded-xl text-xs font-bold transition flex items-center gap-2 shrink-0 shadow-sm active:scale-95"><i class="fa-solid fa-ranking-star"></i> រៀបចំណាត់ថ្នាក់</button>
-                      <button onclick="window.toggleAssessmentLock()" id="btnToggleAssessmentLock" class="px-3.5 py-2 bg-slate-100 hover:bg-amber-50 text-slate-700 hover:text-amber-700 border border-slate-200 hover:border-amber-200 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shrink-0 shadow-sm" title="ចាក់សោ/ដោះសោការកែប្រែពិន្ទុ"><i id="lockIcon" class="fa-solid fa-lock-open text-slate-500"></i> <span id="lockBtnText">ចាក់សោ</span></button>
-                      <button onclick="window.saveScoresData()" id="btnSaveScores" class="px-6 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-xl text-xs font-bold shadow-md shadow-blue-500/30 flex items-center gap-2 shrink-0 active:scale-95 border border-blue-500/50 transform hover:-translate-y-0.5 transition-all"><i class="fa-solid fa-floppy-disk text-[14px]"></i> រក្សាទុក</button>
+                  <div class="relative w-36 sm:w-44 md:w-56 shrink-0">
+                      <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                      <input type="text" id="scoreSearchInput" oninput="window.filterScoreTable()" placeholder="ស្វែងរកឈ្មោះសិស្ស..." class="pl-8 pr-3 py-1.5 sm:py-2 bg-slate-100 border border-transparent rounded-xl text-xs font-semibold w-full outline-none focus:bg-white focus:border-blue-400 transition-all">
                   </div>
+
+                  <div class="w-px h-5 bg-slate-200 mx-0.5 shrink-0"></div>
+
+                  <button onclick="window.openSubjectManagerModal()" class="px-3 py-1.5 sm:py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shrink-0 shadow-sm"><i class="fa-solid fa-layer-group"></i> <span>គ្រប់គ្រងមុខវិជ្ជា</span></button>
+                  <button onclick="window.openMobileScoreModal(0)" class="px-3 py-1.5 sm:py-2 bg-white text-slate-700 hover:text-amber-600 border border-slate-200 hover:border-amber-300 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shrink-0 shadow-sm"><i class="fa-solid fa-bolt text-amber-500"></i> <span>បញ្ចូលរហ័ស</span></button>
+                  
+                  <div class="flex items-center bg-slate-50 border border-slate-200 rounded-xl p-0.5 shrink-0 shadow-sm">
+                      <button onclick="window.openImportExcelModal()" class="px-2.5 py-1.5 hover:bg-white text-slate-600 hover:text-cyan-600 rounded-lg text-xs font-bold transition flex items-center gap-1" title="ទាញចូលពី Excel"><i class="fa-solid fa-file-import"></i> <span>Import</span></button>
+                      <div class="w-px h-3.5 bg-slate-300 mx-0.5"></div>
+                      <button onclick="window.exportScoreEntryToExcel()" class="px-2.5 py-1.5 hover:bg-white text-slate-600 hover:text-emerald-600 rounded-lg text-xs font-bold transition flex items-center gap-1" title="ទាញយកជា Excel"><i class="fa-solid fa-file-excel text-[13px]"></i> <span>Export</span></button>
+                  </div>
+                  
+                  <button onclick="window.printScoreList()" class="w-8 h-8 sm:w-9 sm:h-9 bg-white text-slate-600 hover:text-blue-600 border border-slate-200 hover:border-blue-300 rounded-xl text-xs font-bold transition flex items-center justify-center shrink-0 shadow-sm" title="បោះពុម្ពតារាង"><i class="fa-solid fa-print"></i></button>
+
+                  <div class="w-px h-5 bg-slate-200 mx-0.5 shrink-0"></div>
+
+                  <button onclick="window.calculateAllScores()" class="px-3 py-1.5 sm:py-2 bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shrink-0 shadow-sm active:scale-95"><i class="fa-solid fa-calculator"></i> <span>គណនា</span></button>
+                  <button onclick="window.autoRankStudents()" class="px-3 py-1.5 sm:py-2 bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shrink-0 shadow-sm active:scale-95"><i class="fa-solid fa-ranking-star"></i> <span>រៀបចំណាត់ថ្នាក់</span></button>
+                  <button onclick="window.toggleAssessmentLock()" id="btnToggleAssessmentLock" class="px-3 py-1.5 sm:py-2 bg-slate-100 hover:bg-amber-50 text-slate-700 hover:text-amber-700 border border-slate-200 hover:border-amber-200 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shrink-0 shadow-sm" title="ចាក់សោ/ដោះសោការកែប្រែពិន្ទុ"><i id="lockIcon" class="fa-solid fa-lock-open text-slate-500"></i> <span id="lockBtnText">ចាក់សោ</span></button>
+                  <button onclick="window.saveScoresData()" id="btnSaveScores" class="px-4 py-1.5 sm:py-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-xl text-xs font-bold shadow-md shadow-blue-500/30 flex items-center gap-1.5 shrink-0 active:scale-95 border border-blue-500/50"><i class="fa-solid fa-floppy-disk text-[13px]"></i> <span>រក្សាទុក</span></button>
               </div>
               <div id="modal-content-entry" class="flex-1 overflow-hidden flex flex-col relative bg-slate-100/50"></div>
           </div>
@@ -1568,27 +1566,29 @@ window.loadScoresView = async function() {
       <!-- Modal ទី២៖ តារាងចំណាត់ថ្នាក់ -->
       <div id="modal-rankings" class="fixed inset-0 z-[2000] hidden bg-slate-900/60 p-3 md:p-6 transition-all duration-300 font-siemreap" style="backdrop-filter: none !important;">
           <div id="modal-rankings-container" class="bg-slate-50 w-full h-full rounded-[2.5rem] flex flex-col overflow-hidden shadow-2xl relative border border-white/40 transform scale-95 opacity-0 transition-all duration-300 data-[open=true]:scale-100 data-[open=true]:opacity-100">
-              <div class="bg-white/90 backdrop-blur-xl p-4 md:p-5 border-b border-slate-200/60 flex flex-col xl:flex-row justify-between items-center gap-4 shrink-0 shadow-sm z-20">
-                  <div class="flex items-center gap-4 w-full xl:w-auto">
-                      <button onclick="window.closeScoreModal('modal-rankings')" class="w-11 h-11 rounded-2xl bg-slate-100 text-slate-600 flex items-center justify-center transition-all shadow-sm active:scale-90"><i class="fa-solid fa-arrow-left text-lg"></i></button>
-                      <div class="flex items-center gap-3">
-                          <div class="w-10 h-10 rounded-[14px] bg-gradient-to-br from-rose-400 to-rose-600 text-white flex items-center justify-center shadow-md"><i class="fa-solid fa-ranking-star text-sm"></i></div>
-                          <h2 class="font-moul text-lg text-slate-800">តារាងចំណាត់ថ្នាក់</h2>
-                      </div>
+              <div class="bg-white p-2 sm:p-2.5 md:p-3 border-b border-slate-200/80 flex items-center gap-2 shrink-0 z-20 overflow-x-auto custom-scrollbar flex-nowrap whitespace-nowrap w-full">
+                  <button onclick="window.closeScoreModal('modal-rankings')" class="px-3 py-1.5 sm:py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 flex items-center gap-1.5 font-bold text-xs transition shadow-sm active:scale-95 shrink-0" title="ថយក្រោយ"><i class="fa-solid fa-arrow-left text-sm"></i> <span>ថយក្រោយ</span></button>
+                  
+                  <div class="hidden sm:flex items-center gap-2 border-r border-slate-200 pr-3 shrink-0">
+                      <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-rose-400 to-rose-600 text-white flex items-center justify-center shadow-sm text-xs"><i class="fa-solid fa-ranking-star"></i></div>
+                      <h2 class="font-moul text-xs text-slate-800">តារាងចំណាត់ថ្នាក់</h2>
                   </div>
-                  <div class="flex flex-wrap items-center gap-2.5 w-full xl:w-auto">
-                      <div class="relative shadow-sm shrink-0">
-                          <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
-                          <input type="text" placeholder="ស្វែងរកឈ្មោះ..." value="${window.rankingsSearchQuery}" oninput="window.filterRankingsTable(this.value, window.rankingsGenderFilter)" class="pl-8 pr-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold outline-none w-36 sm:w-44 focus:ring-2 focus:ring-indigo-500">
-                      </div>
-                      <select onchange="window.filterRankingsTable(window.rankingsSearchQuery, this.value)" class="bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold outline-none cursor-pointer shrink-0">
-                          <option value="all" ${window.rankingsGenderFilter==='all'?'selected':''}>👥 ភេទទាំងអស់</option>
-                          <option value="ស្រី" ${window.rankingsGenderFilter==='ស្រី'?'selected':''}>👩 សិស្សស្រី</option>
-                          <option value="ប្រុស" ${window.rankingsGenderFilter==='ប្រុស'?'selected':''}>👨 សិស្សប្រុស</option>
-                      </select>
-                      <button onclick="window.exportRankingsToExcel()" class="px-4 py-2 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-xl text-xs font-bold flex items-center gap-2 shadow-sm shrink-0"><i class="fa-solid fa-file-excel"></i> Export Excel</button>
-                      <button onclick="window.printRankingTable()" class="px-4 py-2 bg-gradient-to-r from-rose-500 to-pink-600 text-white rounded-xl text-xs font-black shadow-md flex items-center gap-2 shrink-0"><i class="fa-solid fa-file-pdf"></i> PDF / Print</button>
+
+                  <div class="relative w-36 sm:w-44 shrink-0">
+                      <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                      <input type="text" placeholder="ស្វែងរកឈ្មោះ..." value="${window.rankingsSearchQuery}" oninput="window.filterRankingsTable(this.value, window.rankingsGenderFilter)" class="pl-8 pr-3 py-1.5 sm:py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold outline-none w-full focus:ring-2 focus:ring-indigo-500">
                   </div>
+
+                  <select onchange="window.filterRankingsTable(window.rankingsSearchQuery, this.value)" class="bg-white border border-slate-200 rounded-xl px-2.5 py-1.5 sm:py-2 text-xs font-bold outline-none cursor-pointer shrink-0">
+                      <option value="all" ${window.rankingsGenderFilter==='all'?'selected':''}>👥 ភេទទាំងអស់</option>
+                      <option value="ស្រី" ${window.rankingsGenderFilter==='ស្រី'?'selected':''}>👩 សិស្សស្រី</option>
+                      <option value="ប្រុស" ${window.rankingsGenderFilter==='ប្រុស'?'selected':''}>👨 សិស្សប្រុស</option>
+                  </select>
+
+                  <div class="w-px h-5 bg-slate-200 mx-0.5 shrink-0"></div>
+
+                  <button onclick="window.exportRankingsToExcel()" class="px-3.5 py-1.5 sm:py-2 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-sm shrink-0"><i class="fa-solid fa-file-excel"></i> <span>Export Excel</span></button>
+                  <button onclick="window.printRankingTable()" class="px-3.5 py-1.5 sm:py-2 bg-gradient-to-r from-rose-500 to-pink-600 text-white rounded-xl text-xs font-black shadow-md flex items-center gap-1.5 shrink-0"><i class="fa-solid fa-file-pdf"></i> <span>PDF / Print</span></button>
               </div>
               <div id="modal-content-rankings" class="flex-1 overflow-auto bg-slate-100/30 p-2 md:p-6 custom-scrollbar"></div>
           </div>
@@ -4639,12 +4639,8 @@ window.renderHonorBoardContent = function() {
 
     container.innerHTML = `
       <div class="w-full flex flex-col space-y-4 font-siemreap bg-slate-50 p-2 sm:p-4 rounded-b-3xl min-h-full">
-        <div class="bg-white p-3 md:p-4 rounded-2xl shadow-sm border border-slate-200 flex flex-wrap justify-between items-center gap-3 no-print relative overflow-hidden">
-          <div class="absolute top-0 left-0 w-1.5 h-full bg-gradient-to-b from-amber-400 to-orange-500"></div>
-          
-          <div class="flex flex-wrap items-center gap-2.5 pl-3">
-            <!-- ជ្រើសរើសថ្នាក់ -->
-            <div class="flex items-center gap-1 bg-slate-50 border border-slate-200 rounded-xl px-2 py-1 text-xs">
+        <div class="bg-white p-2 sm:p-2.5 rounded-2xl shadow-sm border border-slate-200 flex items-center gap-2 sm:gap-2.5 no-print relative overflow-x-auto custom-scrollbar flex-nowrap whitespace-nowrap w-full">
+            <div class="flex items-center gap-1 bg-slate-50 border border-slate-200 rounded-xl px-2 py-1 text-xs shrink-0">
               <span class="text-slate-500 font-bold"><i class="fa-solid fa-chalkboard-user text-indigo-500"></i></span>
               <select onchange="if(typeof window.setSelectedClass === 'function') window.setSelectedClass(this.value, document.getElementById('honorRoomSelect')?.value || '«ក»'); window.renderHonorBoardContent();" id="honorLevelSelect" class="bg-transparent font-bold text-slate-800 outline-none cursor-pointer">
                 ${(typeof window.getAllGradesList === 'function' ? window.getAllGradesList() : ["ថ្នាក់ទី ១", "ថ្នាក់ទី ២", "ថ្នាក់ទី ៣", "ថ្នាក់ទី ៤", "ថ្នាក់ទី ៥", "ថ្នាក់ទី ៦"]).map(g => `<option value="${g}" ${g === curLevel ? 'selected' : ''}>${g}</option>`).join('')}
@@ -4654,61 +4650,59 @@ window.renderHonorBoardContent = function() {
               </select>
             </div>
 
-            <!-- ជ្រើសរើសខែ -->
-            <div class="flex items-center gap-1.5 bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1 text-xs">
+            <div class="flex items-center gap-1 bg-slate-50 border border-slate-200 rounded-xl px-2 py-1 text-xs shrink-0">
               <span class="text-slate-500 font-bold"><i class="fa-solid fa-calendar text-amber-500"></i> ខែ៖</span>
               <select onchange="localStorage.setItem('selected_assessment_month', this.value); window.renderHonorBoardContent();" class="bg-transparent font-bold text-slate-800 outline-none cursor-pointer">
                 ${["មករា", "កុម្ភៈ", "មីនា", "មេសា", "ឧសភា", "មិថុនា", "កក្កដា", "សីហា", "កញ្ញា", "តុលា", "វិច្ឆិកា", "ធ្នូ"].map(m => `<option value="${m}" ${m === selMonth ? 'selected' : ''}>${m}</option>`).join('')}
               </select>
             </div>
 
-            <div class="flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200 text-xs font-bold">
-              <button onclick="window.setHonorTopCount(3)" class="px-3 py-1 rounded-lg transition ${window.honorBoardTopCount===3?'bg-white text-amber-700 shadow-sm':'text-slate-500 hover:bg-slate-200'}">Top 3</button>
-              <button onclick="window.setHonorTopCount(5)" class="px-3 py-1 rounded-lg transition ${window.honorBoardTopCount===5?'bg-white text-amber-700 shadow-sm':'text-slate-500 hover:bg-slate-200'}">Top 5</button>
+            <div class="flex items-center bg-slate-100 p-0.5 rounded-xl border border-slate-200 text-xs font-bold shrink-0">
+              <button onclick="window.setHonorTopCount(3)" class="px-2.5 py-1 rounded-lg transition ${window.honorBoardTopCount===3?'bg-white text-amber-700 shadow-sm':'text-slate-500 hover:bg-slate-200'}">Top 3</button>
+              <button onclick="window.setHonorTopCount(5)" class="px-2.5 py-1 rounded-lg transition ${window.honorBoardTopCount===5?'bg-white text-amber-700 shadow-sm':'text-slate-500 hover:bg-slate-200'}">Top 5</button>
             </div>
 
-            <div class="flex items-center gap-1.5 bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1 text-xs">
+            <div class="flex items-center gap-1 bg-slate-50 border border-slate-200 rounded-xl px-2 py-1 text-xs shrink-0">
               <span class="text-slate-500 font-bold"><i class="fa-solid fa-palette text-amber-500"></i> ស្ទីល៖</span>
               <select onchange="window.setHonorTheme(this.value)" class="bg-transparent font-bold text-slate-800 outline-none cursor-pointer">
-                <option value="gold" ${window.honorBoardTheme==='gold'?'selected':''}>✨ មាសប្រណីត (Gold)</option>
-                <option value="blue" ${window.honorBoardTheme==='blue'?'selected':''}>🏛️ ខៀវផ្លូវការ (Blue)</option>
-                <option value="slate" ${window.honorBoardTheme==='slate'?'selected':''}>💎 ប្រាក់ស្រាល (Silver)</option>
+                <option value="gold" ${window.honorBoardTheme==='gold'?'selected':''}>✨ មាស (Gold)</option>
+                <option value="blue" ${window.honorBoardTheme==='blue'?'selected':''}>🏛️ ខៀវ (Blue)</option>
+                <option value="slate" ${window.honorBoardTheme==='slate'?'selected':''}>💎 ប្រាក់ (Silver)</option>
                 <option value="clean" ${window.honorBoardTheme==='clean'?'selected':''}>📄 សាមញ្ញ (Minimal)</option>
               </select>
             </div>
 
-            <div class="flex items-center gap-1 bg-slate-50 border border-slate-200 rounded-xl px-2 py-1 text-xs font-bold text-slate-700">
-              <button onclick="window.adjustHonorScale(-0.05)" class="w-6 h-6 hover:bg-slate-200 rounded-lg flex items-center justify-center transition"><i class="fa-solid fa-magnifying-glass-minus text-[11px]"></i></button>
-              <span id="honorZoomLevelLbl" class="w-12 text-center font-mono text-indigo-700 bg-white py-0.5 rounded shadow-inner text-xs">${Math.round(window.honorBoardScale * 100)}%</span>
-              <button onclick="window.adjustHonorScale(0.05)" class="w-6 h-6 hover:bg-slate-200 rounded-lg flex items-center justify-center transition"><i class="fa-solid fa-magnifying-glass-plus text-[11px]"></i></button>
+            <div class="flex items-center gap-1 bg-slate-50 border border-slate-200 rounded-xl px-2 py-1 text-xs font-bold text-slate-700 shrink-0">
+              <button onclick="window.adjustHonorScale(-0.05)" class="w-5 h-5 hover:bg-slate-200 rounded flex items-center justify-center transition"><i class="fa-solid fa-magnifying-glass-minus text-[10px]"></i></button>
+              <span id="honorZoomLevelLbl" class="w-10 text-center font-mono text-indigo-700 bg-white py-0.5 rounded shadow-inner text-xs">${Math.round(window.honorBoardScale * 100)}%</span>
+              <button onclick="window.adjustHonorScale(0.05)" class="w-5 h-5 hover:bg-slate-200 rounded flex items-center justify-center transition"><i class="fa-solid fa-magnifying-glass-plus text-[10px]"></i></button>
             </div>
 
-            <div class="flex items-center gap-1 bg-indigo-50 border border-indigo-200 rounded-xl p-1 shadow-inner">
-               <button onclick="window.addCustomText()" class="px-2.5 py-1 hover:bg-white text-indigo-700 rounded-lg text-xs font-bold transition tooltip" title="បន្ថែមអក្សរថ្មី"><i class="fa-solid fa-t"></i> អក្សរ</button>
-               <button onclick="window.addCustomSticker('🏆')" class="px-2 py-1 hover:bg-white text-indigo-700 rounded-lg text-sm font-bold transition">🏆</button>
-               <button onclick="window.addCustomSticker('⭐')" class="px-2 py-1 hover:bg-white text-indigo-700 rounded-lg text-sm font-bold transition">⭐</button>
+            <div class="flex items-center gap-1 bg-indigo-50 border border-indigo-200 rounded-xl p-0.5 shadow-inner shrink-0">
+               <button onclick="window.addCustomText()" class="px-2 py-1 hover:bg-white text-indigo-700 rounded-lg text-xs font-bold transition" title="បន្ថែមអក្សរ"><i class="fa-solid fa-t"></i> អក្សរ</button>
+               <button onclick="window.addCustomSticker('🏆')" class="px-1.5 py-0.5 hover:bg-white text-indigo-700 rounded-lg text-sm font-bold transition">🏆</button>
+               <button onclick="window.addCustomSticker('⭐')" class="px-1.5 py-0.5 hover:bg-white text-indigo-700 rounded-lg text-sm font-bold transition">⭐</button>
             </div>
-          </div>
 
-          <div class="flex items-center gap-2 flex-wrap">
-            <button onclick="window.closeScoreModal('modal-honorboard'); window.openReportDetail('report_kha');" class="px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-sm" title="ប្តូរទៅទម្រង់ក្រដាសរដ្ឋបាល A4 របស់ក្រសួង">
-              <i class="fa-solid fa-file-contract"></i> <span class="hidden sm:inline">ទម្រង់ក្រដាស</span> MoEYS
+            <div class="w-px h-5 bg-slate-200 mx-0.5 shrink-0"></div>
+
+            <button onclick="window.closeScoreModal('modal-honorboard'); window.openReportDetail('report_kha');" class="px-2.5 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 rounded-xl text-xs font-bold transition flex items-center gap-1 shrink-0 shadow-sm" title="ទម្រង់ក្រដាស A4 MoEYS">
+              <i class="fa-solid fa-file-contract"></i> <span>MoEYS</span>
             </button>
 
-            <label class="px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer shadow-sm m-0">
-              <i class="fa-solid fa-camera"></i> <span class="hidden sm:inline">ប្ដូរឡូហ្គោ</span>
+            <label class="px-2.5 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 rounded-xl text-xs font-bold transition flex items-center gap-1 cursor-pointer shrink-0 shadow-sm m-0">
+              <i class="fa-solid fa-camera"></i> <span>ឡូហ្គោ</span>
               <input type="file" accept="image/*" class="hidden" onchange="window.changeHonorLogo(event)">
             </label>
 
-            <label class="px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer shadow-sm m-0">
-              <i class="fa-solid fa-image"></i> <span class="hidden sm:inline">បញ្ចូលស៊ុម</span>
+            <label class="px-2.5 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 rounded-xl text-xs font-bold transition flex items-center gap-1 cursor-pointer shrink-0 shadow-sm m-0">
+              <i class="fa-solid fa-image"></i> <span>ស៊ុម</span>
               <input type="file" accept="image/*" class="hidden" onchange="window.changeHonorFrame(event)">
             </label>
 
-            <button onclick="window.printOfficialHonorBoard()" class="px-5 py-1.5 bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white rounded-xl text-xs font-black shadow-md transition flex items-center gap-1.5 transform hover:scale-105 active:scale-95">
+            <button onclick="window.printOfficialHonorBoard()" class="px-4 py-1.5 bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white rounded-xl text-xs font-black shadow-md transition flex items-center gap-1.5 shrink-0 active:scale-95">
               <i class="fa-solid fa-print"></i> <span>បោះពុម្ព</span>
             </button>
-          </div>
         </div>
 
         <div class="w-full flex justify-center overflow-auto p-2 sm:p-4 md:p-8 bg-slate-300 rounded-2xl md:rounded-3xl border border-slate-200 custom-scrollbar shadow-inner mt-3" id="top5HonorContainer" style="min-height: 500px;"></div>

@@ -33,63 +33,60 @@ function openTrackingBookModal() {
       <div id="trackingBookModal" class="fixed inset-0 z-[6000] bg-black/60 hidden flex-col items-center justify-center p-2 md:p-4 font-siemreap fade-in no-print" style="backdrop-filter: none !important;">
         <div class="bg-slate-200 rounded-3xl shadow-2xl w-full max-w-[1200px] h-[95vh] flex flex-col overflow-hidden border border-slate-300">
           
-          <div class="p-3 md:p-5 border-b border-slate-300 bg-white flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 shrink-0 shadow-sm z-10">
-            <div class="flex items-center gap-3">
-              <button onclick="window.closeTrackingBookModal()" class="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 flex items-center gap-2 font-bold text-xs transition shadow-sm active:scale-95 shrink-0" title="ថយក្រោយ"><i class="fa-solid fa-arrow-left text-sm"></i> <span>ថយក្រោយ</span></button>
-              <h2 class="font-black text-base md:text-xl text-slate-800 flex items-center gap-2 sm:gap-3">
-                <div class="w-8 h-8 md:w-10 md:h-10 bg-indigo-100 text-indigo-600 rounded-xl flex items-center justify-center shadow-sm text-sm"><i class="fa-solid fa-book-open-reader"></i></div>
-                សៀវភៅតាមដានការសិក្សា
-              </h2>
+          <div class="p-2 sm:p-2.5 md:p-3 border-b border-slate-300 bg-white flex items-center gap-2 shrink-0 shadow-sm z-10 overflow-x-auto custom-scrollbar flex-nowrap whitespace-nowrap w-full">
+            <button onclick="window.closeTrackingBookModal()" class="px-3 py-1.5 sm:py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 flex items-center gap-1.5 font-bold text-xs transition shadow-sm active:scale-95 shrink-0" title="ថយក្រោយ"><i class="fa-solid fa-arrow-left text-sm"></i> <span>ថយក្រោយ</span></button>
+            
+            <div class="hidden lg:flex items-center gap-2 shrink-0 pr-2 border-r border-slate-200">
+              <div class="w-8 h-8 bg-indigo-100 text-indigo-600 rounded-xl flex items-center justify-center shadow-sm text-xs"><i class="fa-solid fa-book-open-reader"></i></div>
+              <h2 class="font-bold text-xs text-slate-800">សៀវភៅតាមដាន</h2>
             </div>
             
-            <div class="flex flex-wrap items-center gap-2 md:gap-3 bg-slate-50 p-2 rounded-2xl border border-slate-200 w-full xl:w-auto">
-              <div class="flex items-center gap-1 bg-white border border-slate-200 rounded-xl px-2 py-1.5 shadow-sm">
-                <span class="text-[10px] font-bold text-slate-500 uppercase ml-1">ថ្នាក់ទី</span>
-                <select id="tbLevelSelect" onchange="updateTbStudentSelect()" class="border-none bg-transparent text-xs font-bold text-slate-700 outline-none cursor-pointer">
-                  ${(typeof window.getAllGradesList === 'function' ? window.getAllGradesList() : ["ថ្នាក់ទី ១", "ថ្នាក់ទី ២", "ថ្នាក់ទី ៣", "ថ្នាក់ទី ៤", "ថ្នាក់ទី ៥", "ថ្នាក់ទី ៦"]).map(g => `<option value="${g}">${g}</option>`).join('')}
-                </select>
-                <select id="tbRoomSelect" onchange="updateTbStudentSelect()" class="border-none bg-transparent text-xs font-bold text-indigo-700 outline-none cursor-pointer">
-                  ${(typeof window.getAllRoomsList === 'function' ? window.getAllRoomsList() : ["«ក»", "«ខ»", "«គ»", "«ឃ»"]).map(r => `<option value="${r}">${r}</option>`).join('')}
-                </select>
-              </div>
-
-              <div class="flex items-center gap-1 bg-white border border-slate-200 rounded-xl px-2 py-1.5 shadow-sm flex-1 min-w-[150px]">
-                <i class="fa-solid fa-user-graduate text-slate-400 text-xs ml-1"></i>
-                <select id="tbStudentSelect" onchange="renderTrackingBookPreview()" class="w-full border-none bg-transparent text-xs font-bold text-slate-800 outline-none cursor-pointer truncate">
-                  <option value="">-- ជ្រើសរើសសិស្ស --</option>
-                </select>
-              </div>
-
-              <div class="flex items-center gap-1 bg-white border border-slate-200 rounded-xl px-2 py-1.5 shadow-sm">
-                <i class="fa-solid fa-calendar text-slate-400 text-xs ml-1"></i>
-                <select id="tbPeriodSelect" onchange="renderTrackingBookPreview()" class="border-none bg-transparent text-xs font-bold text-blue-700 outline-none cursor-pointer">
-                  <option value="ខែ តុលា">ខែ តុលា</option><option value="ខែ វិច្ឆិកា">ខែ វិច្ឆិកា</option><option value="ខែ ធ្នូ">ខែ ធ្នូ</option>
-                  <option value="ខែ មករា" selected>ខែ មករា</option><option value="ខែ កុម្ភៈ">ខែ កុម្ភៈ</option><option value="ខែ មីនា">ខែ មីនា</option>
-                  <option value="ខែ មេសា">ខែ មេសា</option><option value="ខែ ឧសភា">ខែ ឧសភា</option><option value="ខែ មិថុនា">ខែ មិថុនា</option><option value="ខែ កក្កដា">ខែ កក្កដា</option>
-                  <option value="ប្រចាំឆ្នាំ">ប្រចាំឆ្នាំ</option>
-                </select>
-              </div>
-
-              <!-- Zoom Controls -->
-              <div class="flex items-center gap-1 bg-white border border-slate-200 rounded-xl px-2 py-1 shadow-sm">
-                <button type="button" onclick="window.tbZoomOut()" class="w-6 h-6 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold flex items-center justify-center transition active:scale-95" title="បង្រួម"><i class="fa-solid fa-minus text-[10px]"></i></button>
-                <span id="tbZoomDisplay" class="text-xs font-bold text-slate-700 min-w-[42px] text-center">85%</span>
-                <button type="button" onclick="window.tbZoomIn()" class="w-6 h-6 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold flex items-center justify-center transition active:scale-95" title="ពង្រីក"><i class="fa-solid fa-plus text-[10px]"></i></button>
-                <button type="button" onclick="window.tbZoomFit()" class="px-1.5 py-0.5 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-[10px] font-bold ml-1 transition" title="កំណត់ទំហំសមរម្យ">Fit</button>
-              </div>
-
-              <div class="w-px h-6 bg-slate-300 mx-1 hidden md:block"></div>
-
-              <button onclick="executeTrackingBookPrint('print')" class="px-4 py-2 bg-slate-800 hover:bg-slate-900 text-white rounded-xl text-xs font-bold shadow transition flex items-center gap-2">
-                <i class="fa-solid fa-print"></i> បោះពុម្ព
-              </button>
-              <button onclick="executeTrackingBookPrint('word')" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold shadow transition flex items-center gap-2">
-                <i class="fa-solid fa-file-word"></i> Word
-              </button>
+            <div class="flex items-center gap-1 bg-white border border-slate-200 rounded-xl px-2 py-1 shadow-sm shrink-0">
+              <span class="text-[10px] font-bold text-slate-500 uppercase ml-1">ថ្នាក់ទី</span>
+              <select id="tbLevelSelect" onchange="updateTbStudentSelect()" class="border-none bg-transparent text-xs font-bold text-slate-700 outline-none cursor-pointer">
+                ${(typeof window.getAllGradesList === 'function' ? window.getAllGradesList() : ["ថ្នាក់ទី ១", "ថ្នាក់ទី ២", "ថ្នាក់ទី ៣", "ថ្នាក់ទី ៤", "ថ្នាក់ទី ៥", "ថ្នាក់ទី ៦"]).map(g => `<option value="${g}">${g}</option>`).join('')}
+              </select>
+              <select id="tbRoomSelect" onchange="updateTbStudentSelect()" class="border-none bg-transparent text-xs font-bold text-indigo-700 outline-none cursor-pointer">
+                ${(typeof window.getAllRoomsList === 'function' ? window.getAllRoomsList() : ["«ក»", "«ខ»", "«គ»", "«ឃ»"]).map(r => `<option value="${r}">${r}</option>`).join('')}
+              </select>
             </div>
+
+            <div class="flex items-center gap-1 bg-white border border-slate-200 rounded-xl px-2 py-1 shadow-sm shrink-0 min-w-[140px] max-w-[200px]">
+              <i class="fa-solid fa-user-graduate text-slate-400 text-xs ml-1"></i>
+              <select id="tbStudentSelect" onchange="renderTrackingBookPreview()" class="w-full border-none bg-transparent text-xs font-bold text-slate-800 outline-none cursor-pointer truncate">
+                <option value="">-- ជ្រើសរើសសិស្ស --</option>
+              </select>
+            </div>
+
+            <div class="flex items-center gap-1 bg-white border border-slate-200 rounded-xl px-2 py-1 shadow-sm shrink-0">
+              <i class="fa-solid fa-calendar text-slate-400 text-xs ml-1"></i>
+              <select id="tbPeriodSelect" onchange="renderTrackingBookPreview()" class="border-none bg-transparent text-xs font-bold text-blue-700 outline-none cursor-pointer">
+                <option value="ខែ តុលា">ខែ តុលា</option><option value="ខែ វិច្ឆិកា">ខែ វិច្ឆិកា</option><option value="ខែ ធ្នូ">ខែ ធ្នូ</option>
+                <option value="ខែ មករា" selected>ខែ មករា</option><option value="ខែ កុម្ភៈ">ខែ កុម្ភៈ</option><option value="ខែ មីនា">ខែ មីនា</option>
+                <option value="ខែ មេសា">ខែ មេសា</option><option value="ខែ ឧសភា">ខែ ឧសភា</option><option value="ខែ មិថុនា">ខែ មិថុនា</option><option value="ខែ កក្កដា">ខែ កក្កដា</option>
+                <option value="ប្រចាំឆ្នាំ">ប្រចាំឆ្នាំ</option>
+              </select>
+            </div>
+
+            <!-- Zoom Controls -->
+            <div class="flex items-center gap-1 bg-white border border-slate-200 rounded-xl px-2 py-1 shadow-sm shrink-0">
+              <button type="button" onclick="window.tbZoomOut()" class="w-6 h-6 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold flex items-center justify-center transition active:scale-95" title="បង្រួម"><i class="fa-solid fa-minus text-[10px]"></i></button>
+              <span id="tbZoomDisplay" class="text-xs font-bold text-slate-700 min-w-[38px] text-center">85%</span>
+              <button type="button" onclick="window.tbZoomIn()" class="w-6 h-6 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold flex items-center justify-center transition active:scale-95" title="ពង្រីក"><i class="fa-solid fa-plus text-[10px]"></i></button>
+              <button type="button" onclick="window.tbZoomFit()" class="px-1.5 py-0.5 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-[10px] font-bold ml-0.5 transition" title="កំណត់ទំហំសមរម្យ">Fit</button>
+            </div>
+
+            <div class="w-px h-5 bg-slate-300 mx-0.5 shrink-0"></div>
+
+            <button onclick="executeTrackingBookPrint('print')" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-900 text-white rounded-xl text-xs font-bold shadow transition flex items-center gap-1.5 shrink-0">
+              <i class="fa-solid fa-print"></i> <span>បោះពុម្ព</span>
+            </button>
+            <button onclick="executeTrackingBookPrint('word')" class="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold shadow transition flex items-center gap-1.5 shrink-0">
+              <i class="fa-solid fa-file-word"></i> <span>Word</span>
+            </button>
             
-            <button onclick="closeTrackingBookModal()" class="w-10 h-10 bg-rose-50 text-rose-600 hover:bg-rose-500 hover:text-white rounded-xl font-bold transition flex justify-center items-center shadow-sm shrink-0 absolute top-4 right-4 xl:static">
-              <i class="fa-solid fa-xmark text-lg"></i>
+            <button onclick="closeTrackingBookModal()" class="w-8 h-8 rounded-xl bg-rose-50 text-rose-600 hover:bg-rose-500 hover:text-white font-bold transition flex justify-center items-center shadow-sm shrink-0 ml-auto" title="បិទ">
+              <i class="fa-solid fa-xmark text-sm"></i>
             </button>
           </div>
 

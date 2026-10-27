@@ -229,12 +229,12 @@ window.loadReportsView = function() {
                 </div>
 
                 <!-- ផ្នែកទី ២៖ របារកំណត់ប្រភេទក្រដាស និងការបោះពុម្ព (Section 2: Paper Settings & Print Toolbar Under Title) -->
-                <div id="reportPrintConfigBar" class="bg-gradient-to-r from-slate-50 via-white to-slate-50 dark:from-slate-800 dark:via-slate-850 dark:to-slate-800 p-3 sm:p-4 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 flex flex-wrap justify-between items-center gap-3 z-30 no-print">
+                <div id="reportPrintConfigBar" class="bg-gradient-to-r from-slate-50 via-white to-slate-50 dark:from-slate-800 dark:via-slate-850 dark:to-slate-800 p-2 sm:p-2.5 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 flex items-center gap-2 z-30 no-print overflow-x-auto custom-scrollbar flex-nowrap whitespace-nowrap w-full">
                     <!-- ផ្នែកខាងឆ្វេង៖ តម្រងទិន្នន័យ (Filters: ខែ / ទម្រង់បញ្ជី / រក្សាទុក) -->
-                    <div id="reportExtraControls" class="flex flex-wrap items-center gap-2"></div>
+                    <div id="reportExtraControls" class="flex items-center gap-2 flex-nowrap shrink-0"></div>
 
                     <!-- ផ្នែកខាងស្តាំ៖ ការកំណត់ប្រភេទក្រដាស ទិសដៅ មាត្រដ្ឋាន និងប៊ូតុងព្រីន -->
-                    <div id="reportDetailPrintToolbarArea" class="flex flex-wrap items-center gap-2">
+                    <div id="reportDetailPrintToolbarArea" class="flex items-center gap-2 flex-nowrap shrink-0">
                         <button type="button" onclick="window.saveCurrentReportToGoogleSheets(this)" class="px-4 py-2 bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-700 hover:to-teal-800 text-white rounded-xl text-xs font-bold shadow-md transition flex items-center gap-1.5 active:scale-95 outline-none" title="រក្សាទុករបាយការណ៍នេះទៅក្នុង Google Sheets"><i class="fa-solid fa-cloud-arrow-up text-amber-300"></i><span>រក្សាទុកក្នុង Sheets</span></button>
                         ${window.CMSPrintManager ? window.CMSPrintManager.renderToolbarHtml('reportPaperArea', 'portrait', 'A4', 100) : `
                             <button onclick="window.printCurrentReport()" class="px-5 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-xl text-xs font-bold shadow-md shadow-blue-500/30 transition flex items-center gap-2 active:scale-95 outline-none">
