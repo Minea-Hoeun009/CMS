@@ -75,7 +75,7 @@ window.loadReportsView = function() {
                 </div>
 
                 <div class="flex items-center gap-2">
-                    <button type="button" id="btnSyncReportsGAS" onclick="window.syncReportsToGoogleSheets(this)" class="px-3.5 py-1.5 bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-700 hover:to-teal-800 text-white rounded-xl text-xs font-bold shadow-sm transition flex items-center gap-1.5 active:scale-95 outline-none" title="ធ្វើសមកាលកម្មរបាយការណ៍ទាំងអស់ទៅ Google Sheets"><i class="fa-solid fa-cloud-arrow-up text-amber-300"></i><span>Sync របាយការណ៍ទៅ Google Sheets</span></button>
+                    <button type="button" id="btnSyncReportsGAS" onclick="window.syncReportsToGoogleSheets(this)" class="px-3.5 py-1.5 bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-700 hover:to-teal-800 text-white rounded-xl text-xs font-bold shadow-sm transition flex items-center gap-1.5 active:scale-95 outline-none" title="រក្សាទុករបាយការណ៍ទាំងអស់ទៅក្នុង Google Sheets"><i class="fa-solid fa-cloud-arrow-up text-amber-300"></i><span>រក្សាទុកក្នុង Sheets</span></button>
                     <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-purple-50 text-purple-700 dark:bg-purple-950/60 dark:text-purple-300 border border-purple-200/60 dark:border-purple-800">
                         <i class="fa-solid fa-file-invoice text-xs"></i> របាយការណ៍កម្រិតថ្នាក់
                     </span>
@@ -235,7 +235,6 @@ window.loadReportsView = function() {
 
                     <!-- ផ្នែកខាងស្តាំ៖ ការកំណត់ប្រភេទក្រដាស ទិសដៅ មាត្រដ្ឋាន និងប៊ូតុងព្រីន -->
                     <div id="reportDetailPrintToolbarArea" class="flex items-center gap-2 flex-nowrap shrink-0">
-                        <button type="button" onclick="window.saveCurrentReportToGoogleSheets(this)" class="px-4 py-2 bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-700 hover:to-teal-800 text-white rounded-xl text-xs font-bold shadow-md transition flex items-center gap-1.5 active:scale-95 outline-none" title="រក្សាទុករបាយការណ៍នេះទៅក្នុង Google Sheets"><i class="fa-solid fa-cloud-arrow-up text-amber-300"></i><span>រក្សាទុកក្នុង Sheets</span></button>
                         ${window.CMSPrintManager ? window.CMSPrintManager.renderToolbarHtml('reportPaperArea', 'portrait', 'A4', 100) : `
                             <button onclick="window.printCurrentReport()" class="px-5 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-xl text-xs font-bold shadow-md shadow-blue-500/30 transition flex items-center gap-2 active:scale-95 outline-none">
                                 <i class="fa-solid fa-print"></i> បោះពុម្ព

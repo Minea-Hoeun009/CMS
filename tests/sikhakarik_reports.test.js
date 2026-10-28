@@ -198,6 +198,7 @@ describe('MoEYS Sikha-karik Booklet & Centralized Reports Suite', () => {
         assert.ok(html.includes('report_kha') || html.includes('openHonorBoardModal'), 'Reports view should contain Honor Board trigger');
         // Verified: redundant separate reportcards card was merged into tracking book as requested
         assert.ok(!html.includes('openReportCardsModal'), 'Redundant separate report cards card should not be present in reports view');
+        assert.ok(html.includes('btnSyncReportsGAS') && html.includes('រក្សាទុកក្នុង Sheets'), 'Main reports dashboard should contain the single outer Save to Sheets button');
     });
 
     test('4. window.openHonorBoardModal and window.openReportCardsModal exist globally', () => {
@@ -470,5 +471,11 @@ describe('MoEYS Sikha-karik Booklet & Centralized Reports Suite', () => {
         assert.ok(!aHtml.includes('>អវត្តមាន<'), 'Annual table should not contain absence column');
         assert.ok(aHtml.includes('Khmer OS Muol Light'), 'Annual table thead should have Khmer OS Muol Light font');
         assert.ok(aHtml.includes('font-moul'), 'Annual table thead should have font-moul class');
+
+        // 4. Verify individual section does not duplicate Save to Sheet
+        const detailContainer = context.document.getElementById('reportDetailContent');
+        if (detailContainer) {
+            assert.ok(!detailContainer.innerHTML.includes('saveCurrentReportToGoogleSheets'), 'Individual report detail toolbar should not contain redundant save to sheets button');
+        }
     });
 });
