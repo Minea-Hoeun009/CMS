@@ -280,7 +280,7 @@ describe('MoEYS Sikha-karik Booklet & Centralized Reports Suite', () => {
         context.window.renderAcademicResultsReport(paperArea, 'ថ្នាក់ទី ៤', '«ក»', 'semester');
         const semesterHtml = paperArea.innerHTML;
         assert.ok(semesterHtml.includes('របាយការណ៍លទ្ធផលនៃការសិក្សាប្រចាំ ឆមាសទី1') || semesterHtml.includes('របាយការណ៍លទ្ធផលនៃការសិក្សាប្រចាំ ឆមាសទី១'), 'Should render semester title');
-        assert.ok(semesterHtml.includes('ម.ប្រឡង') || semesterHtml.includes('ម.ប្រចាំឆមាស'), 'Should contain semester exam / avg columns');
+        assert.ok(semesterHtml.includes('មធ្យមភាគប្រឡង') || semesterHtml.includes('ម.ប្រឡង') || semesterHtml.includes('មធ្យមភាគឆមាស') || semesterHtml.includes('ម.ប្រចាំឆមាស'), 'Should contain semester exam / avg columns');
 
         // Test Annual Mode
         context.window.renderAcademicResultsReport(paperArea, 'ថ្នាក់ទី ៤', '«ក»', 'annual');
@@ -394,5 +394,52 @@ describe('MoEYS Sikha-karik Booklet & Centralized Reports Suite', () => {
 
         // Verify ranks are rendered as universal digits (e.g. 1, 2, 3)
         assert.ok(html.includes('>1<') || html.includes('1</td>'), 'Rank should be rendered as universal numeral 1');
+    });
+
+    test('10. Academic Results report provides paper sizing, zoom controls, streamlined semester table, and Khmer date numerals', () => {
+        // 1. Verify paper settings object and functions exist
+        assert.ok(context.window.academicReportPaperSettings, 'academicReportPaperSettings should exist');
+        assert.strictEqual(typeof context.window.setAcademicReportPaperSize, 'function');
+        assert.strictEqual(typeof context.window.setAcademicReportOrientation, 'function');
+        assert.strictEqual(typeof context.window.changeAcademicReportScale, 'function');
+        assert.strictEqual(typeof context.window.setAcademicReportScale, 'function');
+        assert.strictEqual(typeof context.window.printAcademicReportCleanly, 'function');
+
+        // Test changing paper size, orientation, and scale
+        context.window.setAcademicReportPaperSize('A3');
+        assert.strictEqual(context.window.academicReportPaperSettings.paperSize, 'A3');
+
+        context.window.setAcademicReportOrientation('portrait');
+        assert.strictEqual(context.window.academicReportPaperSettings.orientation, 'portrait');
+
+        context.window.setAcademicReportScale(110);
+        assert.strictEqual(context.window.academicReportPaperSettings.scale, 110);
+
+        context.window.changeAcademicReportScale(-10);
+        assert.strictEqual(context.window.academicReportPaperSettings.scale, 100);
+
+        // 2. Verify controls HTML includes paper size, orientation, scale buttons, and print button
+        const controlsContainer = { innerHTML: '' };
+        context.window.renderAcademicReportControls(controlsContainer, 'ថ្នាក់ទី ៤', '«ក»');
+        const cHtml = controlsContainer.innerHTML;
+        assert.ok(cHtml.includes('acadReportPaperSizeSelect'), 'Should render paper size select');
+        assert.ok(cHtml.includes('acadReportOrientationSelect'), 'Should render orientation select');
+        assert.ok(cHtml.includes('acadReportScaleDisplay'), 'Should render scale percentage display');
+        assert.ok(cHtml.includes('ព្រីនស្អាត'), 'Should render clean print button');
+
+        // 3. Verify Semester Mode table has single "មធ្យមភាគខែ" column instead of separate monthly columns
+        const paperArea = { innerHTML: '', style: {} };
+        context.window.currentAcademicReportSemester = 'ឆមាសទី១';
+        context.window.renderAcademicResultsReport(paperArea, 'ថ្នាក់ទី ៤', '«ក»', 'semester');
+        const semHtml = paperArea.innerHTML;
+
+        assert.ok(semHtml.includes('មធ្យមភាគខែ'), 'Table header should contain streamlined មធ្យមភាគខែ');
+        assert.ok(semHtml.includes('មធ្យមភាគប្រឡង'), 'Table header should contain មធ្យមភាគប្រឡង');
+        assert.ok(semHtml.includes('មធ្យមភាគឆមាស'), 'Table header should contain មធ្យមភាគឆមាស');
+        // Ensure the table thead does NOT contain separate month headers
+        assert.ok(!semHtml.includes('<th class="border border-slate-400 p-2 w-14">ខែ'), 'Table thead should not have separate monthly columns');
+
+        // 4. Verify dates use Khmer numerals as requested
+        assert.ok(semHtml.includes('២០២៦') || semHtml.includes('២៥៧០') || semHtml.includes('ធ្វើនៅ'), 'Date should be formatted with Khmer numerals');
     });
 });

@@ -253,6 +253,10 @@ window.loadReportsView = function() {
             </div>
         </div>
     `;
+
+    if (typeof window.applyAcademicReportPaperSettings === 'function') {
+        window.applyAcademicReportPaperSettings();
+    }
 };
 
 window.openReportDetail = function(reportType) {
@@ -1451,6 +1455,10 @@ window.renderClassStructureHTML = function(container, targetGrade, targetRoom) {
             </div>
         </div>
     `;
+
+    if (typeof window.applyAcademicReportPaperSettings === 'function') {
+        window.applyAcademicReportPaperSettings();
+    }
 };
 
 
@@ -2123,6 +2131,10 @@ window.renderScoresReportHTML = function(container) {
             </div>
         </div>
     `;
+
+    if (typeof window.applyAcademicReportPaperSettings === 'function') {
+        window.applyAcademicReportPaperSettings();
+    }
 };
 
 window.triggerPrintScores = function(type) {
@@ -3140,6 +3152,83 @@ window.getSemesterMonthConfig = function(curLevel, curRoom) {
     return defaultSettings;
 };
 
+window.academicReportPaperSettings = {
+    paperSize: 'A4',
+    orientation: 'landscape',
+    scale: 100
+};
+
+window.setAcademicReportPaperSize = function(size) {
+    window.academicReportPaperSettings.paperSize = size;
+    window.applyAcademicReportPaperSettings();
+};
+
+window.setAcademicReportOrientation = function(orient) {
+    window.academicReportPaperSettings.orientation = orient;
+    window.applyAcademicReportPaperSettings();
+};
+
+window.changeAcademicReportScale = function(delta) {
+    let current = window.academicReportPaperSettings.scale || 100;
+    current = Math.min(150, Math.max(50, current + delta));
+    window.academicReportPaperSettings.scale = current;
+    window.applyAcademicReportPaperSettings();
+};
+
+window.setAcademicReportScale = function(val) {
+    window.academicReportPaperSettings.scale = parseInt(val, 10) || 100;
+    window.applyAcademicReportPaperSettings();
+};
+
+window.applyAcademicReportPaperSettings = function() {
+    const printArea = document.getElementById('reportKoKhoPrintArea');
+    const cfg = window.academicReportPaperSettings || { paperSize: 'A4', orientation: 'landscape', scale: 100 };
+    if (!printArea) return;
+
+    const isLandscape = cfg.orientation === 'landscape';
+    if (cfg.paperSize === 'A3') {
+        printArea.style.maxWidth = isLandscape ? '420mm' : '297mm';
+        printArea.style.minHeight = isLandscape ? '297mm' : '420mm';
+    } else if (cfg.paperSize === 'Letter') {
+        printArea.style.maxWidth = isLandscape ? '279mm' : '216mm';
+        printArea.style.minHeight = isLandscape ? '216mm' : '279mm';
+    } else { // A4
+        printArea.style.maxWidth = isLandscape ? '297mm' : '210mm';
+        printArea.style.minHeight = isLandscape ? '210mm' : '297mm';
+    }
+
+    const scaleFraction = (cfg.scale || 100) / 100;
+    printArea.style.transform = `scale(${scaleFraction})`;
+    printArea.style.transformOrigin = 'top center';
+    printArea.style.transition = 'transform 0.15s ease-out';
+
+    const scaleDisplay = document.getElementById('acadReportScaleDisplay');
+    if (scaleDisplay) scaleDisplay.textContent = `${cfg.scale}%`;
+
+    // Synchronize with CMSPrintManager toolbar if present
+    if (window.CMSPrintManager && typeof window.CMSPrintManager.updateToolbarDefaults === 'function') {
+        window.CMSPrintManager.updateToolbarDefaults('reportPaperArea', cfg.orientation, cfg.paperSize, cfg.scale);
+    }
+};
+
+window.printAcademicReportCleanly = function() {
+    const cfg = window.academicReportPaperSettings || { paperSize: 'A4', orientation: 'landscape', scale: 100 };
+    const printArea = document.getElementById('reportKoKhoPrintArea') || document.getElementById('reportPaperArea');
+    const titleEl = document.getElementById("reportDetailTitle");
+    const title = titleEl ? titleEl.textContent : "របាយការណ៍លទ្ធផលសិក្សា";
+
+    if (window.CMSPrintManager && typeof window.CMSPrintManager.print === 'function') {
+        window.CMSPrintManager.print(printArea, {
+            paperSize: cfg.paperSize,
+            orientation: cfg.orientation,
+            scale: cfg.scale,
+            title: title
+        });
+    } else {
+        window.print();
+    }
+};
+
 window.renderAcademicReportControls = function(container, curLevel, curRoom) {
     if (!container) return;
     const mode = window.currentAcademicReportMode || 'monthly';
@@ -3194,6 +3283,44 @@ window.renderAcademicReportControls = function(container, curLevel, curRoom) {
         </div>
     `;
 
+    const paperSettings = window.academicReportPaperSettings || { paperSize: 'A4', orientation: 'landscape', scale: 100 };
+    const paperControlHtml = `
+        <div class="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-700/80 p-1 rounded-xl border border-slate-200 dark:border-slate-600 text-xs shrink-0">
+            <span class="text-slate-500 dark:text-slate-400 font-bold px-1"><i class="fa-solid fa-file-lines mr-1 text-indigo-500"></i>ក្រដាស៖</span>
+            
+            <select id="acadReportPaperSizeSelect" onchange="window.setAcademicReportPaperSize(this.value)" class="bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 px-2 py-1 rounded-lg font-bold border border-slate-200 dark:border-slate-600 outline-none cursor-pointer">
+                <option value="A4" ${paperSettings.paperSize === 'A4' ? 'selected' : ''}>A4</option>
+                <option value="A3" ${paperSettings.paperSize === 'A3' ? 'selected' : ''}>A3 (ធំ)</option>
+                <option value="Letter" ${paperSettings.paperSize === 'Letter' ? 'selected' : ''}>Letter</option>
+            </select>
+
+            <select id="acadReportOrientationSelect" onchange="window.setAcademicReportOrientation(this.value)" class="bg-white dark:bg-slate-800 text-indigo-700 dark:text-indigo-300 px-2 py-1 rounded-lg font-bold border border-slate-200 dark:border-slate-600 outline-none cursor-pointer">
+                <option value="landscape" ${paperSettings.orientation === 'landscape' ? 'selected' : ''}>ផ្តេក (Landscape)</option>
+                <option value="portrait" ${paperSettings.orientation === 'portrait' ? 'selected' : ''}>បញ្ឈរ (Portrait)</option>
+            </select>
+
+            <div class="flex items-center bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-lg overflow-hidden ml-0.5">
+                <button type="button" onclick="window.changeAcademicReportScale(-5)" title="បង្រួម (Zoom Out)" class="px-2 py-1 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold transition">
+                    <i class="fa-solid fa-magnifying-glass-minus"></i>
+                </button>
+                <span id="acadReportScaleDisplay" class="px-2 py-1 font-mono font-bold text-slate-700 dark:text-slate-200 text-[11px] min-w-[45px] text-center select-none">
+                    ${paperSettings.scale}%
+                </span>
+                <button type="button" onclick="window.changeAcademicReportScale(5)" title="ពង្រីក (Zoom In)" class="px-2 py-1 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold transition">
+                    <i class="fa-solid fa-magnifying-glass-plus"></i>
+                </button>
+                <button type="button" onclick="window.setAcademicReportScale(100)" title="កំណត់ឡើងវិញ 100%" class="px-1.5 py-1 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-400 font-bold transition border-l border-slate-200 dark:border-slate-600">
+                    <i class="fa-solid fa-rotate-left"></i>
+                </button>
+            </div>
+
+            <button type="button" onclick="window.printAcademicReportCleanly()" class="px-3 py-1 bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 text-white rounded-lg font-bold shadow-sm flex items-center gap-1.5 transition active:scale-95 ml-1">
+                <i class="fa-solid fa-print"></i>
+                <span>ព្រីនស្អាត</span>
+            </button>
+        </div>
+    `;
+
     container.innerHTML = `
         <div class="flex items-center gap-1 p-1 bg-slate-100 dark:bg-slate-700/80 rounded-xl border border-slate-200 dark:border-slate-600 shrink-0">
             <button type="button" onclick="window.switchAcademicReportMode('monthly')" class="px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 ${mode === 'monthly' ? 'bg-white dark:bg-slate-800 text-blue-700 dark:text-blue-400 shadow-sm' : 'text-slate-600 dark:text-slate-300 hover:text-slate-900'}">
@@ -3211,6 +3338,7 @@ window.renderAcademicReportControls = function(container, curLevel, curRoom) {
         </div>
         ${subControlHtml}
         ${sortControlHtml}
+        ${paperControlHtml}
     `;
 };
 
@@ -3240,6 +3368,11 @@ window.renderAcademicResultsReport = function(container, targetGrade, targetRoom
         ? window.toUniversalNum 
         : (str) => String(str ?? '').replace(/[០-៩]/g, d => "0123456789"["០១២៣៤៥៦៧៨៩".indexOf(d)]);
     const toKhmerNum = (str) => toUniversalNum(str); // Enforces universal numbers (លេខសកល: 0-9) as requested
+    const toKhmerDigits = (str) => {
+        if (!str && str !== 0) return "";
+        const khmerNumbers = ['០', '១', '២', '៣', '៤', '៥', '៦', '៧', '៨', '៩'];
+        return String(str).split('').map(n => (n >= '0' && n <= '9') ? khmerNumbers[parseInt(n, 10)] : n).join('');
+    };
 
     const formattedRoom = curRoom.startsWith('«') ? curRoom : `«${curRoom}»`;
     const gradeFull = `${toUniversalNum(curLevel)} ${formattedRoom}`.trim();
@@ -3251,7 +3384,7 @@ window.renderAcademicResultsReport = function(container, targetGrade, targetRoom
     const principalName = (sInfo.principal_name && sInfo.principal_name !== "នាយកសាលា") ? sInfo.principal_name : "";
     const teacherName = (window.AuthState ? window.AuthState.teacherName : null) || localStorage.getItem('auth_teacher_name') || sInfo.teacher_name || "";
 
-    // Dates
+    // Dates (រក្សាទុកជាលេខខ្មែរតាមការកំណត់)
     let locShort = "";
     const rawLoc = document.getElementById('global_loc_input')?.value || localStorage.getItem('rc_location') || localStorage.getItem('rep_location');
     if (rawLoc) {
@@ -3266,18 +3399,18 @@ window.renderAcademicResultsReport = function(container, targetGrade, targetRoom
     if (rawDate && rawDate.trim()) {
         sDate = rawDate.trim();
     } else {
-        sDate = "ថ្ងៃទី.......ខែ..........ឆ្នាំ2026";
+        sDate = "ថ្ងៃទី.......ខែ..........ឆ្នាំ២០២៦";
     }
     if (sDate.includes("ថ្ងៃទី")) sDate = sDate.substring(sDate.indexOf("ថ្ងៃទី"));
-    const solarDateStr = `ធ្វើនៅ ${locShort}, ${toUniversalNum(sDate)}`;
+    const solarDateStr = `ធ្វើនៅ ${locShort}, ${toKhmerDigits(sDate)}`;
 
     let isLunarChecked = true;
     const chkBox = document.getElementById('global_lun_chk');
     if (chkBox) isLunarChecked = chkBox.checked;
     else isLunarChecked = (localStorage.getItem('rc_show_lunar') !== 'false' && localStorage.getItem('rep_show_lunar') !== 'false');
 
-    let lun = document.getElementById('global_lun_input')?.value || localStorage.getItem('rc_lunar_date') || localStorage.getItem('rep_lunar_date') || "ថ្ងៃ....................ខែ..................ឆ្នាំ...............ព.ស.2570";
-    const lunarDateStr = isLunarChecked ? toUniversalNum(lun) : "";
+    let lun = document.getElementById('global_lun_input')?.value || localStorage.getItem('rc_lunar_date') || localStorage.getItem('rep_lunar_date') || "ថ្ងៃ....................ខែ..................ឆ្នាំ...............ព.ស.២៥៧០";
+    const lunarDateStr = isLunarChecked ? toKhmerDigits(lun) : "";
 
     // Students in Grade
     const allStudents = window.allStudents || (typeof window.getMasterStudents === 'function' ? window.getMasterStudents() : []) || JSON.parse(localStorage.getItem('academic_students') || '[]');
@@ -3500,6 +3633,9 @@ window.renderAcademicResultsReport = function(container, targetGrade, targetRoom
                 </div>
             </div>
         `;
+        if (typeof window.applyAcademicReportPaperSettings === 'function') {
+            window.applyAcademicReportPaperSettings();
+        }
         return;
     }
 
@@ -3521,10 +3657,10 @@ window.renderAcademicResultsReport = function(container, targetGrade, targetRoom
         const preparedStudents = classStudents.map((stu, i) => {
             const isFemale = stu.gender === 'ស្រី' || stu.gender === 'F';
             
-            // Monthly averages inside semester
+            // Monthly averages inside semester (គិតតែមធ្យមភាគខែសរុប មិនបង្ហាញខែរាយនីមួយៗ)
             let monthSum = 0;
             let monthCount = 0;
-            const monthCells = semMonths.map((m, mIdx) => {
+            semMonths.forEach((m, mIdx) => {
                 const cleanM = String(m || '').replace(/^ខែ\s*/, '').trim();
                 const sc = allScores.find(s => {
                     const matchId = String(s.student_id) === String(stu.id) || String(s.id) === String(stu.id) || (s.name && s.name.trim() === stu.name.trim());
@@ -3538,8 +3674,7 @@ window.renderAcademicResultsReport = function(container, targetGrade, targetRoom
                 }
                 monthSum += val;
                 monthCount++;
-                return `<td class="border border-slate-400 p-1 font-mono">${val.toFixed(2)}</td>`;
-            }).join('');
+            });
 
             const monthAvg = monthCount > 0 ? (monthSum / monthCount) : 0;
             
@@ -3568,7 +3703,6 @@ window.renderAcademicResultsReport = function(container, targetGrade, targetRoom
             return {
                 stu,
                 isFemale,
-                monthCells,
                 monthAvg,
                 examVal,
                 semAvg,
@@ -3610,20 +3744,19 @@ window.renderAcademicResultsReport = function(container, targetGrade, targetRoom
         }
 
         const rowsHtml = preparedStudents.length === 0 ? `
-            <tr><td colspan="${semMonths.length + 8}" class="p-8 text-center text-slate-400 font-bold font-siemreap">គ្មានទិន្នន័យសិស្សក្នុងថ្នាក់ ${gradeFull} ឡើយ</td></tr>
+            <tr><td colspan="9" class="p-8 text-center text-slate-400 font-bold font-siemreap">គ្មានទិន្នន័យសិស្សក្នុងថ្នាក់ ${gradeFull} ឡើយ</td></tr>
         ` : preparedStudents.map((item, i) => {
             return `
                 <tr class="hover:bg-slate-50 text-[11px]">
-                    <td class="border border-slate-400 p-1 font-mono">${i + 1}</td>
-                    <td class="border border-slate-400 p-1 text-left font-bold text-slate-900">${item.stu.name}</td>
-                    <td class="border border-slate-400 p-1 ${item.isFemale ? 'text-rose-600 font-bold' : ''}">${item.isFemale ? 'ស្រី' : 'ប្រុស'}</td>
-                    ${item.monthCells}
-                    <td class="border border-slate-400 p-1 font-mono font-bold bg-amber-50/50">${item.monthAvg.toFixed(2)}</td>
-                    <td class="border border-slate-400 p-1 font-mono font-bold bg-blue-50/50">${item.examVal.toFixed(2)}</td>
-                    <td class="border border-slate-400 p-1 font-mono font-bold ${item.semAvg >= 5.0 ? 'text-blue-900 bg-indigo-50/60' : 'text-rose-600 bg-rose-50/60'}">${item.semAvg.toFixed(2)}</td>
-                    <td class="border border-slate-400 p-1 font-mono font-bold text-indigo-700">${toKhmerNum(item.rankVal)}</td>
-                    <td class="border border-slate-400 p-1 font-moul text-[10px] ${item.semAvg >= 8 ? 'text-emerald-700' : (item.semAvg >= 6.5 ? 'text-blue-700' : (item.semAvg >= 5 ? 'text-slate-700' : 'text-rose-600'))}">${item.mention}</td>
-                    <td class="border border-slate-400 p-1 font-bold ${item.isPass ? 'text-emerald-700 bg-emerald-50/40' : 'text-rose-600 bg-rose-50/40'}">${item.isPass ? 'ជាប់មធ្យមភាគ' : 'ក្រោមមធ្យមភាគ'}</td>
+                    <td class="border border-slate-400 p-1.5 font-mono">${i + 1}</td>
+                    <td class="border border-slate-400 p-1.5 text-left font-bold text-slate-900">${item.stu.name}</td>
+                    <td class="border border-slate-400 p-1.5 ${item.isFemale ? 'text-rose-600 font-bold' : ''}">${item.isFemale ? 'ស្រី' : 'ប្រុស'}</td>
+                    <td class="border border-slate-400 p-1.5 font-mono font-bold text-amber-800 bg-amber-50/40">${item.monthAvg.toFixed(2)}</td>
+                    <td class="border border-slate-400 p-1.5 font-mono font-bold text-blue-900 bg-blue-50/40">${item.examVal.toFixed(2)}</td>
+                    <td class="border border-slate-400 p-1.5 font-mono font-bold ${item.semAvg >= 5.0 ? 'text-indigo-900 bg-indigo-50/60' : 'text-rose-600 bg-rose-50/60'}">${item.semAvg.toFixed(2)}</td>
+                    <td class="border border-slate-400 p-1.5 font-mono font-bold text-indigo-700">${item.rankVal}</td>
+                    <td class="border border-slate-400 p-1.5 font-moul text-[10px] ${item.semAvg >= 8 ? 'text-emerald-700' : (item.semAvg >= 6.5 ? 'text-blue-700' : (item.semAvg >= 5 ? 'text-slate-700' : 'text-rose-600'))}">${item.mention}</td>
+                    <td class="border border-slate-400 p-1.5 font-bold ${item.isPass ? 'text-emerald-700 bg-emerald-50/40' : 'text-rose-600 bg-rose-50/40'}">${item.isPass ? 'ជាប់មធ្យមភាគ' : 'ក្រោមមធ្យមភាគ'}</td>
                 </tr>
             `;
         }).join('');
@@ -3649,7 +3782,7 @@ window.renderAcademicResultsReport = function(container, targetGrade, targetRoom
 
                 <div class="text-center mb-4">
                     <h3 class="font-moul text-base text-blue-900">របាយការណ៍លទ្ធផលនៃការសិក្សាប្រចាំ ${toUniversalNum(currentSemester)}</h3>
-                    <h4 class="font-moul text-xs text-red-600 mt-1">${gradeFull} | ឆ្នាំសិក្សា ${academicYear}</h4>
+                    <h4 class="font-moul text-xs text-red-600 mt-1">${gradeFull} | ឆ្នាំសិក្សា ${academicYear} (ខែគិតក្នុងឆមាស៖ ${semMonths.map(m => 'ខែ ' + m).join(', ')})</h4>
                 </div>
 
                 <div class="overflow-x-auto mb-4">
@@ -3659,13 +3792,12 @@ window.renderAcademicResultsReport = function(container, targetGrade, targetRoom
                                 <th class="border border-slate-400 p-2 w-10">ល.រ</th>
                                 <th class="border border-slate-400 p-2 text-left">គោត្តនាម និងនាម</th>
                                 <th class="border border-slate-400 p-2 w-14">ភេទ</th>
-                                ${semMonths.map(m => `<th class="border border-slate-400 p-2 w-14">ខែ ${m}</th>`).join('')}
-                                <th class="border border-slate-400 p-2 w-20 bg-amber-50">មធ្យមខែ</th>
-                                <th class="border border-slate-400 p-2 w-20 bg-blue-50">ម.ប្រឡង</th>
-                                <th class="border border-slate-400 p-2 w-24 bg-indigo-50 font-bold">ម.ប្រចាំឆមាស</th>
-                                <th class="border border-slate-400 p-2 w-16">ចំណាត់ថ្នាក់</th>
-                                <th class="border border-slate-400 p-2 w-20">និទ្ទេស</th>
-                                <th class="border border-slate-400 p-2 w-28 bg-emerald-50">លទ្ធផល</th>
+                                <th class="border border-slate-400 p-2 w-28 bg-amber-50">មធ្យមភាគខែ</th>
+                                <th class="border border-slate-400 p-2 w-28 bg-blue-50">មធ្យមភាគប្រឡង</th>
+                                <th class="border border-slate-400 p-2 w-28 bg-indigo-50 font-bold">មធ្យមភាគឆមាស</th>
+                                <th class="border border-slate-400 p-2 w-20">ចំណាត់ថ្នាក់</th>
+                                <th class="border border-slate-400 p-2 w-24">និទ្ទេស</th>
+                                <th class="border border-slate-400 p-2 w-32 bg-emerald-50">លទ្ធផល</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -3708,6 +3840,9 @@ window.renderAcademicResultsReport = function(container, targetGrade, targetRoom
                 </div>
             </div>
         `;
+        if (typeof window.applyAcademicReportPaperSettings === 'function') {
+            window.applyAcademicReportPaperSettings();
+        }
         return;
     }
 
@@ -3919,5 +4054,9 @@ window.renderAcademicResultsReport = function(container, targetGrade, targetRoom
             </div>
         </div>
     `;
+
+    if (typeof window.applyAcademicReportPaperSettings === 'function') {
+        window.applyAcademicReportPaperSettings();
+    }
 };
 
