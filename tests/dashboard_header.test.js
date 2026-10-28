@@ -66,9 +66,10 @@ describe('Dashboard Executive Header Consistency Tests', () => {
         assert.ok(!timetableCode.includes('<option value="${c}" ${c === this.currentGrade'), 'Must not contain class selection dropdown options in timetable toolbar');
     });
 
-    test('5. Quick shortcuts section does not contain All Classes (ថ្នាក់រៀនទាំងអស់) button', () => {
+    test('5. Quick shortcuts section does not contain All Classes or Grade Summary shortcuts', () => {
         const dashCode = fs.readFileSync('js/dashboard.js', 'utf8');
         assert.ok(!dashCode.includes('shortcutAllClasses'), 'Must not contain shortcutAllClasses in quick shortcuts');
+        assert.ok(!dashCode.includes('shortcutGradesSummary'), 'Must not contain shortcutGradesSummary in quick shortcuts');
         assert.ok(!dashCode.includes('window.openManageClassModal()'), 'Must not contain openManageClassModal in dashboard quick shortcuts');
     });
 });
