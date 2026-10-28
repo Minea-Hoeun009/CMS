@@ -410,10 +410,14 @@ window.KrouDigital = {
     },
 
     // =====================================================================
-    // ៣. របាយការណ៍ គ & ឃ (Report Ko / Kho) - លទ្ធផលឆមាស និងប្រចាំឆ្នាំ
+    // ៣. របាយការណ៍ គ & ឃ (Report Ko / Kho) - លទ្ធផលប្រចាំខែ ឆមាស និងប្រចាំឆ្នាំ
     // =====================================================================
-    renderReportKoKho: function(container, targetGrade = null, targetRoom = null) {
+    renderReportKoKho: function(container, targetGrade = null, targetRoom = null, mode = null) {
         if (!container) return;
+        if (typeof window.renderAcademicResultsReport === 'function') {
+            window.renderAcademicResultsReport(container, targetGrade, targetRoom, mode || window.currentAcademicReportMode || 'annual');
+            return;
+        }
         const sInfo = window.appSettings || JSON.parse(localStorage.getItem('school_settings') || '{}');
         const activeClass = typeof window.getCurrentSelectedClass === 'function' ? window.getCurrentSelectedClass() : { level: "ថ្នាក់ទី ៤", room: "«ក»" };
         const curLevel = targetGrade || activeClass.level;

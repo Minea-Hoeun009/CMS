@@ -253,4 +253,40 @@ describe('MoEYS Sikha-karik Booklet & Centralized Reports Suite', () => {
         assert.ok(previewHtml.includes('font-moul'), 'Should preserve Moul font styling');
         assert.ok(previewHtml.includes('font-siemreap'), 'Should preserve Siemreap font styling');
     });
+
+    test('6. Academic Results report supports 3 distinct modes: monthly, semester, and annual', () => {
+        assert.strictEqual(typeof context.window.renderAcademicResultsReport, 'function');
+        assert.strictEqual(typeof context.window.renderAcademicReportControls, 'function');
+
+        const controlsContainer = { innerHTML: '' };
+        context.window.renderAcademicReportControls(controlsContainer, 'ថ្នាក់ទី ៤', '«ក»');
+        assert.ok(controlsContainer.innerHTML.includes('ប្រចាំខែ'), 'Controls should include Monthly mode button');
+        assert.ok(controlsContainer.innerHTML.includes('ប្រចាំឆមាស'), 'Controls should include Semester mode button');
+        assert.ok(controlsContainer.innerHTML.includes('ប្រចាំឆ្នាំ'), 'Controls should include Annual mode button');
+
+        const paperArea = { innerHTML: '' };
+
+        // Test Monthly Mode
+        context.window.currentAcademicReportMonth = 'មករា';
+        context.window.renderAcademicResultsReport(paperArea, 'ថ្នាក់ទី ៤', '«ក»', 'monthly');
+        const monthlyHtml = paperArea.innerHTML;
+        assert.ok(monthlyHtml.includes('របាយការណ៍លទ្ធផលនៃការសិក្សាប្រចាំខែ មករា'), 'Should render monthly title');
+        assert.ok(monthlyHtml.includes('ពិន្ទុសរុប'), 'Should contain total score column');
+        assert.ok(monthlyHtml.includes('មធ្យមភាគ'), 'Should contain average column');
+        assert.ok(monthlyHtml.includes('សិស្សសរុបក្នុងថ្នាក់'), 'Should contain summary stats box');
+
+        // Test Semester Mode
+        context.window.currentAcademicReportSemester = 'ឆមាសទី១';
+        context.window.renderAcademicResultsReport(paperArea, 'ថ្នាក់ទី ៤', '«ក»', 'semester');
+        const semesterHtml = paperArea.innerHTML;
+        assert.ok(semesterHtml.includes('របាយការណ៍លទ្ធផលនៃការសិក្សាប្រចាំ ឆមាសទី១'), 'Should render semester title');
+        assert.ok(semesterHtml.includes('ម.ប្រឡង') || semesterHtml.includes('ម.ប្រចាំឆមាស'), 'Should contain semester exam / avg columns');
+
+        // Test Annual Mode
+        context.window.renderAcademicResultsReport(paperArea, 'ថ្នាក់ទី ៤', '«ក»', 'annual');
+        const annualHtml = paperArea.innerHTML;
+        assert.ok(annualHtml.includes('សេចក្តីសម្រេចលទ្ធផលសិក្សាប្រចាំឆ្នាំ'), 'Should render annual decision title');
+        assert.ok(annualHtml.includes('ឡើងថ្នាក់') || annualHtml.includes('ត្រួតថ្នាក់'), 'Should contain promotion outcome');
+        assert.ok(annualHtml.includes('សិស្សឡើងថ្នាក់'), 'Should contain promoted students stats');
+    });
 });
