@@ -1142,7 +1142,7 @@ window.KrouDigital = {
                 if (t === tabName) {
                     btn.className = 'px-3.5 py-1.5 rounded-xl font-bold text-xs bg-indigo-600 text-white shadow-md shadow-indigo-500/30 flex items-center gap-1.5 transition';
                 } else {
-                    btn.className = 'px-3.5 py-1.5 rounded-xl font-bold text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center gap-1.5 transition';
+                    btn.className = 'px-3.5 py-1.5 rounded-xl font-bold text-xs bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 flex items-center gap-1.5 transition';
                 }
             }
         });
@@ -1554,8 +1554,13 @@ window.KrouDigital = {
         if (!modal) {
             modal = document.createElement("div");
             modal.id = "certificateModal";
-            modal.className = "fixed inset-0 z-[7000] bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-2 sm:p-4 font-siemreap overflow-y-auto";
+            modal.className = "fixed inset-0 z-[7000] bg-slate-900/60 p-2 md:p-6 transition-all duration-300 font-siemreap overflow-hidden flex flex-col";
             document.body.appendChild(modal);
+        } else {
+            modal.className = "fixed inset-0 z-[7000] bg-slate-900/60 p-2 md:p-6 transition-all duration-300 font-siemreap overflow-hidden flex flex-col";
+            if (modal.parentElement && modal.parentElement !== document.body) {
+                document.body.appendChild(modal);
+            }
         }
 
         modal.innerHTML = `
@@ -1587,96 +1592,99 @@ window.KrouDigital = {
                 }
             </style>
 
-            <div class="bg-slate-900 border border-slate-700/80 rounded-3xl w-full max-w-7xl shadow-2xl relative my-3 text-slate-100 flex flex-col overflow-hidden max-h-[96vh]">
+            <div class="bg-slate-50 border border-slate-200/80 rounded-2xl md:rounded-[2.5rem] w-full h-full shadow-2xl relative text-slate-800 flex flex-col overflow-hidden">
                 
                 <!-- 🎨 CANVA-STYLE TOP STUDIO HEADER 🎨 -->
-                <div class="bg-gradient-to-r from-slate-900 via-slate-850 to-slate-900 px-3 py-2 border-b border-slate-700/80 flex items-center gap-2 sm:gap-3 no-print overflow-x-auto custom-scrollbar flex-nowrap whitespace-nowrap w-full shrink-0">
+                <div class="bg-white p-3 md:p-4 border-b border-slate-200/80 flex justify-between items-center shrink-0 shadow-sm z-20 no-print overflow-x-auto custom-scrollbar flex-nowrap whitespace-nowrap w-full">
                     
                     <!-- Left: Studio Logo & Title -->
-                    <div class="flex items-center gap-2 shrink-0">
-                        <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-amber-500 via-rose-500 to-indigo-600 flex items-center justify-center text-white shadow-md shadow-indigo-500/20">
-                            <i class="fa-solid fa-wand-magic-sparkles text-sm"></i>
-                        </div>
-                        <div>
-                            <div class="flex items-center gap-2">
-                                <h3 class="font-moul text-xs sm:text-sm text-amber-300">Canva Certificate Studio 4.0</h3>
-                                <span class="px-2 py-0.5 bg-slate-800 text-[10px] text-slate-300 border border-slate-700 rounded-md font-mono">${curPageSize.name}</span>
+                    <div class="flex items-center gap-3 shrink-0">
+                        <button type="button" onclick="document.getElementById('certificateModal').classList.add('hidden')" class="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 flex items-center gap-2 font-bold text-xs transition shadow-sm active:scale-95 shrink-0" title="ថយក្រោយ"><i class="fa-solid fa-arrow-left text-sm"></i> <span>ថយក្រោយ</span></button>
+                        <div class="flex items-center gap-2 sm:gap-3">
+                            <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-[14px] bg-gradient-to-br from-amber-500 to-yellow-600 text-white flex items-center justify-center shadow-md text-sm">
+                                <i class="fa-solid fa-certificate"></i>
                             </div>
-                            <p class="text-[10px] text-slate-400">ស្ទូឌីយោរចនាប័ណ្ណសរសើរ អូសទីតាំង Text បានដោយសេរី និងព្រីនពេញក្រដាស A4 ១០០%</p>
+                            <div>
+                                <div class="flex items-center gap-2">
+                                    <h3 class="font-moul text-xs sm:text-sm text-slate-800">ប័ណ្ណសរសើរផ្លូវការ (Certificate Studio)</h3>
+                                    <span class="px-2 py-0.5 bg-slate-100 text-[10px] text-slate-600 border border-slate-200 rounded-md font-mono">${curPageSize.name}</span>
+                                </div>
+                                <p class="text-[10px] text-amber-700 font-bold hidden sm:block">ស្ទូឌីយោរចនាប័ណ្ណសរសើរ អូសទីតាំង Text បានដោយសេរី និងព្រីនពេញក្រដាស A4 ១០០%</p>
+                            </div>
                         </div>
                     </div>
 
                     <!-- Center: Zoom In / Zoom Out Controls -->
-                    <div class="flex items-center gap-1.5 bg-slate-800/90 border border-slate-700 px-2.5 py-1 rounded-xl text-xs shrink-0">
-                        <span class="text-slate-400 text-[11px] mr-1"><i class="fa-solid fa-magnifying-glass"></i> Zoom:</span>
-                        <button onclick="window.KrouDigital.zoomOut()" class="w-6 h-6 rounded-lg bg-slate-700 hover:bg-slate-600 text-white flex items-center justify-center font-bold text-xs transition" title="Zoom Out (-10%)">-</button>
+                    <div class="flex items-center gap-1.5 bg-slate-100 border border-slate-200 px-2.5 py-1 rounded-xl text-xs shrink-0">
+                        <span class="text-slate-500 text-[11px] mr-1"><i class="fa-solid fa-magnifying-glass"></i> Zoom:</span>
+                        <button onclick="window.KrouDigital.zoomOut()" class="w-6 h-6 rounded-lg bg-white hover:bg-slate-200 text-slate-700 border border-slate-200 flex items-center justify-center font-bold text-xs transition" title="Zoom Out (-10%)">-</button>
                         <input type="range" id="certZoomSlider" min="50" max="150" value="${studioZoom}" oninput="window.KrouDigital.setZoom(this.value)" class="w-20 accent-indigo-500 cursor-pointer">
-                        <button onclick="window.KrouDigital.zoomIn()" class="w-6 h-6 rounded-lg bg-slate-700 hover:bg-slate-600 text-white flex items-center justify-center font-bold text-xs transition" title="Zoom In (+10%)">+</button>
-                        <span id="certZoomDisplay" class="font-mono text-indigo-300 font-bold min-w-[36px] text-center">${studioZoom}%</span>
-                        <button onclick="window.KrouDigital.zoomFit()" class="px-2 py-0.5 text-[10px] bg-slate-700 hover:bg-slate-600 text-amber-300 rounded font-bold transition" title="Fit to Screen">Fit</button>
+                        <button onclick="window.KrouDigital.zoomIn()" class="w-6 h-6 rounded-lg bg-white hover:bg-slate-200 text-slate-700 border border-slate-200 flex items-center justify-center font-bold text-xs transition" title="Zoom In (+10%)">+</button>
+                        <span id="certZoomDisplay" class="font-mono text-indigo-700 font-bold min-w-[36px] text-center">${studioZoom}%</span>
+                        <button onclick="window.KrouDigital.zoomFit()" class="px-2 py-0.5 text-[10px] bg-white hover:bg-slate-200 text-slate-700 border border-slate-200 rounded font-bold transition" title="Fit to Screen">Fit</button>
                     </div>
 
                     <!-- Right: Page Size & Action Buttons -->
                     <div class="flex items-center gap-1.5 shrink-0 ml-auto">
                         <!-- Set Page Size Dropdown -->
-                        <div class="flex items-center gap-1 bg-slate-800 border border-slate-700 rounded-xl px-2.5 py-1.5 text-xs">
-                            <i class="fa-solid fa-file-invoice text-indigo-400 text-xs"></i>
-                            <select onchange="window.KrouDigital.setPageSize(this.value)" class="bg-transparent text-slate-200 outline-none cursor-pointer font-bold text-xs">
+                        <div class="flex items-center gap-1 bg-slate-100 border border-slate-200 rounded-xl px-2.5 py-1.5 text-xs">
+                            <i class="fa-solid fa-file-invoice text-indigo-600 text-xs"></i>
+                            <select onchange="window.KrouDigital.setPageSize(this.value)" class="bg-transparent text-slate-700 outline-none cursor-pointer font-bold text-xs">
                                 ${Object.entries(pageSizesMap).map(([k, v]) => `
-                                    <option value="${k}" ${k === pageSizeKey ? 'selected' : ''} class="bg-slate-900 text-white">${v.name}</option>
+                                    <option value="${k}" ${k === pageSizeKey ? 'selected' : ''}>${v.name}</option>
                                 `).join('')}
                             </select>
                         </div>
 
                         <!-- Universal Preview Button -->
-                        <button onclick="window.KrouDigital.openPrintPreview()" class="px-3.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-indigo-300 border border-slate-700 rounded-xl text-xs font-bold transition flex items-center gap-1.5 active:scale-95 outline-none" title="បើកផ្ទាំងពិនិត្យមុនព្រីន (Universal Preview)">
+                        <button onclick="window.KrouDigital.openPrintPreview()" class="px-3.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-indigo-700 border border-slate-200 rounded-xl text-xs font-bold transition flex items-center gap-1.5 active:scale-95 outline-none" title="បើកផ្ទាំងពិនិត្យមុនព្រីន (Universal Preview)">
                             <i class="fa-solid fa-eye"></i>
                             <span>Preview</span>
                         </button>
 
                         <!-- Print Button -->
-                        <button onclick="window.KrouDigital.printCertificate()" class="px-4 py-1.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white rounded-xl text-xs font-bold shadow-md shadow-emerald-500/20 transition flex items-center gap-1.5 active:scale-95 outline-none" title="បោះពុម្ពពេញទំហំក្រដាស ១០០%">
-                            <i class="fa-solid fa-print text-amber-300"></i>
+                        <button onclick="window.KrouDigital.printCertificate()" class="px-4 py-1.5 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white rounded-xl text-xs font-bold shadow-md shadow-amber-500/20 transition flex items-center gap-1.5 active:scale-95 outline-none" title="បោះពុម្ពពេញទំហំក្រដាស ១០០%">
+                            <i class="fa-solid fa-print"></i>
                             <span>ព្រីន (Print)</span>
                         </button>
 
                         <!-- Close Button -->
-                        <button onclick="document.getElementById('certificateModal').classList.add('hidden')" class="w-8 h-8 bg-slate-800 hover:bg-rose-900/80 text-slate-300 hover:text-white rounded-xl font-bold flex items-center justify-center transition border border-slate-700" title="បិទ (Close)">
-                            <i class="fa-solid fa-xmark"></i>
+                        <button onclick="document.getElementById('certificateModal').classList.add('hidden')" class="w-10 h-10 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 flex items-center justify-center transition shadow-sm active:scale-95 shrink-0" title="បិទ (Close)">
+                            <i class="fa-solid fa-xmark text-lg"></i>
                         </button>
                     </div>
 
                 </div>
 
                 <!-- 🎛️ CANVA CATEGORY TABS BAR 🎛️ -->
-                <div class="bg-slate-850 px-3 py-1.5 sm:py-2 border-b border-slate-700/60 flex items-center justify-between gap-2 text-xs no-print overflow-x-auto custom-scrollbar flex-nowrap whitespace-nowrap w-full shrink-0">
+                <div class="bg-slate-100/70 px-3 py-1.5 sm:py-2 border-b border-slate-200/80 flex items-center justify-between gap-2 text-xs no-print overflow-x-auto custom-scrollbar flex-nowrap whitespace-nowrap w-full shrink-0">
                     <!-- Tab Switcher Buttons -->
                     <div class="flex items-center gap-1.5 shrink-0 flex-nowrap">
-                        <button id="certTabBtn_design" onclick="window.KrouDigital.setActiveTab('design')" class="${activeTab === 'design' ? 'px-3.5 py-1.5 rounded-xl font-bold text-xs bg-indigo-600 text-white shadow-md shadow-indigo-500/30 flex items-center gap-1.5 transition' : 'px-3.5 py-1.5 rounded-xl font-bold text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center gap-1.5 transition'}">
-                            <i class="fa-solid fa-border-all text-amber-400"></i>
+                        <button id="certTabBtn_design" onclick="window.KrouDigital.setActiveTab('design')" class="${activeTab === 'design' ? 'px-3.5 py-1.5 rounded-xl font-bold text-xs bg-indigo-600 text-white shadow-md shadow-indigo-500/30 flex items-center gap-1.5 transition' : 'px-3.5 py-1.5 rounded-xl font-bold text-xs bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 flex items-center gap-1.5 transition'}">
+                            <i class="fa-solid fa-border-all ${activeTab === 'design' ? 'text-amber-300' : 'text-amber-500'}"></i>
                             <span>ស៊ុម & ផ្ទៃ (Borders)</span>
                         </button>
-                        <button id="certTabBtn_uploads" onclick="window.KrouDigital.setActiveTab('uploads')" class="${activeTab === 'uploads' ? 'px-3.5 py-1.5 rounded-xl font-bold text-xs bg-indigo-600 text-white shadow-md shadow-indigo-500/30 flex items-center gap-1.5 transition' : 'px-3.5 py-1.5 rounded-xl font-bold text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center gap-1.5 transition'}">
-                            <i class="fa-solid fa-cloud-arrow-up text-indigo-400"></i>
+                        <button id="certTabBtn_uploads" onclick="window.KrouDigital.setActiveTab('uploads')" class="${activeTab === 'uploads' ? 'px-3.5 py-1.5 rounded-xl font-bold text-xs bg-indigo-600 text-white shadow-md shadow-indigo-500/30 flex items-center gap-1.5 transition' : 'px-3.5 py-1.5 rounded-xl font-bold text-xs bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 flex items-center gap-1.5 transition'}">
+                            <i class="fa-solid fa-cloud-arrow-up ${activeTab === 'uploads' ? 'text-white' : 'text-indigo-500'}"></i>
                             <span>Uploads (Logo/Frame/Pic)</span>
                         </button>
-                        <button id="certTabBtn_text" onclick="window.KrouDigital.setActiveTab('text')" class="${activeTab === 'text' ? 'px-3.5 py-1.5 rounded-xl font-bold text-xs bg-indigo-600 text-white shadow-md shadow-indigo-500/30 flex items-center gap-1.5 transition' : 'px-3.5 py-1.5 rounded-xl font-bold text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center gap-1.5 transition'}">
-                            <i class="fa-solid fa-font text-teal-400"></i>
+                        <button id="certTabBtn_text" onclick="window.KrouDigital.setActiveTab('text')" class="${activeTab === 'text' ? 'px-3.5 py-1.5 rounded-xl font-bold text-xs bg-indigo-600 text-white shadow-md shadow-indigo-500/30 flex items-center gap-1.5 transition' : 'px-3.5 py-1.5 rounded-xl font-bold text-xs bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 flex items-center gap-1.5 transition'}">
+                            <i class="fa-solid fa-font ${activeTab === 'text' ? 'text-teal-200' : 'text-teal-600'}"></i>
                             <span>អត្ថបទ & អូស Text (Drag)</span>
                         </button>
-                        <button id="certTabBtn_data" onclick="window.KrouDigital.setActiveTab('data')" class="${activeTab === 'data' ? 'px-3.5 py-1.5 rounded-xl font-bold text-xs bg-indigo-600 text-white shadow-md shadow-indigo-500/30 flex items-center gap-1.5 transition' : 'px-3.5 py-1.5 rounded-xl font-bold text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center gap-1.5 transition'}">
-                            <i class="fa-solid fa-user-graduate text-purple-400"></i>
+                        <button id="certTabBtn_data" onclick="window.KrouDigital.setActiveTab('data')" class="${activeTab === 'data' ? 'px-3.5 py-1.5 rounded-xl font-bold text-xs bg-indigo-600 text-white shadow-md shadow-indigo-500/30 flex items-center gap-1.5 transition' : 'px-3.5 py-1.5 rounded-xl font-bold text-xs bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 flex items-center gap-1.5 transition'}">
+                            <i class="fa-solid fa-user-graduate ${activeTab === 'data' ? 'text-purple-200' : 'text-purple-600'}"></i>
                             <span>ទិន្នន័យសិស្ស (Auto-fill)</span>
                         </button>
                     </div>
 
                     <!-- Reset & Help badges -->
                     <div class="flex items-center gap-2 shrink-0 flex-nowrap ml-auto">
-                        <button onclick="window.KrouDigital.resetCertPositions()" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-amber-300 rounded-lg text-[11px] font-bold border border-slate-700 flex items-center gap-1" title="កំណត់ទីតាំង និងទំហំទាំងអស់ឡើងវិញ">
+                        <button onclick="window.KrouDigital.resetCertPositions()" class="px-2.5 py-1 bg-white hover:bg-slate-100 text-amber-700 rounded-lg text-[11px] font-bold border border-slate-200 flex items-center gap-1 shadow-sm" title="កំណត់ទីតាំង និងទំហំទាំងអស់ឡើងវិញ">
                             <i class="fa-solid fa-rotate-left"></i>
                             <span>Reset ទីតាំងដើម</span>
                         </button>
-                        <span class="text-[11px] text-slate-400 hidden sm:inline">💡 ចុច <b class="text-amber-300">អូស (Drag)</b> ដើម្បីផ្លាស់ប្តូរទីតាំង Text ឬ Logo ដោយសេរី</span>
+                        <span class="text-[11px] text-slate-500 hidden sm:inline">💡 ចុច <b class="text-amber-700">អូស (Drag)</b> ដើម្បីផ្លាស់ប្តូរទីតាំង Text ឬ Logo ដោយសេរី</span>
                     </div>
                 </div>
 
@@ -1865,7 +1873,7 @@ window.KrouDigital = {
                 </div>
 
                 <!-- 📜 CANVAS WORKSPACE AREA (ZOOMABLE) 📜 -->
-                <div class="w-full flex-1 overflow-auto custom-scrollbar flex justify-center items-start p-4 sm:p-8 bg-slate-950/95 min-h-[500px]">
+                <div class="w-full flex-1 overflow-auto custom-scrollbar flex justify-center items-start p-4 sm:p-8 bg-slate-200/70 min-h-[500px]">
                     <div id="certificatePrintWrapper" class="transition-transform duration-200 relative flex justify-center items-center shadow-2xl rounded-2xl" style="transform: scale(${studioZoom / 100}); transform-origin: top center;">
                         
                         <!-- ក្រដាសប័ណ្ណសរសើរ / លិខិតសរសើរ Canvas -->

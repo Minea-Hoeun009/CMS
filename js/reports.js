@@ -28,6 +28,10 @@ window.handleReportClassChange = function() {
 
 // ពេលទំព័រដើម Load រួចរាល់
 window.loadReportsView = function() {
+    const existingModal = document.getElementById("reportDetailContent");
+    if (existingModal && existingModal.parentElement === document.body) {
+        existingModal.remove();
+    }
     const container = document.getElementById("reportsContainer");
     if (!container) return;
 
@@ -271,6 +275,9 @@ window.openReportDetail = function(reportType) {
     const modal = document.getElementById("reportDetailContent");
     const modalContainer = document.getElementById("reportDetailModalContainer");
     if (modal) {
+        if (modal.parentElement && modal.parentElement !== document.body) {
+            document.body.appendChild(modal);
+        }
         modal.classList.remove("hidden");
         modal.classList.add("flex");
         setTimeout(() => {
