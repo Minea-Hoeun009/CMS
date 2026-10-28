@@ -385,10 +385,11 @@ describe('MoEYS Sikha-karik Booklet & Centralized Reports Suite', () => {
         context.window.renderAcademicResultsReport(paperArea, 'ថ្នាក់ទី ៤', '«ក»', 'monthly');
 
         const html = paperArea.innerHTML;
-        // Verify stats box uses universal numbers (1., 2., 3., 5.00)
-        assert.ok(html.includes('1. សិស្សសរុបក្នុងថ្នាក់៖'), 'Stats box should use 1. in universal number');
-        assert.ok(html.includes('2. សិស្សជាប់មធ្យមភាគ (≥ 5.00)៖'), 'Stats box should use 2. and 5.00 in universal numbers');
-        assert.ok(html.includes('3. សិស្សធ្លាក់មធ្យមភាគ (< 5.00)៖'), 'Stats box should use 3. and 5.00 in universal numbers');
+        // Verify stats section uses plain dashes and universal numbers (5.00)
+        assert.ok(html.includes('- <span class="font-bold">សិស្សសរុបក្នុងថ្នាក់៖</span>') || html.includes('សិស្សសរុបក្នុងថ្នាក់៖'), 'Stats should display total students with dash');
+        assert.ok(html.includes('សិស្សជាប់មធ្យមភាគ (≥ 5.00)៖'), 'Stats should use 5.00 in universal numbers');
+        assert.ok(html.includes('សិស្សធ្លាក់មធ្យមភាគ (< 5.00)៖'), 'Stats should use 5.00 in universal numbers');
+        assert.ok(!html.includes('border-slate-300 rounded-xl'), 'Stats section should not have outer container box');
 
         // Verify ranks are rendered as universal digits (e.g. 1, 2, 3)
         assert.ok(html.includes('>1<') || html.includes('1</td>'), 'Rank should be rendered as universal numeral 1');

@@ -3576,22 +3576,11 @@ window.renderAcademicResultsReport = function(container, targetGrade, targetRoom
                     </table>
                 </div>
 
-                <!-- ស្ថិតិសង្ខេបក្រោមតារាង (Summary Statistics Box) -->
-                <div class="mb-6 p-3 bg-slate-50 border border-slate-300 rounded-xl text-xs font-siemreap leading-relaxed">
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-                        <div class="p-2.5 bg-white border border-slate-200 rounded-lg shadow-sm">
-                            <span class="font-bold text-slate-700 block mb-1">1. សិស្សសរុបក្នុងថ្នាក់៖</span>
-                            <span class="text-blue-900 font-bold">${toKhmerNum(totalCount)}</span> នាក់ (ស្រី៖ <span class="text-rose-600 font-bold">${toKhmerNum(femaleCount)}</span> នាក់, ប្រុស៖ <span class="text-slate-800 font-bold">${toKhmerNum(maleCount)}</span> នាក់)
-                        </div>
-                        <div class="p-2.5 bg-emerald-50/60 border border-emerald-200 rounded-lg shadow-sm">
-                            <span class="font-bold text-emerald-800 block mb-1">2. សិស្សជាប់មធ្យមភាគ (≥ 5.00)៖</span>
-                            <span class="text-emerald-700 font-bold">${toKhmerNum(passCount)}</span> នាក់ (ស្រី៖ <span class="text-rose-600 font-bold">${toKhmerNum(passFemales)}</span> នាក់) ស្មើនឹង <span class="font-bold text-emerald-800">${toKhmerNum(passPct)}%</span>
-                        </div>
-                        <div class="p-2.5 bg-rose-50/60 border border-rose-200 rounded-lg shadow-sm">
-                            <span class="font-bold text-rose-800 block mb-1">3. សិស្សធ្លាក់មធ្យមភាគ (< 5.00)៖</span>
-                            <span class="text-rose-700 font-bold">${toKhmerNum(failCount)}</span> នាក់ (ស្រី៖ <span class="text-rose-600 font-bold">${toKhmerNum(failFemales)}</span> នាក់) ស្មើនឹង <span class="font-bold text-rose-800">${toKhmerNum(failPct)}%</span>
-                        </div>
-                    </div>
+                <!-- ស្ថិតិសង្ខេបក្រោមតារាង (Summary Statistics - Plain Dashes / ត្រេធម្មតា) -->
+                <div class="mb-5 text-xs font-siemreap leading-relaxed text-slate-800 text-left px-1 space-y-1">
+                    <div>- <span class="font-bold">សិស្សសរុបក្នុងថ្នាក់៖</span> <span class="font-bold">${toKhmerNum(totalCount)}</span> នាក់ (ស្រី៖ <span class="font-bold text-rose-600">${toKhmerNum(femaleCount)}</span> នាក់, ប្រុស៖ <span class="font-bold">${toKhmerNum(maleCount)}</span> នាក់)</div>
+                    <div>- <span class="font-bold">សិស្សជាប់មធ្យមភាគ (≥ 5.00)៖</span> <span class="font-bold text-emerald-700">${toKhmerNum(passCount)}</span> នាក់ (ស្រី៖ <span class="font-bold text-rose-600">${toKhmerNum(passFemales)}</span> នាក់) ស្មើនឹង <span class="font-bold text-emerald-800">${toKhmerNum(passPct)}%</span></div>
+                    <div>- <span class="font-bold">សិស្សធ្លាក់មធ្យមភាគ (< 5.00)៖</span> <span class="font-bold text-rose-700">${toKhmerNum(failCount)}</span> នាក់ (ស្រី៖ <span class="font-bold text-rose-600">${toKhmerNum(failFemales)}</span> នាក់) ស្មើនឹង <span class="font-bold text-rose-800">${toKhmerNum(failPct)}%</span></div>
                 </div>
 
                 <!-- ហត្ថលេខា និងកាលបរិច្ឆេទផ្លូវការ -->
@@ -3783,22 +3772,11 @@ window.renderAcademicResultsReport = function(container, targetGrade, targetRoom
                     </table>
                 </div>
 
-                <!-- ស្ថិតិសង្ខេបក្រោមតារាង -->
-                <div class="mb-6 p-3 bg-slate-50 border border-slate-300 rounded-xl text-xs font-siemreap leading-relaxed">
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-                        <div class="p-2.5 bg-white border border-slate-200 rounded-lg shadow-sm">
-                            <span class="font-bold text-slate-700 block mb-1">1. សិស្សសរុបក្នុងថ្នាក់៖</span>
-                            <span class="text-blue-900 font-bold">${toKhmerNum(totalCount)}</span> នាក់ (ស្រី៖ <span class="text-rose-600 font-bold">${toKhmerNum(femaleCount)}</span> នាក់, ប្រុស៖ <span class="text-slate-800 font-bold">${toKhmerNum(maleCount)}</span> នាក់)
-                        </div>
-                        <div class="p-2.5 bg-emerald-50/60 border border-emerald-200 rounded-lg shadow-sm">
-                            <span class="font-bold text-emerald-800 block mb-1">2. សិស្សជាប់មធ្យមភាគ (≥ 5.00)៖</span>
-                            <span class="text-emerald-700 font-bold">${toKhmerNum(passCount)}</span> នាក់ (ស្រី៖ <span class="text-rose-600 font-bold">${toKhmerNum(passFemales)}</span> នាក់) ស្មើនឹង <span class="font-bold text-emerald-800">${toKhmerNum(passPct)}%</span>
-                        </div>
-                        <div class="p-2.5 bg-rose-50/60 border border-rose-200 rounded-lg shadow-sm">
-                            <span class="font-bold text-rose-800 block mb-1">3. សិស្សធ្លាក់មធ្យមភាគ (< 5.00)៖</span>
-                            <span class="text-rose-700 font-bold">${toKhmerNum(failCount)}</span> នាក់ (ស្រី៖ <span class="text-rose-600 font-bold">${toKhmerNum(failFemales)}</span> នាក់) ស្មើនឹង <span class="font-bold text-rose-800">${toKhmerNum(failPct)}%</span>
-                        </div>
-                    </div>
+                <!-- ស្ថិតិសង្ខេបក្រោមតារាង (Summary Statistics - Plain Dashes / ត្រេធម្មតា) -->
+                <div class="mb-5 text-xs font-siemreap leading-relaxed text-slate-800 text-left px-1 space-y-1">
+                    <div>- <span class="font-bold">សិស្សសរុបក្នុងថ្នាក់៖</span> <span class="font-bold">${toKhmerNum(totalCount)}</span> នាក់ (ស្រី៖ <span class="font-bold text-rose-600">${toKhmerNum(femaleCount)}</span> នាក់, ប្រុស៖ <span class="font-bold">${toKhmerNum(maleCount)}</span> នាក់)</div>
+                    <div>- <span class="font-bold">សិស្សជាប់មធ្យមភាគ (≥ 5.00)៖</span> <span class="font-bold text-emerald-700">${toKhmerNum(passCount)}</span> នាក់ (ស្រី៖ <span class="font-bold text-rose-600">${toKhmerNum(passFemales)}</span> នាក់) ស្មើនឹង <span class="font-bold text-emerald-800">${toKhmerNum(passPct)}%</span></div>
+                    <div>- <span class="font-bold">សិស្សធ្លាក់មធ្យមភាគ (< 5.00)៖</span> <span class="font-bold text-rose-700">${toKhmerNum(failCount)}</span> នាក់ (ស្រី៖ <span class="font-bold text-rose-600">${toKhmerNum(failFemales)}</span> នាក់) ស្មើនឹង <span class="font-bold text-rose-800">${toKhmerNum(failPct)}%</span></div>
                 </div>
 
                 <!-- ហត្ថលេខា និងកាលបរិច្ឆេទផ្លូវការ -->
@@ -3997,22 +3975,11 @@ window.renderAcademicResultsReport = function(container, targetGrade, targetRoom
                 </table>
             </div>
 
-            <!-- ស្ថិតិសង្ខេបក្រោមតារាង (Annual Summary Statistics Box) -->
-            <div class="mb-6 p-3 bg-slate-50 border border-slate-300 rounded-xl text-xs font-siemreap leading-relaxed">
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-                    <div class="p-2.5 bg-white border border-slate-200 rounded-lg shadow-sm">
-                        <span class="font-bold text-slate-700 block mb-1">1. សិស្សសរុបក្នុងថ្នាក់៖</span>
-                        <span class="text-blue-900 font-bold">${toKhmerNum(totalCount)}</span> នាក់ (ស្រី៖ <span class="text-rose-600 font-bold">${toKhmerNum(femaleCount)}</span> នាក់, ប្រុស៖ <span class="text-slate-800 font-bold">${toKhmerNum(maleCount)}</span> នាក់)
-                    </div>
-                    <div class="p-2.5 bg-emerald-50/60 border border-emerald-200 rounded-lg shadow-sm">
-                        <span class="font-bold text-emerald-800 block mb-1">2. សិស្សឡើងថ្នាក់ (≥ 5.00)៖</span>
-                        <span class="text-emerald-700 font-bold">${toKhmerNum(promotedCount)}</span> នាក់ (ស្រី៖ <span class="text-rose-600 font-bold">${toKhmerNum(promotedFemales)}</span> នាក់) ស្មើនឹង <span class="font-bold text-emerald-800">${toKhmerNum(promotePct)}%</span>
-                    </div>
-                    <div class="p-2.5 bg-rose-50/60 border border-rose-200 rounded-lg shadow-sm">
-                        <span class="font-bold text-rose-800 block mb-1">3. សិស្សត្រួតថ្នាក់ (< 5.00)៖</span>
-                        <span class="text-rose-700 font-bold">${toKhmerNum(retainedCount)}</span> នាក់ (ស្រី៖ <span class="text-rose-600 font-bold">${toKhmerNum(retainedFemales)}</span> នាក់) ស្មើនឹង <span class="font-bold text-rose-800">${toKhmerNum(retainPct)}%</span>
-                    </div>
-                </div>
+            <!-- ស្ថិតិសង្ខេបក្រោមតារាង (Annual Summary Statistics - Plain Dashes / ត្រេធម្មតា) -->
+            <div class="mb-5 text-xs font-siemreap leading-relaxed text-slate-800 text-left px-1 space-y-1">
+                <div>- <span class="font-bold">សិស្សសរុបក្នុងថ្នាក់៖</span> <span class="font-bold">${toKhmerNum(totalCount)}</span> នាក់ (ស្រី៖ <span class="font-bold text-rose-600">${toKhmerNum(femaleCount)}</span> នាក់, ប្រុស៖ <span class="font-bold">${toKhmerNum(maleCount)}</span> នាក់)</div>
+                <div>- <span class="font-bold">សិស្សឡើងថ្នាក់ (≥ 5.00)៖</span> <span class="font-bold text-emerald-700">${toKhmerNum(promotedCount)}</span> នាក់ (ស្រី៖ <span class="font-bold text-rose-600">${toKhmerNum(promotedFemales)}</span> នាក់) ស្មើនឹង <span class="font-bold text-emerald-800">${toKhmerNum(promotePct)}%</span></div>
+                <div>- <span class="font-bold">សិស្សត្រួតថ្នាក់ (< 5.00)៖</span> <span class="font-bold text-rose-700">${toKhmerNum(retainedCount)}</span> នាក់ (ស្រី៖ <span class="font-bold text-rose-600">${toKhmerNum(retainedFemales)}</span> នាក់) ស្មើនឹង <span class="font-bold text-rose-800">${toKhmerNum(retainPct)}%</span></div>
             </div>
 
             <!-- ហត្ថលេខា និងកាលបរិច្ឆេទផ្លូវការ -->
