@@ -3083,6 +3083,19 @@ window.renderSikhaKarikBooklet = function(container, targetGrade, targetRoom, st
 window.currentAcademicReportMode = 'monthly';
 window.currentAcademicReportMonth = 'មករា';
 window.currentAcademicReportSemester = 'ឆមាសទី១';
+window.currentAcademicReportSort = 'rank';
+
+window.switchAcademicReportSort = function(newSort) {
+    window.currentAcademicReportSort = newSort;
+    const curLevel = window.currentReportTargetGrade || document.getElementById("reportGradeSelect")?.value || "ថ្នាក់ទី ៤";
+    const curRoom = window.currentReportTargetRoom || document.getElementById("reportRoomSelect")?.value || "«ក»";
+    const extraControls = document.getElementById("reportExtraControls");
+    const paperArea = document.getElementById("reportPaperArea");
+    if (extraControls) {
+        window.renderAcademicReportControls(extraControls, curLevel, curRoom);
+    }
+    window.renderAcademicResultsReport(paperArea, curLevel, curRoom, window.currentAcademicReportMode);
+};
 
 window.getSemesterMonthConfig = function(curLevel, curRoom) {
     const sInfo = typeof appSettings !== 'undefined' ? appSettings : (JSON.parse(localStorage.getItem('school_settings') || '{}'));
@@ -3161,6 +3174,21 @@ window.renderAcademicReportControls = function(container, curLevel, curRoom) {
         `;
     }
 
+    const sortMode = window.currentAcademicReportSort || 'rank';
+    const sortControlHtml = `
+        <div class="flex items-center gap-1 bg-slate-100 dark:bg-slate-700/80 p-1 rounded-xl border border-slate-200 dark:border-slate-600 text-xs shrink-0">
+            <span class="text-slate-500 dark:text-slate-400 font-bold px-1.5"><i class="fa-solid fa-arrow-down-wide-short mr-1"></i>តម្រៀប៖</span>
+            <button type="button" onclick="window.switchAcademicReportSort('rank')" class="px-2.5 py-1 rounded-lg text-xs font-bold transition flex items-center gap-1 ${sortMode === 'rank' ? 'bg-white dark:bg-slate-800 text-indigo-700 dark:text-indigo-400 shadow-sm' : 'text-slate-600 dark:text-slate-300 hover:text-slate-900'}">
+                <i class="fa-solid fa-award ${sortMode === 'rank' ? 'text-indigo-600' : 'text-slate-400'}"></i>
+                <span>ចំណាត់ថ្នាក់</span>
+            </button>
+            <button type="button" onclick="window.switchAcademicReportSort('name')" class="px-2.5 py-1 rounded-lg text-xs font-bold transition flex items-center gap-1 ${sortMode === 'name' ? 'bg-white dark:bg-slate-800 text-indigo-700 dark:text-indigo-400 shadow-sm' : 'text-slate-600 dark:text-slate-300 hover:text-slate-900'}">
+                <i class="fa-solid fa-arrow-down-a-z ${sortMode === 'name' ? 'text-indigo-600' : 'text-slate-400'}"></i>
+                <span>តាមឈ្មោះ</span>
+            </button>
+        </div>
+    `;
+
     container.innerHTML = `
         <div class="flex items-center gap-1 p-1 bg-slate-100 dark:bg-slate-700/80 rounded-xl border border-slate-200 dark:border-slate-600 shrink-0">
             <button type="button" onclick="window.switchAcademicReportMode('monthly')" class="px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 ${mode === 'monthly' ? 'bg-white dark:bg-slate-800 text-blue-700 dark:text-blue-400 shadow-sm' : 'text-slate-600 dark:text-slate-300 hover:text-slate-900'}">
@@ -3177,6 +3205,7 @@ window.renderAcademicReportControls = function(container, curLevel, curRoom) {
             </button>
         </div>
         ${subControlHtml}
+        ${sortControlHtml}
     `;
 };
 
@@ -3276,12 +3305,10 @@ window.renderAcademicResultsReport = function(container, targetGrade, targetRoom
         const totalCount = classStudents.length;
         const femaleCount = classStudents.filter(s => s.gender === 'ស្រី' || s.gender === 'F').length;
         const maleCount = totalCount - femaleCount;
+        const rawM = currentMonth.replace(/^ខែ\s*/, '').trim();
 
-        const rowsHtml = classStudents.length === 0 ? `
-            <tr><td colspan="9" class="p-8 text-center text-slate-400 font-bold font-siemreap">គ្មានទិន្នន័យសិស្សក្នុងថ្នាក់ ${gradeFull} ឡើយ</td></tr>
-        ` : classStudents.map((stu, i) => {
+        const preparedStudents = classStudents.map((stu, i) => {
             const isFemale = stu.gender === 'ស្រី' || stu.gender === 'F';
-            const rawM = currentMonth.replace(/^ខែ\s*/, '').trim();
 
             const sc = allScores.find(s => {
                 const matchId = String(s.student_id) === String(stu.id) || String(s.id) === String(stu.id) || (s.name && s.name.trim() === stu.name.trim());
@@ -3295,8 +3322,8 @@ window.renderAcademicResultsReport = function(container, targetGrade, targetRoom
                 // Fallback realistic baseline if scores not yet entered
                 avgVal = +(6.2 + (i % 5) * 0.65).toFixed(2);
             }
-            const totalScore = sc?.totalScore || sc?.total || sc?.total_score || (avgVal * 10).toFixed(0);
-            const rankVal = sc?.rank || (i + 1);
+            const totalScore = parseFloat(sc?.totalScore || sc?.total || sc?.total_score || (avgVal * 10).toFixed(0));
+            const savedRank = (sc?.rank !== undefined && sc?.rank !== null && sc?.rank !== "") ? parseInt(sc.rank) : null;
             const mention = sc?.grade_letter || sc?.mention || getKhmerMention(avgVal);
             const isPass = avgVal >= 5.0;
 
@@ -3323,17 +3350,64 @@ window.renderAcademicResultsReport = function(container, targetGrade, targetRoom
                 });
             } catch(e) {}
 
+            return {
+                stu,
+                isFemale,
+                avgVal,
+                totalScore,
+                savedRank,
+                mention,
+                isPass,
+                perm,
+                unex
+            };
+        });
+
+        // Compute rank if not explicitly saved
+        const scoreSorted = [...preparedStudents].sort((a, b) => {
+            if (b.avgVal !== a.avgVal) return b.avgVal - a.avgVal;
+            return b.totalScore - a.totalScore;
+        });
+        let curRank = 1;
+        scoreSorted.forEach((item, idx) => {
+            if (item.savedRank) {
+                item.rankVal = item.savedRank;
+            } else {
+                if (idx > 0 && item.avgVal === scoreSorted[idx - 1].avgVal && item.totalScore === scoreSorted[idx - 1].totalScore) {
+                    item.rankVal = scoreSorted[idx - 1].rankVal;
+                } else {
+                    item.rankVal = curRank;
+                }
+            }
+            curRank++;
+        });
+
+        // Sort by rank ascending by default (or by name if requested)
+        const sortMode = window.currentAcademicReportSort || 'rank';
+        if (sortMode === 'name') {
+            preparedStudents.sort((a, b) => String(a.stu.name || '').localeCompare(String(b.stu.name || ''), 'km'));
+        } else {
+            preparedStudents.sort((a, b) => {
+                if (a.rankVal !== b.rankVal) return a.rankVal - b.rankVal;
+                if (b.avgVal !== a.avgVal) return b.avgVal - a.avgVal;
+                return String(a.stu.name || '').localeCompare(String(b.stu.name || ''), 'km');
+            });
+        }
+
+        const rowsHtml = preparedStudents.length === 0 ? `
+            <tr><td colspan="9" class="p-8 text-center text-slate-400 font-bold font-siemreap">គ្មានទិន្នន័យសិស្សក្នុងថ្នាក់ ${gradeFull} ឡើយ</td></tr>
+        ` : preparedStudents.map((item, i) => {
             return `
                 <tr class="hover:bg-slate-50 text-[11px]">
                     <td class="border border-slate-400 p-1 font-mono">${i + 1}</td>
-                    <td class="border border-slate-400 p-1 text-left font-bold text-slate-900">${stu.name}</td>
-                    <td class="border border-slate-400 p-1 ${isFemale ? 'text-rose-600 font-bold' : ''}">${isFemale ? 'ស្រី' : 'ប្រុស'}</td>
-                    <td class="border border-slate-400 p-1 font-mono font-bold">${toKhmerNum(totalScore)}</td>
-                    <td class="border border-slate-400 p-1 font-mono font-bold ${avgVal >= 5.0 ? 'text-blue-900' : 'text-rose-600'}">${avgVal.toFixed(2)}</td>
-                    <td class="border border-slate-400 p-1 font-mono font-bold text-indigo-700">${toKhmerNum(rankVal)}</td>
-                    <td class="border border-slate-400 p-1 font-moul text-[10px] ${avgVal >= 8 ? 'text-emerald-700' : (avgVal >= 6.5 ? 'text-blue-700' : (avgVal >= 5 ? 'text-slate-700' : 'text-rose-600'))}">${mention}</td>
-                    <td class="border border-slate-400 p-1 font-mono text-[10.5px]">ច:${toKhmerNum(perm)} / ឥត:${toKhmerNum(unex)}</td>
-                    <td class="border border-slate-400 p-1 font-bold ${isPass ? 'text-emerald-700 bg-emerald-50/40' : 'text-rose-600 bg-rose-50/40'}">${isPass ? 'ជាប់មធ្យមភាគ' : 'ក្រោមមធ្យមភាគ'}</td>
+                    <td class="border border-slate-400 p-1 text-left font-bold text-slate-900">${item.stu.name}</td>
+                    <td class="border border-slate-400 p-1 ${item.isFemale ? 'text-rose-600 font-bold' : ''}">${item.isFemale ? 'ស្រី' : 'ប្រុស'}</td>
+                    <td class="border border-slate-400 p-1 font-mono font-bold">${toKhmerNum(item.totalScore)}</td>
+                    <td class="border border-slate-400 p-1 font-mono font-bold ${item.avgVal >= 5.0 ? 'text-blue-900' : 'text-rose-600'}">${item.avgVal.toFixed(2)}</td>
+                    <td class="border border-slate-400 p-1 font-mono font-bold text-indigo-700">${toKhmerNum(item.rankVal)}</td>
+                    <td class="border border-slate-400 p-1 font-moul text-[10px] ${item.avgVal >= 8 ? 'text-emerald-700' : (item.avgVal >= 6.5 ? 'text-blue-700' : (item.avgVal >= 5 ? 'text-slate-700' : 'text-rose-600'))}">${item.mention}</td>
+                    <td class="border border-slate-400 p-1 font-mono text-[10.5px]">ច:${toKhmerNum(item.perm)} / ឥត:${toKhmerNum(item.unex)}</td>
+                    <td class="border border-slate-400 p-1 font-bold ${item.isPass ? 'text-emerald-700 bg-emerald-50/40' : 'text-rose-600 bg-rose-50/40'}">${item.isPass ? 'ជាប់មធ្យមភាគ' : 'ក្រោមមធ្យមភាគ'}</td>
                 </tr>
             `;
         }).join('');
@@ -3435,9 +3509,7 @@ window.renderAcademicResultsReport = function(container, targetGrade, targetRoom
         const femaleCount = classStudents.filter(s => s.gender === 'ស្រី' || s.gender === 'F').length;
         const maleCount = totalCount - femaleCount;
 
-        const rowsHtml = classStudents.length === 0 ? `
-            <tr><td colspan="${semMonths.length + 8}" class="p-8 text-center text-slate-400 font-bold font-siemreap">គ្មានទិន្នន័យសិស្សក្នុងថ្នាក់ ${gradeFull} ឡើយ</td></tr>
-        ` : classStudents.map((stu, i) => {
+        const preparedStudents = classStudents.map((stu, i) => {
             const isFemale = stu.gender === 'ស្រី' || stu.gender === 'F';
             
             // Monthly averages inside semester
@@ -3472,7 +3544,7 @@ window.renderAcademicResultsReport = function(container, targetGrade, targetRoom
             if (examVal <= 0) examVal = +(monthAvg + 0.1).toFixed(2);
 
             const semAvg = parseFloat(((monthAvg + examVal) / 2).toFixed(2));
-            const rankVal = scExam?.rank || (i + 1);
+            const savedRank = (scExam?.rank !== undefined && scExam?.rank !== null && scExam?.rank !== "") ? parseInt(scExam.rank) : null;
             const mention = scExam?.grade_letter || scExam?.mention || getKhmerMention(semAvg);
             const isPass = semAvg >= 5.0;
 
@@ -3484,18 +3556,65 @@ window.renderAcademicResultsReport = function(container, targetGrade, targetRoom
                 if (isFemale) failFemales++;
             }
 
+            return {
+                stu,
+                isFemale,
+                monthCells,
+                monthAvg,
+                examVal,
+                semAvg,
+                savedRank,
+                mention,
+                isPass
+            };
+        });
+
+        // Compute rank if not explicitly stored
+        const scoreSorted = [...preparedStudents].sort((a, b) => {
+            if (b.semAvg !== a.semAvg) return b.semAvg - a.semAvg;
+            return b.examVal - a.examVal;
+        });
+        let curRank = 1;
+        scoreSorted.forEach((item, idx) => {
+            if (item.savedRank) {
+                item.rankVal = item.savedRank;
+            } else {
+                if (idx > 0 && item.semAvg === scoreSorted[idx - 1].semAvg && item.examVal === scoreSorted[idx - 1].examVal) {
+                    item.rankVal = scoreSorted[idx - 1].rankVal;
+                } else {
+                    item.rankVal = curRank;
+                }
+            }
+            curRank++;
+        });
+
+        // Sort by rank ascending by default (or by name if requested)
+        const sortMode = window.currentAcademicReportSort || 'rank';
+        if (sortMode === 'name') {
+            preparedStudents.sort((a, b) => String(a.stu.name || '').localeCompare(String(b.stu.name || ''), 'km'));
+        } else {
+            preparedStudents.sort((a, b) => {
+                if (a.rankVal !== b.rankVal) return a.rankVal - b.rankVal;
+                if (b.semAvg !== a.semAvg) return b.semAvg - a.semAvg;
+                return String(a.stu.name || '').localeCompare(String(b.stu.name || ''), 'km');
+            });
+        }
+
+        const rowsHtml = preparedStudents.length === 0 ? `
+            <tr><td colspan="${semMonths.length + 8}" class="p-8 text-center text-slate-400 font-bold font-siemreap">គ្មានទិន្នន័យសិស្សក្នុងថ្នាក់ ${gradeFull} ឡើយ</td></tr>
+        ` : preparedStudents.map((item, i) => {
             return `
                 <tr class="hover:bg-slate-50 text-[11px]">
                     <td class="border border-slate-400 p-1 font-mono">${i + 1}</td>
-                    <td class="border border-slate-400 p-1 text-left font-bold text-slate-900">${stu.name}</td>
-                    <td class="border border-slate-400 p-1 ${isFemale ? 'text-rose-600 font-bold' : ''}">${isFemale ? 'ស្រី' : 'ប្រុស'}</td>
-                    ${monthCells}
-                    <td class="border border-slate-400 p-1 font-mono font-bold bg-amber-50/50">${monthAvg.toFixed(2)}</td>
-                    <td class="border border-slate-400 p-1 font-mono font-bold bg-blue-50/50">${examVal.toFixed(2)}</td>
-                    <td class="border border-slate-400 p-1 font-mono font-bold ${semAvg >= 5.0 ? 'text-blue-900 bg-indigo-50/60' : 'text-rose-600 bg-rose-50/60'}">${semAvg.toFixed(2)}</td>
-                    <td class="border border-slate-400 p-1 font-mono font-bold text-indigo-700">${toKhmerNum(rankVal)}</td>
-                    <td class="border border-slate-400 p-1 font-moul text-[10px] ${semAvg >= 8 ? 'text-emerald-700' : (semAvg >= 6.5 ? 'text-blue-700' : (semAvg >= 5 ? 'text-slate-700' : 'text-rose-600'))}">${mention}</td>
-                    <td class="border border-slate-400 p-1 font-bold ${isPass ? 'text-emerald-700 bg-emerald-50/40' : 'text-rose-600 bg-rose-50/40'}">${isPass ? 'ជាប់មធ្យមភាគ' : 'ក្រោមមធ្យមភាគ'}</td>
+                    <td class="border border-slate-400 p-1 text-left font-bold text-slate-900">${item.stu.name}</td>
+                    <td class="border border-slate-400 p-1 ${item.isFemale ? 'text-rose-600 font-bold' : ''}">${item.isFemale ? 'ស្រី' : 'ប្រុស'}</td>
+                    ${item.monthCells}
+                    <td class="border border-slate-400 p-1 font-mono font-bold bg-amber-50/50">${item.monthAvg.toFixed(2)}</td>
+                    <td class="border border-slate-400 p-1 font-mono font-bold bg-blue-50/50">${item.examVal.toFixed(2)}</td>
+                    <td class="border border-slate-400 p-1 font-mono font-bold ${item.semAvg >= 5.0 ? 'text-blue-900 bg-indigo-50/60' : 'text-rose-600 bg-rose-50/60'}">${item.semAvg.toFixed(2)}</td>
+                    <td class="border border-slate-400 p-1 font-mono font-bold text-indigo-700">${toKhmerNum(item.rankVal)}</td>
+                    <td class="border border-slate-400 p-1 font-moul text-[10px] ${item.semAvg >= 8 ? 'text-emerald-700' : (item.semAvg >= 6.5 ? 'text-blue-700' : (item.semAvg >= 5 ? 'text-slate-700' : 'text-rose-600'))}">${item.mention}</td>
+                    <td class="border border-slate-400 p-1 font-bold ${item.isPass ? 'text-emerald-700 bg-emerald-50/40' : 'text-rose-600 bg-rose-50/40'}">${item.isPass ? 'ជាប់មធ្យមភាគ' : 'ក្រោមមធ្យមភាគ'}</td>
                 </tr>
             `;
         }).join('');
@@ -3593,9 +3712,7 @@ window.renderAcademicResultsReport = function(container, targetGrade, targetRoom
     const femaleCount = classStudents.filter(s => s.gender === 'ស្រី' || s.gender === 'F').length;
     const maleCount = totalCount - femaleCount;
 
-    const rowsHtml = classStudents.length === 0 ? `
-        <tr><td colspan="9" class="p-8 text-center text-slate-400 font-bold font-siemreap">គ្មានទិន្នន័យសិស្សក្នុងថ្នាក់ ${gradeFull} ឡើយ</td></tr>
-    ` : classStudents.map((stu, i) => {
+    const preparedStudents = classStudents.map((stu, i) => {
         const isFemale = stu.gender === 'ស្រី' || stu.gender === 'F';
 
         const sc1 = allScores.find(s => (String(s.student_id) === String(stu.id) || String(s.id) === String(stu.id) || (s.name && s.name.trim() === stu.name.trim())) && s.month === "ឆមាសទី១");
@@ -3639,7 +3756,7 @@ window.renderAcademicResultsReport = function(container, targetGrade, targetRoom
         let annual = scA ? parseFloat(scA.average || scA.avg || 0) : parseFloat(((sem1 + sem2) / 2).toFixed(2));
         if (annual <= 0) annual = parseFloat(((sem1 + sem2) / 2).toFixed(2));
 
-        const rankVal = scA?.rank || (i + 1);
+        const savedRank = (scA?.rank !== undefined && scA?.rank !== null && scA?.rank !== "") ? parseInt(scA.rank) : null;
         const mention = scA?.grade_letter || scA?.mention || getKhmerMention(annual);
         const isPromoted = annual >= 5.0;
         const outcome = isPromoted ? "ឡើងថ្នាក់" : "ត្រួតថ្នាក់";
@@ -3652,17 +3769,64 @@ window.renderAcademicResultsReport = function(container, targetGrade, targetRoom
             if (isFemale) retainedFemales++;
         }
 
+        return {
+            stu,
+            isFemale,
+            sem1,
+            sem2,
+            annual,
+            savedRank,
+            mention,
+            isPromoted,
+            outcome
+        };
+    });
+
+    // Compute rank if not explicitly stored
+    const scoreSorted = [...preparedStudents].sort((a, b) => {
+        if (b.annual !== a.annual) return b.annual - a.annual;
+        return (b.sem1 + b.sem2) - (a.sem1 + a.sem2);
+    });
+    let curRank = 1;
+    scoreSorted.forEach((item, idx) => {
+        if (item.savedRank) {
+            item.rankVal = item.savedRank;
+        } else {
+            if (idx > 0 && item.annual === scoreSorted[idx - 1].annual && (item.sem1 + item.sem2) === (scoreSorted[idx - 1].sem1 + scoreSorted[idx - 1].sem2)) {
+                item.rankVal = scoreSorted[idx - 1].rankVal;
+            } else {
+                item.rankVal = curRank;
+            }
+        }
+        curRank++;
+    });
+
+    // Sort by rank ascending by default (or by name if requested)
+    const sortMode = window.currentAcademicReportSort || 'rank';
+    if (sortMode === 'name') {
+        preparedStudents.sort((a, b) => String(a.stu.name || '').localeCompare(String(b.stu.name || ''), 'km'));
+    } else {
+        preparedStudents.sort((a, b) => {
+            if (a.rankVal !== b.rankVal) return a.rankVal - b.rankVal;
+            if (b.annual !== a.annual) return b.annual - a.annual;
+            return String(a.stu.name || '').localeCompare(String(b.stu.name || ''), 'km');
+        });
+    }
+
+    const rowsHtml = preparedStudents.length === 0 ? `
+        <tr><td colspan="9" class="p-8 text-center text-slate-400 font-bold font-siemreap">គ្មានទិន្នន័យសិស្សក្នុងថ្នាក់ ${gradeFull} ឡើយ</td></tr>
+    ` : preparedStudents.map((item, i) => {
         return `
             <tr class="hover:bg-slate-50 text-[11px]">
                 <td class="border border-slate-400 p-1.5 font-mono">${i + 1}</td>
-                <td class="border border-slate-400 p-1.5 text-left font-bold text-slate-900">${stu.name}</td>
-                <td class="border border-slate-400 p-1.5 ${isFemale ? 'text-rose-600 font-bold' : ''}">${isFemale ? 'ស្រី' : 'ប្រុស'}</td>
-                <td class="border border-slate-400 p-1.5 font-mono font-bold text-blue-900 bg-blue-50/30">${sem1.toFixed(2)}</td>
-                <td class="border border-slate-400 p-1.5 font-mono font-bold text-emerald-900 bg-emerald-50/30">${sem2.toFixed(2)}</td>
-                <td class="border border-slate-400 p-1.5 font-mono font-bold text-amber-800 bg-amber-50/40">${annual.toFixed(2)}</td>
-                <td class="border border-slate-400 p-1.5 font-mono font-bold text-indigo-700">${toKhmerNum(rankVal)}</td>
-                <td class="border border-slate-400 p-1.5 font-moul text-[10px] ${annual >= 8 ? 'text-emerald-700' : (annual >= 6.5 ? 'text-blue-700' : (annual >= 5 ? 'text-slate-700' : 'text-rose-600'))}">${mention}</td>
-                <td class="border border-slate-400 p-1.5 font-bold ${isPromoted ? 'text-emerald-700 bg-emerald-50/50' : 'text-rose-600 bg-rose-50/50'}">${outcome}</td>
+                <td class="border border-slate-400 p-1.5 text-left font-bold text-slate-900">${item.stu.name}</td>
+                <td class="border border-slate-400 p-1.5 ${item.isFemale ? 'text-rose-600 font-bold' : ''}">${item.isFemale ? 'ស្រី' : 'ប្រុស'}</td>
+                <td class="border border-slate-400 p-1.5 font-mono font-bold text-blue-900 bg-blue-50/30">${item.sem1.toFixed(2)}</td>
+                <td class="border border-slate-400 p-1.5 font-mono font-bold text-emerald-900 bg-emerald-50/30">${item.sem2.toFixed(2)}</td>
+                <td class="border border-slate-400 p-1.5 font-mono font-bold text-amber-800 bg-amber-50/40">${item.annual.toFixed(2)}</td>
+                <td class="border border-slate-400 p-1.5 font-mono font-bold text-indigo-700">${toKhmerNum(item.rankVal)}</td>
+                <td class="border border-slate-400 p-1.5 font-moul text-[10px] ${item.annual >= 8 ? 'text-emerald-700' : (item.annual >= 6.5 ? 'text-blue-700' : (item.annual >= 5 ? 'text-slate-700' : 'text-rose-600'))}">${item.mention}</td>
+                <td class="border border-slate-400 p-1.5 font-bold ${item.isPromoted ? 'text-emerald-700 bg-emerald-50/50' : 'text-rose-600 bg-rose-50/50'}">${item.outcome}</td>
             </tr>
         `;
     }).join('');

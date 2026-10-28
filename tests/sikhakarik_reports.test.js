@@ -329,4 +329,50 @@ describe('MoEYS Sikha-karik Booklet & Centralized Reports Suite', () => {
         assert.ok(sem2Html.includes('ខែ មេសា'), 'Table should contain column for configured month មេសា');
         assert.ok(sem2Html.includes('ខែ ឧសភា'), 'Table should contain column for configured month ឧសភា');
     });
+
+    test('8. Academic Results report sorts students by rank (Sort for rank) by default', () => {
+        assert.strictEqual(typeof context.window.switchAcademicReportSort, 'function');
+        assert.strictEqual(context.window.currentAcademicReportSort, 'rank');
+
+        // Setup test students with scores in academic_scores
+        context.window.allStudents = [
+            { id: 'STU-B', name: 'កែវ ធីតា', gender: 'ស្រី', grade: 'ថ្នាក់ទី ៤', room: '«ក»' },
+            { id: 'STU-A', name: 'ចាន់ ឧត្តម', gender: 'ប្រុស', grade: 'ថ្នាក់ទី ៤', room: '«ក»' },
+            { id: 'STU-C', name: 'ស៊ន វិបុល', gender: 'ប្រុស', grade: 'ថ្នាក់ទី ៤', room: '«ក»' }
+        ];
+
+        // Give STU-A top rank/score, STU-B 2nd, STU-C 3rd
+        const testScores = [
+            { student_id: 'STU-A', month: 'មករា', average: '9.20', totalScore: '920', rank: 1, grade: 'ថ្នាក់ទី ៤ «ក»' },
+            { student_id: 'STU-B', month: 'មករា', average: '8.40', totalScore: '840', rank: 2, grade: 'ថ្នាក់ទី ៤ «ក»' },
+            { student_id: 'STU-C', month: 'មករា', average: '6.50', totalScore: '650', rank: 3, grade: 'ថ្នាក់ទី ៤ «ក»' }
+        ];
+        context.localStorage.setItem('academic_scores', JSON.stringify(testScores));
+
+        const paperArea = { innerHTML: '' };
+        context.window.currentAcademicReportMonth = 'មករា';
+        context.window.currentAcademicReportSort = 'rank';
+        context.window.renderAcademicResultsReport(paperArea, 'ថ្នាក់ទី ៤', '«ក»', 'monthly');
+
+        const html = paperArea.innerHTML;
+        // Verify STU-A (Rank 1: ចាន់ ឧត្តម) appears before STU-B (Rank 2: កែវ ធីតា) in HTML output
+        const idxA = html.indexOf('ចាន់ ឧត្តម');
+        const idxB = html.indexOf('កែវ ធីតា');
+        const idxC = html.indexOf('ស៊ន វិបុល');
+
+        assert.ok(idxA !== -1 && idxB !== -1 && idxC !== -1, 'All students should be in table');
+        assert.ok(idxA < idxB, 'Rank 1 student (ចាន់ ឧត្តម) should appear before Rank 2 (កែវ ធីតា)');
+        assert.ok(idxB < idxC, 'Rank 2 student (កែវ ធីតា) should appear before Rank 3 (ស៊ន វិបុល)');
+
+        // Now switch sort to 'name' and verify alphabetical order (ក < ច < ស)
+        context.window.currentAcademicReportSort = 'name';
+        context.window.renderAcademicResultsReport(paperArea, 'ថ្នាក់ទី ៤', '«ក»', 'monthly');
+        const htmlByName = paperArea.innerHTML;
+        const nameIdxB = htmlByName.indexOf('កែវ ធីតា');
+        const nameIdxA = htmlByName.indexOf('ចាន់ ឧត្តម');
+        const nameIdxC = htmlByName.indexOf('ស៊ន វិបុល');
+
+        assert.ok(nameIdxB < nameIdxA, 'In name sort, កែវ ធីតា should precede ចាន់ ឧត្តម');
+        assert.ok(nameIdxA < nameIdxC, 'In name sort, ចាន់ ឧត្តម should precede ស៊ន វិបុល');
+    });
 });
