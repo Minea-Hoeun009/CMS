@@ -642,7 +642,7 @@
                                     </div>
                                 </div>
 
-                                <!-- Card 2: Quick Shortcuts / តំណភ្ជាប់រហ័ស (6 Shortcuts) -->
+                                <!-- Card 2: Quick Shortcuts / តំណភ្ជាប់រហ័ស (5 Shortcuts) -->
                                 <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl shadow-sm border border-slate-200/80 dark:border-slate-700">
                                     <h3 class="font-bold text-sm text-slate-800 dark:text-white mb-3 flex items-center gap-2" data-i18n="quickShortcuts">
                                         <i class="fa-solid fa-bolt text-amber-500"></i> ${t('quickShortcuts', 'តំណភ្ជាប់រហ័ស')}
@@ -667,16 +667,7 @@
                                             <i class="fa-solid fa-chevron-right text-slate-400 text-[10px] group-hover:translate-x-0.5 transition"></i>
                                         </button>
 
-                                        <!-- 3. ថ្នាក់រៀនទាំងអស់ -->
-                                        <button onclick="window.openManageClassModal()" class="w-full flex items-center justify-between p-3 rounded-xl bg-slate-50 dark:bg-slate-700/50 hover:bg-emerald-50 hover:text-emerald-600 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 transition text-left group">
-                                            <div class="flex items-center gap-2.5">
-                                                <span class="w-7 h-7 rounded-lg bg-emerald-100 dark:bg-emerald-900/60 text-emerald-600 dark:text-emerald-300 flex items-center justify-center text-xs group-hover:scale-105 transition"><i class="fa-solid fa-school"></i></span>
-                                                <span data-i18n="shortcutAllClasses">${t('shortcutAllClasses', 'ថ្នាក់រៀនទាំងអស់')}</span>
-                                            </div>
-                                            <i class="fa-solid fa-chevron-right text-slate-400 text-[10px] group-hover:translate-x-0.5 transition"></i>
-                                        </button>
-
-                                        <!-- 4. ចូលកត់ពិន្ទុ (Mathematics) -->
+                                        <!-- 3. ចូលកត់ពិន្ទុ (Mathematics) -->
                                         <button onclick="window.switchView('scores')" class="w-full flex items-center justify-between p-3 rounded-xl bg-slate-50 dark:bg-slate-700/50 hover:bg-purple-50 hover:text-purple-600 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 transition text-left group">
                                             <div class="flex items-center gap-2.5">
                                                 <span class="w-7 h-7 rounded-lg bg-purple-100 dark:bg-purple-900/60 text-purple-600 dark:text-purple-300 flex items-center justify-center text-xs group-hover:scale-105 transition"><i class="fa-solid fa-pen-to-square"></i></span>
@@ -685,7 +676,7 @@
                                             <i class="fa-solid fa-chevron-right text-slate-400 text-[10px] group-hover:translate-x-0.5 transition"></i>
                                         </button>
 
-                                        <!-- 5. កាលវិភាគបង្រៀន -->
+                                        <!-- 4. កាលវិភាគបង្រៀន -->
                                         <button onclick="window.switchView('timetable-homework')" class="w-full flex items-center justify-between p-3 rounded-xl bg-slate-50 dark:bg-slate-700/50 hover:bg-teal-50 hover:text-teal-600 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 transition text-left group">
                                             <div class="flex items-center gap-2.5">
                                                 <span class="w-7 h-7 rounded-lg bg-teal-100 dark:bg-teal-900/60 text-teal-600 dark:text-teal-300 flex items-center justify-center text-xs group-hover:scale-105 transition"><i class="fa-solid fa-calendar-days"></i></span>
@@ -694,7 +685,7 @@
                                             <i class="fa-solid fa-chevron-right text-slate-400 text-[10px] group-hover:translate-x-0.5 transition"></i>
                                         </button>
 
-                                        <!-- 6. សារជូនដំណឹងថ្មី -->
+                                        <!-- 5. សារជូនដំណឹងថ្មី -->
                                         <button onclick="window.openNotificationCenter()" class="w-full flex items-center justify-between p-3 rounded-xl bg-slate-50 dark:bg-slate-700/50 hover:bg-rose-50 hover:text-rose-600 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 transition text-left group">
                                             <div class="flex items-center gap-2.5">
                                                 <span class="w-7 h-7 rounded-lg bg-rose-100 dark:bg-rose-900/60 text-rose-600 dark:text-rose-300 flex items-center justify-center text-xs group-hover:scale-105 transition"><i class="fa-solid fa-bell"></i></span>
