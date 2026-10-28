@@ -3080,6 +3080,11 @@ window.renderSikhaKarikBooklet = function(container, targetGrade, targetRoom, st
 // ============================================================================
 // មុខងារ ៖ របាយការណ៍លទ្ធផលសិក្សា ៣ ផ្នែក (ប្រចាំខែ ប្រចាំឆមាស និងប្រចាំឆ្នាំ)
 // ============================================================================
+window.toUniversalNum = function(str) {
+    if (str === undefined || str === null) return '';
+    return String(str).replace(/[០-៩]/g, d => "0123456789"["០១២៣៤៥៦៧៨៩".indexOf(d)]);
+};
+
 window.currentAcademicReportMode = 'monthly';
 window.currentAcademicReportMonth = 'មករា';
 window.currentAcademicReportSemester = 'ឆមាសទី១';
@@ -3160,8 +3165,8 @@ window.renderAcademicReportControls = function(container, curLevel, curRoom) {
             <div class="flex items-center gap-1.5 bg-indigo-50 dark:bg-slate-700 border border-indigo-200 dark:border-slate-600 rounded-xl px-2.5 py-1 text-xs shrink-0">
                 <span class="font-bold text-indigo-900 dark:text-indigo-300"><i class="fa-solid fa-bookmark mr-1 text-indigo-500"></i>ជ្រើសរើសឆមាស ៖</span>
                 <select id="acadReportSemesterSelect" onchange="window.currentAcademicReportSemester = this.value; window.renderAcademicResultsReport(document.getElementById('reportPaperArea'), '${curLevel}', '${curRoom}', 'semester');" class="bg-transparent font-bold text-indigo-700 dark:text-indigo-300 outline-none cursor-pointer">
-                    <option value="ឆមាសទី១" ${curSem === 'ឆមាសទី១' ? 'selected' : ''}>ឆមាសទី១ ${sem1Range}</option>
-                    <option value="ឆមាសទី២" ${curSem === 'ឆមាសទី២' ? 'selected' : ''}>ឆមាសទី២ ${sem2Range}</option>
+                    <option value="ឆមាសទី១" ${curSem === 'ឆមាសទី១' || curSem === 'ឆមាសទី1' ? 'selected' : ''}>ឆមាសទី1 ${sem1Range}</option>
+                    <option value="ឆមាសទី២" ${curSem === 'ឆមាសទី២' || curSem === 'ឆមាសទី2' ? 'selected' : ''}>ឆមាសទី2 ${sem2Range}</option>
                 </select>
             </div>
         `;
@@ -3193,15 +3198,15 @@ window.renderAcademicReportControls = function(container, curLevel, curRoom) {
         <div class="flex items-center gap-1 p-1 bg-slate-100 dark:bg-slate-700/80 rounded-xl border border-slate-200 dark:border-slate-600 shrink-0">
             <button type="button" onclick="window.switchAcademicReportMode('monthly')" class="px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 ${mode === 'monthly' ? 'bg-white dark:bg-slate-800 text-blue-700 dark:text-blue-400 shadow-sm' : 'text-slate-600 dark:text-slate-300 hover:text-slate-900'}">
                 <i class="fa-solid fa-calendar-day ${mode === 'monthly' ? 'text-blue-600' : 'text-slate-400'}"></i>
-                <span>១. ប្រចាំខែ</span>
+                <span>1. ប្រចាំខែ</span>
             </button>
             <button type="button" onclick="window.switchAcademicReportMode('semester')" class="px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 ${mode === 'semester' ? 'bg-white dark:bg-slate-800 text-indigo-700 dark:text-indigo-400 shadow-sm' : 'text-slate-600 dark:text-slate-300 hover:text-slate-900'}">
                 <i class="fa-solid fa-chart-pie ${mode === 'semester' ? 'text-indigo-600' : 'text-slate-400'}"></i>
-                <span>២. ប្រចាំឆមាស</span>
+                <span>2. ប្រចាំឆមាស</span>
             </button>
             <button type="button" onclick="window.switchAcademicReportMode('annual')" class="px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 ${mode === 'annual' ? 'bg-white dark:bg-slate-800 text-emerald-700 dark:text-emerald-400 shadow-sm' : 'text-slate-600 dark:text-slate-300 hover:text-slate-900'}">
                 <i class="fa-solid fa-graduation-cap ${mode === 'annual' ? 'text-emerald-600' : 'text-slate-400'}"></i>
-                <span>៣. ប្រចាំឆ្នាំ</span>
+                <span>3. ប្រចាំឆ្នាំ</span>
             </button>
         </div>
         ${subControlHtml}
@@ -3231,10 +3236,16 @@ window.renderAcademicResultsReport = function(container, targetGrade, targetRoom
     const activeClass = typeof window.getCurrentSelectedClass === 'function' ? window.getCurrentSelectedClass() : { level: "ថ្នាក់ទី ៤", room: "«ក»" };
     const curLevel = targetGrade || window.currentReportTargetGrade || document.getElementById("reportGradeSelect")?.value || activeClass.level || sInfo.teacher_level || "ថ្នាក់ទី ៤";
     const curRoom = targetRoom || window.currentReportTargetRoom || document.getElementById("reportRoomSelect")?.value || activeClass.room || sInfo.teacher_room || "«ក»";
-    const formattedRoom = curRoom.startsWith('«') ? curRoom : `«${curRoom}»`;
-    const gradeFull = `${curLevel} ${formattedRoom}`.trim();
+    const toUniversalNum = typeof window.toUniversalNum === 'function' 
+        ? window.toUniversalNum 
+        : (str) => String(str ?? '').replace(/[០-៩]/g, d => "0123456789"["០១២៣៤៥៦៧៨៩".indexOf(d)]);
+    const toKhmerNum = (str) => toUniversalNum(str); // Enforces universal numbers (លេខសកល: 0-9) as requested
 
-    const academicYear = document.getElementById("globalAcademicYear")?.value || sInfo.academic_year || "២០២៦-២០២៧";
+    const formattedRoom = curRoom.startsWith('«') ? curRoom : `«${curRoom}»`;
+    const gradeFull = `${toUniversalNum(curLevel)} ${formattedRoom}`.trim();
+
+    const academicYearRaw = document.getElementById("globalAcademicYear")?.value || sInfo.academic_year || "2026-2027";
+    const academicYear = toUniversalNum(academicYearRaw);
     const districtName = (sInfo.district_name || sInfo.district || "កៀនស្វាយ").replace(/^ស្រុក\s*/, '').trim(); 
     const schoolName = sInfo.school_name || "សាលាបឋមសិក្សា ខ្សុំ";
     const principalName = (sInfo.principal_name && sInfo.principal_name !== "នាយកសាលា") ? sInfo.principal_name : "";
@@ -3255,18 +3266,18 @@ window.renderAcademicResultsReport = function(container, targetGrade, targetRoom
     if (rawDate && rawDate.trim()) {
         sDate = rawDate.trim();
     } else {
-        sDate = "ថ្ងៃទី.......ខែ..........ឆ្នាំ២០២៦";
+        sDate = "ថ្ងៃទី.......ខែ..........ឆ្នាំ2026";
     }
     if (sDate.includes("ថ្ងៃទី")) sDate = sDate.substring(sDate.indexOf("ថ្ងៃទី"));
-    const solarDateStr = `ធ្វើនៅ ${locShort}, ${sDate}`;
+    const solarDateStr = `ធ្វើនៅ ${locShort}, ${toUniversalNum(sDate)}`;
 
     let isLunarChecked = true;
     const chkBox = document.getElementById('global_lun_chk');
     if (chkBox) isLunarChecked = chkBox.checked;
     else isLunarChecked = (localStorage.getItem('rc_show_lunar') !== 'false' && localStorage.getItem('rep_show_lunar') !== 'false');
 
-    let lun = document.getElementById('global_lun_input')?.value || localStorage.getItem('rc_lunar_date') || localStorage.getItem('rep_lunar_date') || "ថ្ងៃ....................ខែ..................ឆ្នាំ...............ព.ស.២៥៧០";
-    const lunarDateStr = isLunarChecked ? lun : "";
+    let lun = document.getElementById('global_lun_input')?.value || localStorage.getItem('rc_lunar_date') || localStorage.getItem('rep_lunar_date') || "ថ្ងៃ....................ខែ..................ឆ្នាំ...............ព.ស.2570";
+    const lunarDateStr = isLunarChecked ? toUniversalNum(lun) : "";
 
     // Students in Grade
     const allStudents = window.allStudents || (typeof window.getMasterStudents === 'function' ? window.getMasterStudents() : []) || JSON.parse(localStorage.getItem('academic_students') || '[]');
@@ -3280,8 +3291,6 @@ window.renderAcademicResultsReport = function(container, targetGrade, targetRoom
 
     let allScores = [];
     try { allScores = JSON.parse(localStorage.getItem('academic_scores') || '[]'); } catch(e) {}
-
-    const toKhmerNum = (str) => typeof window.toKhmerNum === 'function' ? window.toKhmerNum(str) : String(str ?? '').replace(/\d/g, d => "០១២៣៤៥៦៧៨៩"[d]);
 
     const getKhmerMention = (avg) => {
         const val = parseFloat(avg);
@@ -3461,15 +3470,15 @@ window.renderAcademicResultsReport = function(container, targetGrade, targetRoom
                 <div class="mb-6 p-3 bg-slate-50 border border-slate-300 rounded-xl text-xs font-siemreap leading-relaxed">
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
                         <div class="p-2.5 bg-white border border-slate-200 rounded-lg shadow-sm">
-                            <span class="font-bold text-slate-700 block mb-1">១. សិស្សសរុបក្នុងថ្នាក់៖</span>
+                            <span class="font-bold text-slate-700 block mb-1">1. សិស្សសរុបក្នុងថ្នាក់៖</span>
                             <span class="text-blue-900 font-bold">${toKhmerNum(totalCount)}</span> នាក់ (ស្រី៖ <span class="text-rose-600 font-bold">${toKhmerNum(femaleCount)}</span> នាក់, ប្រុស៖ <span class="text-slate-800 font-bold">${toKhmerNum(maleCount)}</span> នាក់)
                         </div>
                         <div class="p-2.5 bg-emerald-50/60 border border-emerald-200 rounded-lg shadow-sm">
-                            <span class="font-bold text-emerald-800 block mb-1">២. សិស្សជាប់មធ្យមភាគ (≥ ៥.០០)៖</span>
+                            <span class="font-bold text-emerald-800 block mb-1">2. សិស្សជាប់មធ្យមភាគ (≥ 5.00)៖</span>
                             <span class="text-emerald-700 font-bold">${toKhmerNum(passCount)}</span> នាក់ (ស្រី៖ <span class="text-rose-600 font-bold">${toKhmerNum(passFemales)}</span> នាក់) ស្មើនឹង <span class="font-bold text-emerald-800">${toKhmerNum(passPct)}%</span>
                         </div>
                         <div class="p-2.5 bg-rose-50/60 border border-rose-200 rounded-lg shadow-sm">
-                            <span class="font-bold text-rose-800 block mb-1">៣. សិស្សធ្លាក់មធ្យមភាគ (< ៥.០០)៖</span>
+                            <span class="font-bold text-rose-800 block mb-1">3. សិស្សធ្លាក់មធ្យមភាគ (< 5.00)៖</span>
                             <span class="text-rose-700 font-bold">${toKhmerNum(failCount)}</span> នាក់ (ស្រី៖ <span class="text-rose-600 font-bold">${toKhmerNum(failFemales)}</span> នាក់) ស្មើនឹង <span class="font-bold text-rose-800">${toKhmerNum(failPct)}%</span>
                         </div>
                     </div>
@@ -3639,7 +3648,7 @@ window.renderAcademicResultsReport = function(container, targetGrade, targetRoom
                 </div>
 
                 <div class="text-center mb-4">
-                    <h3 class="font-moul text-base text-blue-900">របាយការណ៍លទ្ធផលនៃការសិក្សាប្រចាំ ${currentSemester}</h3>
+                    <h3 class="font-moul text-base text-blue-900">របាយការណ៍លទ្ធផលនៃការសិក្សាប្រចាំ ${toUniversalNum(currentSemester)}</h3>
                     <h4 class="font-moul text-xs text-red-600 mt-1">${gradeFull} | ឆ្នាំសិក្សា ${academicYear}</h4>
                 </div>
 
@@ -3669,15 +3678,15 @@ window.renderAcademicResultsReport = function(container, targetGrade, targetRoom
                 <div class="mb-6 p-3 bg-slate-50 border border-slate-300 rounded-xl text-xs font-siemreap leading-relaxed">
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
                         <div class="p-2.5 bg-white border border-slate-200 rounded-lg shadow-sm">
-                            <span class="font-bold text-slate-700 block mb-1">១. សិស្សសរុបក្នុងថ្នាក់៖</span>
+                            <span class="font-bold text-slate-700 block mb-1">1. សិស្សសរុបក្នុងថ្នាក់៖</span>
                             <span class="text-blue-900 font-bold">${toKhmerNum(totalCount)}</span> នាក់ (ស្រី៖ <span class="text-rose-600 font-bold">${toKhmerNum(femaleCount)}</span> នាក់, ប្រុស៖ <span class="text-slate-800 font-bold">${toKhmerNum(maleCount)}</span> នាក់)
                         </div>
                         <div class="p-2.5 bg-emerald-50/60 border border-emerald-200 rounded-lg shadow-sm">
-                            <span class="font-bold text-emerald-800 block mb-1">២. សិស្សជាប់មធ្យមភាគ (≥ ៥.០០)៖</span>
+                            <span class="font-bold text-emerald-800 block mb-1">2. សិស្សជាប់មធ្យមភាគ (≥ 5.00)៖</span>
                             <span class="text-emerald-700 font-bold">${toKhmerNum(passCount)}</span> នាក់ (ស្រី៖ <span class="text-rose-600 font-bold">${toKhmerNum(passFemales)}</span> នាក់) ស្មើនឹង <span class="font-bold text-emerald-800">${toKhmerNum(passPct)}%</span>
                         </div>
                         <div class="p-2.5 bg-rose-50/60 border border-rose-200 rounded-lg shadow-sm">
-                            <span class="font-bold text-rose-800 block mb-1">៣. សិស្សធ្លាក់មធ្យមភាគ (< ៥.០០)៖</span>
+                            <span class="font-bold text-rose-800 block mb-1">3. សិស្សធ្លាក់មធ្យមភាគ (< 5.00)៖</span>
                             <span class="text-rose-700 font-bold">${toKhmerNum(failCount)}</span> នាក់ (ស្រី៖ <span class="text-rose-600 font-bold">${toKhmerNum(failFemales)}</span> នាក់) ស្មើនឹង <span class="font-bold text-rose-800">${toKhmerNum(failPct)}%</span>
                         </div>
                     </div>
@@ -3862,8 +3871,8 @@ window.renderAcademicResultsReport = function(container, targetGrade, targetRoom
                             <th class="border border-slate-400 p-2 w-10">ល.រ</th>
                             <th class="border border-slate-400 p-2 text-left">គោត្តនាម និងនាម</th>
                             <th class="border border-slate-400 p-2 w-14">ភេទ</th>
-                            <th class="border border-slate-400 p-2 w-28 bg-blue-50">មធ្យម ឆមាសទី១</th>
-                            <th class="border border-slate-400 p-2 w-28 bg-emerald-50">មធ្យម ឆមាសទី២</th>
+                            <th class="border border-slate-400 p-2 w-28 bg-blue-50">មធ្យម ឆមាសទី1</th>
+                            <th class="border border-slate-400 p-2 w-28 bg-emerald-50">មធ្យម ឆមាសទី2</th>
                             <th class="border border-slate-400 p-2 w-28 bg-amber-50">មធ្យមប្រចាំឆ្នាំ</th>
                             <th class="border border-slate-400 p-2 w-20">ចំណាត់ថ្នាក់</th>
                             <th class="border border-slate-400 p-2 w-24">និទ្ទេស</th>
@@ -3880,15 +3889,15 @@ window.renderAcademicResultsReport = function(container, targetGrade, targetRoom
             <div class="mb-6 p-3 bg-slate-50 border border-slate-300 rounded-xl text-xs font-siemreap leading-relaxed">
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
                     <div class="p-2.5 bg-white border border-slate-200 rounded-lg shadow-sm">
-                        <span class="font-bold text-slate-700 block mb-1">១. សិស្សសរុបក្នុងថ្នាក់៖</span>
+                        <span class="font-bold text-slate-700 block mb-1">1. សិស្សសរុបក្នុងថ្នាក់៖</span>
                         <span class="text-blue-900 font-bold">${toKhmerNum(totalCount)}</span> នាក់ (ស្រី៖ <span class="text-rose-600 font-bold">${toKhmerNum(femaleCount)}</span> នាក់, ប្រុស៖ <span class="text-slate-800 font-bold">${toKhmerNum(maleCount)}</span> នាក់)
                     </div>
                     <div class="p-2.5 bg-emerald-50/60 border border-emerald-200 rounded-lg shadow-sm">
-                        <span class="font-bold text-emerald-800 block mb-1">២. សិស្សឡើងថ្នាក់ (≥ ៥.០០)៖</span>
+                        <span class="font-bold text-emerald-800 block mb-1">2. សិស្សឡើងថ្នាក់ (≥ 5.00)៖</span>
                         <span class="text-emerald-700 font-bold">${toKhmerNum(promotedCount)}</span> នាក់ (ស្រី៖ <span class="text-rose-600 font-bold">${toKhmerNum(promotedFemales)}</span> នាក់) ស្មើនឹង <span class="font-bold text-emerald-800">${toKhmerNum(promotePct)}%</span>
                     </div>
                     <div class="p-2.5 bg-rose-50/60 border border-rose-200 rounded-lg shadow-sm">
-                        <span class="font-bold text-rose-800 block mb-1">៣. សិស្សត្រួតថ្នាក់ (< ៥.០០)៖</span>
+                        <span class="font-bold text-rose-800 block mb-1">3. សិស្សត្រួតថ្នាក់ (< 5.00)៖</span>
                         <span class="text-rose-700 font-bold">${toKhmerNum(retainedCount)}</span> នាក់ (ស្រី៖ <span class="text-rose-600 font-bold">${toKhmerNum(retainedFemales)}</span> នាក់) ស្មើនឹង <span class="font-bold text-rose-800">${toKhmerNum(retainPct)}%</span>
                     </div>
                 </div>

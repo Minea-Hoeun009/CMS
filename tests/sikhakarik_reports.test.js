@@ -279,7 +279,7 @@ describe('MoEYS Sikha-karik Booklet & Centralized Reports Suite', () => {
         context.window.currentAcademicReportSemester = 'ឆមាសទី១';
         context.window.renderAcademicResultsReport(paperArea, 'ថ្នាក់ទី ៤', '«ក»', 'semester');
         const semesterHtml = paperArea.innerHTML;
-        assert.ok(semesterHtml.includes('របាយការណ៍លទ្ធផលនៃការសិក្សាប្រចាំ ឆមាសទី១'), 'Should render semester title');
+        assert.ok(semesterHtml.includes('របាយការណ៍លទ្ធផលនៃការសិក្សាប្រចាំ ឆមាសទី1') || semesterHtml.includes('របាយការណ៍លទ្ធផលនៃការសិក្សាប្រចាំ ឆមាសទី១'), 'Should render semester title');
         assert.ok(semesterHtml.includes('ម.ប្រឡង') || semesterHtml.includes('ម.ប្រចាំឆមាស'), 'Should contain semester exam / avg columns');
 
         // Test Annual Mode
@@ -374,5 +374,25 @@ describe('MoEYS Sikha-karik Booklet & Centralized Reports Suite', () => {
 
         assert.ok(nameIdxB < nameIdxA, 'In name sort, កែវ ធីតា should precede ចាន់ ឧត្តម');
         assert.ok(nameIdxA < nameIdxC, 'In name sort, ចាន់ ឧត្តម should precede ស៊ន វិបុល');
+    });
+
+    test('9. Academic Results report displays all numbers using Universal numerals (លេខសកល: 0-9)', () => {
+        assert.strictEqual(typeof context.window.toUniversalNum, 'function');
+        assert.strictEqual(context.window.toUniversalNum('២០២៦-២០២៧'), '2026-2027');
+        assert.strictEqual(context.window.toUniversalNum('ចំណាត់ថ្នាក់លេខ ១'), 'ចំណាត់ថ្នាក់លេខ 1');
+
+        const paperArea = { innerHTML: '' };
+        context.window.currentAcademicReportMonth = 'មករា';
+        context.window.currentAcademicReportSort = 'rank';
+        context.window.renderAcademicResultsReport(paperArea, 'ថ្នាក់ទី ៤', '«ក»', 'monthly');
+
+        const html = paperArea.innerHTML;
+        // Verify stats box uses universal numbers (1., 2., 3., 5.00)
+        assert.ok(html.includes('1. សិស្សសរុបក្នុងថ្នាក់៖'), 'Stats box should use 1. in universal number');
+        assert.ok(html.includes('2. សិស្សជាប់មធ្យមភាគ (≥ 5.00)៖'), 'Stats box should use 2. and 5.00 in universal numbers');
+        assert.ok(html.includes('3. សិស្សធ្លាក់មធ្យមភាគ (< 5.00)៖'), 'Stats box should use 3. and 5.00 in universal numbers');
+
+        // Verify ranks are rendered as universal digits (e.g. 1, 2, 3)
+        assert.ok(html.includes('>1<') || html.includes('1</td>'), 'Rank should be rendered as universal numeral 1');
     });
 });
