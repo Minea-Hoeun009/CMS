@@ -304,30 +304,28 @@ describe('MoEYS Sikha-karik Booklet & Centralized Reports Suite', () => {
         assert.deepStrictEqual([...cfg.sem1], ["វិច្ឆិកា", "ធ្នូ", "មករា"]);
         assert.deepStrictEqual([...cfg.sem2], ["កុម្ភៈ", "មីនា", "មេសា", "ឧសភា"]);
 
-        // Verify subcontrols reflect configured months
+        // Verify subcontrols display clean ឆមាសទី១ and ឆមាសទី២ without months in selector
         const controlsContainer = { innerHTML: '' };
         context.window.currentAcademicReportMode = 'semester';
         context.window.renderAcademicReportControls(controlsContainer, 'ថ្នាក់ទី ៤', '«ក»');
-        assert.ok(controlsContainer.innerHTML.includes('វិច្ឆិកា, ធ្នូ, មករា'), 'Controls should display sem1 configured months');
-        assert.ok(controlsContainer.innerHTML.includes('កុម្ភៈ, មីនា, មេសា, ឧសភា'), 'Controls should display sem2 configured months');
+        assert.ok(controlsContainer.innerHTML.includes('ឆមាសទី១'), 'Controls should display ឆមាសទី១');
+        assert.ok(controlsContainer.innerHTML.includes('ឆមាសទី២'), 'Controls should display ឆមាសទី២');
+        assert.ok(!controlsContainer.innerHTML.includes('វិច្ឆិកា, ធ្នូ'), 'Controls should not show month list in semester selector');
 
-        // Verify table renders exact configured months
+        // Verify title displays clean semester title without month string
         const paperArea = { innerHTML: '' };
         context.window.currentAcademicReportSemester = 'ឆមាសទី១';
         context.window.renderAcademicResultsReport(paperArea, 'ថ្នាក់ទី ៤', '«ក»', 'semester');
         const sem1Html = paperArea.innerHTML;
-        assert.ok(sem1Html.includes('ខែ វិច្ឆិកា'), 'Table should contain column for configured month វិច្ឆិកា');
-        assert.ok(sem1Html.includes('ខែ ធ្នូ'), 'Table should contain column for configured month ធ្នូ');
-        assert.ok(sem1Html.includes('ខែ មករា'), 'Table should contain column for configured month មករា');
+        assert.ok(sem1Html.includes('របាយការណ៍លទ្ធផលនៃការសិក្សាប្រចាំ ឆមាសទី១'), 'Table should contain clean title ឆមាសទី១');
+        assert.ok(!sem1Html.includes('ខែគិតក្នុងឆមាស'), 'Title should not contain month string');
 
         // Switch to sem2
         context.window.currentAcademicReportSemester = 'ឆមាសទី២';
         context.window.renderAcademicResultsReport(paperArea, 'ថ្នាក់ទី ៤', '«ក»', 'semester');
         const sem2Html = paperArea.innerHTML;
-        assert.ok(sem2Html.includes('ខែ កុម្ភៈ'), 'Table should contain column for configured month កុម្ភៈ');
-        assert.ok(sem2Html.includes('ខែ មីនា'), 'Table should contain column for configured month មីនា');
-        assert.ok(sem2Html.includes('ខែ មេសា'), 'Table should contain column for configured month មេសា');
-        assert.ok(sem2Html.includes('ខែ ឧសភា'), 'Table should contain column for configured month ឧសភា');
+        assert.ok(sem2Html.includes('របាយការណ៍លទ្ធផលនៃការសិក្សាប្រចាំ ឆមាសទី២'), 'Table should contain clean title ឆមាសទី២');
+        assert.ok(!sem2Html.includes('ខែគិតក្នុងឆមាស'), 'Title should not contain month string');
     });
 
     test('8. Academic Results report sorts students by rank (Sort for rank) by default', () => {
@@ -418,14 +416,12 @@ describe('MoEYS Sikha-karik Booklet & Centralized Reports Suite', () => {
         context.window.changeAcademicReportScale(-10);
         assert.strictEqual(context.window.academicReportPaperSettings.scale, 100);
 
-        // 2. Verify controls HTML includes paper size, orientation, scale buttons, and print button
+        // 2. Verify extra controls does NOT duplicate paper controls (only 1 toolbar in print config bar)
         const controlsContainer = { innerHTML: '' };
         context.window.renderAcademicReportControls(controlsContainer, 'ថ្នាក់ទី ៤', '«ក»');
         const cHtml = controlsContainer.innerHTML;
-        assert.ok(cHtml.includes('acadReportPaperSizeSelect'), 'Should render paper size select');
-        assert.ok(cHtml.includes('acadReportOrientationSelect'), 'Should render orientation select');
-        assert.ok(cHtml.includes('acadReportScaleDisplay'), 'Should render scale percentage display');
-        assert.ok(cHtml.includes('ព្រីនស្អាត'), 'Should render clean print button');
+        assert.ok(!cHtml.includes('acadReportPaperSizeSelect'), 'Controls should not duplicate paper settings because dedicated CMS toolbar exists');
+        assert.ok(!cHtml.includes('acadReportOrientationSelect'), 'Controls should not duplicate orientation select');
 
         // 3. Verify Semester Mode table has single "មធ្យមភាគខែ" column instead of separate monthly columns
         const paperArea = { innerHTML: '', style: {} };

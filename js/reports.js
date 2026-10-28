@@ -3247,15 +3247,12 @@ window.renderAcademicReportControls = function(container, curLevel, curRoom) {
             </div>
         `;
     } else if (mode === 'semester') {
-        const semCfg = window.getSemesterMonthConfig ? window.getSemesterMonthConfig(curLevel, curRoom) : { sem1: ["ធ្នូ", "មករា", "កុម្ភៈ", "មីនា"], sem2: ["មេសា", "ឧសភា", "មិថុនា", "កក្កដា"] };
-        const sem1Range = semCfg.sem1 && semCfg.sem1.length ? `(${semCfg.sem1.join(', ')})` : '';
-        const sem2Range = semCfg.sem2 && semCfg.sem2.length ? `(${semCfg.sem2.join(', ')})` : '';
         subControlHtml = `
             <div class="flex items-center gap-1.5 bg-indigo-50 dark:bg-slate-700 border border-indigo-200 dark:border-slate-600 rounded-xl px-2.5 py-1 text-xs shrink-0">
                 <span class="font-bold text-indigo-900 dark:text-indigo-300"><i class="fa-solid fa-bookmark mr-1 text-indigo-500"></i>ជ្រើសរើសឆមាស ៖</span>
                 <select id="acadReportSemesterSelect" onchange="window.currentAcademicReportSemester = this.value; window.renderAcademicResultsReport(document.getElementById('reportPaperArea'), '${curLevel}', '${curRoom}', 'semester');" class="bg-transparent font-bold text-indigo-700 dark:text-indigo-300 outline-none cursor-pointer">
-                    <option value="ឆមាសទី១" ${curSem === 'ឆមាសទី១' || curSem === 'ឆមាសទី1' ? 'selected' : ''}>ឆមាសទី1 ${sem1Range}</option>
-                    <option value="ឆមាសទី២" ${curSem === 'ឆមាសទី២' || curSem === 'ឆមាសទី2' ? 'selected' : ''}>ឆមាសទី2 ${sem2Range}</option>
+                    <option value="ឆមាសទី១" ${curSem === 'ឆមាសទី១' || curSem === 'ឆមាសទី1' ? 'selected' : ''}>ឆមាសទី១</option>
+                    <option value="ឆមាសទី២" ${curSem === 'ឆមាសទី២' || curSem === 'ឆមាសទី2' ? 'selected' : ''}>ឆមាសទី២</option>
                 </select>
             </div>
         `;
@@ -3283,44 +3280,6 @@ window.renderAcademicReportControls = function(container, curLevel, curRoom) {
         </div>
     `;
 
-    const paperSettings = window.academicReportPaperSettings || { paperSize: 'A4', orientation: 'landscape', scale: 100 };
-    const paperControlHtml = `
-        <div class="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-700/80 p-1 rounded-xl border border-slate-200 dark:border-slate-600 text-xs shrink-0">
-            <span class="text-slate-500 dark:text-slate-400 font-bold px-1"><i class="fa-solid fa-file-lines mr-1 text-indigo-500"></i>ក្រដាស៖</span>
-            
-            <select id="acadReportPaperSizeSelect" onchange="window.setAcademicReportPaperSize(this.value)" class="bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 px-2 py-1 rounded-lg font-bold border border-slate-200 dark:border-slate-600 outline-none cursor-pointer">
-                <option value="A4" ${paperSettings.paperSize === 'A4' ? 'selected' : ''}>A4</option>
-                <option value="A3" ${paperSettings.paperSize === 'A3' ? 'selected' : ''}>A3 (ធំ)</option>
-                <option value="Letter" ${paperSettings.paperSize === 'Letter' ? 'selected' : ''}>Letter</option>
-            </select>
-
-            <select id="acadReportOrientationSelect" onchange="window.setAcademicReportOrientation(this.value)" class="bg-white dark:bg-slate-800 text-indigo-700 dark:text-indigo-300 px-2 py-1 rounded-lg font-bold border border-slate-200 dark:border-slate-600 outline-none cursor-pointer">
-                <option value="landscape" ${paperSettings.orientation === 'landscape' ? 'selected' : ''}>ផ្តេក (Landscape)</option>
-                <option value="portrait" ${paperSettings.orientation === 'portrait' ? 'selected' : ''}>បញ្ឈរ (Portrait)</option>
-            </select>
-
-            <div class="flex items-center bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-lg overflow-hidden ml-0.5">
-                <button type="button" onclick="window.changeAcademicReportScale(-5)" title="បង្រួម (Zoom Out)" class="px-2 py-1 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold transition">
-                    <i class="fa-solid fa-magnifying-glass-minus"></i>
-                </button>
-                <span id="acadReportScaleDisplay" class="px-2 py-1 font-mono font-bold text-slate-700 dark:text-slate-200 text-[11px] min-w-[45px] text-center select-none">
-                    ${paperSettings.scale}%
-                </span>
-                <button type="button" onclick="window.changeAcademicReportScale(5)" title="ពង្រីក (Zoom In)" class="px-2 py-1 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold transition">
-                    <i class="fa-solid fa-magnifying-glass-plus"></i>
-                </button>
-                <button type="button" onclick="window.setAcademicReportScale(100)" title="កំណត់ឡើងវិញ 100%" class="px-1.5 py-1 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-400 font-bold transition border-l border-slate-200 dark:border-slate-600">
-                    <i class="fa-solid fa-rotate-left"></i>
-                </button>
-            </div>
-
-            <button type="button" onclick="window.printAcademicReportCleanly()" class="px-3 py-1 bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 text-white rounded-lg font-bold shadow-sm flex items-center gap-1.5 transition active:scale-95 ml-1">
-                <i class="fa-solid fa-print"></i>
-                <span>ព្រីនស្អាត</span>
-            </button>
-        </div>
-    `;
-
     container.innerHTML = `
         <div class="flex items-center gap-1 p-1 bg-slate-100 dark:bg-slate-700/80 rounded-xl border border-slate-200 dark:border-slate-600 shrink-0">
             <button type="button" onclick="window.switchAcademicReportMode('monthly')" class="px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 ${mode === 'monthly' ? 'bg-white dark:bg-slate-800 text-blue-700 dark:text-blue-400 shadow-sm' : 'text-slate-600 dark:text-slate-300 hover:text-slate-900'}">
@@ -3338,7 +3297,6 @@ window.renderAcademicReportControls = function(container, curLevel, curRoom) {
         </div>
         ${subControlHtml}
         ${sortControlHtml}
-        ${paperControlHtml}
     `;
 };
 
@@ -3781,8 +3739,8 @@ window.renderAcademicResultsReport = function(container, targetGrade, targetRoom
                 </div>
 
                 <div class="text-center mb-4">
-                    <h3 class="font-moul text-base text-blue-900">របាយការណ៍លទ្ធផលនៃការសិក្សាប្រចាំ ${toUniversalNum(currentSemester)}</h3>
-                    <h4 class="font-moul text-xs text-red-600 mt-1">${gradeFull} | ឆ្នាំសិក្សា ${academicYear} (ខែគិតក្នុងឆមាស៖ ${semMonths.map(m => 'ខែ ' + m).join(', ')})</h4>
+                    <h3 class="font-moul text-base text-blue-900">របាយការណ៍លទ្ធផលនៃការសិក្សាប្រចាំ ${currentSemester}</h3>
+                    <h4 class="font-moul text-xs text-red-600 mt-1">${gradeFull} | ឆ្នាំសិក្សា ${academicYear}</h4>
                 </div>
 
                 <div class="overflow-x-auto mb-4">
