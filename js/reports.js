@@ -3084,6 +3084,44 @@ window.currentAcademicReportMode = 'monthly';
 window.currentAcademicReportMonth = 'មករា';
 window.currentAcademicReportSemester = 'ឆមាសទី១';
 
+window.getSemesterMonthConfig = function(curLevel, curRoom) {
+    const sInfo = typeof appSettings !== 'undefined' ? appSettings : (JSON.parse(localStorage.getItem('school_settings') || '{}'));
+    const defaultSettings = { sem1: ["ធ្នូ", "មករា", "កុម្ភៈ", "មីនា"], sem2: ["មេសា", "ឧសភា", "មិថុនា", "កក្កដា"] };
+    
+    const candidateKeys = [];
+    if (curLevel && curRoom) {
+        const cleanRoom = String(curRoom).replace(/[«»\s]/g, '').trim();
+        const formattedRoom = `«${cleanRoom}»`;
+        candidateKeys.push(`semester_month_config_${curLevel} ${formattedRoom}`.trim());
+        candidateKeys.push(`semester_month_config_${curLevel} ${cleanRoom}`.trim());
+        candidateKeys.push(`semester_month_config_${curLevel}_${cleanRoom}`.trim());
+        candidateKeys.push(`semester_month_config_${(curLevel + ' ' + formattedRoom).replace(/\s+/g, '')}`);
+    }
+    if (sInfo.teacher_level && sInfo.teacher_room) {
+        candidateKeys.push(`semester_month_config_${sInfo.teacher_level} ${sInfo.teacher_room}`.trim());
+        candidateKeys.push(`semester_month_config_${(sInfo.teacher_level + ' ' + sInfo.teacher_room).replace(/\s+/g, '')}`);
+    }
+    candidateKeys.push('semester_month_config_ថ្នាក់ទី');
+    candidateKeys.push('semester_month_config');
+
+    for (const key of candidateKeys) {
+        try {
+            const raw = localStorage.getItem(key);
+            if (raw) {
+                const parsed = JSON.parse(raw);
+                if (parsed && (Array.isArray(parsed.sem1) || Array.isArray(parsed.sem2))) {
+                    return {
+                        sem1: (Array.isArray(parsed.sem1) && parsed.sem1.length > 0) ? parsed.sem1 : defaultSettings.sem1,
+                        sem2: (Array.isArray(parsed.sem2) && parsed.sem2.length > 0) ? parsed.sem2 : defaultSettings.sem2
+                    };
+                }
+            }
+        } catch(e) {}
+    }
+
+    return defaultSettings;
+};
+
 window.renderAcademicReportControls = function(container, curLevel, curRoom) {
     if (!container) return;
     const mode = window.currentAcademicReportMode || 'monthly';
@@ -3102,12 +3140,15 @@ window.renderAcademicReportControls = function(container, curLevel, curRoom) {
             </div>
         `;
     } else if (mode === 'semester') {
+        const semCfg = window.getSemesterMonthConfig ? window.getSemesterMonthConfig(curLevel, curRoom) : { sem1: ["ធ្នូ", "មករា", "កុម្ភៈ", "មីនា"], sem2: ["មេសា", "ឧសភា", "មិថុនា", "កក្កដា"] };
+        const sem1Range = semCfg.sem1 && semCfg.sem1.length ? `(${semCfg.sem1.join(', ')})` : '';
+        const sem2Range = semCfg.sem2 && semCfg.sem2.length ? `(${semCfg.sem2.join(', ')})` : '';
         subControlHtml = `
             <div class="flex items-center gap-1.5 bg-indigo-50 dark:bg-slate-700 border border-indigo-200 dark:border-slate-600 rounded-xl px-2.5 py-1 text-xs shrink-0">
                 <span class="font-bold text-indigo-900 dark:text-indigo-300"><i class="fa-solid fa-bookmark mr-1 text-indigo-500"></i>ជ្រើសរើសឆមាស ៖</span>
                 <select id="acadReportSemesterSelect" onchange="window.currentAcademicReportSemester = this.value; window.renderAcademicResultsReport(document.getElementById('reportPaperArea'), '${curLevel}', '${curRoom}', 'semester');" class="bg-transparent font-bold text-indigo-700 dark:text-indigo-300 outline-none cursor-pointer">
-                    <option value="ឆមាសទី១" ${curSem === 'ឆមាសទី១' ? 'selected' : ''}>ឆមាសទី១ (តុលា - មករា)</option>
-                    <option value="ឆមាសទី២" ${curSem === 'ឆមាសទី២' ? 'selected' : ''}>ឆមាសទី២ (កុម្ភៈ - មិថុនា)</option>
+                    <option value="ឆមាសទី១" ${curSem === 'ឆមាសទី១' ? 'selected' : ''}>ឆមាសទី១ ${sem1Range}</option>
+                    <option value="ឆមាសទី២" ${curSem === 'ឆមាសទី២' ? 'selected' : ''}>ឆមាសទី២ ${sem2Range}</option>
                 </select>
             </div>
         `;
@@ -3385,10 +3426,9 @@ window.renderAcademicResultsReport = function(container, targetGrade, targetRoom
     if (mode === 'semester') {
         if (titleEl) titleEl.textContent = `លទ្ធផលសិក្សាប្រចាំ ${currentSemester} (${gradeFull})`;
 
+        const semCfg = window.getSemesterMonthConfig ? window.getSemesterMonthConfig(curLevel, curRoom) : { sem1: ["ធ្នូ", "មករា", "កុម្ភៈ", "មីនា"], sem2: ["មេសា", "ឧសភា", "មិថុនា", "កក្កដា"] };
         const isSem1 = currentSemester === 'ឆមាសទី១';
-        const semMonths = isSem1 
-            ? ["តុលា", "វិច្ឆិកា", "ធ្នូ", "មករា"] 
-            : ["កុម្ភៈ", "មីនា", "មេសា", "ឧសភា", "មិថុនា"];
+        const semMonths = (isSem1 ? semCfg.sem1 : semCfg.sem2) || [];
 
         let passCount = 0, passFemales = 0, failCount = 0, failFemales = 0;
         const totalCount = classStudents.length;
@@ -3404,10 +3444,12 @@ window.renderAcademicResultsReport = function(container, targetGrade, targetRoom
             let monthSum = 0;
             let monthCount = 0;
             const monthCells = semMonths.map((m, mIdx) => {
+                const cleanM = String(m || '').replace(/^ខែ\s*/, '').trim();
                 const sc = allScores.find(s => {
                     const matchId = String(s.student_id) === String(stu.id) || String(s.id) === String(stu.id) || (s.name && s.name.trim() === stu.name.trim());
                     if (!matchId) return false;
-                    return (s.month || '').replace(/^ខែ\s*/, '').trim() === m;
+                    const sm = (s.month || '').replace(/^ខែ\s*/, '').trim();
+                    return sm === cleanM;
                 });
                 let val = sc ? parseFloat(sc.average || sc.avg || 0) : 0;
                 if (val <= 0) {
@@ -3562,6 +3604,35 @@ window.renderAcademicResultsReport = function(container, targetGrade, targetRoom
 
         let sem1 = sc1 ? parseFloat(sc1.average || sc1.avg || 0) : 0;
         let sem2 = sc2 ? parseFloat(sc2.average || sc2.avg || 0) : 0;
+
+        const semCfg = window.getSemesterMonthConfig ? window.getSemesterMonthConfig(curLevel, curRoom) : { sem1: ["ធ្នូ", "មករា", "កុម្ភៈ", "មីនា"], sem2: ["មេសា", "ឧសភា", "មិថុនា", "កក្កដា"] };
+
+        if (sem1 <= 0 && semCfg.sem1 && semCfg.sem1.length > 0) {
+            let sSum = 0, sCnt = 0;
+            semCfg.sem1.forEach(m => {
+                const cleanM = String(m || '').replace(/^ខែ\s*/, '').trim();
+                const sc = allScores.find(s => (String(s.student_id) === String(stu.id) || (s.name && s.name.trim() === stu.name.trim())) && (s.month || '').replace(/^ខែ\s*/, '').trim() === cleanM);
+                if (sc && parseFloat(sc.average || sc.avg || 0) > 0) {
+                    sSum += parseFloat(sc.average || sc.avg);
+                    sCnt++;
+                }
+            });
+            if (sCnt > 0) sem1 = +(sSum / sCnt).toFixed(2);
+        }
+
+        if (sem2 <= 0 && semCfg.sem2 && semCfg.sem2.length > 0) {
+            let sSum = 0, sCnt = 0;
+            semCfg.sem2.forEach(m => {
+                const cleanM = String(m || '').replace(/^ខែ\s*/, '').trim();
+                const sc = allScores.find(s => (String(s.student_id) === String(stu.id) || (s.name && s.name.trim() === stu.name.trim())) && (s.month || '').replace(/^ខែ\s*/, '').trim() === cleanM);
+                if (sc && parseFloat(sc.average || sc.avg || 0) > 0) {
+                    sSum += parseFloat(sc.average || sc.avg);
+                    sCnt++;
+                }
+            });
+            if (sCnt > 0) sem2 = +(sSum / sCnt).toFixed(2);
+        }
+
         if (sem1 <= 0) sem1 = +(6.2 + (i % 4) * 0.75).toFixed(2);
         if (sem2 <= 0) sem2 = +(6.4 + (i % 4) * 0.7).toFixed(2);
 

@@ -289,4 +289,44 @@ describe('MoEYS Sikha-karik Booklet & Centralized Reports Suite', () => {
         assert.ok(annualHtml.includes('ឡើងថ្នាក់') || annualHtml.includes('ត្រួតថ្នាក់'), 'Should contain promotion outcome');
         assert.ok(annualHtml.includes('សិស្សឡើងថ្នាក់'), 'Should contain promoted students stats');
     });
+
+    test('7. Semester month configuration is dynamically loaded from Score List settings', () => {
+        assert.strictEqual(typeof context.window.getSemesterMonthConfig, 'function');
+
+        // Configure custom months in localStorage for class
+        const customConfig = {
+            sem1: ["វិច្ឆិកា", "ធ្នូ", "មករា"],
+            sem2: ["កុម្ភៈ", "មីនា", "មេសា", "ឧសភា"]
+        };
+        context.localStorage.setItem('semester_month_config_ថ្នាក់ទី ៤ «ក»', JSON.stringify(customConfig));
+
+        const cfg = context.window.getSemesterMonthConfig('ថ្នាក់ទី ៤', '«ក»');
+        assert.deepStrictEqual([...cfg.sem1], ["វិច្ឆិកា", "ធ្នូ", "មករា"]);
+        assert.deepStrictEqual([...cfg.sem2], ["កុម្ភៈ", "មីនា", "មេសា", "ឧសភា"]);
+
+        // Verify subcontrols reflect configured months
+        const controlsContainer = { innerHTML: '' };
+        context.window.currentAcademicReportMode = 'semester';
+        context.window.renderAcademicReportControls(controlsContainer, 'ថ្នាក់ទី ៤', '«ក»');
+        assert.ok(controlsContainer.innerHTML.includes('វិច្ឆិកា, ធ្នូ, មករា'), 'Controls should display sem1 configured months');
+        assert.ok(controlsContainer.innerHTML.includes('កុម្ភៈ, មីនា, មេសា, ឧសភា'), 'Controls should display sem2 configured months');
+
+        // Verify table renders exact configured months
+        const paperArea = { innerHTML: '' };
+        context.window.currentAcademicReportSemester = 'ឆមាសទី១';
+        context.window.renderAcademicResultsReport(paperArea, 'ថ្នាក់ទី ៤', '«ក»', 'semester');
+        const sem1Html = paperArea.innerHTML;
+        assert.ok(sem1Html.includes('ខែ វិច្ឆិកា'), 'Table should contain column for configured month វិច្ឆិកា');
+        assert.ok(sem1Html.includes('ខែ ធ្នូ'), 'Table should contain column for configured month ធ្នូ');
+        assert.ok(sem1Html.includes('ខែ មករា'), 'Table should contain column for configured month មករា');
+
+        // Switch to sem2
+        context.window.currentAcademicReportSemester = 'ឆមាសទី២';
+        context.window.renderAcademicResultsReport(paperArea, 'ថ្នាក់ទី ៤', '«ក»', 'semester');
+        const sem2Html = paperArea.innerHTML;
+        assert.ok(sem2Html.includes('ខែ កុម្ភៈ'), 'Table should contain column for configured month កុម្ភៈ');
+        assert.ok(sem2Html.includes('ខែ មីនា'), 'Table should contain column for configured month មីនា');
+        assert.ok(sem2Html.includes('ខែ មេសា'), 'Table should contain column for configured month មេសា');
+        assert.ok(sem2Html.includes('ខែ ឧសភា'), 'Table should contain column for configured month ឧសភា');
+    });
 });
