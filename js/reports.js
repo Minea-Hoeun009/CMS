@@ -3160,54 +3160,75 @@ window.academicReportPaperSettings = {
 
 window.setAcademicReportPaperSize = function(size) {
     window.academicReportPaperSettings.paperSize = size;
+    const pEl = document.getElementById('print_paper_reportPaperArea');
+    if (pEl) pEl.value = size;
     window.applyAcademicReportPaperSettings();
 };
 
 window.setAcademicReportOrientation = function(orient) {
     window.academicReportPaperSettings.orientation = orient;
+    const oEl = document.getElementById('print_orient_reportPaperArea');
+    if (oEl) oEl.value = orient;
     window.applyAcademicReportPaperSettings();
 };
 
 window.changeAcademicReportScale = function(delta) {
     let current = window.academicReportPaperSettings.scale || 100;
-    current = Math.min(150, Math.max(50, current + delta));
-    window.academicReportPaperSettings.scale = current;
-    window.applyAcademicReportPaperSettings();
+    current = Math.min(140, Math.max(50, current + delta));
+    window.setAcademicReportScale(current);
 };
 
 window.setAcademicReportScale = function(val) {
-    window.academicReportPaperSettings.scale = parseInt(val, 10) || 100;
+    const s = parseInt(val, 10) || 100;
+    window.academicReportPaperSettings.scale = s;
+    const sEl = document.getElementById('print_scale_reportPaperArea');
+    if (sEl) sEl.value = String(s);
+    const sValEl = document.getElementById('print_scale_val_reportPaperArea');
+    if (sValEl) sValEl.textContent = `${s}%`;
     window.applyAcademicReportPaperSettings();
 };
 
 window.applyAcademicReportPaperSettings = function() {
+    const oEl = document.getElementById('print_orient_reportPaperArea');
+    const pEl = document.getElementById('print_paper_reportPaperArea');
+    const sEl = document.getElementById('print_scale_reportPaperArea');
+
+    if (window.CMSPrintManager && typeof window.CMSPrintManager.applyLivePreview === 'function') {
+        if (oEl || pEl || sEl) {
+            window.CMSPrintManager.applyLivePreview('reportPaperArea');
+            return;
+        }
+    }
+
     const printArea = document.getElementById('reportKoKhoPrintArea');
     const cfg = window.academicReportPaperSettings || { paperSize: 'A4', orientation: 'landscape', scale: 100 };
     if (!printArea) return;
 
     const isLandscape = cfg.orientation === 'landscape';
+    let widthMm = '297mm';
+    let minHeightMm = '210mm';
     if (cfg.paperSize === 'A3') {
-        printArea.style.maxWidth = isLandscape ? '420mm' : '297mm';
-        printArea.style.minHeight = isLandscape ? '297mm' : '420mm';
+        widthMm = isLandscape ? '420mm' : '297mm';
+        minHeightMm = isLandscape ? '297mm' : '420mm';
     } else if (cfg.paperSize === 'Letter') {
-        printArea.style.maxWidth = isLandscape ? '279mm' : '216mm';
-        printArea.style.minHeight = isLandscape ? '216mm' : '279mm';
+        widthMm = isLandscape ? '279mm' : '216mm';
+        minHeightMm = isLandscape ? '216mm' : '279mm';
     } else { // A4
-        printArea.style.maxWidth = isLandscape ? '297mm' : '210mm';
-        printArea.style.minHeight = isLandscape ? '210mm' : '297mm';
+        widthMm = isLandscape ? '297mm' : '210mm';
+        minHeightMm = isLandscape ? '210mm' : '297mm';
     }
 
+    printArea.style.maxWidth = widthMm;
+    printArea.style.width = widthMm;
+    printArea.style.minHeight = minHeightMm;
+
     const scaleFraction = (cfg.scale || 100) / 100;
-    printArea.style.transform = `scale(${scaleFraction})`;
-    printArea.style.transformOrigin = 'top center';
-    printArea.style.transition = 'transform 0.15s ease-out';
-
-    const scaleDisplay = document.getElementById('acadReportScaleDisplay');
-    if (scaleDisplay) scaleDisplay.textContent = `${cfg.scale}%`;
-
-    // Synchronize with CMSPrintManager toolbar if present
-    if (window.CMSPrintManager && typeof window.CMSPrintManager.updateToolbarDefaults === 'function') {
-        window.CMSPrintManager.updateToolbarDefaults('reportPaperArea', cfg.orientation, cfg.paperSize, cfg.scale);
+    printArea.style.zoom = scaleFraction;
+    if (!('zoom' in printArea.style)) {
+        printArea.style.transform = `scale(${scaleFraction})`;
+        printArea.style.transformOrigin = 'top center';
+    } else {
+        printArea.style.transform = '';
     }
 };
 

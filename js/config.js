@@ -1076,30 +1076,60 @@ window.CMSPrintManager = {
         if (!target) return;
         const orient = document.getElementById(`print_orient_${targetElementId}`)?.value || 'landscape';
         const paper = document.getElementById(`print_paper_${targetElementId}`)?.value || 'A4';
-        const scale = parseInt(document.getElementById(`print_scale_${targetElementId}`)?.value || 100, 10);
+        const scaleVal = document.getElementById(`print_scale_${targetElementId}`)?.value;
+        const scale = scaleVal !== undefined && scaleVal !== null && scaleVal !== '' ? parseInt(scaleVal, 10) : 100;
 
         const sValEl = document.getElementById(`print_scale_val_${targetElementId}`);
         if (sValEl) sValEl.textContent = `${scale}%`;
 
-        const paperWrapper = target.firstElementChild || target;
+        // Sync global settings object if present
+        if (window.academicReportPaperSettings) {
+            window.academicReportPaperSettings.paperSize = paper;
+            window.academicReportPaperSettings.orientation = orient;
+            window.academicReportPaperSettings.scale = scale;
+        }
+
+        const paperWrapper = document.getElementById('reportKoKhoPrintArea') || 
+                             target.querySelector('#reportKoKhoPrintArea') || 
+                             target.firstElementChild || 
+                             target;
+
         if (paperWrapper && paperWrapper.style) {
             const isLandscape = orient === 'landscape';
-            if (paper === 'A4') {
-                paperWrapper.style.maxWidth = isLandscape ? '297mm' : '210mm';
-            } else if (paper === 'A3') {
-                paperWrapper.style.maxWidth = isLandscape ? '420mm' : '297mm';
+            let widthMm = '297mm';
+            let minHeightMm = '210mm';
+
+            if (paper === 'A3') {
+                widthMm = isLandscape ? '420mm' : '297mm';
+                minHeightMm = isLandscape ? '297mm' : '420mm';
             } else if (paper === 'Letter') {
-                paperWrapper.style.maxWidth = isLandscape ? '279mm' : '216mm';
+                widthMm = isLandscape ? '279mm' : '216mm';
+                minHeightMm = isLandscape ? '216mm' : '279mm';
             } else if (paper === 'Legal') {
-                paperWrapper.style.maxWidth = isLandscape ? '356mm' : '216mm';
+                widthMm = isLandscape ? '356mm' : '216mm';
+                minHeightMm = isLandscape ? '216mm' : '356mm';
+            } else { // A4
+                widthMm = isLandscape ? '297mm' : '210mm';
+                minHeightMm = isLandscape ? '210mm' : '297mm';
             }
-            if (scale && scale !== 100) {
-                target.style.transform = `scale(${scale / 100})`;
-                target.style.transformOrigin = 'top center';
-                target.style.transition = 'transform 0.05s ease-out';
+
+            paperWrapper.style.maxWidth = widthMm;
+            paperWrapper.style.width = widthMm;
+            paperWrapper.style.minHeight = minHeightMm;
+
+            const scaleRatio = (scale || 100) / 100;
+            // Use CSS zoom so all child text, tables, columns and borders scale proportionately
+            paperWrapper.style.zoom = scaleRatio;
+
+            // Fallback for browsers that do not support zoom
+            if (!('zoom' in paperWrapper.style)) {
+                paperWrapper.style.transform = `scale(${scaleRatio})`;
+                paperWrapper.style.transformOrigin = 'top center';
             } else {
-                target.style.transform = '';
+                paperWrapper.style.transform = '';
             }
+
+            target.style.transform = '';
         }
     },
 
