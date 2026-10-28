@@ -438,4 +438,36 @@ describe('MoEYS Sikha-karik Booklet & Centralized Reports Suite', () => {
         // 4. Verify dates use Khmer numerals as requested
         assert.ok(semHtml.includes('២០២៦') || semHtml.includes('២៥៧០') || semHtml.includes('ធ្វើនៅ'), 'Date should be formatted with Khmer numerals');
     });
+
+    test('11. Academic Results report excludes absence column and styles table headers with Khmer OS Muol Light', () => {
+        const paperArea = { innerHTML: '', style: {} };
+
+        // 1. Monthly Mode
+        context.window.currentAcademicReportMonth = 'មករា';
+        context.window.renderAcademicResultsReport(paperArea, 'ថ្នាក់ទី ៤', '«ក»', 'monthly');
+        const mHtml = paperArea.innerHTML;
+
+        // Ensure "អវត្តមាន" column is NOT present in table header or student row
+        assert.ok(!mHtml.includes('<th class="border border-slate-400 p-2 w-28">អវត្តមាន</th>'), 'Monthly table should not have absence column header');
+        assert.ok(!mHtml.includes('ច:') && !mHtml.includes('ឥត:'), 'Monthly table student rows should not have absence counters');
+
+        // Verify thead font-family uses Khmer OS Muol Light / font-moul
+        assert.ok(mHtml.includes('Khmer OS Muol Light'), 'Monthly table thead should have Khmer OS Muol Light font');
+        assert.ok(mHtml.includes('font-moul'), 'Monthly table thead should have font-moul class');
+
+        // 2. Semester Mode
+        context.window.currentAcademicReportSemester = 'ឆមាសទី១';
+        context.window.renderAcademicResultsReport(paperArea, 'ថ្នាក់ទី ៤', '«ក»', 'semester');
+        const sHtml = paperArea.innerHTML;
+        assert.ok(!sHtml.includes('>អវត្តមាន<'), 'Semester table should not contain absence column');
+        assert.ok(sHtml.includes('Khmer OS Muol Light'), 'Semester table thead should have Khmer OS Muol Light font');
+        assert.ok(sHtml.includes('font-moul'), 'Semester table thead should have font-moul class');
+
+        // 3. Annual Mode
+        context.window.renderAcademicResultsReport(paperArea, 'ថ្នាក់ទី ៤', '«ក»', 'annual');
+        const aHtml = paperArea.innerHTML;
+        assert.ok(!aHtml.includes('>អវត្តមាន<'), 'Annual table should not contain absence column');
+        assert.ok(aHtml.includes('Khmer OS Muol Light'), 'Annual table thead should have Khmer OS Muol Light font');
+        assert.ok(aHtml.includes('font-moul'), 'Annual table thead should have font-moul class');
+    });
 });

@@ -3516,7 +3516,7 @@ window.renderAcademicResultsReport = function(container, targetGrade, targetRoom
         }
 
         const rowsHtml = preparedStudents.length === 0 ? `
-            <tr><td colspan="9" class="p-8 text-center text-slate-400 font-bold font-siemreap">គ្មានទិន្នន័យសិស្សក្នុងថ្នាក់ ${gradeFull} ឡើយ</td></tr>
+            <tr><td colspan="8" class="p-8 text-center text-slate-400 font-bold font-siemreap">គ្មានទិន្នន័យសិស្សក្នុងថ្នាក់ ${gradeFull} ឡើយ</td></tr>
         ` : preparedStudents.map((item, i) => {
             return `
                 <tr class="hover:bg-slate-50 text-[11px]">
@@ -3527,7 +3527,6 @@ window.renderAcademicResultsReport = function(container, targetGrade, targetRoom
                     <td class="border border-slate-400 p-1 font-mono font-bold ${item.avgVal >= 5.0 ? 'text-blue-900' : 'text-rose-600'}">${item.avgVal.toFixed(2)}</td>
                     <td class="border border-slate-400 p-1 font-mono font-bold text-indigo-700">${toKhmerNum(item.rankVal)}</td>
                     <td class="border border-slate-400 p-1 font-moul text-[10px] ${item.avgVal >= 8 ? 'text-emerald-700' : (item.avgVal >= 6.5 ? 'text-blue-700' : (item.avgVal >= 5 ? 'text-slate-700' : 'text-rose-600'))}">${item.mention}</td>
-                    <td class="border border-slate-400 p-1 font-mono text-[10.5px]">ច:${toKhmerNum(item.perm)} / ឥត:${toKhmerNum(item.unex)}</td>
                     <td class="border border-slate-400 p-1 font-bold ${item.isPass ? 'text-emerald-700 bg-emerald-50/40' : 'text-rose-600 bg-rose-50/40'}">${item.isPass ? 'ជាប់មធ្យមភាគ' : 'ក្រោមមធ្យមភាគ'}</td>
                 </tr>
             `;
@@ -3559,16 +3558,15 @@ window.renderAcademicResultsReport = function(container, targetGrade, targetRoom
 
                 <div class="overflow-x-auto mb-4">
                     <table class="w-full text-xs text-center border-collapse border border-slate-400">
-                        <thead>
-                            <tr class="bg-slate-100 font-bold text-slate-800 text-[11px]">
+                        <thead class="font-moul" style="font-family: 'Khmer OS Muol Light', 'Khmer OS Muol', 'Moul', serif;">
+                            <tr class="bg-slate-100 text-slate-900 text-[10px] font-moul leading-normal" style="font-family: 'Khmer OS Muol Light', 'Khmer OS Muol', 'Moul', serif;">
                                 <th class="border border-slate-400 p-2 w-10">ល.រ</th>
                                 <th class="border border-slate-400 p-2 text-left">គោត្តនាម និងនាម</th>
                                 <th class="border border-slate-400 p-2 w-14">ភេទ</th>
-                                <th class="border border-slate-400 p-2 w-20 bg-blue-50">ពិន្ទុសរុប</th>
-                                <th class="border border-slate-400 p-2 w-20 bg-indigo-50">មធ្យមភាគ</th>
+                                <th class="border border-slate-400 p-2 w-24 bg-blue-50">ពិន្ទុសរុប</th>
+                                <th class="border border-slate-400 p-2 w-24 bg-indigo-50">មធ្យមភាគ</th>
                                 <th class="border border-slate-400 p-2 w-20 bg-amber-50">ចំណាត់ថ្នាក់</th>
                                 <th class="border border-slate-400 p-2 w-24">និទ្ទេស</th>
-                                <th class="border border-slate-400 p-2 w-28">អវត្តមាន</th>
                                 <th class="border border-slate-400 p-2 w-32 bg-emerald-50">ការវាយតម្លៃ</th>
                             </tr>
                         </thead>
@@ -3766,8 +3764,8 @@ window.renderAcademicResultsReport = function(container, targetGrade, targetRoom
 
                 <div class="overflow-x-auto mb-4">
                     <table class="w-full text-xs text-center border-collapse border border-slate-400">
-                        <thead>
-                            <tr class="bg-slate-100 font-bold text-slate-800 text-[11px]">
+                        <thead class="font-moul" style="font-family: 'Khmer OS Muol Light', 'Khmer OS Muol', 'Moul', serif;">
+                            <tr class="bg-slate-100 text-slate-900 text-[10px] font-moul leading-normal" style="font-family: 'Khmer OS Muol Light', 'Khmer OS Muol', 'Moul', serif;">
                                 <th class="border border-slate-400 p-2 w-10">ល.រ</th>
                                 <th class="border border-slate-400 p-2 text-left">គោត្តនាម និងនាម</th>
                                 <th class="border border-slate-400 p-2 w-14">ភេទ</th>
@@ -3980,8 +3978,8 @@ window.renderAcademicResultsReport = function(container, targetGrade, targetRoom
 
             <div class="overflow-x-auto mb-4">
                 <table class="w-full text-xs text-center border-collapse border border-slate-400">
-                    <thead>
-                        <tr class="bg-slate-100 font-bold text-slate-800 text-[11px]">
+                    <thead class="font-moul" style="font-family: 'Khmer OS Muol Light', 'Khmer OS Muol', 'Moul', serif;">
+                        <tr class="bg-slate-100 text-slate-900 text-[10px] font-moul leading-normal" style="font-family: 'Khmer OS Muol Light', 'Khmer OS Muol', 'Moul', serif;">
                             <th class="border border-slate-400 p-2 w-10">ល.រ</th>
                             <th class="border border-slate-400 p-2 text-left">គោត្តនាម និងនាម</th>
                             <th class="border border-slate-400 p-2 w-14">ភេទ</th>
