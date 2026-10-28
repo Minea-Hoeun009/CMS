@@ -500,4 +500,23 @@ describe('MoEYS Sikha-karik Booklet & Centralized Reports Suite', () => {
 
         context.window.closeReportDetail();
     });
+
+    test('13. Absence report calculates and displays bottom summary statistics and total absence row', () => {
+        const typeSelect = context.document.getElementById('attReportType');
+        typeSelect.value = 'monthly';
+
+        const valSelect = context.document.getElementById('attReportValue');
+        valSelect.value = 'តុលា';
+
+        // Render attendance content
+        context.window.renderAttendanceContent();
+        const html = context.document.getElementById('attendancePrintWrapper').innerHTML;
+
+        assert.ok(html.includes('សរុបអវត្តមាន'), 'Must contain total absence row in table');
+        assert.ok(html.includes('បញ្ឈប់បញ្ជី'), 'Must contain list end note');
+        assert.ok(html.includes('ពេលសិស្សត្រូវមករៀនសរុប'), 'Must contain total sessions required calculation');
+        assert.ok(html.includes('ពេលអវត្តមានសរុប'), 'Must contain total absent sessions calculation');
+        assert.ok(html.includes('ពេលដែលសិស្សមករៀនពិតប្រាកដ'), 'Must contain actual attended sessions calculation');
+        assert.ok(html.includes('ភាគរយអវត្តមាន'), 'Must contain absence percentage calculation');
+    });
 });

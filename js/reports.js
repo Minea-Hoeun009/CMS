@@ -1868,6 +1868,79 @@ window.renderAttendanceContent = function() {
         return result;
     };
 
+    // 🔴 គណនាទិន្នន័យវត្តមានសរុបប្រចាំថ្នាក់ (Classwide Attendance Totals & Aggregations)
+    let grandTotalPerm = 0;
+    let grandTotalUnex = 0;
+    let dailyTotals = {}; 
+    let periodTotals = {}; 
+    let studentAttMap = {};
+
+    students.forEach(stu => {
+        if (type === "monthly") {
+            let attData = fetchAttendanceData(stu.id, value);
+            studentAttMap[stu.id] = attData;
+            grandTotalPerm += (attData.perm || 0);
+            grandTotalUnex += (attData.unex || 0);
+            periods.forEach(d => {
+                let dVal = attData.days[d] || "";
+                if (dVal === "ច" || dVal === "ច្ប" || dVal === "អ" || dVal === "អច្ប" || dVal === "ឈ") {
+                    dailyTotals[d] = (dailyTotals[d] || 0) + 1;
+                }
+            });
+        } else {
+            let sPerm = 0, sUnex = 0;
+            let sPeriodMap = {};
+            periods.forEach(m => {
+                let mData = fetchAttendanceData(stu.id, m);
+                sPeriodMap[m] = mData;
+                periodTotals[m] = periodTotals[m] || { perm: 0, unex: 0 };
+                let p = mData.perm || 0;
+                let u = mData.unex || 0;
+                periodTotals[m].perm += p;
+                periodTotals[m].unex += u;
+                sPerm += p;
+                sUnex += u;
+            });
+            studentAttMap[stu.id] = { periodMap: sPeriodMap, perm: sPerm, unex: sUnex };
+            grandTotalPerm += sPerm;
+            grandTotalUnex += sUnex;
+        }
+    });
+
+    // 🔴 គណនាចំនួនពេល/ថ្ងៃរៀនជាក់ស្តែង (Actual School Sessions)
+    let schoolSessions = 25;
+    if (type === "monthly") {
+        const monthMap = { "មករា": 1, "កុម្ភៈ": 2, "មីនា": 3, "មេសា": 4, "ឧសភា": 5, "មិថុនា": 6, "កក្កដា": 7, "សីហា": 8, "កញ្ញា": 9, "តុលា": 10, "វិច្ឆិកា": 11, "ធ្នូ": 12 };
+        const monthNum = monthMap[value] || 10;
+        const yrMatch = String(academicYear).match(/\d{4}/g);
+        let calYear = new Date().getFullYear();
+        if (yrMatch && yrMatch.length >= 2) {
+            calYear = monthNum >= 10 ? parseInt(yrMatch[0]) : parseInt(yrMatch[1]);
+        }
+        const daysInMonth = new Date(calYear, monthNum, 0).getDate();
+        let offDays = 0;
+        for (let d = 1; d <= daysInMonth; d++) {
+            const dayOfWeek = new Date(calYear, monthNum - 1, d).getDay();
+            if (dayOfWeek === 0) offDays++;
+            else if (window.monthlyHolidays && window.monthlyHolidays[d]) offDays++;
+        }
+        schoolSessions = Math.max(1, daysInMonth - offDays);
+    } else if (type === "semester") {
+        schoolSessions = periods.length * 25;
+    } else {
+        schoolSessions = periods.length * 25;
+    }
+
+    const totalAbsentSessions = grandTotalPerm + grandTotalUnex;
+    const totalSessionsRequired = totalStus > 0 ? (schoolSessions * totalStus) : 0;
+    const actualAttendedSessions = Math.max(0, totalSessionsRequired - totalAbsentSessions);
+    const absencePercentage = totalSessionsRequired > 0 
+        ? ((totalAbsentSessions / totalSessionsRequired) * 100).toFixed(2) 
+        : "0.00";
+    const attendancePercentage = totalSessionsRequired > 0 
+        ? ((actualAttendedSessions / totalSessionsRequired) * 100).toFixed(2) 
+        : "100.00";
+
     pages.forEach((pageStus, pageIdx) => {
         let isFirstPage = pageIdx === 0;
         let isLastPage = pageIdx === pages.length - 1;
@@ -1889,10 +1962,10 @@ window.renderAttendanceContent = function() {
 
             if (type === "monthly") {
                 // 🔴 ទាញទិន្នន័យវត្តមានប្រចាំខែ (តាមថ្ងៃនីមួយៗ)
-                let attData = fetchAttendanceData(stu.id, value);
+                let attData = studentAttMap[stu.id] || fetchAttendanceData(stu.id, value);
                 
                 periods.forEach(d => {
-                    let dVal = attData.days[d] || ""; 
+                    let dVal = attData.days ? (attData.days[d] || "") : ""; 
                     let textColor = "";
                     if(dVal === "ច" || dVal === "ច្ប") textColor = "text-blue-700";
                     if(dVal === "អ" || dVal === "អច្ប") textColor = "text-rose-600";
@@ -1912,10 +1985,11 @@ window.renderAttendanceContent = function() {
                 `;
             } else {
                 // 🔴 ទាញទិន្នន័យសរុបប្រចាំខែនីមួយៗ សម្រាប់របាយការណ៍ឆមាស និងប្រចាំឆ្នាំ
+                let sCached = studentAttMap[stu.id];
                 periods.forEach(m => {
-                    let attData = fetchAttendanceData(stu.id, m);
-                    let pVal = attData.perm || 0;
-                    let uVal = attData.unex || 0;
+                    let attData = (sCached && sCached.periodMap) ? sCached.periodMap[m] : fetchAttendanceData(stu.id, m);
+                    let pVal = attData ? (attData.perm || 0) : 0;
+                    let uVal = attData ? (attData.unex || 0) : 0;
                     
                     totalPerm += pVal;
                     totalUnex += uVal;
@@ -1957,6 +2031,45 @@ window.renderAttendanceContent = function() {
                 emptyRow += `<td class="border border-slate-800"></td></tr>`;
                 pageTbodyHtml += emptyRow;
             }
+        }
+
+        // 🟢 ជួរដេកសរុបអវត្តមានប្រចាំថ្នាក់ (Total Absence Row in Table) លើទំព័រចុងក្រោយ 🟢
+        if (isLastPage) {
+            let totalRowHtml = `
+                <tr class="bg-slate-100 font-bold font-siemreap text-center text-slate-900 border-t-2 border-slate-800" style="height: 26px;">
+                    <td colspan="4" class="border border-slate-800 text-center font-bold text-[11px] bg-[#e2e8f0]">សរុបអវត្តមាន</td>
+            `;
+            if (type === "monthly") {
+                periods.forEach(d => {
+                    const cnt = dailyTotals[d] || 0;
+                    totalRowHtml += `<td class="border border-slate-800 text-center font-mono text-[10px] ${cnt > 0 ? 'text-rose-600 font-bold bg-rose-50' : 'text-slate-400'}">${cnt > 0 ? window.toKhmerNum(cnt.toString()) : '-'}</td>`;
+                });
+                totalRowHtml += `
+                    <td class="border border-slate-800 text-center font-bold text-blue-800 bg-blue-100/60 text-[11px]">${grandTotalPerm > 0 ? window.toKhmerNum(grandTotalPerm.toString()) : '-'}</td>
+                    <td class="border border-slate-800 text-center font-bold text-rose-700 bg-rose-100/60 text-[11px]">${grandTotalUnex > 0 ? window.toKhmerNum(grandTotalUnex.toString()) : '-'}</td>
+                    <td class="border border-slate-800 text-center font-bold text-purple-700 bg-purple-100/60 text-[11px]">-</td>
+                    <td class="border border-slate-800 text-center font-bold text-slate-900 bg-slate-200/80 text-[11px]">${totalAbsentSessions > 0 ? window.toKhmerNum(totalAbsentSessions.toString()) : '-'}</td>
+                `;
+            } else {
+                periods.forEach(m => {
+                    const pCnt = periodTotals[m]?.perm || 0;
+                    const uCnt = periodTotals[m]?.unex || 0;
+                    totalRowHtml += `
+                        <td class="border border-slate-800 text-center font-bold text-blue-800 bg-blue-50/50 text-[10px]">${pCnt > 0 ? window.toKhmerNum(pCnt.toString()) : '-'}</td>
+                        <td class="border border-slate-800 text-center font-bold text-rose-700 bg-rose-50/50 text-[10px]">${uCnt > 0 ? window.toKhmerNum(uCnt.toString()) : '-'}</td>
+                    `;
+                });
+                totalRowHtml += `
+                    <td class="border border-slate-800 text-center font-bold text-blue-800 bg-blue-100/60 text-[11px]">${grandTotalPerm > 0 ? window.toKhmerNum(grandTotalPerm.toString()) : '-'}</td>
+                    <td class="border border-slate-800 text-center font-bold text-rose-700 bg-rose-100/60 text-[11px]">${grandTotalUnex > 0 ? window.toKhmerNum(grandTotalUnex.toString()) : '-'}</td>
+                    <td class="border border-slate-800 text-center font-bold text-slate-900 bg-slate-200/80 text-[11px]">${totalAbsentSessions > 0 ? window.toKhmerNum(totalAbsentSessions.toString()) : '-'}</td>
+                `;
+            }
+            totalRowHtml += `
+                    <td class="border border-slate-800 bg-[#e2e8f0]"></td>
+                </tr>
+            `;
+            pageTbodyHtml += totalRowHtml;
         }
 
         let headerSection = "";
@@ -2002,16 +2115,12 @@ window.renderAttendanceContent = function() {
         `;
 
         let bottomSummaryBarHtml = `
-            <div class="flex justify-between items-center mt-1.5 px-1 font-siemreap">
-                <div class="text-[11px] text-slate-500 italic">បញ្ឈប់បញ្ជីក្នុងខែនេះត្រឹម <b class="text-blue-700 underline" contenteditable="true">២៥</b> ពេល</div>
-            </div>
-            <div class="flex items-center justify-between border border-emerald-400 bg-emerald-50/50 p-2 mt-1.5 text-[10.5px] font-siemreap rounded">
-                <div class="flex gap-6 mx-auto w-full justify-around">
-                    <span class="text-slate-500">ពេលសិស្សត្រូវមករៀន៖ <b class="text-slate-800" contenteditable="true">០</b></span>
-                    <span class="text-slate-500">ពេលអវត្តមាន៖ <b class="text-rose-600" contenteditable="true">០</b></span>
-                    <span class="text-slate-500">ពេលដែលសិស្សមករៀនពិតប្រាកដ៖ <b class="text-emerald-700" contenteditable="true">០</b></span>
-                    <span class="text-slate-500">ភាគរយអវត្តមាន៖ <b class="text-rose-600" contenteditable="true">0.00%</b></span>
-                </div>
+            <div class="my-2.5 text-[11.5px] font-siemreap leading-relaxed text-slate-800 text-left px-1 space-y-1">
+                <div>- <span class="font-bold">បញ្ឈប់បញ្ជី${type === "monthly" ? "ក្នុងខែនេះ" : type === "semester" ? "ក្នុងឆមាសនេះ" : "ក្នុងឆ្នាំនេះ"}ត្រឹម៖</span> <b class="text-blue-700 underline font-bold" contenteditable="true">${window.toKhmerNum(schoolSessions.toString())}</b> ពេល</div>
+                <div>- <span class="font-bold">ពេលសិស្សត្រូវមករៀនសរុប៖</span> <b class="text-slate-800 font-bold" contenteditable="true">${window.toKhmerNum(totalSessionsRequired.toString())}</b> ពេល</div>
+                <div>- <span class="font-bold">ពេលអវត្តមានសរុប៖</span> <b class="text-rose-600 font-bold" contenteditable="true">${window.toKhmerNum(totalAbsentSessions.toString())}</b> ពេល (ច្បាប់៖ <b class="text-blue-700 font-bold">${window.toKhmerNum(grandTotalPerm.toString())}</b>, ឥតច្បាប់៖ <b class="text-rose-700 font-bold">${window.toKhmerNum(grandTotalUnex.toString())}</b>)</div>
+                <div>- <span class="font-bold">ពេលដែលសិស្សមករៀនពិតប្រាកដ៖</span> <b class="text-emerald-700 font-bold" contenteditable="true">${window.toKhmerNum(actualAttendedSessions.toString())}</b> ពេល</div>
+                <div>- <span class="font-bold">ភាគរយអវត្តមាន៖</span> <b class="text-rose-600 font-bold" contenteditable="true">${window.toKhmerNum(absencePercentage)}%</b> (អត្រាវត្តមានចូលរៀន៖ <b class="text-emerald-700 font-bold">${window.toKhmerNum(attendancePercentage)}%</b>)</div>
             </div>
         `;
 
