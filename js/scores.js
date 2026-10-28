@@ -1490,7 +1490,6 @@ window.loadScoresView = async function() {
               </div>
 
               <div class="flex flex-wrap items-center gap-2.5">
-                <button onclick="window.openHonorBoardModal()" class="flex px-4 py-2.5 bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 hover:border-amber-300 rounded-xl text-xs font-bold items-center gap-2 shadow-sm transition-all"><i class="fa-solid fa-crown text-amber-500"></i> តារាងកិត្តិយស (Top 5)</button>
                 <button id="btnGlobalSemesterConfig" onclick="window.openSemesterConfig()" class="flex px-4 py-2.5 bg-slate-100 hover:bg-purple-50 text-purple-700 border border-slate-200 hover:border-purple-300 rounded-xl text-xs font-bold shadow-sm items-center justify-center gap-2 transition-all group"><i class="fa-solid fa-sliders group-hover:rotate-90 transition-transform"></i> កំណត់ខែឆមាស</button>
                 <button type="button" onclick="window.toggleSharedDatePanel()" class="flex px-4 py-2.5 bg-slate-100 hover:bg-amber-50 text-amber-700 border border-slate-200 hover:border-amber-300 rounded-xl text-xs font-bold items-center gap-2 shadow-sm transition-all"><i class="fa-solid fa-calendar-day"></i> កាលបរិច្ឆេទប្រព័ន្ធ</button>
               </div>
