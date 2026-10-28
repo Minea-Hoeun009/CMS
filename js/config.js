@@ -1037,15 +1037,18 @@ window.CMSPrintManager = {
                     <option value="portrait" ${defaultOrientation === 'portrait' ? 'selected' : ''}>បញ្ឈរ (Portrait)</option>
                 </select>
 
-                <span class="font-bold text-slate-500 ml-1">មាត្រដ្ឋាន (Scale)៖</span>
-                <select id="print_scale_${targetElementId}" onchange="window.CMSPrintManager.applyLivePreview('${targetElementId}')" class="bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg px-2 py-1 font-bold text-rose-600 dark:text-rose-400 outline-none cursor-pointer">
-                    <option value="120" ${defaultScale === 120 ? 'selected' : ''}>120%</option>
-                    <option value="110" ${defaultScale === 110 ? 'selected' : ''}>110%</option>
-                    <option value="100" ${defaultScale === 100 ? 'selected' : ''}>100% (ធម្មតា)</option>
-                    <option value="90" ${defaultScale === 90 ? 'selected' : ''}>90% (សន្សំ)</option>
-                    <option value="80" ${defaultScale === 80 ? 'selected' : ''}>80% (សន្សំ)</option>
-                    <option value="75" ${defaultScale === 75 ? 'selected' : ''}>75% (បង្រួម)</option>
-                </select>
+                <div class="flex items-center gap-1.5 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg px-2 py-1 ml-1 shadow-inner">
+                    <span class="font-bold text-slate-500 text-[11px] select-none flex items-center gap-1">
+                        <i class="fa-solid fa-magnifying-glass text-[10px] text-rose-500"></i>ទំហំ៖
+                    </span>
+                    <input type="range" id="print_scale_${targetElementId}" min="50" max="140" step="1" value="${defaultScale}" 
+                        oninput="window.CMSPrintManager.applyLivePreview('${targetElementId}')"
+                        class="w-20 sm:w-28 h-1.5 bg-slate-200 dark:bg-slate-600 rounded-lg appearance-none cursor-pointer accent-rose-600 focus:outline-none">
+                    <span id="print_scale_val_${targetElementId}" class="font-mono font-bold text-rose-600 dark:text-rose-400 text-xs min-w-[38px] text-center select-none">${defaultScale}%</span>
+                    <button type="button" onclick="const s = document.getElementById('print_scale_${targetElementId}'); if(s){ s.value = 100; window.CMSPrintManager.applyLivePreview('${targetElementId}'); }" title="កំណត់ឡើងវិញ 100%" class="text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 p-0.5 transition active:scale-90">
+                        <i class="fa-solid fa-rotate-left text-[10px]"></i>
+                    </button>
+                </div>
 
                 <button onclick="window.CMSPrintManager.executePrintWithToolbar('${targetElementId}')" class="px-4 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-bold shadow flex items-center gap-1.5 ml-1 sm:ml-2 transition active:scale-95">
                     <i class="fa-solid fa-print"></i> <span>ព្រីន (Print)</span>
@@ -1058,9 +1061,13 @@ window.CMSPrintManager = {
         const pEl = document.getElementById(`print_paper_${targetElementId}`);
         const oEl = document.getElementById(`print_orient_${targetElementId}`);
         const sEl = document.getElementById(`print_scale_${targetElementId}`);
+        const sValEl = document.getElementById(`print_scale_val_${targetElementId}`);
         if (pEl && defaultPaper) pEl.value = defaultPaper;
         if (oEl && defaultOrientation) oEl.value = defaultOrientation;
-        if (sEl && defaultScale) sEl.value = String(defaultScale);
+        if (sEl && defaultScale) {
+            sEl.value = String(defaultScale);
+            if (sValEl) sValEl.textContent = `${defaultScale}%`;
+        }
         this.applyLivePreview(targetElementId);
     },
 
@@ -1071,6 +1078,9 @@ window.CMSPrintManager = {
         const paper = document.getElementById(`print_paper_${targetElementId}`)?.value || 'A4';
         const scale = parseInt(document.getElementById(`print_scale_${targetElementId}`)?.value || 100, 10);
 
+        const sValEl = document.getElementById(`print_scale_val_${targetElementId}`);
+        if (sValEl) sValEl.textContent = `${scale}%`;
+
         const paperWrapper = target.firstElementChild || target;
         if (paperWrapper && paperWrapper.style) {
             const isLandscape = orient === 'landscape';
@@ -1078,10 +1088,15 @@ window.CMSPrintManager = {
                 paperWrapper.style.maxWidth = isLandscape ? '297mm' : '210mm';
             } else if (paper === 'A3') {
                 paperWrapper.style.maxWidth = isLandscape ? '420mm' : '297mm';
+            } else if (paper === 'Letter') {
+                paperWrapper.style.maxWidth = isLandscape ? '279mm' : '216mm';
+            } else if (paper === 'Legal') {
+                paperWrapper.style.maxWidth = isLandscape ? '356mm' : '216mm';
             }
             if (scale && scale !== 100) {
                 target.style.transform = `scale(${scale / 100})`;
                 target.style.transformOrigin = 'top center';
+                target.style.transition = 'transform 0.05s ease-out';
             } else {
                 target.style.transform = '';
             }

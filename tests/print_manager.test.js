@@ -80,19 +80,19 @@ describe('CMS Universal Print Manager & Paper Config Tests', () => {
     assert.equal(typeof context.window.CMSPrintManager.executePrintWithToolbar, 'function');
   });
 
-  test('2. renderToolbarHtml outputs paper size, orientation, and scale controls', () => {
+  test('2. renderToolbarHtml outputs paper size, orientation, and interactive scale slider', () => {
     const html = context.window.CMSPrintManager.renderToolbarHtml('testTarget', 'landscape', 'A4', 100);
     assert.ok(html.includes('id="print_paper_testTarget"'), 'Must have paper size select');
     assert.ok(html.includes('id="print_orient_testTarget"'), 'Must have orientation select');
-    assert.ok(html.includes('id="print_scale_testTarget"'), 'Must have scale select');
+    assert.ok(html.includes('id="print_scale_testTarget"'), 'Must have scale slider');
+    assert.ok(html.includes('type="range"'), 'Scale control must be a range slider');
     assert.ok(html.includes('A4'), 'Contains A4 option');
     assert.ok(html.includes('A3'), 'Contains A3 option');
     assert.ok(html.includes('Letter'), 'Contains Letter option');
     assert.ok(html.includes('Legal'), 'Contains Legal option');
     assert.ok(html.includes('landscape'), 'Contains landscape option');
     assert.ok(html.includes('portrait'), 'Contains portrait option');
-    assert.ok(html.includes('100%'), 'Contains 100% option');
-    assert.ok(html.includes('80%'), 'Contains 80% option');
+    assert.ok(html.includes('100%'), 'Contains 100% scale badge');
   });
 
   test('3. print function configures @page size, orientation, and zoom/scale correctly', () => {
