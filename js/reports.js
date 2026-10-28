@@ -205,48 +205,56 @@ window.loadReportsView = function() {
                 </div>
             </div>
 
-            <!-- ផ្ទាំងបង្ហាញរបាយការណ៍លម្អិត (Report Detail View) -->
-            <div id="reportDetailContent" class="hidden w-full h-full flex-col relative z-20 space-y-3">
-                <!-- ផ្នែកទី ១៖ របារចំណងជើងរបាយការណ៍ (Section 1: Report Title Header Bar) -->
-                <div class="bg-white dark:bg-slate-800 p-3 sm:p-4 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 flex flex-wrap justify-between items-center gap-3 z-40 sticky top-0 no-print">
-                    <div class="flex items-center gap-3">
-                        <button onclick="window.closeReportDetail()" class="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-slate-700 dark:text-slate-200 flex items-center gap-2 font-bold text-xs transition shadow-sm active:scale-95 shrink-0" title="ត្រឡប់ក្រោយ (Back)">
-                            <i class="fa-solid fa-arrow-left text-sm"></i> <span>ត្រឡប់ក្រោយ</span>
-                        </button>
-                        <div>
-                            <h2 id="reportDetailTitle" class="font-moul text-slate-800 dark:text-white text-sm sm:text-base md:text-lg leading-snug">ចំណងជើងរបាយការណ៍</h2>
-                            <p id="reportDetailSub" class="text-xs text-indigo-600 dark:text-indigo-400 font-bold mt-0.5">ថ្នាក់ ${gradeFull}</p>
+            <!-- ផ្ទាំងបង្ហាញរបាយការណ៍លម្អិត ជា Pop-up Modal (Report Detail Pop-up Modal matching Honor Board / Image) -->
+            <div id="reportDetailContent" onclick="if(event.target === this) window.closeReportDetail()" class="fixed inset-0 z-[2000] hidden bg-slate-900/60 p-2 md:p-6 transition-all duration-300 font-siemreap" style="backdrop-filter: none !important;">
+                <div id="reportDetailModalContainer" class="bg-slate-50 w-full h-full rounded-2xl md:rounded-[2.5rem] flex flex-col overflow-hidden shadow-2xl relative border border-white/40 transform scale-95 opacity-0 transition-all duration-300 data-[open=true]:scale-100 data-[open=true]:opacity-100">
+                    
+                    <!-- ផ្នែកទី ១៖ របារចំណងជើង Pop up (Header Bar exactly matching Honor Board modal) -->
+                    <div class="bg-white p-3 md:p-4 border-b border-slate-200/80 flex justify-between items-center shrink-0 shadow-sm z-20">
+                        <div class="flex items-center gap-3">
+                            <button type="button" onclick="window.closeReportDetail()" class="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 flex items-center gap-2 font-bold text-xs transition shadow-sm active:scale-95 shrink-0" title="ថយក្រោយ">
+                                <i class="fa-solid fa-arrow-left text-sm"></i> <span>ថយក្រោយ</span>
+                            </button>
+                            <div class="flex items-center gap-2 sm:gap-3">
+                                <div id="reportDetailHeaderIcon" class="w-9 h-9 sm:w-10 sm:h-10 rounded-[14px] bg-gradient-to-br from-blue-600 to-indigo-700 text-white flex items-center justify-center shadow-md text-sm">
+                                    <i class="fa-solid fa-file-invoice"></i>
+                                </div>
+                                <div>
+                                    <h2 id="reportDetailTitle" class="font-moul text-sm sm:text-base md:text-lg text-slate-800 leading-snug">ចំណងជើងរបាយការណ៍</h2>
+                                    <p id="reportDetailSub" class="text-xs text-indigo-600 font-bold mt-0.5">ថ្នាក់ ${gradeFull}</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="hidden sm:flex px-3 py-1 bg-indigo-50 text-indigo-700 rounded-full text-xs font-bold border border-indigo-200 items-center gap-1.5 shadow-sm">
+                                <i class="fa-solid fa-file-lines"></i> <span>ឯកសាររដ្ឋបាល</span>
+                            </span>
+                            <button type="button" onclick="window.closeReportDetail()" class="w-10 h-10 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 flex items-center justify-center transition shadow-sm active:scale-95 shrink-0" title="បិទ (Close)">
+                                <i class="fa-solid fa-xmark text-lg"></i>
+                            </button>
                         </div>
                     </div>
-                    <div class="flex items-center gap-2">
-                        <span class="hidden sm:flex px-3 py-1 bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 rounded-full text-xs font-bold border border-indigo-200 dark:border-indigo-800 items-center gap-1.5 shadow-sm">
-                            <i class="fa-solid fa-file-lines"></i> <span>ឯកសាររដ្ឋបាល</span>
-                        </span>
-                        <button onclick="window.closeReportDetail()" class="w-10 h-10 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 dark:bg-slate-700 dark:text-rose-400 flex items-center justify-center transition shadow-sm active:scale-95 shrink-0" title="បិទ (Close)">
-                            <i class="fa-solid fa-xmark text-lg"></i>
-                        </button>
+
+                    <!-- ផ្នែកទី ២៖ របារកំណត់ប្រភេទក្រដាស និងមុខងារនីមួយៗ (Toolbar row matching image) -->
+                    <div id="reportPrintConfigBar" class="p-2.5 sm:p-3 shrink-0 bg-white/95 border-b border-slate-200/80 no-print flex items-center justify-between gap-3 overflow-x-auto custom-scrollbar flex-nowrap whitespace-nowrap shadow-sm">
+                        <!-- ផ្នែកខាងឆ្វេង៖ តម្រងទិន្នន័យ (Filters: ខែ / ទម្រង់បញ្ជី) -->
+                        <div id="reportExtraControls" class="flex items-center gap-2 flex-nowrap shrink-0"></div>
+
+                        <!-- ផ្នែកខាងស្តាំ៖ ការកំណត់ប្រភេទក្រដាស ទិសដៅ មាត្រដ្ឋាន និងប៊ូតុងព្រីន -->
+                        <div id="reportDetailPrintToolbarArea" class="flex items-center gap-2 flex-nowrap shrink-0">
+                            ${window.CMSPrintManager ? window.CMSPrintManager.renderToolbarHtml('reportPaperArea', 'portrait', 'A4', 100) : `
+                                <button onclick="window.printCurrentReport()" class="px-5 py-2.5 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white rounded-xl text-xs font-bold shadow-md shadow-amber-500/30 transition flex items-center gap-2 active:scale-95 outline-none">
+                                    <i class="fa-solid fa-print"></i> បោះពុម្ព
+                                </button>
+                            `}
+                        </div>
                     </div>
-                </div>
 
-                <!-- ផ្នែកទី ២៖ របារកំណត់ប្រភេទក្រដាស និងការបោះពុម្ព (Section 2: Paper Settings & Print Toolbar Under Title) -->
-                <div id="reportPrintConfigBar" class="bg-gradient-to-r from-slate-50 via-white to-slate-50 dark:from-slate-800 dark:via-slate-850 dark:to-slate-800 p-2 sm:p-2.5 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 flex items-center gap-2 z-30 no-print overflow-x-auto custom-scrollbar flex-nowrap whitespace-nowrap w-full">
-                    <!-- ផ្នែកខាងឆ្វេង៖ តម្រងទិន្នន័យ (Filters: ខែ / ទម្រង់បញ្ជី / រក្សាទុក) -->
-                    <div id="reportExtraControls" class="flex items-center gap-2 flex-nowrap shrink-0"></div>
-
-                    <!-- ផ្នែកខាងស្តាំ៖ ការកំណត់ប្រភេទក្រដាស ទិសដៅ មាត្រដ្ឋាន និងប៊ូតុងព្រីន -->
-                    <div id="reportDetailPrintToolbarArea" class="flex items-center gap-2 flex-nowrap shrink-0">
-                        ${window.CMSPrintManager ? window.CMSPrintManager.renderToolbarHtml('reportPaperArea', 'portrait', 'A4', 100) : `
-                            <button onclick="window.printCurrentReport()" class="px-5 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-xl text-xs font-bold shadow-md shadow-blue-500/30 transition flex items-center gap-2 active:scale-95 outline-none">
-                                <i class="fa-solid fa-print"></i> បោះពុម្ព
-                            </button>
-                        `}
-                    </div>
-                </div>
-
-                <!-- ផ្នែកទី ៣៖ ផ្ទាំងការងារក្រដាសរបាយការណ៍ (Section 3: Realistic Paper Canvas) -->
-                <div class="w-full flex-1 overflow-auto custom-scrollbar flex justify-center pb-16 pt-2">
-                    <div id="reportPaperArea" class="transition-all relative flex justify-center items-start">
-                        <!-- Content goes here -->
+                    <!-- ផ្នែកទី ៣៖ ផ្ទាំងការងារក្រដាសរបាយការណ៍ (Realistic Canvas with Paper) -->
+                    <div class="flex-1 overflow-auto bg-slate-200/70 p-4 md:p-8 custom-scrollbar flex justify-center items-start">
+                        <div id="reportPaperArea" class="transition-all relative flex justify-center items-start">
+                            <!-- Content goes here -->
+                        </div>
                     </div>
                 </div>
             </div>
@@ -260,9 +268,41 @@ window.loadReportsView = function() {
 
 window.openReportDetail = function(reportType) {
     window.currentActiveReportType = reportType;
-    document.getElementById("reportsMainDashboard").classList.add("hidden");
-    document.getElementById("reportDetailContent").classList.remove("hidden");
-    document.getElementById("reportDetailContent").classList.add("flex");
+    const modal = document.getElementById("reportDetailContent");
+    const modalContainer = document.getElementById("reportDetailModalContainer");
+    if (modal) {
+        modal.classList.remove("hidden");
+        modal.classList.add("flex");
+        setTimeout(() => {
+            if (modalContainer) modalContainer.setAttribute('data-open', 'true');
+        }, 10);
+    }
+
+    const iconEl = document.getElementById("reportDetailHeaderIcon");
+    if (iconEl) {
+        if (reportType === 'sikhakarik') {
+            iconEl.className = "w-9 h-9 sm:w-10 sm:h-10 rounded-[14px] bg-gradient-to-br from-blue-700 to-indigo-900 text-white flex items-center justify-center shadow-md text-sm";
+            iconEl.innerHTML = '<i class="fa-solid fa-book-bookmark"></i>';
+        } else if (reportType === 'report_ko_kho') {
+            iconEl.className = "w-9 h-9 sm:w-10 sm:h-10 rounded-[14px] bg-gradient-to-br from-emerald-500 to-teal-700 text-white flex items-center justify-center shadow-md text-sm";
+            iconEl.innerHTML = '<i class="fa-solid fa-graduation-cap"></i>';
+        } else if (reportType === 'attendance') {
+            iconEl.className = "w-9 h-9 sm:w-10 sm:h-10 rounded-[14px] bg-gradient-to-br from-emerald-500 to-teal-600 text-white flex items-center justify-center shadow-md text-sm";
+            iconEl.innerHTML = '<i class="fa-solid fa-calendar-check"></i>';
+        } else if (reportType === 'health') {
+            iconEl.className = "w-9 h-9 sm:w-10 sm:h-10 rounded-[14px] bg-gradient-to-br from-rose-500 to-pink-600 text-white flex items-center justify-center shadow-md text-sm";
+            iconEl.innerHTML = '<i class="fa-solid fa-heart-pulse"></i>';
+        } else if (reportType === 'stats') {
+            iconEl.className = "w-9 h-9 sm:w-10 sm:h-10 rounded-[14px] bg-gradient-to-br from-blue-600 to-indigo-600 text-white flex items-center justify-center shadow-md text-sm";
+            iconEl.innerHTML = '<i class="fa-solid fa-chart-pie"></i>';
+        } else if (reportType === 'structure') {
+            iconEl.className = "w-9 h-9 sm:w-10 sm:h-10 rounded-[14px] bg-gradient-to-br from-purple-600 to-indigo-700 text-white flex items-center justify-center shadow-md text-sm";
+            iconEl.innerHTML = '<i class="fa-solid fa-users"></i>';
+        } else {
+            iconEl.className = "w-9 h-9 sm:w-10 sm:h-10 rounded-[14px] bg-gradient-to-br from-blue-600 to-indigo-700 text-white flex items-center justify-center shadow-md text-sm";
+            iconEl.innerHTML = '<i class="fa-solid fa-file-invoice"></i>';
+        }
+    }
 
     const activeClass = typeof window.getCurrentSelectedClass === 'function' ? window.getCurrentSelectedClass() : { level: "ថ្នាក់ទី ៤", room: "«ក»" };
     const curLevel = document.getElementById("reportGradeSelect")?.value || activeClass.level;
@@ -465,9 +505,22 @@ window.openReportDetail = function(reportType) {
 };
 
 window.closeReportDetail = function() {
-    document.getElementById("reportDetailContent").classList.add("hidden");
-    document.getElementById("reportDetailContent").classList.remove("flex");
-    document.getElementById("reportsMainDashboard").classList.remove("hidden");
+    const modal = document.getElementById("reportDetailContent");
+    const container = document.getElementById("reportDetailModalContainer");
+    if (container) {
+        container.removeAttribute('data-open');
+        setTimeout(() => {
+            if (modal) {
+                modal.classList.add("hidden");
+                modal.classList.remove("flex");
+            }
+        }, 200);
+    } else if (modal) {
+        modal.classList.add("hidden");
+        modal.classList.remove("flex");
+    }
+    const dash = document.getElementById("reportsMainDashboard");
+    if (dash) dash.classList.remove("hidden");
 };
 
 window.printCurrentReport = function() {

@@ -478,4 +478,26 @@ describe('MoEYS Sikha-karik Booklet & Centralized Reports Suite', () => {
             assert.ok(!detailContainer.innerHTML.includes('saveCurrentReportToGoogleSheets'), 'Individual report detail toolbar should not contain redundant save to sheets button');
         }
     });
+
+    test('12. All report sections display in a unified Pop-up Modal matching Honor Board styling', () => {
+        const reportsContainer = context.document.getElementById('reportsContainer');
+        context.window.loadReportsView();
+        const html = reportsContainer.innerHTML;
+
+        assert.ok(html.includes('id="reportDetailContent"'), 'reportDetailContent pop-up modal should exist in HTML');
+        assert.ok(html.includes('fixed inset-0') && html.includes('z-[2000]'), 'Modal should have fixed inset-0 full screen positioning and high z-index overlay');
+        assert.ok(html.includes('id="reportDetailModalContainer"'), 'reportDetailModalContainer should exist in HTML');
+        assert.ok(html.includes('rounded-2xl md:rounded-[2.5rem]'), 'Modal container should have large rounded corners');
+        assert.ok(html.includes('shadow-2xl'), 'Modal container should have shadow-2xl');
+
+        // Test opening and closing report detail modal functions
+        assert.strictEqual(typeof context.window.openReportDetail, 'function');
+        assert.strictEqual(typeof context.window.closeReportDetail, 'function');
+
+        context.window.openReportDetail('report_ko_kho');
+        const modal = context.document.getElementById('reportDetailContent');
+        assert.ok(modal, 'Modal element should exist');
+
+        context.window.closeReportDetail();
+    });
 });
