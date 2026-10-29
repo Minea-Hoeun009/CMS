@@ -716,7 +716,7 @@ window.updateReportViewSettings = function() {
 // ==========================================================================
 window.renderStudentStatsReportHTML = function(container, targetGrade, targetRoom) {
     const sInfo = typeof appSettings !== 'undefined' ? appSettings : {};
-    const academicYear = document.getElementById("globalAcademicYear")?.value || sInfo.academic_year || "២០២៤-២០២៥";
+    const academicYear = document.getElementById("globalAcademicYear")?.value || sInfo.academic_year || "២០២៦-២០២៧";
     const activeClass = typeof window.getCurrentSelectedClass === 'function' ? window.getCurrentSelectedClass() : { level: "ថ្នាក់ទី ៤", room: "«ក»" };
     const curLevel = targetGrade || window.currentReportTargetGrade || document.getElementById("reportGradeSelect")?.value || activeClass.level || sInfo.teacher_level || "ថ្នាក់ទី ៤";
     const curRoom = targetRoom || window.currentReportTargetRoom || document.getElementById("reportRoomSelect")?.value || activeClass.room || sInfo.teacher_room || "«ក»";
@@ -3851,8 +3851,9 @@ window.renderAcademicResultsReport = function(container, targetGrade, targetRoom
     const formattedRoom = curRoom.startsWith('«') ? curRoom : `«${curRoom}»`;
     const gradeFull = `${toUniversalNum(curLevel)} ${formattedRoom}`.trim();
 
-    const academicYearRaw = document.getElementById("globalAcademicYear")?.value || sInfo.academic_year || "2026-2027";
-    const academicYear = toUniversalNum(academicYearRaw);
+    const academicYearRaw = document.getElementById("globalAcademicYear")?.value || sInfo.academic_year || "២០២៦-២០២៧";
+    const academicYearUni = toUniversalNum(academicYearRaw);
+    const academicYear = toKhmerDigits(academicYearRaw) || '២០២៦-២០២៧';
     const districtName = (sInfo.district_name || sInfo.district || "កៀនស្វាយ").replace(/^ស្រុក\s*/, '').trim(); 
     const schoolName = sInfo.school_name || "សាលាបឋមសិក្សា ខ្សុំ";
     const principalName = (sInfo.principal_name && sInfo.principal_name !== "នាយកសាលា") ? sInfo.principal_name : "";
@@ -3889,7 +3890,7 @@ window.renderAcademicResultsReport = function(container, targetGrade, targetRoom
     // Students in Grade
     const allStudents = window.allStudents || (typeof window.getMasterStudents === 'function' ? window.getMasterStudents() : []) || JSON.parse(localStorage.getItem('academic_students') || '[]');
     const classStudents = typeof window.getStudentsForClass === 'function'
-        ? window.getStudentsForClass(curLevel, curRoom, academicYear)
+        ? window.getStudentsForClass(curLevel, curRoom, academicYearUni)
         : allStudents.filter(s => {
             if (s.status === "Dropped" || s.status === "Withdrawn") return false;
             return (s.grade || "").replace(/\s+/g, '') === curLevel.replace(/\s+/g, '') &&
@@ -4827,7 +4828,8 @@ window.renderClassInventoryReport = function(container, targetGrade, targetRoom)
     try { storedSettings = JSON.parse(localStorage.getItem('school_settings') || '{}'); } catch(e) {}
     const districtName = ctx.districtName || (storedSettings.district_name || storedSettings.district || sInfo.district_name || sInfo.district || localStorage.getItem('cms_school_district') || "កៀនស្វាយ").replace(/^ស្រុក\s*/, '').trim();
     const schoolName = ctx.schoolName || storedSettings.school_name || sInfo.school_name || localStorage.getItem('cms_school_name') || 'សាលាបឋមសិក្សា ឃុំ';
-    const academicYear = ctx.academicYear || localStorage.getItem('selected_academic_year') || '២០២៤-២០២៥';
+    const rawAcademicYear = ctx.academicYear || (storedSettings && storedSettings.academic_year) || sInfo.academic_year || localStorage.getItem('selected_academic_year') || '២០២៦-២០២៧';
+    const academicYear = typeof window.toKhmerNum === 'function' ? window.toKhmerNum(rawAcademicYear) : '២០២៦-២០២៧';
     const teacherName = ctx.teacherName || localStorage.getItem('teacher_name') || '................................';
     const principalName = ctx.principalName || localStorage.getItem('school_principal') || '................................';
     const solarDateStr = ctx.solarDate || (window.reportDateSettings ? window.reportDateSettings.solarDate : "ថ្ងៃទី....... ខែ....... ឆ្នាំ២០....");
@@ -4932,7 +4934,7 @@ window.renderClassInventoryReport = function(container, targetGrade, targetRoom)
                 <div class="text-left leading-relaxed pt-1">
                     <p class="font-moul text-slate-900 text-[11px] mb-0.5">ការិយាល័យ អប់រំ យុវជននិងកីឡានៃរដ្ឋបាលស្រុក ${districtName}</p>
                     <p class="font-moul text-slate-900 text-[11px]">${schoolName}</p>
-                    <p class="text-slate-600 mt-1 font-bold text-[10.5px]">ថ្នាក់ទី ៖ <span class="text-indigo-700">${gradeFull}</span> | ឆ្នាំសិក្សា ៖ <span class="text-slate-800">${academicYear}</span></p>
+                    <p class="text-slate-600 mt-1 font-bold text-[10.5px]">ថ្នាក់ទី ៖ <span class="text-indigo-700 font-bold">${gradeFull}</span></p>
                 </div>
                 <div class="text-center">
                     <p class="font-moul text-slate-900 text-[12px] mb-0.5">ព្រះរាជាណាចក្រកម្ពុជា</p>
@@ -4946,6 +4948,7 @@ window.renderClassInventoryReport = function(container, targetGrade, targetRoom)
             <!-- Main Title -->
             <div class="text-center mb-4">
                 <h2 class="font-moul text-base text-amber-900 inline-block px-4 pb-1 border-b-2 border-amber-600">បញ្ជីសារពើភ័ណ្ឌសម្ភារក្នុងថ្នាក់រៀន</h2>
+                <h4 class="font-moul text-xs text-red-600 mt-1">${gradeFull} | ឆ្នាំសិក្សា ${academicYear}</h4>
             </div>
 
             <!-- 2-Column Split Table (Items 1-16 on Left, 17-32 on Right) -->
@@ -5057,7 +5060,8 @@ window.renderInternalRulesReport = function(container, targetGrade, targetRoom) 
     try { storedSettings = JSON.parse(localStorage.getItem('school_settings') || '{}'); } catch(e) {}
     const districtName = ctx.districtName || (storedSettings.district_name || storedSettings.district || sInfo.district_name || sInfo.district || localStorage.getItem('cms_school_district') || "កៀនស្វាយ").replace(/^ស្រុក\s*/, '').trim();
     const schoolName = ctx.schoolName || storedSettings.school_name || sInfo.school_name || localStorage.getItem('cms_school_name') || 'សាលាបឋមសិក្សា ឃុំ';
-    const academicYear = ctx.academicYear || localStorage.getItem('selected_academic_year') || '២០២៤-២០២៥';
+    const rawAcademicYear = ctx.academicYear || (storedSettings && storedSettings.academic_year) || sInfo.academic_year || localStorage.getItem('selected_academic_year') || '២០២៦-២០២៧';
+    const academicYear = typeof window.toKhmerNum === 'function' ? window.toKhmerNum(rawAcademicYear) : '២០២៦-២០២៧';
     const teacherName = ctx.teacherName || localStorage.getItem('teacher_name') || '................................';
     const principalName = ctx.principalName || localStorage.getItem('school_principal') || '................................';
     const solarDateStr = ctx.solarDate || (window.reportDateSettings ? window.reportDateSettings.solarDate : "ថ្ងៃទី....... ខែ....... ឆ្នាំ២០....");
@@ -5105,7 +5109,7 @@ window.renderInternalRulesReport = function(container, targetGrade, targetRoom) 
                 <div class="text-left leading-relaxed pt-1">
                     <p class="font-moul text-slate-900 text-[11px] mb-0.5">ការិយាល័យ អប់រំ យុវជននិងកីឡានៃរដ្ឋបាលស្រុក ${districtName}</p>
                     <p class="font-moul text-slate-900 text-[11px]">${schoolName}</p>
-                    <p class="text-slate-600 mt-1 font-bold text-[10.5px]">ថ្នាក់ទី ៖ <span class="text-rose-700">${gradeFull}</span> | ឆ្នាំសិក្សា ៖ <span class="text-slate-800">${academicYear}</span></p>
+                    <p class="text-slate-600 mt-1 font-bold text-[10.5px]">ថ្នាក់ទី ៖ <span class="text-rose-700 font-bold">${gradeFull}</span></p>
                 </div>
                 <div class="text-center">
                     <p class="font-moul text-slate-900 text-[12px] mb-0.5">ព្រះរាជាណាចក្រកម្ពុជា</p>
@@ -5119,6 +5123,7 @@ window.renderInternalRulesReport = function(container, targetGrade, targetRoom) 
             <!-- Main Title -->
             <div class="text-center mb-3">
                 <h2 class="font-moul text-base text-rose-900 inline-block px-4 pb-1 border-b-2 border-rose-600">បទបញ្ជាផ្ទៃក្នុងក្នុងថ្នាក់រៀន</h2>
+                <h4 class="font-moul text-xs text-red-600 mt-1">${gradeFull} | ឆ្នាំសិក្សា ${academicYear}</h4>
             </div>
 
             <!-- Preamble -->
@@ -5183,7 +5188,8 @@ window.renderClassPrinciplesReport = function(container, targetGrade, targetRoom
     try { storedSettings = JSON.parse(localStorage.getItem('school_settings') || '{}'); } catch(e) {}
     const districtName = ctx.districtName || (storedSettings.district_name || storedSettings.district || sInfo.district_name || sInfo.district || localStorage.getItem('cms_school_district') || "កៀនស្វាយ").replace(/^ស្រុក\s*/, '').trim();
     const schoolName = ctx.schoolName || storedSettings.school_name || sInfo.school_name || localStorage.getItem('cms_school_name') || 'សាលាបឋមសិក្សា ឃុំ';
-    const academicYear = ctx.academicYear || localStorage.getItem('selected_academic_year') || '២០២៤-២០២៥';
+    const rawAcademicYear = ctx.academicYear || (storedSettings && storedSettings.academic_year) || sInfo.academic_year || localStorage.getItem('selected_academic_year') || '២០២៦-២០២៧';
+    const academicYear = typeof window.toKhmerNum === 'function' ? window.toKhmerNum(rawAcademicYear) : '២០២៦-២០២៧';
     const teacherName = ctx.teacherName || localStorage.getItem('teacher_name') || '................................';
     const principalName = ctx.principalName || localStorage.getItem('school_principal') || '................................';
     const solarDateStr = ctx.solarDate || (window.reportDateSettings ? window.reportDateSettings.solarDate : "ថ្ងៃទី....... ខែ....... ឆ្នាំ២០....");
@@ -5243,7 +5249,7 @@ window.renderClassPrinciplesReport = function(container, targetGrade, targetRoom
                 <div class="text-left leading-relaxed pt-1">
                     <p class="font-moul text-slate-900 text-[11px] mb-0.5">ការិយាល័យ អប់រំ យុវជននិងកីឡានៃរដ្ឋបាលស្រុក ${districtName}</p>
                     <p class="font-moul text-slate-900 text-[11px]">${schoolName}</p>
-                    <p class="text-slate-600 mt-1 font-bold text-[10.5px]">ថ្នាក់ទី ៖ <span class="text-sky-700">${gradeFull}</span> | ឆ្នាំសិក្សា ៖ <span class="text-slate-800">${academicYear}</span></p>
+                    <p class="text-slate-600 mt-1 font-bold text-[10.5px]">ថ្នាក់ទី ៖ <span class="text-sky-700 font-bold">${gradeFull}</span></p>
                 </div>
                 <div class="text-center">
                     <p class="font-moul text-slate-900 text-[12px] mb-0.5">ព្រះរាជាណាចក្រកម្ពុជា</p>
@@ -5257,6 +5263,7 @@ window.renderClassPrinciplesReport = function(container, targetGrade, targetRoom
             <!-- Main Title -->
             <div class="text-center mb-2">
                 <h2 class="font-moul text-base text-sky-950 inline-block px-4 pb-1 border-b-2 border-sky-600">គោលការណ៍ថ្នាក់រៀន</h2>
+                <h4 class="font-moul text-xs text-red-600 mt-1">${gradeFull} | ឆ្នាំសិក្សា ${academicYear}</h4>
             </div>
 
             <!-- Motto Banner (ដូចក្នុងរូបភាពគំរូ) -->
@@ -5316,7 +5323,8 @@ window.renderCleaningScheduleReport = function(container, targetGrade, targetRoo
     try { storedSettings = JSON.parse(localStorage.getItem('school_settings') || '{}'); } catch(e) {}
     const districtName = ctx.districtName || (storedSettings.district_name || storedSettings.district || sInfo.district_name || sInfo.district || localStorage.getItem('cms_school_district') || "កៀនស្វាយ").replace(/^ស្រុក\s*/, '').trim();
     const schoolName = ctx.schoolName || storedSettings.school_name || sInfo.school_name || localStorage.getItem('cms_school_name') || 'សាលាបឋមសិក្សា ឃុំ';
-    const academicYear = ctx.academicYear || localStorage.getItem('selected_academic_year') || '២០២៤-២០២៥';
+    const rawAcademicYear = ctx.academicYear || (storedSettings && storedSettings.academic_year) || sInfo.academic_year || localStorage.getItem('selected_academic_year') || '២០២៦-២០២៧';
+    const academicYear = typeof window.toKhmerNum === 'function' ? window.toKhmerNum(rawAcademicYear) : '២០២៦-២០២៧';
     const teacherName = ctx.teacherName || localStorage.getItem('teacher_name') || '................................';
     const principalName = ctx.principalName || localStorage.getItem('school_principal') || '................................';
     const solarDateStr = ctx.solarDate || (window.reportDateSettings ? window.reportDateSettings.solarDate : "ថ្ងៃទី....... ខែ....... ឆ្នាំ២០....");
@@ -5424,7 +5432,7 @@ window.renderCleaningScheduleReport = function(container, targetGrade, targetRoo
                 <div class="text-left leading-relaxed pt-1">
                     <p class="font-moul text-slate-900 text-[11px] mb-0.5">ការិយាល័យ អប់រំ យុវជននិងកីឡានៃរដ្ឋបាលស្រុក ${districtName}</p>
                     <p class="font-moul text-slate-900 text-[11px]">${schoolName}</p>
-                    <p class="text-slate-600 mt-1 font-bold text-[10.5px]">ថ្នាក់ទី ៖ <span class="text-emerald-700">${gradeFull}</span> | ឆ្នាំសិក្សា ៖ <span class="text-slate-800">${academicYear}</span></p>
+                    <p class="text-slate-600 mt-1 font-bold text-[10.5px]">ថ្នាក់ទី ៖ <span class="text-emerald-700 font-bold">${gradeFull}</span></p>
                 </div>
                 <div class="text-center">
                     <p class="font-moul text-slate-900 text-[12px] mb-0.5">ព្រះរាជាណាចក្រកម្ពុជា</p>
@@ -5438,6 +5446,7 @@ window.renderCleaningScheduleReport = function(container, targetGrade, targetRoo
             <!-- Main Title -->
             <div class="text-center mb-2">
                 <h2 class="font-moul text-base text-emerald-950 inline-block px-4 pb-1 border-b-2 border-emerald-600">តារាងវេនសម្អាតប្រចាំសប្ដាហ៍</h2>
+                <h4 class="font-moul text-xs text-red-600 mt-1">${gradeFull} | ឆ្នាំសិក្សា ${academicYear}</h4>
             </div>
 
             <!-- Committee Leadership Header (ប្រធានថ្នាក់ និងអនុប្រធាន) -->
@@ -5504,7 +5513,8 @@ window.renderBranchCommitteeReport = function(container, targetGrade, targetRoom
     try { storedSettings = JSON.parse(localStorage.getItem('school_settings') || '{}'); } catch(e) {}
     const districtName = ctx.districtName || (storedSettings.district_name || storedSettings.district || sInfo.district_name || sInfo.district || localStorage.getItem('cms_school_district') || "កៀនស្វាយ").replace(/^ស្រុក\s*/, '').trim();
     const schoolName = ctx.schoolName || storedSettings.school_name || sInfo.school_name || localStorage.getItem('cms_school_name') || 'សាលាបឋមសិក្សា ឃុំ';
-    const academicYear = ctx.academicYear || localStorage.getItem('selected_academic_year') || '២០២៤-២០២៥';
+    const rawAcademicYear = ctx.academicYear || (storedSettings && storedSettings.academic_year) || sInfo.academic_year || localStorage.getItem('selected_academic_year') || '២០២៦-២០២៧';
+    const academicYear = typeof window.toKhmerNum === 'function' ? window.toKhmerNum(rawAcademicYear) : '២០២៦-២០២៧';
     const teacherName = ctx.teacherName || localStorage.getItem('teacher_name') || '................................';
     const principalName = ctx.principalName || localStorage.getItem('school_principal') || '................................';
     const solarDateStr = ctx.solarDate || (window.reportDateSettings ? window.reportDateSettings.solarDate : "ថ្ងៃទី....... ខែ....... ឆ្នាំ២០....");
@@ -5574,7 +5584,7 @@ window.renderBranchCommitteeReport = function(container, targetGrade, targetRoom
                 <div class="text-left leading-relaxed pt-1">
                     <p class="font-moul text-slate-900 text-[11px] mb-0.5">ការិយាល័យ អប់រំ យុវជននិងកីឡានៃរដ្ឋបាលស្រុក ${districtName}</p>
                     <p class="font-moul text-slate-900 text-[11px]">${schoolName}</p>
-                    <p class="text-slate-600 mt-1 font-bold text-[10.5px]">ថ្នាក់ទី ៖ <span class="text-purple-700">${gradeFull}</span> | ឆ្នាំសិក្សា ៖ <span class="text-slate-800">${academicYear}</span></p>
+                    <p class="text-slate-600 mt-1 font-bold text-[10.5px]">ថ្នាក់ទី ៖ <span class="text-purple-700 font-bold">${gradeFull}</span></p>
                 </div>
                 <div class="text-center">
                     <p class="font-moul text-slate-900 text-[12px] mb-0.5">ព្រះរាជាណាចក្រកម្ពុជា</p>
@@ -5588,6 +5598,7 @@ window.renderBranchCommitteeReport = function(container, targetGrade, targetRoom
             <!-- Main Title -->
             <div class="text-center mb-3">
                 <h2 class="font-moul text-sm sm:text-base text-purple-950 inline-block px-4 pb-1 border-b-2 border-purple-600">រចនាសម្ព័ន្ធគណៈកម្មការសាខា និងក្រុមប្រឹក្សាកុមារប្រចាំថ្នាក់</h2>
+                <h4 class="font-moul text-xs text-red-600 mt-1">${gradeFull} | ឆ្នាំសិក្សា ${academicYear}</h4>
             </div>
 
             <!-- Hierarchy Tree Layout (ដូចគំរូរូបភាពជាក់ស្តែង) -->

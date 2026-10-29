@@ -666,6 +666,7 @@ describe('MoEYS Sikha-karik Booklet & Centralized Reports Suite', () => {
         assert.ok(invHtml.includes('ការិយាល័យ អប់រំ យុវជននិងកីឡានៃរដ្ឋបាលស្រុក') && invHtml.includes('ព្រះរាជាណាចក្រកម្ពុជា'), 'Inventory must contain official dual header');
         assert.ok(invHtml.includes('header-flourish-symbol'), 'Inventory must contain official flourish ornament');
         assert.ok(invHtml.includes('នាយិកាសាលា') && invHtml.includes('គ្រូបន្ទុកថ្នាក់'), 'Inventory must have signature block with នាយិកាសាលា');
+        assert.ok(invHtml.includes('ឆ្នាំសិក្សា ២០២៦-២០២៧'), 'Inventory must contain academic year 2026-2027 below title');
 
         // Test 2: បទបញ្ជាផ្ទៃក្នុង (Internal Rules - 12 Articles)
         assert.strictEqual(typeof context.window.renderInternalRulesReport, 'function', 'renderInternalRulesReport must be globally exported');
@@ -681,6 +682,7 @@ describe('MoEYS Sikha-karik Booklet & Centralized Reports Suite', () => {
         }
         assert.ok(rulesHtml.includes('បទបញ្ជាផ្ទៃក្នុងនេះ មានសុពលភាពអនុវត្ត'), 'Internal rules must have closing clause');
         assert.ok(rulesHtml.includes('នាយិកាសាលា') && rulesHtml.includes('គ្រូបន្ទុកថ្នាក់'), 'Internal rules must have signatures with នាយិកាសាលា');
+        assert.ok(rulesHtml.includes('ឆ្នាំសិក្សា ២០២៦-២០២៧'), 'Internal rules must contain academic year 2026-2027 below title');
 
         // Test 3: គោលការណ៍ថ្នាក់រៀន (Class Principles - 16 Rules)
         assert.strictEqual(typeof context.window.renderClassPrinciplesReport, 'function', 'renderClassPrinciplesReport must be globally exported');
@@ -692,6 +694,7 @@ describe('MoEYS Sikha-karik Booklet & Centralized Reports Suite', () => {
         assert.ok(princHtml.includes('ស្លៀកពាក់ស្អាតបាត និងសមរម្យ'), 'Principles must contain principle 2');
         assert.ok(princHtml.includes('សុំច្បាប់ពេលឈប់សម្រាក'), 'Principles must contain principle 16');
         assert.ok(princHtml.includes('តំណាងសិស្ស / ប្រធានថ្នាក់'), 'Principles must have monitor signature');
+        assert.ok(princHtml.includes('ឆ្នាំសិក្សា ២០២៦-២០២៧'), 'Principles must contain academic year 2026-2027 below title');
 
         // Test 4: វេនសម្អាតប្រចាំសប្ដាហ៍ (Cleaning Schedule)
         assert.strictEqual(typeof context.window.renderCleaningScheduleReport, 'function', 'renderCleaningScheduleReport must be globally exported');
@@ -701,6 +704,7 @@ describe('MoEYS Sikha-karik Booklet & Centralized Reports Suite', () => {
         assert.ok(cleanHtml.includes('ប្រធានថ្នាក់ (ត្រួតពិនិត្យរួម)'), 'Cleaning schedule must contain monitor banner');
         assert.ok(cleanHtml.includes('ថ្ងៃចន្ទ') && cleanHtml.includes('ថ្ងៃសៅរ៍'), 'Cleaning schedule must include days Mon-Sat');
         assert.ok(cleanHtml.includes('ភារកិច្ចវេនសម្អាត'), 'Cleaning schedule must contain duty scope note');
+        assert.ok(cleanHtml.includes('ឆ្នាំសិក្សា ២០២៦-២០២៧'), 'Cleaning schedule must contain academic year 2026-2027 below title');
 
         // Test 5: គណៈកម្មការសាខា & ក្រុមប្រឹក្សាកុមារ (Branch Committee)
         assert.strictEqual(typeof context.window.renderBranchCommitteeReport, 'function', 'renderBranchCommitteeReport must be globally exported');
@@ -712,6 +716,7 @@ describe('MoEYS Sikha-karik Booklet & Centralized Reports Suite', () => {
         assert.ok(branchHtml.includes('សមាជិកទី ១') && branchHtml.includes('សមាជិកទី ៤'), 'Branch committee must have Level 3 tree');
         assert.ok(branchHtml.includes('តារាងបែងចែកសិស្សតាមអនុសាខាទាំង ៦'), 'Branch committee must have Sub-branches table');
         assert.ok(branchHtml.includes('អនុសាខាទី ១') && branchHtml.includes('អនុសាខាទី ៦'), 'Sub-branches 1 to 6 must be listed');
+        assert.ok(branchHtml.includes('ឆ្នាំសិក្សា ២០២៦-២០២៧'), 'Branch committee must contain academic year 2026-2027 below title');
 
         // Test 6: Verify Reports List Dashboard includes all 5 new cards
         const dashContainer = { innerHTML: '' };
