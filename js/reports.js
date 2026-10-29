@@ -310,7 +310,13 @@ window.loadReportsView = function() {
                         <div id="reportExtraControls" class="flex items-center gap-2 flex-nowrap shrink-0"></div>
 
                         <!-- ផ្នែកខាងស្តាំ៖ ការកំណត់ប្រភេទក្រដាស ទិសដៅ មាត្រដ្ឋាន និងប៊ូតុងព្រីន -->
-                        <div id="reportDetailPrintToolbarArea" class="flex items-center gap-2 flex-nowrap shrink-0">
+                                                <div id="reportDetailPrintToolbarArea" class="flex items-center gap-2 flex-nowrap shrink-0">
+                            <!-- Custom Border Configuration Button -->
+                            <button type="button" onclick="window.openReportBorderModal()" class="px-3.5 py-2 bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 hover:from-amber-600 hover:to-orange-600 text-white rounded-xl text-xs font-bold shadow-sm transition flex items-center gap-1.5 active:scale-95 no-print" title="កំណត់ ឬ Upload ស៊ុមទំព័ររបាយការណ៍">
+                                <i class="fa-solid fa-crop-simple text-amber-200"></i>
+                                <span>ស៊ុមទំព័រ (Border)</span>
+                                <span id="reportBorderBadge" class="hidden w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                            </button>
                             ${window.CMSPrintManager ? window.CMSPrintManager.renderToolbarHtml('reportPaperArea', 'portrait', 'A4', 100) : `
                                 <button onclick="window.printCurrentReport()" class="px-5 py-2.5 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white rounded-xl text-xs font-bold shadow-md shadow-amber-500/30 transition flex items-center gap-2 active:scale-95 outline-none">
                                     <i class="fa-solid fa-print"></i> បោះពុម្ព
@@ -328,11 +334,293 @@ window.loadReportsView = function() {
                     </div>
                 </div>
             </div>
+            <!-- MODAL: Custom Report Border Modal (កំណត់ និង Upload ស៊ុមទំព័ររបាយការណ៍) -->
+            <div id="reportBorderModal" class="hidden fixed inset-0 z-[2500] bg-black/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 font-siemreap">
+                <div class="bg-white dark:bg-slate-800 rounded-3xl w-full max-w-lg max-h-[90vh] overflow-y-auto p-5 sm:p-6 shadow-2xl border border-slate-200 dark:border-slate-700 animate-scale-up space-y-5 custom-scrollbar">
+                    <!-- Modal Header -->
+                    <div class="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-700">
+                        <div class="flex items-center gap-3">
+                            <div class="w-11 h-11 rounded-2xl bg-amber-100 text-amber-700 dark:bg-amber-900/60 dark:text-amber-300 flex items-center justify-center text-xl shadow-inner">
+                                <i class="fa-solid fa-crop-simple"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-moul text-base text-slate-800 dark:text-white">កំណត់ និង Upload ស៊ុមទំព័រ</h3>
+                                <p class="text-xs text-slate-400">អ្នកអាចដកស៊ុមចេញ ឬ Upload រូបភាពស៊ុមដោយខ្លួនឯង</p>
+                            </div>
+                        </div>
+                        <button type="button" onclick="window.closeReportBorderModal()" class="w-9 h-9 rounded-full bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-500 text-sm flex items-center justify-center transition">
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
+                    </div>
+
+                    <!-- Presets Selection Grid -->
+                    <div class="space-y-2.5">
+                        <label class="block font-bold text-xs text-slate-700 dark:text-slate-300">ជ្រើសរើសប្រភេទស៊ុម ៖</label>
+                        <div class="grid grid-cols-2 sm:grid-cols-3 gap-2.5 text-xs">
+                            <!-- Preset 1: No Border (Default) -->
+                            <div onclick="window.selectReportBorderPreset('none')" id="border_opt_none" class="p-3 rounded-2xl border-2 border-slate-200 dark:border-slate-700 hover:border-amber-500 cursor-pointer transition text-center flex flex-col items-center justify-center gap-1.5 bg-slate-50 dark:bg-slate-700/50">
+                                <i class="fa-solid fa-ban text-rose-500 text-xl"></i>
+                                <span class="font-bold text-slate-700 dark:text-slate-200 text-[11px]">គ្មានស៊ុម (Default)</span>
+                            </div>
+
+                            <!-- Preset 2: Custom Upload -->
+                            <div onclick="window.selectReportBorderPreset('custom')" id="border_opt_custom" class="p-3 rounded-2xl border-2 border-slate-200 dark:border-slate-700 hover:border-amber-500 cursor-pointer transition text-center flex flex-col items-center justify-center gap-1.5 bg-slate-50 dark:bg-slate-700/50">
+                                <i class="fa-solid fa-cloud-arrow-up text-amber-600 text-xl"></i>
+                                <span class="font-bold text-slate-700 dark:text-slate-200 text-[11px]">ស៊ុមផ្ទាល់ខ្លួន</span>
+                            </div>
+
+                            <!-- Preset 3: Gold Flourish -->
+                            <div onclick="window.selectReportBorderPreset('gold_flourish')" id="border_opt_gold_flourish" class="p-3 rounded-2xl border-2 border-slate-200 dark:border-slate-700 hover:border-amber-500 cursor-pointer transition text-center flex flex-col items-center justify-center gap-1.5 bg-slate-50 dark:bg-slate-700/50">
+                                <i class="fa-solid fa-certificate text-amber-500 text-xl"></i>
+                                <span class="font-bold text-slate-700 dark:text-slate-200 text-[11px]">ក្បាច់ពណ៌មាស</span>
+                            </div>
+
+                            <!-- Preset 4: Classic Double -->
+                            <div onclick="window.selectReportBorderPreset('classic_double')" id="border_opt_classic_double" class="p-3 rounded-2xl border-2 border-slate-200 dark:border-slate-700 hover:border-amber-500 cursor-pointer transition text-center flex flex-col items-center justify-center gap-1.5 bg-slate-50 dark:bg-slate-700/50">
+                                <i class="fa-solid fa-square-full text-blue-500 text-xl"></i>
+                                <span class="font-bold text-slate-700 dark:text-slate-200 text-[11px]">បន្ទាត់ទ្វេ (ខៀវ)</span>
+                            </div>
+
+                            <!-- Preset 5: Classic Thin -->
+                            <div onclick="window.selectReportBorderPreset('classic_thin')" id="border_opt_classic_thin" class="p-3 rounded-2xl border-2 border-slate-200 dark:border-slate-700 hover:border-amber-500 cursor-pointer transition text-center flex flex-col items-center justify-center gap-1.5 bg-slate-50 dark:bg-slate-700/50">
+                                <i class="fa-regular fa-square text-slate-400 text-xl"></i>
+                                <span class="font-bold text-slate-700 dark:text-slate-200 text-[11px]">បន្ទាត់ទោលស្តើង</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Custom Border Upload Section -->
+                    <div id="borderUploadContainer" class="p-4 bg-amber-50/70 dark:bg-amber-950/30 rounded-2xl border border-amber-200/80 dark:border-amber-700/50 space-y-3">
+                        <div class="flex items-center justify-between">
+                            <span class="font-bold text-xs text-amber-900 dark:text-amber-200 flex items-center gap-1.5">
+                                <i class="fa-solid fa-image text-amber-600"></i> ផ្ទុកឡើងរូបភាពស៊ុមផ្ទាល់ខ្លួន (Custom Border)
+                            </span>
+                            <button type="button" onclick="window.removeCustomBorderImage()" class="text-[11px] text-rose-600 hover:underline font-bold">
+                                លុបរូបភាពចេញ
+                            </button>
+                        </div>
+
+                        <!-- Dropzone -->
+                        <div onclick="document.getElementById('reportBorderFileInput')?.click()" class="border-2 border-dashed border-amber-300 dark:border-amber-700/60 bg-white/80 dark:bg-slate-800/80 rounded-2xl p-4 text-center cursor-pointer hover:bg-amber-50 dark:hover:bg-slate-800 transition">
+                            <input type="file" id="reportBorderFileInput" accept="image/png, image/jpeg, image/svg+xml, image/webp" class="hidden" onchange="window.handleBorderFileUpload(event)">
+                            <i class="fa-solid fa-cloud-arrow-up text-amber-600 text-2xl mb-1.5"></i>
+                            <p class="font-bold text-xs text-slate-700 dark:text-slate-200">ចុច ឬទម្លាក់រូបភាពស៊ុមនៅទីនេះ</p>
+                            <p class="text-[10px] text-slate-400 mt-0.5">ណែនាំ៖ ប្រើប្រាស់រូបភាព PNG ដែលមានផ្ទៃកណ្តាលថ្លា (Transparent Center PNG)</p>
+                        </div>
+
+                        <!-- Preview Area -->
+                        <div id="borderPreviewBox" class="hidden relative w-full h-28 rounded-xl border border-amber-300/80 dark:border-amber-700/60 bg-white/90 dark:bg-slate-900 overflow-hidden flex items-center justify-center p-2">
+                            <img id="borderPreviewImg" src="" class="max-h-full max-w-full object-contain" alt="Border Preview" />
+                        </div>
+                    </div>
+
+                    <!-- Inset Distance Slider -->
+                    <div class="space-y-1.5 text-xs">
+                        <div class="flex justify-between font-bold text-slate-700 dark:text-slate-300">
+                            <span>គម្លាតស៊ុមពីគែមក្រដាស (Border Inset) ៖</span>
+                            <span id="borderInsetDisplay" class="font-mono text-amber-600 font-bold">4px</span>
+                        </div>
+                        <input type="range" id="reportBorderInsetSlider" min="0" max="20" step="1" value="4" oninput="document.getElementById('borderInsetDisplay').textContent = this.value + 'px'" class="w-full h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-amber-600">
+                        <div class="flex justify-between text-[10px] text-slate-400">
+                            <span>0px (ជាប់គែម)</span>
+                            <span>4px (ស្តង់ដារ)</span>
+                            <span>20px (ឆ្ងាយ)</span>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="flex flex-col sm:flex-row items-center justify-between gap-3 pt-3 border-t border-slate-100 dark:border-slate-700">
+                        <button type="button" onclick="window.removeAllReportBorders()" class="w-full sm:w-auto px-4 py-2.5 rounded-xl text-xs font-bold text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition border border-rose-200/60">
+                            <i class="fa-solid fa-trash-can mr-1"></i> ដកស៊ុមចេញទាំងអស់
+                        </button>
+                        <div class="flex items-center gap-2 w-full sm:w-auto justify-end">
+                            <button type="button" onclick="window.closeReportBorderModal()" class="px-4 py-2.5 rounded-xl text-xs font-bold text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700 transition">
+                                បោះបង់
+                            </button>
+                            <button type="button" onclick="window.saveReportBorderSettings()" class="px-5 py-2.5 bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white rounded-xl text-xs font-bold shadow-md transition flex items-center gap-2">
+                                <i class="fa-solid fa-check"></i> អនុវត្តស៊ុម (Apply)
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     `;
 
     if (typeof window.applyAcademicReportPaperSettings === 'function') {
         window.applyAcademicReportPaperSettings();
+    }
+};
+
+
+// ==========================================================================
+// មុខងារគ្រប់គ្រងស៊ុមទំព័ររបាយការណ៍ និង Upload Custom Border
+// ==========================================================================
+window.currentBorderSelection = localStorage.getItem('cms_report_border_mode') || 'none';
+
+window.getReportBorderLayerHtml = function() {
+    const mode = localStorage.getItem('cms_report_border_mode') || 'none';
+    const inset = (localStorage.getItem('cms_report_border_inset') || '4') + 'px';
+    if (mode === 'none') {
+        return '';
+    }
+    if (mode === 'custom') {
+        const customImg = localStorage.getItem('cms_report_border_custom_img');
+        if (!customImg) return '';
+        return `<div class="cms-report-border-layer" style="position: absolute; inset: ${inset}; pointer-events: none; background-image: url('${customImg}'); background-size: 100% 100%; background-repeat: no-repeat; z-index: 20;"></div>`;
+    }
+    if (mode === 'gold_flourish') {
+        return `<div class="cms-report-border-layer" style="position: absolute; inset: ${inset}; border: 2.5px solid #d97706; pointer-events: none; border-radius: 4px; z-index: 20;"><div style="position: absolute; inset: 3px; border: 1.5px dashed #d97706;"></div></div>`;
+    }
+    if (mode === 'classic_double') {
+        return `<div class="cms-report-border-layer" style="position: absolute; inset: ${inset}; border: 3px double #2563eb; pointer-events: none; z-index: 20;"></div>`;
+    }
+    if (mode === 'classic_thin') {
+        return `<div class="cms-report-border-layer" style="position: absolute; inset: ${inset}; border: 1px solid #64748b; pointer-events: none; z-index: 20;"></div>`;
+    }
+    return '';
+};
+
+window.applyReportBorderToContainer = function(container) {
+    const target = container || document.getElementById('reportPaperArea');
+    if (!target) return;
+    const a4Pages = target.querySelectorAll('.a4-page');
+    const borderHtml = window.getReportBorderLayerHtml();
+    a4Pages.forEach(page => {
+        const existing = page.querySelector('.cms-report-border-layer');
+        if (existing) existing.remove();
+        if (borderHtml) {
+            page.insertAdjacentHTML('afterbegin', borderHtml);
+        }
+    });
+    const badge = document.getElementById('reportBorderBadge');
+    const mode = localStorage.getItem('cms_report_border_mode') || 'none';
+    if (badge) {
+        if (mode !== 'none') badge.classList.remove('hidden');
+        else badge.classList.add('hidden');
+    }
+};
+
+window.openReportBorderModal = function() {
+    const modal = document.getElementById('reportBorderModal');
+    if (!modal) return;
+    modal.classList.remove('hidden');
+
+    const curMode = localStorage.getItem('cms_report_border_mode') || 'none';
+    window.selectReportBorderPreset(curMode, false);
+
+    const inset = parseInt(localStorage.getItem('cms_report_border_inset') || '4', 10);
+    const slider = document.getElementById('reportBorderInsetSlider');
+    const display = document.getElementById('borderInsetDisplay');
+    if (slider) slider.value = inset;
+    if (display) display.textContent = inset + 'px';
+
+    const customImg = localStorage.getItem('cms_report_border_custom_img');
+    const previewBox = document.getElementById('borderPreviewBox');
+    const previewImg = document.getElementById('borderPreviewImg');
+    if (customImg && previewImg && previewBox) {
+        previewImg.src = customImg;
+        previewBox.classList.remove('hidden');
+    } else if (previewBox) {
+        previewBox.classList.add('hidden');
+    }
+};
+
+window.closeReportBorderModal = function() {
+    const modal = document.getElementById('reportBorderModal');
+    if (modal) modal.classList.add('hidden');
+};
+
+window.selectReportBorderPreset = function(mode, updateState = true) {
+    window.currentBorderSelection = mode;
+    const presets = ['none', 'custom', 'gold_flourish', 'classic_double', 'classic_thin'];
+    presets.forEach(p => {
+        const el = document.getElementById(`border_opt_${p}`);
+        if (el) {
+            if (p === mode) {
+                el.classList.add('border-amber-500', 'bg-amber-50/80', 'dark:bg-amber-950/40', 'ring-2', 'ring-amber-400');
+                el.classList.remove('border-slate-200', 'dark:border-slate-700');
+            } else {
+                el.classList.remove('border-amber-500', 'bg-amber-50/80', 'dark:bg-amber-950/40', 'ring-2', 'ring-amber-400');
+                el.classList.add('border-slate-200', 'dark:border-slate-700');
+            }
+        }
+    });
+};
+
+window.handleBorderFileUpload = function(event) {
+    const file = event.target.files && event.target.files[0];
+    if (!file) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+        if (typeof window.showToast === 'function') {
+            window.showToast("ទំហំរូបភាពធំពេក! សូមជ្រើសរើសរូបភាពក្រោម 5MB", "warning");
+        } else {
+            alert("ទំហំរូបភាពធំពេក! សូមជ្រើសរើសរូបភាពក្រោម 5MB");
+        }
+        return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        const dataUrl = e.target.result;
+        try {
+            localStorage.setItem('cms_report_border_custom_img', dataUrl);
+            window.selectReportBorderPreset('custom');
+            const previewBox = document.getElementById('borderPreviewBox');
+            const previewImg = document.getElementById('borderPreviewImg');
+            if (previewImg && previewBox) {
+                previewImg.src = dataUrl;
+                previewBox.classList.remove('hidden');
+            }
+            if (typeof window.showToast === 'function') {
+                window.showToast("បានផ្ទុកឡើងរូបភាពស៊ុមដោយជោគជ័យ!", "success");
+            }
+        } catch(err) {
+            console.error("Error storing custom border image:", err);
+            if (typeof window.showToast === 'function') {
+                window.showToast("មិនអាចផ្ទុករូបភាពបានទេ (ទំហំធំលើសកំណត់ LocalStorage)!", "error");
+            }
+        }
+    };
+    reader.readAsDataURL(file);
+};
+
+window.removeCustomBorderImage = function() {
+    localStorage.removeItem('cms_report_border_custom_img');
+    const previewBox = document.getElementById('borderPreviewBox');
+    const previewImg = document.getElementById('borderPreviewImg');
+    const fileInput = document.getElementById('reportBorderFileInput');
+    if (fileInput) fileInput.value = '';
+    if (previewImg) previewImg.src = '';
+    if (previewBox) previewBox.classList.add('hidden');
+    window.selectReportBorderPreset('none');
+    if (typeof window.showToast === 'function') {
+        window.showToast("បានលុបរូបភាពស៊ុមផ្ទាល់ខ្លួនរួចរាល់!", "info");
+    }
+};
+
+window.saveReportBorderSettings = function() {
+    const mode = window.currentBorderSelection || 'none';
+    const insetVal = document.getElementById('reportBorderInsetSlider')?.value || '4';
+    localStorage.setItem('cms_report_border_mode', mode);
+    localStorage.setItem('cms_report_border_inset', insetVal);
+    window.applyReportBorderToContainer();
+    window.closeReportBorderModal();
+    if (typeof window.showToast === 'function') {
+        const modeLabel = mode === 'none' ? 'ដកស៊ុមចេញ' : (mode === 'custom' ? 'ស៊ុមផ្ទាល់ខ្លួន' : 'ស៊ុមស្តង់ដារ');
+        window.showToast(`បានអនុវត្ត${modeLabel}ដោយជោគជ័យ!`, "success");
+    }
+};
+
+window.removeAllReportBorders = function() {
+    localStorage.setItem('cms_report_border_mode', 'none');
+    window.currentBorderSelection = 'none';
+    window.selectReportBorderPreset('none');
+    window.applyReportBorderToContainer();
+    window.closeReportBorderModal();
+    if (typeof window.showToast === 'function') {
+        window.showToast("បានដកស៊ុមចេញទាំងអស់ក្នុងរបាយការណ៍!", "info");
     }
 };
 
@@ -4916,16 +5204,10 @@ window.renderClassInventoryReport = function(container, targetGrade, targetRoom)
     `).join('');
 
     container.innerHTML = `
-        <div class="a4-page bg-white shadow-xl rounded-lg mx-auto p-6 md:p-8 font-siemreap text-slate-800 relative w-full min-h-[297mm] text-[11px] leading-relaxed border-[3px] border-amber-500/80 flex flex-col justify-between" style="box-sizing: border-box; max-width: 210mm;">
-            <!-- Inner decorative border -->
-            <div style="position: absolute; inset: 4px; border: 1.5px solid #d97706; pointer-events: none; border-radius: 4px;"></div>
-            <div style="position: absolute; top: 8px; left: 10px; color: #d97706; font-size: 16px;">❖</div>
-            <div style="position: absolute; top: 8px; right: 10px; color: #d97706; font-size: 16px;">❖</div>
-            <div style="position: absolute; bottom: 8px; left: 10px; color: #d97706; font-size: 16px;">❖</div>
-            <div style="position: absolute; bottom: 8px; right: 10px; color: #d97706; font-size: 16px;">❖</div>
-
+        <div class="a4-page bg-white shadow-xl rounded-lg mx-auto p-6 md:p-8 font-siemreap text-slate-800 relative w-full min-h-[297mm] text-[11px] leading-relaxed flex flex-col justify-start" style="box-sizing: border-box; max-width: 210mm;">
+            ${window.getReportBorderLayerHtml ? window.getReportBorderLayerHtml() : ''}
             <!-- Main Content Area -->
-            <div class="flex-1 flex flex-col justify-start">
+            <div>
                 <!-- Official Dual-Side Header matching User Model (Images 1 & 2) -->
                 <div class="flex justify-between items-start mb-4 text-xs">
                     <div class="text-left leading-relaxed pt-3.5 sm:pt-4">
@@ -5016,17 +5298,17 @@ window.renderClassInventoryReport = function(container, targetGrade, targetRoom)
             </div>
             </div>
 
-            <!-- Signatures -->
-            <div class="mt-auto pt-4 px-8 font-siemreap">
+            <!-- Signatures (រំកិលឡើងលើឱ្យជិតតារាង) -->
+            <div class="mt-4 pt-2 px-8 font-siemreap">
                 <div class="flex justify-between items-start text-xs">
                     <div class="text-center w-2/5">
                         <p class="mb-1 text-slate-700">បានឃើញ និងឯកភាព</p>
-                        <p class="font-moul text-slate-900 mb-14">នាយិកាសាលា</p>
+                        <p class="font-moul text-slate-900 mb-8">នាយិកាសាលា</p>
                     </div>
                     <div class="text-center w-2/5">
                         <p class="mb-1 text-slate-700">${lunarDateStr}</p>
                         <p class="mb-1 text-slate-700 font-bold">${solarDateStr}</p>
-                        <p class="font-moul text-slate-900 mb-14">គ្រូបន្ទុកថ្នាក់</p>
+                        <p class="font-moul text-slate-900 mb-8">គ្រូបន្ទុកថ្នាក់</p>
                         <p class="font-moul text-slate-900 text-xs">${teacherName}</p>
                     </div>
                 </div>
@@ -5095,16 +5377,10 @@ window.renderInternalRulesReport = function(container, targetGrade, targetRoom) 
     `;
 
     container.innerHTML = `
-        <div class="a4-page bg-white shadow-xl rounded-lg mx-auto p-6 md:p-8 font-siemreap text-slate-800 relative w-full min-h-[297mm] text-[11px] leading-relaxed border-[3px] border-rose-500/80 flex flex-col justify-between" style="box-sizing: border-box; max-width: 210mm;">
-            <!-- Inner decorative border -->
-            <div style="position: absolute; inset: 4px; border: 1.5px solid #e11d48; pointer-events: none; border-radius: 4px;"></div>
-            <div style="position: absolute; top: 8px; left: 10px; color: #e11d48; font-size: 16px;">❖</div>
-            <div style="position: absolute; top: 8px; right: 10px; color: #e11d48; font-size: 16px;">❖</div>
-            <div style="position: absolute; bottom: 8px; left: 10px; color: #e11d48; font-size: 16px;">❖</div>
-            <div style="position: absolute; bottom: 8px; right: 10px; color: #e11d48; font-size: 16px;">❖</div>
-
+        <div class="a4-page bg-white shadow-xl rounded-lg mx-auto p-6 md:p-8 font-siemreap text-slate-800 relative w-full min-h-[297mm] text-[11px] leading-relaxed flex flex-col justify-start" style="box-sizing: border-box; max-width: 210mm;">
+            ${window.getReportBorderLayerHtml ? window.getReportBorderLayerHtml() : ''}
             <!-- Main Content Area -->
-            <div class="flex-1 flex flex-col justify-start">
+            <div>
                 <!-- Official Dual-Side Header matching User Model (Images 1 & 2) -->
                 <div class="flex justify-between items-start mb-3 text-xs">
                     <div class="text-left leading-relaxed pt-3.5 sm:pt-4">
@@ -5148,17 +5424,17 @@ window.renderInternalRulesReport = function(container, targetGrade, targetRoom) 
             </div>
             </div>
 
-            <!-- Signatures -->
-            <div class="mt-auto pt-3 px-8 font-siemreap">
+            <!-- Signatures (រំកិលឡើងលើឱ្យជិតតារាង) -->
+            <div class="mt-4 pt-2 px-8 font-siemreap">
                 <div class="flex justify-between items-start text-xs">
                     <div class="text-center w-2/5">
                         <p class="mb-1 text-slate-700">បានឃើញ និងឯកភាព</p>
-                        <p class="font-moul text-slate-900 mb-14">នាយិកាសាលា</p>
+                        <p class="font-moul text-slate-900 mb-8">នាយិកាសាលា</p>
                     </div>
                     <div class="text-center w-2/5">
                         <p class="mb-1 text-slate-700">${lunarDateStr}</p>
                         <p class="mb-1 text-slate-700 font-bold">${solarDateStr}</p>
-                        <p class="font-moul text-slate-900 mb-14">គ្រូបន្ទុកថ្នាក់</p>
+                        <p class="font-moul text-slate-900 mb-8">គ្រូបន្ទុកថ្នាក់</p>
                         <p class="font-moul text-slate-900 text-xs">${teacherName}</p>
                     </div>
                 </div>
@@ -5239,16 +5515,10 @@ window.renderClassPrinciplesReport = function(container, targetGrade, targetRoom
     `;
 
     container.innerHTML = `
-        <div class="a4-page bg-white shadow-xl rounded-lg mx-auto p-6 md:p-8 font-siemreap text-slate-800 relative w-full min-h-[297mm] text-[11px] leading-relaxed border-[3px] border-sky-500/80 flex flex-col justify-between" style="box-sizing: border-box; max-width: 210mm;">
-            <!-- Inner decorative border -->
-            <div style="position: absolute; inset: 4px; border: 1.5px solid #0284c7; pointer-events: none; border-radius: 4px;"></div>
-            <div style="position: absolute; top: 8px; left: 10px; color: #0284c7; font-size: 16px;">❖</div>
-            <div style="position: absolute; top: 8px; right: 10px; color: #0284c7; font-size: 16px;">❖</div>
-            <div style="position: absolute; bottom: 8px; left: 10px; color: #0284c7; font-size: 16px;">❖</div>
-            <div style="position: absolute; bottom: 8px; right: 10px; color: #0284c7; font-size: 16px;">❖</div>
-
+        <div class="a4-page bg-white shadow-xl rounded-lg mx-auto p-6 md:p-8 font-siemreap text-slate-800 relative w-full min-h-[297mm] text-[11px] leading-relaxed flex flex-col justify-start" style="box-sizing: border-box; max-width: 210mm;">
+            ${window.getReportBorderLayerHtml ? window.getReportBorderLayerHtml() : ''}
             <!-- Main Content Area -->
-            <div class="flex-1 flex flex-col justify-start">
+            <div>
                 <!-- Official Dual-Side Header matching User Model (Images 1 & 2) -->
                 <div class="flex justify-between items-start mb-2 text-xs">
                     <div class="text-left leading-relaxed pt-3.5 sm:pt-4">
@@ -5287,18 +5557,18 @@ window.renderClassPrinciplesReport = function(container, targetGrade, targetRoom
             </div>
             </div>
 
-            <!-- Signatures -->
-            <div class="mt-auto pt-4 px-8 font-siemreap">
+            <!-- Signatures (រំកិលឡើងលើឱ្យជិតតារាង) -->
+            <div class="mt-4 pt-2 px-8 font-siemreap">
                 <div class="flex justify-between items-start text-xs">
                     <div class="text-center w-2/5">
                         <p class="mb-1 text-slate-700">បានឃើញ និងឯកភាព</p>
-                        <p class="font-moul text-slate-900 mb-14">គ្រូបន្ទុកថ្នាក់</p>
+                        <p class="font-moul text-slate-900 mb-8">គ្រូបន្ទុកថ្នាក់</p>
                         <p class="font-moul text-slate-900 text-xs">${teacherName}</p>
                     </div>
                     <div class="text-center w-2/5">
                         <p class="mb-1 text-slate-700">${lunarDateStr}</p>
                         <p class="mb-1 text-slate-700 font-bold">${solarDateStr}</p>
-                        <p class="font-moul text-slate-900 mb-14">តំណាងសិស្ស / ប្រធានថ្នាក់</p>
+                        <p class="font-moul text-slate-900 mb-8">តំណាងសិស្ស / ប្រធានថ្នាក់</p>
                         <p class="font-moul text-slate-900 text-xs">${monitorStudent}</p>
                     </div>
                 </div>
@@ -5427,16 +5697,10 @@ window.renderCleaningScheduleReport = function(container, targetGrade, targetRoo
     };
 
     container.innerHTML = `
-        <div class="a4-page bg-white shadow-xl rounded-lg mx-auto p-6 md:p-8 font-siemreap text-slate-800 relative w-full min-h-[297mm] text-[11px] leading-relaxed border-[3px] border-emerald-500/80 flex flex-col justify-between" style="box-sizing: border-box; max-width: 210mm;">
-            <!-- Inner decorative border -->
-            <div style="position: absolute; inset: 4px; border: 1.5px solid #059669; pointer-events: none; border-radius: 4px;"></div>
-            <div style="position: absolute; top: 8px; left: 10px; color: #059669; font-size: 16px;">❖</div>
-            <div style="position: absolute; top: 8px; right: 10px; color: #059669; font-size: 16px;">❖</div>
-            <div style="position: absolute; bottom: 8px; left: 10px; color: #059669; font-size: 16px;">❖</div>
-            <div style="position: absolute; bottom: 8px; right: 10px; color: #059669; font-size: 16px;">❖</div>
-
+        <div class="a4-page bg-white shadow-xl rounded-lg mx-auto p-6 md:p-8 font-siemreap text-slate-800 relative w-full min-h-[297mm] text-[11px] leading-relaxed flex flex-col justify-start" style="box-sizing: border-box; max-width: 210mm;">
+            ${window.getReportBorderLayerHtml ? window.getReportBorderLayerHtml() : ''}
             <!-- Main Content Area -->
-            <div class="flex-1 flex flex-col justify-start">
+            <div>
                 <!-- Official Dual-Side Header matching User Model (Images 1 & 2) -->
                 <div class="flex justify-between items-start mb-2 text-xs">
                     <div class="text-left leading-relaxed pt-3.5 sm:pt-4">
@@ -5482,17 +5746,17 @@ window.renderCleaningScheduleReport = function(container, targetGrade, targetRoo
             </div>
             </div>
 
-            <!-- Signatures -->
-            <div class="mt-auto pt-2 px-8 font-siemreap">
+            <!-- Signatures (រំកិលឡើងលើឱ្យជិតតារាង) -->
+            <div class="mt-4 pt-2 px-8 font-siemreap">
                 <div class="flex justify-between items-start text-xs">
                     <div class="text-center w-2/5">
                         <p class="mb-1 text-slate-700">បានឃើញ និងឯកភាព</p>
-                        <p class="font-moul text-slate-900 mb-12">នាយិកាសាលា</p>
+                        <p class="font-moul text-slate-900 mb-8">នាយិកាសាលា</p>
                     </div>
                     <div class="text-center w-2/5">
                         <p class="mb-1 text-slate-700">${lunarDateStr}</p>
                         <p class="mb-1 text-slate-700 font-bold">${solarDateStr}</p>
-                        <p class="font-moul text-slate-900 mb-12">គ្រូបន្ទុកថ្នាក់</p>
+                        <p class="font-moul text-slate-900 mb-8">គ្រូបន្ទុកថ្នាក់</p>
                         <p class="font-moul text-slate-900 text-xs">${teacherName}</p>
                     </div>
                 </div>
@@ -5583,16 +5847,10 @@ window.renderBranchCommitteeReport = function(container, targetGrade, targetRoom
     }).join('');
 
     container.innerHTML = `
-        <div class="a4-page bg-white shadow-xl rounded-lg mx-auto p-6 md:p-8 font-siemreap text-slate-800 relative w-full min-h-[297mm] text-[11px] leading-relaxed border-[3px] border-purple-500/80 flex flex-col justify-between" style="box-sizing: border-box; max-width: 210mm;">
-            <!-- Inner decorative border -->
-            <div style="position: absolute; inset: 4px; border: 1.5px solid #9333ea; pointer-events: none; border-radius: 4px;"></div>
-            <div style="position: absolute; top: 8px; left: 10px; color: #9333ea; font-size: 16px;">❖</div>
-            <div style="position: absolute; top: 8px; right: 10px; color: #9333ea; font-size: 16px;">❖</div>
-            <div style="position: absolute; bottom: 8px; left: 10px; color: #9333ea; font-size: 16px;">❖</div>
-            <div style="position: absolute; bottom: 8px; right: 10px; color: #9333ea; font-size: 16px;">❖</div>
-
+        <div class="a4-page bg-white shadow-xl rounded-lg mx-auto p-6 md:p-8 font-siemreap text-slate-800 relative w-full min-h-[297mm] text-[11px] leading-relaxed flex flex-col justify-start" style="box-sizing: border-box; max-width: 210mm;">
+            ${window.getReportBorderLayerHtml ? window.getReportBorderLayerHtml() : ''}
             <!-- Main Content Area -->
-            <div class="flex-1 flex flex-col justify-start">
+            <div>
                 <!-- Official Dual-Side Header matching User Model (Images 1 & 2) -->
                 <div class="flex justify-between items-start mb-3 text-xs">
                     <div class="text-left leading-relaxed pt-3.5 sm:pt-4">
@@ -5691,17 +5949,17 @@ window.renderBranchCommitteeReport = function(container, targetGrade, targetRoom
             </div>
             </div>
 
-            <!-- Signatures -->
-            <div class="mt-auto pt-3 px-8 font-siemreap">
+            <!-- Signatures (រំកិលឡើងលើឱ្យជិតតារាង) -->
+            <div class="mt-4 pt-2 px-8 font-siemreap">
                 <div class="flex justify-between items-start text-xs">
                     <div class="text-center w-2/5">
                         <p class="mb-1 text-slate-700">បានឃើញ និងឯកភាព</p>
-                        <p class="font-moul text-slate-900 mb-12">នាយិកាសាលា</p>
+                        <p class="font-moul text-slate-900 mb-8">នាយិកាសាលា</p>
                     </div>
                     <div class="text-center w-2/5">
                         <p class="mb-1 text-slate-700">${lunarDateStr}</p>
                         <p class="mb-1 text-slate-700 font-bold">${solarDateStr}</p>
-                        <p class="font-moul text-slate-900 mb-12">គ្រូបន្ទុកថ្នាក់</p>
+                        <p class="font-moul text-slate-900 mb-8">គ្រូបន្ទុកថ្នាក់</p>
                         <p class="font-moul text-slate-900 text-xs">${teacherName}</p>
                     </div>
                 </div>

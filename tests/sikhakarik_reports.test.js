@@ -737,4 +737,41 @@ describe('MoEYS Sikha-karik Booklet & Centralized Reports Suite', () => {
         assert.ok(dashHtml.includes("openReportDetail('cleaning_schedule')"), 'Dashboard must have cleaning_schedule card');
         assert.ok(dashHtml.includes("openReportDetail('branch_committee')"), 'Dashboard must have branch_committee card');
     });
+
+    test('17. Custom Report Border Manager and Borderless Default with Compact Signature Placement', async () => {
+        const dummyContainer = { innerHTML: '' };
+        context.window.renderClassInventoryReport(dummyContainer, 'ថ្នាក់ទី ៤', '«ក»');
+        const invHtml = dummyContainer.innerHTML;
+
+        // Verify hardcoded double borders are removed
+        assert.ok(!invHtml.includes('border-[3px]'), 'Inventory report must not have hardcoded border-[3px]');
+        assert.ok(!invHtml.includes('border-amber-500'), 'Inventory report must not have hardcoded border-amber-500');
+
+        // Verify signatures are moved up close to the table (mt-4 pt-2 instead of mt-auto)
+        assert.ok(invHtml.includes('mt-4 pt-2'), 'Signatures must use compact spacing mt-4 pt-2 right under the table');
+        assert.ok(!invHtml.includes('mt-auto pt-4'), 'Signatures must not be pushed to bottom with mt-auto');
+
+        // Verify Border Manager Methods exist
+        assert.strictEqual(typeof context.window.getReportBorderLayerHtml, 'function', 'getReportBorderLayerHtml must exist');
+        assert.strictEqual(typeof context.window.openReportBorderModal, 'function', 'openReportBorderModal must exist');
+        assert.strictEqual(typeof context.window.closeReportBorderModal, 'function', 'closeReportBorderModal must exist');
+        assert.strictEqual(typeof context.window.selectReportBorderPreset, 'function', 'selectReportBorderPreset must exist');
+        assert.strictEqual(typeof context.window.saveReportBorderSettings, 'function', 'saveReportBorderSettings must exist');
+        assert.strictEqual(typeof context.window.removeAllReportBorders, 'function', 'removeAllReportBorders must exist');
+
+        // Verify default mode is 'none' (returns empty string)
+        context.localStorage.setItem('cms_report_border_mode', 'none');
+        assert.strictEqual(context.window.getReportBorderLayerHtml(), '', 'Default mode none must return empty border HTML');
+
+        // Verify custom image mode renders overlay div
+        context.localStorage.setItem('cms_report_border_mode', 'custom');
+        context.localStorage.setItem('cms_report_border_custom_img', 'data:image/png;base64,mockCustomBorder');
+        const customBorderHtml = context.window.getReportBorderLayerHtml();
+        assert.ok(customBorderHtml.includes('cms-report-border-layer'), 'Custom border must include cms-report-border-layer');
+        assert.ok(customBorderHtml.includes('data:image/png;base64,mockCustomBorder'), 'Custom border must include uploaded image URL');
+
+        // Verify remove all borders resets mode
+        context.window.removeAllReportBorders();
+        assert.strictEqual(context.localStorage.getItem('cms_report_border_mode'), 'none', 'removeAllReportBorders must set mode to none');
+    });
 });
