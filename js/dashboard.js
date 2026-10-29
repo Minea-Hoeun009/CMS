@@ -272,7 +272,7 @@
             container.className = "p-2 md:p-6 transition duration-500 h-full w-full flex flex-col min-h-0 bg-slate-50 dark:bg-slate-900";
             container.innerHTML = `
                 <div class="w-full h-full overflow-y-auto overflow-x-hidden custom-scrollbar bg-slate-50 dark:bg-slate-900 relative">
-                    <div class="flex animate-fade-in flex-col font-siemreap text-slate-800 dark:text-slate-100 max-w-[1680px] mx-auto pb-16 pt-1 space-y-6">
+                    <div class="flex animate-fade-in flex-col font-siemreap text-slate-800 dark:text-slate-100 max-w-[1680px] mx-auto pb-24 sm:pb-16 pt-1 space-y-4 sm:space-y-6">
                         
                         <!-- 🟢 ១. Modern Executive Header Banner (Same as Other Modules) 🟢 -->
                         ${typeof window.renderExecutiveHeaderHTML === 'function' ? window.renderExecutiveHeaderHTML({
@@ -326,96 +326,96 @@
                         </div>
 
                         <!-- 3. Top 4 Stat Cards: សិស្សសរុប, សិស្សស្រី, សិស្សប្រុស, វត្តមានថ្ងៃនេះ -->
-                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <div class="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
                             
                             <!-- Card 1: សិស្សសរុប (Total Students) -->
-                            <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl shadow-sm border border-slate-200/80 dark:border-slate-700 hover:shadow-md transition flex flex-col justify-between">
-                                <div class="flex items-center justify-between mb-3">
-                                    <div class="w-12 h-12 rounded-2xl bg-blue-50 dark:bg-blue-950 text-blue-600 dark:text-blue-400 flex items-center justify-center text-xl">
+                            <div class="bg-white dark:bg-slate-800 p-3.5 sm:p-5 rounded-2xl shadow-sm border border-slate-200/80 dark:border-slate-700 hover:shadow-md transition flex flex-col justify-between">
+                                <div class="flex items-center justify-between mb-2 sm:mb-3">
+                                    <div class="w-9 h-9 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-blue-50 dark:bg-blue-950 text-blue-600 dark:text-blue-400 flex items-center justify-center text-base sm:text-xl">
                                         <i class="fa-solid fa-users"></i>
                                     </div>
-                                    <span class="inline-flex items-center gap-1 text-[11px] font-bold text-blue-600 bg-blue-50 dark:bg-blue-950/60 px-2.5 py-1 rounded-full border border-blue-200/50">
-                                        <i class="fa-solid fa-school text-[10px]"></i> ${currentClassFull}
+                                    <span class="inline-flex items-center gap-1 text-[10px] sm:text-[11px] font-bold text-blue-600 bg-blue-50 dark:bg-blue-950/60 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full border border-blue-200/50 truncate max-w-[100px] sm:max-w-none">
+                                        <i class="fa-solid fa-school text-[9px] sm:text-[10px]"></i> ${currentClassFull}
                                     </span>
                                 </div>
                                 <div>
-                                    <p class="text-xs font-bold text-slate-500 dark:text-slate-400" data-i18n="totalStudents">${t('totalStudents', 'សិស្សសរុប')}</p>
-                                    <div class="flex items-baseline gap-2 mt-1">
-                                        <span class="text-3xl font-black text-slate-800 dark:text-white font-mono">${toKhNum(totalStudents)}</span>
-                                        <span class="text-[11px] text-slate-400 font-medium">នាក់</span>
+                                    <p class="text-[11px] sm:text-xs font-bold text-slate-500 dark:text-slate-400" data-i18n="totalStudents">${t('totalStudents', 'សិស្សសរុប')}</p>
+                                    <div class="flex items-baseline gap-1.5 sm:gap-2 mt-1">
+                                        <span class="text-2xl sm:text-3xl font-black text-slate-800 dark:text-white font-mono">${toKhNum(totalStudents)}</span>
+                                        <span class="text-[10px] sm:text-[11px] text-slate-400 font-medium">នាក់</span>
                                     </div>
-                                    <p class="text-[11px] text-blue-600 mt-2 font-bold flex items-center gap-1">
-                                        <i class="fa-solid fa-circle-check text-xs"></i>
-                                        <span>ក្នុងបន្ទប់សិក្សា ${currentClassFull}</span>
+                                    <p class="text-[10px] sm:text-[11px] text-blue-600 mt-1.5 sm:mt-2 font-bold flex items-center gap-1 truncate">
+                                        <i class="fa-solid fa-circle-check text-[10px] sm:text-xs"></i>
+                                        <span>ក្នុងបន្ទប់ ${currentClassFull}</span>
                                     </p>
                                 </div>
                             </div>
 
                             <!-- Card 2: សិស្សស្រី (Female Students) -->
-                            <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl shadow-sm border border-slate-200/80 dark:border-slate-700 hover:shadow-md transition flex flex-col justify-between">
-                                <div class="flex items-center justify-between mb-3">
-                                    <div class="w-12 h-12 rounded-2xl bg-pink-50 dark:bg-pink-950 text-pink-600 dark:text-pink-400 flex items-center justify-center text-xl">
+                            <div class="bg-white dark:bg-slate-800 p-3.5 sm:p-5 rounded-2xl shadow-sm border border-slate-200/80 dark:border-slate-700 hover:shadow-md transition flex flex-col justify-between">
+                                <div class="flex items-center justify-between mb-2 sm:mb-3">
+                                    <div class="w-9 h-9 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-pink-50 dark:bg-pink-950 text-pink-600 dark:text-pink-400 flex items-center justify-center text-base sm:text-xl">
                                         <i class="fa-solid fa-venus"></i>
                                     </div>
-                                    <span class="inline-flex items-center gap-1 text-[11px] font-bold text-pink-600 bg-pink-50 dark:bg-pink-950/60 px-2.5 py-1 rounded-full border border-pink-200/50">
-                                        ${toKhNum(femalePercent)}% នៃសរុប
+                                    <span class="inline-flex items-center gap-1 text-[10px] sm:text-[11px] font-bold text-pink-600 bg-pink-50 dark:bg-pink-950/60 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full border border-pink-200/50 truncate">
+                                        ${toKhNum(femalePercent)}%
                                     </span>
                                 </div>
                                 <div>
-                                    <p class="text-xs font-bold text-slate-500 dark:text-slate-400">សិស្សស្រី <span class="text-[11px] font-normal text-slate-400 font-sans">(Female)</span></p>
-                                    <div class="flex items-baseline gap-2 mt-1">
-                                        <span class="text-3xl font-black text-pink-600 dark:text-pink-400 font-mono">${toKhNum(femaleStudents)}</span>
-                                        <span class="text-[11px] text-slate-400 font-medium">នាក់</span>
+                                    <p class="text-[11px] sm:text-xs font-bold text-slate-500 dark:text-slate-400">សិស្សស្រី</p>
+                                    <div class="flex items-baseline gap-1.5 sm:gap-2 mt-1">
+                                        <span class="text-2xl sm:text-3xl font-black text-pink-600 dark:text-pink-400 font-mono">${toKhNum(femaleStudents)}</span>
+                                        <span class="text-[10px] sm:text-[11px] text-slate-400 font-medium">នាក់</span>
                                     </div>
-                                    <p class="text-[11px] text-pink-500 mt-2 font-bold flex items-center gap-1">
-                                        <i class="fa-solid fa-percent text-xs"></i>
-                                        <span>សមាមាត្រសិស្សស្រី ${toKhNum(femalePercent)}%</span>
+                                    <p class="text-[10px] sm:text-[11px] text-pink-500 mt-1.5 sm:mt-2 font-bold flex items-center gap-1 truncate">
+                                        <i class="fa-solid fa-percent text-[10px] sm:text-xs"></i>
+                                        <span>សមាមាត្រ ${toKhNum(femalePercent)}%</span>
                                     </p>
                                 </div>
                             </div>
 
                             <!-- Card 3: សិស្សប្រុស (Male Students) -->
-                            <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl shadow-sm border border-slate-200/80 dark:border-slate-700 hover:shadow-md transition flex flex-col justify-between">
-                                <div class="flex items-center justify-between mb-3">
-                                    <div class="w-12 h-12 rounded-2xl bg-sky-50 dark:bg-sky-950 text-sky-600 dark:text-sky-400 flex items-center justify-center text-xl">
+                            <div class="bg-white dark:bg-slate-800 p-3.5 sm:p-5 rounded-2xl shadow-sm border border-slate-200/80 dark:border-slate-700 hover:shadow-md transition flex flex-col justify-between">
+                                <div class="flex items-center justify-between mb-2 sm:mb-3">
+                                    <div class="w-9 h-9 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-sky-50 dark:bg-sky-950 text-sky-600 dark:text-sky-400 flex items-center justify-center text-base sm:text-xl">
                                         <i class="fa-solid fa-mars"></i>
                                     </div>
-                                    <span class="inline-flex items-center gap-1 text-[11px] font-bold text-sky-600 bg-sky-50 dark:bg-sky-950/60 px-2.5 py-1 rounded-full border border-sky-200/50">
-                                        ${toKhNum(malePercent)}% នៃសរុប
+                                    <span class="inline-flex items-center gap-1 text-[10px] sm:text-[11px] font-bold text-sky-600 bg-sky-50 dark:bg-sky-950/60 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full border border-sky-200/50 truncate">
+                                        ${toKhNum(malePercent)}%
                                     </span>
                                 </div>
                                 <div>
-                                    <p class="text-xs font-bold text-slate-500 dark:text-slate-400">សិស្សប្រុស <span class="text-[11px] font-normal text-slate-400 font-sans">(Male)</span></p>
-                                    <div class="flex items-baseline gap-2 mt-1">
-                                        <span class="text-3xl font-black text-sky-600 dark:text-sky-400 font-mono">${toKhNum(maleStudents)}</span>
-                                        <span class="text-[11px] text-slate-400 font-medium">នាក់</span>
+                                    <p class="text-[11px] sm:text-xs font-bold text-slate-500 dark:text-slate-400">សិស្សប្រុស</p>
+                                    <div class="flex items-baseline gap-1.5 sm:gap-2 mt-1">
+                                        <span class="text-2xl sm:text-3xl font-black text-sky-600 dark:text-sky-400 font-mono">${toKhNum(maleStudents)}</span>
+                                        <span class="text-[10px] sm:text-[11px] text-slate-400 font-medium">នាក់</span>
                                     </div>
-                                    <p class="text-[11px] text-sky-500 mt-2 font-bold flex items-center gap-1">
-                                        <i class="fa-solid fa-percent text-xs"></i>
-                                        <span>សមាមាត្រសិស្សប្រុស ${toKhNum(malePercent)}%</span>
+                                    <p class="text-[10px] sm:text-[11px] text-sky-500 mt-1.5 sm:mt-2 font-bold flex items-center gap-1 truncate">
+                                        <i class="fa-solid fa-percent text-[10px] sm:text-xs"></i>
+                                        <span>សមាមាត្រ ${toKhNum(malePercent)}%</span>
                                     </p>
                                 </div>
                             </div>
 
                             <!-- Card 4: វត្តមានថ្ងៃនេះ (Today Attendance) -->
-                            <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl shadow-sm border border-slate-200/80 dark:border-slate-700 hover:shadow-md transition flex flex-col justify-between">
-                                <div class="flex items-center justify-between mb-3">
-                                    <div class="w-12 h-12 rounded-2xl bg-emerald-50 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 flex items-center justify-center text-xl">
+                            <div class="bg-white dark:bg-slate-800 p-3.5 sm:p-5 rounded-2xl shadow-sm border border-slate-200/80 dark:border-slate-700 hover:shadow-md transition flex flex-col justify-between">
+                                <div class="flex items-center justify-between mb-2 sm:mb-3">
+                                    <div class="w-9 h-9 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-emerald-50 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 flex items-center justify-center text-base sm:text-xl">
                                         <i class="fa-solid fa-clipboard-check"></i>
                                     </div>
-                                    <span class="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-600 bg-emerald-50 dark:bg-emerald-950/60 px-2.5 py-1 rounded-full border border-emerald-200/50">
-                                        ${toKhNum(attendanceMarkedCount > 0 ? attPresent : totalStudents)} / ${toKhNum(totalStudents)} នាក់
+                                    <span class="inline-flex items-center gap-1 text-[10px] sm:text-[11px] font-bold text-emerald-600 bg-emerald-50 dark:bg-emerald-950/60 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full border border-emerald-200/50 truncate">
+                                        ${toKhNum(attendanceMarkedCount > 0 ? attPresent : totalStudents)} / ${toKhNum(totalStudents)}
                                     </span>
                                 </div>
                                 <div>
-                                    <p class="text-xs font-bold text-slate-500 dark:text-slate-400" data-i18n="todayAttendance">${t('todayAttendance', 'វត្តមានថ្ងៃនេះ')}</p>
-                                    <div class="flex items-baseline gap-2 mt-1">
-                                        <span class="text-3xl font-black text-emerald-600 dark:text-emerald-400 font-mono">${toKhNum(attRate)}%</span>
-                                        <span class="text-[11px] text-slate-400 font-medium">អត្រាចូលរៀន</span>
+                                    <p class="text-[11px] sm:text-xs font-bold text-slate-500 dark:text-slate-400" data-i18n="todayAttendance">${t('todayAttendance', 'វត្តមានថ្ងៃនេះ')}</p>
+                                    <div class="flex items-baseline gap-1.5 sm:gap-2 mt-1">
+                                        <span class="text-2xl sm:text-3xl font-black text-emerald-600 dark:text-emerald-400 font-mono">${toKhNum(attRate)}%</span>
+                                        <span class="text-[10px] sm:text-[11px] text-slate-400 font-medium">ចូលរៀន</span>
                                     </div>
-                                    <p class="text-[11px] text-emerald-600 mt-2 font-bold flex items-center gap-1">
-                                        <i class="fa-solid fa-circle-check text-xs"></i>
-                                        <span>${attAbsent > 0 ? `អវត្តមាន ${toKhNum(attAbsent)} នាក់` : 'សិស្សទាំងអស់ចូលរៀនធម្មតា'}</span>
+                                    <p class="text-[10px] sm:text-[11px] text-emerald-600 mt-1.5 sm:mt-2 font-bold flex items-center gap-1 truncate">
+                                        <i class="fa-solid fa-circle-check text-[10px] sm:text-xs"></i>
+                                        <span>${attAbsent > 0 ? `អវត្តមាន ${toKhNum(attAbsent)} នាក់` : 'ចូលរៀនពេញ'}</span>
                                     </p>
                                 </div>
                             </div>

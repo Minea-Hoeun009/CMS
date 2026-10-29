@@ -2,7 +2,7 @@
 <html lang="km">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
@@ -633,7 +633,7 @@
         
         <!-- ១. ទំព័រដើម (Dashboard) -->
         <button onclick="switchView('dashboard')" class="w-full flex items-center px-3 py-2.5 rounded-xl text-white/85 hover:text-white transition-all text-left group nav-btn sidebar-btn-active touch-target sidebar-khmer-btn" id="nav-dashboard" aria-current="page">
-          <span class="w-8 h-8 rounded-lg bg-white/15 text-white flex items-center justify-center shrink-0 text-sm group-hover:scale-105 transition-all shadow-sm"><i class="fa-solid fa-chart-pie"></i></span>
+          <span class="w-8 h-8 rounded-lg bg-white/15 text-white flex items-center justify-center shrink-0 text-sm group-hover:scale-105 transition-all shadow-sm"><i class="fa-solid fa-house"></i></span>
           <span class="sidebar-text ml-3 whitespace-nowrap" data-i18n="dashboard">ទំព័រដើម</span>
         </button>
         
@@ -736,10 +736,10 @@
             <!-- Breadcrumb Header -->
             <div class="flex items-center gap-2">
               <span id="pageTitleIcon" class="w-8 h-8 rounded-xl bg-blue-50 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 flex items-center justify-center text-sm shadow-sm shrink-0">
-                <i class="fa-solid fa-chart-pie"></i>
+                <i class="fa-solid fa-house"></i>
               </span>
               <div>
-                <div class="flex items-center gap-1.5 text-[11px] text-slate-400 dark:text-slate-500 font-bold">
+                <div class="hidden sm:flex items-center gap-1.5 text-[11px] text-slate-400 dark:text-slate-500 font-bold">
                   <span data-i18n="appName">Classroom CMS</span>
                   <i class="fa-solid fa-chevron-right text-[9px]"></i>
                   <span id="headerBreadcrumbCurrent" class="text-blue-600 dark:text-blue-400" data-i18n="dashboard">ទំព័រដើម</span>
@@ -756,15 +756,18 @@
          </div>
          
          <!-- Right Actions: Bilingual Toggle, Sync, Year, Theme, Notification, User -->
-         <div class="flex items-center gap-2 sm:gap-3 shrink-0">
+         <div class="flex items-center gap-1.5 sm:gap-3 shrink-0">
             
             <!-- Hidden Classroom Badge (Preserves script compatibility) -->
             <span id="headerActiveClassBadge" class="hidden" style="display:none;">ថ្នាក់ទី ១ «ក»</span>
 
             <!-- Bilingual Switcher Toggle Pill [ ខ្មែរ | English ] -->
             <div class="flex items-center bg-slate-100 dark:bg-slate-700/80 p-0.5 rounded-xl border border-slate-200/60 dark:border-slate-600 shadow-sm text-xs font-bold">
-               <button type="button" id="btnLangKm" onclick="window.switchLanguage('km')" class="px-2.5 py-1 rounded-lg bg-blue-600 text-white font-bold shadow-sm transition">ខ្មែរ</button>
-               <button type="button" id="btnLangEn" onclick="window.switchLanguage('en')" class="px-2.5 py-1 rounded-lg text-slate-500 hover:text-slate-800 dark:text-slate-400 font-bold transition">English</button>
+               <button type="button" id="btnLangKm" onclick="window.switchLanguage('km')" class="px-2 sm:px-2.5 py-1 rounded-lg bg-blue-600 text-white font-bold shadow-sm transition">ខ្មែរ</button>
+               <button type="button" id="btnLangEn" onclick="window.switchLanguage('en')" class="px-2 sm:px-2.5 py-1 rounded-lg text-slate-500 hover:text-slate-800 dark:text-slate-400 font-bold transition">
+                 <span class="sm:hidden">EN</span>
+                 <span class="hidden sm:inline">English</span>
+               </button>
             </div>
 
             <!-- Google Sheet Sync Button -->
@@ -824,26 +827,50 @@
     </div>
 
     <!-- Mobile Bottom Navigation Bar (Visible on mobile < md only) -->
-    <nav id="mobileBottomNav" class="md:hidden fixed bottom-0 left-0 right-0 z-30 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-t border-slate-200 dark:border-slate-800 px-2 py-1.5 flex items-center justify-around shadow-2xl transition-all">
-      <button onclick="switchView('dashboard')" id="mob-nav-dashboard" class="flex flex-col items-center justify-center flex-1 py-1 text-indigo-600 dark:text-indigo-400 font-bold transition-all">
-        <i class="fa-solid fa-chart-pie text-base"></i>
-        <span class="text-[10px] font-bold mt-0.5 font-siemreap">ផ្ទាំងមេ</span>
+    <nav id="mobileBottomNav" class="md:hidden fixed bottom-0 left-0 right-0 z-30 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border-t border-slate-200/80 dark:border-slate-800/80 px-2 pt-1.5 flex items-center justify-around shadow-[0_-4px_25px_rgba(0,0,0,0.06)] transition-all">
+      <!-- 1. ទំព័រដើម (Home) -->
+      <button onclick="switchView('dashboard')" id="mob-nav-dashboard" class="mob-nav-btn group flex flex-col items-center justify-center flex-1 py-1 text-blue-600 dark:text-blue-400 font-bold transition-all active:scale-95" aria-label="ទំព័រដើម" aria-current="page">
+        <div class="mob-icon-wrap w-10 h-7 rounded-2xl flex items-center justify-center bg-blue-50 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 transition-all duration-200 shadow-sm">
+          <i class="fa-solid fa-house text-[15px]"></i>
+        </div>
+        <span class="text-[10px] font-bold mt-1 font-siemreap tracking-tight leading-none">ទំព័រដើម</span>
+        <span class="mob-active-dot w-1 h-1 rounded-full bg-blue-600 dark:bg-blue-400 mt-1 opacity-100 transition-opacity"></span>
       </button>
-      <button onclick="switchView('students')" id="mob-nav-students" class="flex flex-col items-center justify-center flex-1 py-1 text-slate-500 dark:text-slate-400 hover:text-indigo-600 transition-all">
-        <i class="fa-solid fa-user-graduate text-base"></i>
-        <span class="text-[10px] font-bold mt-0.5 font-siemreap">សិស្ស</span>
+
+      <!-- 2. សិស្ស (Students) -->
+      <button onclick="switchView('students')" id="mob-nav-students" class="mob-nav-btn group flex flex-col items-center justify-center flex-1 py-1 text-slate-500 dark:text-slate-400 hover:text-blue-600 transition-all active:scale-95" aria-label="សិស្ស">
+        <div class="mob-icon-wrap w-10 h-7 rounded-2xl flex items-center justify-center bg-transparent text-slate-500 dark:text-slate-400 transition-all duration-200">
+          <i class="fa-solid fa-user-graduate text-[15px]"></i>
+        </div>
+        <span class="text-[10px] font-bold mt-1 font-siemreap tracking-tight leading-none">សិស្ស</span>
+        <span class="mob-active-dot w-1 h-1 rounded-full bg-blue-600 dark:bg-blue-400 mt-1 opacity-0 transition-opacity"></span>
       </button>
-      <button onclick="switchView('attendance')" id="mob-nav-attendance" class="flex flex-col items-center justify-center flex-1 py-1 text-slate-500 dark:text-slate-400 hover:text-indigo-600 transition-all">
-        <i class="fa-solid fa-clipboard-user text-base"></i>
-        <span class="text-[10px] font-bold mt-0.5 font-siemreap">វត្តមាន</span>
+
+      <!-- 3. វត្តមាន (Attendance) -->
+      <button onclick="switchView('attendance')" id="mob-nav-attendance" class="mob-nav-btn group flex flex-col items-center justify-center flex-1 py-1 text-slate-500 dark:text-slate-400 hover:text-blue-600 transition-all active:scale-95" aria-label="វត្តមាន">
+        <div class="mob-icon-wrap w-10 h-7 rounded-2xl flex items-center justify-center bg-transparent text-slate-500 dark:text-slate-400 transition-all duration-200">
+          <i class="fa-solid fa-clipboard-user text-[15px]"></i>
+        </div>
+        <span class="text-[10px] font-bold mt-1 font-siemreap tracking-tight leading-none">វត្តមាន</span>
+        <span class="mob-active-dot w-1 h-1 rounded-full bg-blue-600 dark:bg-blue-400 mt-1 opacity-0 transition-opacity"></span>
       </button>
-      <button onclick="switchView('scores')" id="mob-nav-scores" class="flex flex-col items-center justify-center flex-1 py-1 text-slate-500 dark:text-slate-400 hover:text-indigo-600 transition-all">
-        <i class="fa-solid fa-award text-base"></i>
-        <span class="text-[10px] font-bold mt-0.5 font-siemreap">ពិន្ទុ</span>
+
+      <!-- 4. ពិន្ទុ (Scores) -->
+      <button onclick="switchView('scores')" id="mob-nav-scores" class="mob-nav-btn group flex flex-col items-center justify-center flex-1 py-1 text-slate-500 dark:text-slate-400 hover:text-blue-600 transition-all active:scale-95" aria-label="ពិន្ទុ">
+        <div class="mob-icon-wrap w-10 h-7 rounded-2xl flex items-center justify-center bg-transparent text-slate-500 dark:text-slate-400 transition-all duration-200">
+          <i class="fa-solid fa-award text-[15px]"></i>
+        </div>
+        <span class="text-[10px] font-bold mt-1 font-siemreap tracking-tight leading-none">ពិន្ទុ</span>
+        <span class="mob-active-dot w-1 h-1 rounded-full bg-blue-600 dark:bg-blue-400 mt-1 opacity-0 transition-opacity"></span>
       </button>
-      <button onclick="window.toggleMobileSidebar(true)" id="mob-nav-more" class="flex flex-col items-center justify-center flex-1 py-1 text-slate-500 dark:text-slate-400 hover:text-indigo-600 transition-all">
-        <i class="fa-solid fa-bars-staggered text-base"></i>
-        <span class="text-[10px] font-bold mt-0.5 font-siemreap">ម៉ឺនុយ</span>
+
+      <!-- 5. ម៉ឺនុយ (More / Sidebar Drawer) -->
+      <button onclick="window.toggleMobileSidebar(true)" id="mob-nav-more" class="mob-nav-btn group flex flex-col items-center justify-center flex-1 py-1 text-slate-500 dark:text-slate-400 hover:text-blue-600 transition-all active:scale-95" aria-label="ម៉ឺនុយ">
+        <div class="mob-icon-wrap w-10 h-7 rounded-2xl flex items-center justify-center bg-transparent text-slate-500 dark:text-slate-400 transition-all duration-200">
+          <i class="fa-solid fa-bars-staggered text-[15px]"></i>
+        </div>
+        <span class="text-[10px] font-bold mt-1 font-siemreap tracking-tight leading-none">ម៉ឺនុយ</span>
+        <span class="mob-active-dot w-1 h-1 rounded-full bg-blue-600 dark:bg-blue-400 mt-1 opacity-0 transition-opacity"></span>
       </button>
     </nav>
   </div>
@@ -1073,16 +1100,36 @@
         }
 
         // Active state លើ Mobile Bottom Nav
-        document.querySelectorAll('#mobileBottomNav button').forEach(b => {
-            b.classList.remove('text-indigo-600', 'dark:text-indigo-400', 'font-bold', 'scale-105');
+        document.querySelectorAll('#mobileBottomNav .mob-nav-btn, #mobileBottomNav button').forEach(b => {
+            b.classList.remove('text-blue-600', 'dark:text-blue-400', 'text-indigo-600', 'dark:text-indigo-400', 'font-bold', 'scale-105');
             b.classList.add('text-slate-500', 'dark:text-slate-400');
             b.removeAttribute('aria-current');
+            const iconWrap = b.querySelector('.mob-icon-wrap');
+            if (iconWrap) {
+                iconWrap.classList.remove('bg-blue-50', 'dark:bg-blue-900/40', 'text-blue-600', 'dark:text-blue-400', 'shadow-sm');
+                iconWrap.classList.add('bg-transparent', 'text-slate-500', 'dark:text-slate-400');
+            }
+            const dot = b.querySelector('.mob-active-dot');
+            if (dot) {
+                dot.classList.remove('opacity-100');
+                dot.classList.add('opacity-0');
+            }
         });
         const mobActive = document.getElementById(`mob-nav-${viewName}`);
         if (mobActive) {
             mobActive.classList.remove('text-slate-500', 'dark:text-slate-400');
-            mobActive.classList.add('text-indigo-600', 'dark:text-indigo-400', 'font-bold', 'scale-105');
+            mobActive.classList.add('text-blue-600', 'dark:text-blue-400', 'font-bold');
             mobActive.setAttribute('aria-current', 'page');
+            const iconWrap = mobActive.querySelector('.mob-icon-wrap');
+            if (iconWrap) {
+                iconWrap.classList.remove('bg-transparent', 'text-slate-500', 'dark:text-slate-400');
+                iconWrap.classList.add('bg-blue-50', 'dark:bg-blue-900/40', 'text-blue-600', 'dark:text-blue-400', 'shadow-sm');
+            }
+            const dot = mobActive.querySelector('.mob-active-dot');
+            if (dot) {
+                dot.classList.remove('opacity-0');
+                dot.classList.add('opacity-100');
+            }
         }
 
         const titleMap = {
@@ -1099,7 +1146,7 @@
             'reports': 'របាយការណ៍ផ្សេងៗ'
         };
         const iconMap = {
-            'dashboard': 'fa-chart-pie',
+            'dashboard': 'fa-house',
             'analytics': 'fa-chart-line',
             'students': 'fa-user-graduate',
             'attendance': 'fa-clipboard-user',

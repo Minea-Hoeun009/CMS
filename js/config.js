@@ -2050,33 +2050,33 @@ window.renderExecutiveHeaderHTML = function(options = {}) {
 
     return `
         <!-- 🟢 Standardized Modern Executive Header (Image 2 Aligned) 🟢 -->
-        <div class="bg-gradient-to-r from-blue-600 via-blue-600 to-indigo-600 rounded-[2.5rem] p-6 sm:p-8 text-white shadow-xl relative overflow-hidden border border-white/20 mb-6 shrink-0 no-print">
+        <div class="bg-gradient-to-r from-blue-600 via-blue-600 to-indigo-600 rounded-3xl sm:rounded-[2.5rem] p-4 sm:p-7 text-white shadow-xl relative overflow-hidden border border-white/20 mb-4 sm:mb-6 shrink-0 no-print">
             <!-- Subtle glowing background shapes -->
             <div class="absolute -right-12 -bottom-12 w-80 h-80 bg-white/10 rounded-full blur-3xl pointer-events-none"></div>
             <div class="absolute -left-12 -top-12 w-64 h-64 bg-indigo-400/20 rounded-full blur-3xl pointer-events-none"></div>
 
-            <div class="relative z-10 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
+            <div class="relative z-10 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 sm:gap-6">
                 
                 <!-- Left Column: Greetings & Teacher Info -->
-                <div class="space-y-3">
-                    <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-white/15 backdrop-blur-md border border-white/20 text-xs font-bold text-white shadow-sm">
+                <div class="space-y-2.5 sm:space-y-3">
+                    <div class="inline-flex items-center gap-2 px-3 sm:px-3.5 py-1 rounded-full bg-white/15 backdrop-blur-md border border-white/20 text-xs font-bold text-white shadow-sm">
                         <i class="fa-solid fa-graduation-cap text-amber-300"></i>
                         <span>ឆ្នាំសិក្សា ${toKhNum(academicYear)}</span>
                     </div>
 
-                    <h1 class="text-2xl sm:text-3xl lg:text-4xl font-black font-moul tracking-wide text-white drop-shadow-md">
+                    <h1 class="text-xl sm:text-3xl lg:text-4xl font-black font-moul tracking-wide text-white drop-shadow-md">
                         ${title}
                     </h1>
 
-                    <div class="flex flex-wrap items-center gap-3 pt-1 text-xs text-blue-100 font-medium">
+                    <div class="flex flex-wrap items-center gap-2 sm:gap-3 pt-1 text-xs text-blue-100 font-medium">
                         <span class="flex items-center gap-2 text-white/95">
                             <i class="${icon} text-blue-200"></i>
                             <span>${subtitle}</span>
                         </span>
-                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-indigo-950/70 border border-white/20 font-bold font-moul text-amber-300 shadow-sm">
+                        <span class="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1 rounded-xl bg-indigo-950/70 border border-white/20 font-bold font-moul text-amber-300 shadow-sm">
                             ${currentClassFull}
                         </span>
-                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-white/10 border border-white/15 text-[11px] text-blue-100 font-bold">
+                        <span class="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1 rounded-xl bg-white/10 border border-white/15 text-[11px] text-blue-100 font-bold">
                             <i class="fa-solid fa-chalkboard-user text-amber-300"></i>
                             <span>${teacherName} (${teacherCode})</span>
                         </span>
@@ -2087,27 +2087,27 @@ window.renderExecutiveHeaderHTML = function(options = {}) {
                 <!-- Right Column: Modern Glass Card for Time & Dates (Exact Match Image 2) -->
                 <div class="w-full lg:w-auto shrink-0 flex flex-col sm:flex-row lg:flex-col gap-3 items-stretch lg:items-end">
                     ${extraActionsHtml ? `<div class="flex flex-wrap items-center gap-2 justify-start lg:justify-end">${extraActionsHtml}</div>` : ''}
-                    <div class="bg-white/10 backdrop-blur-md border border-white/20 rounded-3xl p-5 shadow-inner space-y-3 min-w-[280px] sm:min-w-[340px]">
+                    <div class="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl sm:rounded-3xl p-3.5 sm:p-5 shadow-inner space-y-2.5 sm:space-y-3 w-full sm:min-w-[340px]">
                         <!-- Realtime Digital Clock Row -->
-                        <div class="flex items-center gap-3.5 pb-2.5 border-b border-white/15">
-                            <div class="w-11 h-11 rounded-2xl bg-white/20 text-white flex items-center justify-center text-xl shrink-0 shadow-sm border border-white/25">
+                        <div class="flex items-center gap-3 sm:gap-3.5 pb-2 sm:pb-2.5 border-b border-white/15">
+                            <div class="w-9 h-9 sm:w-11 sm:h-11 rounded-xl sm:rounded-2xl bg-white/20 text-white flex items-center justify-center text-lg sm:text-xl shrink-0 shadow-sm border border-white/25">
                                 <i class="fa-regular fa-clock"></i>
                             </div>
                             <div>
                                 <span class="text-[10px] text-blue-200 font-bold uppercase tracking-wider block">ម៉ោងបច្ចុប្បន្ន</span>
-                                <span id="${clockId}" class="text-2xl sm:text-3xl font-black font-mono tracking-wider text-amber-300 block leading-tight">--:--:--</span>
+                                <span id="${clockId}" class="text-xl sm:text-3xl font-black font-mono tracking-wider text-amber-300 block leading-tight">--:--:--</span>
                             </div>
                         </div>
 
                         <!-- Lunar Date Row -->
-                        <div class="flex items-center gap-2.5 text-xs text-white/95 font-medium">
-                            <i class="fa-solid fa-moon text-amber-300 text-sm shrink-0"></i>
+                        <div class="flex items-center gap-2 sm:gap-2.5 text-[11px] sm:text-xs text-white/95 font-medium">
+                            <i class="fa-solid fa-moon text-amber-300 text-xs sm:text-sm shrink-0"></i>
                             <span class="truncate">${lunarDateStr}</span>
                         </div>
 
                         <!-- Solar Date Row -->
-                        <div class="flex items-center gap-2.5 text-xs text-white/95 font-medium">
-                            <i class="fa-regular fa-calendar-check text-blue-200 text-sm shrink-0"></i>
+                        <div class="flex items-center gap-2 sm:gap-2.5 text-[11px] sm:text-xs text-white/95 font-medium">
+                            <i class="fa-regular fa-calendar-check text-blue-200 text-xs sm:text-sm shrink-0"></i>
                             <span>${solarDateStr}</span>
                         </div>
                     </div>

@@ -506,12 +506,12 @@ tbody tr:hover {
    Mobile Bottom Navigation & Drawer Smooth Transitions
 ======================================================== */
 #mobileBottomNav {
-    padding-bottom: max(6px, env(safe-area-inset-bottom, 8px));
+    padding-bottom: max(18px, env(safe-area-inset-bottom, 18px));
 }
 
 @media (max-width: 767px) {
     #appView main {
-        padding-bottom: 76px !important;
+        padding-bottom: max(88px, calc(72px + env(safe-area-inset-bottom, 18px))) !important;
     }
 }
 
