@@ -4916,7 +4916,7 @@ window.renderClassInventoryReport = function(container, targetGrade, targetRoom)
     `).join('');
 
     container.innerHTML = `
-        <div class="a4-page bg-white shadow-xl rounded-lg mx-auto p-6 md:p-8 font-siemreap text-slate-800 relative w-full max-w-[210mm] min-h-[297mm] h-[297mm] text-[11px] leading-relaxed border-[3px] border-amber-500/80 flex flex-col justify-between" style="box-sizing: border-box;">
+        <div class="a4-page bg-white shadow-xl rounded-lg mx-auto p-6 md:p-8 font-siemreap text-slate-800 relative w-full min-h-[297mm] text-[11px] leading-relaxed border-[3px] border-amber-500/80 flex flex-col justify-between" style="box-sizing: border-box; max-width: 210mm;">
             <!-- Inner decorative border -->
             <div style="position: absolute; inset: 4px; border: 1.5px solid #d97706; pointer-events: none; border-radius: 4px;"></div>
             <div style="position: absolute; top: 8px; left: 10px; color: #d97706; font-size: 16px;">❖</div>
@@ -4941,7 +4941,6 @@ window.renderClassInventoryReport = function(container, targetGrade, targetRoom)
                         </div>
                     </div>
                 </div>
-            </div>
 
             <!-- Main Title -->
             <div class="text-center mb-4">
@@ -5035,8 +5034,8 @@ window.renderClassInventoryReport = function(container, targetGrade, targetRoom)
         </div>
     `;
 
-    if (typeof window.applyAcademicReportPaperSettings === 'function') {
-        window.applyAcademicReportPaperSettings();
+    if (window.CMSPrintManager && typeof window.CMSPrintManager.applyLivePreview === 'function') {
+        window.CMSPrintManager.applyLivePreview('reportPaperArea');
     }
 };
 
@@ -5096,7 +5095,7 @@ window.renderInternalRulesReport = function(container, targetGrade, targetRoom) 
     `;
 
     container.innerHTML = `
-        <div class="a4-page bg-white shadow-xl rounded-lg mx-auto p-6 md:p-8 font-siemreap text-slate-800 relative w-full max-w-[210mm] min-h-[297mm] h-[297mm] text-[11px] leading-relaxed border-[3px] border-rose-500/80 flex flex-col justify-between" style="box-sizing: border-box;">
+        <div class="a4-page bg-white shadow-xl rounded-lg mx-auto p-6 md:p-8 font-siemreap text-slate-800 relative w-full min-h-[297mm] text-[11px] leading-relaxed border-[3px] border-rose-500/80 flex flex-col justify-between" style="box-sizing: border-box; max-width: 210mm;">
             <!-- Inner decorative border -->
             <div style="position: absolute; inset: 4px; border: 1.5px solid #e11d48; pointer-events: none; border-radius: 4px;"></div>
             <div style="position: absolute; top: 8px; left: 10px; color: #e11d48; font-size: 16px;">❖</div>
@@ -5121,7 +5120,6 @@ window.renderInternalRulesReport = function(container, targetGrade, targetRoom) 
                         </div>
                     </div>
                 </div>
-            </div>
 
             <!-- Main Title -->
             <div class="text-center mb-3">
@@ -5168,8 +5166,8 @@ window.renderInternalRulesReport = function(container, targetGrade, targetRoom) 
         </div>
     `;
 
-    if (typeof window.applyAcademicReportPaperSettings === 'function') {
-        window.applyAcademicReportPaperSettings();
+    if (window.CMSPrintManager && typeof window.CMSPrintManager.applyLivePreview === 'function') {
+        window.CMSPrintManager.applyLivePreview('reportPaperArea');
     }
 };
 
@@ -5241,7 +5239,7 @@ window.renderClassPrinciplesReport = function(container, targetGrade, targetRoom
     `;
 
     container.innerHTML = `
-        <div class="a4-page bg-white shadow-xl rounded-lg mx-auto p-6 md:p-8 font-siemreap text-slate-800 relative w-full max-w-[210mm] min-h-[297mm] h-[297mm] text-[11px] leading-relaxed border-[3px] border-sky-500/80 flex flex-col justify-between" style="box-sizing: border-box;">
+        <div class="a4-page bg-white shadow-xl rounded-lg mx-auto p-6 md:p-8 font-siemreap text-slate-800 relative w-full min-h-[297mm] text-[11px] leading-relaxed border-[3px] border-sky-500/80 flex flex-col justify-between" style="box-sizing: border-box; max-width: 210mm;">
             <!-- Inner decorative border -->
             <div style="position: absolute; inset: 4px; border: 1.5px solid #0284c7; pointer-events: none; border-radius: 4px;"></div>
             <div style="position: absolute; top: 8px; left: 10px; color: #0284c7; font-size: 16px;">❖</div>
@@ -5266,7 +5264,6 @@ window.renderClassPrinciplesReport = function(container, targetGrade, targetRoom
                         </div>
                     </div>
                 </div>
-            </div>
 
             <!-- Main Title -->
             <div class="text-center mb-2">
@@ -5309,8 +5306,8 @@ window.renderClassPrinciplesReport = function(container, targetGrade, targetRoom
         </div>
     `;
 
-    if (typeof window.applyAcademicReportPaperSettings === 'function') {
-        window.applyAcademicReportPaperSettings();
+    if (window.CMSPrintManager && typeof window.CMSPrintManager.applyLivePreview === 'function') {
+        window.CMSPrintManager.applyLivePreview('reportPaperArea');
     }
 };
 
@@ -5430,7 +5427,7 @@ window.renderCleaningScheduleReport = function(container, targetGrade, targetRoo
     };
 
     container.innerHTML = `
-        <div class="a4-page bg-white shadow-xl rounded-lg mx-auto p-6 md:p-8 font-siemreap text-slate-800 relative w-full max-w-[210mm] min-h-[297mm] h-[297mm] text-[11px] leading-relaxed border-[3px] border-emerald-500/80 flex flex-col justify-between" style="box-sizing: border-box;">
+        <div class="a4-page bg-white shadow-xl rounded-lg mx-auto p-6 md:p-8 font-siemreap text-slate-800 relative w-full min-h-[297mm] text-[11px] leading-relaxed border-[3px] border-emerald-500/80 flex flex-col justify-between" style="box-sizing: border-box; max-width: 210mm;">
             <!-- Inner decorative border -->
             <div style="position: absolute; inset: 4px; border: 1.5px solid #059669; pointer-events: none; border-radius: 4px;"></div>
             <div style="position: absolute; top: 8px; left: 10px; color: #059669; font-size: 16px;">❖</div>
@@ -5455,7 +5452,6 @@ window.renderCleaningScheduleReport = function(container, targetGrade, targetRoo
                         </div>
                     </div>
                 </div>
-            </div>
 
             <!-- Main Title -->
             <div class="text-center mb-2">
@@ -5504,8 +5500,8 @@ window.renderCleaningScheduleReport = function(container, targetGrade, targetRoo
         </div>
     `;
 
-    if (typeof window.applyAcademicReportPaperSettings === 'function') {
-        window.applyAcademicReportPaperSettings();
+    if (window.CMSPrintManager && typeof window.CMSPrintManager.applyLivePreview === 'function') {
+        window.CMSPrintManager.applyLivePreview('reportPaperArea');
     }
 };
 
@@ -5587,7 +5583,7 @@ window.renderBranchCommitteeReport = function(container, targetGrade, targetRoom
     }).join('');
 
     container.innerHTML = `
-        <div class="a4-page bg-white shadow-xl rounded-lg mx-auto p-6 md:p-8 font-siemreap text-slate-800 relative w-full max-w-[210mm] min-h-[297mm] h-[297mm] text-[11px] leading-relaxed border-[3px] border-purple-500/80 flex flex-col justify-between" style="box-sizing: border-box;">
+        <div class="a4-page bg-white shadow-xl rounded-lg mx-auto p-6 md:p-8 font-siemreap text-slate-800 relative w-full min-h-[297mm] text-[11px] leading-relaxed border-[3px] border-purple-500/80 flex flex-col justify-between" style="box-sizing: border-box; max-width: 210mm;">
             <!-- Inner decorative border -->
             <div style="position: absolute; inset: 4px; border: 1.5px solid #9333ea; pointer-events: none; border-radius: 4px;"></div>
             <div style="position: absolute; top: 8px; left: 10px; color: #9333ea; font-size: 16px;">❖</div>
@@ -5612,7 +5608,6 @@ window.renderBranchCommitteeReport = function(container, targetGrade, targetRoom
                         </div>
                     </div>
                 </div>
-            </div>
 
             <!-- Main Title -->
             <div class="text-center mb-3">
@@ -5714,8 +5709,8 @@ window.renderBranchCommitteeReport = function(container, targetGrade, targetRoom
         </div>
     `;
 
-    if (typeof window.applyAcademicReportPaperSettings === 'function') {
-        window.applyAcademicReportPaperSettings();
+    if (window.CMSPrintManager && typeof window.CMSPrintManager.applyLivePreview === 'function') {
+        window.CMSPrintManager.applyLivePreview('reportPaperArea');
     }
 };
 
