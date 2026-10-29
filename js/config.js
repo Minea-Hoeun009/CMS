@@ -915,11 +915,12 @@ window.CMSPrintManager = {
             const isA4Page = clone.firstElementChild.classList && clone.firstElementChild.classList.contains('a4-page');
             if (clone.firstElementChild.style) {
                 clone.firstElementChild.style.boxShadow = "none";
+                clone.firstElementChild.style.minHeight = "auto";
+                clone.firstElementChild.style.height = "auto";
                 if (!isA4Page) {
                     clone.firstElementChild.style.border = "none";
                     clone.firstElementChild.style.borderRadius = "0";
                     clone.firstElementChild.style.padding = "0";
-                    clone.firstElementChild.style.minHeight = "auto";
                 }
             }
             if (clone.firstElementChild.classList) {
@@ -990,16 +991,16 @@ window.CMSPrintManager = {
                     thead { display: table-header-group !important; }
                     tfoot { display: table-footer-group !important; }
                     
-                    /* A4 Page Structured Layout - Full Sheet Coverage without Mid-Break */
+                    /* A4 Page Structured Layout - Compact & Natural Flow without Bottom-Dropping */
                     .a4-page {
                         box-sizing: border-box !important;
                         width: 100% !important;
                         max-width: 100% !important;
-                        min-height: ${orientation === 'landscape' ? '195mm' : '280mm'} !important;
-                        height: ${orientation === 'landscape' ? '195mm' : '280mm'} !important;
+                        height: auto !important;
+                        min-height: auto !important;
                         display: flex !important;
                         flex-direction: column !important;
-                        justify-content: space-between !important;
+                        justify-content: flex-start !important;
                         position: relative !important;
                         padding: 6mm 8mm !important;
                         margin: 0 auto !important;
