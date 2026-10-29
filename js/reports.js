@@ -335,7 +335,7 @@ window.loadReportsView = function() {
                 </div>
             </div>
             <!-- MODAL: Custom Report Border Modal (កំណត់ និង Upload ស៊ុមទំព័ររបាយការណ៍) -->
-            <div id="reportBorderModal" class="hidden fixed inset-0 z-[2500] bg-black/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 font-siemreap">
+            <div id="reportBorderModal" onclick="if(event.target === this) window.closeReportBorderModal()" class="hidden fixed inset-0 z-[99999] bg-black/70 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 font-siemreap" style="z-index: 99999 !important;">
                 <div class="bg-white dark:bg-slate-800 rounded-3xl w-full max-w-lg max-h-[90vh] overflow-y-auto p-5 sm:p-6 shadow-2xl border border-slate-200 dark:border-slate-700 animate-scale-up space-y-5 custom-scrollbar">
                     <!-- Modal Header -->
                     <div class="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-700">
@@ -502,9 +502,16 @@ window.applyReportBorderToContainer = function(container) {
 };
 
 window.openReportBorderModal = function() {
-    const modal = document.getElementById('reportBorderModal');
+    let modal = document.getElementById('reportBorderModal');
     if (!modal) return;
+
+    // Pop up on top of the original report detail modal
+    if (modal.parentElement && modal.parentElement !== document.body) {
+        document.body.appendChild(modal);
+    }
+    modal.style.zIndex = "99999";
     modal.classList.remove('hidden');
+    modal.classList.add('flex');
 
     const curMode = localStorage.getItem('cms_report_border_mode') || 'none';
     window.selectReportBorderPreset(curMode, false);
@@ -528,7 +535,10 @@ window.openReportBorderModal = function() {
 
 window.closeReportBorderModal = function() {
     const modal = document.getElementById('reportBorderModal');
-    if (modal) modal.classList.add('hidden');
+    if (modal) {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    }
 };
 
 window.selectReportBorderPreset = function(mode, updateState = true) {
@@ -941,6 +951,7 @@ window.openReportDetail = function(reportType) {
 };
 
 window.closeReportDetail = function() {
+    if (typeof window.closeReportBorderModal === 'function') window.closeReportBorderModal();
     const modal = document.getElementById("reportDetailContent");
     const container = document.getElementById("reportDetailModalContainer");
     if (container) {
