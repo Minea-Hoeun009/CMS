@@ -3710,7 +3710,7 @@ window.renderAcademicResultsReport = function(container, targetGrade, targetRoom
         else if (str.includes("C") || str.includes("បង្គួរ")) colorClass = "bg-teal-100 text-teal-700 border-teal-200";
         else if (str.includes("D") || str.includes("មធ្យម")) colorClass = "bg-amber-100 text-amber-700 border-amber-200";
         else if (str.includes("E") || str.includes("ខ្សោយ") || str.includes("F") || str.includes("ធ្លាក់")) colorClass = "bg-rose-100 text-rose-700 border-rose-200";
-        return `<span class="px-3 py-1 rounded-lg text-[11px] md:text-xs font-bold font-siemreap border shadow-sm ${colorClass}">${str}</span>`;
+        return `<span class="inline-block px-2.5 py-0.5 rounded-lg text-[11px] font-bold font-siemreap border shadow-sm whitespace-nowrap ${colorClass}">${str}</span>`;
     };
     window.getGradeBadge = window.getGradeBadge || getGradeBadge;
 
@@ -3845,21 +3845,19 @@ window.renderAcademicResultsReport = function(container, targetGrade, targetRoom
             };
         });
 
-        // Compute rank if not explicitly saved
+        // Compute rank dynamically based on actual average scores
         const scoreSorted = [...preparedStudents].sort((a, b) => {
             if (b.avgVal !== a.avgVal) return b.avgVal - a.avgVal;
             return b.totalScore - a.totalScore;
         });
         let curRank = 1;
         scoreSorted.forEach((item, idx) => {
-            if (item.savedRank) {
-                item.rankVal = item.savedRank;
+            if (item.avgVal <= 0) {
+                item.rankVal = '-';
+            } else if (idx > 0 && item.avgVal === scoreSorted[idx - 1].avgVal && item.totalScore === scoreSorted[idx - 1].totalScore) {
+                item.rankVal = scoreSorted[idx - 1].rankVal;
             } else {
-                if (idx > 0 && item.avgVal === scoreSorted[idx - 1].avgVal && item.totalScore === scoreSorted[idx - 1].totalScore) {
-                    item.rankVal = scoreSorted[idx - 1].rankVal;
-                } else {
-                    item.rankVal = curRank;
-                }
+                item.rankVal = curRank;
             }
             curRank++;
         });
@@ -3870,30 +3868,20 @@ window.renderAcademicResultsReport = function(container, targetGrade, targetRoom
             preparedStudents.sort((a, b) => String(a.stu.name || '').localeCompare(String(b.stu.name || ''), 'km'));
         } else {
             preparedStudents.sort((a, b) => {
-                if (a.rankVal !== b.rankVal) return a.rankVal - b.rankVal;
+                if (typeof a.rankVal === 'number' && typeof b.rankVal === 'number' && a.rankVal !== b.rankVal) {
+                    return a.rankVal - b.rankVal;
+                }
+                if (typeof a.rankVal === 'number' && typeof b.rankVal !== 'number') return -1;
+                if (typeof a.rankVal !== 'number' && typeof b.rankVal === 'number') return 1;
                 if (b.avgVal !== a.avgVal) return b.avgVal - a.avgVal;
                 return String(a.stu.name || '').localeCompare(String(b.stu.name || ''), 'km');
             });
         }
 
-        const rowsHtml = preparedStudents.length === 0 ? `
-            <tr><td colspan="6" class="p-8 text-center text-slate-400 font-bold font-siemreap">គ្មានទិន្នន័យសិស្សក្នុងថ្នាក់ ${gradeFull} ឡើយ</td></tr>
-        ` : preparedStudents.map((item, i) => {
-            const bgClass = i % 2 !== 0 ? 'bg-slate-50/40' : 'bg-white';
-            return `
-                <tr class="hover:bg-blue-50/50 transition-colors border-b border-slate-200/80 text-[12px] ${bgClass}">
-                    <td class="border border-slate-300 p-2 font-mono text-slate-500 font-bold">${i + 1}</td>
-                    <td class="border border-slate-300 p-2 text-left px-4 font-bold text-slate-800 font-siemreap">${item.stu.name}</td>
-                    <td class="border border-slate-300 p-2 text-center font-bold font-siemreap ${item.isFemale ? 'text-rose-500' : 'text-blue-600'}">${item.isFemale ? 'ស្រី' : 'ប្រុស'}</td>
-                    <td class="border border-slate-300 p-2 font-mono font-black text-blue-700 bg-blue-50/40 text-[13px] md:text-[14px]">${item.avgVal.toFixed(2)}</td>
-                    <td class="border border-slate-300 p-2 text-center font-mono font-black text-rose-600 bg-rose-50/40 text-[13px] md:text-[14px]">${item.rankVal}</td>
-                    <td class="border border-slate-300 p-2 text-center">${getGradeBadge(item.mention)}</td>
-                </tr>
-            `;
-        }).join('');
-
         const passPct = totalCount > 0 ? ((passCount / totalCount) * 100).toFixed(2) : "0.00";
         const failPct = totalCount > 0 ? ((failCount / totalCount) * 100).toFixed(2) : "0.00";
+        const passFemalesPct = femaleCount > 0 ? ((passFemales / femaleCount) * 100).toFixed(2) : "0.00";
+        const failFemalesPct = femaleCount > 0 ? ((failFemales / femaleCount) * 100).toFixed(2) : "0.00";
         const classAvg = totalCount > 0 ? (preparedStudents.reduce((acc, s) => acc + (s.avgVal || 0), 0) / totalCount).toFixed(2) : "0.00";
         const topStudent = preparedStudents.find(s => s.rankVal === 1) || preparedStudents[0];
 
@@ -3941,6 +3929,53 @@ window.renderAcademicResultsReport = function(container, targetGrade, targetRoom
             `;
         }
 
+        // Dual-Column Table Data Split (ដូចទម្រង់គំរូផ្លូវការ ២ ចំហៀងស្មើគ្នា)
+        const half = Math.max(1, Math.ceil(preparedStudents.length / 2));
+        const leftList = preparedStudents.slice(0, half);
+        const rightList = preparedStudents.slice(half);
+
+        const renderHalfCellRow = (item, num) => {
+            if (!item) {
+                return `
+                    <td class="border border-slate-300 p-1 text-center font-mono text-slate-300 w-10">&nbsp;</td>
+                    <td class="border border-slate-300 p-1 text-left px-3 font-siemreap text-slate-300">&nbsp;</td>
+                    <td class="border border-slate-300 p-1 text-center font-siemreap w-10">&nbsp;</td>
+                    <td class="border border-slate-300 p-1 text-center font-mono w-14">&nbsp;</td>
+                    <td class="border border-slate-300 p-1 text-center font-mono w-14">&nbsp;</td>
+                `;
+            }
+            const isF = item.isFemale;
+            const genderSym = isF ? 'ស' : 'ប';
+            const genderColor = isF ? 'text-rose-600 font-bold' : 'text-slate-800 font-bold';
+            const avgStr = item.avgVal > 0 ? item.avgVal.toFixed(2) : '0.00';
+            const avgColor = item.avgVal >= 5.0 ? 'text-emerald-700 font-bold' : 'text-rose-600 font-bold';
+            const rankStr = item.rankVal !== undefined && item.rankVal !== null ? item.rankVal : '-';
+            const rankColor = (rankStr !== '-' && rankStr !== '') ? 'text-rose-600 font-bold' : 'text-slate-400 font-bold';
+
+            return `
+                <td class="border border-slate-300 p-1 text-center font-mono text-slate-600 font-bold w-10">${num}</td>
+                <td class="border border-slate-300 p-1 text-left px-3 font-bold text-slate-800 font-siemreap truncate">${item.stu.name}</td>
+                <td class="border border-slate-300 p-1 text-center font-siemreap w-10 ${genderColor}">${genderSym}</td>
+                <td class="border border-slate-300 p-1 text-center font-mono text-[13px] w-14 ${avgColor}">${avgStr}</td>
+                <td class="border border-slate-300 p-1 text-center font-mono text-[13px] w-14 ${rankColor}">${rankStr}</td>
+            `;
+        };
+
+        const leftRowsHtml = leftList.map((item, i) => `
+            <tr class="hover:bg-slate-50/80 transition-colors border-b border-slate-300 text-[12px] h-8.5">
+                ${renderHalfCellRow(item, i + 1)}
+            </tr>
+        `).join('');
+
+        const rightRowsHtml = Array.from({ length: half }).map((_, i) => {
+            const item = rightList[i];
+            return `
+                <tr class="hover:bg-slate-50/80 transition-colors border-b border-slate-300 text-[12px] h-8.5">
+                    ${renderHalfCellRow(item, half + i + 1)}
+                </tr>
+            `;
+        }).join('');
+
         container.innerHTML = `
             <div id="reportKoKhoPrintArea" class="bg-white p-6 md:p-8 w-full shadow-2xl rounded-2xl border border-slate-200 text-slate-800" style="max-width: 297mm; min-height: 210mm; font-family: 'Khmer OS Siemreap', 'Siemreap', sans-serif;">
                 
@@ -3963,36 +3998,57 @@ window.renderAcademicResultsReport = function(container, targetGrade, targetRoom
                     <h4 class="font-moul text-xs text-red-600 mt-1">${gradeFull} | ឆ្នាំសិក្សា ${academicYear}</h4>
                 </div>
 
-                <div class="overflow-x-auto mb-4">
-                    <table class="w-full text-xs text-center border-collapse border border-slate-300">
-                        <thead class="font-moul" style="font-family: 'Khmer OS Muol Light', 'Khmer OS Muol', 'Moul', serif;">
-                            <tr class="bg-slate-50 text-slate-800 text-[11px] font-moul leading-normal border-b-2 border-slate-300" style="font-family: 'Khmer OS Muol Light', 'Khmer OS Muol', 'Moul', serif;">
-                                <th class="border border-slate-300 p-2 w-12 text-center text-slate-600 bg-slate-50">ល.រ</th>
-                                <th class="border border-slate-300 p-2 text-left px-4 text-slate-800">គោត្តនាម និងនាម</th>
-                                <th class="border border-slate-300 p-2 w-14 text-center text-slate-600 bg-slate-50">ភេទ</th>
-                                <th class="border border-slate-300 p-1 w-14 text-center align-middle bg-blue-50/80 text-blue-900 border-x border-white" style="height: 90px;">
-                                    <div style="writing-mode: vertical-rl; transform: rotate(180deg); white-space: nowrap; margin: 0 auto; display: inline-block;">មធ្យមភាគ</div>
-                                    <span class="hidden">ពិន្ទុសរុប</span>
-                                </th>
-                                <th class="border border-slate-300 p-1 w-14 text-center align-middle bg-rose-50/80 text-rose-900 border-r border-white" style="height: 90px;">
-                                    <div style="writing-mode: vertical-rl; transform: rotate(180deg); white-space: nowrap; margin: 0 auto; display: inline-block;">ចំណាត់ថ្នាក់</div>
-                                </th>
-                                <th class="border border-slate-300 p-1 w-14 text-center align-middle bg-emerald-50/80 text-emerald-900" style="height: 90px;">
-                                    <div style="writing-mode: vertical-rl; transform: rotate(180deg); white-space: nowrap; margin: 0 auto; display: inline-block;">និទ្ទេស</div>
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${rowsHtml}
-                        </tbody>
-                    </table>
+                <!-- តារាងចំណាត់ថ្នាក់ទម្រង់ ២ ជួរស្មើស្អាត (Dual-Column Split Table) តាមគំរូរូបភាពជាក់ស្តែង -->
+                <div class="overflow-x-auto mb-4 border border-slate-400 shadow-sm rounded-sm max-w-[270mm] mx-auto">
+                    <div class="flex justify-center w-full min-w-[650px]">
+                        <!-- តារាងផ្នែកឆ្វេង (Left Half Table) -->
+                        <table class="w-1/2 text-xs text-center border-collapse border-r-2 border-slate-700">
+                            <thead class="font-moul" style="font-family: 'Khmer OS Muol Light', 'Khmer OS Muol', 'Moul', serif;">
+                                <tr class="bg-slate-50 text-slate-800 text-[11px] font-moul leading-normal border-b-2 border-slate-400">
+                                    <th class="border border-slate-300 p-1.5 w-10 text-center text-slate-700 bg-slate-50">ល.រ</th>
+                                    <th class="border border-slate-300 p-1.5 text-left px-3 text-slate-800">គោត្តនាម និងនាម</th>
+                                    <th class="border border-slate-300 p-1.5 w-10 text-center text-slate-700 bg-slate-50">ភេទ</th>
+                                    <th class="border border-slate-300 p-1 w-14 text-center align-middle bg-blue-50/80 text-blue-900 border-x border-white" style="height: 85px;">
+                                        <div style="writing-mode: vertical-rl; transform: rotate(180deg); white-space: nowrap; margin: 0 auto; display: inline-block;">មធ្យមភាគ</div>
+                                        <span class="hidden">ពិន្ទុសរុប</span>
+                                    </th>
+                                    <th class="border border-slate-300 p-1 w-14 text-center align-middle bg-rose-50/80 text-rose-900" style="height: 85px;">
+                                        <div style="writing-mode: vertical-rl; transform: rotate(180deg); white-space: nowrap; margin: 0 auto; display: inline-block;">ចំណាត់ថ្នាក់</div>
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${leftRowsHtml}
+                            </tbody>
+                        </table>
+
+                        <!-- តារាងផ្នែកស្តាំ (Right Half Table) -->
+                        <table class="w-1/2 text-xs text-center border-collapse">
+                            <thead class="font-moul" style="font-family: 'Khmer OS Muol Light', 'Khmer OS Muol', 'Moul', serif;">
+                                <tr class="bg-slate-50 text-slate-800 text-[11px] font-moul leading-normal border-b-2 border-slate-400">
+                                    <th class="border border-slate-300 p-1.5 w-10 text-center text-slate-700 bg-slate-50">ល.រ</th>
+                                    <th class="border border-slate-300 p-1.5 text-left px-3 text-slate-800">គោត្តនាម និងនាម</th>
+                                    <th class="border border-slate-300 p-1.5 w-10 text-center text-slate-700 bg-slate-50">ភេទ</th>
+                                    <th class="border border-slate-300 p-1 w-14 text-center align-middle bg-blue-50/80 text-blue-900 border-x border-white" style="height: 85px;">
+                                        <div style="writing-mode: vertical-rl; transform: rotate(180deg); white-space: nowrap; margin: 0 auto; display: inline-block;">មធ្យមភាគ</div>
+                                    </th>
+                                    <th class="border border-slate-300 p-1 w-14 text-center align-middle bg-rose-50/80 text-rose-900" style="height: 85px;">
+                                        <div style="writing-mode: vertical-rl; transform: rotate(180deg); white-space: nowrap; margin: 0 auto; display: inline-block;">ចំណាត់ថ្នាក់</div>
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${rightRowsHtml}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
 
-                <!-- ស្ថិតិសង្ខេបក្រោមតារាង (Summary Statistics - Plain Dashes / ត្រេធម្មតា) -->
+                <!-- ស្ថិតិសង្ខេបក្រោមតារាង (Summary Statistics - ដូចទម្រង់គំរូជាក់ស្តែង) -->
                 <div class="mb-5 text-xs font-siemreap leading-relaxed text-slate-800 text-left px-1 space-y-1">
-                    <div>- <span class="font-bold">សិស្សសរុបក្នុងថ្នាក់៖</span> <span class="font-bold">${toKhmerNum(totalCount)}</span> នាក់ (ស្រី៖ <span class="font-bold text-rose-600">${toKhmerNum(femaleCount)}</span> នាក់, ប្រុស៖ <span class="font-bold">${toKhmerNum(maleCount)}</span> នាក់)</div>
-                    <div>- <span class="font-bold">សិស្សជាប់មធ្យមភាគ (≥ 5.00)៖</span> <span class="font-bold text-emerald-700">${toKhmerNum(passCount)}</span> នាក់ (ស្រី៖ <span class="font-bold text-rose-600">${toKhmerNum(passFemales)}</span> នាក់) ស្មើនឹង <span class="font-bold text-emerald-800">${toKhmerNum(passPct)}%</span></div>
-                    <div>- <span class="font-bold">សិស្សធ្លាក់មធ្យមភាគ (< 5.00)៖</span> <span class="font-bold text-rose-700">${toKhmerNum(failCount)}</span> នាក់ (ស្រី៖ <span class="font-bold text-rose-600">${toKhmerNum(failFemales)}</span> នាក់) ស្មើនឹង <span class="font-bold text-rose-800">${toKhmerNum(failPct)}%</span></div>
+                    <div>✤ <span class="font-bold">បញ្ឈប់បញ្ជីត្រឹមលេខរៀង ${toUniversalNum(totalCount)}</span> | <span class="font-bold">សិស្សសរុបក្នុងថ្នាក់៖</span> <span class="font-bold">${toUniversalNum(totalCount)}</span> នាក់ (ស្រី៖ <span class="font-bold text-rose-600">${toUniversalNum(femaleCount)}</span> នាក់, ប្រុស៖ <span class="font-bold">${toUniversalNum(maleCount)}</span> នាក់)</div>
+                    <div>✤ <span class="font-bold">សិស្សជាប់មធ្យមភាគ (≥ 5.00)៖</span> <span class="font-bold text-emerald-700">${toUniversalNum(passCount)}</span> នាក់ គិតជាភាគរយ <span class="font-bold text-emerald-800">${toUniversalNum(passPct)}%</span> (ស្រី៖ <span class="font-bold text-rose-600">${toUniversalNum(passFemales)}</span> នាក់ គិតជាភាគរយ <span class="font-bold text-emerald-800">${toUniversalNum(passFemalesPct)}%</span>)</div>
+                    <div>✤ <span class="font-bold">សិស្សធ្លាក់មធ្យមភាគ (< 5.00)៖</span> <span class="font-bold text-rose-700">${toUniversalNum(failCount)}</span> នាក់ គិតជាភាគរយ <span class="font-bold text-rose-800">${toUniversalNum(failPct)}%</span> (ស្រី៖ <span class="font-bold text-rose-600">${toUniversalNum(failFemales)}</span> នាក់ គិតជាភាគរយ <span class="font-bold text-rose-800">${toUniversalNum(failFemalesPct)}%</span>)</div>
                 </div>
 
                 <!-- ហត្ថលេខា និងកាលបរិច្ឆេទផ្លូវការ -->
@@ -4091,21 +4147,19 @@ window.renderAcademicResultsReport = function(container, targetGrade, targetRoom
             };
         });
 
-        // Compute rank if not explicitly stored
+        // Compute rank dynamically
         const scoreSorted = [...preparedStudents].sort((a, b) => {
             if (b.semAvg !== a.semAvg) return b.semAvg - a.semAvg;
             return b.examVal - a.examVal;
         });
         let curRank = 1;
         scoreSorted.forEach((item, idx) => {
-            if (item.savedRank) {
-                item.rankVal = item.savedRank;
+            if (item.semAvg <= 0) {
+                item.rankVal = '-';
+            } else if (idx > 0 && item.semAvg === scoreSorted[idx - 1].semAvg && item.examVal === scoreSorted[idx - 1].examVal) {
+                item.rankVal = scoreSorted[idx - 1].rankVal;
             } else {
-                if (idx > 0 && item.semAvg === scoreSorted[idx - 1].semAvg && item.examVal === scoreSorted[idx - 1].examVal) {
-                    item.rankVal = scoreSorted[idx - 1].rankVal;
-                } else {
-                    item.rankVal = curRank;
-                }
+                item.rankVal = curRank;
             }
             curRank++;
         });
@@ -4116,7 +4170,11 @@ window.renderAcademicResultsReport = function(container, targetGrade, targetRoom
             preparedStudents.sort((a, b) => String(a.stu.name || '').localeCompare(String(b.stu.name || ''), 'km'));
         } else {
             preparedStudents.sort((a, b) => {
-                if (a.rankVal !== b.rankVal) return a.rankVal - b.rankVal;
+                if (typeof a.rankVal === 'number' && typeof b.rankVal === 'number' && a.rankVal !== b.rankVal) {
+                    return a.rankVal - b.rankVal;
+                }
+                if (typeof a.rankVal === 'number' && typeof b.rankVal !== 'number') return -1;
+                if (typeof a.rankVal !== 'number' && typeof b.rankVal === 'number') return 1;
                 if (b.semAvg !== a.semAvg) return b.semAvg - a.semAvg;
                 return String(a.stu.name || '').localeCompare(String(b.stu.name || ''), 'km');
             });
@@ -4128,14 +4186,14 @@ window.renderAcademicResultsReport = function(container, targetGrade, targetRoom
             const bgClass = i % 2 !== 0 ? 'bg-slate-50/40' : 'bg-white';
             return `
                 <tr class="hover:bg-blue-50/50 transition-colors border-b border-slate-200/80 text-[12px] ${bgClass}">
-                    <td class="border border-slate-300 p-2 font-mono text-slate-500 font-bold">${i + 1}</td>
+                    <td class="border border-slate-300 p-2 font-mono text-slate-500 font-bold w-12">${i + 1}</td>
                     <td class="border border-slate-300 p-2 text-left px-4 font-bold text-slate-800 font-siemreap">${item.stu.name}</td>
-                    <td class="border border-slate-300 p-2 text-center font-bold font-siemreap ${item.isFemale ? 'text-rose-500' : 'text-blue-600'}">${item.isFemale ? 'ស្រី' : 'ប្រុស'}</td>
-                    <td class="border border-slate-300 p-2 font-mono font-bold text-orange-700 bg-orange-50/40">${item.examVal.toFixed(2)}</td>
-                    <td class="border border-slate-300 p-2 font-mono font-bold text-indigo-700 bg-indigo-50/40">${item.monthAvg.toFixed(2)}</td>
-                    <td class="border border-slate-300 p-2 font-mono font-black text-blue-700 bg-blue-50/40 text-[13px] md:text-[14px]">${item.semAvg.toFixed(2)}</td>
-                    <td class="border border-slate-300 p-2 text-center font-mono font-black text-rose-600 bg-rose-50/40 text-[13px] md:text-[14px]">${item.rankVal}</td>
-                    <td class="border border-slate-300 p-2 text-center">${getGradeBadge(item.mention)}</td>
+                    <td class="border border-slate-300 p-2 text-center font-bold font-siemreap w-12 ${item.isFemale ? 'text-rose-600' : 'text-blue-700'}">${item.isFemale ? 'ស' : 'ប'}</td>
+                    <td class="border border-slate-300 p-2 font-mono font-bold text-orange-700 bg-orange-50/40 w-16">${item.examVal > 0 ? item.examVal.toFixed(2) : '0.00'}</td>
+                    <td class="border border-slate-300 p-2 font-mono font-bold text-indigo-700 bg-indigo-50/40 w-16">${item.monthAvg > 0 ? item.monthAvg.toFixed(2) : '0.00'}</td>
+                    <td class="border border-slate-300 p-2 font-mono font-black ${item.semAvg >= 5.0 ? 'text-emerald-700 bg-blue-50/40' : 'text-rose-600 bg-rose-50/40'} text-[13px] md:text-[14px] w-20">${item.semAvg > 0 ? item.semAvg.toFixed(2) : '0.00'}</td>
+                    <td class="border border-slate-300 p-2 text-center font-mono font-black text-rose-600 bg-rose-50/40 text-[13px] md:text-[14px] w-16">${item.rankVal}</td>
+                    <td class="border border-slate-300 p-2 text-center whitespace-nowrap w-24">${getGradeBadge(item.mention)}</td>
                 </tr>
             `;
         }).join('');
@@ -4353,21 +4411,19 @@ window.renderAcademicResultsReport = function(container, targetGrade, targetRoom
         };
     });
 
-    // Compute rank if not explicitly stored
+    // Compute rank dynamically
     const scoreSorted = [...preparedStudents].sort((a, b) => {
         if (b.annual !== a.annual) return b.annual - a.annual;
         return (b.sem1 + b.sem2) - (a.sem1 + a.sem2);
     });
     let curRank = 1;
     scoreSorted.forEach((item, idx) => {
-        if (item.savedRank) {
-            item.rankVal = item.savedRank;
+        if (item.annual <= 0) {
+            item.rankVal = '-';
+        } else if (idx > 0 && item.annual === scoreSorted[idx - 1].annual && (item.sem1 + item.sem2) === (scoreSorted[idx - 1].sem1 + scoreSorted[idx - 1].sem2)) {
+            item.rankVal = scoreSorted[idx - 1].rankVal;
         } else {
-            if (idx > 0 && item.annual === scoreSorted[idx - 1].annual && (item.sem1 + item.sem2) === (scoreSorted[idx - 1].sem1 + scoreSorted[idx - 1].sem2)) {
-                item.rankVal = scoreSorted[idx - 1].rankVal;
-            } else {
-                item.rankVal = curRank;
-            }
+            item.rankVal = curRank;
         }
         curRank++;
     });
@@ -4378,7 +4434,11 @@ window.renderAcademicResultsReport = function(container, targetGrade, targetRoom
         preparedStudents.sort((a, b) => String(a.stu.name || '').localeCompare(String(b.stu.name || ''), 'km'));
     } else {
         preparedStudents.sort((a, b) => {
-            if (a.rankVal !== b.rankVal) return a.rankVal - b.rankVal;
+            if (typeof a.rankVal === 'number' && typeof b.rankVal === 'number' && a.rankVal !== b.rankVal) {
+                return a.rankVal - b.rankVal;
+            }
+            if (typeof a.rankVal === 'number' && typeof b.rankVal !== 'number') return -1;
+            if (typeof a.rankVal !== 'number' && typeof b.rankVal === 'number') return 1;
             if (b.annual !== a.annual) return b.annual - a.annual;
             return String(a.stu.name || '').localeCompare(String(b.stu.name || ''), 'km');
         });
@@ -4390,14 +4450,14 @@ window.renderAcademicResultsReport = function(container, targetGrade, targetRoom
         const bgClass = i % 2 !== 0 ? 'bg-slate-50/40' : 'bg-white';
         return `
             <tr class="hover:bg-blue-50/50 transition-colors border-b border-slate-200/80 text-[12px] ${bgClass}">
-                <td class="border border-slate-300 p-2 font-mono text-slate-500 font-bold">${i + 1}</td>
+                <td class="border border-slate-300 p-2 font-mono text-slate-500 font-bold w-12">${i + 1}</td>
                 <td class="border border-slate-300 p-2 text-left px-4 font-bold text-slate-800 font-siemreap">${item.stu.name}</td>
-                <td class="border border-slate-300 p-2 text-center font-bold font-siemreap ${item.isFemale ? 'text-rose-500' : 'text-blue-600'}">${item.isFemale ? 'ស្រី' : 'ប្រុស'}</td>
-                <td class="border border-slate-300 p-2 font-mono font-bold text-blue-700 bg-blue-50/40">${item.sem1.toFixed(2)}</td>
-                <td class="border border-slate-300 p-2 font-mono font-bold text-indigo-700 bg-indigo-50/40">${item.sem2.toFixed(2)}</td>
-                <td class="border border-slate-300 p-2 font-mono font-black text-amber-700 bg-amber-50/40 text-[13px] md:text-[14px]">${item.annual.toFixed(2)}</td>
-                <td class="border border-slate-300 p-2 text-center font-mono font-black text-rose-600 bg-rose-50/40 text-[13px] md:text-[14px]">${item.rankVal}</td>
-                <td class="border border-slate-300 p-2 text-center">${getGradeBadge(item.mention)}</td>
+                <td class="border border-slate-300 p-2 text-center font-bold font-siemreap w-12 ${item.isFemale ? 'text-rose-600' : 'text-blue-700'}">${item.isFemale ? 'ស' : 'ប'}</td>
+                <td class="border border-slate-300 p-2 font-mono font-bold text-blue-700 bg-blue-50/40 w-16">${item.sem1 > 0 ? item.sem1.toFixed(2) : '0.00'}</td>
+                <td class="border border-slate-300 p-2 font-mono font-bold text-indigo-700 bg-indigo-50/40 w-16">${item.sem2 > 0 ? item.sem2.toFixed(2) : '0.00'}</td>
+                <td class="border border-slate-300 p-2 font-mono font-black ${item.annual >= 5.0 ? 'text-amber-700 bg-amber-50/40' : 'text-rose-600 bg-rose-50/40'} text-[13px] md:text-[14px] w-20">${item.annual > 0 ? item.annual.toFixed(2) : '0.00'}</td>
+                <td class="border border-slate-300 p-2 text-center font-mono font-black text-rose-600 bg-rose-50/40 text-[13px] md:text-[14px] w-16">${item.rankVal}</td>
+                <td class="border border-slate-300 p-2 text-center whitespace-nowrap w-24">${getGradeBadge(item.mention)}</td>
             </tr>
         `;
     }).join('');
