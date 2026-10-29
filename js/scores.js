@@ -2513,7 +2513,7 @@ window.exportScoreEntryToExcel = function() {
                 <tr>
                     <td colspan="12" style="border: none; text-align: center; vertical-align: top; font-family: 'Khmer OS Siemreap', 'Siemreap', sans-serif; font-size: 10.5pt; line-height: 1.6;">
                         បានឃើញ និងឯកភាព<br>
-                        <b style="font-family: 'Khmer OS Muol Light', Moul, serif; font-size: 11pt;">នាយក/នាយិកាសាលា</b><br><br><br><br><br>
+                        <b style="font-family: 'Khmer OS Muol Light', Moul, serif; font-size: 11pt;">នាយិកាសាលា</b><br><br><br><br><br>
                         ${principalDisplayName ? `<b style="font-family: 'Khmer OS Muol Light', Moul, serif; font-size: 11pt;">${principalDisplayName}</b>` : ''}
                     </td>
                     <td colspan="6" style="border: none;"></td>
@@ -2697,7 +2697,7 @@ window.exportRankingsToExcel = function() {
                 <tr>
                     <td colspan="12" style="border: none; text-align: center; vertical-align: top; font-family: 'Khmer OS Siemreap', 'Siemreap', sans-serif; font-size: 10.5pt; line-height: 1.6;">
                         បានឃើញ និងឯកភាព<br>
-                        <b style="font-family: 'Khmer OS Muol Light', Moul, serif; font-size: 11pt;">នាយក/នាយិកាសាលា</b><br><br><br><br><br>
+                        <b style="font-family: 'Khmer OS Muol Light', Moul, serif; font-size: 11pt;">នាយិកាសាលា</b><br><br><br><br><br>
                         ${principalDisplayName ? `<b style="font-family: 'Khmer OS Muol Light', Moul, serif; font-size: 11pt;">${principalDisplayName}</b>` : ''}
                     </td>
                     <td colspan="6" style="border: none;"></td>
@@ -3013,7 +3013,7 @@ window.downloadExcelTemplate = function() {
             <tr>
                 <td colspan="${leftCols}" style="border: none; text-align: center; vertical-align: top; font-family: 'Khmer OS Siemreap', 'Siemreap', sans-serif; font-size: 10.5pt; line-height: 1.6;">
                     បានឃើញ និងឯកភាព<br>
-                    <b style="font-family: 'Khmer OS Muol Light', Moul, serif; font-size: 11pt;">នាយក/នាយិកាសាលា</b><br><br><br><br><br>
+                    <b style="font-family: 'Khmer OS Muol Light', Moul, serif; font-size: 11pt;">នាយិកាសាលា</b><br><br><br><br><br>
                     ${principalDisplayNameRank ? `<b style="font-family: 'Khmer OS Muol Light', Moul, serif; font-size: 11pt;">${principalDisplayNameRank}</b>` : ''}
                 </td>
                 <td colspan="${rightCols}" style="border: none; text-align: center; vertical-align: top; font-family: 'Khmer OS Siemreap', 'Siemreap', sans-serif; font-size: 10.5pt; line-height: 1.6;">
@@ -3492,7 +3492,7 @@ window.printScoreList = function() {
             <div class="bottom-sig-container" style="display: flex; justify-content: space-between; align-items: flex-start; width: 100%; page-break-inside: avoid; padding: 0 20px; margin-top: 15px;">
                 <div class="sig-box-left" style="width: 40%; text-align: center;">
                     <p style="margin: 0 0 4px 0; font-size: 11pt; font-family: 'Siemreap', sans-serif; color: #000;">បានឃើញ និងឯកភាព</p>
-                    <p style="margin: 0 0 55px 0; font-size: 11pt; font-family: 'Khmer OS Muol Light', 'Moul', serif; color: #000;">នាយក/នាយិកាសាលា</p>
+                    <p style="margin: 0 0 55px 0; font-size: 11pt; font-family: 'Khmer OS Muol Light', 'Moul', serif; color: #000;">នាយិកាសាលា</p>
                     <p style="margin: 0; font-size: 11pt; font-family: 'Khmer OS Muol Light', 'Moul', serif; color: #000;">${principalName}</p>
                 </div>
                 <div class="sig-box-right" style="width: 40%; text-align: center;">
@@ -3802,7 +3802,7 @@ window.printRankingTable = function() {
             <div class="bottom-sig-container" style="display: flex; justify-content: space-between; align-items: flex-start; width: 100%; page-break-inside: avoid; padding: 0 20px; margin-top: 15px;">
                 <div class="sig-box-left" style="width: 40%; text-align: center;">
                     <p style="margin: 0 0 4px 0; font-size: 11pt; font-family: 'Siemreap', sans-serif; color: #000;">បានឃើញ និងឯកភាព</p>
-                    <p style="margin: 0 0 55px 0; font-size: 11pt; font-family: 'Khmer OS Muol Light', 'Moul', serif; color: #000;">នាយក/នាយិកាសាលា</p>
+                    <p style="margin: 0 0 55px 0; font-size: 11pt; font-family: 'Khmer OS Muol Light', 'Moul', serif; color: #000;">នាយិកាសាលា</p>
                     <p style="margin: 0; font-size: 11pt; font-family: 'Khmer OS Muol Light', 'Moul', serif; color: #000;">${principalName}</p>
                 </div>
                 <div class="sig-box-right" style="width: 40%; text-align: center;">
@@ -4336,7 +4336,7 @@ window.generateMonthlySheetHTML = function(stu, periodOverride = null) {
          </div>
        </div>
        <div style="display: flex; justify-content: space-between; align-items: flex-start; text-align: center; margin-bottom: 2mm;">
-         <div style="width: 40%;"><p style="margin: 0 0 3px 0; font-size: 11.5px; font-weight: bold;">បានឃើញ និងឯកភាព</p><p style="margin: 0 0 40px 0; font-family: 'Moul', serif; font-size: 11.5px; color: #1e3a8a;">នាយក/នាយិកាសាលា</p><p style="margin: 0; color: #64748b;">................................................</p></div>
+         <div style="width: 40%;"><p style="margin: 0 0 3px 0; font-size: 11.5px; font-weight: bold;">បានឃើញ និងឯកភាព</p><p style="margin: 0 0 40px 0; font-family: 'Moul', serif; font-size: 11.5px; color: #1e3a8a;">នាយិកាសាលា</p><p style="margin: 0; color: #64748b;">................................................</p></div>
          <div style="width: 50%;">
             <p class="rc-lunar-date-lbl" style="margin: 0 0 2px 0; font-size: 10.5px; color: #1e293b; display: ${rDates.showLunar ? 'block' : 'none'};">${lunarDateStr}</p>
             <p class="rc-solar-date-lbl" style="margin: 0 0 3px 0; font-size: 11px; color: #1e293b;">${solarDateStr}</p>
@@ -4486,7 +4486,7 @@ window.generateCoverAndProfileHTML = function(stu) {
            </div>
            <div style="display: flex; justify-content: space-between; text-align: center; font-size: 12.5px; margin-top: 4mm; padding-top: 3mm; border-top: 1.5px solid #e2e8f0;">
               <div style="width: 44%;"><p style="margin: 0 0 45px 0; font-weight: bold; color: #334155;">ហត្ថលេខា ឬស្នាមមេដៃអាណាព្យាបាល</p><p style="margin: 0; color: #94a3b8; font-size: 11px;">............................................................</p></div>
-              <div style="width: 44%;"><p style="margin: 0 0 4px 0; font-size: 11px; color: #64748b;">${window.getFormattedSolarDate()}</p><p style="margin: 0 0 35px 0; font-family: 'Moul', serif; font-size: 12.5px; color: #1e3a8a;">នាយក/នាយិកាសាលា</p><p style="margin: 0; color: #94a3b8; font-size: 11px;">............................................................</p></div>
+              <div style="width: 44%;"><p style="margin: 0 0 4px 0; font-size: 11px; color: #64748b;">${window.getFormattedSolarDate()}</p><p style="margin: 0 0 35px 0; font-family: 'Moul', serif; font-size: 12.5px; color: #1e3a8a;">នាយិកាសាលា</p><p style="margin: 0; color: #94a3b8; font-size: 11px;">............................................................</p></div>
            </div>
         </div>
       </div>
@@ -4921,7 +4921,7 @@ function renderTop5HonorBoard() {
               <div class="flex justify-between items-end text-[13px] font-bold px-8">
                 <div class="text-center canva-el cursor-grab hover:ring-2 hover:ring-dashed hover:ring-blue-400 p-3 rounded-xl transition-colors hover:bg-white/50 backdrop-blur-sm">
                   <p contenteditable="true" spellcheck="false" class="mb-2 text-slate-800 outline-none font-normal">បានឃើញ និងឯកភាព</p>
-                  <p contenteditable="true" spellcheck="false" class="font-moul text-[12px] text-slate-900 mb-10 outline-none">នាយក/នាយិកាសាលា</p>
+                  <p contenteditable="true" spellcheck="false" class="font-moul text-[12px] text-slate-900 mb-10 outline-none">នាយិកាសាលា</p>
                   <div contenteditable="true" spellcheck="false" class="font-moul text-[14px] text-indigo-950 outline-none min-w-[120px] border-b border-dashed border-transparent hover:border-slate-400 pb-1">${principal_name}</div>
                 </div>
                 <div class="text-center canva-el cursor-grab hover:ring-2 hover:ring-dashed hover:ring-blue-400 p-3 rounded-xl transition-colors hover:bg-white/50 backdrop-blur-sm">

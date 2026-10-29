@@ -1517,7 +1517,7 @@ window.updateStudentListContent = function() {
                 <div class="flex justify-between items-start mt-6 px-10 text-[11.5px] font-siemreap text-slate-800">
                     <div class="text-center w-2/5">
                         <p class="mb-1 text-slate-700">បានឃើញ និងឯកភាព</p>
-                        <p class="font-moul text-slate-900 mb-16">នាយក/នាយិកាសាលា</p>
+                        <p class="font-moul text-slate-900 mb-16">នាយិកាសាលា</p>
                         ${principalName ? `<p class="font-moul text-slate-900 text-sm">${principalName}</p>` : ""}
                     </div>
                     <div class="text-center w-2/5">
@@ -2271,7 +2271,7 @@ window.renderAttendanceContent = function() {
                 <div class="flex justify-between items-start mt-6 px-10 text-[11px] font-siemreap text-slate-800">
                     <div class="text-center w-2/5">
                         <p class="mb-1 text-slate-700">បានឃើញ និងឯកភាព</p>
-                        <p class="font-moul text-slate-900 mb-16">នាយក/នាយិកាសាលា</p>
+                        <p class="font-moul text-slate-900 mb-16">នាយិកាសាលា</p>
                         <p class="font-moul text-slate-900 text-sm">${principalName}</p>
                     </div>
                     <div class="text-center w-2/5">
@@ -4189,7 +4189,7 @@ window.renderAcademicResultsReport = function(container, targetGrade, targetRoom
                 <div class="flex justify-between items-start text-xs pt-2 px-8 font-siemreap">
                     <div class="text-center w-2/5">
                         <p class="mb-1 text-slate-700">បានឃើញ និងឯកភាព</p>
-                        <p class="font-moul text-slate-900 mb-14">នាយក/នាយិកាសាលា</p>
+                        <p class="font-moul text-slate-900 mb-14">នាយិកាសាលា</p>
                         <p class="font-moul text-slate-900 text-xs">${principalName}</p>
                     </div>
                     <div class="text-center w-2/5">
@@ -4449,7 +4449,7 @@ window.renderAcademicResultsReport = function(container, targetGrade, targetRoom
                 <div class="flex justify-between items-start text-xs pt-2 px-8 font-siemreap">
                     <div class="text-center w-2/5">
                         <p class="mb-1 text-slate-700">បានឃើញ និងឯកភាព</p>
-                        <p class="font-moul text-slate-900 mb-14">នាយក/នាយិកាសាលា</p>
+                        <p class="font-moul text-slate-900 mb-14">នាយិកាសាលា</p>
                         <p class="font-moul text-slate-900 text-xs">${principalName}</p>
                     </div>
                     <div class="text-center w-2/5">
@@ -4712,7 +4712,7 @@ window.renderAcademicResultsReport = function(container, targetGrade, targetRoom
             <div class="flex justify-between items-start text-xs pt-2 px-8 font-siemreap">
                 <div class="text-center w-2/5">
                     <p class="mb-1 text-slate-700">បានឃើញ និងឯកភាព</p>
-                    <p class="font-moul text-slate-900 mb-14">នាយក/នាយិកាសាលា</p>
+                    <p class="font-moul text-slate-900 mb-14">នាយិកាសាលា</p>
                     <p class="font-moul text-slate-900 text-xs">${principalName}</p>
                 </div>
                 <div class="text-center w-2/5">
@@ -4822,7 +4822,11 @@ window.renderClassInventoryReport = function(container, targetGrade, targetRoom)
         ? window.CMSPrintManager.getStandardContext({ grade: gradeFull })
         : {};
 
-    const schoolName = ctx.schoolName || localStorage.getItem('cms_school_name') || 'សាលាបឋមសិក្សា................................';
+    const sInfo = typeof appSettings !== 'undefined' ? appSettings : {};
+    let storedSettings = {};
+    try { storedSettings = JSON.parse(localStorage.getItem('school_settings') || '{}'); } catch(e) {}
+    const districtName = ctx.districtName || (storedSettings.district_name || storedSettings.district || sInfo.district_name || sInfo.district || localStorage.getItem('cms_school_district') || "កៀនស្វាយ").replace(/^ស្រុក\s*/, '').trim();
+    const schoolName = ctx.schoolName || storedSettings.school_name || sInfo.school_name || localStorage.getItem('cms_school_name') || 'សាលាបឋមសិក្សា ឃុំ';
     const academicYear = ctx.academicYear || localStorage.getItem('selected_academic_year') || '២០២៤-២០២៥';
     const teacherName = ctx.teacherName || localStorage.getItem('teacher_name') || '................................';
     const principalName = ctx.principalName || localStorage.getItem('school_principal') || '................................';
@@ -4923,22 +4927,19 @@ window.renderClassInventoryReport = function(container, targetGrade, targetRoom)
             <div style="position: absolute; bottom: 8px; left: 10px; color: #d97706; font-size: 16px;">❖</div>
             <div style="position: absolute; bottom: 8px; right: 10px; color: #d97706; font-size: 16px;">❖</div>
 
-            <!-- National Header -->
-            <div class="text-center mb-3">
-                <p class="font-moul text-xs text-amber-900 tracking-wide">ព្រះរាជាណាចក្រកម្ពុជា</p>
-                <p class="font-moul text-xs text-amber-900 tracking-wide mt-0.5">ជាតិ សាសនា ព្រះមហាក្សត្រ</p>
-                <div class="text-amber-600 text-xs mt-0.5">*** ៚ ៚ ៚ ***</div>
-            </div>
-
-            <!-- School & Class Metadata -->
-            <div class="flex justify-between items-center mb-2 px-2 text-xs">
-                <div>
-                    <p class="font-bold text-slate-800">${schoolName}</p>
-                    <p class="text-slate-600 mt-0.5">ថ្នាក់ទី ៖ <b class="text-indigo-700">${gradeFull}</b></p>
+            <!-- Official Dual-Side Header matching User Model (Images 1 & 2) -->
+            <div class="flex justify-between items-start mb-4 text-xs">
+                <div class="text-left leading-relaxed pt-1">
+                    <p class="font-moul text-slate-900 text-[11px] mb-0.5">ការិយាល័យ អប់រំ យុវជននិងកីឡានៃរដ្ឋបាលស្រុក ${districtName}</p>
+                    <p class="font-moul text-slate-900 text-[11px]">${schoolName}</p>
+                    <p class="text-slate-600 mt-1 font-bold text-[10.5px]">ថ្នាក់ទី ៖ <span class="text-indigo-700">${gradeFull}</span> | ឆ្នាំសិក្សា ៖ <span class="text-slate-800">${academicYear}</span></p>
                 </div>
-                <div class="text-right">
-                    <p class="text-slate-600">ឆ្នាំសិក្សា ៖ <b class="text-slate-800">${academicYear}</b></p>
-                    <p class="text-slate-500 text-[10px]">កាលបរិច្ឆេទ ៖ ${solarDateStr}</p>
+                <div class="text-center">
+                    <p class="font-moul text-slate-900 text-[12px] mb-0.5">ព្រះរាជាណាចក្រកម្ពុជា</p>
+                    <p class="font-moul text-slate-900 text-[12px]">ជាតិ សាសនា ព្រះមហាក្សត្រ</p>
+                    <div class="flex items-center justify-center mt-1 mx-auto">
+                        <img src="${window.CMS_HEADER_SYMBOL_B64 || 'assets/images/header-flourish.png'}" class="header-flourish-symbol" alt="symbol" style="display: block; margin: 2px auto 0 auto; width: 135px; height: 11px; object-fit: contain;" />
+                    </div>
                 </div>
             </div>
 
@@ -5018,7 +5019,7 @@ window.renderClassInventoryReport = function(container, targetGrade, targetRoom)
             <div class="flex justify-between items-start text-xs pt-4 px-8 font-siemreap">
                 <div class="text-center w-2/5">
                     <p class="mb-1 text-slate-700">បានឃើញ និងឯកភាព</p>
-                    <p class="font-moul text-slate-900 mb-14">នាយក/នាយិកាសាលា</p>
+                    <p class="font-moul text-slate-900 mb-14">នាយិកាសាលា</p>
                     <p class="font-moul text-slate-900 text-xs">${principalName}</p>
                 </div>
                 <div class="text-center w-2/5">
@@ -5051,7 +5052,11 @@ window.renderInternalRulesReport = function(container, targetGrade, targetRoom) 
         ? window.CMSPrintManager.getStandardContext({ grade: gradeFull })
         : {};
 
-    const schoolName = ctx.schoolName || localStorage.getItem('cms_school_name') || 'សាលាបឋមសិក្សា................................';
+    const sInfo = typeof appSettings !== 'undefined' ? appSettings : {};
+    let storedSettings = {};
+    try { storedSettings = JSON.parse(localStorage.getItem('school_settings') || '{}'); } catch(e) {}
+    const districtName = ctx.districtName || (storedSettings.district_name || storedSettings.district || sInfo.district_name || sInfo.district || localStorage.getItem('cms_school_district') || "កៀនស្វាយ").replace(/^ស្រុក\s*/, '').trim();
+    const schoolName = ctx.schoolName || storedSettings.school_name || sInfo.school_name || localStorage.getItem('cms_school_name') || 'សាលាបឋមសិក្សា ឃុំ';
     const academicYear = ctx.academicYear || localStorage.getItem('selected_academic_year') || '២០២៤-២០២៥';
     const teacherName = ctx.teacherName || localStorage.getItem('teacher_name') || '................................';
     const principalName = ctx.principalName || localStorage.getItem('school_principal') || '................................';
@@ -5095,22 +5100,19 @@ window.renderInternalRulesReport = function(container, targetGrade, targetRoom) 
             <div style="position: absolute; bottom: 8px; left: 10px; color: #e11d48; font-size: 16px;">❖</div>
             <div style="position: absolute; bottom: 8px; right: 10px; color: #e11d48; font-size: 16px;">❖</div>
 
-            <!-- National Header -->
-            <div class="text-center mb-3">
-                <p class="font-moul text-xs text-rose-950 tracking-wide">ព្រះរាជាណាចក្រកម្ពុជា</p>
-                <p class="font-moul text-xs text-rose-950 tracking-wide mt-0.5">ជាតិ សាសនា ព្រះមហាក្សត្រ</p>
-                <div class="text-rose-600 text-xs mt-0.5">*** ៚ ៚ ៚ ***</div>
-            </div>
-
-            <!-- School & Class Metadata -->
-            <div class="flex justify-between items-center mb-2 px-2 text-xs">
-                <div>
-                    <p class="font-bold text-slate-800">${schoolName}</p>
-                    <p class="text-slate-600 mt-0.5">ថ្នាក់ទី ៖ <b class="text-rose-700">${gradeFull}</b></p>
+            <!-- Official Dual-Side Header matching User Model (Images 1 & 2) -->
+            <div class="flex justify-between items-start mb-3 text-xs">
+                <div class="text-left leading-relaxed pt-1">
+                    <p class="font-moul text-slate-900 text-[11px] mb-0.5">ការិយាល័យ អប់រំ យុវជននិងកីឡានៃរដ្ឋបាលស្រុក ${districtName}</p>
+                    <p class="font-moul text-slate-900 text-[11px]">${schoolName}</p>
+                    <p class="text-slate-600 mt-1 font-bold text-[10.5px]">ថ្នាក់ទី ៖ <span class="text-rose-700">${gradeFull}</span> | ឆ្នាំសិក្សា ៖ <span class="text-slate-800">${academicYear}</span></p>
                 </div>
-                <div class="text-right">
-                    <p class="text-slate-600">ឆ្នាំសិក្សា ៖ <b class="text-slate-800">${academicYear}</b></p>
-                    <p class="text-slate-500 text-[10px]">កាលបរិច្ឆេទ ៖ ${solarDateStr}</p>
+                <div class="text-center">
+                    <p class="font-moul text-slate-900 text-[12px] mb-0.5">ព្រះរាជាណាចក្រកម្ពុជា</p>
+                    <p class="font-moul text-slate-900 text-[12px]">ជាតិ សាសនា ព្រះមហាក្សត្រ</p>
+                    <div class="flex items-center justify-center mt-1 mx-auto">
+                        <img src="${window.CMS_HEADER_SYMBOL_B64 || 'assets/images/header-flourish.png'}" class="header-flourish-symbol" alt="symbol" style="display: block; margin: 2px auto 0 auto; width: 135px; height: 11px; object-fit: contain;" />
+                    </div>
                 </div>
             </div>
 
@@ -5143,7 +5145,7 @@ window.renderInternalRulesReport = function(container, targetGrade, targetRoom) 
             <div class="flex justify-between items-start text-xs pt-3 px-8 font-siemreap">
                 <div class="text-center w-2/5">
                     <p class="mb-1 text-slate-700">បានឃើញ និងឯកភាព</p>
-                    <p class="font-moul text-slate-900 mb-14">នាយក/នាយិកាសាលា</p>
+                    <p class="font-moul text-slate-900 mb-14">នាយិកាសាលា</p>
                     <p class="font-moul text-slate-900 text-xs">${principalName}</p>
                 </div>
                 <div class="text-center w-2/5">
@@ -5176,9 +5178,14 @@ window.renderClassPrinciplesReport = function(container, targetGrade, targetRoom
         ? window.CMSPrintManager.getStandardContext({ grade: gradeFull })
         : {};
 
-    const schoolName = ctx.schoolName || localStorage.getItem('cms_school_name') || 'សាលាបឋមសិក្សា................................';
+    const sInfo = typeof appSettings !== 'undefined' ? appSettings : {};
+    let storedSettings = {};
+    try { storedSettings = JSON.parse(localStorage.getItem('school_settings') || '{}'); } catch(e) {}
+    const districtName = ctx.districtName || (storedSettings.district_name || storedSettings.district || sInfo.district_name || sInfo.district || localStorage.getItem('cms_school_district') || "កៀនស្វាយ").replace(/^ស្រុក\s*/, '').trim();
+    const schoolName = ctx.schoolName || storedSettings.school_name || sInfo.school_name || localStorage.getItem('cms_school_name') || 'សាលាបឋមសិក្សា ឃុំ';
     const academicYear = ctx.academicYear || localStorage.getItem('selected_academic_year') || '២០២៤-២០២៥';
     const teacherName = ctx.teacherName || localStorage.getItem('teacher_name') || '................................';
+    const principalName = ctx.principalName || localStorage.getItem('school_principal') || '................................';
     const solarDateStr = ctx.solarDate || (window.reportDateSettings ? window.reportDateSettings.solarDate : "ថ្ងៃទី....... ខែ....... ឆ្នាំ២០....");
     const lunarDateStr = ctx.lunarDate || (window.reportDateSettings ? window.reportDateSettings.lunarDate : "ថ្ងៃ................. ខែ............. ឆ្នាំ......... ........ស័ក ព.ស.២៥....");
 
@@ -5231,22 +5238,19 @@ window.renderClassPrinciplesReport = function(container, targetGrade, targetRoom
             <div style="position: absolute; bottom: 8px; left: 10px; color: #0284c7; font-size: 16px;">❖</div>
             <div style="position: absolute; bottom: 8px; right: 10px; color: #0284c7; font-size: 16px;">❖</div>
 
-            <!-- National Header -->
-            <div class="text-center mb-3">
-                <p class="font-moul text-xs text-sky-950 tracking-wide">ព្រះរាជាណាចក្រកម្ពុជា</p>
-                <p class="font-moul text-xs text-sky-950 tracking-wide mt-0.5">ជាតិ សាសនា ព្រះមហាក្សត្រ</p>
-                <div class="text-sky-600 text-xs mt-0.5">*** ៚ ៚ ៚ ***</div>
-            </div>
-
-            <!-- School & Class Metadata -->
-            <div class="flex justify-between items-center mb-2 px-2 text-xs">
-                <div>
-                    <p class="font-bold text-slate-800">${schoolName}</p>
-                    <p class="text-slate-600 mt-0.5">ថ្នាក់ទី ៖ <b class="text-sky-700">${gradeFull}</b></p>
+            <!-- Official Dual-Side Header matching User Model (Images 1 & 2) -->
+            <div class="flex justify-between items-start mb-2 text-xs">
+                <div class="text-left leading-relaxed pt-1">
+                    <p class="font-moul text-slate-900 text-[11px] mb-0.5">ការិយាល័យ អប់រំ យុវជននិងកីឡានៃរដ្ឋបាលស្រុក ${districtName}</p>
+                    <p class="font-moul text-slate-900 text-[11px]">${schoolName}</p>
+                    <p class="text-slate-600 mt-1 font-bold text-[10.5px]">ថ្នាក់ទី ៖ <span class="text-sky-700">${gradeFull}</span> | ឆ្នាំសិក្សា ៖ <span class="text-slate-800">${academicYear}</span></p>
                 </div>
-                <div class="text-right">
-                    <p class="text-slate-600">ឆ្នាំសិក្សា ៖ <b class="text-slate-800">${academicYear}</b></p>
-                    <p class="text-slate-500 text-[10px]">កាលបរិច្ឆេទ ៖ ${solarDateStr}</p>
+                <div class="text-center">
+                    <p class="font-moul text-slate-900 text-[12px] mb-0.5">ព្រះរាជាណាចក្រកម្ពុជា</p>
+                    <p class="font-moul text-slate-900 text-[12px]">ជាតិ សាសនា ព្រះមហាក្សត្រ</p>
+                    <div class="flex items-center justify-center mt-1 mx-auto">
+                        <img src="${window.CMS_HEADER_SYMBOL_B64 || 'assets/images/header-flourish.png'}" class="header-flourish-symbol" alt="symbol" style="display: block; margin: 2px auto 0 auto; width: 135px; height: 11px; object-fit: contain;" />
+                    </div>
                 </div>
             </div>
 
@@ -5307,7 +5311,11 @@ window.renderCleaningScheduleReport = function(container, targetGrade, targetRoo
         ? window.CMSPrintManager.getStandardContext({ grade: gradeFull })
         : {};
 
-    const schoolName = ctx.schoolName || localStorage.getItem('cms_school_name') || 'សាលាបឋមសិក្សា................................';
+    const sInfo = typeof appSettings !== 'undefined' ? appSettings : {};
+    let storedSettings = {};
+    try { storedSettings = JSON.parse(localStorage.getItem('school_settings') || '{}'); } catch(e) {}
+    const districtName = ctx.districtName || (storedSettings.district_name || storedSettings.district || sInfo.district_name || sInfo.district || localStorage.getItem('cms_school_district') || "កៀនស្វាយ").replace(/^ស្រុក\s*/, '').trim();
+    const schoolName = ctx.schoolName || storedSettings.school_name || sInfo.school_name || localStorage.getItem('cms_school_name') || 'សាលាបឋមសិក្សា ឃុំ';
     const academicYear = ctx.academicYear || localStorage.getItem('selected_academic_year') || '២០២៤-២០២៥';
     const teacherName = ctx.teacherName || localStorage.getItem('teacher_name') || '................................';
     const principalName = ctx.principalName || localStorage.getItem('school_principal') || '................................';
@@ -5411,22 +5419,19 @@ window.renderCleaningScheduleReport = function(container, targetGrade, targetRoo
             <div style="position: absolute; bottom: 8px; left: 10px; color: #059669; font-size: 16px;">❖</div>
             <div style="position: absolute; bottom: 8px; right: 10px; color: #059669; font-size: 16px;">❖</div>
 
-            <!-- National Header -->
-            <div class="text-center mb-3">
-                <p class="font-moul text-xs text-emerald-950 tracking-wide">ព្រះរាជាណាចក្រកម្ពុជា</p>
-                <p class="font-moul text-xs text-emerald-950 tracking-wide mt-0.5">ជាតិ សាសនា ព្រះមហាក្សត្រ</p>
-                <div class="text-emerald-600 text-xs mt-0.5">*** ៚ ៚ ៚ ***</div>
-            </div>
-
-            <!-- School & Class Metadata -->
-            <div class="flex justify-between items-center mb-2 px-2 text-xs">
-                <div>
-                    <p class="font-bold text-slate-800">${schoolName}</p>
-                    <p class="text-slate-600 mt-0.5">ថ្នាក់ទី ៖ <b class="text-emerald-700">${gradeFull}</b></p>
+            <!-- Official Dual-Side Header matching User Model (Images 1 & 2) -->
+            <div class="flex justify-between items-start mb-2 text-xs">
+                <div class="text-left leading-relaxed pt-1">
+                    <p class="font-moul text-slate-900 text-[11px] mb-0.5">ការិយាល័យ អប់រំ យុវជននិងកីឡានៃរដ្ឋបាលស្រុក ${districtName}</p>
+                    <p class="font-moul text-slate-900 text-[11px]">${schoolName}</p>
+                    <p class="text-slate-600 mt-1 font-bold text-[10.5px]">ថ្នាក់ទី ៖ <span class="text-emerald-700">${gradeFull}</span> | ឆ្នាំសិក្សា ៖ <span class="text-slate-800">${academicYear}</span></p>
                 </div>
-                <div class="text-right">
-                    <p class="text-slate-600">ឆ្នាំសិក្សា ៖ <b class="text-slate-800">${academicYear}</b></p>
-                    <p class="text-slate-500 text-[10px]">កាលបរិច្ឆេទ ៖ ${solarDateStr}</p>
+                <div class="text-center">
+                    <p class="font-moul text-slate-900 text-[12px] mb-0.5">ព្រះរាជាណាចក្រកម្ពុជា</p>
+                    <p class="font-moul text-slate-900 text-[12px]">ជាតិ សាសនា ព្រះមហាក្សត្រ</p>
+                    <div class="flex items-center justify-center mt-1 mx-auto">
+                        <img src="${window.CMS_HEADER_SYMBOL_B64 || 'assets/images/header-flourish.png'}" class="header-flourish-symbol" alt="symbol" style="display: block; margin: 2px auto 0 auto; width: 135px; height: 11px; object-fit: contain;" />
+                    </div>
                 </div>
             </div>
 
@@ -5461,7 +5466,7 @@ window.renderCleaningScheduleReport = function(container, targetGrade, targetRoo
             <div class="flex justify-between items-start text-xs pt-2 px-8 font-siemreap">
                 <div class="text-center w-2/5">
                     <p class="mb-1 text-slate-700">បានឃើញ និងឯកភាព</p>
-                    <p class="font-moul text-slate-900 mb-12">នាយក/នាយិកាសាលា</p>
+                    <p class="font-moul text-slate-900 mb-12">នាយិកាសាលា</p>
                     <p class="font-moul text-slate-900 text-xs">${principalName}</p>
                 </div>
                 <div class="text-center w-2/5">
@@ -5494,7 +5499,11 @@ window.renderBranchCommitteeReport = function(container, targetGrade, targetRoom
         ? window.CMSPrintManager.getStandardContext({ grade: gradeFull })
         : {};
 
-    const schoolName = ctx.schoolName || localStorage.getItem('cms_school_name') || 'សាលាបឋមសិក្សា................................';
+    const sInfo = typeof appSettings !== 'undefined' ? appSettings : {};
+    let storedSettings = {};
+    try { storedSettings = JSON.parse(localStorage.getItem('school_settings') || '{}'); } catch(e) {}
+    const districtName = ctx.districtName || (storedSettings.district_name || storedSettings.district || sInfo.district_name || sInfo.district || localStorage.getItem('cms_school_district') || "កៀនស្វាយ").replace(/^ស្រុក\s*/, '').trim();
+    const schoolName = ctx.schoolName || storedSettings.school_name || sInfo.school_name || localStorage.getItem('cms_school_name') || 'សាលាបឋមសិក្សា ឃុំ';
     const academicYear = ctx.academicYear || localStorage.getItem('selected_academic_year') || '២០២៤-២០២៥';
     const teacherName = ctx.teacherName || localStorage.getItem('teacher_name') || '................................';
     const principalName = ctx.principalName || localStorage.getItem('school_principal') || '................................';
@@ -5560,22 +5569,19 @@ window.renderBranchCommitteeReport = function(container, targetGrade, targetRoom
             <div style="position: absolute; bottom: 8px; left: 10px; color: #9333ea; font-size: 16px;">❖</div>
             <div style="position: absolute; bottom: 8px; right: 10px; color: #9333ea; font-size: 16px;">❖</div>
 
-            <!-- National Header -->
-            <div class="text-center mb-3">
-                <p class="font-moul text-xs text-purple-950 tracking-wide">ព្រះរាជាណាចក្រកម្ពុជា</p>
-                <p class="font-moul text-xs text-purple-950 tracking-wide mt-0.5">ជាតិ សាសនា ព្រះមហាក្សត្រ</p>
-                <div class="text-purple-600 text-xs mt-0.5">*** ៚ ៚ ៚ ***</div>
-            </div>
-
-            <!-- School & Class Metadata -->
-            <div class="flex justify-between items-center mb-2 px-2 text-xs">
-                <div>
-                    <p class="font-bold text-slate-800">${schoolName}</p>
-                    <p class="text-slate-600 mt-0.5">ថ្នាក់ទី ៖ <b class="text-purple-700">${gradeFull}</b></p>
+            <!-- Official Dual-Side Header matching User Model (Images 1 & 2) -->
+            <div class="flex justify-between items-start mb-3 text-xs">
+                <div class="text-left leading-relaxed pt-1">
+                    <p class="font-moul text-slate-900 text-[11px] mb-0.5">ការិយាល័យ អប់រំ យុវជននិងកីឡានៃរដ្ឋបាលស្រុក ${districtName}</p>
+                    <p class="font-moul text-slate-900 text-[11px]">${schoolName}</p>
+                    <p class="text-slate-600 mt-1 font-bold text-[10.5px]">ថ្នាក់ទី ៖ <span class="text-purple-700">${gradeFull}</span> | ឆ្នាំសិក្សា ៖ <span class="text-slate-800">${academicYear}</span></p>
                 </div>
-                <div class="text-right">
-                    <p class="text-slate-600">ឆ្នាំសិក្សា ៖ <b class="text-slate-800">${academicYear}</b></p>
-                    <p class="text-slate-500 text-[10px]">កាលបរិច្ឆេទ ៖ ${solarDateStr}</p>
+                <div class="text-center">
+                    <p class="font-moul text-slate-900 text-[12px] mb-0.5">ព្រះរាជាណាចក្រកម្ពុជា</p>
+                    <p class="font-moul text-slate-900 text-[12px]">ជាតិ សាសនា ព្រះមហាក្សត្រ</p>
+                    <div class="flex items-center justify-center mt-1 mx-auto">
+                        <img src="${window.CMS_HEADER_SYMBOL_B64 || 'assets/images/header-flourish.png'}" class="header-flourish-symbol" alt="symbol" style="display: block; margin: 2px auto 0 auto; width: 135px; height: 11px; object-fit: contain;" />
+                    </div>
                 </div>
             </div>
 
@@ -5663,7 +5669,7 @@ window.renderBranchCommitteeReport = function(container, targetGrade, targetRoom
             <div class="flex justify-between items-start text-xs pt-3 px-8 font-siemreap">
                 <div class="text-center w-2/5">
                     <p class="mb-1 text-slate-700">បានឃើញ និងឯកភាព</p>
-                    <p class="font-moul text-slate-900 mb-12">នាយក/នាយិកាសាលា</p>
+                    <p class="font-moul text-slate-900 mb-12">នាយិកាសាលា</p>
                     <p class="font-moul text-slate-900 text-xs">${principalName}</p>
                 </div>
                 <div class="text-center w-2/5">
