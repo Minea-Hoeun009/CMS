@@ -414,6 +414,45 @@ window.loadReportsView = function() {
                         </div>
                     </div>
 
+                                        <!-- Custom Border Render Type (Frame vs Full Background) -->
+                    <div id="borderCustomTypeWrapper" class="space-y-1.5 text-xs">
+                        <label class="block font-bold text-slate-700 dark:text-slate-300">ទម្រង់បង្ហាញរូបភាព ៖</label>
+                        <div class="grid grid-cols-2 gap-2">
+                            <label class="flex items-center gap-2 p-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 cursor-pointer hover:border-amber-500">
+                                <input type="radio" name="customBorderTypeRadio" value="frame" id="radio_type_frame" checked onchange="window.toggleBorderType(this.value)" class="text-amber-600 focus:ring-amber-500">
+                                <div>
+                                    <span class="font-bold text-slate-800 dark:text-white block text-[11px]">🖼️ ស៊ុមគែម (កាត់កណ្តាលចេញ)</span>
+                                    <span class="text-[9.5px] text-slate-400">មិនបាំងអក្សរ ទុកកណ្តាលថ្លា ១០០%</span>
+                                </div>
+                            </label>
+                            <label class="flex items-center gap-2 p-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 cursor-pointer hover:border-amber-500">
+                                <input type="radio" name="customBorderTypeRadio" value="background" id="radio_type_background" onchange="window.toggleBorderType(this.value)" class="text-amber-600 focus:ring-amber-500">
+                                <div>
+                                    <span class="font-bold text-slate-800 dark:text-white block text-[11px]">🎨 ផ្ទៃខាងក្រោយ (Background)</span>
+                                    <span class="text-[9.5px] text-slate-400">នៅពីក្រោយអក្សរ (Watermark)</span>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Border Width Slider (For Frame Mode) -->
+                    <div id="borderWidthSliderWrapper" class="space-y-1 text-xs">
+                        <div class="flex justify-between font-bold text-slate-700 dark:text-slate-300">
+                            <span>កម្រាស់ស៊ុមគែម (Frame Width) ៖</span>
+                            <span id="borderWidthDisplay" class="font-mono text-amber-600 font-bold">28px</span>
+                        </div>
+                        <input type="range" id="reportBorderWidthSlider" min="15" max="60" step="1" value="28" oninput="document.getElementById('borderWidthDisplay').textContent = this.value + 'px'" class="w-full h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-amber-600">
+                    </div>
+
+                    <!-- Opacity Slider -->
+                    <div id="borderOpacitySliderWrapper" class="space-y-1 text-xs">
+                        <div class="flex justify-between font-bold text-slate-700 dark:text-slate-300">
+                            <span>កម្រិតភាពថ្លា (Opacity) ៖</span>
+                            <span id="borderOpacityDisplay" class="font-mono text-amber-600 font-bold">100%</span>
+                        </div>
+                        <input type="range" id="reportBorderOpacitySlider" min="10" max="100" step="5" value="100" oninput="document.getElementById('borderOpacityDisplay').textContent = this.value + '%'" class="w-full h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-amber-600">
+                    </div>
+
                     <!-- Inset Distance Slider -->
                     <div class="space-y-1.5 text-xs">
                         <div class="flex justify-between font-bold text-slate-700 dark:text-slate-300">
@@ -461,22 +500,33 @@ window.currentBorderSelection = localStorage.getItem('cms_report_border_mode') |
 window.getReportBorderLayerHtml = function() {
     const mode = localStorage.getItem('cms_report_border_mode') || 'none';
     const inset = (localStorage.getItem('cms_report_border_inset') || '4') + 'px';
+    const opacityVal = (parseInt(localStorage.getItem('cms_report_border_opacity') || '100', 10) / 100);
+    const customType = localStorage.getItem('cms_report_border_custom_type') || 'frame';
+    const borderWidth = (localStorage.getItem('cms_report_border_width') || '28') + 'px';
+
     if (mode === 'none') {
         return '';
     }
     if (mode === 'custom') {
         const customImg = localStorage.getItem('cms_report_border_custom_img');
         if (!customImg) return '';
-        return `<div class="cms-report-border-layer" style="position: absolute; inset: ${inset}; pointer-events: none; background-image: url('${customImg}'); background-size: 100% 100%; background-repeat: no-repeat; z-index: 20;"></div>`;
+
+        if (customType === 'frame') {
+            // Cut out the center completely: middle is 100% transparent, only decorative frame is shown
+            return `<div class="cms-report-border-layer" style="position: absolute; inset: ${inset}; pointer-events: none; border-style: solid; border-width: ${borderWidth}; border-image-source: url('${customImg}'); border-image-slice: 16%; border-image-repeat: round; background-color: transparent; opacity: ${opacityVal}; z-index: 1;"></div>`;
+        } else {
+            // Background Watermark mode: placed strictly BEHIND the content (z-index: 0)
+            return `<div class="cms-report-border-layer" style="position: absolute; inset: ${inset}; pointer-events: none; background-image: url('${customImg}'); background-size: 100% 100%; background-repeat: no-repeat; opacity: ${opacityVal}; z-index: 0;"></div>`;
+        }
     }
     if (mode === 'gold_flourish') {
-        return `<div class="cms-report-border-layer" style="position: absolute; inset: ${inset}; border: 2.5px solid #d97706; pointer-events: none; border-radius: 4px; z-index: 20;"><div style="position: absolute; inset: 3px; border: 1.5px dashed #d97706;"></div></div>`;
+        return `<div class="cms-report-border-layer" style="position: absolute; inset: ${inset}; border: 2.5px solid #d97706; pointer-events: none; border-radius: 4px; z-index: 1;"><div style="position: absolute; inset: 3px; border: 1.5px dashed #d97706;"></div></div>`;
     }
     if (mode === 'classic_double') {
-        return `<div class="cms-report-border-layer" style="position: absolute; inset: ${inset}; border: 3px double #2563eb; pointer-events: none; z-index: 20;"></div>`;
+        return `<div class="cms-report-border-layer" style="position: absolute; inset: ${inset}; border: 3px double #2563eb; pointer-events: none; z-index: 1;"></div>`;
     }
     if (mode === 'classic_thin') {
-        return `<div class="cms-report-border-layer" style="position: absolute; inset: ${inset}; border: 1px solid #64748b; pointer-events: none; z-index: 20;"></div>`;
+        return `<div class="cms-report-border-layer" style="position: absolute; inset: ${inset}; border: 1px solid #64748b; pointer-events: none; z-index: 1;"></div>`;
     }
     return '';
 };
@@ -501,6 +551,27 @@ window.applyReportBorderToContainer = function(container) {
     }
 };
 
+
+window.toggleBorderType = function(val) {
+    localStorage.setItem('cms_report_border_custom_type', val);
+    const widthWrapper = document.getElementById('borderWidthSliderWrapper');
+    const opacitySlider = document.getElementById('reportBorderOpacitySlider');
+    const opacityDisplay = document.getElementById('borderOpacityDisplay');
+    if (val === 'frame') {
+        if (widthWrapper) widthWrapper.classList.remove('hidden');
+        if (opacitySlider && opacitySlider.value < 50) {
+            opacitySlider.value = 100;
+            if (opacityDisplay) opacityDisplay.textContent = '100%';
+        }
+    } else {
+        if (widthWrapper) widthWrapper.classList.add('hidden');
+        if (opacitySlider && opacitySlider.value > 60) {
+            opacitySlider.value = 30; // Default soft watermark for background
+            if (opacityDisplay) opacityDisplay.textContent = '30%';
+        }
+    }
+};
+
 window.openReportBorderModal = function() {
     let modal = document.getElementById('reportBorderModal');
     if (!modal) return;
@@ -521,6 +592,28 @@ window.openReportBorderModal = function() {
     const display = document.getElementById('borderInsetDisplay');
     if (slider) slider.value = inset;
     if (display) display.textContent = inset + 'px';
+
+    const curType = localStorage.getItem('cms_report_border_custom_type') || 'frame';
+    const radioFrame = document.getElementById('radio_type_frame');
+    const radioBg = document.getElementById('radio_type_background');
+    if (curType === 'background') {
+        if (radioBg) radioBg.checked = true;
+    } else {
+        if (radioFrame) radioFrame.checked = true;
+    }
+    window.toggleBorderType(curType);
+
+    const curWidth = parseInt(localStorage.getItem('cms_report_border_width') || '28', 10);
+    const widthSlider = document.getElementById('reportBorderWidthSlider');
+    const widthDisplay = document.getElementById('borderWidthDisplay');
+    if (widthSlider) widthSlider.value = curWidth;
+    if (widthDisplay) widthDisplay.textContent = curWidth + 'px';
+
+    const curOpacity = parseInt(localStorage.getItem('cms_report_border_opacity') || '100', 10);
+    const opacitySlider = document.getElementById('reportBorderOpacitySlider');
+    const opacityDisplay = document.getElementById('borderOpacityDisplay');
+    if (opacitySlider) opacitySlider.value = curOpacity;
+    if (opacityDisplay) opacityDisplay.textContent = curOpacity + '%';
 
     const customImg = localStorage.getItem('cms_report_border_custom_img');
     const previewBox = document.getElementById('borderPreviewBox');
@@ -613,8 +706,15 @@ window.removeCustomBorderImage = function() {
 window.saveReportBorderSettings = function() {
     const mode = window.currentBorderSelection || 'none';
     const insetVal = document.getElementById('reportBorderInsetSlider')?.value || '4';
+    const customType = document.querySelector('input[name="customBorderTypeRadio"]:checked')?.value || 'frame';
+    const widthVal = document.getElementById('reportBorderWidthSlider')?.value || '28';
+    const opacityVal = document.getElementById('reportBorderOpacitySlider')?.value || '100';
+
     localStorage.setItem('cms_report_border_mode', mode);
     localStorage.setItem('cms_report_border_inset', insetVal);
+    localStorage.setItem('cms_report_border_custom_type', customType);
+    localStorage.setItem('cms_report_border_width', widthVal);
+    localStorage.setItem('cms_report_border_opacity', opacityVal);
     window.applyReportBorderToContainer();
     window.closeReportBorderModal();
     if (typeof window.showToast === 'function') {
@@ -5218,7 +5318,7 @@ window.renderClassInventoryReport = function(container, targetGrade, targetRoom)
         <div class="a4-page bg-white shadow-xl rounded-lg mx-auto p-6 md:p-8 font-siemreap text-slate-800 relative w-full min-h-[297mm] text-[11px] leading-relaxed flex flex-col justify-start" style="box-sizing: border-box; max-width: 210mm;">
             ${window.getReportBorderLayerHtml ? window.getReportBorderLayerHtml() : ''}
             <!-- Main Content Area -->
-            <div>
+            <div style="position: relative; z-index: 10;">
                 <!-- Official Dual-Side Header matching User Model (Images 1 & 2) -->
                 <div class="flex justify-between items-start mb-4 text-xs">
                     <div class="text-left leading-relaxed pt-3.5 sm:pt-4">
@@ -5310,7 +5410,7 @@ window.renderClassInventoryReport = function(container, targetGrade, targetRoom)
             </div>
 
             <!-- Signatures (រំកិលឡើងលើឱ្យជិតតារាង) -->
-            <div class="mt-4 pt-2 px-8 font-siemreap">
+            <div class="mt-4 pt-2 px-8 font-siemreap" style="position: relative; z-index: 10;">
                 <div class="flex justify-between items-start text-xs">
                     <div class="text-center w-2/5">
                         <p class="mb-1 text-slate-700">បានឃើញ និងឯកភាព</p>
@@ -5391,7 +5491,7 @@ window.renderInternalRulesReport = function(container, targetGrade, targetRoom) 
         <div class="a4-page bg-white shadow-xl rounded-lg mx-auto p-6 md:p-8 font-siemreap text-slate-800 relative w-full min-h-[297mm] text-[11px] leading-relaxed flex flex-col justify-start" style="box-sizing: border-box; max-width: 210mm;">
             ${window.getReportBorderLayerHtml ? window.getReportBorderLayerHtml() : ''}
             <!-- Main Content Area -->
-            <div>
+            <div style="position: relative; z-index: 10;">
                 <!-- Official Dual-Side Header matching User Model (Images 1 & 2) -->
                 <div class="flex justify-between items-start mb-3 text-xs">
                     <div class="text-left leading-relaxed pt-3.5 sm:pt-4">
@@ -5436,7 +5536,7 @@ window.renderInternalRulesReport = function(container, targetGrade, targetRoom) 
             </div>
 
             <!-- Signatures (រំកិលឡើងលើឱ្យជិតតារាង) -->
-            <div class="mt-4 pt-2 px-8 font-siemreap">
+            <div class="mt-4 pt-2 px-8 font-siemreap" style="position: relative; z-index: 10;">
                 <div class="flex justify-between items-start text-xs">
                     <div class="text-center w-2/5">
                         <p class="mb-1 text-slate-700">បានឃើញ និងឯកភាព</p>
@@ -5529,7 +5629,7 @@ window.renderClassPrinciplesReport = function(container, targetGrade, targetRoom
         <div class="a4-page bg-white shadow-xl rounded-lg mx-auto p-6 md:p-8 font-siemreap text-slate-800 relative w-full min-h-[297mm] text-[11px] leading-relaxed flex flex-col justify-start" style="box-sizing: border-box; max-width: 210mm;">
             ${window.getReportBorderLayerHtml ? window.getReportBorderLayerHtml() : ''}
             <!-- Main Content Area -->
-            <div>
+            <div style="position: relative; z-index: 10;">
                 <!-- Official Dual-Side Header matching User Model (Images 1 & 2) -->
                 <div class="flex justify-between items-start mb-2 text-xs">
                     <div class="text-left leading-relaxed pt-3.5 sm:pt-4">
@@ -5569,7 +5669,7 @@ window.renderClassPrinciplesReport = function(container, targetGrade, targetRoom
             </div>
 
             <!-- Signatures (រំកិលឡើងលើឱ្យជិតតារាង) -->
-            <div class="mt-4 pt-2 px-8 font-siemreap">
+            <div class="mt-4 pt-2 px-8 font-siemreap" style="position: relative; z-index: 10;">
                 <div class="flex justify-between items-start text-xs">
                     <div class="text-center w-2/5">
                         <p class="mb-1 text-slate-700">បានឃើញ និងឯកភាព</p>
@@ -5711,7 +5811,7 @@ window.renderCleaningScheduleReport = function(container, targetGrade, targetRoo
         <div class="a4-page bg-white shadow-xl rounded-lg mx-auto p-6 md:p-8 font-siemreap text-slate-800 relative w-full min-h-[297mm] text-[11px] leading-relaxed flex flex-col justify-start" style="box-sizing: border-box; max-width: 210mm;">
             ${window.getReportBorderLayerHtml ? window.getReportBorderLayerHtml() : ''}
             <!-- Main Content Area -->
-            <div>
+            <div style="position: relative; z-index: 10;">
                 <!-- Official Dual-Side Header matching User Model (Images 1 & 2) -->
                 <div class="flex justify-between items-start mb-2 text-xs">
                     <div class="text-left leading-relaxed pt-3.5 sm:pt-4">
@@ -5758,7 +5858,7 @@ window.renderCleaningScheduleReport = function(container, targetGrade, targetRoo
             </div>
 
             <!-- Signatures (រំកិលឡើងលើឱ្យជិតតារាង) -->
-            <div class="mt-4 pt-2 px-8 font-siemreap">
+            <div class="mt-4 pt-2 px-8 font-siemreap" style="position: relative; z-index: 10;">
                 <div class="flex justify-between items-start text-xs">
                     <div class="text-center w-2/5">
                         <p class="mb-1 text-slate-700">បានឃើញ និងឯកភាព</p>
@@ -5861,7 +5961,7 @@ window.renderBranchCommitteeReport = function(container, targetGrade, targetRoom
         <div class="a4-page bg-white shadow-xl rounded-lg mx-auto p-6 md:p-8 font-siemreap text-slate-800 relative w-full min-h-[297mm] text-[11px] leading-relaxed flex flex-col justify-start" style="box-sizing: border-box; max-width: 210mm;">
             ${window.getReportBorderLayerHtml ? window.getReportBorderLayerHtml() : ''}
             <!-- Main Content Area -->
-            <div>
+            <div style="position: relative; z-index: 10;">
                 <!-- Official Dual-Side Header matching User Model (Images 1 & 2) -->
                 <div class="flex justify-between items-start mb-3 text-xs">
                     <div class="text-left leading-relaxed pt-3.5 sm:pt-4">
@@ -5961,7 +6061,7 @@ window.renderBranchCommitteeReport = function(container, targetGrade, targetRoom
             </div>
 
             <!-- Signatures (រំកិលឡើងលើឱ្យជិតតារាង) -->
-            <div class="mt-4 pt-2 px-8 font-siemreap">
+            <div class="mt-4 pt-2 px-8 font-siemreap" style="position: relative; z-index: 10;">
                 <div class="flex justify-between items-start text-xs">
                     <div class="text-center w-2/5">
                         <p class="mb-1 text-slate-700">បានឃើញ និងឯកភាព</p>
