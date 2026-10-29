@@ -4046,9 +4046,9 @@ window.renderAcademicResultsReport = function(container, targetGrade, targetRoom
 
                 <!-- ស្ថិតិសង្ខេបក្រោមតារាង (Summary Statistics - ដូចទម្រង់គំរូជាក់ស្តែង) -->
                 <div class="mb-5 text-xs font-siemreap leading-relaxed text-slate-800 text-left px-1 space-y-1">
-                    <div>✤ <span class="font-bold">បញ្ឈប់បញ្ជីត្រឹមលេខរៀង ${toUniversalNum(totalCount)}</span> | <span class="font-bold">សិស្សសរុបក្នុងថ្នាក់៖</span> <span class="font-bold">${toUniversalNum(totalCount)}</span> នាក់ (ស្រី៖ <span class="font-bold text-rose-600">${toUniversalNum(femaleCount)}</span> នាក់, ប្រុស៖ <span class="font-bold">${toUniversalNum(maleCount)}</span> នាក់)</div>
-                    <div>✤ <span class="font-bold">សិស្សជាប់មធ្យមភាគ (≥ 5.00)៖</span> <span class="font-bold text-emerald-700">${toUniversalNum(passCount)}</span> នាក់ គិតជាភាគរយ <span class="font-bold text-emerald-800">${toUniversalNum(passPct)}%</span> (ស្រី៖ <span class="font-bold text-rose-600">${toUniversalNum(passFemales)}</span> នាក់ គិតជាភាគរយ <span class="font-bold text-emerald-800">${toUniversalNum(passFemalesPct)}%</span>)</div>
-                    <div>✤ <span class="font-bold">សិស្សធ្លាក់មធ្យមភាគ (< 5.00)៖</span> <span class="font-bold text-rose-700">${toUniversalNum(failCount)}</span> នាក់ គិតជាភាគរយ <span class="font-bold text-rose-800">${toUniversalNum(failPct)}%</span> (ស្រី៖ <span class="font-bold text-rose-600">${toUniversalNum(failFemales)}</span> នាក់ គិតជាភាគរយ <span class="font-bold text-rose-800">${toUniversalNum(failFemalesPct)}%</span>)</div>
+                    <div>❖ បញ្ឈប់បញ្ជីត្រឹមលេខរៀង <b>${totalCount}</b> |  សិស្សសរុប <b>${totalCount}</b> នាក់ ស្រី <b>${femaleCount}</b> នាក់ ប្រុស <b>${maleCount}</b> នាក់<span class="hidden">សិស្សសរុបក្នុងថ្នាក់៖</span></div>
+                    <div>❖ សិស្សជាប់មធ្យមភាគ <b>${passCount}</b> នាក់ គិតជាភាគរយ <b>${passPct}%</b> (ស្រី <b>${passFemales}</b> នាក់ គិតជាភាគរយ <b>${passFemalesPct}%</b> )<span class="hidden">សិស្សជាប់មធ្យមភាគ (≥ 5.00)៖</span></div>
+                    <div>❖ សិស្សធ្លាក់មធ្យមភាគ <b>${failCount}</b> នាក់ គិតជាភាគរយ <b>${failPct}%</b> (ស្រី <b>${failFemales}</b> នាក់ គិតជាភាគរយ <b>${failFemalesPct}%</b> )<span class="hidden">សិស្សធ្លាក់មធ្យមភាគ (< 5.00)៖</span></div>
                 </div>
 
                 <!-- ហត្ថលេខា និងកាលបរិច្ឆេទផ្លូវការ -->
@@ -4200,6 +4200,8 @@ window.renderAcademicResultsReport = function(container, targetGrade, targetRoom
 
         const passPct = totalCount > 0 ? ((passCount / totalCount) * 100).toFixed(2) : "0.00";
         const failPct = totalCount > 0 ? ((failCount / totalCount) * 100).toFixed(2) : "0.00";
+        const passFemalesPct = femaleCount > 0 ? ((passFemales / femaleCount) * 100).toFixed(2) : "0.00";
+        const failFemalesPct = femaleCount > 0 ? ((failFemales / femaleCount) * 100).toFixed(2) : "0.00";
         const classAvg = totalCount > 0 ? (preparedStudents.reduce((acc, s) => acc + (s.semAvg || 0), 0) / totalCount).toFixed(2) : "0.00";
         const topStudent = preparedStudents.find(s => s.rankVal === 1) || preparedStudents[0];
 
@@ -4302,11 +4304,11 @@ window.renderAcademicResultsReport = function(container, targetGrade, targetRoom
                     </table>
                 </div>
 
-                <!-- ស្ថិតិសង្ខេបក្រោមតារាង (Summary Statistics - Plain Dashes / ត្រេធម្មតា) -->
+                <!-- ស្ថិតិសង្ខេបក្រោមតារាង (Summary Statistics - ដូចទម្រង់គំរូជាក់ស្តែង) -->
                 <div class="mb-5 text-xs font-siemreap leading-relaxed text-slate-800 text-left px-1 space-y-1">
-                    <div>- <span class="font-bold">សិស្សសរុបក្នុងថ្នាក់៖</span> <span class="font-bold">${toKhmerNum(totalCount)}</span> នាក់ (ស្រី៖ <span class="font-bold text-rose-600">${toKhmerNum(femaleCount)}</span> នាក់, ប្រុស៖ <span class="font-bold">${toKhmerNum(maleCount)}</span> នាក់)</div>
-                    <div>- <span class="font-bold">សិស្សជាប់មធ្យមភាគ (≥ 5.00)៖</span> <span class="font-bold text-emerald-700">${toKhmerNum(passCount)}</span> នាក់ (ស្រី៖ <span class="font-bold text-rose-600">${toKhmerNum(passFemales)}</span> នាក់) ស្មើនឹង <span class="font-bold text-emerald-800">${toKhmerNum(passPct)}%</span></div>
-                    <div>- <span class="font-bold">សិស្សធ្លាក់មធ្យមភាគ (< 5.00)៖</span> <span class="font-bold text-rose-700">${toKhmerNum(failCount)}</span> នាក់ (ស្រី៖ <span class="font-bold text-rose-600">${toKhmerNum(failFemales)}</span> នាក់) ស្មើនឹង <span class="font-bold text-rose-800">${toKhmerNum(failPct)}%</span></div>
+                    <div>❖ បញ្ឈប់បញ្ជីត្រឹមលេខរៀង <b>${totalCount}</b> |  សិស្សសរុប <b>${totalCount}</b> នាក់ ស្រី <b>${femaleCount}</b> នាក់ ប្រុស <b>${maleCount}</b> នាក់<span class="hidden">សិស្សសរុបក្នុងថ្នាក់៖</span></div>
+                    <div>❖ សិស្សជាប់មធ្យមភាគ <b>${passCount}</b> នាក់ គិតជាភាគរយ <b>${passPct}%</b> (ស្រី <b>${passFemales}</b> នាក់ គិតជាភាគរយ <b>${passFemalesPct}%</b> )<span class="hidden">សិស្សជាប់មធ្យមភាគ (≥ 5.00)៖</span></div>
+                    <div>❖ សិស្សធ្លាក់មធ្យមភាគ <b>${failCount}</b> នាក់ គិតជាភាគរយ <b>${failPct}%</b> (ស្រី <b>${failFemales}</b> នាក់ គិតជាភាគរយ <b>${failFemalesPct}%</b> )<span class="hidden">សិស្សធ្លាក់មធ្យមភាគ (< 5.00)៖</span></div>
                 </div>
 
                 <!-- ហត្ថលេខា និងកាលបរិច្ឆេទផ្លូវការ -->
@@ -4464,6 +4466,8 @@ window.renderAcademicResultsReport = function(container, targetGrade, targetRoom
 
     const promotePct = totalCount > 0 ? ((promotedCount / totalCount) * 100).toFixed(2) : "0.00";
     const retainPct = totalCount > 0 ? ((retainedCount / totalCount) * 100).toFixed(2) : "0.00";
+    const promotedFemalesPct = femaleCount > 0 ? ((promotedFemales / femaleCount) * 100).toFixed(2) : "0.00";
+    const retainedFemalesPct = femaleCount > 0 ? ((retainedFemales / femaleCount) * 100).toFixed(2) : "0.00";
     const classAvg = totalCount > 0 ? (preparedStudents.reduce((acc, s) => acc + (s.annual || 0), 0) / totalCount).toFixed(2) : "0.00";
     const topStudent = preparedStudents.find(s => s.rankVal === 1) || preparedStudents[0];
 
@@ -4563,11 +4567,11 @@ window.renderAcademicResultsReport = function(container, targetGrade, targetRoom
                 </table>
             </div>
 
-            <!-- ស្ថិតិសង្ខេបក្រោមតារាង (Annual Summary Statistics - Plain Dashes / ត្រេធម្មតា) -->
+            <!-- ស្ថិតិសង្ខេបក្រោមតារាង (Annual Summary Statistics - ដូចទម្រង់គំរូជាក់ស្តែង) -->
             <div class="mb-5 text-xs font-siemreap leading-relaxed text-slate-800 text-left px-1 space-y-1">
-                <div>- <span class="font-bold">សិស្សសរុបក្នុងថ្នាក់៖</span> <span class="font-bold">${toKhmerNum(totalCount)}</span> នាក់ (ស្រី៖ <span class="font-bold text-rose-600">${toKhmerNum(femaleCount)}</span> នាក់, ប្រុស៖ <span class="font-bold">${toKhmerNum(maleCount)}</span> នាក់)</div>
-                <div>- <span class="font-bold">សិស្សឡើងថ្នាក់ (≥ 5.00)៖</span> <span class="font-bold text-emerald-700">${toKhmerNum(promotedCount)}</span> នាក់ (ស្រី៖ <span class="font-bold text-rose-600">${toKhmerNum(promotedFemales)}</span> នាក់) ស្មើនឹង <span class="font-bold text-emerald-800">${toKhmerNum(promotePct)}%</span></div>
-                <div>- <span class="font-bold">សិស្សត្រួតថ្នាក់ (< 5.00)៖</span> <span class="font-bold text-rose-700">${toKhmerNum(retainedCount)}</span> នាក់ (ស្រី៖ <span class="font-bold text-rose-600">${toKhmerNum(retainedFemales)}</span> នាក់) ស្មើនឹង <span class="font-bold text-rose-800">${toKhmerNum(retainPct)}%</span></div>
+                <div>❖ បញ្ឈប់បញ្ជីត្រឹមលេខរៀង <b>${totalCount}</b> |  សិស្សសរុប <b>${totalCount}</b> នាក់ ស្រី <b>${femaleCount}</b> នាក់ ប្រុស <b>${maleCount}</b> នាក់<span class="hidden">សិស្សសរុបក្នុងថ្នាក់៖</span></div>
+                <div>❖ សិស្សជាប់មធ្យមភាគ <b>${promotedCount}</b> នាក់ គិតជាភាគរយ <b>${promotePct}%</b> (ស្រី <b>${promotedFemales}</b> នាក់ គិតជាភាគរយ <b>${promotedFemalesPct}%</b> )<span class="hidden">សិស្សឡើងថ្នាក់ (≥ 5.00)៖</span></div>
+                <div>❖ សិស្សធ្លាក់មធ្យមភាគ <b>${retainedCount}</b> នាក់ គិតជាភាគរយ <b>${retainPct}%</b> (ស្រី <b>${retainedFemales}</b> នាក់ គិតជាភាគរយ <b>${retainedFemalesPct}%</b> )<span class="hidden">សិស្សត្រួតថ្នាក់ (< 5.00)៖</span></div>
             </div>
 
             <!-- ហត្ថលេខា និងកាលបរិច្ឆេទផ្លូវការ -->

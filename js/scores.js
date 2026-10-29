@@ -913,6 +913,29 @@ window.updateRanksInMemory = function() {
     if (typeof window.renderSubjectAveragesRow === 'function') {
         window.renderSubjectAveragesRow();
     }
+
+    // Update Score Entry Summary Statistics
+    const sumEl = document.getElementById("scoreEntrySummaryContainer");
+    if (sumEl && window.scoresStudentList && window.scoresStudentList.length > 0) {
+        const total = window.scoresStudentList.length;
+        const female = window.scoresStudentList.filter(s => s.gender === 'ស្រី' || s.gender === 'ស' || s.gender === 'F').length;
+        const male = total - female;
+        const passedList = (window.rankingsDataList || []).filter(s => s.hasScore && s.avg >= 5.0);
+        const passed = passedList.length;
+        const femalePass = passedList.filter(s => s.gender === 'ស្រី' || s.gender === 'ស' || s.gender === 'F').length;
+        const failed = total - passed;
+        const femaleFail = female - femalePass;
+        const passPct = total > 0 ? ((passed / total) * 100).toFixed(2) : "0.00";
+        const failPct = total > 0 ? ((failed / total) * 100).toFixed(2) : "0.00";
+        const passFPct = female > 0 ? ((femalePass / female) * 100).toFixed(2) : "0.00";
+        const failFPct = female > 0 ? ((femaleFail / female) * 100).toFixed(2) : "0.00";
+
+        sumEl.innerHTML = `
+            <div>❖ បញ្ឈប់បញ្ជីត្រឹមលេខរៀង <b>${total}</b> |  សិស្សសរុប <b>${total}</b> នាក់ ស្រី <b>${female}</b> នាក់ ប្រុស <b>${male}</b> នាក់</div>
+            <div>❖ សិស្សជាប់មធ្យមភាគ <b>${passed}</b> នាក់ គិតជាភាគរយ <b>${passPct}%</b> (ស្រី <b>${femalePass}</b> នាក់ គិតជាភាគរយ <b>${passFPct}%</b> )</div>
+            <div>❖ សិស្សធ្លាក់មធ្យមភាគ <b>${failed}</b> នាក់ គិតជាភាគរយ <b>${failPct}%</b> (ស្រី <b>${femaleFail}</b> នាក់ គិតជាភាគរយ <b>${failFPct}%</b> )</div>
+        `;
+    }
 };
 
 window.autoRankStudents = function() {
@@ -1748,6 +1771,7 @@ window.renderScoreEntryContent = async function() {
               </tbody>
               <tfoot id="scoreTableFoot" class="sticky bottom-0 z-30 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]"></tfoot>
             </table>
+            <div id="scoreEntrySummaryContainer" class="p-4 bg-slate-50 border-t border-slate-200 text-xs font-siemreap space-y-1 text-left text-slate-800"></div>
         </div>
       </div>
     `;
@@ -2401,8 +2425,8 @@ window.exportScoreEntryToExcel = function() {
     const passFPct = femaleStus > 0 ? ((passedF / femaleStus) * 100).toFixed(2) : "0.00";
     const failFPct = femaleStus > 0 ? ((failedF / femaleStus) * 100).toFixed(2) : "0.00";
 
-    let passLabel = type === "annual" ? "សិស្សឡើងថ្នាក់ (ជាប់មធ្យមភាគ)" : "សិស្សជាប់មធ្យមភាគ";
-    let failLabel = type === "annual" ? "សិស្សត្រួតថ្នាក់ (ធ្លាក់មធ្យមភាគ)" : "សិស្សធ្លាក់មធ្យមភាគ";
+    let passLabel = "សិស្សជាប់មធ្យមភាគ";
+    let failLabel = "សិស្សធ្លាក់មធ្យមភាគ";
 
     let excelContent = `
         <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
@@ -2429,17 +2453,17 @@ window.exportScoreEntryToExcel = function() {
                 </tr>
                 <tr>
                     <td colspan="20" style="border: none; padding: 3px 0; font-size: 10.5pt; line-height: 1.8;">
-                        • <b>សិស្សសរុប ៖</b> <b>${totalStus}</b> នាក់ &nbsp;|&nbsp; ស្រី <b>${femaleStus}</b> នាក់ (${femalePct}%) &nbsp;|&nbsp; ប្រុស <b>${maleStus}</b> នាក់ (${malePct}%)
+                        ❖ បញ្ឈប់បញ្ជីត្រឹមលេខរៀង <b>${totalStus}</b> |  សិស្សសរុប <b>${totalStus}</b> នាក់ ស្រី <b>${femaleStus}</b> នាក់ ប្រុស <b>${maleStus}</b> នាក់
                     </td>
                 </tr>
                 <tr>
                     <td colspan="20" style="border: none; padding: 3px 0; font-size: 10.5pt; line-height: 1.8;">
-                        • <b>${passLabel} ៖</b> <b>${passed}</b> នាក់ គិតជាភាគរយ <b>${passPct}%</b> &nbsp;|&nbsp; ស្រី <b>${passedF}</b> នាក់ គិតជាភាគរយ <b>${passFPct}%</b> (នៃសិស្សស្រី) &nbsp;|&nbsp; ប្រុស <b>${passedM}</b> នាក់
+                        ❖ ${passLabel} <b>${passed}</b> នាក់ គិតជាភាគរយ <b>${passPct}%</b> (ស្រី <b>${passedF}</b> នាក់ គិតជាភាគរយ <b>${passFPct}%</b> )
                     </td>
                 </tr>
                 <tr>
                     <td colspan="20" style="border: none; padding: 3px 0; font-size: 10.5pt; line-height: 1.8;">
-                        • <b>${failLabel} ៖</b> <b>${failed}</b> នាក់ គិតជាភាគរយ <b>${failPct}%</b> &nbsp;|&nbsp; ស្រី <b>${failedF}</b> នាក់ គិតជាភាគរយ <b>${failFPct}%</b> (នៃសិស្សស្រី) &nbsp;|&nbsp; ប្រុស <b>${failedM}</b> នាក់
+                        ❖ ${failLabel} <b>${failed}</b> នាក់ គិតជាភាគរយ <b>${failPct}%</b> (ស្រី <b>${failedF}</b> នាក់ គិតជាភាគរយ <b>${failFPct}%</b> )
                     </td>
                 </tr>
                 <tr><td colspan="20" style="border: none; height: 10px;"></td></tr>
@@ -2585,8 +2609,8 @@ window.exportRankingsToExcel = function() {
     const passFPct = femaleStus > 0 ? ((passedF / femaleStus) * 100).toFixed(2) : "0.00";
     const failFPct = femaleStus > 0 ? ((failedF / femaleStus) * 100).toFixed(2) : "0.00";
 
-    let passLabel = type === "annual" ? "សិស្សឡើងថ្នាក់ (ជាប់មធ្យមភាគ)" : "សិស្សជាប់មធ្យមភាគ";
-    let failLabel = type === "annual" ? "សិស្សត្រួតថ្នាក់ (ធ្លាក់មធ្យមភាគ)" : "សិស្សធ្លាក់មធ្យមភាគ";
+    let passLabel = "សិស្សជាប់មធ្យមភាគ";
+    let failLabel = "សិស្សធ្លាក់មធ្យមភាគ";
 
     let excelContent = `
         <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
@@ -2613,17 +2637,17 @@ window.exportRankingsToExcel = function() {
                 </tr>
                 <tr>
                     <td colspan="20" style="border: none; padding: 3px 0; font-size: 10.5pt; line-height: 1.8;">
-                        • <b>សិស្សសរុប ៖</b> <b>${totalStus}</b> នាក់ &nbsp;|&nbsp; ស្រី <b>${femaleStus}</b> នាក់ (${femalePct}%) &nbsp;|&nbsp; ប្រុស <b>${maleStus}</b> នាក់ (${malePct}%)
+                        ❖ បញ្ឈប់បញ្ជីត្រឹមលេខរៀង <b>${totalStus}</b> |  សិស្សសរុប <b>${totalStus}</b> នាក់ ស្រី <b>${femaleStus}</b> នាក់ ប្រុស <b>${maleStus}</b> នាក់
                     </td>
                 </tr>
                 <tr>
                     <td colspan="20" style="border: none; padding: 3px 0; font-size: 10.5pt; line-height: 1.8;">
-                        • <b>${passLabel} ៖</b> <b>${passed}</b> នាក់ គិតជាភាគរយ <b>${passPct}%</b> &nbsp;|&nbsp; ស្រី <b>${passedF}</b> នាក់ គិតជាភាគរយ <b>${passFPct}%</b> (នៃសិស្សស្រី) &nbsp;|&nbsp; ប្រុស <b>${passedM}</b> នាក់
+                        ❖ ${passLabel} <b>${passed}</b> នាក់ គិតជាភាគរយ <b>${passPct}%</b> (ស្រី <b>${passedF}</b> នាក់ គិតជាភាគរយ <b>${passFPct}%</b> )
                     </td>
                 </tr>
                 <tr>
                     <td colspan="20" style="border: none; padding: 3px 0; font-size: 10.5pt; line-height: 1.8;">
-                        • <b>${failLabel} ៖</b> <b>${failed}</b> នាក់ គិតជាភាគរយ <b>${failPct}%</b> &nbsp;|&nbsp; ស្រី <b>${failedF}</b> នាក់ គិតជាភាគរយ <b>${failFPct}%</b> (នៃសិស្សស្រី) &nbsp;|&nbsp; ប្រុស <b>${failedM}</b> នាក់
+                        ❖ ${failLabel} <b>${failed}</b> នាក់ គិតជាភាគរយ <b>${failPct}%</b> (ស្រី <b>${failedF}</b> នាក់ គិតជាភាគរយ <b>${failFPct}%</b> )
                     </td>
                 </tr>
                 <tr><td colspan="20" style="border: none; height: 10px;"></td></tr>
@@ -3323,9 +3347,9 @@ window.printScoreList = function() {
     let passFPct = femaleStus > 0 ? ((passedF / femaleStus) * 100).toFixed(2) : "0.00";
     let failFPct = femaleStus > 0 ? ((failedF / femaleStus) * 100).toFixed(2) : "0.00";
 
-    // ផ្លាស់ប្តូរពាក្យ ឡើងថ្នាក់/ត្រួតថ្នាក់ សម្រាប់របាយការណ៍ប្រចាំឆ្នាំ
-    let passLabel = type === "annual" ? "សិស្សឡើងថ្នាក់សរុប" : "សិស្សជាប់មធ្យមភាគ";
-    let failLabel = type === "annual" ? "សិស្សត្រូវត្រួតថ្នាក់សរុប" : "សិស្សធ្លាក់មធ្យមភាគ";
+    // ស្ថិតិសង្ខេបលទ្ធផល
+    let passLabel = "សិស្សជាប់មធ្យមភាគ";
+    let failLabel = "សិស្សធ្លាក់មធ្យមភាគ";
 
     // 🔴 ការកំណត់ CSS និងទំហំតារាង
     let isAnnual = type === "annual";
@@ -3461,9 +3485,9 @@ window.printScoreList = function() {
             ${htmlTable}
             
             <table class="summary-table">
-                <tr><td style="width: 100%;">❖ បញ្ឈប់បញ្ជីត្រឹមលេខរៀង <b>${totalStus}</b> &nbsp;|&nbsp; សិស្សសរុប <b>${totalStus}</b> នាក់ ស្រី <b>${femaleStus}</b> នាក់ ប្រុស <b>${maleStus}</b> នាក់</td></tr>
-                <tr><td style="width: 100%;">❖ ${passLabel} <b>${passed}</b> នាក់ គិតជាភាគរយ <b>${passPct}%</b> (ស្រី <b>${passedF}</b> នាក់ គិតជាភាគរយ <b>${passFPct}%</b>)</td></tr>
-                <tr><td style="width: 100%;">❖ ${failLabel} <b>${failed}</b> នាក់ គិតជាភាគរយ <b>${failPct}%</b> (ស្រី <b>${failedF}</b> នាក់ គិតជាភាគរយ <b>${failFPct}%</b>)</td></tr>
+                <tr><td style="width: 100%;">❖ បញ្ឈប់បញ្ជីត្រឹមលេខរៀង <b>${totalStus}</b> |  សិស្សសរុប <b>${totalStus}</b> នាក់ ស្រី <b>${femaleStus}</b> នាក់ ប្រុស <b>${maleStus}</b> នាក់</td></tr>
+                <tr><td style="width: 100%;">❖ ${passLabel} <b>${passed}</b> នាក់ គិតជាភាគរយ <b>${passPct}%</b> (ស្រី <b>${passedF}</b> នាក់ គិតជាភាគរយ <b>${passFPct}%</b> )</td></tr>
+                <tr><td style="width: 100%;">❖ ${failLabel} <b>${failed}</b> នាក់ គិតជាភាគរយ <b>${failPct}%</b> (ស្រី <b>${failedF}</b> នាក់ គិតជាភាគរយ <b>${failFPct}%</b> )</td></tr>
             </table>
             <div class="bottom-sig-container" style="display: flex; justify-content: space-between; align-items: flex-start; width: 100%; page-break-inside: avoid; padding: 0 20px; margin-top: 15px;">
                 <div class="sig-box-left" style="width: 40%; text-align: center;">
@@ -3600,8 +3624,8 @@ window.printRankingTable = function() {
     let passFPct = femaleStus > 0 ? ((passedF / femaleStus) * 100).toFixed(2) : "0.00";
     let failFPct = femaleStus > 0 ? ((failedF / femaleStus) * 100).toFixed(2) : "0.00";
 
-    let passLabel = type === "annual" ? "សិស្សឡើងថ្នាក់សរុប" : "សិស្សជាប់មធ្យមភាគ";
-    let failLabel = type === "annual" ? "សិស្សត្រូវត្រួតថ្នាក់សរុប" : "សិស្សធ្លាក់មធ្យមភាគ";
+    let passLabel = "សិស្សជាប់មធ្យមភាគ";
+    let failLabel = "សិស្សធ្លាក់មធ្យមភាគ";
 
     let headerHtml = '';
     const thBase = `border: 1pt solid #000; text-align: center; vertical-align: middle; font-family: 'Khmer OS Muol Light', 'Moul', serif; font-size: 10pt; font-weight: normal;`;
@@ -3771,9 +3795,9 @@ window.printRankingTable = function() {
             <table class="rnk-table"><thead>${headerHtml}</thead><tbody>${rowsHtml}</tbody></table>
             
             <table class="summary-table">
-                <tr><td style="width: 100%;">❖ បញ្ឈប់បញ្ជីត្រឹមលេខរៀង <b>${totalStus}</b> &nbsp;|&nbsp; សិស្សសរុប <b>${totalStus}</b> នាក់ ស្រី <b>${femaleStus}</b> នាក់ ប្រុស <b>${maleStus}</b> នាក់</td></tr>
-                <tr><td style="width: 100%;">❖ ${passLabel} <b>${passed}</b> នាក់ គិតជាភាគរយ <b>${passPct}%</b> (ស្រី <b>${passedF}</b> នាក់ គិតជាភាគរយ <b>${passFPct}%</b>)</td></tr>
-                <tr><td style="width: 100%;">❖ ${failLabel} <b>${failed}</b> នាក់ គិតជាភាគរយ <b>${failPct}%</b> (ស្រី <b>${failedF}</b> នាក់ គិតជាភាគរយ <b>${failFPct}%</b>)</td></tr>
+                <tr><td style="width: 100%;">❖ បញ្ឈប់បញ្ជីត្រឹមលេខរៀង <b>${totalStus}</b> |  សិស្សសរុប <b>${totalStus}</b> នាក់ ស្រី <b>${femaleStus}</b> នាក់ ប្រុស <b>${maleStus}</b> នាក់</td></tr>
+                <tr><td style="width: 100%;">❖ ${passLabel} <b>${passed}</b> នាក់ គិតជាភាគរយ <b>${passPct}%</b> (ស្រី <b>${passedF}</b> នាក់ គិតជាភាគរយ <b>${passFPct}%</b> )</td></tr>
+                <tr><td style="width: 100%;">❖ ${failLabel} <b>${failed}</b> នាក់ គិតជាភាគរយ <b>${failPct}%</b> (ស្រី <b>${failedF}</b> នាក់ គិតជាភាគរយ <b>${failFPct}%</b> )</td></tr>
             </table>
             <div class="bottom-sig-container" style="display: flex; justify-content: space-between; align-items: flex-start; width: 100%; page-break-inside: avoid; padding: 0 20px; margin-top: 15px;">
                 <div class="sig-box-left" style="width: 40%; text-align: center;">
@@ -3869,6 +3893,7 @@ window.renderRankingsContent = function() {
               <tbody id="rankingsTableBody" class="divide-y divide-slate-100 text-slate-700"></tbody>
             </table>
           </div>
+          <div id="rankingsSummaryContainer" class="p-4 bg-slate-50 border-t border-slate-200 text-xs font-siemreap space-y-1 text-left text-slate-800"></div>
         </div>
       </div>
     `;
@@ -3883,10 +3908,16 @@ function buildRankingsTable() {
     const allStudents = window.rankingsDataList || [];
 
     let total = allStudents.length;
-    let female = allStudents.filter(s => s.gender === 'ស្រី').length;
+    let female = allStudents.filter(s => s.gender === 'ស្រី' || s.gender === 'ស' || s.gender === 'F').length;
+    let male = total - female;
     let passed = allStudents.filter(s => s.avg >= 5.0).length;
+    let femalePass = allStudents.filter(s => s.avg >= 5.0 && (s.gender === 'ស្រី' || s.gender === 'ស' || s.gender === 'F')).length;
     let failed = total - passed;
-    let passRate = total > 0 ? ((passed / total) * 100).toFixed(1) : "0.0";
+    let femaleFail = female - femalePass;
+    let passRate = total > 0 ? ((passed / total) * 100).toFixed(2) : "0.00";
+    let failRate = total > 0 ? ((failed / total) * 100).toFixed(2) : "0.00";
+    let passFPct = female > 0 ? ((femalePass / female) * 100).toFixed(2) : "0.00";
+    let failFPct = female > 0 ? ((femaleFail / female) * 100).toFixed(2) : "0.00";
     let classAvg = total > 0 ? (allStudents.reduce((acc, s) => acc + (s.avg || 0), 0) / total).toFixed(2) : "0.00";
     let topStudent = allStudents.find(s => s.rank === 1);
 
@@ -3895,25 +3926,34 @@ function buildRankingsTable() {
       kpiEl.innerHTML = `
         <div class="bg-white p-3.5 md:p-5 rounded-2xl border border-slate-200/60 shadow-sm flex items-center gap-3 md:gap-4 transition-transform hover:-translate-y-1">
           <div class="w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold text-lg md:text-xl shadow-inner"><i class="fa-solid fa-users"></i></div>
-          <div><div class="text-[10px] md:text-[11px] text-slate-500 font-bold uppercase tracking-wider">សិស្សសរុប</div><div class="text-sm md:text-base font-black text-slate-800 font-mono">${total} <span class="text-[10px] font-normal text-slate-400 font-siemreap">(ស្រី ${female})</span></div></div>
+          <div><div class="text-[10px] md:text-[11px] text-slate-500 font-bold uppercase tracking-wider font-siemreap">សិស្សសរុប</div><div class="text-sm md:text-base font-black text-slate-800 font-siemreap">${total} <span class="text-[10px] font-normal text-slate-400 font-siemreap">(ស្រី ${female})</span></div></div>
         </div>
         <div class="bg-white p-3.5 md:p-5 rounded-2xl border border-slate-200/60 shadow-sm flex items-center gap-3 md:gap-4 transition-transform hover:-translate-y-1">
           <div class="w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold text-lg md:text-xl shadow-inner"><i class="fa-solid fa-circle-check"></i></div>
-          <div><div class="text-[10px] md:text-[11px] text-slate-500 font-bold uppercase tracking-wider">ជាប់មធ្យមភាគ</div><div class="text-sm md:text-base font-black text-emerald-600 font-mono">${passed} <span class="text-[10px] font-bold text-emerald-700 font-mono">(${passRate}%)</span></div></div>
+          <div><div class="text-[10px] md:text-[11px] text-slate-500 font-bold uppercase tracking-wider font-siemreap">ជាប់មធ្យមភាគ</div><div class="text-sm md:text-base font-black text-emerald-600 font-siemreap">${passed} <span class="text-[10px] font-bold text-emerald-700 font-siemreap">(${passRate}%)</span></div></div>
         </div>
         <div class="bg-white p-3.5 md:p-5 rounded-2xl border border-slate-200/60 shadow-sm flex items-center gap-3 md:gap-4 transition-transform hover:-translate-y-1">
           <div class="w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center font-bold text-lg md:text-xl shadow-inner"><i class="fa-solid fa-circle-xmark"></i></div>
-          <div><div class="text-[10px] md:text-[11px] text-slate-500 font-bold uppercase tracking-wider">ធ្លាក់មធ្យមភាគ</div><div class="text-sm md:text-base font-black text-rose-600 font-mono">${failed} <span class="text-[10px] font-normal text-slate-400 font-siemreap">នាក់</span></div></div>
+          <div><div class="text-[10px] md:text-[11px] text-slate-500 font-bold uppercase tracking-wider font-siemreap">ធ្លាក់មធ្យមភាគ</div><div class="text-sm md:text-base font-black text-rose-600 font-siemreap">${failed} <span class="text-[10px] font-normal text-slate-400 font-siemreap">នាក់</span></div></div>
         </div>
         <div class="bg-white p-3.5 md:p-5 rounded-2xl border border-slate-200/60 shadow-sm flex items-center gap-3 md:gap-4 transition-transform hover:-translate-y-1">
           <div class="w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold text-lg md:text-xl shadow-inner"><i class="fa-solid fa-chart-line"></i></div>
-          <div><div class="text-[10px] md:text-[11px] text-slate-500 font-bold uppercase tracking-wider">មធ្យមភាគថ្នាក់</div><div class="text-sm md:text-base font-black text-indigo-700 font-mono">${classAvg}</div></div>
+          <div><div class="text-[10px] md:text-[11px] text-slate-500 font-bold uppercase tracking-wider font-siemreap">មធ្យមភាគថ្នាក់</div><div class="text-sm md:text-base font-black text-indigo-700 font-siemreap">${classAvg}</div></div>
         </div>
         <div class="bg-gradient-to-r from-amber-50 to-orange-50 p-3.5 md:p-5 rounded-2xl border border-amber-200 shadow-sm flex items-center gap-3 md:gap-4 col-span-2 sm:col-span-1 lg:col-span-1 transition-transform hover:-translate-y-1 relative overflow-hidden">
           <div class="absolute right-0 top-0 w-16 h-16 bg-white/40 rounded-full blur-xl pointer-events-none"></div>
           <div class="w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl bg-gradient-to-br from-amber-400 to-orange-500 text-white flex items-center justify-center font-bold text-lg md:text-xl shadow-md border border-white/50 relative z-10"><i class="fa-solid fa-medal"></i></div>
-          <div class="truncate relative z-10"><div class="text-[10px] md:text-[11px] text-amber-800 font-bold uppercase tracking-wider">ជើងឯកលេខ ១</div><div class="text-sm md:text-base font-bold text-slate-800 font-moul truncate mt-0.5">${topStudent ? topStudent.name : '-'}</div></div>
+          <div class="truncate relative z-10"><div class="text-[10px] md:text-[11px] text-amber-800 font-bold uppercase tracking-wider font-siemreap">ជើងឯកលេខ ១</div><div class="text-sm md:text-base font-bold text-slate-800 font-moul truncate mt-0.5">${topStudent ? topStudent.name : '-'}</div></div>
         </div>
+      `;
+    }
+
+    const sumEl = document.getElementById("rankingsSummaryContainer");
+    if (sumEl && total > 0) {
+      sumEl.innerHTML = `
+        <div>❖ បញ្ឈប់បញ្ជីត្រឹមលេខរៀង <b>${total}</b> |  សិស្សសរុប <b>${total}</b> នាក់ ស្រី <b>${female}</b> នាក់ ប្រុស <b>${male}</b> នាក់</div>
+        <div>❖ សិស្សជាប់មធ្យមភាគ <b>${passed}</b> នាក់ គិតជាភាគរយ <b>${passRate}%</b> (ស្រី <b>${femalePass}</b> នាក់ គិតជាភាគរយ <b>${passFPct}%</b> )</div>
+        <div>❖ សិស្សធ្លាក់មធ្យមភាគ <b>${failed}</b> នាក់ គិតជាភាគរយ <b>${failRate}%</b> (ស្រី <b>${femaleFail}</b> នាក់ គិតជាភាគរយ <b>${failFPct}%</b> )</div>
       `;
     }
 
