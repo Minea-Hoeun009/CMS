@@ -206,6 +206,71 @@ window.loadReportsView = function() {
                             <p class="text-slate-500 text-[11px] leading-relaxed">ស្វែងរកពិន្ទុ និងទាញយកព្រឹត្តិបត្រពិន្ទុសម្រាប់មាតាបិតា។</p>
                         </div>
                     </div>
+
+                    <!-- Card 12: បញ្ជីសារពើភ័ណ្ឌ (Classroom Inventory List) -->
+                    <div onclick="window.openReportDetail('inventory')" class="bg-white/90 backdrop-blur-md rounded-[2rem] p-6 shadow-sm hover:shadow-[0_20px_40px_rgb(217,119,6,0.2)] hover:-translate-y-1.5 transition-all duration-300 cursor-pointer border-2 border-amber-100 hover:border-amber-500 group flex flex-col justify-between h-[210px] relative overflow-hidden">
+                        <div class="absolute -right-4 -top-4 w-24 h-24 bg-amber-50 rounded-full group-hover:scale-150 transition-transform duration-500 ease-out pointer-events-none"></div>
+                        <div class="flex items-center justify-between relative z-10">
+                            <div class="w-14 h-14 bg-gradient-to-br from-amber-500 to-yellow-600 text-white rounded-2xl flex items-center justify-center text-2xl shadow-md shadow-amber-500/30 group-hover:scale-110 transition-transform"><i class="fa-solid fa-boxes-stacked"></i></div>
+                            <span class="text-[10px] bg-amber-100 text-amber-800 font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">Inventory</span>
+                        </div>
+                        <div class="relative z-10">
+                            <h3 class="font-moul text-[15px] text-slate-900 mb-1.5 group-hover:text-amber-600">បញ្ជីសារពើភ័ណ្ឌ</h3>
+                            <p class="text-slate-500 text-[11px] leading-relaxed">បញ្ជីគ្រប់គ្រង និងតាមដានសម្ភារ តុ កៅអី និងបរិក្ខារប្រើប្រាស់ក្នុងថ្នាក់រៀន។</p>
+                        </div>
+                    </div>
+
+                    <!-- Card 13: បទបញ្ជាផ្ទៃក្នុង (Internal Class Regulations) -->
+                    <div onclick="window.openReportDetail('internal_rules')" class="bg-white/90 backdrop-blur-md rounded-[2rem] p-6 shadow-sm hover:shadow-[0_20px_40px_rgb(225,29,72,0.2)] hover:-translate-y-1.5 transition-all duration-300 cursor-pointer border-2 border-rose-100 hover:border-rose-500 group flex flex-col justify-between h-[210px] relative overflow-hidden">
+                        <div class="absolute -right-4 -top-4 w-24 h-24 bg-rose-50 rounded-full group-hover:scale-150 transition-transform duration-500 ease-out pointer-events-none"></div>
+                        <div class="flex items-center justify-between relative z-10">
+                            <div class="w-14 h-14 bg-gradient-to-br from-rose-500 to-red-600 text-white rounded-2xl flex items-center justify-center text-2xl shadow-md shadow-rose-500/30 group-hover:scale-110 transition-transform"><i class="fa-solid fa-scale-balanced"></i></div>
+                            <span class="text-[10px] bg-rose-100 text-rose-800 font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">Internal Rules</span>
+                        </div>
+                        <div class="relative z-10">
+                            <h3 class="font-moul text-[15px] text-slate-900 mb-1.5 group-hover:text-rose-600">បទបញ្ជាផ្ទៃក្នុង</h3>
+                            <p class="text-slate-500 text-[11px] leading-relaxed">បទបញ្ជាផ្ទៃក្នុងផ្លូវការទាំង ១២ ប្រការ សម្រាប់ពង្រឹងវិន័យ និងសីលធម៌ក្នុងថ្នាក់។</p>
+                        </div>
+                    </div>
+
+                    <!-- Card 14: គោលការណ៍ថ្នាក់រៀន (Class Principles) -->
+                    <div onclick="window.openReportDetail('class_principles')" class="bg-white/90 backdrop-blur-md rounded-[2rem] p-6 shadow-sm hover:shadow-[0_20px_40px_rgb(14,165,233,0.2)] hover:-translate-y-1.5 transition-all duration-300 cursor-pointer border-2 border-sky-100 hover:border-sky-500 group flex flex-col justify-between h-[210px] relative overflow-hidden">
+                        <div class="absolute -right-4 -top-4 w-24 h-24 bg-sky-50 rounded-full group-hover:scale-150 transition-transform duration-500 ease-out pointer-events-none"></div>
+                        <div class="flex items-center justify-between relative z-10">
+                            <div class="w-14 h-14 bg-gradient-to-br from-sky-500 to-indigo-600 text-white rounded-2xl flex items-center justify-center text-2xl shadow-md shadow-sky-500/30 group-hover:scale-110 transition-transform"><i class="fa-solid fa-list-check"></i></div>
+                            <span class="text-[10px] bg-sky-100 text-sky-800 font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">Principles</span>
+                        </div>
+                        <div class="relative z-10">
+                            <h3 class="font-moul text-[15px] text-slate-900 mb-1.5 group-hover:text-sky-600">គោលការណ៍ថ្នាក់រៀន</h3>
+                            <p class="text-slate-500 text-[11px] leading-relaxed">គោលការណ៍រួម ១៦ ចំណុច សម្រាប់សិស្សានុសិស្សប្រកាន់ខ្ជាប់ក្នុងការសិក្សាប្រចាំថ្ងៃ។</p>
+                        </div>
+                    </div>
+
+                    <!-- Card 15: វេនសម្អាតប្រចាំសប្ដាហ៍ (Weekly Cleaning Duty Roster) -->
+                    <div onclick="window.openReportDetail('cleaning_schedule')" class="bg-white/90 backdrop-blur-md rounded-[2rem] p-6 shadow-sm hover:shadow-[0_20px_40px_rgb(16,185,129,0.2)] hover:-translate-y-1.5 transition-all duration-300 cursor-pointer border-2 border-emerald-100 hover:border-emerald-500 group flex flex-col justify-between h-[210px] relative overflow-hidden">
+                        <div class="absolute -right-4 -top-4 w-24 h-24 bg-emerald-50 rounded-full group-hover:scale-150 transition-transform duration-500 ease-out pointer-events-none"></div>
+                        <div class="flex items-center justify-between relative z-10">
+                            <div class="w-14 h-14 bg-gradient-to-br from-emerald-500 to-teal-600 text-white rounded-2xl flex items-center justify-center text-2xl shadow-md shadow-emerald-500/30 group-hover:scale-110 transition-transform"><i class="fa-solid fa-broom"></i></div>
+                            <span class="text-[10px] bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">Cleaning Duty</span>
+                        </div>
+                        <div class="relative z-10">
+                            <h3 class="font-moul text-[15px] text-slate-900 mb-1.5 group-hover:text-emerald-600">វេនសម្អាតប្រចាំសប្ដាហ៍</h3>
+                            <p class="text-slate-500 text-[11px] leading-relaxed">តារាងបែងចែកកាលវិភាគវេនសម្អាត ពីថ្ងៃចន្ទ ដល់ សៅរ៍ តាមក្រុម និងតួនាទីសិស្ស។</p>
+                        </div>
+                    </div>
+
+                    <!-- Card 16: គណៈកម្មការសាខា (Branch Committee & Youth Council) -->
+                    <div onclick="window.openReportDetail('branch_committee')" class="bg-white/90 backdrop-blur-md rounded-[2rem] p-6 shadow-sm hover:shadow-[0_20px_40px_rgb(147,51,234,0.2)] hover:-translate-y-1.5 transition-all duration-300 cursor-pointer border-2 border-purple-100 hover:border-purple-500 group flex flex-col justify-between h-[210px] relative overflow-hidden">
+                        <div class="absolute -right-4 -top-4 w-24 h-24 bg-purple-50 rounded-full group-hover:scale-150 transition-transform duration-500 ease-out pointer-events-none"></div>
+                        <div class="flex items-center justify-between relative z-10">
+                            <div class="w-14 h-14 bg-gradient-to-br from-purple-600 to-indigo-700 text-white rounded-2xl flex items-center justify-center text-2xl shadow-md shadow-purple-600/30 group-hover:scale-110 transition-transform"><i class="fa-solid fa-sitemap"></i></div>
+                            <span class="text-[10px] bg-purple-100 text-purple-800 font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">Branch Committee</span>
+                        </div>
+                        <div class="relative z-10">
+                            <h3 class="font-moul text-[15px] text-slate-900 mb-1.5 group-hover:text-purple-600">គណៈកម្មការសាខា</h3>
+                            <p class="text-slate-500 text-[11px] leading-relaxed">រចនាសម្ព័ន្ធគណៈកម្មការសាខា ក្រុមប្រឹក្សាកុមារប្រចាំថ្នាក់ និងការបែងចែកអនុសាខាទាំង ៦។</p>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -306,6 +371,21 @@ window.openReportDetail = function(reportType) {
         } else if (reportType === 'structure') {
             iconEl.className = "w-9 h-9 sm:w-10 sm:h-10 rounded-[14px] bg-gradient-to-br from-purple-600 to-indigo-700 text-white flex items-center justify-center shadow-md text-sm";
             iconEl.innerHTML = '<i class="fa-solid fa-users"></i>';
+        } else if (reportType === 'inventory') {
+            iconEl.className = "w-9 h-9 sm:w-10 sm:h-10 rounded-[14px] bg-gradient-to-br from-amber-500 to-yellow-600 text-white flex items-center justify-center shadow-md text-sm";
+            iconEl.innerHTML = '<i class="fa-solid fa-boxes-stacked"></i>';
+        } else if (reportType === 'internal_rules') {
+            iconEl.className = "w-9 h-9 sm:w-10 sm:h-10 rounded-[14px] bg-gradient-to-br from-rose-500 to-red-600 text-white flex items-center justify-center shadow-md text-sm";
+            iconEl.innerHTML = '<i class="fa-solid fa-scale-balanced"></i>';
+        } else if (reportType === 'class_principles') {
+            iconEl.className = "w-9 h-9 sm:w-10 sm:h-10 rounded-[14px] bg-gradient-to-br from-sky-500 to-indigo-600 text-white flex items-center justify-center shadow-md text-sm";
+            iconEl.innerHTML = '<i class="fa-solid fa-list-check"></i>';
+        } else if (reportType === 'cleaning_schedule') {
+            iconEl.className = "w-9 h-9 sm:w-10 sm:h-10 rounded-[14px] bg-gradient-to-br from-emerald-500 to-teal-600 text-white flex items-center justify-center shadow-md text-sm";
+            iconEl.innerHTML = '<i class="fa-solid fa-broom"></i>';
+        } else if (reportType === 'branch_committee') {
+            iconEl.className = "w-9 h-9 sm:w-10 sm:h-10 rounded-[14px] bg-gradient-to-br from-purple-600 to-indigo-700 text-white flex items-center justify-center shadow-md text-sm";
+            iconEl.innerHTML = '<i class="fa-solid fa-sitemap"></i>';
         } else {
             iconEl.className = "w-9 h-9 sm:w-10 sm:h-10 rounded-[14px] bg-gradient-to-br from-blue-600 to-indigo-700 text-white flex items-center justify-center shadow-md text-sm";
             iconEl.innerHTML = '<i class="fa-solid fa-file-invoice"></i>';
@@ -513,6 +593,60 @@ window.openReportDetail = function(reportType) {
                 window.renderClassStructureHTML(paperArea, curLevel, curRoom);
             } else {
                 paperArea.innerHTML = `<div class="text-center p-12 bg-amber-50/50 rounded-2xl border border-amber-200 text-amber-800 font-siemreap max-w-md mx-auto my-10 shadow-sm animate-fade-in"><i class="fa-solid fa-clock-rotate-left text-3xl mb-3 text-amber-500"></i><h4 class="font-moul text-base mb-1">របាយការណ៍នេះគ្រោងនឹងដាក់ឱ្យប្រើប្រាស់ឆាប់ៗ</h4><p class="text-xs text-amber-600 leading-relaxed">មុខងារនេះស្ថិតក្នុងដំណាក់កាលអភិវឌ្ឍ (In Progress/Planned)។ សូមជ្រើសរើសរបាយការណ៍ស្តង់ដាផ្សេងទៀតជាបណ្តោះអាសន្ន។</p></div>`;
+            }
+        } else if (reportType === 'inventory') {
+            titleEl.textContent = `បញ្ជីសារពើភ័ណ្ឌ (${gradeFull})`;
+            if (extraControls) {
+                extraControls.classList.remove("hidden");
+                extraControls.innerHTML = `
+                    <button onclick="window.saveClassReportData('inventory', '${curLevel}', '${curRoom}')" class="px-3 py-1 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold shadow flex items-center gap-1.5 transition active:scale-95">
+                        <i class="fa-solid fa-floppy-disk"></i> <span>រក្សាទុកទិន្នន័យ</span>
+                    </button>
+                `;
+            }
+            if (window.CMSPrintManager) window.CMSPrintManager.updateToolbarDefaults('reportPaperArea', 'portrait', 'A4', 100);
+            if (typeof window.renderClassInventoryReport === 'function') {
+                window.renderClassInventoryReport(paperArea, curLevel, curRoom);
+            }
+        } else if (reportType === 'internal_rules') {
+            titleEl.textContent = `បទបញ្ជាផ្ទៃក្នុង (${gradeFull})`;
+            if (window.CMSPrintManager) window.CMSPrintManager.updateToolbarDefaults('reportPaperArea', 'portrait', 'A4', 100);
+            if (typeof window.renderInternalRulesReport === 'function') {
+                window.renderInternalRulesReport(paperArea, curLevel, curRoom);
+            }
+        } else if (reportType === 'class_principles') {
+            titleEl.textContent = `គោលការណ៍ថ្នាក់រៀន (${gradeFull})`;
+            if (window.CMSPrintManager) window.CMSPrintManager.updateToolbarDefaults('reportPaperArea', 'portrait', 'A4', 100);
+            if (typeof window.renderClassPrinciplesReport === 'function') {
+                window.renderClassPrinciplesReport(paperArea, curLevel, curRoom);
+            }
+        } else if (reportType === 'cleaning_schedule') {
+            titleEl.textContent = `វេនសម្អាតប្រចាំសប្ដាហ៍ (${gradeFull})`;
+            if (extraControls) {
+                extraControls.classList.remove("hidden");
+                extraControls.innerHTML = `
+                    <button onclick="window.saveClassReportData('cleaning_schedule', '${curLevel}', '${curRoom}')" class="px-3 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow flex items-center gap-1.5 transition active:scale-95">
+                        <i class="fa-solid fa-floppy-disk"></i> <span>រក្សាទុកទិន្នន័យ</span>
+                    </button>
+                `;
+            }
+            if (window.CMSPrintManager) window.CMSPrintManager.updateToolbarDefaults('reportPaperArea', 'portrait', 'A4', 100);
+            if (typeof window.renderCleaningScheduleReport === 'function') {
+                window.renderCleaningScheduleReport(paperArea, curLevel, curRoom);
+            }
+        } else if (reportType === 'branch_committee') {
+            titleEl.textContent = `គណៈកម្មការសាខា & ក្រុមប្រឹក្សាកុមារ (${gradeFull})`;
+            if (extraControls) {
+                extraControls.classList.remove("hidden");
+                extraControls.innerHTML = `
+                    <button onclick="window.saveClassReportData('branch_committee', '${curLevel}', '${curRoom}')" class="px-3 py-1 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-xs font-bold shadow flex items-center gap-1.5 transition active:scale-95">
+                        <i class="fa-solid fa-floppy-disk"></i> <span>រក្សាទុកទិន្នន័យ</span>
+                    </button>
+                `;
+            }
+            if (window.CMSPrintManager) window.CMSPrintManager.updateToolbarDefaults('reportPaperArea', 'portrait', 'A4', 100);
+            if (typeof window.renderBranchCommitteeReport === 'function') {
+                window.renderBranchCommitteeReport(paperArea, curLevel, curRoom);
             }
         }
     }, 150);
@@ -4585,6 +4719,957 @@ window.renderAcademicResultsReport = function(container, targetGrade, targetRoom
                     <p class="mb-1 text-slate-700">${lunarDateStr}</p>
                     <p class="mb-1 text-slate-700 font-bold">${solarDateStr}</p>
                     <p class="font-moul text-slate-900 mb-14">គ្រូបន្ទុកថ្នាក់</p>
+                    <p class="font-moul text-slate-900 text-xs">${teacherName}</p>
+                </div>
+            </div>
+        </div>
+    `;
+
+    if (typeof window.applyAcademicReportPaperSettings === 'function') {
+        window.applyAcademicReportPaperSettings();
+    }
+};
+
+// ==========================================================================
+// ផ្នែករបាយការណ៍រដ្ឋបាលថ្មីទាំង ៥ តាមគំរូស្តង់ដារក្រសួង និងរូបភាពជាក់ស្តែង
+// ១. បញ្ជីសារពើភ័ណ្ឌ (Classroom Inventory List)
+// ២. បទបញ្ជាផ្ទៃក្នុង (Internal Class Regulations - 12 Articles)
+// ៣. គោលការណ៍ថ្នាក់រៀន (Class Principles - 16 Rules)
+// ៤. វេនសម្អាតប្រចាំសប្ដាហ៍ (Weekly Cleaning Duty Roster - Mon to Sat)
+// ៥. គណៈកម្មការសាខា (Branch Committee & Youth Council Hierarchy Tree)
+// ==========================================================================
+
+// Helper: មុខងាររក្សាទុកទិន្នន័យកែប្រែដោយគ្រូ
+window.saveClassReportData = function(reportType, targetGrade, targetRoom) {
+    const key = `cms_report_${reportType}_${targetGrade}_${targetRoom}`.replace(/\s+/g, '_');
+    const container = document.getElementById('reportPaperArea');
+    if (!container) return;
+
+    if (reportType === 'inventory') {
+        const rows = container.querySelectorAll('tr[data-inv-id]');
+        const data = [];
+        rows.forEach(r => {
+            const id = r.getAttribute('data-inv-id');
+            const name = r.querySelector('.inv-name')?.textContent?.trim() || '';
+            const qty = r.querySelector('.inv-qty')?.textContent?.trim() || '0';
+            const damaged = r.querySelector('.inv-damaged')?.textContent?.trim() || '0';
+            const lost = r.querySelector('.inv-lost')?.textContent?.trim() || '0';
+            const note = r.querySelector('.inv-note')?.textContent?.trim() || '';
+            data.push({ id, name, qty, damaged, lost, note });
+        });
+        localStorage.setItem(key, JSON.stringify(data));
+    } else if (reportType === 'cleaning_schedule') {
+        const tables = container.querySelectorAll('.cleaning-day-card');
+        const schedule = {};
+        tables.forEach(t => {
+            const day = t.getAttribute('data-day');
+            const students = [];
+            t.querySelectorAll('tbody tr').forEach(r => {
+                const name = r.querySelector('.duty-name')?.textContent?.trim() || '';
+                const gender = r.querySelector('.duty-gender')?.textContent?.trim() || '';
+                const role = r.querySelector('.duty-role')?.textContent?.trim() || '';
+                students.push({ name, gender, role });
+            });
+            schedule[day] = students;
+        });
+        const monitor = container.querySelector('#cleaningMonitorName')?.textContent?.trim() || '';
+        const deputy1 = container.querySelector('#cleaningDeputy1Name')?.textContent?.trim() || '';
+        const deputy2 = container.querySelector('#cleaningDeputy2Name')?.textContent?.trim() || '';
+        localStorage.setItem(key, JSON.stringify({ schedule, monitor, deputy1, deputy2 }));
+    } else if (reportType === 'branch_committee') {
+        const commData = {
+            advisor: container.querySelector('#branchAdvisorName')?.textContent?.trim() || '',
+            monitor: container.querySelector('#branchMonitorName')?.textContent?.trim() || '',
+            deputy1: container.querySelector('#branchDeputy1Name')?.textContent?.trim() || '',
+            deputy2: container.querySelector('#branchDeputy2Name')?.textContent?.trim() || '',
+            member1: container.querySelector('#branchMember1Name')?.textContent?.trim() || '',
+            member2: container.querySelector('#branchMember2Name')?.textContent?.trim() || '',
+            member3: container.querySelector('#branchMember3Name')?.textContent?.trim() || '',
+            member4: container.querySelector('#branchMember4Name')?.textContent?.trim() || '',
+            groups: []
+        };
+        const gRows = container.querySelectorAll('.branch-group-row');
+        gRows.forEach(gr => {
+            const groupName = gr.querySelector('.group-title')?.textContent?.trim() || '';
+            const leader = gr.querySelector('.group-leader')?.textContent?.trim() || '';
+            const deputy = gr.querySelector('.group-deputy')?.textContent?.trim() || '';
+            const members = gr.querySelector('.group-members')?.textContent?.trim() || '';
+            const duty = gr.querySelector('.group-duty')?.textContent?.trim() || '';
+            commData.groups.push({ groupName, leader, deputy, members, duty });
+        });
+        localStorage.setItem(key, JSON.stringify(commData));
+    }
+
+    if (typeof showToast === 'function') {
+        showToast("✓ បានរក្សាទុកការកែប្រែដោយជោគជ័យ!");
+    } else {
+        alert("✓ បានរក្សាទុកការកែប្រែដោយជោគជ័យ!");
+    }
+};
+
+// ==========================================================================
+// របាយការណ៍ទី ១៖ បញ្ជីសារពើភ័ណ្ឌ (Classroom Inventory List)
+// ==========================================================================
+window.renderClassInventoryReport = function(container, targetGrade, targetRoom) {
+    if (!container) return;
+
+    const activeClass = typeof window.getCurrentSelectedClass === 'function' ? window.getCurrentSelectedClass() : { level: "ថ្នាក់ទី ៤", room: "«ក»" };
+    const curLevel = targetGrade || activeClass.level;
+    const curRoom = targetRoom || activeClass.room;
+    const gradeFull = `${curLevel} ${curRoom}`.trim();
+
+    const ctx = (window.CMSPrintManager && typeof window.CMSPrintManager.getStandardContext === 'function')
+        ? window.CMSPrintManager.getStandardContext({ grade: gradeFull })
+        : {};
+
+    const schoolName = ctx.schoolName || localStorage.getItem('cms_school_name') || 'សាលាបឋមសិក្សា................................';
+    const academicYear = ctx.academicYear || localStorage.getItem('selected_academic_year') || '២០២៤-២០២៥';
+    const teacherName = ctx.teacherName || localStorage.getItem('teacher_name') || '................................';
+    const principalName = ctx.principalName || localStorage.getItem('school_principal') || '................................';
+    const solarDateStr = ctx.solarDate || (window.reportDateSettings ? window.reportDateSettings.solarDate : "ថ្ងៃទី....... ខែ....... ឆ្នាំ២០....");
+    const lunarDateStr = ctx.lunarDate || (window.reportDateSettings ? window.reportDateSettings.lunarDate : "ថ្ងៃ................. ខែ............. ឆ្នាំ......... ........ស័ក ព.ស.២៥....");
+
+    // បញ្ជីសម្ភារស្តង់ដារ ៣២ មុខ តាមគំរូរូបភាពជាក់ស្តែង
+    const defaultLeftItems = [
+        { id: 1, name: "តុគ្រូ", qty: 1, damaged: 0, lost: 0, note: "" },
+        { id: 2, name: "កៅអីគ្រូ", qty: 1, damaged: 0, lost: 0, note: "" },
+        { id: 3, name: "តុសិស្ស", qty: 20, damaged: 0, lost: 0, note: "" },
+        { id: 4, name: "កៅអីសិស្ស", qty: 40, damaged: 0, lost: 0, note: "" },
+        { id: 5, name: "ក្ដារខៀន", qty: 1, damaged: 0, lost: 0, note: "" },
+        { id: 6, name: "បន្ទាត់", qty: 2, damaged: 0, lost: 0, note: "" },
+        { id: 7, name: "ដែកឈាន", qty: 1, damaged: 0, lost: 0, note: "" },
+        { id: 8, name: "រ៉ាប់ព័រទ័រ", qty: 1, damaged: 0, lost: 0, note: "" },
+        { id: 9, name: "ត្រីកោណកែង", qty: 1, damaged: 0, lost: 0, note: "" },
+        { id: 10, name: "ធុងសម្រាម", qty: 1, damaged: 0, lost: 0, note: "" },
+        { id: 11, name: "អំបោស", qty: 2, damaged: 0, lost: 0, note: "" },
+        { id: 12, name: "ប្រដាប់ប្រមូលសម្រាម", qty: 1, damaged: 0, lost: 0, note: "" },
+        { id: 13, name: "កន្ត្រកដាក់ដីស", qty: 1, damaged: 0, lost: 0, note: "" },
+        { id: 14, name: "ជ័រលុបក្ដារខៀន", qty: 1, damaged: 0, lost: 0, note: "" },
+        { id: 15, name: "កាតាបគ្រូ", qty: 1, damaged: 0, lost: 0, note: "" },
+        { id: 16, name: "ទូដាក់ឯកសារ", qty: 1, damaged: 0, lost: 0, note: "" }
+    ];
+
+    const defaultRightItems = [
+        { id: 17, name: "នាឡិកាជញ្ជាំង", qty: 1, damaged: 0, lost: 0, note: "" },
+        { id: 18, name: "ផែនទីប្រទេសកម្ពុជា", qty: 1, damaged: 0, lost: 0, note: "" },
+        { id: 19, name: "រូបថតថ្នាក់ដឹកនាំ", qty: 3, damaged: 0, lost: 0, note: "" },
+        { id: 20, name: "ទង់ជាតិ", qty: 1, damaged: 0, lost: 0, note: "" },
+        { id: 21, name: "កង្ហារ", qty: 2, damaged: 0, lost: 0, note: "" },
+        { id: 22, name: "អំពូលភ្លើង", qty: 4, damaged: 0, lost: 0, note: "" },
+        { id: 23, name: "កុងតាក់ភ្លើង", qty: 2, damaged: 0, lost: 0, note: "" },
+        { id: 24, name: "កែវទឹក/កំសៀវ", qty: 1, damaged: 0, lost: 0, note: "" },
+        { id: 25, name: "ផ្តិលទឹក", qty: 1, damaged: 0, lost: 0, note: "" },
+        { id: 26, name: "កន្សែងជូតដៃ", qty: 2, damaged: 0, lost: 0, note: "" },
+        { id: 27, name: "ស្បែកជើងក្នុងថ្នាក់", qty: 20, damaged: 0, lost: 0, note: "" },
+        { id: 28, name: "កម្រាលតុ", qty: 1, damaged: 0, lost: 0, note: "" },
+        { id: 29, name: "ថូផ្កា", qty: 1, damaged: 0, lost: 0, note: "" },
+        { id: 30, name: "ផ្ទាំងទស្សនីយភាព/រូបភាពអប់រំ", qty: 2, damaged: 0, lost: 0, note: "" },
+        { id: 31, name: "បទបញ្ជាផ្ទៃក្នុង", qty: 1, damaged: 0, lost: 0, note: "" },
+        { id: 32, name: "គោលការណ៍ថ្នាក់រៀន", qty: 1, damaged: 0, lost: 0, note: "" }
+    ];
+
+    // ពិនិត្យមើលទិន្នន័យដែលបានរក្សាទុកក្នុង LocalStorage
+    const key = `cms_report_inventory_${curLevel}_${curRoom}`.replace(/\s+/g, '_');
+    let savedItems = null;
+    try {
+        const stored = localStorage.getItem(key);
+        if (stored) savedItems = JSON.parse(stored);
+    } catch(e) {}
+
+    let leftItems = defaultLeftItems;
+    let rightItems = defaultRightItems;
+
+    if (savedItems && Array.isArray(savedItems) && savedItems.length > 0) {
+        leftItems = defaultLeftItems.map(def => {
+            const match = savedItems.find(s => String(s.id) === String(def.id));
+            return match ? { ...def, ...match } : def;
+        });
+        rightItems = defaultRightItems.map(def => {
+            const match = savedItems.find(s => String(s.id) === String(def.id));
+            return match ? { ...def, ...match } : def;
+        });
+    }
+
+    const calcSum = (arr, prop) => arr.reduce((acc, it) => acc + (parseInt(it[prop], 10) || 0), 0);
+    const sub1Qty = calcSum(leftItems, 'qty');
+    const sub1Damaged = calcSum(leftItems, 'damaged');
+    const sub1Lost = calcSum(leftItems, 'lost');
+
+    const sub2Qty = calcSum(rightItems, 'qty');
+    const sub2Damaged = calcSum(rightItems, 'damaged');
+    const sub2Lost = calcSum(rightItems, 'lost');
+
+    const grandTotalQty = sub1Qty + sub2Qty;
+    const grandTotalDamaged = sub1Damaged + sub2Damaged;
+    const grandTotalLost = sub1Lost + sub2Lost;
+
+    const renderTableCol = (items, startIdx) => items.map((it, idx) => `
+        <tr data-inv-id="${it.id}" class="hover:bg-amber-50/40 transition">
+            <td class="border border-slate-300 px-1 py-0.5 text-center font-bold text-slate-700 w-7">${startIdx + idx}</td>
+            <td class="border border-slate-300 px-2 py-0.5 text-left text-slate-800 inv-name" contenteditable="true">${it.name}</td>
+            <td class="border border-slate-300 px-1 py-0.5 text-center font-bold text-indigo-700 w-10 inv-qty" contenteditable="true">${it.qty}</td>
+            <td class="border border-slate-300 px-1 py-0.5 text-center font-bold text-amber-700 w-9 inv-damaged" contenteditable="true">${it.damaged}</td>
+            <td class="border border-slate-300 px-1 py-0.5 text-center font-bold text-rose-700 w-9 inv-lost" contenteditable="true">${it.lost}</td>
+            <td class="border border-slate-300 px-1.5 py-0.5 text-left text-slate-500 inv-note" contenteditable="true">${it.note || ''}</td>
+        </tr>
+    `).join('');
+
+    container.innerHTML = `
+        <div class="a4-page bg-white shadow-xl rounded-lg mx-auto p-7 font-siemreap text-slate-800 relative max-w-[210mm] min-h-[297mm] text-[11px] leading-relaxed border-[3px] border-amber-500/80" style="box-sizing: border-box;">
+            <!-- Inner decorative border -->
+            <div style="position: absolute; inset: 4px; border: 1.5px solid #d97706; pointer-events: none; border-radius: 4px;"></div>
+            <div style="position: absolute; top: 8px; left: 10px; color: #d97706; font-size: 16px;">❖</div>
+            <div style="position: absolute; top: 8px; right: 10px; color: #d97706; font-size: 16px;">❖</div>
+            <div style="position: absolute; bottom: 8px; left: 10px; color: #d97706; font-size: 16px;">❖</div>
+            <div style="position: absolute; bottom: 8px; right: 10px; color: #d97706; font-size: 16px;">❖</div>
+
+            <!-- National Header -->
+            <div class="text-center mb-3">
+                <p class="font-moul text-xs text-amber-900 tracking-wide">ព្រះរាជាណាចក្រកម្ពុជា</p>
+                <p class="font-moul text-xs text-amber-900 tracking-wide mt-0.5">ជាតិ សាសនា ព្រះមហាក្សត្រ</p>
+                <div class="text-amber-600 text-xs mt-0.5">*** ៚ ៚ ៚ ***</div>
+            </div>
+
+            <!-- School & Class Metadata -->
+            <div class="flex justify-between items-center mb-2 px-2 text-xs">
+                <div>
+                    <p class="font-bold text-slate-800">${schoolName}</p>
+                    <p class="text-slate-600 mt-0.5">ថ្នាក់ទី ៖ <b class="text-indigo-700">${gradeFull}</b></p>
+                </div>
+                <div class="text-right">
+                    <p class="text-slate-600">ឆ្នាំសិក្សា ៖ <b class="text-slate-800">${academicYear}</b></p>
+                    <p class="text-slate-500 text-[10px]">កាលបរិច្ឆេទ ៖ ${solarDateStr}</p>
+                </div>
+            </div>
+
+            <!-- Main Title -->
+            <div class="text-center mb-4">
+                <h2 class="font-moul text-base text-amber-900 inline-block px-4 pb-1 border-b-2 border-amber-600">បញ្ជីសារពើភ័ណ្ឌសម្ភារក្នុងថ្នាក់រៀន</h2>
+            </div>
+
+            <!-- 2-Column Split Table (Items 1-16 on Left, 17-32 on Right) -->
+            <div class="grid grid-cols-2 gap-3 mb-3">
+                <!-- Column 1 (Items 1 to 16) -->
+                <div>
+                    <table class="w-full border-collapse border border-slate-300 text-[10px]">
+                        <thead>
+                            <tr class="bg-amber-100/70 text-slate-900 font-moul text-[9.5px]">
+                                <th class="border border-slate-300 p-1 w-7 text-center">ល.រ</th>
+                                <th class="border border-slate-300 p-1 text-center">បរិយាយសម្ភារ</th>
+                                <th class="border border-slate-300 p-1 w-10 text-center">ចំនួន</th>
+                                <th class="border border-slate-300 p-1 w-9 text-center">ខូច</th>
+                                <th class="border border-slate-300 p-1 w-9 text-center">បាត់</th>
+                                <th class="border border-slate-300 p-1 text-center">ផ្សេងៗ</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${renderTableCol(leftItems, 1)}
+                            <!-- Subtotal 1 -->
+                            <tr class="bg-amber-50/80 font-bold text-slate-900">
+                                <td colspan="2" class="border border-slate-300 p-1 text-center font-moul text-[9.5px]">សរុប (១)</td>
+                                <td class="border border-slate-300 p-1 text-center text-indigo-800">${sub1Qty}</td>
+                                <td class="border border-slate-300 p-1 text-center text-amber-800">${sub1Damaged}</td>
+                                <td class="border border-slate-300 p-1 text-center text-rose-800">${sub1Lost}</td>
+                                <td class="border border-slate-300 p-1 text-center">-</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Column 2 (Items 17 to 32) -->
+                <div>
+                    <table class="w-full border-collapse border border-slate-300 text-[10px]">
+                        <thead>
+                            <tr class="bg-amber-100/70 text-slate-900 font-moul text-[9.5px]">
+                                <th class="border border-slate-300 p-1 w-7 text-center">ល.រ</th>
+                                <th class="border border-slate-300 p-1 text-center">បរិយាយសម្ភារ</th>
+                                <th class="border border-slate-300 p-1 w-10 text-center">ចំនួន</th>
+                                <th class="border border-slate-300 p-1 w-9 text-center">ខូច</th>
+                                <th class="border border-slate-300 p-1 w-9 text-center">បាត់</th>
+                                <th class="border border-slate-300 p-1 text-center">ផ្សេងៗ</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${renderTableCol(rightItems, 17)}
+                            <!-- Subtotal 2 -->
+                            <tr class="bg-amber-50/80 font-bold text-slate-900">
+                                <td colspan="2" class="border border-slate-300 p-1 text-center font-moul text-[9.5px]">សរុប (២)</td>
+                                <td class="border border-slate-300 p-1 text-center text-indigo-800">${sub2Qty}</td>
+                                <td class="border border-slate-300 p-1 text-center text-amber-800">${sub2Damaged}</td>
+                                <td class="border border-slate-300 p-1 text-center text-rose-800">${sub2Lost}</td>
+                                <td class="border border-slate-300 p-1 text-center">-</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Grand Total Row Across Both Sides -->
+            <div class="bg-amber-100/90 border border-amber-300 rounded-lg p-2 mb-4 flex justify-between items-center text-xs font-bold text-slate-900 shadow-sm">
+                <span class="font-moul text-amber-950">សរុបរួមទាំងពីរផ្នែក ៖</span>
+                <div class="flex gap-6">
+                    <span>ចំនួនសម្ភារសរុប ៖ <b class="text-indigo-800 text-sm">${grandTotalQty}</b> គ្រឿង</span>
+                    <span>ខូចខាត ៖ <b class="text-amber-800 text-sm">${grandTotalDamaged}</b></span>
+                    <span>បាត់បង់ ៖ <b class="text-rose-800 text-sm">${grandTotalLost}</b></span>
+                </div>
+            </div>
+
+            <!-- Signatures -->
+            <div class="flex justify-between items-start text-xs pt-4 px-8 font-siemreap">
+                <div class="text-center w-2/5">
+                    <p class="mb-1 text-slate-700">បានឃើញ និងឯកភាព</p>
+                    <p class="font-moul text-slate-900 mb-14">នាយក/នាយិកាសាលា</p>
+                    <p class="font-moul text-slate-900 text-xs">${principalName}</p>
+                </div>
+                <div class="text-center w-2/5">
+                    <p class="mb-1 text-slate-700">${lunarDateStr}</p>
+                    <p class="mb-1 text-slate-700 font-bold">${solarDateStr}</p>
+                    <p class="font-moul text-slate-900 mb-14">គ្រូបន្ទុកថ្នាក់</p>
+                    <p class="font-moul text-slate-900 text-xs">${teacherName}</p>
+                </div>
+            </div>
+        </div>
+    `;
+
+    if (typeof window.applyAcademicReportPaperSettings === 'function') {
+        window.applyAcademicReportPaperSettings();
+    }
+};
+
+// ==========================================================================
+// របាយការណ៍ទី ២៖ បទបញ្ជាផ្ទៃក្នុង (Internal Class Regulations - 12 Articles)
+// ==========================================================================
+window.renderInternalRulesReport = function(container, targetGrade, targetRoom) {
+    if (!container) return;
+
+    const activeClass = typeof window.getCurrentSelectedClass === 'function' ? window.getCurrentSelectedClass() : { level: "ថ្នាក់ទី ៤", room: "«ក»" };
+    const curLevel = targetGrade || activeClass.level;
+    const curRoom = targetRoom || activeClass.room;
+    const gradeFull = `${curLevel} ${curRoom}`.trim();
+
+    const ctx = (window.CMSPrintManager && typeof window.CMSPrintManager.getStandardContext === 'function')
+        ? window.CMSPrintManager.getStandardContext({ grade: gradeFull })
+        : {};
+
+    const schoolName = ctx.schoolName || localStorage.getItem('cms_school_name') || 'សាលាបឋមសិក្សា................................';
+    const academicYear = ctx.academicYear || localStorage.getItem('selected_academic_year') || '២០២៤-២០២៥';
+    const teacherName = ctx.teacherName || localStorage.getItem('teacher_name') || '................................';
+    const principalName = ctx.principalName || localStorage.getItem('school_principal') || '................................';
+    const solarDateStr = ctx.solarDate || (window.reportDateSettings ? window.reportDateSettings.solarDate : "ថ្ងៃទី....... ខែ....... ឆ្នាំ២០....");
+    const lunarDateStr = ctx.lunarDate || (window.reportDateSettings ? window.reportDateSettings.lunarDate : "ថ្ងៃ................. ខែ............. ឆ្នាំ......... ........ស័ក ព.ស.២៥....");
+
+    // ១២ ប្រការពេញលេញ តាមគំរូរូបភាពជាក់ស្តែង
+    const articles = [
+        { num: "១", text: "ត្រូវមកសាលារៀនឱ្យបានទៀងទាត់ពេលវេលា យ៉ាងតិច ១៥ នាទីមុនចូលរៀន និងចូលរួមគោរពទង់ជាតិជារៀងរាល់ព្រឹក។" },
+        { num: "២", text: "ត្រូវស្លៀកពាក់ឯកសណ្ឋានសិស្សឱ្យបានត្រឹមត្រូវ ស្អាតបាត សមរម្យ និងពាក់ផ្លាកឈ្មោះតាមការកំណត់របស់សាលារៀន។" },
+        { num: "៣", text: "ត្រូវមានអាកប្បកិរិយាសមរម្យ សុភាពរាបសារ គោរពគំនាប់ចំពោះលោកគ្រូ អ្នកគ្រូ មាតាបិតា អាណាព្យាបាល និងចាស់ទុំ។" },
+        { num: "៤", text: "ត្រូវមានសាមគ្គីភាព ស្រឡាញ់រាប់អានមិត្តភក្តិ ចេះជួយទុក្ខធុរៈគ្នា មិនឈ្លោះប្រកែក មិនប្រើពាក្យអសុរស និងមិនប្រើអំពើហិង្សា។" },
+        { num: "៥", text: "ត្រូវយកចិត្តទុកដាក់ស្ដាប់ការពន្យល់របស់គ្រូ មិនត្រូវនិយាយគ្នាលេង មិនបង្កសំឡេងរំខាន ឬដើរចេញក្រៅដោយគ្មានការអនុញ្ញាតក្នុងម៉ោងសិក្សា។" },
+        { num: "៦", text: "ត្រូវខិតខំរៀនសូត្រ ធ្វើកិច្ចការផ្ទះ មេរៀន និងបំពេញភារកិច្ចដែលគ្រូដាក់ឱ្យបានគ្រប់ជ្រុងជ្រោយ និងទាន់ពេលវេលា។" },
+        { num: "៧", text: "ត្រូវថែរក្សាអនាម័យផ្ទាល់ខ្លួន អនាម័យតុ កៅអី ថ្នាក់រៀន និងបរិស្ថានសាលាឱ្យបានស្អាតជានិច្ច តាមគោលការណ៍ «ថ្នាក់រៀនស្អាត»។" },
+        { num: "៨", text: "ត្រូវចូលរួមបំពេញវេនសម្អាតថ្នាក់រៀន និងបរិស្ថានតាមការបែងចែកដោយស្មារតីទទួលខុសត្រូវខ្ពស់ និងសហការគ្នាបានល្អ។" },
+        { num: "៩", text: "ត្រូវថែរក្សាការពារទ្រព្យសម្បត្តិរួមរបស់ថ្នាក់រៀន និងសាលារៀន មិនគូសវាស ឬបំផ្លាញតុ កៅអី ក្ដារខៀន ឬជញ្ជាំងឡើយ។" },
+        { num: "១០", text: "ហាមដាច់ខាតនូវការយកគ្រឿងញៀន អាវុធ ជាតិផ្ទុះ បារីអេឡិចត្រូនិច ល្បែងស៊ីសង ឬសម្ភារមិនសមរម្យផ្សេងៗមកកាន់សាលារៀន។" },
+        { num: "១១", text: "ហាមប្រើប្រាស់ទូរស័ព្ទដៃ ឬឧបករណ៍អេឡិចត្រូនិកក្នុងម៉ោងសិក្សាដោយគ្មានការអនុញ្ញាតពីគ្រូបន្ទុកថ្នាក់។" },
+        { num: "១២", text: "ករណីសិស្សឈប់សម្រាក ត្រូវមានច្បាប់សុំការអនុញ្ញាតពីគ្រូបន្ទុកថ្នាក់ជាលាយលក្ខណ៍អក្សរពីមាតាបិតា ឬអាណាព្យាបាល។" }
+    ];
+
+    const leftCol = articles.slice(0, 6);
+    const rightCol = articles.slice(6, 12);
+
+    const renderArticleCard = (art) => `
+        <div class="p-2.5 rounded-xl border border-rose-200/80 bg-rose-50/30 hover:bg-rose-50/70 transition flex items-start gap-2.5">
+            <span class="w-6 h-6 rounded-lg bg-rose-600 text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-sm">${art.num}</span>
+            <div class="text-slate-800 text-xs leading-relaxed">
+                <b class="text-rose-900 font-siemreap">ប្រការ ${art.num} ៖</b> ${art.text}
+            </div>
+        </div>
+    `;
+
+    container.innerHTML = `
+        <div class="a4-page bg-white shadow-xl rounded-lg mx-auto p-7 font-siemreap text-slate-800 relative max-w-[210mm] min-h-[297mm] text-[11px] leading-relaxed border-[3px] border-rose-500/80" style="box-sizing: border-box;">
+            <!-- Inner decorative border -->
+            <div style="position: absolute; inset: 4px; border: 1.5px solid #e11d48; pointer-events: none; border-radius: 4px;"></div>
+            <div style="position: absolute; top: 8px; left: 10px; color: #e11d48; font-size: 16px;">❖</div>
+            <div style="position: absolute; top: 8px; right: 10px; color: #e11d48; font-size: 16px;">❖</div>
+            <div style="position: absolute; bottom: 8px; left: 10px; color: #e11d48; font-size: 16px;">❖</div>
+            <div style="position: absolute; bottom: 8px; right: 10px; color: #e11d48; font-size: 16px;">❖</div>
+
+            <!-- National Header -->
+            <div class="text-center mb-3">
+                <p class="font-moul text-xs text-rose-950 tracking-wide">ព្រះរាជាណាចក្រកម្ពុជា</p>
+                <p class="font-moul text-xs text-rose-950 tracking-wide mt-0.5">ជាតិ សាសនា ព្រះមហាក្សត្រ</p>
+                <div class="text-rose-600 text-xs mt-0.5">*** ៚ ៚ ៚ ***</div>
+            </div>
+
+            <!-- School & Class Metadata -->
+            <div class="flex justify-between items-center mb-2 px-2 text-xs">
+                <div>
+                    <p class="font-bold text-slate-800">${schoolName}</p>
+                    <p class="text-slate-600 mt-0.5">ថ្នាក់ទី ៖ <b class="text-rose-700">${gradeFull}</b></p>
+                </div>
+                <div class="text-right">
+                    <p class="text-slate-600">ឆ្នាំសិក្សា ៖ <b class="text-slate-800">${academicYear}</b></p>
+                    <p class="text-slate-500 text-[10px]">កាលបរិច្ឆេទ ៖ ${solarDateStr}</p>
+                </div>
+            </div>
+
+            <!-- Main Title -->
+            <div class="text-center mb-3">
+                <h2 class="font-moul text-base text-rose-900 inline-block px-4 pb-1 border-b-2 border-rose-600">បទបញ្ជាផ្ទៃក្នុងក្នុងថ្នាក់រៀន</h2>
+            </div>
+
+            <!-- Preamble -->
+            <div class="bg-rose-50/60 border border-rose-200 rounded-xl p-2.5 mb-4 text-xs text-rose-950 text-center font-bold leading-relaxed shadow-sm">
+                ដើម្បីលើកកម្ពស់វិន័យ សីលធម៌ សេចក្តីថ្លៃថ្នូរ និងគុណភាពនៃការអប់រំក្នុងថ្នាក់រៀនឱ្យកាន់តែល្អប្រសើរ សិស្សានុសិស្សទាំងអស់ត្រូវគោរព និងអនុវត្តតាមបទបញ្ជាផ្ទៃក្នុងដូចខាងក្រោម៖
+            </div>
+
+            <!-- 12 Articles Grid (2 Columns x 6 Articles) -->
+            <div class="grid grid-cols-2 gap-3 mb-4">
+                <div class="space-y-2.5">
+                    ${leftCol.map(renderArticleCard).join('')}
+                </div>
+                <div class="space-y-2.5">
+                    ${rightCol.map(renderArticleCard).join('')}
+                </div>
+            </div>
+
+            <!-- Closing Clause -->
+            <div class="bg-slate-50 border border-slate-200 rounded-lg p-2 mb-4 text-[11px] text-slate-700 text-center italic">
+                បទបញ្ជាផ្ទៃក្នុងនេះ មានសុពលភាពអនុវត្តចាប់ពីថ្ងៃចុះហត្ថលេខានេះតទៅ។ សិស្សានុសិស្សដែលប្រព្រឹត្តល្មើសនឹងត្រូវទទួលការអប់រំ និងវិន័យតាមកម្រិត។
+            </div>
+
+            <!-- Signatures -->
+            <div class="flex justify-between items-start text-xs pt-3 px-8 font-siemreap">
+                <div class="text-center w-2/5">
+                    <p class="mb-1 text-slate-700">បានឃើញ និងឯកភាព</p>
+                    <p class="font-moul text-slate-900 mb-14">នាយក/នាយិកាសាលា</p>
+                    <p class="font-moul text-slate-900 text-xs">${principalName}</p>
+                </div>
+                <div class="text-center w-2/5">
+                    <p class="mb-1 text-slate-700">${lunarDateStr}</p>
+                    <p class="mb-1 text-slate-700 font-bold">${solarDateStr}</p>
+                    <p class="font-moul text-slate-900 mb-14">គ្រូបន្ទុកថ្នាក់</p>
+                    <p class="font-moul text-slate-900 text-xs">${teacherName}</p>
+                </div>
+            </div>
+        </div>
+    `;
+
+    if (typeof window.applyAcademicReportPaperSettings === 'function') {
+        window.applyAcademicReportPaperSettings();
+    }
+};
+
+// ==========================================================================
+// របាយការណ៍ទី ៣៖ គោលការណ៍ថ្នាក់រៀន (Class Principles - 16 Rules)
+// ==========================================================================
+window.renderClassPrinciplesReport = function(container, targetGrade, targetRoom) {
+    if (!container) return;
+
+    const activeClass = typeof window.getCurrentSelectedClass === 'function' ? window.getCurrentSelectedClass() : { level: "ថ្នាក់ទី ៤", room: "«ក»" };
+    const curLevel = targetGrade || activeClass.level;
+    const curRoom = targetRoom || activeClass.room;
+    const gradeFull = `${curLevel} ${curRoom}`.trim();
+
+    const ctx = (window.CMSPrintManager && typeof window.CMSPrintManager.getStandardContext === 'function')
+        ? window.CMSPrintManager.getStandardContext({ grade: gradeFull })
+        : {};
+
+    const schoolName = ctx.schoolName || localStorage.getItem('cms_school_name') || 'សាលាបឋមសិក្សា................................';
+    const academicYear = ctx.academicYear || localStorage.getItem('selected_academic_year') || '២០២៤-២០២៥';
+    const teacherName = ctx.teacherName || localStorage.getItem('teacher_name') || '................................';
+    const solarDateStr = ctx.solarDate || (window.reportDateSettings ? window.reportDateSettings.solarDate : "ថ្ងៃទី....... ខែ....... ឆ្នាំ២០....");
+    const lunarDateStr = ctx.lunarDate || (window.reportDateSettings ? window.reportDateSettings.lunarDate : "ថ្ងៃ................. ខែ............. ឆ្នាំ......... ........ស័ក ព.ស.២៥....");
+
+    // រកឈ្មោះប្រធានថ្នាក់
+    const classStudents = (typeof window.getStudentsForClass === 'function')
+        ? window.getStudentsForClass(curLevel, curRoom)
+        : (window.allStudents || []);
+    const monitorStudent = classStudents[0] ? (classStudents[0].name || classStudents[0].name_khmer || '................................') : '................................';
+
+    // ១៦ ចំណុចគោលការណ៍ថ្នាក់រៀន តាមគំរូរូបភាពជាក់ស្តែង
+    const principles = [
+        { num: 1, title: "មកឱ្យទាន់ពេលវេលា", desc: "មកដល់សាលា និងថ្នាក់រៀនយ៉ាងហោច ១៥ នាទីមុនចូលរៀន", icon: "fa-regular fa-clock" },
+        { num: 2, title: "ស្លៀកពាក់ស្អាតបាត និងសមរម្យ", desc: "ស្លៀកពាក់ឯកសណ្ឋានសិស្សឱ្យបានត្រឹមត្រូវ និងមានរបៀប", icon: "fa-solid fa-shirt" },
+        { num: 3, title: "គោរពលោកគ្រូ អ្នកគ្រូ និងចាស់ទុំ", desc: "លើកដៃសំពះ និងមានសុជីវធម៌ទន់ភ្លន់គ្រប់ពេលវេលា", icon: "fa-solid fa-hands-praying" },
+        { num: 4, title: "ស្រឡាញ់ និងរាប់អានមិត្តភក្តិ", desc: "ចេះជួយគ្នា មិនរើសអើង និងសាមគ្គីភាពជិតស្និទ្ធ", icon: "fa-solid fa-heart" },
+        { num: 5, title: "យកចិត្តទុកដាក់ស្ដាប់គ្រូពន្យល់", desc: "ផ្ដោតអារម្មណ៍រៀនសូត្រ មិននិយាយគ្នាលេងក្នុងម៉ោង", icon: "fa-solid fa-ear-listen" },
+        { num: 6, title: "លើកដៃមុនឆ្លើយ ឬចង់និយាយ", desc: "សុំការអនុញ្ញាតពីគ្រូជាមុនពេលចង់សួរ ឬឆ្លើយសំណួរ", icon: "fa-solid fa-hand" },
+        { num: 7, title: "ធ្វើកិច្ចការឱ្យទាន់ពេលវេលា", desc: "បំពេញកិច្ចការផ្ទះ និងលំហាត់គ្រប់ជ្រុងជ្រោយ", icon: "fa-solid fa-book-open" },
+        { num: 8, title: "រក្សាភាពស្ងប់ស្ងាត់ក្នុងថ្នាក់", desc: "មិនបង្កសំឡេងរំខាន និងមិនរត់លេងក្នុងបន្ទប់រៀន", icon: "fa-solid fa-volume-xmark" },
+        { num: 9, title: "ថែរក្សាអនាម័យខ្លួន និងថ្នាក់", desc: "កាត់ក្រចក តុ កៅអី និងបរិស្ថានថ្នាក់ស្អាតជានិច្ច", icon: "fa-solid fa-soap" },
+        { num: 10, title: "ចូលរួមវេនសម្អាតដោយស្ម័គ្រចិត្ត", desc: "បំពេញវេនបោសជូត និងរៀបចំថ្នាក់តាមវេនកំណត់", icon: "fa-solid fa-broom" },
+        { num: 11, title: "ការពារ និងថែរក្សាសម្បត្តិរួម", desc: "មិនគូសវាសលើតុ កៅអី ក្ដារខៀន និងជញ្ជាំង", icon: "fa-solid fa-shield-halved" },
+        { num: 12, title: "មិនឈ្លោះប្រកែក ឬប្រើហិង្សា", desc: "ដោះស្រាយបញ្ហាដោយសន្តិវិធី និងមិនប្រើពាក្យអសុរស", icon: "fa-solid fa-handshake-angle" },
+        { num: 13, title: "មិនចោលសម្រាមពាសវាលពាសកាល", desc: "បោះសម្រាមក្នុងធុងឱ្យបានត្រឹមត្រូវគ្រប់ពេលវេលា", icon: "fa-solid fa-trash-can" },
+        { num: 14, title: "មិនយកចំណីមកញ៉ាំក្នុងថ្នាក់", desc: "ទទួលទានចំណីអាហារក្រៅបន្ទប់រៀនក្នុងពេលចេញលេង", icon: "fa-solid fa-ban" },
+        { num: 15, title: "មិនប្រើទូរស័ព្ទក្នុងម៉ោងសិក្សា", desc: "ហាមលេងហ្គេម ឬប្រើទូរស័ព្ទពេលកំពុងរៀន", icon: "fa-solid fa-mobile-screen" },
+        { num: 16, title: "សុំច្បាប់ពេលឈប់សម្រាក", desc: "មានលិខិតសុំច្បាប់ពីមាតាបិតាពេលមានធុរៈ ឬឈឺ", icon: "fa-solid fa-file-signature" }
+    ];
+
+    const leftPrinciples = principles.slice(0, 8);
+    const rightPrinciples = principles.slice(8, 16);
+
+    const renderPrincipleCard = (p) => `
+        <div class="p-2 rounded-xl border border-sky-200 bg-sky-50/40 hover:bg-sky-50/80 transition flex items-center gap-2.5">
+            <span class="w-6 h-6 rounded-lg bg-gradient-to-br from-sky-500 to-indigo-600 text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-sm">${p.num}</span>
+            <div class="flex-1">
+                <p class="font-bold text-sky-950 text-xs">${p.title}</p>
+                <p class="text-[10px] text-slate-500 leading-tight">${p.desc}</p>
+            </div>
+            <i class="${p.icon} text-sky-400 text-xs"></i>
+        </div>
+    `;
+
+    container.innerHTML = `
+        <div class="a4-page bg-white shadow-xl rounded-lg mx-auto p-7 font-siemreap text-slate-800 relative max-w-[210mm] min-h-[297mm] text-[11px] leading-relaxed border-[3px] border-sky-500/80" style="box-sizing: border-box;">
+            <!-- Inner decorative border -->
+            <div style="position: absolute; inset: 4px; border: 1.5px solid #0284c7; pointer-events: none; border-radius: 4px;"></div>
+            <div style="position: absolute; top: 8px; left: 10px; color: #0284c7; font-size: 16px;">❖</div>
+            <div style="position: absolute; top: 8px; right: 10px; color: #0284c7; font-size: 16px;">❖</div>
+            <div style="position: absolute; bottom: 8px; left: 10px; color: #0284c7; font-size: 16px;">❖</div>
+            <div style="position: absolute; bottom: 8px; right: 10px; color: #0284c7; font-size: 16px;">❖</div>
+
+            <!-- National Header -->
+            <div class="text-center mb-3">
+                <p class="font-moul text-xs text-sky-950 tracking-wide">ព្រះរាជាណាចក្រកម្ពុជា</p>
+                <p class="font-moul text-xs text-sky-950 tracking-wide mt-0.5">ជាតិ សាសនា ព្រះមហាក្សត្រ</p>
+                <div class="text-sky-600 text-xs mt-0.5">*** ៚ ៚ ៚ ***</div>
+            </div>
+
+            <!-- School & Class Metadata -->
+            <div class="flex justify-between items-center mb-2 px-2 text-xs">
+                <div>
+                    <p class="font-bold text-slate-800">${schoolName}</p>
+                    <p class="text-slate-600 mt-0.5">ថ្នាក់ទី ៖ <b class="text-sky-700">${gradeFull}</b></p>
+                </div>
+                <div class="text-right">
+                    <p class="text-slate-600">ឆ្នាំសិក្សា ៖ <b class="text-slate-800">${academicYear}</b></p>
+                    <p class="text-slate-500 text-[10px]">កាលបរិច្ឆេទ ៖ ${solarDateStr}</p>
+                </div>
+            </div>
+
+            <!-- Main Title -->
+            <div class="text-center mb-2">
+                <h2 class="font-moul text-base text-sky-950 inline-block px-4 pb-1 border-b-2 border-sky-600">គោលការណ៍ថ្នាក់រៀន</h2>
+            </div>
+
+            <!-- Motto Banner (ដូចក្នុងរូបភាពគំរូ) -->
+            <div class="bg-gradient-to-r from-sky-50 via-indigo-50 to-sky-50 border border-sky-200 rounded-xl p-2.5 mb-4 text-xs text-indigo-950 text-center font-bold shadow-sm">
+                ✨ « វិន័យនាំមកនូវសេចក្តីថ្លៃថ្នូរ • ការសិក្សានាំមកនូវចំណេះដឹង • អនាម័យនាំមកនូវសុខភាពល្អ » ✨
+            </div>
+
+            <!-- 16 Principles Grid (2 Columns x 8 Items) -->
+            <div class="grid grid-cols-2 gap-3 mb-4">
+                <div class="space-y-2">
+                    ${leftPrinciples.map(renderPrincipleCard).join('')}
+                </div>
+                <div class="space-y-2">
+                    ${rightPrinciples.map(renderPrincipleCard).join('')}
+                </div>
+            </div>
+
+            <!-- Signatures -->
+            <div class="flex justify-between items-start text-xs pt-4 px-8 font-siemreap">
+                <div class="text-center w-2/5">
+                    <p class="mb-1 text-slate-700">បានឃើញ និងឯកភាព</p>
+                    <p class="font-moul text-slate-900 mb-14">គ្រូបន្ទុកថ្នាក់</p>
+                    <p class="font-moul text-slate-900 text-xs">${teacherName}</p>
+                </div>
+                <div class="text-center w-2/5">
+                    <p class="mb-1 text-slate-700">${lunarDateStr}</p>
+                    <p class="mb-1 text-slate-700 font-bold">${solarDateStr}</p>
+                    <p class="font-moul text-slate-900 mb-14">តំណាងសិស្ស / ប្រធានថ្នាក់</p>
+                    <p class="font-moul text-slate-900 text-xs">${monitorStudent}</p>
+                </div>
+            </div>
+        </div>
+    `;
+
+    if (typeof window.applyAcademicReportPaperSettings === 'function') {
+        window.applyAcademicReportPaperSettings();
+    }
+};
+
+// ==========================================================================
+// របាយការណ៍ទី ៤៖ វេនសម្អាតប្រចាំសប្ដាហ៍ (Weekly Cleaning Duty Roster)
+// ==========================================================================
+window.renderCleaningScheduleReport = function(container, targetGrade, targetRoom) {
+    if (!container) return;
+
+    const activeClass = typeof window.getCurrentSelectedClass === 'function' ? window.getCurrentSelectedClass() : { level: "ថ្នាក់ទី ៤", room: "«ក»" };
+    const curLevel = targetGrade || activeClass.level;
+    const curRoom = targetRoom || activeClass.room;
+    const gradeFull = `${curLevel} ${curRoom}`.trim();
+
+    const ctx = (window.CMSPrintManager && typeof window.CMSPrintManager.getStandardContext === 'function')
+        ? window.CMSPrintManager.getStandardContext({ grade: gradeFull })
+        : {};
+
+    const schoolName = ctx.schoolName || localStorage.getItem('cms_school_name') || 'សាលាបឋមសិក្សា................................';
+    const academicYear = ctx.academicYear || localStorage.getItem('selected_academic_year') || '២០២៤-២០២៥';
+    const teacherName = ctx.teacherName || localStorage.getItem('teacher_name') || '................................';
+    const principalName = ctx.principalName || localStorage.getItem('school_principal') || '................................';
+    const solarDateStr = ctx.solarDate || (window.reportDateSettings ? window.reportDateSettings.solarDate : "ថ្ងៃទី....... ខែ....... ឆ្នាំ២០....");
+    const lunarDateStr = ctx.lunarDate || (window.reportDateSettings ? window.reportDateSettings.lunarDate : "ថ្ងៃ................. ខែ............. ឆ្នាំ......... ........ស័ក ព.ស.២៥....");
+
+    // សិស្សក្នុងថ្នាក់ជាក់ស្តែង
+    const classStudents = (typeof window.getStudentsForClass === 'function')
+        ? window.getStudentsForClass(curLevel, curRoom)
+        : (window.allStudents || []);
+
+    const days = [
+        { key: "mon", name: "ថ្ងៃចន្ទ", labelEn: "Monday" },
+        { key: "tue", name: "ថ្ងៃអង្គារ", labelEn: "Tuesday" },
+        { key: "wed", name: "ថ្ងៃពុធ", labelEn: "Wednesday" },
+        { key: "thu", name: "ថ្ងៃព្រហស្បតិ៍", labelEn: "Thursday" },
+        { key: "fri", name: "ថ្ងៃសុក្រ", labelEn: "Friday" },
+        { key: "sat", name: "ថ្ងៃសៅរ៍", labelEn: "Saturday" }
+    ];
+
+    // ពិនិត្យទិន្នន័យរក្សាទុក
+    const key = `cms_report_cleaning_schedule_${curLevel}_${curRoom}`.replace(/\s+/g, '_');
+    let savedSchedule = null;
+    try {
+        const stored = localStorage.getItem(key);
+        if (stored) savedSchedule = JSON.parse(stored);
+    } catch(e) {}
+
+    const monitorName = savedSchedule?.monitor || (classStudents[0] ? (classStudents[0].name || classStudents[0].name_khmer) : '................................');
+    const deputy1Name = savedSchedule?.deputy1 || (classStudents[1] ? (classStudents[1].name || classStudents[1].name_khmer) : '................................');
+    const deputy2Name = savedSchedule?.deputy2 || (classStudents[2] ? (classStudents[2].name || classStudents[2].name_khmer) : '................................');
+
+    // បែងចែកសិស្សតាម ៦ ថ្ងៃ ស្មើៗគ្នា
+    const pool = classStudents.slice(3); // សល់ពីប្រធាន និងអនុប្រធាន
+    const dayGroups = {};
+    days.forEach((d, dIdx) => {
+        if (savedSchedule?.schedule && savedSchedule.schedule[d.key]) {
+            dayGroups[d.key] = savedSchedule.schedule[d.key];
+        } else {
+            // បែងចែកស្វ័យប្រវត្តិ
+            const groupList = [];
+            for (let i = dIdx; i < pool.length; i += 6) {
+                groupList.push(pool[i]);
+            }
+            // យ៉ាងហោច ៤-៥ ជួរក្នុងមួយតារាង
+            const rows = [];
+            const rCount = Math.max(groupList.length, 5);
+            for (let r = 0; r < rCount; r++) {
+                const stu = groupList[r];
+                const role = r === 0 ? "ប្រធានវេន" : (r === 1 ? "អនុប្រធាន" : "សមាជិក");
+                rows.push({
+                    name: stu ? (stu.name || stu.name_khmer || '') : '',
+                    gender: stu ? (stu.gender || '') : '',
+                    role: role
+                });
+            }
+            dayGroups[d.key] = rows;
+        }
+    });
+
+    const renderDayCard = (d) => {
+        const rows = dayGroups[d.key] || [];
+        const rowsHtml = rows.map((r, idx) => `
+            <tr class="hover:bg-emerald-50/40 transition">
+                <td class="border border-slate-300 px-1 py-0.5 text-center font-bold text-slate-700 w-6">${idx + 1}</td>
+                <td class="border border-slate-300 px-1.5 py-0.5 text-left text-slate-800 duty-name" contenteditable="true">${r.name || ''}</td>
+                <td class="border border-slate-300 px-1 py-0.5 text-center text-slate-600 w-8 duty-gender" contenteditable="true">${r.gender || ''}</td>
+                <td class="border border-slate-300 px-1 py-0.5 text-center text-emerald-800 font-bold w-16 duty-role" contenteditable="true">${r.role || 'សមាជិក'}</td>
+            </tr>
+        `).join('');
+
+        return `
+            <div class="cleaning-day-card border border-emerald-300 rounded-xl overflow-hidden shadow-sm bg-white" data-day="${d.key}">
+                <div class="bg-gradient-to-r from-emerald-600 to-teal-700 text-white font-moul text-center py-1 text-[11px] flex justify-between px-3 items-center">
+                    <span>${d.name}</span>
+                    <span class="text-[9px] font-siemreap opacity-80 uppercase">${d.labelEn}</span>
+                </div>
+                <table class="w-full border-collapse border border-slate-300 text-[10px]">
+                    <thead>
+                        <tr class="bg-emerald-50 text-emerald-950 font-bold text-[9.5px]">
+                            <th class="border border-slate-300 p-0.5 w-6 text-center">ល.រ</th>
+                            <th class="border border-slate-300 p-0.5 text-center">ឈ្មោះសិស្ស</th>
+                            <th class="border border-slate-300 p-0.5 w-8 text-center">ភេទ</th>
+                            <th class="border border-slate-300 p-0.5 w-16 text-center">តួនាទី</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${rowsHtml}
+                    </tbody>
+                </table>
+            </div>
+        `;
+    };
+
+    container.innerHTML = `
+        <div class="a4-page bg-white shadow-xl rounded-lg mx-auto p-7 font-siemreap text-slate-800 relative max-w-[210mm] min-h-[297mm] text-[11px] leading-relaxed border-[3px] border-emerald-500/80" style="box-sizing: border-box;">
+            <!-- Inner decorative border -->
+            <div style="position: absolute; inset: 4px; border: 1.5px solid #059669; pointer-events: none; border-radius: 4px;"></div>
+            <div style="position: absolute; top: 8px; left: 10px; color: #059669; font-size: 16px;">❖</div>
+            <div style="position: absolute; top: 8px; right: 10px; color: #059669; font-size: 16px;">❖</div>
+            <div style="position: absolute; bottom: 8px; left: 10px; color: #059669; font-size: 16px;">❖</div>
+            <div style="position: absolute; bottom: 8px; right: 10px; color: #059669; font-size: 16px;">❖</div>
+
+            <!-- National Header -->
+            <div class="text-center mb-3">
+                <p class="font-moul text-xs text-emerald-950 tracking-wide">ព្រះរាជាណាចក្រកម្ពុជា</p>
+                <p class="font-moul text-xs text-emerald-950 tracking-wide mt-0.5">ជាតិ សាសនា ព្រះមហាក្សត្រ</p>
+                <div class="text-emerald-600 text-xs mt-0.5">*** ៚ ៚ ៚ ***</div>
+            </div>
+
+            <!-- School & Class Metadata -->
+            <div class="flex justify-between items-center mb-2 px-2 text-xs">
+                <div>
+                    <p class="font-bold text-slate-800">${schoolName}</p>
+                    <p class="text-slate-600 mt-0.5">ថ្នាក់ទី ៖ <b class="text-emerald-700">${gradeFull}</b></p>
+                </div>
+                <div class="text-right">
+                    <p class="text-slate-600">ឆ្នាំសិក្សា ៖ <b class="text-slate-800">${academicYear}</b></p>
+                    <p class="text-slate-500 text-[10px]">កាលបរិច្ឆេទ ៖ ${solarDateStr}</p>
+                </div>
+            </div>
+
+            <!-- Main Title -->
+            <div class="text-center mb-2">
+                <h2 class="font-moul text-base text-emerald-950 inline-block px-4 pb-1 border-b-2 border-emerald-600">តារាងវេនសម្អាតប្រចាំសប្ដាហ៍</h2>
+            </div>
+
+            <!-- Committee Leadership Header (ប្រធានថ្នាក់ និងអនុប្រធាន) -->
+            <div class="bg-gradient-to-r from-emerald-50 via-teal-50 to-emerald-50 border border-emerald-300 rounded-xl p-2.5 mb-3 text-xs shadow-sm flex flex-wrap justify-around items-center gap-2">
+                <div>ប្រធានថ្នាក់ (ត្រួតពិនិត្យរួម) ៖ <b id="cleaningMonitorName" class="text-emerald-900" contenteditable="true">${monitorName}</b></div>
+                <div class="text-slate-300">|</div>
+                <div>អនុប្រធានទី១ (អនាម័យ) ៖ <b id="cleaningDeputy1Name" class="text-teal-900" contenteditable="true">${deputy1Name}</b></div>
+                <div class="text-slate-300">|</div>
+                <div>អនុប្រធានទី២ (សម្ភារ) ៖ <b id="cleaningDeputy2Name" class="text-indigo-900" contenteditable="true">${deputy2Name}</b></div>
+            </div>
+
+            <!-- 6 Day Tables (2 Rows x 3 Columns) -->
+            <div class="grid grid-cols-3 gap-2.5 mb-3">
+                ${days.slice(0, 3).map(renderDayCard).join('')}
+            </div>
+            <div class="grid grid-cols-3 gap-2.5 mb-3">
+                ${days.slice(3, 6).map(renderDayCard).join('')}
+            </div>
+
+            <!-- Duty Scope Note -->
+            <div class="bg-slate-50 border border-slate-200 rounded-lg p-2 mb-3 text-[10.5px] text-slate-700 leading-normal">
+                <b>* ភារកិច្ចវេនសម្អាត ៖</b> បោស និងជូតបន្ទប់រៀន, ជូតក្ដារខៀន និងតុគ្រូ-សិស្ស, ចាក់សម្រាមក្នុងធុងធំ, បិទភ្លើង កង្ហារ និងទ្វារ បង្អួច ក្រោយពេលចប់ម៉ោងសិក្សាជារៀងរាល់ថ្ងៃ។
+            </div>
+
+            <!-- Signatures -->
+            <div class="flex justify-between items-start text-xs pt-2 px-8 font-siemreap">
+                <div class="text-center w-2/5">
+                    <p class="mb-1 text-slate-700">បានឃើញ និងឯកភាព</p>
+                    <p class="font-moul text-slate-900 mb-12">នាយក/នាយិកាសាលា</p>
+                    <p class="font-moul text-slate-900 text-xs">${principalName}</p>
+                </div>
+                <div class="text-center w-2/5">
+                    <p class="mb-1 text-slate-700">${lunarDateStr}</p>
+                    <p class="mb-1 text-slate-700 font-bold">${solarDateStr}</p>
+                    <p class="font-moul text-slate-900 mb-12">គ្រូបន្ទុកថ្នាក់</p>
+                    <p class="font-moul text-slate-900 text-xs">${teacherName}</p>
+                </div>
+            </div>
+        </div>
+    `;
+
+    if (typeof window.applyAcademicReportPaperSettings === 'function') {
+        window.applyAcademicReportPaperSettings();
+    }
+};
+
+// ==========================================================================
+// របាយការណ៍ទី ៥៖ គណៈកម្មការសាខា & ក្រុមប្រឹក្សាកុមារ (Branch Committee & Youth Council)
+// ==========================================================================
+window.renderBranchCommitteeReport = function(container, targetGrade, targetRoom) {
+    if (!container) return;
+
+    const activeClass = typeof window.getCurrentSelectedClass === 'function' ? window.getCurrentSelectedClass() : { level: "ថ្នាក់ទី ៤", room: "«ក»" };
+    const curLevel = targetGrade || activeClass.level;
+    const curRoom = targetRoom || activeClass.room;
+    const gradeFull = `${curLevel} ${curRoom}`.trim();
+
+    const ctx = (window.CMSPrintManager && typeof window.CMSPrintManager.getStandardContext === 'function')
+        ? window.CMSPrintManager.getStandardContext({ grade: gradeFull })
+        : {};
+
+    const schoolName = ctx.schoolName || localStorage.getItem('cms_school_name') || 'សាលាបឋមសិក្សា................................';
+    const academicYear = ctx.academicYear || localStorage.getItem('selected_academic_year') || '២០២៤-២០២៥';
+    const teacherName = ctx.teacherName || localStorage.getItem('teacher_name') || '................................';
+    const principalName = ctx.principalName || localStorage.getItem('school_principal') || '................................';
+    const solarDateStr = ctx.solarDate || (window.reportDateSettings ? window.reportDateSettings.solarDate : "ថ្ងៃទី....... ខែ....... ឆ្នាំ២០....");
+    const lunarDateStr = ctx.lunarDate || (window.reportDateSettings ? window.reportDateSettings.lunarDate : "ថ្ងៃ................. ខែ............. ឆ្នាំ......... ........ស័ក ព.ស.២៥....");
+
+    // សិស្សក្នុងថ្នាក់
+    const classStudents = (typeof window.getStudentsForClass === 'function')
+        ? window.getStudentsForClass(curLevel, curRoom)
+        : (window.allStudents || []);
+
+    // ពិនិត្យទិន្នន័យរក្សាទុក
+    const key = `cms_report_branch_committee_${curLevel}_${curRoom}`.replace(/\s+/g, '_');
+    let savedComm = null;
+    try {
+        const stored = localStorage.getItem(key);
+        if (stored) savedComm = JSON.parse(stored);
+    } catch(e) {}
+
+    const advisorName = savedComm?.advisor || teacherName;
+    const monitorName = savedComm?.monitor || (classStudents[0] ? (classStudents[0].name || classStudents[0].name_khmer) : '................................');
+    const deputy1Name = savedComm?.deputy1 || (classStudents[1] ? (classStudents[1].name || classStudents[1].name_khmer) : '................................');
+    const deputy2Name = savedComm?.deputy2 || (classStudents[2] ? (classStudents[2].name || classStudents[2].name_khmer) : '................................');
+    const member1Name = savedComm?.member1 || (classStudents[3] ? (classStudents[3].name || classStudents[3].name_khmer) : '................................');
+    const member2Name = savedComm?.member2 || (classStudents[4] ? (classStudents[4].name || classStudents[4].name_khmer) : '................................');
+    const member3Name = savedComm?.member3 || (classStudents[5] ? (classStudents[5].name || classStudents[5].name_khmer) : '................................');
+    const member4Name = savedComm?.member4 || (classStudents[6] ? (classStudents[6].name || classStudents[6].name_khmer) : '................................');
+
+    // ៦ អនុសាខា (Sub-branches)
+    const defaultGroups = [
+        { name: "អនុសាខាទី ១", duty: "ទទួលបន្ទុកផ្នែកសិក្សា និងជំនួយការរៀនសូត្រ" },
+        { name: "អនុសាខាទី ២", duty: "ទទួលបន្ទុកផ្នែកវិន័យ សីលធម៌ និងវត្តមាន" },
+        { name: "អនុសាខាទី ៣", duty: "ទទួលបន្ទុកផ្នែកអនាម័យ សុខភាព និងបរិស្ថាន" },
+        { name: "អនុសាខាទី ៤", duty: "ទទួលបន្ទុកផ្នែកកីឡា កាយវប្បកម្ម និងសកម្មភាពក្រៅថ្នាក់" },
+        { name: "អនុសាខាទី ៥", duty: "ទទួលបន្ទុកផ្នែកសិល្បៈ ចម្រៀង និងគំនូរ" },
+        { name: "អនុសាខាទី ៦", duty: "ទទួលបន្ទុកផ្នែកព័ត៌មាន បណ្ណាល័យ និងសៀវភៅ" }
+    ];
+
+    const groupRowsHtml = defaultGroups.map((g, gIdx) => {
+        const savedG = savedComm?.groups?.[gIdx];
+        const gLeader = savedG?.leader || (classStudents[7 + gIdx * 3] ? (classStudents[7 + gIdx * 3].name || classStudents[7 + gIdx * 3].name_khmer) : '');
+        const gDeputy = savedG?.deputy || (classStudents[8 + gIdx * 3] ? (classStudents[8 + gIdx * 3].name || classStudents[8 + gIdx * 3].name_khmer) : '');
+        const gMembers = savedG?.members || (classStudents[9 + gIdx * 3] ? `${classStudents[9 + gIdx * 3].name || classStudents[9 + gIdx * 3].name_khmer}, ...` : '');
+        const gDuty = savedG?.duty || g.duty;
+
+        return `
+            <tr class="branch-group-row hover:bg-purple-50/40 transition">
+                <td class="border border-slate-300 px-2 py-1 text-center font-bold text-purple-900 bg-purple-50/50 group-title">${g.name}</td>
+                <td class="border border-slate-300 px-2 py-1 text-left text-slate-800 font-bold group-leader" contenteditable="true">${gLeader}</td>
+                <td class="border border-slate-300 px-2 py-1 text-left text-slate-700 group-deputy" contenteditable="true">${gDeputy}</td>
+                <td class="border border-slate-300 px-2 py-1 text-left text-slate-600 group-members" contenteditable="true">${gMembers}</td>
+                <td class="border border-slate-300 px-2 py-1 text-left text-slate-500 text-[9.5px] group-duty" contenteditable="true">${gDuty}</td>
+            </tr>
+        `;
+    }).join('');
+
+    container.innerHTML = `
+        <div class="a4-page bg-white shadow-xl rounded-lg mx-auto p-7 font-siemreap text-slate-800 relative max-w-[210mm] min-h-[297mm] text-[11px] leading-relaxed border-[3px] border-purple-500/80" style="box-sizing: border-box;">
+            <!-- Inner decorative border -->
+            <div style="position: absolute; inset: 4px; border: 1.5px solid #9333ea; pointer-events: none; border-radius: 4px;"></div>
+            <div style="position: absolute; top: 8px; left: 10px; color: #9333ea; font-size: 16px;">❖</div>
+            <div style="position: absolute; top: 8px; right: 10px; color: #9333ea; font-size: 16px;">❖</div>
+            <div style="position: absolute; bottom: 8px; left: 10px; color: #9333ea; font-size: 16px;">❖</div>
+            <div style="position: absolute; bottom: 8px; right: 10px; color: #9333ea; font-size: 16px;">❖</div>
+
+            <!-- National Header -->
+            <div class="text-center mb-3">
+                <p class="font-moul text-xs text-purple-950 tracking-wide">ព្រះរាជាណាចក្រកម្ពុជា</p>
+                <p class="font-moul text-xs text-purple-950 tracking-wide mt-0.5">ជាតិ សាសនា ព្រះមហាក្សត្រ</p>
+                <div class="text-purple-600 text-xs mt-0.5">*** ៚ ៚ ៚ ***</div>
+            </div>
+
+            <!-- School & Class Metadata -->
+            <div class="flex justify-between items-center mb-2 px-2 text-xs">
+                <div>
+                    <p class="font-bold text-slate-800">${schoolName}</p>
+                    <p class="text-slate-600 mt-0.5">ថ្នាក់ទី ៖ <b class="text-purple-700">${gradeFull}</b></p>
+                </div>
+                <div class="text-right">
+                    <p class="text-slate-600">ឆ្នាំសិក្សា ៖ <b class="text-slate-800">${academicYear}</b></p>
+                    <p class="text-slate-500 text-[10px]">កាលបរិច្ឆេទ ៖ ${solarDateStr}</p>
+                </div>
+            </div>
+
+            <!-- Main Title -->
+            <div class="text-center mb-3">
+                <h2 class="font-moul text-sm sm:text-base text-purple-950 inline-block px-4 pb-1 border-b-2 border-purple-600">រចនាសម្ព័ន្ធគណៈកម្មការសាខា និងក្រុមប្រឹក្សាកុមារប្រចាំថ្នាក់</h2>
+            </div>
+
+            <!-- Hierarchy Tree Layout (ដូចគំរូរូបភាពជាក់ស្តែង) -->
+            <div class="mb-4">
+                <!-- Level 1: Advisor & Class Monitor -->
+                <div class="flex justify-center gap-6 mb-2 relative">
+                    <div class="w-48 p-2 rounded-xl border-2 border-indigo-500 bg-indigo-50 text-center shadow-sm">
+                        <p class="text-[10px] text-indigo-700 font-bold uppercase">ទីប្រឹក្សាថ្នាក់រៀន</p>
+                        <p id="branchAdvisorName" class="font-moul text-xs text-indigo-950 mt-0.5" contenteditable="true">${advisorName}</p>
+                    </div>
+                    <div class="w-48 p-2 rounded-xl border-2 border-purple-600 bg-purple-50 text-center shadow-sm">
+                        <p class="text-[10px] text-purple-700 font-bold uppercase">ប្រធានថ្នាក់រួម</p>
+                        <p id="branchMonitorName" class="font-moul text-xs text-purple-950 mt-0.5" contenteditable="true">${monitorName}</p>
+                    </div>
+                </div>
+
+                <!-- Connector Line -->
+                <div class="w-24 h-3 border-l-2 border-r-2 border-purple-300 mx-auto"></div>
+
+                <!-- Level 2: 2 Deputies -->
+                <div class="flex justify-center gap-6 mb-2">
+                    <div class="w-52 p-2 rounded-xl border border-teal-500 bg-teal-50 text-center shadow-sm">
+                        <p class="text-[10px] text-teal-700 font-bold">អនុប្រធានទី ១ (សិក្សា-វិន័យ)</p>
+                        <p id="branchDeputy1Name" class="font-bold text-xs text-teal-950 mt-0.5" contenteditable="true">${deputy1Name}</p>
+                    </div>
+                    <div class="w-52 p-2 rounded-xl border border-emerald-500 bg-emerald-50 text-center shadow-sm">
+                        <p class="text-[10px] text-emerald-700 font-bold">អនុប្រធានទី ២ (អនាម័យ-កីឡា)</p>
+                        <p id="branchDeputy2Name" class="font-bold text-xs text-emerald-950 mt-0.5" contenteditable="true">${deputy2Name}</p>
+                    </div>
+                </div>
+
+                <!-- Connector Line -->
+                <div class="w-80 h-2 border-t-2 border-purple-300 mx-auto"></div>
+
+                <!-- Level 3: 4 Department Officers -->
+                <div class="grid grid-cols-4 gap-2 mb-3 mt-1">
+                    <div class="p-1.5 rounded-lg border border-slate-300 bg-slate-50 text-center shadow-xs">
+                        <p class="text-[9px] text-slate-500 font-bold">សមាជិកទី ១ (សិក្សា)</p>
+                        <p id="branchMember1Name" class="font-bold text-[10.5px] text-slate-800" contenteditable="true">${member1Name}</p>
+                    </div>
+                    <div class="p-1.5 rounded-lg border border-slate-300 bg-slate-50 text-center shadow-xs">
+                        <p class="text-[9px] text-slate-500 font-bold">សមាជិកទី ២ (វិន័យ-វត្តមាន)</p>
+                        <p id="branchMember2Name" class="font-bold text-[10.5px] text-slate-800" contenteditable="true">${member2Name}</p>
+                    </div>
+                    <div class="p-1.5 rounded-lg border border-slate-300 bg-slate-50 text-center shadow-xs">
+                        <p class="text-[9px] text-slate-500 font-bold">សមាជិកទី ៣ (អនាម័យ)</p>
+                        <p id="branchMember3Name" class="font-bold text-[10.5px] text-slate-800" contenteditable="true">${member3Name}</p>
+                    </div>
+                    <div class="p-1.5 rounded-lg border border-slate-300 bg-slate-50 text-center shadow-xs">
+                        <p class="text-[9px] text-slate-500 font-bold">សមាជិកទី ៤ (ព័ត៌មាន-សិល្បៈ)</p>
+                        <p id="branchMember4Name" class="font-bold text-[10.5px] text-slate-800" contenteditable="true">${member4Name}</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Level 4: 6 Sub-Branch Groups Table (អនុសាខាទាំង ៦) -->
+            <div class="mb-3">
+                <div class="bg-purple-100/80 px-3 py-1 rounded-t-lg font-moul text-xs text-purple-950 flex justify-between items-center border border-slate-300 border-b-0">
+                    <span>តារាងបែងចែកសិស្សតាមអនុសាខាទាំង ៦</span>
+                    <span class="font-siemreap text-[10px] text-purple-800 font-bold">កុមារ និងយុវជន</span>
+                </div>
+                <table class="w-full border-collapse border border-slate-300 text-[10px]">
+                    <thead>
+                        <tr class="bg-slate-100 text-slate-900 font-bold text-[9.5px]">
+                            <th class="border border-slate-300 p-1 w-24 text-center">អនុសាខា</th>
+                            <th class="border border-slate-300 p-1 w-32 text-center">ប្រធានសាខា</th>
+                            <th class="border border-slate-300 p-1 w-28 text-center">អនុប្រធាន</th>
+                            <th class="border border-slate-300 p-1 text-center">សមាជិកក្នុងក្រុម</th>
+                            <th class="border border-slate-300 p-1 w-44 text-center">ភារកិច្ចទទួលខុសត្រូវ</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${groupRowsHtml}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Signatures -->
+            <div class="flex justify-between items-start text-xs pt-3 px-8 font-siemreap">
+                <div class="text-center w-2/5">
+                    <p class="mb-1 text-slate-700">បានឃើញ និងឯកភាព</p>
+                    <p class="font-moul text-slate-900 mb-12">នាយក/នាយិកាសាលា</p>
+                    <p class="font-moul text-slate-900 text-xs">${principalName}</p>
+                </div>
+                <div class="text-center w-2/5">
+                    <p class="mb-1 text-slate-700">${lunarDateStr}</p>
+                    <p class="mb-1 text-slate-700 font-bold">${solarDateStr}</p>
+                    <p class="font-moul text-slate-900 mb-12">គ្រូបន្ទុកថ្នាក់</p>
                     <p class="font-moul text-slate-900 text-xs">${teacherName}</p>
                 </div>
             </div>

@@ -648,4 +648,79 @@ describe('MoEYS Sikha-karik Booklet & Centralized Reports Suite', () => {
         assert.ok(html.includes('ខ្ទង់និទ្ទេសៈ'), 'Must contain mention instruction');
         assert.ok(html.includes('ខ្ទង់ចំណុចដែលត្រូវពង្រឹងបន្ថែមៈ'), 'Must contain reinforcement instruction');
     });
+
+    test('16. Five New Classroom Administration Reports (Inventory, Internal Rules, Class Principles, Cleaning Schedule, Branch Committee)', () => {
+        const dummyContainer = { innerHTML: '' };
+
+        // Test 1: បញ្ជីសារពើភ័ណ្ឌ (Inventory List)
+        assert.strictEqual(typeof context.window.renderClassInventoryReport, 'function', 'renderClassInventoryReport must be globally exported');
+        context.window.renderClassInventoryReport(dummyContainer, 'ថ្នាក់ទី ៤', '«ក»');
+        const invHtml = dummyContainer.innerHTML;
+        assert.ok(invHtml.includes('បញ្ជីសារពើភ័ណ្ឌសម្ភារក្នុងថ្នាក់រៀន'), 'Inventory must contain title');
+        assert.ok(invHtml.includes('តុគ្រូ'), 'Inventory must contain តុគ្រូ');
+        assert.ok(invHtml.includes('តុសិស្ស'), 'Inventory must contain តុសិស្ស');
+        assert.ok(invHtml.includes('ក្ដារខៀន'), 'Inventory must contain ក្ដារខៀន');
+        assert.ok(invHtml.includes('នាឡិកាជញ្ជាំង'), 'Inventory must contain នាឡិកាជញ្ជាំង');
+        assert.ok(invHtml.includes('គោលការណ៍ថ្នាក់រៀន'), 'Inventory must contain គោលការណ៍ថ្នាក់រៀន');
+        assert.ok(invHtml.includes('សរុបរួមទាំងពីរផ្នែក'), 'Inventory must contain grand total row');
+        assert.ok(invHtml.includes('នាយក/នាយិកាសាលា') && invHtml.includes('គ្រូបន្ទុកថ្នាក់'), 'Inventory must have signature block');
+
+        // Test 2: បទបញ្ជាផ្ទៃក្នុង (Internal Rules - 12 Articles)
+        assert.strictEqual(typeof context.window.renderInternalRulesReport, 'function', 'renderInternalRulesReport must be globally exported');
+        context.window.renderInternalRulesReport(dummyContainer, 'ថ្នាក់ទី ៤', '«ក»');
+        const rulesHtml = dummyContainer.innerHTML;
+        assert.ok(rulesHtml.includes('បទបញ្ជាផ្ទៃក្នុងក្នុងថ្នាក់រៀន'), 'Internal rules must contain title');
+        assert.ok(rulesHtml.includes('ដើម្បីលើកកម្ពស់វិន័យ សីលធម៌'), 'Internal rules must contain preamble');
+        for (let i = 1; i <= 12; i++) {
+            const khmerNums = ['០', '១', '២', '៣', '៤', '៥', '៦', '៧', '៨', '៩', '១០', '១១', '១២'];
+            assert.ok(rulesHtml.includes(`ប្រការ ${khmerNums[i]}`), `Internal rules must contain Article ${i}`);
+        }
+        assert.ok(rulesHtml.includes('បទបញ្ជាផ្ទៃក្នុងនេះ មានសុពលភាពអនុវត្ត'), 'Internal rules must have closing clause');
+        assert.ok(rulesHtml.includes('នាយក/នាយិកាសាលា') && rulesHtml.includes('គ្រូបន្ទុកថ្នាក់'), 'Internal rules must have signatures');
+
+        // Test 3: គោលការណ៍ថ្នាក់រៀន (Class Principles - 16 Rules)
+        assert.strictEqual(typeof context.window.renderClassPrinciplesReport, 'function', 'renderClassPrinciplesReport must be globally exported');
+        context.window.renderClassPrinciplesReport(dummyContainer, 'ថ្នាក់ទី ៤', '«ក»');
+        const princHtml = dummyContainer.innerHTML;
+        assert.ok(princHtml.includes('គោលការណ៍ថ្នាក់រៀន'), 'Principles must contain title');
+        assert.ok(princHtml.includes('វិន័យនាំមកនូវសេចក្តីថ្លៃថ្នូរ'), 'Principles must contain motto banner');
+        assert.ok(princHtml.includes('មកឱ្យទាន់ពេលវេលា'), 'Principles must contain principle 1');
+        assert.ok(princHtml.includes('ស្លៀកពាក់ស្អាតបាត និងសមរម្យ'), 'Principles must contain principle 2');
+        assert.ok(princHtml.includes('សុំច្បាប់ពេលឈប់សម្រាក'), 'Principles must contain principle 16');
+        assert.ok(princHtml.includes('តំណាងសិស្ស / ប្រធានថ្នាក់'), 'Principles must have monitor signature');
+
+        // Test 4: វេនសម្អាតប្រចាំសប្ដាហ៍ (Cleaning Schedule)
+        assert.strictEqual(typeof context.window.renderCleaningScheduleReport, 'function', 'renderCleaningScheduleReport must be globally exported');
+        context.window.renderCleaningScheduleReport(dummyContainer, 'ថ្នាក់ទី ៤', '«ក»');
+        const cleanHtml = dummyContainer.innerHTML;
+        assert.ok(cleanHtml.includes('តារាងវេនសម្អាតប្រចាំសប្ដាហ៍'), 'Cleaning schedule must contain title');
+        assert.ok(cleanHtml.includes('ប្រធានថ្នាក់ (ត្រួតពិនិត្យរួម)'), 'Cleaning schedule must contain monitor banner');
+        assert.ok(cleanHtml.includes('ថ្ងៃចន្ទ') && cleanHtml.includes('ថ្ងៃសៅរ៍'), 'Cleaning schedule must include days Mon-Sat');
+        assert.ok(cleanHtml.includes('ភារកិច្ចវេនសម្អាត'), 'Cleaning schedule must contain duty scope note');
+
+        // Test 5: គណៈកម្មការសាខា & ក្រុមប្រឹក្សាកុមារ (Branch Committee)
+        assert.strictEqual(typeof context.window.renderBranchCommitteeReport, 'function', 'renderBranchCommitteeReport must be globally exported');
+        context.window.renderBranchCommitteeReport(dummyContainer, 'ថ្នាក់ទី ៤', '«ក»');
+        const branchHtml = dummyContainer.innerHTML;
+        assert.ok(branchHtml.includes('រចនាសម្ព័ន្ធគណៈកម្មការសាខា'), 'Branch committee must contain title');
+        assert.ok(branchHtml.includes('ទីប្រឹក្សាថ្នាក់រៀន') && branchHtml.includes('ប្រធានថ្នាក់រួម'), 'Branch committee must have Level 1 tree');
+        assert.ok(branchHtml.includes('អនុប្រធានទី ១') && branchHtml.includes('អនុប្រធានទី ២'), 'Branch committee must have Level 2 tree');
+        assert.ok(branchHtml.includes('សមាជិកទី ១') && branchHtml.includes('សមាជិកទី ៤'), 'Branch committee must have Level 3 tree');
+        assert.ok(branchHtml.includes('តារាងបែងចែកសិស្សតាមអនុសាខាទាំង ៦'), 'Branch committee must have Sub-branches table');
+        assert.ok(branchHtml.includes('អនុសាខាទី ១') && branchHtml.includes('អនុសាខាទី ៦'), 'Sub-branches 1 to 6 must be listed');
+
+        // Test 6: Verify Reports List Dashboard includes all 5 new cards
+        const dashContainer = { innerHTML: '' };
+        context.document.getElementById = (id) => {
+            if (id === 'reportsContainer') return dashContainer;
+            return null;
+        };
+        context.window.loadReportsView();
+        const dashHtml = dashContainer.innerHTML;
+        assert.ok(dashHtml.includes("openReportDetail('inventory')"), 'Dashboard must have inventory card');
+        assert.ok(dashHtml.includes("openReportDetail('internal_rules')"), 'Dashboard must have internal_rules card');
+        assert.ok(dashHtml.includes("openReportDetail('class_principles')"), 'Dashboard must have class_principles card');
+        assert.ok(dashHtml.includes("openReportDetail('cleaning_schedule')"), 'Dashboard must have cleaning_schedule card');
+        assert.ok(dashHtml.includes("openReportDetail('branch_committee')"), 'Dashboard must have branch_committee card');
+    });
 });
