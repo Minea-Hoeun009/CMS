@@ -579,4 +579,73 @@ describe('MoEYS Sikha-karik Booklet & Centralized Reports Suite', () => {
         assert.ok(html.includes('មធ្យមភាគប្រចាំឆមាស'), 'Should display semester average row');
         assert.ok(html.includes('លទ្ធផលដំណាច់ឆ្នាំ'), 'Should display annual result row');
     });
+
+    test('15. Upgraded Tracking Book matches user model: modern cover, 9 rules, demographics, 16 subjects, and instructions', () => {
+        context.window.allStudents = [
+            {
+                id: 'STU-001',
+                student_id: 'STU-001',
+                name: 'សុខ ចាន់ដារ៉ា',
+                gender: 'ប្រុស',
+                dob: '១៥/០៥/២០១៤',
+                pob: 'ភ្នំពេញ',
+                father_name: 'សុខ គឹមហុង',
+                father_job: 'គ្រូបង្រៀន',
+                mother_name: 'អ៊ុំ ស្រីមុំ',
+                mother_job: 'មេផ្ទះ',
+                grade: 'ថ្នាក់ទី ៤',
+                room: '«ក»'
+            }
+        ];
+
+        context.window.openTrackingBookModal();
+        const studentSelect = context.document.getElementById('tbStudentSelect');
+        studentSelect.value = 'STU-001';
+
+        const periodSelect = context.document.getElementById('tbPeriodSelect');
+        periodSelect.value = 'ខែ មករា';
+
+        const pageSelect = context.document.getElementById('tbPageSelect');
+        pageSelect.value = 'all';
+
+        context.window.renderTrackingBookPreview();
+        const html = context.document.getElementById('tbPreviewContainer').innerHTML;
+
+        // 1. Modern Front Cover Elements
+        assert.ok(html.includes('សៀវភៅតាមដានការសិក្សា'), 'Cover must contain booklet title');
+        assert.ok(html.includes('រូបថត') && html.includes('៤ × ៦'), 'Cover must contain modern photo frame');
+        assert.ok(html.includes('សុខ ចាន់ដារ៉ា'), 'Cover must contain student name');
+        assert.ok(html.includes('ថ្នាក់ទី ៤ «ក»'), 'Cover must contain grade and room');
+        assert.ok(html.includes('ទូរសព្ទសាលា'), 'Cover must contain school phone');
+
+        // 2. 9 Internal Rules
+        assert.ok(html.includes('ចំណុចសំខាន់ៗនៃបទបញ្ជាផ្ទៃក្នុង'), 'Must contain internal rules header');
+        assert.ok(html.includes('សិស្សត្រូវអនុវត្តតាមអង្គការវិន័យ'), 'Must contain rule 1');
+        assert.ok(html.includes('សិស្សត្រូវស្អាតជានិច្ច'), 'Must contain rule 2');
+        assert.ok(html.includes('ហាមផ្ដាច់មិនឱ្យកោសលប់ ឬសរសេរបន្ថែម'), 'Must contain rule 9');
+        assert.ok(html.includes('មតិមាតាបិតាសិស្ស'), 'Must contain parent feedback area');
+
+        // 3. 16 Official Subjects in Table
+        const expectedSubjects = [
+            'រៀនអាន', 'តែងសេចក្ដី', 'សរសេរតាមអាន', 'មេសូត្រ', 'អក្សរផ្ចង់',
+            'គណិតវិទ្យា', 'វិទ្យាសាស្ត្រអនុវត្ត', 'ប្រវត្តិវិទ្យា', 'ភូមិវិទ្យា',
+            'សិលធម៌-ពលរដ្ឋវិទ្យា', 'គំនូរ', 'អង់គ្លេស-បារាំង', 'ហត្ថកម្ម',
+            'អប់រំកាយ-កីឡា', 'សីលធម៌រស់នៅ', 'សុខភាព-អនាម័យ'
+        ];
+        expectedSubjects.forEach(sub => {
+            assert.ok(html.includes(sub), `Table must include subject: ${sub}`);
+        });
+
+        // 4. Mention Thresholds and Columns
+        assert.ok(html.includes('ល្អ'), 'Table must contain Good mention');
+        assert.ok(html.includes('ល្អបង្គួរ'), 'Table must contain Very Good mention');
+        assert.ok(html.includes('មធ្យម'), 'Table must contain Medium mention');
+        assert.ok(html.includes('ខ្សោយ'), 'Table must contain Weak mention');
+        assert.ok(html.includes('ចំណុចដែលត្រូវជួយ'), 'Table must contain reinforcement points');
+
+        // 5. Official Instructions
+        assert.ok(html.includes('សេចក្ដីណែនាំ'), 'Must contain official instructions');
+        assert.ok(html.includes('ខ្ទង់និទ្ទេសៈ'), 'Must contain mention instruction');
+        assert.ok(html.includes('ខ្ទង់ចំណុចដែលត្រូវពង្រឹងបន្ថែមៈ'), 'Must contain reinforcement instruction');
+    });
 });
