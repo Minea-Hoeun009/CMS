@@ -252,6 +252,24 @@ h6,
     page-break-inside: avoid !important;
     break-inside: avoid !important;
   }
+
+  /* A4 Structured Document Frame (Border & Full-Sheet Layout) */
+  .a4-page {
+    box-sizing: border-box !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-height: 280mm !important;
+    height: 280mm !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: space-between !important;
+    position: relative !important;
+    padding: 6mm 8mm !important;
+    margin: 0 auto !important;
+    page-break-inside: avoid !important;
+    page-break-after: avoid !important;
+    background: white !important;
+  }
 }
 
 /* បន្ថែមនៅខាងក្រោមគេនៃ style.css របស់អ្នក */

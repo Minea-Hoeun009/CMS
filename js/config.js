@@ -912,19 +912,26 @@ window.CMSPrintManager = {
             clone.style.minHeight = "auto";
         }
         if (clone.firstElementChild) {
+            const isA4Page = clone.firstElementChild.classList && clone.firstElementChild.classList.contains('a4-page');
             if (clone.firstElementChild.style) {
                 clone.firstElementChild.style.boxShadow = "none";
-                clone.firstElementChild.style.border = "none";
-                clone.firstElementChild.style.borderRadius = "0";
-                clone.firstElementChild.style.padding = "0";
-                clone.firstElementChild.style.minHeight = "auto";
+                if (!isA4Page) {
+                    clone.firstElementChild.style.border = "none";
+                    clone.firstElementChild.style.borderRadius = "0";
+                    clone.firstElementChild.style.padding = "0";
+                    clone.firstElementChild.style.minHeight = "auto";
+                }
             }
             if (clone.firstElementChild.classList) {
-                clone.firstElementChild.classList.remove(
-                    "p-4", "sm:p-6", "p-6", "md:p-10", "p-8", "md:p-12",
-                    "rounded-xl", "rounded-2xl", "border", "border-slate-200",
-                    "border-slate-300", "shadow-sm", "shadow-md", "shadow-xl", "shadow-2xl"
-                );
+                if (!isA4Page) {
+                    clone.firstElementChild.classList.remove(
+                        "p-4", "sm:p-6", "p-6", "md:p-10", "p-8", "md:p-12",
+                        "rounded-xl", "rounded-2xl", "border", "border-slate-200",
+                        "border-slate-300", "shadow-sm", "shadow-md", "shadow-xl", "shadow-2xl"
+                    );
+                } else {
+                    clone.firstElementChild.classList.remove("shadow-sm", "shadow-md", "shadow-xl", "shadow-2xl");
+                }
             }
         }
 
@@ -983,6 +990,24 @@ window.CMSPrintManager = {
                     thead { display: table-header-group !important; }
                     tfoot { display: table-footer-group !important; }
                     
+                    /* A4 Page Structured Layout - Full Sheet Coverage without Mid-Break */
+                    .a4-page {
+                        box-sizing: border-box !important;
+                        width: 100% !important;
+                        max-width: 100% !important;
+                        min-height: ${orientation === 'landscape' ? '195mm' : '280mm'} !important;
+                        height: ${orientation === 'landscape' ? '195mm' : '280mm'} !important;
+                        display: flex !important;
+                        flex-direction: column !important;
+                        justify-content: space-between !important;
+                        position: relative !important;
+                        padding: 6mm 8mm !important;
+                        margin: 0 auto !important;
+                        page-break-inside: avoid !important;
+                        page-break-after: avoid !important;
+                        background: white !important;
+                    }
+
                     /* Scale / Zoom Support */
                     .cms-print-container {
                         width: 100%;

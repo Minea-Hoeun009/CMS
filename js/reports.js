@@ -1518,7 +1518,6 @@ window.updateStudentListContent = function() {
                     <div class="text-center w-2/5">
                         <p class="mb-1 text-slate-700">បានឃើញ និងឯកភាព</p>
                         <p class="font-moul text-slate-900 mb-16">នាយិកាសាលា</p>
-                        ${principalName ? `<p class="font-moul text-slate-900 text-sm">${principalName}</p>` : ""}
                     </div>
                     <div class="text-center w-2/5">
                         <p class="mb-1 text-slate-700">${lunarDateStr || 'ថ្ងៃ....................ខែ..................ឆ្នាំ...............ព.ស.២៥៧០'}</p>
@@ -2272,7 +2271,6 @@ window.renderAttendanceContent = function() {
                     <div class="text-center w-2/5">
                         <p class="mb-1 text-slate-700">បានឃើញ និងឯកភាព</p>
                         <p class="font-moul text-slate-900 mb-16">នាយិកាសាលា</p>
-                        <p class="font-moul text-slate-900 text-sm">${principalName}</p>
                     </div>
                     <div class="text-center w-2/5">
                         <p class="mb-1 text-slate-700">${lunarDateStr || 'ថ្ងៃ....................ខែ..................ឆ្នាំ...............ព.ស.២៥៧០'}</p>
@@ -4115,11 +4113,11 @@ window.renderAcademicResultsReport = function(container, targetGrade, targetRoom
             <div id="reportKoKhoPrintArea" class="bg-white p-6 md:p-8 w-full shadow-2xl rounded-2xl border border-slate-200 text-slate-800" style="max-width: 210mm; min-height: 297mm; font-family: 'Khmer OS Siemreap', 'Siemreap', sans-serif;">
                 
                 <div class="flex justify-between items-start mb-4 text-xs">
-                    <div class="text-left leading-relaxed pt-3">
+                    <div class="text-left leading-relaxed pt-3.5 sm:pt-4">
                         <p class="font-moul text-slate-900 text-[11.5px] mb-0.5">ការិយាល័យ អប់រំ យុវជន និងកីឡានៃរដ្ឋបាលស្រុក ${districtName}</p>
                         <p class="font-moul text-slate-900 text-[11.5px]">${schoolName}</p>
                     </div>
-                    <div class="text-center">
+                    <div class="text-center pt-0 -mt-1">
                         <p class="font-moul text-slate-900 text-[12px] mb-0.5">ព្រះរាជាណាចក្រកម្ពុជា</p>
                         <p class="font-moul text-slate-900 text-[12px]">ជាតិ សាសនា ព្រះមហាក្សត្រ</p>
                         <div class="flex items-center justify-center mt-1 mx-auto">
@@ -4191,7 +4189,6 @@ window.renderAcademicResultsReport = function(container, targetGrade, targetRoom
                     <div class="text-center w-2/5">
                         <p class="mb-1 text-slate-700">បានឃើញ និងឯកភាព</p>
                         <p class="font-moul text-slate-900 mb-14">នាយិកាសាលា</p>
-                        <p class="font-moul text-slate-900 text-xs">${principalName}</p>
                     </div>
                     <div class="text-center w-2/5">
                         <p class="mb-1 text-slate-700">${lunarDateStr}</p>
@@ -4388,11 +4385,11 @@ window.renderAcademicResultsReport = function(container, targetGrade, targetRoom
             <div id="reportKoKhoPrintArea" class="bg-white p-6 md:p-8 w-full shadow-2xl rounded-2xl border border-slate-200 text-slate-800" style="max-width: 210mm; min-height: 297mm; font-family: 'Khmer OS Siemreap', 'Siemreap', sans-serif;">
                 
                 <div class="flex justify-between items-start mb-4 text-xs">
-                    <div class="text-left leading-relaxed pt-3">
+                    <div class="text-left leading-relaxed pt-3.5 sm:pt-4">
                         <p class="font-moul text-slate-900 text-[11.5px] mb-0.5">ការិយាល័យ អប់រំ យុវជន និងកីឡានៃរដ្ឋបាលស្រុក ${districtName}</p>
                         <p class="font-moul text-slate-900 text-[11.5px]">${schoolName}</p>
                     </div>
-                    <div class="text-center">
+                    <div class="text-center pt-0 -mt-1">
                         <p class="font-moul text-slate-900 text-[12px] mb-0.5">ព្រះរាជាណាចក្រកម្ពុជា</p>
                         <p class="font-moul text-slate-900 text-[12px]">ជាតិ សាសនា ព្រះមហាក្សត្រ</p>
                         <div class="flex items-center justify-center mt-1 mx-auto">
@@ -4451,7 +4448,6 @@ window.renderAcademicResultsReport = function(container, targetGrade, targetRoom
                     <div class="text-center w-2/5">
                         <p class="mb-1 text-slate-700">បានឃើញ និងឯកភាព</p>
                         <p class="font-moul text-slate-900 mb-14">នាយិកាសាលា</p>
-                        <p class="font-moul text-slate-900 text-xs">${principalName}</p>
                     </div>
                     <div class="text-center w-2/5">
                         <p class="mb-1 text-slate-700">${lunarDateStr}</p>
@@ -4654,11 +4650,11 @@ window.renderAcademicResultsReport = function(container, targetGrade, targetRoom
         <div id="reportKoKhoPrintArea" class="bg-white p-6 md:p-8 w-full shadow-2xl rounded-2xl border border-slate-200 text-slate-800" style="max-width: 210mm; min-height: 297mm; font-family: 'Khmer OS Siemreap', 'Siemreap', sans-serif;">
             
             <div class="flex justify-between items-start mb-4 text-xs">
-                <div class="text-left leading-relaxed pt-3">
+                <div class="text-left leading-relaxed pt-3.5 sm:pt-4">
                     <p class="font-moul text-slate-900 text-[11.5px] mb-0.5">ការិយាល័យ អប់រំ យុវជន និងកីឡានៃរដ្ឋបាលស្រុក ${districtName}</p>
                     <p class="font-moul text-slate-900 text-[11.5px]">${schoolName}</p>
                 </div>
-                <div class="text-center">
+                <div class="text-center pt-0 -mt-1">
                     <p class="font-moul text-slate-900 text-[12px] mb-0.5">ព្រះរាជាណាចក្រកម្ពុជា</p>
                     <p class="font-moul text-slate-900 text-[12px]">ជាតិ សាសនា ព្រះមហាក្សត្រ</p>
                     <div class="flex items-center justify-center mt-1 mx-auto">
@@ -4714,7 +4710,6 @@ window.renderAcademicResultsReport = function(container, targetGrade, targetRoom
                 <div class="text-center w-2/5">
                     <p class="mb-1 text-slate-700">បានឃើញ និងឯកភាព</p>
                     <p class="font-moul text-slate-900 mb-14">នាយិកាសាលា</p>
-                    <p class="font-moul text-slate-900 text-xs">${principalName}</p>
                 </div>
                 <div class="text-center w-2/5">
                     <p class="mb-1 text-slate-700">${lunarDateStr}</p>
@@ -4921,7 +4916,7 @@ window.renderClassInventoryReport = function(container, targetGrade, targetRoom)
     `).join('');
 
     container.innerHTML = `
-        <div class="a4-page bg-white shadow-xl rounded-lg mx-auto p-7 font-siemreap text-slate-800 relative max-w-[210mm] min-h-[297mm] text-[11px] leading-relaxed border-[3px] border-amber-500/80" style="box-sizing: border-box;">
+        <div class="a4-page bg-white shadow-xl rounded-lg mx-auto p-6 md:p-8 font-siemreap text-slate-800 relative w-full max-w-[210mm] min-h-[297mm] h-[297mm] text-[11px] leading-relaxed border-[3px] border-amber-500/80 flex flex-col justify-between" style="box-sizing: border-box;">
             <!-- Inner decorative border -->
             <div style="position: absolute; inset: 4px; border: 1.5px solid #d97706; pointer-events: none; border-radius: 4px;"></div>
             <div style="position: absolute; top: 8px; left: 10px; color: #d97706; font-size: 16px;">❖</div>
@@ -4929,18 +4924,21 @@ window.renderClassInventoryReport = function(container, targetGrade, targetRoom)
             <div style="position: absolute; bottom: 8px; left: 10px; color: #d97706; font-size: 16px;">❖</div>
             <div style="position: absolute; bottom: 8px; right: 10px; color: #d97706; font-size: 16px;">❖</div>
 
-            <!-- Official Dual-Side Header matching User Model (Images 1 & 2) -->
-            <div class="flex justify-between items-start mb-4 text-xs">
-                <div class="text-left leading-relaxed pt-1">
-                    <p class="font-moul text-slate-900 text-[11px] mb-0.5">ការិយាល័យ អប់រំ យុវជននិងកីឡានៃរដ្ឋបាលស្រុក ${districtName}</p>
-                    <p class="font-moul text-slate-900 text-[11px]">${schoolName}</p>
-                    <p class="text-slate-600 mt-1 font-bold text-[10.5px]">ថ្នាក់ទី ៖ <span class="text-indigo-700 font-bold">${gradeFull}</span></p>
-                </div>
-                <div class="text-center">
-                    <p class="font-moul text-slate-900 text-[12px] mb-0.5">ព្រះរាជាណាចក្រកម្ពុជា</p>
-                    <p class="font-moul text-slate-900 text-[12px]">ជាតិ សាសនា ព្រះមហាក្សត្រ</p>
-                    <div class="flex items-center justify-center mt-1 mx-auto">
-                        <img src="${window.CMS_HEADER_SYMBOL_B64 || 'assets/images/header-flourish.png'}" class="header-flourish-symbol" alt="symbol" style="display: block; margin: 2px auto 0 auto; width: 135px; height: 11px; object-fit: contain;" />
+            <!-- Main Content Area -->
+            <div class="flex-1 flex flex-col justify-start">
+                <!-- Official Dual-Side Header matching User Model (Images 1 & 2) -->
+                <div class="flex justify-between items-start mb-4 text-xs">
+                    <div class="text-left leading-relaxed pt-3.5 sm:pt-4">
+                        <p class="font-moul text-slate-900 text-[11px] mb-0.5">ការិយាល័យ អប់រំ យុវជននិងកីឡានៃរដ្ឋបាលស្រុក ${districtName}</p>
+                        <p class="font-moul text-slate-900 text-[11px]">${schoolName}</p>
+                        <p class="text-slate-600 mt-1 font-bold text-[10.5px]">ថ្នាក់ទី ៖ <span class="text-indigo-700 font-bold">${gradeFull}</span></p>
+                    </div>
+                    <div class="text-center pt-0 -mt-1">
+                        <p class="font-moul text-slate-900 text-[12px] mb-0.5">ព្រះរាជាណាចក្រកម្ពុជា</p>
+                        <p class="font-moul text-slate-900 text-[12px]">ជាតិ សាសនា ព្រះមហាក្សត្រ</p>
+                        <div class="flex items-center justify-center mt-1 mx-auto">
+                            <img src="${window.CMS_HEADER_SYMBOL_B64 || 'assets/images/header-flourish.png'}" class="header-flourish-symbol" alt="symbol" style="display: block; margin: 2px auto 0 auto; width: 135px; height: 11px; object-fit: contain;" />
+                        </div>
                     </div>
                 </div>
             </div>
@@ -5017,19 +5015,21 @@ window.renderClassInventoryReport = function(container, targetGrade, targetRoom)
                     <span>បាត់បង់ ៖ <b class="text-rose-800 text-sm">${grandTotalLost}</b></span>
                 </div>
             </div>
+            </div>
 
             <!-- Signatures -->
-            <div class="flex justify-between items-start text-xs pt-4 px-8 font-siemreap">
-                <div class="text-center w-2/5">
-                    <p class="mb-1 text-slate-700">បានឃើញ និងឯកភាព</p>
-                    <p class="font-moul text-slate-900 mb-14">នាយិកាសាលា</p>
-                    <p class="font-moul text-slate-900 text-xs">${principalName}</p>
-                </div>
-                <div class="text-center w-2/5">
-                    <p class="mb-1 text-slate-700">${lunarDateStr}</p>
-                    <p class="mb-1 text-slate-700 font-bold">${solarDateStr}</p>
-                    <p class="font-moul text-slate-900 mb-14">គ្រូបន្ទុកថ្នាក់</p>
-                    <p class="font-moul text-slate-900 text-xs">${teacherName}</p>
+            <div class="mt-auto pt-4 px-8 font-siemreap">
+                <div class="flex justify-between items-start text-xs">
+                    <div class="text-center w-2/5">
+                        <p class="mb-1 text-slate-700">បានឃើញ និងឯកភាព</p>
+                        <p class="font-moul text-slate-900 mb-14">នាយិកាសាលា</p>
+                    </div>
+                    <div class="text-center w-2/5">
+                        <p class="mb-1 text-slate-700">${lunarDateStr}</p>
+                        <p class="mb-1 text-slate-700 font-bold">${solarDateStr}</p>
+                        <p class="font-moul text-slate-900 mb-14">គ្រូបន្ទុកថ្នាក់</p>
+                        <p class="font-moul text-slate-900 text-xs">${teacherName}</p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -5096,7 +5096,7 @@ window.renderInternalRulesReport = function(container, targetGrade, targetRoom) 
     `;
 
     container.innerHTML = `
-        <div class="a4-page bg-white shadow-xl rounded-lg mx-auto p-7 font-siemreap text-slate-800 relative max-w-[210mm] min-h-[297mm] text-[11px] leading-relaxed border-[3px] border-rose-500/80" style="box-sizing: border-box;">
+        <div class="a4-page bg-white shadow-xl rounded-lg mx-auto p-6 md:p-8 font-siemreap text-slate-800 relative w-full max-w-[210mm] min-h-[297mm] h-[297mm] text-[11px] leading-relaxed border-[3px] border-rose-500/80 flex flex-col justify-between" style="box-sizing: border-box;">
             <!-- Inner decorative border -->
             <div style="position: absolute; inset: 4px; border: 1.5px solid #e11d48; pointer-events: none; border-radius: 4px;"></div>
             <div style="position: absolute; top: 8px; left: 10px; color: #e11d48; font-size: 16px;">❖</div>
@@ -5104,18 +5104,21 @@ window.renderInternalRulesReport = function(container, targetGrade, targetRoom) 
             <div style="position: absolute; bottom: 8px; left: 10px; color: #e11d48; font-size: 16px;">❖</div>
             <div style="position: absolute; bottom: 8px; right: 10px; color: #e11d48; font-size: 16px;">❖</div>
 
-            <!-- Official Dual-Side Header matching User Model (Images 1 & 2) -->
-            <div class="flex justify-between items-start mb-3 text-xs">
-                <div class="text-left leading-relaxed pt-1">
-                    <p class="font-moul text-slate-900 text-[11px] mb-0.5">ការិយាល័យ អប់រំ យុវជននិងកីឡានៃរដ្ឋបាលស្រុក ${districtName}</p>
-                    <p class="font-moul text-slate-900 text-[11px]">${schoolName}</p>
-                    <p class="text-slate-600 mt-1 font-bold text-[10.5px]">ថ្នាក់ទី ៖ <span class="text-rose-700 font-bold">${gradeFull}</span></p>
-                </div>
-                <div class="text-center">
-                    <p class="font-moul text-slate-900 text-[12px] mb-0.5">ព្រះរាជាណាចក្រកម្ពុជា</p>
-                    <p class="font-moul text-slate-900 text-[12px]">ជាតិ សាសនា ព្រះមហាក្សត្រ</p>
-                    <div class="flex items-center justify-center mt-1 mx-auto">
-                        <img src="${window.CMS_HEADER_SYMBOL_B64 || 'assets/images/header-flourish.png'}" class="header-flourish-symbol" alt="symbol" style="display: block; margin: 2px auto 0 auto; width: 135px; height: 11px; object-fit: contain;" />
+            <!-- Main Content Area -->
+            <div class="flex-1 flex flex-col justify-start">
+                <!-- Official Dual-Side Header matching User Model (Images 1 & 2) -->
+                <div class="flex justify-between items-start mb-3 text-xs">
+                    <div class="text-left leading-relaxed pt-3.5 sm:pt-4">
+                        <p class="font-moul text-slate-900 text-[11px] mb-0.5">ការិយាល័យ អប់រំ យុវជននិងកីឡានៃរដ្ឋបាលស្រុក ${districtName}</p>
+                        <p class="font-moul text-slate-900 text-[11px]">${schoolName}</p>
+                        <p class="text-slate-600 mt-1 font-bold text-[10.5px]">ថ្នាក់ទី ៖ <span class="text-rose-700 font-bold">${gradeFull}</span></p>
+                    </div>
+                    <div class="text-center pt-0 -mt-1">
+                        <p class="font-moul text-slate-900 text-[12px] mb-0.5">ព្រះរាជាណាចក្រកម្ពុជា</p>
+                        <p class="font-moul text-slate-900 text-[12px]">ជាតិ សាសនា ព្រះមហាក្សត្រ</p>
+                        <div class="flex items-center justify-center mt-1 mx-auto">
+                            <img src="${window.CMS_HEADER_SYMBOL_B64 || 'assets/images/header-flourish.png'}" class="header-flourish-symbol" alt="symbol" style="display: block; margin: 2px auto 0 auto; width: 135px; height: 11px; object-fit: contain;" />
+                        </div>
                     </div>
                 </div>
             </div>
@@ -5145,19 +5148,21 @@ window.renderInternalRulesReport = function(container, targetGrade, targetRoom) 
             <div class="bg-slate-50 border border-slate-200 rounded-lg p-2 mb-4 text-[11px] text-slate-700 text-center italic">
                 បទបញ្ជាផ្ទៃក្នុងនេះ មានសុពលភាពអនុវត្តចាប់ពីថ្ងៃចុះហត្ថលេខានេះតទៅ។ សិស្សានុសិស្សដែលប្រព្រឹត្តល្មើសនឹងត្រូវទទួលការអប់រំ និងវិន័យតាមកម្រិត។
             </div>
+            </div>
 
             <!-- Signatures -->
-            <div class="flex justify-between items-start text-xs pt-3 px-8 font-siemreap">
-                <div class="text-center w-2/5">
-                    <p class="mb-1 text-slate-700">បានឃើញ និងឯកភាព</p>
-                    <p class="font-moul text-slate-900 mb-14">នាយិកាសាលា</p>
-                    <p class="font-moul text-slate-900 text-xs">${principalName}</p>
-                </div>
-                <div class="text-center w-2/5">
-                    <p class="mb-1 text-slate-700">${lunarDateStr}</p>
-                    <p class="mb-1 text-slate-700 font-bold">${solarDateStr}</p>
-                    <p class="font-moul text-slate-900 mb-14">គ្រូបន្ទុកថ្នាក់</p>
-                    <p class="font-moul text-slate-900 text-xs">${teacherName}</p>
+            <div class="mt-auto pt-3 px-8 font-siemreap">
+                <div class="flex justify-between items-start text-xs">
+                    <div class="text-center w-2/5">
+                        <p class="mb-1 text-slate-700">បានឃើញ និងឯកភាព</p>
+                        <p class="font-moul text-slate-900 mb-14">នាយិកាសាលា</p>
+                    </div>
+                    <div class="text-center w-2/5">
+                        <p class="mb-1 text-slate-700">${lunarDateStr}</p>
+                        <p class="mb-1 text-slate-700 font-bold">${solarDateStr}</p>
+                        <p class="font-moul text-slate-900 mb-14">គ្រូបន្ទុកថ្នាក់</p>
+                        <p class="font-moul text-slate-900 text-xs">${teacherName}</p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -5236,7 +5241,7 @@ window.renderClassPrinciplesReport = function(container, targetGrade, targetRoom
     `;
 
     container.innerHTML = `
-        <div class="a4-page bg-white shadow-xl rounded-lg mx-auto p-7 font-siemreap text-slate-800 relative max-w-[210mm] min-h-[297mm] text-[11px] leading-relaxed border-[3px] border-sky-500/80" style="box-sizing: border-box;">
+        <div class="a4-page bg-white shadow-xl rounded-lg mx-auto p-6 md:p-8 font-siemreap text-slate-800 relative w-full max-w-[210mm] min-h-[297mm] h-[297mm] text-[11px] leading-relaxed border-[3px] border-sky-500/80 flex flex-col justify-between" style="box-sizing: border-box;">
             <!-- Inner decorative border -->
             <div style="position: absolute; inset: 4px; border: 1.5px solid #0284c7; pointer-events: none; border-radius: 4px;"></div>
             <div style="position: absolute; top: 8px; left: 10px; color: #0284c7; font-size: 16px;">❖</div>
@@ -5244,18 +5249,21 @@ window.renderClassPrinciplesReport = function(container, targetGrade, targetRoom
             <div style="position: absolute; bottom: 8px; left: 10px; color: #0284c7; font-size: 16px;">❖</div>
             <div style="position: absolute; bottom: 8px; right: 10px; color: #0284c7; font-size: 16px;">❖</div>
 
-            <!-- Official Dual-Side Header matching User Model (Images 1 & 2) -->
-            <div class="flex justify-between items-start mb-2 text-xs">
-                <div class="text-left leading-relaxed pt-1">
-                    <p class="font-moul text-slate-900 text-[11px] mb-0.5">ការិយាល័យ អប់រំ យុវជននិងកីឡានៃរដ្ឋបាលស្រុក ${districtName}</p>
-                    <p class="font-moul text-slate-900 text-[11px]">${schoolName}</p>
-                    <p class="text-slate-600 mt-1 font-bold text-[10.5px]">ថ្នាក់ទី ៖ <span class="text-sky-700 font-bold">${gradeFull}</span></p>
-                </div>
-                <div class="text-center">
-                    <p class="font-moul text-slate-900 text-[12px] mb-0.5">ព្រះរាជាណាចក្រកម្ពុជា</p>
-                    <p class="font-moul text-slate-900 text-[12px]">ជាតិ សាសនា ព្រះមហាក្សត្រ</p>
-                    <div class="flex items-center justify-center mt-1 mx-auto">
-                        <img src="${window.CMS_HEADER_SYMBOL_B64 || 'assets/images/header-flourish.png'}" class="header-flourish-symbol" alt="symbol" style="display: block; margin: 2px auto 0 auto; width: 135px; height: 11px; object-fit: contain;" />
+            <!-- Main Content Area -->
+            <div class="flex-1 flex flex-col justify-start">
+                <!-- Official Dual-Side Header matching User Model (Images 1 & 2) -->
+                <div class="flex justify-between items-start mb-2 text-xs">
+                    <div class="text-left leading-relaxed pt-3.5 sm:pt-4">
+                        <p class="font-moul text-slate-900 text-[11px] mb-0.5">ការិយាល័យ អប់រំ យុវជននិងកីឡានៃរដ្ឋបាលស្រុក ${districtName}</p>
+                        <p class="font-moul text-slate-900 text-[11px]">${schoolName}</p>
+                        <p class="text-slate-600 mt-1 font-bold text-[10.5px]">ថ្នាក់ទី ៖ <span class="text-sky-700 font-bold">${gradeFull}</span></p>
+                    </div>
+                    <div class="text-center pt-0 -mt-1">
+                        <p class="font-moul text-slate-900 text-[12px] mb-0.5">ព្រះរាជាណាចក្រកម្ពុជា</p>
+                        <p class="font-moul text-slate-900 text-[12px]">ជាតិ សាសនា ព្រះមហាក្សត្រ</p>
+                        <div class="flex items-center justify-center mt-1 mx-auto">
+                            <img src="${window.CMS_HEADER_SYMBOL_B64 || 'assets/images/header-flourish.png'}" class="header-flourish-symbol" alt="symbol" style="display: block; margin: 2px auto 0 auto; width: 135px; height: 11px; object-fit: contain;" />
+                        </div>
                     </div>
                 </div>
             </div>
@@ -5280,19 +5288,22 @@ window.renderClassPrinciplesReport = function(container, targetGrade, targetRoom
                     ${rightPrinciples.map(renderPrincipleCard).join('')}
                 </div>
             </div>
+            </div>
 
             <!-- Signatures -->
-            <div class="flex justify-between items-start text-xs pt-4 px-8 font-siemreap">
-                <div class="text-center w-2/5">
-                    <p class="mb-1 text-slate-700">បានឃើញ និងឯកភាព</p>
-                    <p class="font-moul text-slate-900 mb-14">គ្រូបន្ទុកថ្នាក់</p>
-                    <p class="font-moul text-slate-900 text-xs">${teacherName}</p>
-                </div>
-                <div class="text-center w-2/5">
-                    <p class="mb-1 text-slate-700">${lunarDateStr}</p>
-                    <p class="mb-1 text-slate-700 font-bold">${solarDateStr}</p>
-                    <p class="font-moul text-slate-900 mb-14">តំណាងសិស្ស / ប្រធានថ្នាក់</p>
-                    <p class="font-moul text-slate-900 text-xs">${monitorStudent}</p>
+            <div class="mt-auto pt-4 px-8 font-siemreap">
+                <div class="flex justify-between items-start text-xs">
+                    <div class="text-center w-2/5">
+                        <p class="mb-1 text-slate-700">បានឃើញ និងឯកភាព</p>
+                        <p class="font-moul text-slate-900 mb-14">គ្រូបន្ទុកថ្នាក់</p>
+                        <p class="font-moul text-slate-900 text-xs">${teacherName}</p>
+                    </div>
+                    <div class="text-center w-2/5">
+                        <p class="mb-1 text-slate-700">${lunarDateStr}</p>
+                        <p class="mb-1 text-slate-700 font-bold">${solarDateStr}</p>
+                        <p class="font-moul text-slate-900 mb-14">តំណាងសិស្ស / ប្រធានថ្នាក់</p>
+                        <p class="font-moul text-slate-900 text-xs">${monitorStudent}</p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -5388,10 +5399,10 @@ window.renderCleaningScheduleReport = function(container, targetGrade, targetRoo
         const rows = dayGroups[d.key] || [];
         const rowsHtml = rows.map((r, idx) => `
             <tr class="hover:bg-emerald-50/40 transition">
-                <td class="border border-slate-300 px-1 py-0.5 text-center font-bold text-slate-700 w-6">${idx + 1}</td>
-                <td class="border border-slate-300 px-1.5 py-0.5 text-left text-slate-800 duty-name" contenteditable="true">${r.name || ''}</td>
-                <td class="border border-slate-300 px-1 py-0.5 text-center text-slate-600 w-8 duty-gender" contenteditable="true">${r.gender || ''}</td>
-                <td class="border border-slate-300 px-1 py-0.5 text-center text-emerald-800 font-bold w-16 duty-role" contenteditable="true">${r.role || 'សមាជិក'}</td>
+                <td class="border border-slate-300 px-1 py-1 text-center font-bold text-slate-700 w-6">${idx + 1}</td>
+                <td class="border border-slate-300 px-1.5 py-1 text-left text-slate-800 duty-name" contenteditable="true">${r.name || ''}</td>
+                <td class="border border-slate-300 px-1 py-1 text-center text-slate-600 w-8 duty-gender" contenteditable="true">${r.gender || ''}</td>
+                <td class="border border-slate-300 px-1 py-1 text-center text-emerald-800 font-bold w-16 duty-role" contenteditable="true">${r.role || 'សមាជិក'}</td>
             </tr>
         `).join('');
 
@@ -5404,10 +5415,10 @@ window.renderCleaningScheduleReport = function(container, targetGrade, targetRoo
                 <table class="w-full border-collapse border border-slate-300 text-[10px]">
                     <thead>
                         <tr class="bg-emerald-50 text-emerald-950 font-bold text-[9.5px]">
-                            <th class="border border-slate-300 p-0.5 w-6 text-center">ល.រ</th>
-                            <th class="border border-slate-300 p-0.5 text-center">ឈ្មោះសិស្ស</th>
-                            <th class="border border-slate-300 p-0.5 w-8 text-center">ភេទ</th>
-                            <th class="border border-slate-300 p-0.5 w-16 text-center">តួនាទី</th>
+                            <th class="border border-slate-300 p-1 w-6 text-center">ល.រ</th>
+                            <th class="border border-slate-300 p-1 text-center">ឈ្មោះសិស្ស</th>
+                            <th class="border border-slate-300 p-1 w-8 text-center">ភេទ</th>
+                            <th class="border border-slate-300 p-1 w-16 text-center">តួនាទី</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -5419,7 +5430,7 @@ window.renderCleaningScheduleReport = function(container, targetGrade, targetRoo
     };
 
     container.innerHTML = `
-        <div class="a4-page bg-white shadow-xl rounded-lg mx-auto p-7 font-siemreap text-slate-800 relative max-w-[210mm] min-h-[297mm] text-[11px] leading-relaxed border-[3px] border-emerald-500/80" style="box-sizing: border-box;">
+        <div class="a4-page bg-white shadow-xl rounded-lg mx-auto p-6 md:p-8 font-siemreap text-slate-800 relative w-full max-w-[210mm] min-h-[297mm] h-[297mm] text-[11px] leading-relaxed border-[3px] border-emerald-500/80 flex flex-col justify-between" style="box-sizing: border-box;">
             <!-- Inner decorative border -->
             <div style="position: absolute; inset: 4px; border: 1.5px solid #059669; pointer-events: none; border-radius: 4px;"></div>
             <div style="position: absolute; top: 8px; left: 10px; color: #059669; font-size: 16px;">❖</div>
@@ -5427,18 +5438,21 @@ window.renderCleaningScheduleReport = function(container, targetGrade, targetRoo
             <div style="position: absolute; bottom: 8px; left: 10px; color: #059669; font-size: 16px;">❖</div>
             <div style="position: absolute; bottom: 8px; right: 10px; color: #059669; font-size: 16px;">❖</div>
 
-            <!-- Official Dual-Side Header matching User Model (Images 1 & 2) -->
-            <div class="flex justify-between items-start mb-2 text-xs">
-                <div class="text-left leading-relaxed pt-1">
-                    <p class="font-moul text-slate-900 text-[11px] mb-0.5">ការិយាល័យ អប់រំ យុវជននិងកីឡានៃរដ្ឋបាលស្រុក ${districtName}</p>
-                    <p class="font-moul text-slate-900 text-[11px]">${schoolName}</p>
-                    <p class="text-slate-600 mt-1 font-bold text-[10.5px]">ថ្នាក់ទី ៖ <span class="text-emerald-700 font-bold">${gradeFull}</span></p>
-                </div>
-                <div class="text-center">
-                    <p class="font-moul text-slate-900 text-[12px] mb-0.5">ព្រះរាជាណាចក្រកម្ពុជា</p>
-                    <p class="font-moul text-slate-900 text-[12px]">ជាតិ សាសនា ព្រះមហាក្សត្រ</p>
-                    <div class="flex items-center justify-center mt-1 mx-auto">
-                        <img src="${window.CMS_HEADER_SYMBOL_B64 || 'assets/images/header-flourish.png'}" class="header-flourish-symbol" alt="symbol" style="display: block; margin: 2px auto 0 auto; width: 135px; height: 11px; object-fit: contain;" />
+            <!-- Main Content Area -->
+            <div class="flex-1 flex flex-col justify-start">
+                <!-- Official Dual-Side Header matching User Model (Images 1 & 2) -->
+                <div class="flex justify-between items-start mb-2 text-xs">
+                    <div class="text-left leading-relaxed pt-3.5 sm:pt-4">
+                        <p class="font-moul text-slate-900 text-[11px] mb-0.5">ការិយាល័យ អប់រំ យុវជននិងកីឡានៃរដ្ឋបាលស្រុក ${districtName}</p>
+                        <p class="font-moul text-slate-900 text-[11px]">${schoolName}</p>
+                        <p class="text-slate-600 mt-1 font-bold text-[10.5px]">ថ្នាក់ទី ៖ <span class="text-emerald-700 font-bold">${gradeFull}</span></p>
+                    </div>
+                    <div class="text-center pt-0 -mt-1">
+                        <p class="font-moul text-slate-900 text-[12px] mb-0.5">ព្រះរាជាណាចក្រកម្ពុជា</p>
+                        <p class="font-moul text-slate-900 text-[12px]">ជាតិ សាសនា ព្រះមហាក្សត្រ</p>
+                        <div class="flex items-center justify-center mt-1 mx-auto">
+                            <img src="${window.CMS_HEADER_SYMBOL_B64 || 'assets/images/header-flourish.png'}" class="header-flourish-symbol" alt="symbol" style="display: block; margin: 2px auto 0 auto; width: 135px; height: 11px; object-fit: contain;" />
+                        </div>
                     </div>
                 </div>
             </div>
@@ -5470,19 +5484,21 @@ window.renderCleaningScheduleReport = function(container, targetGrade, targetRoo
             <div class="bg-slate-50 border border-slate-200 rounded-lg p-2 mb-3 text-[10.5px] text-slate-700 leading-normal">
                 <b>* ភារកិច្ចវេនសម្អាត ៖</b> បោស និងជូតបន្ទប់រៀន, ជូតក្ដារខៀន និងតុគ្រូ-សិស្ស, ចាក់សម្រាមក្នុងធុងធំ, បិទភ្លើង កង្ហារ និងទ្វារ បង្អួច ក្រោយពេលចប់ម៉ោងសិក្សាជារៀងរាល់ថ្ងៃ។
             </div>
+            </div>
 
             <!-- Signatures -->
-            <div class="flex justify-between items-start text-xs pt-2 px-8 font-siemreap">
-                <div class="text-center w-2/5">
-                    <p class="mb-1 text-slate-700">បានឃើញ និងឯកភាព</p>
-                    <p class="font-moul text-slate-900 mb-12">នាយិកាសាលា</p>
-                    <p class="font-moul text-slate-900 text-xs">${principalName}</p>
-                </div>
-                <div class="text-center w-2/5">
-                    <p class="mb-1 text-slate-700">${lunarDateStr}</p>
-                    <p class="mb-1 text-slate-700 font-bold">${solarDateStr}</p>
-                    <p class="font-moul text-slate-900 mb-12">គ្រូបន្ទុកថ្នាក់</p>
-                    <p class="font-moul text-slate-900 text-xs">${teacherName}</p>
+            <div class="mt-auto pt-2 px-8 font-siemreap">
+                <div class="flex justify-between items-start text-xs">
+                    <div class="text-center w-2/5">
+                        <p class="mb-1 text-slate-700">បានឃើញ និងឯកភាព</p>
+                        <p class="font-moul text-slate-900 mb-12">នាយិកាសាលា</p>
+                    </div>
+                    <div class="text-center w-2/5">
+                        <p class="mb-1 text-slate-700">${lunarDateStr}</p>
+                        <p class="mb-1 text-slate-700 font-bold">${solarDateStr}</p>
+                        <p class="font-moul text-slate-900 mb-12">គ្រូបន្ទុកថ្នាក់</p>
+                        <p class="font-moul text-slate-900 text-xs">${teacherName}</p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -5571,7 +5587,7 @@ window.renderBranchCommitteeReport = function(container, targetGrade, targetRoom
     }).join('');
 
     container.innerHTML = `
-        <div class="a4-page bg-white shadow-xl rounded-lg mx-auto p-7 font-siemreap text-slate-800 relative max-w-[210mm] min-h-[297mm] text-[11px] leading-relaxed border-[3px] border-purple-500/80" style="box-sizing: border-box;">
+        <div class="a4-page bg-white shadow-xl rounded-lg mx-auto p-6 md:p-8 font-siemreap text-slate-800 relative w-full max-w-[210mm] min-h-[297mm] h-[297mm] text-[11px] leading-relaxed border-[3px] border-purple-500/80 flex flex-col justify-between" style="box-sizing: border-box;">
             <!-- Inner decorative border -->
             <div style="position: absolute; inset: 4px; border: 1.5px solid #9333ea; pointer-events: none; border-radius: 4px;"></div>
             <div style="position: absolute; top: 8px; left: 10px; color: #9333ea; font-size: 16px;">❖</div>
@@ -5579,18 +5595,21 @@ window.renderBranchCommitteeReport = function(container, targetGrade, targetRoom
             <div style="position: absolute; bottom: 8px; left: 10px; color: #9333ea; font-size: 16px;">❖</div>
             <div style="position: absolute; bottom: 8px; right: 10px; color: #9333ea; font-size: 16px;">❖</div>
 
-            <!-- Official Dual-Side Header matching User Model (Images 1 & 2) -->
-            <div class="flex justify-between items-start mb-3 text-xs">
-                <div class="text-left leading-relaxed pt-1">
-                    <p class="font-moul text-slate-900 text-[11px] mb-0.5">ការិយាល័យ អប់រំ យុវជននិងកីឡានៃរដ្ឋបាលស្រុក ${districtName}</p>
-                    <p class="font-moul text-slate-900 text-[11px]">${schoolName}</p>
-                    <p class="text-slate-600 mt-1 font-bold text-[10.5px]">ថ្នាក់ទី ៖ <span class="text-purple-700 font-bold">${gradeFull}</span></p>
-                </div>
-                <div class="text-center">
-                    <p class="font-moul text-slate-900 text-[12px] mb-0.5">ព្រះរាជាណាចក្រកម្ពុជា</p>
-                    <p class="font-moul text-slate-900 text-[12px]">ជាតិ សាសនា ព្រះមហាក្សត្រ</p>
-                    <div class="flex items-center justify-center mt-1 mx-auto">
-                        <img src="${window.CMS_HEADER_SYMBOL_B64 || 'assets/images/header-flourish.png'}" class="header-flourish-symbol" alt="symbol" style="display: block; margin: 2px auto 0 auto; width: 135px; height: 11px; object-fit: contain;" />
+            <!-- Main Content Area -->
+            <div class="flex-1 flex flex-col justify-start">
+                <!-- Official Dual-Side Header matching User Model (Images 1 & 2) -->
+                <div class="flex justify-between items-start mb-3 text-xs">
+                    <div class="text-left leading-relaxed pt-3.5 sm:pt-4">
+                        <p class="font-moul text-slate-900 text-[11px] mb-0.5">ការិយាល័យ អប់រំ យុវជននិងកីឡានៃរដ្ឋបាលស្រុក ${districtName}</p>
+                        <p class="font-moul text-slate-900 text-[11px]">${schoolName}</p>
+                        <p class="text-slate-600 mt-1 font-bold text-[10.5px]">ថ្នាក់ទី ៖ <span class="text-purple-700 font-bold">${gradeFull}</span></p>
+                    </div>
+                    <div class="text-center pt-0 -mt-1">
+                        <p class="font-moul text-slate-900 text-[12px] mb-0.5">ព្រះរាជាណាចក្រកម្ពុជា</p>
+                        <p class="font-moul text-slate-900 text-[12px]">ជាតិ សាសនា ព្រះមហាក្សត្រ</p>
+                        <div class="flex items-center justify-center mt-1 mx-auto">
+                            <img src="${window.CMS_HEADER_SYMBOL_B64 || 'assets/images/header-flourish.png'}" class="header-flourish-symbol" alt="symbol" style="display: block; margin: 2px auto 0 auto; width: 135px; height: 11px; object-fit: contain;" />
+                        </div>
                     </div>
                 </div>
             </div>
@@ -5675,19 +5694,21 @@ window.renderBranchCommitteeReport = function(container, targetGrade, targetRoom
                     </tbody>
                 </table>
             </div>
+            </div>
 
             <!-- Signatures -->
-            <div class="flex justify-between items-start text-xs pt-3 px-8 font-siemreap">
-                <div class="text-center w-2/5">
-                    <p class="mb-1 text-slate-700">បានឃើញ និងឯកភាព</p>
-                    <p class="font-moul text-slate-900 mb-12">នាយិកាសាលា</p>
-                    <p class="font-moul text-slate-900 text-xs">${principalName}</p>
-                </div>
-                <div class="text-center w-2/5">
-                    <p class="mb-1 text-slate-700">${lunarDateStr}</p>
-                    <p class="mb-1 text-slate-700 font-bold">${solarDateStr}</p>
-                    <p class="font-moul text-slate-900 mb-12">គ្រូបន្ទុកថ្នាក់</p>
-                    <p class="font-moul text-slate-900 text-xs">${teacherName}</p>
+            <div class="mt-auto pt-3 px-8 font-siemreap">
+                <div class="flex justify-between items-start text-xs">
+                    <div class="text-center w-2/5">
+                        <p class="mb-1 text-slate-700">បានឃើញ និងឯកភាព</p>
+                        <p class="font-moul text-slate-900 mb-12">នាយិកាសាលា</p>
+                    </div>
+                    <div class="text-center w-2/5">
+                        <p class="mb-1 text-slate-700">${lunarDateStr}</p>
+                        <p class="mb-1 text-slate-700 font-bold">${solarDateStr}</p>
+                        <p class="font-moul text-slate-900 mb-12">គ្រូបន្ទុកថ្នាក់</p>
+                        <p class="font-moul text-slate-900 text-xs">${teacherName}</p>
+                    </div>
                 </div>
             </div>
         </div>
