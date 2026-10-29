@@ -3654,15 +3654,15 @@ window.renderAcademicReportControls = function(container, curLevel, curRoom) {
         <div class="flex items-center gap-1 p-1 bg-slate-100 dark:bg-slate-700/80 rounded-xl border border-slate-200 dark:border-slate-600 shrink-0">
             <button type="button" onclick="window.switchAcademicReportMode('monthly')" class="px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 ${mode === 'monthly' ? 'bg-white dark:bg-slate-800 text-blue-700 dark:text-blue-400 shadow-sm' : 'text-slate-600 dark:text-slate-300 hover:text-slate-900'}">
                 <i class="fa-solid fa-calendar-day ${mode === 'monthly' ? 'text-blue-600' : 'text-slate-400'}"></i>
-                <span>1. ប្រចាំខែ</span>
+                <span>1. ចំណាត់ថ្នាក់ប្រចាំខែ</span>
             </button>
             <button type="button" onclick="window.switchAcademicReportMode('semester')" class="px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 ${mode === 'semester' ? 'bg-white dark:bg-slate-800 text-indigo-700 dark:text-indigo-400 shadow-sm' : 'text-slate-600 dark:text-slate-300 hover:text-slate-900'}">
                 <i class="fa-solid fa-chart-pie ${mode === 'semester' ? 'text-indigo-600' : 'text-slate-400'}"></i>
-                <span>2. ប្រចាំឆមាស</span>
+                <span>2. ចំណាត់ថ្នាក់ប្រចាំឆមាស</span>
             </button>
             <button type="button" onclick="window.switchAcademicReportMode('annual')" class="px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 ${mode === 'annual' ? 'bg-white dark:bg-slate-800 text-emerald-700 dark:text-emerald-400 shadow-sm' : 'text-slate-600 dark:text-slate-300 hover:text-slate-900'}">
                 <i class="fa-solid fa-graduation-cap ${mode === 'annual' ? 'text-emerald-600' : 'text-slate-400'}"></i>
-                <span>3. ប្រចាំឆ្នាំ</span>
+                <span>3. ចំណាត់ថ្នាក់ប្រចាំឆ្នាំ</span>
             </button>
         </div>
         ${subControlHtml}
@@ -3781,7 +3781,7 @@ window.renderAcademicResultsReport = function(container, targetGrade, targetRoom
     // ផ្នែកទី ១ ៖ លទ្ធផលសិក្សាប្រចាំខែ (Monthly Mode)
     // =========================================================================
     if (mode === 'monthly') {
-        if (titleEl) titleEl.textContent = `លទ្ធផលសិក្សាប្រចាំខែ ${currentMonth} (${gradeFull})`;
+        if (titleEl) titleEl.textContent = `ចំណាត់ថ្នាក់ប្រចាំខែ ${currentMonth} (${gradeFull})`;
 
         let passCount = 0, passFemales = 0, failCount = 0, failFemales = 0;
         const totalCount = classStudents.length;
@@ -3959,7 +3959,7 @@ window.renderAcademicResultsReport = function(container, targetGrade, targetRoom
                 </div>
 
                 <div class="text-center mb-4">
-                    <h3 class="font-moul text-base text-blue-900">របាយការណ៍លទ្ធផលនៃការសិក្សាប្រចាំខែ ${currentMonth}</h3>
+                    <h3 class="font-moul text-base text-blue-900">ចំណាត់ថ្នាក់ប្រចាំខែ ${currentMonth} <span class="hidden">របាយការណ៍លទ្ធផលនៃការសិក្សាប្រចាំខែ ${currentMonth}</span></h3>
                     <h4 class="font-moul text-xs text-red-600 mt-1">${gradeFull} | ឆ្នាំសិក្សា ${academicYear}</h4>
                 </div>
 
@@ -3967,12 +3967,19 @@ window.renderAcademicResultsReport = function(container, targetGrade, targetRoom
                     <table class="w-full text-xs text-center border-collapse border border-slate-300">
                         <thead class="font-moul" style="font-family: 'Khmer OS Muol Light', 'Khmer OS Muol', 'Moul', serif;">
                             <tr class="bg-slate-50 text-slate-800 text-[11px] font-moul leading-normal border-b-2 border-slate-300" style="font-family: 'Khmer OS Muol Light', 'Khmer OS Muol', 'Moul', serif;">
-                                <th class="border border-slate-300 p-2.5 w-12 text-slate-600 bg-slate-50">ល.រ</th>
-                                <th class="border border-slate-300 p-2.5 text-left px-4 text-slate-800">គោត្តនាម និងនាម</th>
-                                <th class="border border-slate-300 p-2.5 w-14 text-slate-600 bg-slate-50">ភេទ</th>
-                                <th class="border border-slate-300 p-2.5 w-28 bg-blue-50/80 text-blue-900 border-x border-white">មធ្យមភាគ<span class="hidden">ពិន្ទុសរុប</span></th>
-                                <th class="border border-slate-300 p-2.5 w-24 bg-rose-50/80 text-rose-900 border-r border-white">ចំណាត់ថ្នាក់</th>
-                                <th class="border border-slate-300 p-2.5 w-28 bg-emerald-50/80 text-emerald-900">និទ្ទេស</th>
+                                <th class="border border-slate-300 p-2 w-12 text-center text-slate-600 bg-slate-50">ល.រ</th>
+                                <th class="border border-slate-300 p-2 text-left px-4 text-slate-800">គោត្តនាម និងនាម</th>
+                                <th class="border border-slate-300 p-2 w-14 text-center text-slate-600 bg-slate-50">ភេទ</th>
+                                <th class="border border-slate-300 p-1 w-14 text-center align-middle bg-blue-50/80 text-blue-900 border-x border-white" style="height: 90px;">
+                                    <div style="writing-mode: vertical-rl; transform: rotate(180deg); white-space: nowrap; margin: 0 auto; display: inline-block;">មធ្យមភាគ</div>
+                                    <span class="hidden">ពិន្ទុសរុប</span>
+                                </th>
+                                <th class="border border-slate-300 p-1 w-14 text-center align-middle bg-rose-50/80 text-rose-900 border-r border-white" style="height: 90px;">
+                                    <div style="writing-mode: vertical-rl; transform: rotate(180deg); white-space: nowrap; margin: 0 auto; display: inline-block;">ចំណាត់ថ្នាក់</div>
+                                </th>
+                                <th class="border border-slate-300 p-1 w-14 text-center align-middle bg-emerald-50/80 text-emerald-900" style="height: 90px;">
+                                    <div style="writing-mode: vertical-rl; transform: rotate(180deg); white-space: nowrap; margin: 0 auto; display: inline-block;">និទ្ទេស</div>
+                                </th>
                             </tr>
                         </thead>
                         <tbody>
@@ -4014,10 +4021,11 @@ window.renderAcademicResultsReport = function(container, targetGrade, targetRoom
     // ផ្នែកទី ២ ៖ លទ្ធផលសិក្សាប្រចាំឆមាស (Semester Mode: ឆមាសទី១ ឬ ឆមាសទី២)
     // =========================================================================
     if (mode === 'semester') {
-        if (titleEl) titleEl.textContent = `លទ្ធផលសិក្សាប្រចាំ ${currentSemester} (${gradeFull})`;
+        const isSem1 = currentSemester === 'ឆមាសទី១' || currentSemester === 'ឆមាសទី1';
+        const semNumKhmer = isSem1 ? '១' : '២';
+        if (titleEl) titleEl.textContent = `ចំណាត់ថ្នាក់ប្រចាំឆមាសលើកទី ${semNumKhmer} (${gradeFull})`;
 
         const semCfg = window.getSemesterMonthConfig ? window.getSemesterMonthConfig(curLevel, curRoom) : { sem1: ["ធ្នូ", "មករា", "កុម្ភៈ", "មីនា"], sem2: ["មេសា", "ឧសភា", "មិថុនា", "កក្កដា"] };
-        const isSem1 = currentSemester === 'ឆមាសទី១';
         const semMonths = (isSem1 ? semCfg.sem1 : semCfg.sem2) || [];
 
         let passCount = 0, passFemales = 0, failCount = 0, failFemales = 0;
@@ -4199,7 +4207,7 @@ window.renderAcademicResultsReport = function(container, targetGrade, targetRoom
                 </div>
 
                 <div class="text-center mb-4">
-                    <h3 class="font-moul text-base text-blue-900">របាយការណ៍លទ្ធផលនៃការសិក្សាប្រចាំ ${currentSemester}</h3>
+                    <h3 class="font-moul text-base text-blue-900">ចំណាត់ថ្នាក់ប្រចាំឆមាសលើកទី ${semNumKhmer} <span class="hidden">របាយការណ៍លទ្ធផលនៃការសិក្សាប្រចាំ ${currentSemester}</span></h3>
                     <h4 class="font-moul text-xs text-red-600 mt-1">${gradeFull} | ឆ្នាំសិក្សា ${academicYear}</h4>
                 </div>
 
@@ -4207,14 +4215,27 @@ window.renderAcademicResultsReport = function(container, targetGrade, targetRoom
                     <table class="w-full text-xs text-center border-collapse border border-slate-300">
                         <thead class="font-moul" style="font-family: 'Khmer OS Muol Light', 'Khmer OS Muol', 'Moul', serif;">
                             <tr class="bg-slate-50 text-slate-800 text-[11px] font-moul leading-normal border-b-2 border-slate-300" style="font-family: 'Khmer OS Muol Light', 'Khmer OS Muol', 'Moul', serif;">
-                                <th class="border border-slate-300 p-2.5 w-12 text-slate-600 bg-slate-50">ល.រ</th>
-                                <th class="border border-slate-300 p-2.5 text-left px-4 text-slate-800">គោត្តនាម និងនាម</th>
-                                <th class="border border-slate-300 p-2.5 w-14 text-slate-600 bg-slate-50">ភេទ</th>
-                                <th class="border border-slate-300 p-2.5 w-24 bg-orange-50/80 text-orange-900 border-l border-white">ម.ប្រឡង<span class="hidden">មធ្យមភាគប្រឡង</span></th>
-                                <th class="border border-slate-300 p-2.5 w-24 bg-indigo-50/80 text-indigo-900 border-l border-white">មធ្យមខែ<span class="hidden">មធ្យមភាគខែ</span></th>
-                                <th class="border border-slate-300 p-2.5 w-28 bg-blue-50/80 text-blue-900 border-x border-white">ម.ប្រចាំឆមាស<span class="hidden">មធ្យមភាគឆមាស</span></th>
-                                <th class="border border-slate-300 p-2.5 w-24 bg-rose-50/80 text-rose-900 border-r border-white">ចំណាត់ថ្នាក់</th>
-                                <th class="border border-slate-300 p-2.5 w-28 bg-emerald-50/80 text-emerald-900">និទ្ទេស</th>
+                                <th class="border border-slate-300 p-2 w-12 text-center text-slate-600 bg-slate-50">ល.រ</th>
+                                <th class="border border-slate-300 p-2 text-left px-4 text-slate-800">គោត្តនាម និងនាម</th>
+                                <th class="border border-slate-300 p-2 w-14 text-center text-slate-600 bg-slate-50">ភេទ</th>
+                                <th class="border border-slate-300 p-1 w-14 text-center align-middle bg-orange-50/80 text-orange-900 border-l border-white" style="height: 90px;">
+                                    <div style="writing-mode: vertical-rl; transform: rotate(180deg); white-space: nowrap; margin: 0 auto; display: inline-block;">ម.ប្រឡង</div>
+                                    <span class="hidden">មធ្យមភាគប្រឡង</span>
+                                </th>
+                                <th class="border border-slate-300 p-1 w-14 text-center align-middle bg-indigo-50/80 text-indigo-900 border-l border-white" style="height: 90px;">
+                                    <div style="writing-mode: vertical-rl; transform: rotate(180deg); white-space: nowrap; margin: 0 auto; display: inline-block;">មធ្យមខែ</div>
+                                    <span class="hidden">មធ្យមភាគខែ</span>
+                                </th>
+                                <th class="border border-slate-300 p-1 w-14 text-center align-middle bg-blue-50/80 text-blue-900 border-x border-white" style="height: 90px;">
+                                    <div style="writing-mode: vertical-rl; transform: rotate(180deg); white-space: nowrap; margin: 0 auto; display: inline-block;">ម.ប្រចាំឆមាស</div>
+                                    <span class="hidden">មធ្យមភាគឆមាស</span>
+                                </th>
+                                <th class="border border-slate-300 p-1 w-14 text-center align-middle bg-rose-50/80 text-rose-900 border-r border-white" style="height: 90px;">
+                                    <div style="writing-mode: vertical-rl; transform: rotate(180deg); white-space: nowrap; margin: 0 auto; display: inline-block;">ចំណាត់ថ្នាក់</div>
+                                </th>
+                                <th class="border border-slate-300 p-1 w-14 text-center align-middle bg-emerald-50/80 text-emerald-900" style="height: 90px;">
+                                    <div style="writing-mode: vertical-rl; transform: rotate(180deg); white-space: nowrap; margin: 0 auto; display: inline-block;">និទ្ទេស</div>
+                                </th>
                             </tr>
                         </thead>
                         <tbody>
@@ -4255,7 +4276,7 @@ window.renderAcademicResultsReport = function(container, targetGrade, targetRoom
     // =========================================================================
     // ផ្នែកទី ៣ ៖ សេចក្តីសម្រេចលទ្ធផលសិក្សាប្រចាំឆ្នាំ (Annual Mode)
     // =========================================================================
-    if (titleEl) titleEl.textContent = `តារាងចំណាត់ថ្នាក់ និងលទ្ធផលសិក្សាប្រចាំឆ្នាំ (${gradeFull})`;
+    if (titleEl) titleEl.textContent = `ចំណាត់ថ្នាក់ប្រចាំឆ្នាំ (${gradeFull})`;
 
     let promotedCount = 0, promotedFemales = 0, retainedCount = 0, retainedFemales = 0;
     const totalCount = classStudents.length;
@@ -4448,7 +4469,7 @@ window.renderAcademicResultsReport = function(container, targetGrade, targetRoom
             </div>
 
             <div class="text-center mb-4">
-                <h3 class="font-moul text-base text-blue-900">សេចក្តីសម្រេចលទ្ធផលសិក្សាប្រចាំឆ្នាំ (ការឡើងថ្នាក់-ត្រួតថ្នាក់)</h3>
+                <h3 class="font-moul text-base text-blue-900">ចំណាត់ថ្នាក់ប្រចាំឆ្នាំ <span class="hidden">សេចក្តីសម្រេចលទ្ធផលសិក្សាប្រចាំឆ្នាំ (ការឡើងថ្នាក់-ត្រួតថ្នាក់)</span></h3>
                 <h4 class="font-moul text-xs text-red-600 mt-1">${gradeFull} | ឆ្នាំសិក្សា ${academicYear}</h4>
             </div>
 
@@ -4456,14 +4477,24 @@ window.renderAcademicResultsReport = function(container, targetGrade, targetRoom
                 <table class="w-full text-xs text-center border-collapse border border-slate-300">
                     <thead class="font-moul" style="font-family: 'Khmer OS Muol Light', 'Khmer OS Muol', 'Moul', serif;">
                         <tr class="bg-slate-50 text-slate-800 text-[11px] font-moul leading-normal border-b-2 border-slate-300" style="font-family: 'Khmer OS Muol Light', 'Khmer OS Muol', 'Moul', serif;">
-                            <th class="border border-slate-300 p-2.5 w-12 text-slate-600 bg-slate-50">ល.រ</th>
-                            <th class="border border-slate-300 p-2.5 text-left px-4 text-slate-800">គោត្តនាម និងនាម</th>
-                            <th class="border border-slate-300 p-2.5 w-14 text-slate-600 bg-slate-50">ភេទ</th>
-                            <th class="border border-slate-300 p-2.5 w-24 bg-blue-50/80 text-blue-900 border-l border-white">ម.ឆមាសទី១</th>
-                            <th class="border border-slate-300 p-2.5 w-24 bg-indigo-50/80 text-indigo-900 border-l border-white">ម.ឆមាសទី២</th>
-                            <th class="border border-slate-300 p-2.5 w-28 bg-amber-50/80 text-amber-900 border-x border-white">ម.ប្រចាំឆ្នាំ</th>
-                            <th class="border border-slate-300 p-2.5 w-24 bg-rose-50/80 text-rose-900 border-r border-white">ចំណាត់ថ្នាក់</th>
-                            <th class="border border-slate-300 p-2.5 w-28 bg-emerald-50/80 text-emerald-900">និទ្ទេស</th>
+                            <th class="border border-slate-300 p-2 w-12 text-center text-slate-600 bg-slate-50">ល.រ</th>
+                            <th class="border border-slate-300 p-2 text-left px-4 text-slate-800">គោត្តនាម និងនាម</th>
+                            <th class="border border-slate-300 p-2 w-14 text-center text-slate-600 bg-slate-50">ភេទ</th>
+                            <th class="border border-slate-300 p-1 w-14 text-center align-middle bg-blue-50/80 text-blue-900 border-l border-white" style="height: 90px;">
+                                <div style="writing-mode: vertical-rl; transform: rotate(180deg); white-space: nowrap; margin: 0 auto; display: inline-block;">ម.ឆមាសទី១</div>
+                            </th>
+                            <th class="border border-slate-300 p-1 w-14 text-center align-middle bg-indigo-50/80 text-indigo-900 border-l border-white" style="height: 90px;">
+                                <div style="writing-mode: vertical-rl; transform: rotate(180deg); white-space: nowrap; margin: 0 auto; display: inline-block;">ម.ឆមាសទី២</div>
+                            </th>
+                            <th class="border border-slate-300 p-1 w-14 text-center align-middle bg-amber-50/80 text-amber-900 border-x border-white" style="height: 90px;">
+                                <div style="writing-mode: vertical-rl; transform: rotate(180deg); white-space: nowrap; margin: 0 auto; display: inline-block;">ម.ប្រចាំឆ្នាំ</div>
+                            </th>
+                            <th class="border border-slate-300 p-1 w-14 text-center align-middle bg-rose-50/80 text-rose-900 border-r border-white" style="height: 90px;">
+                                <div style="writing-mode: vertical-rl; transform: rotate(180deg); white-space: nowrap; margin: 0 auto; display: inline-block;">ចំណាត់ថ្នាក់</div>
+                            </th>
+                            <th class="border border-slate-300 p-1 w-14 text-center align-middle bg-emerald-50/80 text-emerald-900" style="height: 90px;">
+                                <div style="writing-mode: vertical-rl; transform: rotate(180deg); white-space: nowrap; margin: 0 auto; display: inline-block;">និទ្ទេស</div>
+                            </th>
                         </tr>
                     </thead>
                     <tbody>
