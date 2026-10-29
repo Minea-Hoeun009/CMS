@@ -18,43 +18,65 @@ window.TimetableHomeworkManager = {
     ],
 
     periods: [
-        { slot: 1, session: 'morning', time: '០៧:០០ - ០៧:៤៥', label: 'ម៉ោងទី ១ (ព្រឹក)' },
-        { slot: 2, session: 'morning', time: '០៧:៥០ - ០៨:៣៥', label: 'ម៉ោងទី ២ (ព្រឹក)' },
-        { slot: 3, session: 'morning', time: '០៨:៥០ - ០៩:៣៥', label: 'ម៉ោងទី ៣ (ព្រឹក)' },
-        { slot: 4, session: 'morning', time: '០៩:៤០ - ១០:២៥', label: 'ម៉ោងទី ៤ (ព្រឹក)' },
-        { slot: 5, session: 'afternoon', time: '១៣:០០ - ១៣:៤៥', label: 'ម៉ោងទី ៥ (រសៀល)' },
-        { slot: 6, session: 'afternoon', time: '១៣:៥០ - ១៤:៣៥', label: 'ម៉ោងទី ៦ (រសៀល)' },
-        { slot: 7, session: 'afternoon', time: '១៤:៥០ - ១៥:៣៥', label: 'ម៉ោងទី ៧ (រសៀល)' },
-        { slot: 8, session: 'afternoon', time: '១៥:៤០ - ១៦:២៥', label: 'ម៉ោងទី ៨ (រសៀល)' }
+        { slot: 1, session: 'morning', time: '០៧:០០ - ០៧:៤០', label: 'ម៉ោងទី ១ (ព្រឹក)' },
+        { slot: 2, session: 'morning', time: '០៧:៤០ - ០៨:២០', label: 'ម៉ោងទី ២ (ព្រឹក)' },
+        { slot: 3, session: 'morning', time: '០៨:៣៥ - ០៩:១៥', label: 'ម៉ោងទី ៣ (ព្រឹក)' },
+        { slot: 4, session: 'morning', time: '០៩:៣០ - ១០:១០', label: 'ម៉ោងទី ៤ (ព្រឹក)' },
+        { slot: 5, session: 'morning', time: '១០:១០ - ១០:៥០', label: 'ម៉ោងទី ៥ (ព្រឹក)' },
+        { slot: 6, session: 'afternoon', time: '០១:០០ - ០១:៤០', label: 'ម៉ោងទី ១ (រសៀល)' },
+        { slot: 7, session: 'afternoon', time: '០១:៤០ - ០២:២០', label: 'ម៉ោងទី ២ (រសៀល)' },
+        { slot: 8, session: 'afternoon', time: '០២:៣៥ - ០៣:១៥', label: 'ម៉ោងទី ៣ (រសៀល)' },
+        { slot: 9, session: 'afternoon', time: '០៣:៣០ - ០៤:១០', label: 'ម៉ោងទី ៤ (រសៀល)' },
+        { slot: 10, session: 'afternoon', time: '០៤:១០ - ០៤:៥០', label: 'ម៉ោងទី ៥ (រសៀល)' }
     ],
 
     defaultPeriods: [
-        { slot: 1, session: 'morning', time: '០៧:០០ - ០៧:៤៥', label: 'ម៉ោងទី ១ (ព្រឹក)' },
-        { slot: 2, session: 'morning', time: '០៧:៥០ - ០៨:៣៥', label: 'ម៉ោងទី ២ (ព្រឹក)' },
-        { slot: 3, session: 'morning', time: '០៨:៥០ - ០៩:៣៥', label: 'ម៉ោងទី ៣ (ព្រឹក)' },
-        { slot: 4, session: 'morning', time: '០៩:៤០ - ១០:២៥', label: 'ម៉ោងទី ៤ (ព្រឹក)' },
-        { slot: 5, session: 'afternoon', time: '១៣:០០ - ១៣:៤៥', label: 'ម៉ោងទី ៥ (រសៀល)' },
-        { slot: 6, session: 'afternoon', time: '១៣:៥០ - ១៤:៣៥', label: 'ម៉ោងទី ៦ (រសៀល)' },
-        { slot: 7, session: 'afternoon', time: '១៤:៥០ - ១៥:៣៥', label: 'ម៉ោងទី ៧ (រសៀល)' },
-        { slot: 8, session: 'afternoon', time: '១៥:៤០ - ១៦:២៥', label: 'ម៉ោងទី ៨ (រសៀល)' }
+        { slot: 1, session: 'morning', time: '០៧:០០ - ០៧:៤០', label: 'ម៉ោងទី ១ (ព្រឹក)' },
+        { slot: 2, session: 'morning', time: '០៧:៤០ - ០៨:២០', label: 'ម៉ោងទី ២ (ព្រឹក)' },
+        { slot: 3, session: 'morning', time: '០៨:៣៥ - ០៩:១៥', label: 'ម៉ោងទី ៣ (ព្រឹក)' },
+        { slot: 4, session: 'morning', time: '០៩:៣០ - ១០:១០', label: 'ម៉ោងទី ៤ (ព្រឹក)' },
+        { slot: 5, session: 'morning', time: '១០:១០ - ១០:៥០', label: 'ម៉ោងទី ៥ (ព្រឹក)' },
+        { slot: 6, session: 'afternoon', time: '០១:០០ - ០១:៤០', label: 'ម៉ោងទី ១ (រសៀល)' },
+        { slot: 7, session: 'afternoon', time: '០១:៤០ - ០២:២០', label: 'ម៉ោងទី ២ (រសៀល)' },
+        { slot: 8, session: 'afternoon', time: '០២:៣៥ - ០៣:១៥', label: 'ម៉ោងទី ៣ (រសៀល)' },
+        { slot: 9, session: 'afternoon', time: '០៣:៣០ - ០៤:១០', label: 'ម៉ោងទី ៤ (រសៀល)' },
+        { slot: 10, session: 'afternoon', time: '០៤:១០ - ០៤:៥០', label: 'ម៉ោងទី ៥ (រសៀល)' }
     ],
 
     getRecessTimes: function() {
         try {
             const saved = localStorage.getItem('cms_custom_timetable_recess');
-            if (saved) return JSON.parse(saved);
+            if (saved) {
+                const p = JSON.parse(saved);
+                return {
+                    morning1: p.morning1 || p.morning || '០៨:២០ - ០៨:៣៥',
+                    morning2: p.morning2 || '០៩:១៥ - ០៩:៣០',
+                    afternoon1: p.afternoon1 || p.afternoon || '០២:២០ - ០២:៣៥',
+                    afternoon2: p.afternoon2 || '០៣:១៥ - ០៣:៣០',
+                    flagMorning: p.flagMorning || '០៦:៥០ - ០៧:០០',
+                    flagAfternoon: p.flagAfternoon || '០៤:៥០ - ០៥:០០'
+                };
+            }
         } catch(e) {}
         return {
-            morning: '០៨:៣៥ - ០៨:៥០',
-            afternoon: '១៤:៣៥ - ១៤:៥០'
+            morning1: '០៨:២០ - ០៨:៣៥',
+            morning2: '០៩:១៥ - ០៩:៣០',
+            afternoon1: '០២:២០ - ០២:៣៥',
+            afternoon2: '០៣:១៥ - ០៣:៣០',
+            flagMorning: '០៦:៥០ - ០៧:០០',
+            flagAfternoon: '០៤:៥០ - ០៥:០០'
         };
     },
 
-    saveRecessTimes: function(morning, afternoon) {
+    saveRecessTimes: function(m1, m2, a1, a2, fm, fa) {
         const toKh = typeof window.toKhmerNum === 'function' ? window.toKhmerNum : String;
         const data = {
-            morning: morning ? toKh(morning.trim()) : '០៨:៣៥ - ០៨:៥០',
-            afternoon: afternoon ? toKh(afternoon.trim()) : '១៤:៣៥ - ១៤:៥០'
+            morning1: m1 ? toKh(m1.trim()) : '០៨:២០ - ០៨:៣៥',
+            morning2: m2 ? toKh(m2.trim()) : '០៩:១៥ - ០៩:៣០',
+            afternoon1: a1 ? toKh(a1.trim()) : '០២:២០ - ០២:៣៥',
+            afternoon2: a2 ? toKh(a2.trim()) : '០៣:១៥ - ០៣:៣០',
+            flagMorning: fm ? toKh(fm.trim()) : '០៦:៥០ - ០៧:០០',
+            flagAfternoon: fa ? toKh(fa.trim()) : '០៤:៥០ - ០៥:០០'
         };
         localStorage.setItem('cms_custom_timetable_recess', JSON.stringify(data));
         return data;
@@ -65,7 +87,7 @@ window.TimetableHomeworkManager = {
             const saved = localStorage.getItem('cms_custom_timetable_periods');
             if (saved) {
                 const parsed = JSON.parse(saved);
-                if (Array.isArray(parsed) && parsed.length > 0) {
+                if (Array.isArray(parsed) && parsed.length >= 10) {
                     this.periods = parsed;
                     return;
                 }
@@ -78,7 +100,7 @@ window.TimetableHomeworkManager = {
 
     saveCustomPeriods: function() {
         const newPeriods = JSON.parse(JSON.stringify(this.periods));
-        for (let i = 1; i <= 8; i++) {
+        for (let i = 1; i <= this.periods.length; i++) {
             const timeInp = document.getElementById(`custom_period_time_${i}`);
             const labelInp = document.getElementById(`custom_period_label_${i}`);
             const target = newPeriods.find(p => p.slot === i);
@@ -94,17 +116,21 @@ window.TimetableHomeworkManager = {
             }
         }
 
-        // Save recess times too
-        const recM = document.getElementById("custom_recess_morning")?.value;
-        const recA = document.getElementById("custom_recess_afternoon")?.value;
-        this.saveRecessTimes(recM, recA);
+        // Save recess & flag times too
+        const recM1 = document.getElementById("custom_recess_morning1")?.value;
+        const recM2 = document.getElementById("custom_recess_morning2")?.value;
+        const recA1 = document.getElementById("custom_recess_afternoon1")?.value;
+        const recA2 = document.getElementById("custom_recess_afternoon2")?.value;
+        const flagM = document.getElementById("custom_flag_morning")?.value;
+        const flagA = document.getElementById("custom_flag_afternoon")?.value;
+        this.saveRecessTimes(recM1, recM2, recA1, recA2, flagM, flagA);
 
         localStorage.setItem('cms_custom_timetable_periods', JSON.stringify(newPeriods));
         this.periods = newPeriods;
         this.closePeriodSettingsModal();
         this.renderView();
         if (typeof window.showToast === 'function') {
-            window.showToast("បានរក្សាទុកម៉ោងសិក្សា និងម៉ោងចេញលេងដោយជោគជ័យ!", "success");
+            window.showToast("បានរក្សាទុកម៉ោងសិក្សា ចេញលេង និងគោរពទង់ជាតិដោយជោគជ័យ!", "success");
         }
     },
 
@@ -116,7 +142,7 @@ window.TimetableHomeworkManager = {
         this.closePeriodSettingsModal();
         this.renderView();
         if (typeof window.showToast === 'function') {
-            window.showToast("បានកំណត់ម៉ោងសិក្សា និងម៉ោងចេញលេងដូចដើម!", "info");
+            window.showToast("បានកំណត់ម៉ោងសិក្សា ចេញលេង និងគោរពទង់ជាតិដូចដើម!", "info");
         }
     },
 
@@ -586,8 +612,8 @@ window.TimetableHomeworkManager = {
             }
 
             const newSchedule = {};
-            let slotIndexMorning = [1, 2, 3, 4];
-            let slotIndexAfternoon = [5, 6, 7, 8];
+            let slotIndexMorning = [1, 2, 3, 4, 5];
+            let slotIndexAfternoon = [6, 7, 8, 9, 10];
             let activeSlots = sessionMode === 'afternoon' ? slotIndexAfternoon : (sessionMode === 'fullday' ? [...slotIndexMorning, ...slotIndexAfternoon] : slotIndexMorning);
 
             let slotPointer = 0;
@@ -598,7 +624,7 @@ window.TimetableHomeworkManager = {
                     let subName = weeklySlots[slotPointer % weeklySlots.length];
                     
                     // ក្បួនឆ្លាតវៃគរុកោសល្យ៖ ម៉ោងទី ១ និង ២ ត្រូវតែជា ភាសាខ្មែរ ឬ គណិតវិទ្យា
-                    if ((slotNum === 1 || slotNum === 2 || slotNum === 5 || slotNum === 6)) {
+                    if ((slotNum === 1 || slotNum === 2 || slotNum === 6 || slotNum === 7)) {
                         if (dIdx % 2 === 0) {
                             subName = (sIdx === 0) ? (level === 'secondary' ? "អក្សរសាស្ត្រខ្មែរ" : "ភាសាខ្មែរ") : "គណិតវិទ្យា";
                         } else {
@@ -607,9 +633,9 @@ window.TimetableHomeworkManager = {
                     }
 
                     // ម៉ោងចុងសប្តាហ៍ ឬរសៀល ដាក់កីឡា ឬសិល្បៈ
-                    if (day.key === 'sat' && (slotNum === 4 || slotNum === 8)) {
+                    if (day.key === 'sat' && (slotNum === 5 || slotNum === 10)) {
                         subName = "អប់រំកាយ/កីឡា";
-                    } else if (day.key === 'fri' && (slotNum === 4 || slotNum === 8)) {
+                    } else if (day.key === 'fri' && (slotNum === 5 || slotNum === 10)) {
                         subName = level === 'secondary' ? "ភាសាអង់គ្លេស" : "សិល្បៈ";
                     }
 
@@ -722,9 +748,8 @@ window.TimetableHomeworkManager = {
                 <div class="footer-box" style="display: flex; justify-content: space-between; margin-top: 22px; padding: 0 40px; page-break-inside: avoid; font-family: 'Siemreap', sans-serif;">
                     <div style="text-align: center; width: 250px;">
                         <p style="margin: 0 0 3px 0;">បានឃើញ និងឯកភាព</p>
-                        <p class="font-moul" style="font-size: 10pt; margin: 0;">នាយក/នាយិកាសាលា</p>
+                        <p class="font-moul" style="font-size: 10pt; margin: 0;">នាយិកាសាលា</p>
                         <div style="height: 60px;"></div>
-                        <p style="margin: 0; font-family: 'Moul', cursive; font-size: 10pt;">${principalName}</p>
                     </div>
                     <div style="text-align: center; width: 290px;">
                         <p style="margin: 0 0 2px 0; font-size: 9pt; color: #475569;">${lunarDateStr}</p>
@@ -767,9 +792,8 @@ window.TimetableHomeworkManager = {
                 <div class="flex justify-between items-start pt-6 border-t border-slate-200 dark:border-slate-600 text-xs">
                     <div class="text-center space-y-1">
                         <p class="font-bold text-slate-700 dark:text-slate-300">បានឃើញ និងឯកភាព</p>
-                        <p class="font-moul text-xs text-slate-800 dark:text-white">នាយក/នាយិកាសាលា</p>
+                        <p class="font-moul text-xs text-slate-800 dark:text-white">នាយិកាសាលា</p>
                         <div class="h-16"></div>
-                        <p class="font-moul text-xs text-slate-900 dark:text-white font-bold">${principalName}</p>
                     </div>
                     <div class="text-center space-y-1">
                         <p class="text-[11px] text-slate-500 dark:text-slate-400">${lunarDateStr}</p>
@@ -808,6 +832,11 @@ window.TimetableHomeworkManager = {
                         <tr class="session-header">
                             <td colspan="7">● វេនព្រឹក (MORNING SESSION)</td>
                         </tr>
+                        <tr style="background-color: #fff1f2; font-weight: bold; text-align: center;">
+                            <td colspan="7" style="padding: 5px; font-size: 9.5pt; color: #be123c; border: 1px solid #111;">
+                                🚩 ម៉ោង ${recessTimes.flagMorning} ៖ ការគោរពទង់ជាតិ
+                            </td>
+                        </tr>
                         ${this.periods.filter(p => p.session === 'morning').map(p => {
                             let pRow = `
                                 <tr>
@@ -832,8 +861,17 @@ window.TimetableHomeworkManager = {
                             if (p.slot === 2) {
                                 pRow += `
                                     <tr style="background-color: #fef3c7; font-weight: bold; text-align: center;">
-                                        <td colspan="7" style="padding: 5px; font-size: 9.5pt; color: #92400e; border: 1px solid #111;">
-                                            🔔 ម៉ោងចេញលេង (${recessTimes.morning})
+                                        <td colspan="7" style="padding: 5px; font-size: 9.5pt; color: #dc2626; border: 1px solid #111; font-family: 'Moul', cursive;">
+                                            ចេញលេង (${recessTimes.morning1})
+                                        </td>
+                                    </tr>
+                                `;
+                            }
+                            if (p.slot === 3) {
+                                pRow += `
+                                    <tr style="background-color: #fef3c7; font-weight: bold; text-align: center;">
+                                        <td colspan="7" style="padding: 5px; font-size: 9.5pt; color: #dc2626; border: 1px solid #111; font-family: 'Moul', cursive;">
+                                            ចេញលេង (${recessTimes.morning2})
                                         </td>
                                     </tr>
                                 `;
@@ -865,17 +903,31 @@ window.TimetableHomeworkManager = {
                                     }).join("")}
                                 </tr>
                             `;
-                            if (p.slot === 6) {
+                            if (p.slot === 7) {
                                 pRow += `
                                     <tr style="background-color: #fef3c7; font-weight: bold; text-align: center;">
-                                        <td colspan="7" style="padding: 5px; font-size: 9.5pt; color: #92400e; border: 1px solid #111;">
-                                            🔔 ម៉ោងចេញលេង (${recessTimes.afternoon})
+                                        <td colspan="7" style="padding: 5px; font-size: 9.5pt; color: #dc2626; border: 1px solid #111; font-family: 'Moul', cursive;">
+                                            ចេញលេង (${recessTimes.afternoon1})
+                                        </td>
+                                    </tr>
+                                `;
+                            }
+                            if (p.slot === 8) {
+                                pRow += `
+                                    <tr style="background-color: #fef3c7; font-weight: bold; text-align: center;">
+                                        <td colspan="7" style="padding: 5px; font-size: 9.5pt; color: #dc2626; border: 1px solid #111; font-family: 'Moul', cursive;">
+                                            ចេញលេង (${recessTimes.afternoon2})
                                         </td>
                                     </tr>
                                 `;
                             }
                             return pRow;
                         }).join("")}
+                        <tr style="background-color: #fff1f2; font-weight: bold; text-align: center;">
+                            <td colspan="7" style="padding: 5px; font-size: 9.5pt; color: #be123c; border: 1px solid #111;">
+                                🚩 ម៉ោង ${recessTimes.flagAfternoon} ៖ គោរពទង់ជាតិ
+                            </td>
+                        </tr>
                     </tbody>
                 </table>
         `;
@@ -963,6 +1015,11 @@ window.TimetableHomeworkManager = {
                         <tr class="session-header">
                             <td colspan="7">● វេនព្រឹក (MORNING SESSION)</td>
                         </tr>
+                        <tr style="background-color: #fff1f2; font-weight: bold; text-align: center;">
+                            <td colspan="7" style="padding: 5px; font-size: 9.5pt; color: #be123c; border: 1px solid #111;">
+                                🚩 ម៉ោង ${recessTimes.flagMorning} ៖ ការគោរពទង់ជាតិ
+                            </td>
+                        </tr>
                         ${this.periods.filter(p => p.session === 'morning').map(p => {
                             let pRow = `
                                 <tr>
@@ -987,8 +1044,17 @@ window.TimetableHomeworkManager = {
                             if (p.slot === 2) {
                                 pRow += `
                                     <tr style="background-color: #fef3c7; font-weight: bold; text-align: center;">
-                                        <td colspan="7" style="padding: 5px; font-size: 9.5pt; color: #92400e; border: 1px solid #111;">
-                                            🔔 ម៉ោងចេញលេង (${recessTimes.morning})
+                                        <td colspan="7" style="padding: 5px; font-size: 9.5pt; color: #dc2626; border: 1px solid #111; font-family: 'Moul', cursive;">
+                                            ចេញលេង (${recessTimes.morning1})
+                                        </td>
+                                    </tr>
+                                `;
+                            }
+                            if (p.slot === 3) {
+                                pRow += `
+                                    <tr style="background-color: #fef3c7; font-weight: bold; text-align: center;">
+                                        <td colspan="7" style="padding: 5px; font-size: 9.5pt; color: #dc2626; border: 1px solid #111; font-family: 'Moul', cursive;">
+                                            ចេញលេង (${recessTimes.morning2})
                                         </td>
                                     </tr>
                                 `;
@@ -1020,17 +1086,31 @@ window.TimetableHomeworkManager = {
                                     }).join("")}
                                 </tr>
                             `;
-                            if (p.slot === 6) {
+                            if (p.slot === 7) {
                                 pRow += `
                                     <tr style="background-color: #fef3c7; font-weight: bold; text-align: center;">
-                                        <td colspan="7" style="padding: 5px; font-size: 9.5pt; color: #92400e; border: 1px solid #111;">
-                                            🔔 ម៉ោងចេញលេង (${recessTimes.afternoon})
+                                        <td colspan="7" style="padding: 5px; font-size: 9.5pt; color: #dc2626; border: 1px solid #111; font-family: 'Moul', cursive;">
+                                            ចេញលេង (${recessTimes.afternoon1})
+                                        </td>
+                                    </tr>
+                                `;
+                            }
+                            if (p.slot === 8) {
+                                pRow += `
+                                    <tr style="background-color: #fef3c7; font-weight: bold; text-align: center;">
+                                        <td colspan="7" style="padding: 5px; font-size: 9.5pt; color: #dc2626; border: 1px solid #111; font-family: 'Moul', cursive;">
+                                            ចេញលេង (${recessTimes.afternoon2})
                                         </td>
                                     </tr>
                                 `;
                             }
                             return pRow;
                         }).join("")}
+                        <tr style="background-color: #fff1f2; font-weight: bold; text-align: center;">
+                            <td colspan="7" style="padding: 5px; font-size: 9.5pt; color: #be123c; border: 1px solid #111;">
+                                🚩 ម៉ោង ${recessTimes.flagAfternoon} ៖ គោរពទង់ជាតិ
+                            </td>
+                        </tr>
                     </tbody>
                 </table>
 
@@ -1331,14 +1411,30 @@ window.TimetableHomeworkManager = {
                                             <i class="fa-solid fa-sun mr-2 text-amber-500"></i> វេនព្រឹក (Morning Session)
                                         </td>
                                     </tr>
+                                    <!-- Flag Ceremony (Morning - Before Period 1) -->
+                                    <tr class="bg-red-50/80 dark:bg-red-950/40 font-bold text-center text-red-900 dark:text-red-200 border-y border-red-300/80 dark:border-red-700/60">
+                                        <td colspan="7" class="py-1.5 px-4 text-xs font-bold">
+                                            <i class="fa-solid fa-flag text-red-600 mr-1.5 animate-pulse"></i>
+                                            ម៉ោង ${recessTimes.flagMorning} ៖ ការគោរពទង់ជាតិ និងចម្រៀងជាតិ
+                                        </td>
+                                    </tr>
                                     ${this.periods.filter(p => p.session === 'morning').map(p => {
                                         let rowHtml = this.renderPeriodRow(p);
                                         if (p.slot === 2) {
                                             rowHtml += `
                                                 <tr class="bg-amber-100/80 dark:bg-amber-950/40 font-bold text-center text-amber-900 dark:text-amber-200 border-y border-amber-300/80 dark:border-amber-700/60">
-                                                    <td colspan="7" class="py-2 px-4 text-xs font-bold">
+                                                    <td colspan="7" class="py-1.5 px-4 text-xs font-bold">
                                                         <i class="fa-solid fa-bell text-amber-600 animate-bounce mr-1.5"></i>
-                                                        ម៉ោងចេញលេងពេលព្រឹក (${recessTimes.morning})
+                                                        ម៉ោងចេញលេងលើកទី ១ (${recessTimes.morning1})
+                                                    </td>
+                                                </tr>
+                                            `;
+                                        } else if (p.slot === 3) {
+                                            rowHtml += `
+                                                <tr class="bg-amber-100/80 dark:bg-amber-950/40 font-bold text-center text-amber-900 dark:text-amber-200 border-y border-amber-300/80 dark:border-amber-700/60">
+                                                    <td colspan="7" class="py-1.5 px-4 text-xs font-bold">
+                                                        <i class="fa-solid fa-bell text-amber-600 animate-bounce mr-1.5"></i>
+                                                        ម៉ោងចេញលេងលើកទី ២ (${recessTimes.morning2})
                                                     </td>
                                                 </tr>
                                             `;
@@ -1354,18 +1450,34 @@ window.TimetableHomeworkManager = {
                                     </tr>
                                     ${this.periods.filter(p => p.session === 'afternoon').map(p => {
                                         let rowHtml = this.renderPeriodRow(p);
-                                        if (p.slot === 6) {
+                                        if (p.slot === 7) {
                                             rowHtml += `
                                                 <tr class="bg-amber-100/80 dark:bg-amber-950/40 font-bold text-center text-amber-900 dark:text-amber-200 border-y border-amber-300/80 dark:border-amber-700/60">
-                                                    <td colspan="7" class="py-2 px-4 text-xs font-bold">
+                                                    <td colspan="7" class="py-1.5 px-4 text-xs font-bold">
                                                         <i class="fa-solid fa-bell text-amber-600 animate-bounce mr-1.5"></i>
-                                                        ម៉ោងចេញលេងពេលរសៀល (${recessTimes.afternoon})
+                                                        ម៉ោងចេញលេងលើកទី ១ (${recessTimes.afternoon1})
+                                                    </td>
+                                                </tr>
+                                            `;
+                                        } else if (p.slot === 8) {
+                                            rowHtml += `
+                                                <tr class="bg-amber-100/80 dark:bg-amber-950/40 font-bold text-center text-amber-900 dark:text-amber-200 border-y border-amber-300/80 dark:border-amber-700/60">
+                                                    <td colspan="7" class="py-1.5 px-4 text-xs font-bold">
+                                                        <i class="fa-solid fa-bell text-amber-600 animate-bounce mr-1.5"></i>
+                                                        ម៉ោងចេញលេងលើកទី ២ (${recessTimes.afternoon2})
                                                     </td>
                                                 </tr>
                                             `;
                                         }
                                         return rowHtml;
                                     }).join("")}
+                                    <!-- Flag Ceremony (Afternoon - After Period 5) -->
+                                    <tr class="bg-red-50/80 dark:bg-red-950/40 font-bold text-center text-red-900 dark:text-red-200 border-y border-red-300/80 dark:border-red-700/60">
+                                        <td colspan="7" class="py-1.5 px-4 text-xs font-bold">
+                                            <i class="fa-solid fa-flag text-red-600 mr-1.5 animate-pulse"></i>
+                                            ម៉ោង ${recessTimes.flagAfternoon} ៖ គោរពទង់ជាតិ
+                                        </td>
+                                    </tr>
                                 </tbody>
                             </table>
                         </div>
@@ -1396,19 +1508,47 @@ window.TimetableHomeworkManager = {
                     </div>
 
                     <div class="space-y-6 text-xs">
-                        <!-- ម៉ោងចេញលេង (Recess Breaks) -->
-                        <div class="p-4 bg-amber-50/80 dark:bg-amber-950/30 rounded-2xl border border-amber-200/80 dark:border-amber-700/50 space-y-3">
+                        <!-- ម៉ោងចេញលេង និងគោរពទង់ជាតិ (Recess Breaks & Flag Ceremony) -->
+                        <div class="p-4 bg-amber-50/80 dark:bg-amber-950/30 rounded-2xl border border-amber-200/80 dark:border-amber-700/50 space-y-4">
                             <h4 class="font-bold text-amber-800 dark:text-amber-300 text-sm flex items-center gap-2">
-                                <i class="fa-solid fa-bell text-amber-600"></i> ម៉ោងចេញលេង (Recess / Break Times)
+                                <i class="fa-solid fa-bell text-amber-600"></i> ម៉ោងចេញលេង និងគោរពទង់ជាតិ (Recess Breaks & Flag Ceremony)
                             </h4>
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                <div>
-                                    <label class="block font-bold text-slate-700 dark:text-slate-200 mb-1">ចេញលេងពេលព្រឹក (ក្រោយម៉ោងទី ២)</label>
-                                    <input type="text" id="custom_recess_morning" value="${recessTimes.morning}" class="w-full px-3 py-2 rounded-xl border border-amber-300 dark:border-amber-700 bg-white dark:bg-slate-800 text-xs font-mono font-bold text-amber-900 dark:text-amber-200 outline-none focus:ring-2 focus:ring-amber-500" placeholder="ឧ. ០៨:៣៥ - ០៨:៥០">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <!-- Morning Recess & Flag -->
+                                <div class="p-3.5 bg-white/90 dark:bg-slate-800/90 rounded-2xl border border-emerald-200 dark:border-emerald-700/40 space-y-2.5">
+                                    <div class="font-bold text-emerald-700 dark:text-emerald-400 text-xs flex items-center gap-1.5 pb-1 border-b border-emerald-100 dark:border-emerald-800">
+                                        <i class="fa-solid fa-sun text-amber-500"></i> វេនព្រឹក (Morning)
+                                    </div>
+                                    <div>
+                                        <label class="block font-bold text-slate-700 dark:text-slate-300 mb-1">គោរពទង់ជាតិ (ពេលព្រឹក មុនម៉ោងទី ១)</label>
+                                        <input type="text" id="custom_flag_morning" value="${recessTimes.flagMorning}" class="w-full px-3 py-1.5 rounded-xl border border-red-300 dark:border-red-700 bg-white dark:bg-slate-800 text-xs font-mono font-bold text-red-900 dark:text-red-200 outline-none focus:ring-2 focus:ring-red-500" placeholder="ឧ. ០៦:៥០ - ០៧:០០">
+                                    </div>
+                                    <div>
+                                        <label class="block font-bold text-slate-700 dark:text-slate-300 mb-1">ចេញលេងលើកទី ១ (ក្រោយម៉ោងទី ២)</label>
+                                        <input type="text" id="custom_recess_morning1" value="${recessTimes.morning1}" class="w-full px-3 py-1.5 rounded-xl border border-amber-300 dark:border-amber-700 bg-white dark:bg-slate-800 text-xs font-mono font-bold text-amber-900 dark:text-amber-200 outline-none focus:ring-2 focus:ring-amber-500" placeholder="ឧ. ០៨:២០ - ០៨:៣៥">
+                                    </div>
+                                    <div>
+                                        <label class="block font-bold text-slate-700 dark:text-slate-300 mb-1">ចេញលេងលើកទី ២ (ក្រោយម៉ោងទី ៣)</label>
+                                        <input type="text" id="custom_recess_morning2" value="${recessTimes.morning2}" class="w-full px-3 py-1.5 rounded-xl border border-amber-300 dark:border-amber-700 bg-white dark:bg-slate-800 text-xs font-mono font-bold text-amber-900 dark:text-amber-200 outline-none focus:ring-2 focus:ring-amber-500" placeholder="ឧ. ០៩:១៥ - ០៩:៣០">
+                                    </div>
                                 </div>
-                                <div>
-                                    <label class="block font-bold text-slate-700 dark:text-slate-200 mb-1">ចេញលេងពេលរសៀល (ក្រោយម៉ោងទី ៦)</label>
-                                    <input type="text" id="custom_recess_afternoon" value="${recessTimes.afternoon}" class="w-full px-3 py-2 rounded-xl border border-amber-300 dark:border-amber-700 bg-white dark:bg-slate-800 text-xs font-mono font-bold text-amber-900 dark:text-amber-200 outline-none focus:ring-2 focus:ring-amber-500" placeholder="ឧ. ១៤:៣៥ - ១៤:៥០">
+                                <!-- Afternoon Recess & Flag -->
+                                <div class="p-3.5 bg-white/90 dark:bg-slate-800/90 rounded-2xl border border-blue-200 dark:border-blue-700/40 space-y-2.5">
+                                    <div class="font-bold text-blue-700 dark:text-blue-400 text-xs flex items-center gap-1.5 pb-1 border-b border-blue-100 dark:border-blue-800">
+                                        <i class="fa-solid fa-cloud-sun text-blue-500"></i> វេនរសៀល (Afternoon)
+                                    </div>
+                                    <div>
+                                        <label class="block font-bold text-slate-700 dark:text-slate-300 mb-1">ចេញលេងលើកទី ១ (ក្រោយម៉ោងទី ២ រសៀល)</label>
+                                        <input type="text" id="custom_recess_afternoon1" value="${recessTimes.afternoon1}" class="w-full px-3 py-1.5 rounded-xl border border-amber-300 dark:border-amber-700 bg-white dark:bg-slate-800 text-xs font-mono font-bold text-amber-900 dark:text-amber-200 outline-none focus:ring-2 focus:ring-amber-500" placeholder="ឧ. ០២:២០ - ០២:៣៥">
+                                    </div>
+                                    <div>
+                                        <label class="block font-bold text-slate-700 dark:text-slate-300 mb-1">ចេញលេងលើកទី ២ (ក្រោយម៉ោងទី ៣ រសៀល)</label>
+                                        <input type="text" id="custom_recess_afternoon2" value="${recessTimes.afternoon2}" class="w-full px-3 py-1.5 rounded-xl border border-amber-300 dark:border-amber-700 bg-white dark:bg-slate-800 text-xs font-mono font-bold text-amber-900 dark:text-amber-200 outline-none focus:ring-2 focus:ring-amber-500" placeholder="ឧ. ០៣:១៥ - ០៣:៣០">
+                                    </div>
+                                    <div>
+                                        <label class="block font-bold text-slate-700 dark:text-slate-300 mb-1">គោរពទង់ជាតិ (ពេលរសៀល ក្រោយម៉ោងទី ៥)</label>
+                                        <input type="text" id="custom_flag_afternoon" value="${recessTimes.flagAfternoon}" class="w-full px-3 py-1.5 rounded-xl border border-red-300 dark:border-red-700 bg-white dark:bg-slate-800 text-xs font-mono font-bold text-red-900 dark:text-red-200 outline-none focus:ring-2 focus:ring-red-500" placeholder="ឧ. ០៤:៥០ - ០៥:០០">
+                                    </div>
                                 </div>
                             </div>
                         </div>
