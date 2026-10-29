@@ -149,7 +149,7 @@ describe('MoEYS Sikha-karik Booklet & Centralized Reports Suite', () => {
             'សុជីវធម៌ និងពលរដ្ឋវិជ្ជា',
             'រៀនអាន និងមេសូត្រ',
             'គណិតវិទ្យា',
-            'អក្ខរាវិរុទ្ធ',
+            'អក្សរផ្ចង់',
             'គំនូរ និង ហត្ថកម្ម',
             'សរសេរតាមអាន និងសំណួរ',
             'តែងសេចក្តី',
@@ -518,5 +518,65 @@ describe('MoEYS Sikha-karik Booklet & Centralized Reports Suite', () => {
         assert.ok(html.includes('ពេលអវត្តមានសរុប'), 'Must contain total absent sessions calculation');
         assert.ok(html.includes('ពេលដែលសិស្សមករៀនពិតប្រាកដ'), 'Must contain actual attended sessions calculation');
         assert.ok(html.includes('ភាគរយអវត្តមាន'), 'Must contain absence percentage calculation');
+    });
+
+    test('14. Sikhakarik booklet populates Semester 1 and Semester 2 exam scores and summary rows', () => {
+        context.window.allStudents = [
+            {
+                id: 'STU-001',
+                student_id: 'STU-001',
+                name: 'សុខ ចាន់ដារ៉ា',
+                gender: 'ប្រុស',
+                dob: '១៥/០៥/២០១៤',
+                pob: 'ភ្នំពេញ',
+                grade: 'ថ្នាក់ទី ៤',
+                room: '«ក»'
+            }
+        ];
+
+        const sampleScores = [
+            {
+                student_id: 'STU-001',
+                name: 'សុខ ចាន់ដារ៉ា',
+                grade: 'ថ្នាក់ទី ៤ «ក»',
+                period_type: 'semester',
+                month: 'ឆមាសទី១',
+                math: 9.5,
+                k_write: 8.5,
+                total_exam: 18.0,
+                avg_exam: 9.0,
+                monthly_avg: 8.5,
+                average: 8.75,
+                rank: 1,
+                grade_letter: 'ល្អណាស់'
+            },
+            {
+                student_id: 'STU-001',
+                name: 'សុខ ចាន់ដារ៉ា',
+                grade: 'ថ្នាក់ទី ៤ «ក»',
+                period_type: 'semester',
+                month: 'ឆមាសទី២',
+                math: 9.0,
+                k_write: 9.0,
+                total_exam: 18.0,
+                avg_exam: 9.0,
+                monthly_avg: 9.0,
+                average: 9.0,
+                rank: 1,
+                grade_letter: 'ល្អណាស់'
+            }
+        ];
+        context.localStorage.setItem('academic_scores', JSON.stringify(sampleScores));
+
+        const container = { innerHTML: '' };
+        context.window.renderSikhaKarikBooklet(container, 'ថ្នាក់ទី ៤', '«ក»', 'STU-001', 'scores_eval');
+        const html = container.innerHTML;
+
+        assert.ok(html.includes('៩.៥') || html.includes('9.5'), 'Should display semester 1 math score');
+        assert.ok(html.includes('៨.៧៥') || html.includes('8.75'), 'Should display semester 1 overall average');
+        assert.ok(html.includes('៩') || html.includes('9'), 'Should display semester 2 score/average');
+        assert.ok(html.includes('សរុបពិន្ទុ'), 'Should display total score row');
+        assert.ok(html.includes('មធ្យមភាគប្រចាំឆមាស'), 'Should display semester average row');
+        assert.ok(html.includes('លទ្ធផលដំណាច់ឆ្នាំ'), 'Should display annual result row');
     });
 });

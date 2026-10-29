@@ -2730,17 +2730,54 @@ window.renderSikhaKarikBooklet = function(container, targetGrade, targetRoom, st
     try {
         allScores = JSON.parse(localStorage.getItem('academic_scores') || '[]');
     } catch(e) { allScores = []; }
-    const stuScores = allScores.filter(s => 
-        (s.student_id && (String(s.student_id) === String(student.id) || String(s.student_id) === String(student.student_id))) ||
-        (s.name && s.name.trim() === stuName.trim())
+
+    const curGradeClean = (curLevel + (curRoom || '')).replace(/\s+/g, '');
+    const isMatchingGrade = (g) => {
+        if (!g) return true;
+        const gClean = String(g).replace(/\s+/g, '');
+        return gClean === curGradeClean || gClean.includes(curGradeClean) || curGradeClean.includes(gClean);
+    };
+
+    // ត្រងយកកំណត់ត្រាពិន្ទុឆមាសទី១ ឆមាសទី២ និងប្រចាំឆ្នាំ
+    const s1ClassScores = allScores.filter(s => 
+        (s.period_type === "semester" || s.type === "semester" || !s.period_type) &&
+        (s.month === "ឆមាសទី១" || s.semester === "1" || s.semester === 1 || s.term === "s1" || (s.month && String(s.month).includes("១"))) &&
+        isMatchingGrade(s.grade)
     );
 
-    // មុខវិជ្ជាទាំង ១២ ផ្លូវការរបស់ក្រសួងអប់រំ
+    const s2ClassScores = allScores.filter(s => 
+        (s.period_type === "semester" || s.type === "semester") &&
+        (s.month === "ឆមាសទី២" || s.semester === "2" || s.semester === 2 || s.term === "s2" || (s.month && String(s.month).includes("២"))) &&
+        isMatchingGrade(s.grade)
+    );
+
+    const annualClassScores = allScores.filter(s => 
+        (s.period_type === "annual" || s.type === "annual" || s.month === "ប្រចាំឆ្នាំ") &&
+        isMatchingGrade(s.grade)
+    );
+
+    // កំណត់ត្រារបស់សិស្សបច្ចុប្បន្ន
+    const stuS1 = s1ClassScores.find(s => 
+        (s.student_id && (String(s.student_id) === String(student.id) || String(s.student_id) === String(student.student_id))) ||
+        (s.name && s.name.trim() === stuName.trim())
+    ) || {};
+
+    const stuS2 = s2ClassScores.find(s => 
+        (s.student_id && (String(s.student_id) === String(student.id) || String(s.student_id) === String(student.student_id))) ||
+        (s.name && s.name.trim() === stuName.trim())
+    ) || {};
+
+    const stuAnnual = annualClassScores.find(s => 
+        (s.student_id && (String(s.student_id) === String(student.id) || String(s.student_id) === String(student.student_id))) ||
+        (s.name && s.name.trim() === stuName.trim())
+    ) || {};
+
+    // មុខវិជ្ជាទាំង ១២ ផ្លូវការរបស់ក្រសួងអប់រំ (យោងតាមសៀវភៅសិក្ខាគារិកផ្លូវការ)
     const officialSubjects = [
         "សុជីវធម៌ និងពលរដ្ឋវិជ្ជា",
         "រៀនអាន និងមេសូត្រ",
         "គណិតវិទ្យា",
-        "អក្ខរាវិរុទ្ធ",
+        "អក្សរផ្ចង់",
         "គំនូរ និង ហត្ថកម្ម",
         "សរសេរតាមអាន និងសំណួរ",
         "តែងសេចក្តី",
@@ -2752,80 +2789,220 @@ window.renderSikhaKarikBooklet = function(container, targetGrade, targetRoom, st
     ];
 
     const officialSubjectAliases = {
-        "សុជីវធម៌ និងពលរដ្ឋវិជ្ជា": ["សុជីវធម៌ និងពលរដ្ឋវិជ្ជា", "សីលធម៌-ពលរដ្ឋ", "ss_moral", "moral"],
-        "រៀនអាន និងមេសូត្រ": ["រៀនអាន និងមេសូត្រ", "អាន", "មេសូត្រ", "k_read", "k_recite", "read"],
-        "គណិតវិទ្យា": ["គណិតវិទ្យា", "គណិត", "math", "m_num", "m_alg", "m_geo"],
-        "អក្ខរាវិរុទ្ធ": ["អក្ខរាវិរុទ្ធ", "អក្សរផ្ចង់", "k_calligraphy", "spelling"],
-        "គំនូរ និង ហត្ថកម្ម": ["គំនូរ និង ហត្ថកម្ម", "គំនូរ", "art", "drawing"],
+        "សុជីវធម៌ និងពលរដ្ឋវិជ្ជា": ["សុជីវធម៌ និងពលរដ្ឋវិជ្ជា", "សីលធម៌-ពលរដ្ឋ", "ss_moral", "moral", "សីលធម៌", "ពលរដ្ឋ"],
+        "រៀនអាន និងមេត្រួត": ["រៀនអាន និងមេត្រួត", "រៀនអាន និងមេសូត្រ", "អាន", "មេសូត្រ", "k_read", "k_recite", "read", "k_listen"],
+        "គណិតវិទ្យា": ["គណិតវិទ្យា", "គណិត", "math", "m_num", "m_alg", "m_geo", "m_measure", "m_stat"],
+        "អក្សរផ្ចង់": ["អក្សរផ្ចង់", "អក្ខរាវិរុទ្ធ", "k_calligraphy", "spelling", "calligraphy"],
+        "គំនូរ និង ហត្ថកម្ម": ["គំនូរ និង ហត្ថកម្ម", "គំនូរ", "art", "drawing", "life_skill", "បំណិនជីវិត"],
         "សរសេរតាមអាន និងសំណួរ": ["សរសេរតាមអាន និងសំណួរ", "សរសេរតាមអាន", "សរសេរ", "k_write", "dictation"],
         "តែងសេចក្តី": ["តែងសេចក្តី", "តែងសេចក្ដី", "k_compose", "compose"],
-        "វិទ្យាសាស្ត្រអនុវត្ត": ["វិទ្យាសាស្ត្រអនុវត្ត", "វិទ្យាសាស្ត្រ", "science", "s_bio", "s_phy", "s_chem"],
+        "វិទ្យាសាស្ត្រអនុវត្ត": ["វិទ្យាសាស្ត្រអនុវត្ត", "វិទ្យាសាស្ត្រ", "science", "s_bio", "s_phy", "s_chem", "s_earth", "physics", "chemistry", "biology", "earth"],
         "ភូមិវិទ្យា": ["ភូមិវិទ្យា", "ភូមិ", "geography", "ss_geo"],
         "ប្រវត្តិវិទ្យា": ["ប្រវត្តិវិទ្យា", "ប្រវត្តិ", "history", "ss_hist"],
-        "អប់រំកាយ និងកីឡា": ["អប់រំកាយ និងកីឡា", "អប់រំកាយ-កីឡា", "កីឡា", "sport", "pe_sport"],
+        "អប់រំកាយ និងកីឡា": ["អប់រំកាយ និងកីឡា", "អប់រំកាយ-កីឡា", "កីឡា", "sport", "pe_sport", "pe_health"],
         "ភាសាបរទេស": ["ភាសាបរទេស", "អង់គ្លេស", "english", "foreign_lang"]
     };
 
-    const getScoreForSubject = (subName, sem) => {
+    // មុខងារទាញយកពិន្ទុមុខវិជ្ជា
+    const getSubjectScore = (stuObj, stuId, subName, sem) => {
         const aliases = officialSubjectAliases[subName] || [subName];
-        // 1. Check in stuScores where subject matches alias
-        for (const s of stuScores) {
-            const isSem = sem === 1 ? (s.semester === '1' || s.semester === 1 || s.term === 's1' || !s.semester) : (s.semester === '2' || s.semester === 2 || s.term === 's2');
-            if (!isSem) continue;
+        if (stuObj) {
             for (const al of aliases) {
-                if (s.subject === al || s.subject_khmer === al) {
-                    return { val: s.score || s.val || '', rank: s.rank || '' };
+                if (stuObj[al] !== undefined && stuObj[al] !== null && stuObj[al] !== '') {
+                    return stuObj[al];
                 }
-                if (s.scores && s.scores[al] !== undefined) {
-                    return { val: s.scores[al], rank: s.rank || '' };
+                if (stuObj.scores && stuObj.scores[al] !== undefined && stuObj.scores[al] !== '') {
+                    return stuObj.scores[al];
                 }
-                if (s[al] !== undefined && s[al] !== null && typeof s[al] !== 'object') {
-                    return { val: s[al], rank: s.rank || '' };
+            }
+            // ប្រសិនបើមុខវិជ្ជាគណិតវិទ្យា ហើយមានតែមុខវិជ្ជារង
+            if (subName === "គណិតវិទ្យា") {
+                const mathKeys = ["m_num", "m_measure", "m_geo", "m_alg", "m_stat"];
+                let mSum = 0, mCount = 0;
+                mathKeys.forEach(mk => {
+                    if (stuObj[mk] !== undefined && stuObj[mk] !== '' && !isNaN(parseFloat(stuObj[mk]))) {
+                        mSum += parseFloat(stuObj[mk]); mCount++;
+                    }
+                });
+                if (mCount > 0) return (mSum / mCount).toFixed(1);
+            }
+            // ប្រសិនបើវិទ្យាសាស្ត្រ ហើយមានតែមុខវិជ្ជារង
+            if (subName === "វិទ្យាសាស្ត្រអនុវត្ត") {
+                const sciKeys = ["s_phy", "s_chem", "s_bio", "s_earth"];
+                let sSum = 0, sCount = 0;
+                sciKeys.forEach(sk => {
+                    if (stuObj[sk] !== undefined && stuObj[sk] !== '' && !isNaN(parseFloat(stuObj[sk]))) {
+                        sSum += parseFloat(stuObj[sk]); sCount++;
+                    }
+                });
+                if (sCount > 0) return (sSum / sCount).toFixed(1);
+            }
+        }
+        // Fallback ស្វែងរកតាមជួរដេកក្នុង allScores
+        for (const s of allScores) {
+            if ((String(s.student_id) === String(stuId) || (s.name && s.name.trim() === stuName.trim())) &&
+                (sem === 1 ? (s.semester === '1' || s.semester === 1 || s.term === 's1' || (s.month && String(s.month).includes('១')))
+                           : (s.semester === '2' || s.semester === 2 || s.term === 's2' || (s.month && String(s.month).includes('២'))))) {
+                for (const al of aliases) {
+                    if (s.subject === al || s.subject_khmer === al) {
+                        return s.score !== undefined ? s.score : (s.val || '');
+                    }
                 }
             }
         }
-        return { val: '', rank: '' };
+        return '';
     };
 
-    // រៀបចំតារាងពិន្ទុមុខវិជ្ជាទាំង ១២
+    // មុខងារគណនាចំណាត់ថ្នាក់តាមមុខវិជ្ជាក្នុងថ្នាក់ (Subject Rank)
+    const getSubjectRank = (subName, sem, studentScore) => {
+        if (studentScore === '' || studentScore === null || studentScore === undefined) return '';
+        const num = parseFloat(studentScore);
+        if (isNaN(num)) return '';
+        let higherCount = 0;
+        allStus.forEach(st => {
+            const stId = st.id || st.student_id;
+            if (String(stId) === String(student.id || student.student_id)) return;
+            const stRec = (sem === 1 ? s1ClassScores : s2ClassScores).find(s => String(s.student_id) === String(stId));
+            const stScore = getSubjectScore(stRec, stId, subName, sem);
+            if (stScore !== '' && !isNaN(parseFloat(stScore))) {
+                if (parseFloat(stScore) > num) higherCount++;
+            }
+        });
+        return higherCount + 1;
+    };
+
+    // គណនាពិន្ទុ និងចំណាត់ថ្នាក់មុខវិជ្ជាទាំង ១២
+    let s1SubScoresSum = 0, s1SubCount = 0;
+    let s2SubScoresSum = 0, s2SubCount = 0;
+
     const subjectRowsHtml = officialSubjects.map(subName => {
-        const s1 = getScoreForSubject(subName, 1);
-        const s2 = getScoreForSubject(subName, 2);
-        
-        const s1Val = s1.val;
-        const s1Rank = s1.rank;
-        const s2Val = s2.val;
-        const s2Rank = s2.rank;
+        const s1Raw = getSubjectScore(stuS1, student.id || student.student_id, subName, 1);
+        const s2Raw = getSubjectScore(stuS2, student.id || student.student_id, subName, 2);
+
+        if (s1Raw !== '' && !isNaN(parseFloat(s1Raw))) {
+            s1SubScoresSum += parseFloat(s1Raw); s1SubCount++;
+        }
+        if (s2Raw !== '' && !isNaN(parseFloat(s2Raw))) {
+            s2SubScoresSum += parseFloat(s2Raw); s2SubCount++;
+        }
+
+        const s1RankRaw = getSubjectRank(subName, 1, s1Raw);
+        const s2RankRaw = getSubjectRank(subName, 2, s2Raw);
+
+        const s1Val = s1Raw !== '' ? window.toKhmerNum(String(s1Raw)) : '';
+        const s1Rank = s1RankRaw ? window.toKhmerNum(String(s1RankRaw)) : '';
+        const s2Val = s2Raw !== '' ? window.toKhmerNum(String(s2Raw)) : '';
+        const s2Rank = s2RankRaw ? window.toKhmerNum(String(s2RankRaw)) : '';
 
         return `
             <tr>
                 <td style="border: 1px solid #1e3a8a; padding: 3px 6px; text-align: left; font-size: 9pt;">${subName}</td>
-                <td style="border: 1px solid #1e3a8a; padding: 3px 4px; text-align: center; font-size: 9pt; width: 50px;">${s1Val}</td>
-                <td style="border: 1px solid #1e3a8a; padding: 3px 4px; text-align: center; font-size: 9pt; width: 50px;">${s1Rank}</td>
-                <td style="border: 1px solid #1e3a8a; padding: 3px 4px; text-align: center; font-size: 9pt; width: 50px;">${s2Val}</td>
-                <td style="border: 1px solid #1e3a8a; padding: 3px 4px; text-align: center; font-size: 9pt; width: 50px;">${s2Rank}</td>
+                <td style="border: 1px solid #1e3a8a; padding: 3px 4px; text-align: center; font-size: 9pt; width: 50px; font-weight: bold; color: #1e3a8a;">${s1Val}</td>
+                <td style="border: 1px solid #1e3a8a; padding: 3px 4px; text-align: center; font-size: 9pt; width: 50px; color: #64748b;">${s1Rank}</td>
+                <td style="border: 1px solid #1e3a8a; padding: 3px 4px; text-align: center; font-size: 9pt; width: 50px; font-weight: bold; color: #1e3a8a;">${s2Val}</td>
+                <td style="border: 1px solid #1e3a8a; padding: 3px 4px; text-align: center; font-size: 9pt; width: 50px; color: #64748b;">${s2Rank}</td>
             </tr>
         `;
     }).join('');
 
+    // គណនាតម្លៃសរុប និងមធ្យមភាគប្រចាំឆមាសទី១ និងទី២
+    const s1TotalExamVal = stuS1.total_exam || stuS1.total_score || (s1SubCount > 0 ? s1SubScoresSum.toFixed(1) : '');
+    const s1AvgExamVal = stuS1.avg_exam || (s1SubCount > 0 ? (s1SubScoresSum / s1SubCount).toFixed(2) : '');
+    const s1MonthlyAvgVal = stuS1.monthly_avg || (typeof window.calculateDynamicMonthlyAverage === 'function' ? window.calculateDynamicMonthlyAverage(student.id || student.student_id, 's1') : '') || '';
+    
+    let s1SemAvgVal = stuS1.average || '';
+    if (!s1SemAvgVal && s1AvgExamVal && s1MonthlyAvgVal) {
+        s1SemAvgVal = ((parseFloat(s1AvgExamVal) + parseFloat(s1MonthlyAvgVal)) / 2).toFixed(2);
+    } else if (!s1SemAvgVal && s1AvgExamVal) {
+        s1SemAvgVal = s1AvgExamVal;
+    }
+    const s1SemRankVal = stuS1.rank || '';
+
+    const s2TotalExamVal = stuS2.total_exam || stuS2.total_score || (s2SubCount > 0 ? s2SubScoresSum.toFixed(1) : '');
+    const s2AvgExamVal = stuS2.avg_exam || (s2SubCount > 0 ? (s2SubScoresSum / s2SubCount).toFixed(2) : '');
+    const s2MonthlyAvgVal = stuS2.monthly_avg || (typeof window.calculateDynamicMonthlyAverage === 'function' ? window.calculateDynamicMonthlyAverage(student.id || student.student_id, 's2') : '') || '';
+    
+    let s2SemAvgVal = stuS2.average || '';
+    if (!s2SemAvgVal && s2AvgExamVal && s2MonthlyAvgVal) {
+        s2SemAvgVal = ((parseFloat(s2AvgExamVal) + parseFloat(s2MonthlyAvgVal)) / 2).toFixed(2);
+    } else if (!s2SemAvgVal && s2AvgExamVal) {
+        s2SemAvgVal = s2AvgExamVal;
+    }
+    const s2SemRankVal = stuS2.rank || '';
+
+    // គណនាលទ្ធផលប្រចាំឆ្នាំ
+    let annualAvgVal = stuAnnual.average || '';
+    if (!annualAvgVal && s1SemAvgVal && s2SemAvgVal) {
+        annualAvgVal = ((parseFloat(s1SemAvgVal) + (parseFloat(s2SemAvgVal) * 2)) / 3).toFixed(2);
+    } else if (!annualAvgVal && s1SemAvgVal) {
+        annualAvgVal = s1SemAvgVal;
+    }
+    const annualRankVal = stuAnnual.rank || '';
+    const annualGradeLetter = stuAnnual.grade_letter || (typeof window.getGradeLetter === 'function' ? window.getGradeLetter(annualAvgVal) : '');
+
+    // ការឡើងថ្នាក់ស្វ័យប្រវត្តិតាមកម្រិតថ្នាក់
+    const gradeProgression = {
+        "ថ្នាក់ទី ១": "ថ្នាក់ទី ២", "ថ្នាក់ទី 1": "ថ្នាក់ទី ២",
+        "ថ្នាក់ទី ២": "ថ្នាក់ទី ៣", "ថ្នាក់ទី 2": "ថ្នាក់ទី ៣",
+        "ថ្នាក់ទី ៣": "ថ្នាក់ទី ៤", "ថ្នាក់ទី 3": "ថ្នាក់ទី ៤",
+        "ថ្នាក់ទី ៤": "ថ្នាក់ទី ៥", "ថ្នាក់ទី 4": "ថ្នាក់ទី ៥",
+        "ថ្នាក់ទី ៥": "ថ្នាក់ទី ៦", "ថ្នាក់ទី 5": "ថ្នាក់ទី ៦",
+        "ថ្នាក់ទី ៦": "ថ្នាក់ទី ៧", "ថ្នាក់ទី 6": "ថ្នាក់ទី ៧"
+    };
+    const nextGrade = gradeProgression[curLevel] || "ថ្នាក់បន្ទាប់";
+    const isPromoted = parseFloat(annualAvgVal) >= 5.00;
+    const isFailed = parseFloat(annualAvgVal) > 0 && parseFloat(annualAvgVal) < 5.00;
+
     // ទាញទិន្នន័យអវត្តមាន
     let s1Permit = 0, s1Unpermit = 0, s2Permit = 0, s2Unpermit = 0;
     try {
-        const attRecords = JSON.parse(localStorage.getItem('attendance_records') || '[]');
+        const attRecords = JSON.parse(localStorage.getItem('academic_attendance') || '[]');
         attRecords.forEach(rec => {
-            if (String(rec.student_id) === String(student.id) || String(rec.student_id) === String(student.student_id) || rec.name === stuName) {
-                const monthNum = parseInt(rec.month, 10);
-                const isS1 = (monthNum >= 10 || monthNum <= 1);
-                if (rec.status === 'P' || rec.status === 'ច' || rec.status === 'មានច្បាប់') {
-                    if (isS1) s1Permit++; else s2Permit++;
-                } else if (rec.status === 'A' || rec.status === 'អ' || rec.status === 'ឥតច្បាប់') {
-                    if (isS1) s1Unpermit++; else s2Unpermit++;
+            if (!rec) return;
+            const recId = String(rec.student_id || rec.studentId || rec.id || '').trim();
+            const recName = String(rec.student_name || rec.name || '').trim();
+            if (recId !== String(student.id || student.student_id) && recName !== stuName) return;
+
+            let isS1 = true;
+            if (rec.month) {
+                const mStr = String(rec.month);
+                if (["មីនា", "មេសា", "ឧសភា", "មិថុនា", "កក្កដា"].includes(mStr)) isS1 = false;
+            } else if (rec.date) {
+                const dObj = new Date(rec.date);
+                if (!isNaN(dObj.getTime())) {
+                    const mIdx = dObj.getMonth();
+                    if (mIdx >= 2 && mIdx <= 6) isS1 = false;
                 }
+            }
+
+            const st = String(rec.status || rec.attendance || '').trim();
+            if (st === 'ច' || st === 'ច្ប' || st.includes('ច្បាប់')) {
+                if (isS1) s1Permit++; else s2Permit++;
+            } else if (st === 'អ' || st === 'អច្ប' || st.includes('ឥតច្បាប់') || st.includes('អវត្តមាន')) {
+                if (isS1) s1Unpermit++; else s2Unpermit++;
             }
         });
     } catch(e) {}
+
+    // Fallback ពិនិត្យ attendance_records
+    if (s1Permit + s1Unpermit + s2Permit + s2Unpermit === 0) {
+        try {
+            const attRecordsFb = JSON.parse(localStorage.getItem('attendance_records') || '[]');
+            attRecordsFb.forEach(rec => {
+                if (String(rec.student_id) === String(student.id) || String(rec.student_id) === String(student.student_id) || rec.name === stuName) {
+                    const monthNum = parseInt(rec.month, 10);
+                    const isS1 = (monthNum >= 10 || monthNum <= 1);
+                    if (rec.status === 'P' || rec.status === 'ច' || rec.status === 'មានច្បាប់') {
+                        if (isS1) s1Permit++; else s2Permit++;
+                    } else if (rec.status === 'A' || rec.status === 'អ' || rec.status === 'ឥតច្បាប់') {
+                        if (isS1) s1Unpermit++; else s2Unpermit++;
+                    }
+                }
+            });
+        } catch(e) {}
+    }
     const totalAbsences = s1Permit + s1Unpermit + s2Permit + s2Unpermit;
-    const absTotalStr = totalAbsences > 0 ? String(totalAbsences) : '';
+    const absTotalStr = totalAbsences > 0 ? window.toKhmerNum(String(totalAbsences)) : '';
 
     // ================= SPREAD 1: ក្របមុខ (Cover Page - Image 1) =================
     const spread1Html = `
@@ -3055,35 +3232,35 @@ window.renderSikhaKarikBooklet = function(container, targetGrade, targetRoom, st
                             <!-- ជួរបូកសរុបពិន្ទុ -->
                             <tr style="font-weight: bold; background: #fdfefe;">
                                 <td style="border: 1px solid #1e3a8a; padding: 3px 6px; text-align: left;">សរុបពិន្ទុ</td>
-                                <td style="border: 1px solid #1e3a8a; padding: 3px 4px;"></td>
-                                <td style="border: 1px solid #1e3a8a; padding: 3px 4px;"></td>
-                                <td style="border: 1px solid #1e3a8a; padding: 3px 4px;"></td>
-                                <td style="border: 1px solid #1e3a8a; padding: 3px 4px;"></td>
+                                <td style="border: 1px solid #1e3a8a; padding: 3px 4px; text-align: center; color: #1e3a8a;">${s1TotalExamVal ? window.toKhmerNum(String(s1TotalExamVal)) : ''}</td>
+                                <td style="border: 1px solid #1e3a8a; padding: 3px 4px; text-align: center; color: #64748b;"></td>
+                                <td style="border: 1px solid #1e3a8a; padding: 3px 4px; text-align: center; color: #1e3a8a;">${s2TotalExamVal ? window.toKhmerNum(String(s2TotalExamVal)) : ''}</td>
+                                <td style="border: 1px solid #1e3a8a; padding: 3px 4px; text-align: center; color: #64748b;"></td>
                             </tr>
                             <tr style="font-weight: bold;">
                                 <td style="border: 1px solid #1e3a8a; padding: 3px 6px; text-align: left;">មធ្យមភាគ</td>
-                                <td style="border: 1px solid #1e3a8a; padding: 3px 4px;"></td>
-                                <td style="border: 1px solid #1e3a8a; padding: 3px 4px;"></td>
-                                <td style="border: 1px solid #1e3a8a; padding: 3px 4px;"></td>
-                                <td style="border: 1px solid #1e3a8a; padding: 3px 4px;"></td>
+                                <td style="border: 1px solid #1e3a8a; padding: 3px 4px; text-align: center; color: #1e3a8a;">${s1AvgExamVal ? window.toKhmerNum(String(s1AvgExamVal)) : ''}</td>
+                                <td style="border: 1px solid #1e3a8a; padding: 3px 4px; text-align: center; color: #64748b;"></td>
+                                <td style="border: 1px solid #1e3a8a; padding: 3px 4px; text-align: center; color: #1e3a8a;">${s2AvgExamVal ? window.toKhmerNum(String(s2AvgExamVal)) : ''}</td>
+                                <td style="border: 1px solid #1e3a8a; padding: 3px 4px; text-align: center; color: #64748b;"></td>
                             </tr>
                             <tr>
                                 <td style="border: 1px solid #1e3a8a; padding: 3px 6px; text-align: left;">មធ្យមភាគប្រចាំខែ</td>
-                                <td style="border: 1px solid #1e3a8a; padding: 3px 4px;"></td>
-                                <td style="border: 1px solid #1e3a8a; padding: 3px 4px;"></td>
-                                <td style="border: 1px solid #1e3a8a; padding: 3px 4px;"></td>
-                                <td style="border: 1px solid #1e3a8a; padding: 3px 4px;"></td>
+                                <td style="border: 1px solid #1e3a8a; padding: 3px 4px; text-align: center; color: #1d4ed8;">${s1MonthlyAvgVal ? window.toKhmerNum(String(s1MonthlyAvgVal)) : ''}</td>
+                                <td style="border: 1px solid #1e3a8a; padding: 3px 4px; text-align: center; color: #64748b;"></td>
+                                <td style="border: 1px solid #1e3a8a; padding: 3px 4px; text-align: center; color: #1d4ed8;">${s2MonthlyAvgVal ? window.toKhmerNum(String(s2MonthlyAvgVal)) : ''}</td>
+                                <td style="border: 1px solid #1e3a8a; padding: 3px 4px; text-align: center; color: #64748b;"></td>
                             </tr>
                             <tr style="font-weight: bold; background: #f8fafc;">
                                 <td style="border: 1px solid #1e3a8a; padding: 3px 6px; text-align: left;">មធ្យមភាគប្រចាំឆមាស</td>
-                                <td style="border: 1px solid #1e3a8a; padding: 3px 4px;"></td>
-                                <td style="border: 1px solid #1e3a8a; padding: 3px 4px;"></td>
-                                <td style="border: 1px solid #1e3a8a; padding: 3px 4px;"></td>
-                                <td style="border: 1px solid #1e3a8a; padding: 3px 4px;"></td>
+                                <td style="border: 1px solid #1e3a8a; padding: 3px 4px; text-align: center; color: #047857; font-size: 9.5pt;">${s1SemAvgVal ? window.toKhmerNum(String(s1SemAvgVal)) : ''}</td>
+                                <td style="border: 1px solid #1e3a8a; padding: 3px 4px; text-align: center; color: #be123c; font-size: 9.5pt;">${s1SemRankVal ? window.toKhmerNum(String(s1SemRankVal)) : ''}</td>
+                                <td style="border: 1px solid #1e3a8a; padding: 3px 4px; text-align: center; color: #047857; font-size: 9.5pt;">${s2SemAvgVal ? window.toKhmerNum(String(s2SemAvgVal)) : ''}</td>
+                                <td style="border: 1px solid #1e3a8a; padding: 3px 4px; text-align: center; color: #be123c; font-size: 9.5pt;">${s2SemRankVal ? window.toKhmerNum(String(s2SemRankVal)) : ''}</td>
                             </tr>
                             <tr style="font-weight: bold; background: #eff6ff; color: #1e3a8a;">
-                                <td colspan="5" style="border: 1px solid #1e3a8a; padding: 4px; text-align: center; font-size: 8pt;">
-                                    លទ្ធផលចំណាត់ថ្នាក់ ( មធ្យមភាគ - ចំណាត់ថ្នាក់ ) ៖ .............................................
+                                <td colspan="5" style="border: 1px solid #1e3a8a; padding: 5px 6px; text-align: center; font-size: 8.5pt;">
+                                    លទ្ធផលដំណាច់ឆ្នាំ ( មធ្យមភាគ - ចំណាត់ថ្នាក់ ) ៖ &nbsp;&nbsp;មធ្យមភាគ <b style="color: #047857; font-size: 9.5pt;">${annualAvgVal ? window.toKhmerNum(String(annualAvgVal)) : '.........'}</b> &nbsp;&nbsp;|&nbsp;&nbsp; ចំណាត់ថ្នាក់ <b style="color: #be123c; font-size: 9.5pt;">${annualRankVal ? window.toKhmerNum(String(annualRankVal)) : '.........'}</b> ${annualGradeLetter ? `&nbsp;(<span style="color: #1e3a8a;">${annualGradeLetter}</span>)` : ''}
                                 </td>
                             </tr>
                         </tbody>
@@ -3111,10 +3288,10 @@ window.renderSikhaKarikBooklet = function(container, targetGrade, targetRoom, st
                         </thead>
                         <tbody>
                             <tr>
-                                <td style="border: 1px solid #1e3a8a; padding: 5px 2px; font-weight: bold;">${s1Permit > 0 ? s1Permit : ''}</td>
-                                <td style="border: 1px solid #1e3a8a; padding: 5px 2px; font-weight: bold; color: #dc2626;">${s1Unpermit > 0 ? s1Unpermit : ''}</td>
-                                <td style="border: 1px solid #1e3a8a; padding: 5px 2px; font-weight: bold;">${s2Permit > 0 ? s2Permit : ''}</td>
-                                <td style="border: 1px solid #1e3a8a; padding: 5px 2px; font-weight: bold; color: #dc2626;">${s2Unpermit > 0 ? s2Unpermit : ''}</td>
+                                <td style="border: 1px solid #1e3a8a; padding: 5px 2px; font-weight: bold;">${s1Permit > 0 ? window.toKhmerNum(String(s1Permit)) : ''}</td>
+                                <td style="border: 1px solid #1e3a8a; padding: 5px 2px; font-weight: bold; color: #dc2626;">${s1Unpermit > 0 ? window.toKhmerNum(String(s1Unpermit)) : ''}</td>
+                                <td style="border: 1px solid #1e3a8a; padding: 5px 2px; font-weight: bold;">${s2Permit > 0 ? window.toKhmerNum(String(s2Permit)) : ''}</td>
+                                <td style="border: 1px solid #1e3a8a; padding: 5px 2px; font-weight: bold; color: #dc2626;">${s2Unpermit > 0 ? window.toKhmerNum(String(s2Unpermit)) : ''}</td>
                                 <td style="border: 1px solid #1e3a8a; padding: 5px 2px; font-weight: bold; background: #f8fafc;">${absTotalStr}</td>
                             </tr>
                         </tbody>
@@ -3147,16 +3324,13 @@ window.renderSikhaKarikBooklet = function(container, targetGrade, targetRoom, st
                         <tbody>
                             <tr>
                                 <td style="border: 1px solid #1e3a8a; padding: 6px 4px; height: 38px; vertical-align: top; text-align: left; font-size: 7.5pt; line-height: 1.4;">
-                                    ............................................<br>
-                                    ............................................
+                                    ${stuS1.evaluation || stuS1.eval_knowledge || (stuS1.grade_letter ? `កម្រិតសិក្សា ៖ ${stuS1.grade_letter}` : '............................................<br>............................................')}
                                 </td>
                                 <td style="border: 1px solid #1e3a8a; padding: 6px 4px; height: 38px; vertical-align: top; text-align: left; font-size: 7.5pt; line-height: 1.4;">
-                                    ............................................<br>
-                                    ............................................
+                                    ${stuS2.evaluation || stuS2.eval_knowledge || (stuS2.grade_letter ? `កម្រិតសិក្សា ៖ ${stuS2.grade_letter}` : '............................................<br>............................................')}
                                 </td>
                                 <td style="border: 1px solid #1e3a8a; padding: 6px 4px; height: 38px; vertical-align: top; text-align: left; font-size: 7.5pt; line-height: 1.4;">
-                                    ............................................<br>
-                                    ............................................
+                                    ${stuAnnual.evaluation || (annualGradeLetter ? `កម្រិតសិក្សា ៖ ${annualGradeLetter}` : '............................................<br>............................................')}
                                 </td>
                             </tr>
                         </tbody>
@@ -3166,10 +3340,10 @@ window.renderSikhaKarikBooklet = function(container, targetGrade, targetRoom, st
                 <!-- ឃ- លទ្ធផលប្រចាំឆ្នាំ (Annual Outcome) -->
                 <div style="border: 1.5px solid #1e3a8a; border-radius: 2px; padding: 6px 8px; font-size: 8pt; line-height: 1.8; color: #0f172a; margin-top: 6px;">
                     <div style="font-family: 'Khmer OS Muol Light', serif; color: #1e3a8a; font-size: 8.5pt; text-align: center; margin-bottom: 2px;">ឃ- លទ្ធផលប្រចាំឆ្នាំ</div>
-                    <div>ត្រូវបានឡើងថ្នាក់ទី <span style="border-bottom: 1px dotted #1e3a8a; display: inline-block; width: 73%;">&nbsp;</span></div>
+                    <div>ត្រូវបានឡើងថ្នាក់ទី <span style="font-weight: bold; color: #1e3a8a; border-bottom: 1px dotted #1e3a8a; display: inline-block; width: 73%;">${isPromoted ? nextGrade : '&nbsp;'}</span></div>
                     <div>ត្រូវប្រឡងឡើងថ្នាក់ ៖ មុខវិជ្ជាដែលត្រូវប្រឡង <span style="border-bottom: 1px dotted #1e3a8a; display: inline-block; width: 45%;">&nbsp;</span></div>
                     <div><span style="border-bottom: 1px dotted #1e3a8a; display: inline-block; width: 98%;">&nbsp;</span></div>
-                    <div>ត្រូវបានឡើងថ្នាក់ទី <span style="border-bottom: 1px dotted #1e3a8a; display: inline-block; width: 28%;">&nbsp;</span> ត្រូវរៀនត្រួតថ្នាក់ទី <span style="border-bottom: 1px dotted #1e3a8a; display: inline-block; width: 28%;">&nbsp;</span></div>
+                    <div>ត្រូវបានឡើងថ្នាក់ទី <span style="border-bottom: 1px dotted #1e3a8a; display: inline-block; width: 28%;">&nbsp;</span> ត្រូវរៀនត្រួតថ្នាក់ទី <span style="font-weight: bold; color: #dc2626; border-bottom: 1px dotted #1e3a8a; display: inline-block; width: 28%;">${isFailed ? curLevel : '&nbsp;'}</span></div>
                 </div>
 
                 <!-- ង- ការសរសើរ និងកែលម្អ (Teacher Remarks & Signature) -->
