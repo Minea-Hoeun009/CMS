@@ -370,7 +370,7 @@ window.openReportDetail = function(reportType) {
                     </div>
                 `;
             }
-            if (window.CMSPrintManager) window.CMSPrintManager.updateToolbarDefaults('reportPaperArea', 'landscape', 'A4', 100);
+            if (window.CMSPrintManager) window.CMSPrintManager.updateToolbarDefaults('reportPaperArea', 'portrait', 'A4', 100);
             if (typeof window.renderSikhaKarikBooklet === 'function') {
                 window.renderSikhaKarikBooklet(paperArea, curLevel, curRoom, selectedStuId, selectedPage);
             }
@@ -387,7 +387,7 @@ window.openReportDetail = function(reportType) {
                     </div>
                 `;
             }
-            if (window.CMSPrintManager) window.CMSPrintManager.updateToolbarDefaults('reportPaperArea', 'landscape', 'A4', 100);
+            if (window.CMSPrintManager) window.CMSPrintManager.updateToolbarDefaults('reportPaperArea', 'portrait', 'A4', 100);
             if (window.KrouDigital && typeof window.KrouDigital.renderReportKa === 'function') {
                 window.KrouDigital.renderReportKa(paperArea, curLevel, curRoom);
             }
@@ -425,7 +425,7 @@ window.openReportDetail = function(reportType) {
                 }
             }
 
-            if (window.CMSPrintManager) window.CMSPrintManager.updateToolbarDefaults('reportPaperArea', 'landscape', 'A4', 100);
+            if (window.CMSPrintManager) window.CMSPrintManager.updateToolbarDefaults('reportPaperArea', 'portrait', 'A4', 100);
             if (typeof window.renderAcademicResultsReport === 'function') {
                 window.renderAcademicResultsReport(paperArea, curLevel, curRoom, window.currentAcademicReportMode);
             } else if (window.KrouDigital && typeof window.KrouDigital.renderReportKoKho === 'function') {
@@ -441,7 +441,7 @@ window.openReportDetail = function(reportType) {
                     </button>
                 `;
             }
-            if (window.CMSPrintManager) window.CMSPrintManager.updateToolbarDefaults('reportPaperArea', 'landscape', 'A4', 100);
+            if (window.CMSPrintManager) window.CMSPrintManager.updateToolbarDefaults('reportPaperArea', 'portrait', 'A4', 100);
             if (window.KrouDigital && typeof window.KrouDigital.renderHealthTracker === 'function') {
                 window.KrouDigital.renderHealthTracker(paperArea, curLevel, curRoom);
             }
@@ -472,7 +472,7 @@ window.openReportDetail = function(reportType) {
                     </div>
                 `;
             }
-            if (window.CMSPrintManager) window.CMSPrintManager.updateToolbarDefaults('reportPaperArea', 'landscape', 'A4', 100);
+            if (window.CMSPrintManager) window.CMSPrintManager.updateToolbarDefaults('reportPaperArea', 'portrait', 'A4', 100);
             if(typeof window.renderAttendanceReportHTML === 'function') {
                 window.renderAttendanceReportHTML(paperArea, curLevel, curRoom);
             } else {
@@ -492,7 +492,7 @@ window.openReportDetail = function(reportType) {
                     </div>
                 `;
             }
-            if (window.CMSPrintManager) window.CMSPrintManager.updateToolbarDefaults('reportPaperArea', 'landscape', 'A4', 100);
+            if (window.CMSPrintManager) window.CMSPrintManager.updateToolbarDefaults('reportPaperArea', 'portrait', 'A4', 100);
             if(typeof window.renderStudentListReportHTML === 'function') {
                 window.renderStudentListReportHTML(paperArea, curLevel, curRoom);
             } else {
@@ -3503,7 +3503,7 @@ window.getSemesterMonthConfig = function(curLevel, curRoom) {
 
 window.academicReportPaperSettings = {
     paperSize: 'A4',
-    orientation: 'landscape',
+    orientation: 'portrait',
     scale: 100
 };
 
@@ -3550,12 +3550,12 @@ window.applyAcademicReportPaperSettings = function() {
     }
 
     const printArea = document.getElementById('reportKoKhoPrintArea');
-    const cfg = window.academicReportPaperSettings || { paperSize: 'A4', orientation: 'landscape', scale: 100 };
+    const cfg = window.academicReportPaperSettings || { paperSize: 'A4', orientation: 'portrait', scale: 100 };
     if (!printArea) return;
 
     const isLandscape = cfg.orientation === 'landscape';
-    let widthMm = '297mm';
-    let minHeightMm = '210mm';
+    let widthMm = '210mm';
+    let minHeightMm = '297mm';
     if (cfg.paperSize === 'A3') {
         widthMm = isLandscape ? '420mm' : '297mm';
         minHeightMm = isLandscape ? '297mm' : '420mm';
@@ -3582,7 +3582,7 @@ window.applyAcademicReportPaperSettings = function() {
 };
 
 window.printAcademicReportCleanly = function() {
-    const cfg = window.academicReportPaperSettings || { paperSize: 'A4', orientation: 'landscape', scale: 100 };
+    const cfg = window.academicReportPaperSettings || { paperSize: 'A4', orientation: 'portrait', scale: 100 };
     const printArea = document.getElementById('reportKoKhoPrintArea') || document.getElementById('reportPaperArea');
     const titleEl = document.getElementById("reportDetailTitle");
     const title = titleEl ? titleEl.textContent : "របាយការណ៍លទ្ធផលសិក្សា";
@@ -3893,35 +3893,35 @@ window.renderAcademicResultsReport = function(container, targetGrade, targetRoom
                     <div class="bg-white p-3.5 rounded-2xl border border-slate-200/70 shadow-sm flex items-center gap-3">
                         <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold text-lg"><i class="fa-solid fa-users"></i></div>
                         <div>
-                            <div class="text-[10px] text-slate-500 font-bold uppercase">សិស្សសរុប</div>
-                            <div class="text-sm font-black text-slate-800 font-mono">${totalCount} <span class="text-[10px] font-normal text-slate-400 font-siemreap">(ស្រី ${femaleCount})</span></div>
+                            <div class="text-[10px] text-slate-500 font-bold uppercase font-siemreap">សិស្សសរុប</div>
+                            <div class="text-sm font-black text-slate-800 font-siemreap">${totalCount} <span class="text-[10px] font-normal text-slate-400 font-siemreap">(ស្រី ${femaleCount})</span></div>
                         </div>
                     </div>
                     <div class="bg-white p-3.5 rounded-2xl border border-slate-200/70 shadow-sm flex items-center gap-3">
                         <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold text-lg"><i class="fa-solid fa-circle-check"></i></div>
                         <div>
-                            <div class="text-[10px] text-slate-500 font-bold uppercase">ជាប់មធ្យមភាគ</div>
-                            <div class="text-sm font-black text-emerald-600 font-mono">${passCount} <span class="text-[10px] font-bold text-emerald-700 font-mono">(${passPct}%)</span></div>
+                            <div class="text-[10px] text-slate-500 font-bold uppercase font-siemreap">ជាប់មធ្យមភាគ</div>
+                            <div class="text-sm font-black text-emerald-600 font-siemreap">${passCount} <span class="text-[10px] font-bold text-emerald-700 font-siemreap">(${passPct}%)</span></div>
                         </div>
                     </div>
                     <div class="bg-white p-3.5 rounded-2xl border border-slate-200/70 shadow-sm flex items-center gap-3">
                         <div class="w-10 h-10 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center font-bold text-lg"><i class="fa-solid fa-circle-xmark"></i></div>
                         <div>
-                            <div class="text-[10px] text-slate-500 font-bold uppercase">ធ្លាក់មធ្យមភាគ</div>
-                            <div class="text-sm font-black text-rose-600 font-mono">${failCount} <span class="text-[10px] font-normal text-slate-400 font-siemreap">នាក់</span></div>
+                            <div class="text-[10px] text-slate-500 font-bold uppercase font-siemreap">ធ្លាក់មធ្យមភាគ</div>
+                            <div class="text-sm font-black text-rose-600 font-siemreap">${failCount} <span class="text-[10px] font-normal text-slate-400 font-siemreap">នាក់</span></div>
                         </div>
                     </div>
                     <div class="bg-white p-3.5 rounded-2xl border border-slate-200/70 shadow-sm flex items-center gap-3">
                         <div class="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold text-lg"><i class="fa-solid fa-chart-line"></i></div>
                         <div>
-                            <div class="text-[10px] text-slate-500 font-bold uppercase">មធ្យមភាគថ្នាក់</div>
-                            <div class="text-sm font-black text-indigo-700 font-mono">${classAvg}</div>
+                            <div class="text-[10px] text-slate-500 font-bold uppercase font-siemreap">មធ្យមភាគថ្នាក់</div>
+                            <div class="text-sm font-black text-indigo-700 font-siemreap">${classAvg}</div>
                         </div>
                     </div>
                     <div class="bg-gradient-to-r from-amber-50 to-orange-50 p-3.5 rounded-2xl border border-amber-200 shadow-sm flex items-center gap-3 col-span-2 sm:col-span-1 lg:col-span-1">
                         <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 text-white flex items-center justify-center font-bold text-lg"><i class="fa-solid fa-medal"></i></div>
                         <div class="truncate">
-                            <div class="text-[10px] text-amber-800 font-bold uppercase">ជើងឯកលេខ ១</div>
+                            <div class="text-[10px] text-amber-800 font-bold uppercase font-siemreap">ជើងឯកលេខ ១</div>
                             <div class="text-xs font-bold text-slate-800 font-moul truncate mt-0.5">${topStudent?.stu?.name || '-'}</div>
                         </div>
                     </div>
@@ -3937,11 +3937,11 @@ window.renderAcademicResultsReport = function(container, targetGrade, targetRoom
         const renderHalfCellRow = (item, num) => {
             if (!item) {
                 return `
-                    <td class="border border-slate-300 p-1 text-center font-mono text-slate-300 w-10">&nbsp;</td>
+                    <td class="border border-slate-300 p-1 text-center font-siemreap text-slate-300 w-10">&nbsp;</td>
                     <td class="border border-slate-300 p-1 text-left px-3 font-siemreap text-slate-300">&nbsp;</td>
                     <td class="border border-slate-300 p-1 text-center font-siemreap w-10">&nbsp;</td>
-                    <td class="border border-slate-300 p-1 text-center font-mono w-14">&nbsp;</td>
-                    <td class="border border-slate-300 p-1 text-center font-mono w-14">&nbsp;</td>
+                    <td class="border border-slate-300 p-1 text-center font-siemreap font-bold w-14">&nbsp;</td>
+                    <td class="border border-slate-300 p-1 text-center font-siemreap font-bold w-14">&nbsp;</td>
                 `;
             }
             const isF = item.isFemale;
@@ -3953,11 +3953,11 @@ window.renderAcademicResultsReport = function(container, targetGrade, targetRoom
             const rankColor = (rankStr !== '-' && rankStr !== '') ? 'text-rose-600 font-bold' : 'text-slate-400 font-bold';
 
             return `
-                <td class="border border-slate-300 p-1 text-center font-mono text-slate-600 font-bold w-10">${num}</td>
+                <td class="border border-slate-300 p-1 text-center font-siemreap text-slate-600 font-bold w-10">${num}</td>
                 <td class="border border-slate-300 p-1 text-left px-3 font-bold text-slate-800 font-siemreap truncate">${item.stu.name}</td>
                 <td class="border border-slate-300 p-1 text-center font-siemreap w-10 ${genderColor}">${genderSym}</td>
-                <td class="border border-slate-300 p-1 text-center font-mono text-[13px] w-14 ${avgColor}">${avgStr}</td>
-                <td class="border border-slate-300 p-1 text-center font-mono text-[13px] w-14 ${rankColor}">${rankStr}</td>
+                <td class="border border-slate-300 p-1 text-center font-siemreap font-bold text-[13px] w-14 ${avgColor}">${avgStr}</td>
+                <td class="border border-slate-300 p-1 text-center font-siemreap font-bold text-[13px] w-14 ${rankColor}">${rankStr}</td>
             `;
         };
 
@@ -3977,7 +3977,7 @@ window.renderAcademicResultsReport = function(container, targetGrade, targetRoom
         }).join('');
 
         container.innerHTML = `
-            <div id="reportKoKhoPrintArea" class="bg-white p-6 md:p-8 w-full shadow-2xl rounded-2xl border border-slate-200 text-slate-800" style="max-width: 297mm; min-height: 210mm; font-family: 'Khmer OS Siemreap', 'Siemreap', sans-serif;">
+            <div id="reportKoKhoPrintArea" class="bg-white p-6 md:p-8 w-full shadow-2xl rounded-2xl border border-slate-200 text-slate-800" style="max-width: 210mm; min-height: 297mm; font-family: 'Khmer OS Siemreap', 'Siemreap', sans-serif;">
                 
                 <div class="flex justify-between items-start mb-4 text-xs">
                     <div class="text-left leading-relaxed pt-3">
@@ -3999,7 +3999,7 @@ window.renderAcademicResultsReport = function(container, targetGrade, targetRoom
                 </div>
 
                 <!-- តារាងចំណាត់ថ្នាក់ទម្រង់ ២ ជួរស្មើស្អាត (Dual-Column Split Table) តាមគំរូរូបភាពជាក់ស្តែង -->
-                <div class="overflow-x-auto mb-4 border border-slate-400 shadow-sm rounded-sm max-w-[270mm] mx-auto">
+                <div class="overflow-x-auto mb-4 border border-slate-400 shadow-sm rounded-sm w-full mx-auto">
                     <div class="flex justify-center w-full min-w-[650px]">
                         <!-- តារាងផ្នែកឆ្វេង (Left Half Table) -->
                         <table class="w-1/2 text-xs text-center border-collapse border-r-2 border-slate-700">
@@ -4186,13 +4186,13 @@ window.renderAcademicResultsReport = function(container, targetGrade, targetRoom
             const bgClass = i % 2 !== 0 ? 'bg-slate-50/40' : 'bg-white';
             return `
                 <tr class="hover:bg-blue-50/50 transition-colors border-b border-slate-200/80 text-[12px] ${bgClass}">
-                    <td class="border border-slate-300 p-2 font-mono text-slate-500 font-bold w-12">${i + 1}</td>
+                    <td class="border border-slate-300 p-2 font-siemreap text-slate-500 font-bold w-12">${i + 1}</td>
                     <td class="border border-slate-300 p-2 text-left px-4 font-bold text-slate-800 font-siemreap">${item.stu.name}</td>
                     <td class="border border-slate-300 p-2 text-center font-bold font-siemreap w-12 ${item.isFemale ? 'text-rose-600' : 'text-blue-700'}">${item.isFemale ? 'ស' : 'ប'}</td>
-                    <td class="border border-slate-300 p-2 font-mono font-bold text-orange-700 bg-orange-50/40 w-16">${item.examVal > 0 ? item.examVal.toFixed(2) : '0.00'}</td>
-                    <td class="border border-slate-300 p-2 font-mono font-bold text-indigo-700 bg-indigo-50/40 w-16">${item.monthAvg > 0 ? item.monthAvg.toFixed(2) : '0.00'}</td>
-                    <td class="border border-slate-300 p-2 font-mono font-black ${item.semAvg >= 5.0 ? 'text-emerald-700 bg-blue-50/40' : 'text-rose-600 bg-rose-50/40'} text-[13px] md:text-[14px] w-20">${item.semAvg > 0 ? item.semAvg.toFixed(2) : '0.00'}</td>
-                    <td class="border border-slate-300 p-2 text-center font-mono font-black text-rose-600 bg-rose-50/40 text-[13px] md:text-[14px] w-16">${item.rankVal}</td>
+                    <td class="border border-slate-300 p-2 font-siemreap font-bold text-orange-700 bg-orange-50/40 w-16">${item.examVal > 0 ? item.examVal.toFixed(2) : '0.00'}</td>
+                    <td class="border border-slate-300 p-2 font-siemreap font-bold text-indigo-700 bg-indigo-50/40 w-16">${item.monthAvg > 0 ? item.monthAvg.toFixed(2) : '0.00'}</td>
+                    <td class="border border-slate-300 p-2 font-siemreap font-bold ${item.semAvg >= 5.0 ? 'text-emerald-700 bg-blue-50/40' : 'text-rose-600 bg-rose-50/40'} text-[13px] md:text-[14px] w-20">${item.semAvg > 0 ? item.semAvg.toFixed(2) : '0.00'}</td>
+                    <td class="border border-slate-300 p-2 text-center font-siemreap font-bold text-rose-600 bg-rose-50/40 text-[13px] md:text-[14px] w-16">${item.rankVal}</td>
                     <td class="border border-slate-300 p-2 text-center whitespace-nowrap w-24">${getGradeBadge(item.mention)}</td>
                 </tr>
             `;
@@ -4211,35 +4211,35 @@ window.renderAcademicResultsReport = function(container, targetGrade, targetRoom
                     <div class="bg-white p-3.5 rounded-2xl border border-slate-200/70 shadow-sm flex items-center gap-3">
                         <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold text-lg"><i class="fa-solid fa-users"></i></div>
                         <div>
-                            <div class="text-[10px] text-slate-500 font-bold uppercase">សិស្សសរុប</div>
-                            <div class="text-sm font-black text-slate-800 font-mono">${totalCount} <span class="text-[10px] font-normal text-slate-400 font-siemreap">(ស្រី ${femaleCount})</span></div>
+                            <div class="text-[10px] text-slate-500 font-bold uppercase font-siemreap">សិស្សសរុប</div>
+                            <div class="text-sm font-black text-slate-800 font-siemreap">${totalCount} <span class="text-[10px] font-normal text-slate-400 font-siemreap">(ស្រី ${femaleCount})</span></div>
                         </div>
                     </div>
                     <div class="bg-white p-3.5 rounded-2xl border border-slate-200/70 shadow-sm flex items-center gap-3">
                         <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold text-lg"><i class="fa-solid fa-circle-check"></i></div>
                         <div>
-                            <div class="text-[10px] text-slate-500 font-bold uppercase">ជាប់មធ្យមភាគ</div>
-                            <div class="text-sm font-black text-emerald-600 font-mono">${passCount} <span class="text-[10px] font-bold text-emerald-700 font-mono">(${passPct}%)</span></div>
+                            <div class="text-[10px] text-slate-500 font-bold uppercase font-siemreap">ជាប់មធ្យមភាគ</div>
+                            <div class="text-sm font-black text-emerald-600 font-siemreap">${passCount} <span class="text-[10px] font-bold text-emerald-700 font-siemreap">(${passPct}%)</span></div>
                         </div>
                     </div>
                     <div class="bg-white p-3.5 rounded-2xl border border-slate-200/70 shadow-sm flex items-center gap-3">
                         <div class="w-10 h-10 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center font-bold text-lg"><i class="fa-solid fa-circle-xmark"></i></div>
                         <div>
-                            <div class="text-[10px] text-slate-500 font-bold uppercase">ធ្លាក់មធ្យមភាគ</div>
-                            <div class="text-sm font-black text-rose-600 font-mono">${failCount} <span class="text-[10px] font-normal text-slate-400 font-siemreap">នាក់</span></div>
+                            <div class="text-[10px] text-slate-500 font-bold uppercase font-siemreap">ធ្លាក់មធ្យមភាគ</div>
+                            <div class="text-sm font-black text-rose-600 font-siemreap">${failCount} <span class="text-[10px] font-normal text-slate-400 font-siemreap">នាក់</span></div>
                         </div>
                     </div>
                     <div class="bg-white p-3.5 rounded-2xl border border-slate-200/70 shadow-sm flex items-center gap-3">
                         <div class="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold text-lg"><i class="fa-solid fa-chart-line"></i></div>
                         <div>
-                            <div class="text-[10px] text-slate-500 font-bold uppercase">មធ្យមភាគថ្នាក់</div>
-                            <div class="text-sm font-black text-indigo-700 font-mono">${classAvg}</div>
+                            <div class="text-[10px] text-slate-500 font-bold uppercase font-siemreap">មធ្យមភាគថ្នាក់</div>
+                            <div class="text-sm font-black text-indigo-700 font-siemreap">${classAvg}</div>
                         </div>
                     </div>
                     <div class="bg-gradient-to-r from-amber-50 to-orange-50 p-3.5 rounded-2xl border border-amber-200 shadow-sm flex items-center gap-3 col-span-2 sm:col-span-1 lg:col-span-1">
                         <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 text-white flex items-center justify-center font-bold text-lg"><i class="fa-solid fa-medal"></i></div>
                         <div class="truncate">
-                            <div class="text-[10px] text-amber-800 font-bold uppercase">ជើងឯកលេខ ១</div>
+                            <div class="text-[10px] text-amber-800 font-bold uppercase font-siemreap">ជើងឯកលេខ ១</div>
                             <div class="text-xs font-bold text-slate-800 font-moul truncate mt-0.5">${topStudent?.stu?.name || '-'}</div>
                         </div>
                     </div>
@@ -4248,7 +4248,7 @@ window.renderAcademicResultsReport = function(container, targetGrade, targetRoom
         }
 
         container.innerHTML = `
-            <div id="reportKoKhoPrintArea" class="bg-white p-6 md:p-8 w-full shadow-2xl rounded-2xl border border-slate-200 text-slate-800" style="max-width: 297mm; min-height: 210mm; font-family: 'Khmer OS Siemreap', 'Siemreap', sans-serif;">
+            <div id="reportKoKhoPrintArea" class="bg-white p-6 md:p-8 w-full shadow-2xl rounded-2xl border border-slate-200 text-slate-800" style="max-width: 210mm; min-height: 297mm; font-family: 'Khmer OS Siemreap', 'Siemreap', sans-serif;">
                 
                 <div class="flex justify-between items-start mb-4 text-xs">
                     <div class="text-left leading-relaxed pt-3">
@@ -4450,13 +4450,13 @@ window.renderAcademicResultsReport = function(container, targetGrade, targetRoom
         const bgClass = i % 2 !== 0 ? 'bg-slate-50/40' : 'bg-white';
         return `
             <tr class="hover:bg-blue-50/50 transition-colors border-b border-slate-200/80 text-[12px] ${bgClass}">
-                <td class="border border-slate-300 p-2 font-mono text-slate-500 font-bold w-12">${i + 1}</td>
+                <td class="border border-slate-300 p-2 font-siemreap text-slate-500 font-bold w-12">${i + 1}</td>
                 <td class="border border-slate-300 p-2 text-left px-4 font-bold text-slate-800 font-siemreap">${item.stu.name}</td>
                 <td class="border border-slate-300 p-2 text-center font-bold font-siemreap w-12 ${item.isFemale ? 'text-rose-600' : 'text-blue-700'}">${item.isFemale ? 'ស' : 'ប'}</td>
-                <td class="border border-slate-300 p-2 font-mono font-bold text-blue-700 bg-blue-50/40 w-16">${item.sem1 > 0 ? item.sem1.toFixed(2) : '0.00'}</td>
-                <td class="border border-slate-300 p-2 font-mono font-bold text-indigo-700 bg-indigo-50/40 w-16">${item.sem2 > 0 ? item.sem2.toFixed(2) : '0.00'}</td>
-                <td class="border border-slate-300 p-2 font-mono font-black ${item.annual >= 5.0 ? 'text-amber-700 bg-amber-50/40' : 'text-rose-600 bg-rose-50/40'} text-[13px] md:text-[14px] w-20">${item.annual > 0 ? item.annual.toFixed(2) : '0.00'}</td>
-                <td class="border border-slate-300 p-2 text-center font-mono font-black text-rose-600 bg-rose-50/40 text-[13px] md:text-[14px] w-16">${item.rankVal}</td>
+                <td class="border border-slate-300 p-2 font-siemreap font-bold text-blue-700 bg-blue-50/40 w-16">${item.sem1 > 0 ? item.sem1.toFixed(2) : '0.00'}</td>
+                <td class="border border-slate-300 p-2 font-siemreap font-bold text-indigo-700 bg-indigo-50/40 w-16">${item.sem2 > 0 ? item.sem2.toFixed(2) : '0.00'}</td>
+                <td class="border border-slate-300 p-2 font-siemreap font-bold ${item.annual >= 5.0 ? 'text-amber-700 bg-amber-50/40' : 'text-rose-600 bg-rose-50/40'} text-[13px] md:text-[14px] w-20">${item.annual > 0 ? item.annual.toFixed(2) : '0.00'}</td>
+                <td class="border border-slate-300 p-2 text-center font-siemreap font-bold text-rose-600 bg-rose-50/40 text-[13px] md:text-[14px] w-16">${item.rankVal}</td>
                 <td class="border border-slate-300 p-2 text-center whitespace-nowrap w-24">${getGradeBadge(item.mention)}</td>
             </tr>
         `;
@@ -4475,35 +4475,35 @@ window.renderAcademicResultsReport = function(container, targetGrade, targetRoom
                 <div class="bg-white p-3.5 rounded-2xl border border-slate-200/70 shadow-sm flex items-center gap-3">
                     <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold text-lg"><i class="fa-solid fa-users"></i></div>
                     <div>
-                        <div class="text-[10px] text-slate-500 font-bold uppercase">សិស្សសរុប</div>
-                        <div class="text-sm font-black text-slate-800 font-mono">${totalCount} <span class="text-[10px] font-normal text-slate-400 font-siemreap">(ស្រី ${femaleCount})</span></div>
+                        <div class="text-[10px] text-slate-500 font-bold uppercase font-siemreap">សិស្សសរុប</div>
+                        <div class="text-sm font-black text-slate-800 font-siemreap">${totalCount} <span class="text-[10px] font-normal text-slate-400 font-siemreap">(ស្រី ${femaleCount})</span></div>
                     </div>
                 </div>
                 <div class="bg-white p-3.5 rounded-2xl border border-slate-200/70 shadow-sm flex items-center gap-3">
                     <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold text-lg"><i class="fa-solid fa-circle-check"></i></div>
                     <div>
-                        <div class="text-[10px] text-slate-500 font-bold uppercase">ឡើងថ្នាក់</div>
-                        <div class="text-sm font-black text-emerald-600 font-mono">${promotedCount} <span class="text-[10px] font-bold text-emerald-700 font-mono">(${promotePct}%)</span></div>
+                        <div class="text-[10px] text-slate-500 font-bold uppercase font-siemreap">ឡើងថ្នាក់</div>
+                        <div class="text-sm font-black text-emerald-600 font-siemreap">${promotedCount} <span class="text-[10px] font-bold text-emerald-700 font-siemreap">(${promotePct}%)</span></div>
                     </div>
                 </div>
                 <div class="bg-white p-3.5 rounded-2xl border border-slate-200/70 shadow-sm flex items-center gap-3">
                     <div class="w-10 h-10 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center font-bold text-lg"><i class="fa-solid fa-circle-xmark"></i></div>
                     <div>
-                        <div class="text-[10px] text-slate-500 font-bold uppercase">ត្រួតថ្នាក់</div>
-                        <div class="text-sm font-black text-rose-600 font-mono">${retainedCount} <span class="text-[10px] font-normal text-slate-400 font-siemreap">នាក់</span></div>
+                        <div class="text-[10px] text-slate-500 font-bold uppercase font-siemreap">ត្រួតថ្នាក់</div>
+                        <div class="text-sm font-black text-rose-600 font-siemreap">${retainedCount} <span class="text-[10px] font-normal text-slate-400 font-siemreap">នាក់</span></div>
                     </div>
                 </div>
                 <div class="bg-white p-3.5 rounded-2xl border border-slate-200/70 shadow-sm flex items-center gap-3">
                     <div class="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold text-lg"><i class="fa-solid fa-chart-line"></i></div>
                     <div>
-                        <div class="text-[10px] text-slate-500 font-bold uppercase">មធ្យមភាគថ្នាក់</div>
-                        <div class="text-sm font-black text-indigo-700 font-mono">${classAvg}</div>
+                        <div class="text-[10px] text-slate-500 font-bold uppercase font-siemreap">មធ្យមភាគថ្នាក់</div>
+                        <div class="text-sm font-black text-indigo-700 font-siemreap">${classAvg}</div>
                     </div>
                 </div>
                 <div class="bg-gradient-to-r from-amber-50 to-orange-50 p-3.5 rounded-2xl border border-amber-200 shadow-sm flex items-center gap-3 col-span-2 sm:col-span-1 lg:col-span-1">
                     <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 text-white flex items-center justify-center font-bold text-lg"><i class="fa-solid fa-medal"></i></div>
                     <div class="truncate">
-                        <div class="text-[10px] text-amber-800 font-bold uppercase">ជើងឯកលេខ ១</div>
+                        <div class="text-[10px] text-amber-800 font-bold uppercase font-siemreap">ជើងឯកលេខ ១</div>
                         <div class="text-xs font-bold text-slate-800 font-moul truncate mt-0.5">${topStudent?.stu?.name || '-'}</div>
                     </div>
                 </div>
@@ -4512,7 +4512,7 @@ window.renderAcademicResultsReport = function(container, targetGrade, targetRoom
     }
 
     container.innerHTML = `
-        <div id="reportKoKhoPrintArea" class="bg-white p-6 md:p-8 w-full shadow-2xl rounded-2xl border border-slate-200 text-slate-800" style="max-width: 297mm; min-height: 210mm; font-family: 'Khmer OS Siemreap', 'Siemreap', sans-serif;">
+        <div id="reportKoKhoPrintArea" class="bg-white p-6 md:p-8 w-full shadow-2xl rounded-2xl border border-slate-200 text-slate-800" style="max-width: 210mm; min-height: 297mm; font-family: 'Khmer OS Siemreap', 'Siemreap', sans-serif;">
             
             <div class="flex justify-between items-start mb-4 text-xs">
                 <div class="text-left leading-relaxed pt-3">

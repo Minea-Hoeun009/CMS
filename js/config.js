@@ -1019,7 +1019,7 @@ window.CMSPrintManager = {
     },
 
     // Toolbar អន្តរកម្មសម្រាប់កំណត់ប្រភេទក្រដាស និងមាត្រដ្ឋាន (ដាក់នៅលើរបារ Title Bar)
-    renderToolbarHtml: function(targetElementId, defaultOrientation = 'landscape', defaultPaper = 'A4', defaultScale = 100) {
+    renderToolbarHtml: function(targetElementId, defaultOrientation = 'portrait', defaultPaper = 'A4', defaultScale = 100) {
         return `
             <div class="flex flex-wrap items-center gap-1.5 sm:gap-2 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-2.5 sm:px-3 py-1.5 shadow-sm text-xs no-print">
                 <i class="fa-solid fa-sliders text-indigo-600 dark:text-indigo-400"></i>
@@ -1057,7 +1057,7 @@ window.CMSPrintManager = {
         `;
     },
 
-    updateToolbarDefaults: function(targetElementId, defaultOrientation = 'landscape', defaultPaper = 'A4', defaultScale = 100) {
+    updateToolbarDefaults: function(targetElementId, defaultOrientation = 'portrait', defaultPaper = 'A4', defaultScale = 100) {
         const pEl = document.getElementById(`print_paper_${targetElementId}`);
         const oEl = document.getElementById(`print_orient_${targetElementId}`);
         const sEl = document.getElementById(`print_scale_${targetElementId}`);
@@ -1074,7 +1074,7 @@ window.CMSPrintManager = {
     applyLivePreview: function(targetElementId) {
         const target = document.getElementById(targetElementId);
         if (!target) return;
-        const orient = document.getElementById(`print_orient_${targetElementId}`)?.value || 'landscape';
+        const orient = document.getElementById(`print_orient_${targetElementId}`)?.value || 'portrait';
         const paper = document.getElementById(`print_paper_${targetElementId}`)?.value || 'A4';
         const scaleVal = document.getElementById(`print_scale_${targetElementId}`)?.value;
         const scale = scaleVal !== undefined && scaleVal !== null && scaleVal !== '' ? parseInt(scaleVal, 10) : 100;
@@ -1135,7 +1135,7 @@ window.CMSPrintManager = {
 
     executePrintWithToolbar: function(targetElementId) {
         const paper = document.getElementById(`print_paper_${targetElementId}`)?.value || 'A4';
-        const orient = document.getElementById(`print_orient_${targetElementId}`)?.value || 'landscape';
+        const orient = document.getElementById(`print_orient_${targetElementId}`)?.value || 'portrait';
         const scale = document.getElementById(`print_scale_${targetElementId}`)?.value || 100;
         this.print(targetElementId, {
             paperSize: paper,
