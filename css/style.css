@@ -256,24 +256,26 @@ h6,
   /* A4 Structured Document Frame (Exact Fit with 0.5mm - 1mm Thin Margin matching Honor Board) */
   @page {
     size: A4 portrait;
-    margin: 1mm !important;
+    margin: 0mm !important;
   }
   .a4-page {
     box-sizing: border-box !important;
-    width: 208mm !important;
-    height: 295mm !important;
-    min-height: 295mm !important;
+    width: 210mm !important;
+    height: 297mm !important;
+    min-height: 297mm !important;
+    max-height: 297mm !important;
     display: flex !important;
     flex-direction: column !important;
     justify-content: space-between !important;
     position: relative !important;
-    padding: 5mm 6mm !important;
+    padding: 18px 24px !important;
     margin: 0 auto !important;
     page-break-inside: avoid !important;
     page-break-after: avoid !important;
     background: white !important;
     border-radius: 0 !important;
     box-shadow: none !important;
+    overflow: hidden !important;
   }
 }
 

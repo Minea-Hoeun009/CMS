@@ -862,7 +862,7 @@ window.CMSPrintManager = {
         const paperSize = options.paperSize || 'A4';
         const orientation = options.orientation || 'portrait';
         const scale = options.scale ? parseInt(options.scale, 10) : 100;
-        const margin = options.margin || (paperSize === 'A3' ? '10mm' : '1mm');
+        const margin = options.margin !== undefined ? options.margin : (paperSize === 'A3' ? '10mm' : '0mm');
         const title = options.title || document.title || "បោះពុម្ពឯកសារ";
 
         let oldIframe = document.getElementById("cms_print_frame_helper");
@@ -911,31 +911,54 @@ window.CMSPrintManager = {
             clone.style.padding = "0";
             clone.style.minHeight = "auto";
         }
-        // Enforce natural compact flow for all .a4-page elements so signatures stay close to content
+        // Standardize .a4-page elements to exact full A4 dimensions (210mm x 297mm) matching Honor Board
+        const isLandscape = orientation === 'landscape';
+        const pageW = isLandscape ? '297mm' : '210mm';
+        const pageH = isLandscape ? '210mm' : '297mm';
+
         const a4Pages = clone.querySelectorAll ? clone.querySelectorAll('.a4-page') : [];
         if (a4Pages.length > 0) {
             a4Pages.forEach(p => {
-                p.style.setProperty('min-height', 'auto', 'important');
-                p.style.setProperty('height', 'auto', 'important');
-                p.style.setProperty('justify-content', 'flex-start', 'important');
-                p.classList.remove('min-h-[297mm]', 'justify-between');
-                p.classList.add('justify-start');
+                p.style.setProperty('width', pageW, 'important');
+                p.style.setProperty('height', pageH, 'important');
+                p.style.setProperty('min-height', pageH, 'important');
+                p.style.setProperty('max-height', pageH, 'important');
+                p.style.setProperty('display', 'flex', 'important');
+                p.style.setProperty('flex-direction', 'column', 'important');
+                p.style.setProperty('justify-content', 'space-between', 'important');
+                p.style.setProperty('box-shadow', 'none', 'important');
+                p.style.setProperty('border-radius', '0', 'important');
+                p.style.setProperty('margin', '0 auto', 'important');
+                p.style.setProperty('overflow', 'hidden', 'important');
             });
         }
         if (clone.classList && clone.classList.contains('a4-page')) {
-            clone.style.setProperty('min-height', 'auto', 'important');
-            clone.style.setProperty('height', 'auto', 'important');
-            clone.style.setProperty('justify-content', 'flex-start', 'important');
-            clone.classList.remove('min-h-[297mm]', 'justify-between');
-            clone.classList.add('justify-start');
+            clone.style.setProperty('width', pageW, 'important');
+            clone.style.setProperty('height', pageH, 'important');
+            clone.style.setProperty('min-height', pageH, 'important');
+            clone.style.setProperty('max-height', pageH, 'important');
+            clone.style.setProperty('display', 'flex', 'important');
+            clone.style.setProperty('flex-direction', 'column', 'important');
+            clone.style.setProperty('justify-content', 'space-between', 'important');
+            clone.style.setProperty('box-shadow', 'none', 'important');
+            clone.style.setProperty('border-radius', '0', 'important');
+            clone.style.setProperty('margin', '0 auto', 'important');
+            clone.style.setProperty('overflow', 'hidden', 'important');
         }
         if (clone.firstElementChild) {
             const isA4Page = clone.firstElementChild.classList && clone.firstElementChild.classList.contains('a4-page');
             if (clone.firstElementChild.style) {
                 clone.firstElementChild.style.boxShadow = "none";
-                clone.firstElementChild.style.setProperty('min-height', 'auto', 'important');
-                clone.firstElementChild.style.setProperty('height', 'auto', 'important');
-                clone.firstElementChild.style.setProperty('justify-content', 'flex-start', 'important');
+                if (isA4Page) {
+                    clone.firstElementChild.style.setProperty('width', pageW, 'important');
+                    clone.firstElementChild.style.setProperty('height', pageH, 'important');
+                    clone.firstElementChild.style.setProperty('min-height', pageH, 'important');
+                    clone.firstElementChild.style.setProperty('max-height', pageH, 'important');
+                    clone.firstElementChild.style.setProperty('display', 'flex', 'important');
+                    clone.firstElementChild.style.setProperty('flex-direction', 'column', 'important');
+                    clone.firstElementChild.style.setProperty('justify-content', 'space-between', 'important');
+                    clone.firstElementChild.style.setProperty('overflow', 'hidden', 'important');
+                }
                 if (!isA4Page) {
                     clone.firstElementChild.style.border = "none";
                     clone.firstElementChild.style.borderRadius = "0";
@@ -1013,20 +1036,22 @@ window.CMSPrintManager = {
                     /* A4 Page Structured Layout - Compact & Natural Flow without Bottom-Dropping */
                     .a4-page, [class*="min-h-"] {
                         box-sizing: border-box !important;
-                        width: ${orientation === 'landscape' ? '295mm' : '208mm'} !important;
-                        height: ${orientation === 'landscape' ? '208mm' : '295mm'} !important;
-                        min-height: ${orientation === 'landscape' ? '208mm' : '295mm'} !important;
+                        width: ${orientation === 'landscape' ? '297mm' : '210mm'} !important;
+                        height: ${orientation === 'landscape' ? '210mm' : '297mm'} !important;
+                        min-height: ${orientation === 'landscape' ? '210mm' : '297mm'} !important;
+                        max-height: ${orientation === 'landscape' ? '210mm' : '297mm'} !important;
                         display: flex !important;
                         flex-direction: column !important;
                         justify-content: space-between !important;
                         position: relative !important;
-                        padding: 5mm 6mm !important;
+                        padding: 18px 24px !important;
                         margin: 0 auto !important;
                         page-break-inside: avoid !important;
                         page-break-after: avoid !important;
                         background: white !important;
                         border-radius: 0 !important;
                         box-shadow: none !important;
+                        overflow: hidden !important;
                     }
 
                     /* Scale / Zoom Support */
