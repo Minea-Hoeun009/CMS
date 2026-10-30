@@ -69,7 +69,7 @@ window.KrouDigital = {
         let lun = document.getElementById('global_lun_input')?.value || localStorage.getItem('rc_lunar_date') || localStorage.getItem('rep_lunar_date') || "ថ្ងៃ....................ខែ..................ឆ្នាំ...............ព.ស.២៥៧០";
         const lunarDateStr = isLunarChecked ? lun : "";
 
-        const allStudents = window.allStudents || JSON.parse(localStorage.getItem('academic_students') || '[]');
+        const allStudents = window.allStudents || JSON.parse(localStorage.getItem('academic_students') || localStorage.getItem('students') || '[]');
         const allScores = JSON.parse(localStorage.getItem('academic_scores') || '[]');
         const selectedMonth = localStorage.getItem('selected_assessment_month') || "មករា";
 
@@ -1389,13 +1389,51 @@ window.KrouDigital = {
         }
     },
 
-    renderCertificateModal: function(studentId = null, rankNum = null, targetGrade = null, frameStyle = null) {
-        const customFrameB64 = localStorage.getItem('custom_cert_frame_b64');
-        if (!frameStyle) {
-            frameStyle = customFrameB64 ? 'custom-uploaded' : (localStorage.getItem('cert_last_frame') || 'khmer-kbach-gold');
+    // 🖨️ បោះពុម្ពប័ណ្ណសរសើរជាក្រុម (Batch Printing Top 1-5 or All)
+    printBatchCertificates: function(limit = 5) {
+        if (document.activeElement && typeof document.activeElement.blur === 'function') {
+            document.activeElement.blur();
         }
-        localStorage.setItem('cert_last_frame', frameStyle);
 
+        const pageSizeKey = localStorage.getItem('cert_page_size') || 'A4-landscape';
+        const pageSizesMap = {
+            'A4-landscape': { width: '297mm', height: '210mm', isLandscape: true, name: 'A4' },
+            'A4-portrait': { width: '210mm', height: '297mm', isLandscape: false, name: 'A4' },
+            'A3-landscape': { width: '420mm', height: '297mm', isLandscape: true, name: 'A3' },
+            'Letter-landscape': { width: '11in', height: '8.5in', isLandscape: true, name: 'Letter' }
+        };
+        const curSize = pageSizesMap[pageSizeKey] || pageSizesMap['A4-landscape'];
+
+        const sInfo = window.appSettings || JSON.parse(localStorage.getItem('school_settings') || '{}');
+        const academicYear = (typeof window.getReportAcademicYear === 'function' ? window.getReportAcademicYear() : (document.getElementById("globalAcademicYear")?.value || localStorage.getItem('selected_academic_year') || sInfo.academic_year || "2026-2027"));
+        const activeClass = typeof window.getCurrentSelectedClass === 'function' ? window.getCurrentSelectedClass() : { level: "ថ្នាក់ទី ៤", room: "«ក»" };
+        const curLevel = document.getElementById('certGradeSelect')?.value || activeClass.level || "ថ្នាក់ទី ៤";
+        const curRoom = activeClass.room || "«ក»";
+        const periodType = localStorage.getItem('cert_eval_period_type') || document.getElementById('certPeriodTypeSelect')?.value || document.getElementById('globalPeriodType')?.value || 'monthly';
+        const periodMonth = localStorage.getItem('cert_eval_month') || document.getElementById('certPeriodValueSelect')?.value || localStorage.getItem('selected_assessment_month') || document.getElementById('globalPeriodValue')?.value || 'មករា';
+
+        const evaluatedStudents = this.getEvaluatedStudentsForCertificates(curLevel, periodType, periodMonth, academicYear, curRoom);
+        if (!evaluatedStudents || evaluatedStudents.length === 0) {
+            alert("⚠️ មិនមានទិន្នន័យសិស្សសម្រាប់បោះពុម្ពប័ណ្ណសរសើរឡើយ!");
+            return;
+        }
+
+        let studentsToPrint = [];
+        if (limit === 'all') {
+            studentsToPrint = evaluatedStudents.filter(s => s.hasScore && s.avg > 0);
+            if (studentsToPrint.length === 0) studentsToPrint = evaluatedStudents;
+        } else {
+            const count = parseInt(limit, 10) || 5;
+            studentsToPrint = evaluatedStudents.slice(0, count);
+        }
+
+        if (studentsToPrint.length === 0) {
+            alert("⚠️ មិនមានសិស្សក្នុងបញ្ជីបោះពុម្ពប័ណ្ណសរសើរឡើយ!");
+            return;
+        }
+
+        const customFrameB64 = localStorage.getItem('custom_cert_frame_b64');
+        const frameStyle = customFrameB64 ? 'custom-uploaded' : (localStorage.getItem('cert_last_frame') || 'khmer-kbach-gold');
         const customLogoB64 = localStorage.getItem('custom_cert_logo_b64');
         const customPics = JSON.parse(localStorage.getItem('custom_cert_pictures') || '[]');
         const customTexts = JSON.parse(localStorage.getItem('custom_cert_texts') || '[]');
@@ -1405,13 +1443,8 @@ window.KrouDigital = {
         const certTitleColor = localStorage.getItem('cert_title_color') || '#dc2626';
         const certBgColor = localStorage.getItem('cert_bg_color') || '#ffffff';
         const watermarkEnabled = localStorage.getItem('cert_watermark_enabled') !== 'false';
-        const activeTab = localStorage.getItem('cert_active_tab') || 'design';
-        const studioZoom = parseInt(localStorage.getItem('cert_studio_zoom') || '85', 10);
-        const pageSizeKey = localStorage.getItem('cert_page_size') || 'A4-landscape';
-        const titleType = localStorage.getItem('cert_title_type') || 'លិខិតសរសើរ';
-        const examSession = localStorage.getItem('cert_exam_session') || 'ប្រឡងឆមាសលើកទី១ ឆ្នាំសិក្សា ២០២៥ - ២០២៦';
+        const titleType = localStorage.getItem('cert_title_type') || 'ប័ណ្ណសរសើរ';
 
-        // Load section saved positions (Canva drag offsets)
         const posHeaderLeft = JSON.parse(localStorage.getItem('cert_pos_sec_header_left') || '{"x":0,"y":0}');
         const posHeaderCenter = JSON.parse(localStorage.getItem('cert_pos_sec_header_center') || '{"x":0,"y":0}');
         const posTitle = JSON.parse(localStorage.getItem('cert_pos_sec_title') || '{"x":0,"y":0}');
@@ -1419,34 +1452,7 @@ window.KrouDigital = {
         const posSigLeft = JSON.parse(localStorage.getItem('cert_pos_sec_sig_left') || '{"x":0,"y":0}');
         const posSigRight = JSON.parse(localStorage.getItem('cert_pos_sec_sig_right') || '{"x":0,"y":0}');
 
-        // Page size mapping
-        const pageSizesMap = {
-            'A4-landscape': { name: 'A4 ផ្តេក (297 x 210 mm)', width: '297mm', height: '210mm', css: 'A4 landscape' },
-            'A4-portrait': { name: 'A4 បញ្ឈរ (210 x 297 mm)', width: '210mm', height: '297mm', css: 'A4 portrait' },
-            'A3-landscape': { name: 'A3 ផ្តេក (420 x 297 mm)', width: '420mm', height: '297mm', css: 'A3 landscape' },
-            'Letter-landscape': { name: 'Letter ផ្តេក (11 x 8.5 in)', width: '11in', height: '8.5in', css: 'Letter landscape' }
-        };
-        const curPageSize = pageSizesMap[pageSizeKey] || pageSizesMap['A4-landscape'];
-
-        const allStudents = window.allStudents || JSON.parse(localStorage.getItem('academic_students') || '[]');
-        const activeClass = typeof window.getCurrentSelectedClass === 'function' ? window.getCurrentSelectedClass() : { level: "ថ្នាក់ទី ៤", room: "«ក»" };
-        const curLevel = targetGrade || activeClass.level;
-
-        const classStudents = allStudents.filter(s => {
-            if (!curLevel || curLevel === 'all') return true;
-            const norm = typeof window.normalizeGrade === 'function' ? window.normalizeGrade(s.grade) : s.grade;
-            return norm === curLevel;
-        });
-        const selectableStudents = classStudents.length > 0 ? classStudents : allStudents;
-
-        const student = selectableStudents.find(s => String(s.id) === String(studentId)) || selectableStudents[0] || allStudents[0] || { name: "ណៃ ច័ន្ទសុផានី", gender: "ស្រី", grade: curLevel, id: "STU-001" };
-        const activeRank = rankNum !== null ? rankNum : (localStorage.getItem('cert_last_rank') || '3');
-        localStorage.setItem('cert_last_rank', activeRank);
-
-        const sInfo = window.appSettings || JSON.parse(localStorage.getItem('school_settings') || '{}');
-        const academicYear = (typeof window.getReportAcademicYear === 'function' ? window.getReportAcademicYear() : (document.getElementById("globalAcademicYear")?.value || localStorage.getItem('selected_academic_year') || sInfo.academic_year || "2026-2027"));
         const districtName = (sInfo.district || "អង្គរជ័យ").replace(/^ស្រុក\s*/, '').trim(); 
-        const provinceName = sInfo.province || "កំពត";
         const schoolName = sInfo.school_name || "វិទ្យាល័យ សម្តេច ជា ស៊ីម អង្គរជ័យ";
         const principalName = (sInfo.principal_name && sInfo.principal_name !== "នាយកសាលា") ? sInfo.principal_name : "";
         const teacherName = (window.AuthState ? window.AuthState.teacherName : null) || localStorage.getItem('auth_teacher_name') || sInfo.teacher_name || "លុយ សុផល";
@@ -1467,13 +1473,357 @@ window.KrouDigital = {
             sDate = "ថ្ងៃទី២៥ ខែកុម្ភៈ ឆ្នាំ២០២៦";
         }
         if (sDate.includes("ថ្ងៃទី")) sDate = sDate.substring(sDate.indexOf("ថ្ងៃទី"));
-
         const solarDateStr = `${locShort} ${sDate}`;
         const lunarDateStr = "ថ្ងៃពុធ ៩កើត ខែផល្គុន ឆ្នាំម្សាញ់ សប្តស័ក ព.ស. ២៥៦៩";
 
-        const gradesList = typeof window.getAllGradesList === 'function' ? window.getAllGradesList() : ["ថ្នាក់ទី ១", "ថ្នាក់ទី ២", "ថ្នាក់ទី ៣", "ថ្នាក់ទី ៤", "ថ្នាក់ទី ៥", "ថ្នាក់ទី ៦", "10A", "10B", "11A", "12A"];
+        const cleanMonth = (periodMonth || '').replace(/^ខែ\s*/, '').trim();
+        const khmerYearStr = typeof window.toKhmerNum === 'function' ? window.toKhmerNum(academicYear) : academicYear;
+        let autoExamSession = '';
+        if (periodType === 'monthly') {
+            autoExamSession = `ការវាយតម្លៃលទ្ធផលសិក្សាប្រចាំខែ ${cleanMonth} ឆ្នាំសិក្សា ${khmerYearStr}`;
+        } else if (periodType === 'semester') {
+            const semNum = cleanMonth.includes('២') ? '២' : '១';
+            autoExamSession = `ការប្រឡងឆមាសលើកទី${semNum} ឆ្នាំសិក្សា ${khmerYearStr}`;
+        } else {
+            autoExamSession = `ការវាយតម្លៃលទ្ធផលសិក្សាប្រចាំឆ្នាំ ឆ្នាំសិក្សា ${khmerYearStr}`;
+        }
+        let examSession = localStorage.getItem('cert_exam_session');
+        if (!examSession || examSession.includes('២០២៥ - ២០២៦') || examSession.includes('2025-2026')) {
+            examSession = autoExamSession;
+        }
 
-        // 🎨 ម៉ូដស៊ុម Preset
+        const commonOptions = {
+            frameStyle,
+            customFrameB64,
+            customLogoB64,
+            customPics,
+            customTexts,
+            certPadding,
+            certFontScale,
+            certFontFamily,
+            certTitleColor,
+            certBgColor,
+            watermarkEnabled,
+            curPageSize: curSize,
+            titleType,
+            examSession,
+            posHeaderLeft,
+            posHeaderCenter,
+            posTitle,
+            posBody,
+            posSigLeft,
+            posSigRight,
+            districtName,
+            schoolName,
+            principalName,
+            teacherName,
+            solarDateStr,
+            lunarDateStr,
+            cleanMonth,
+            curLevel,
+            curRoom,
+            isPrintMode: true
+        };
+
+        const pagesHtml = studentsToPrint.map((stu, idx) => {
+            const rankToUse = stu.rank ? stu.rank : (idx + 1);
+            const certCard = this.buildCertificateHtmlForStudent(stu, rankToUse, commonOptions);
+            return `
+                <div class="cert-print-page" style="page-break-after: always; break-after: page; width: ${curSize.width}; height: ${curSize.height}; margin: 0 auto; display: flex; justify-content: center; align-items: center; box-sizing: border-box; overflow: hidden;">
+                    ${certCard}
+                </div>
+            `;
+        }).join('\n');
+
+        const stylesHtml = Array.from(document.querySelectorAll('style, link[rel="stylesheet"]'))
+            .map(el => el.outerHTML)
+            .join('\n');
+
+        const printDoc = `
+            <!DOCTYPE html>
+            <html lang="km">
+            <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <title>បោះពុម្ពប័ណ្ណសរសើរជាក្រុម (${studentsToPrint.length} សន្លឹក)</title>
+                <link rel="preconnect" href="https://fonts.googleapis.com">
+                <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+                <link href="https://fonts.googleapis.com/css2?family=Moul&family=Siemreap&family=Battambang&display=swap" rel="stylesheet">
+                <script src="https://cdn.tailwindcss.com"></script>
+                ${stylesHtml}
+                <style>
+                    @page {
+                        size: ${curSize.isLandscape ? 'landscape' : 'portrait'};
+                        margin: 0 !important;
+                    }
+                    @media print {
+                        @page {
+                            size: ${curSize.isLandscape ? 'landscape' : 'portrait'};
+                            margin: 0 !important;
+                        }
+                        html, body {
+                            width: 100vw !important;
+                            height: 100vh !important;
+                            margin: 0 !important;
+                            padding: 0 !important;
+                            -webkit-print-color-adjust: exact !important;
+                            print-color-adjust: exact !important;
+                        }
+                        .no-print, .drag-handle, button {
+                            display: none !important;
+                        }
+                        .cert-print-page {
+                            page-break-after: always !important;
+                            break-after: page !important;
+                            width: 100vw !important;
+                            height: 100vh !important;
+                            margin: 0 !important;
+                            padding: 0 !important;
+                            overflow: hidden !important;
+                        }
+                    }
+                    * {
+                        box-sizing: border-box !important;
+                        -webkit-print-color-adjust: exact !important;
+                        print-color-adjust: exact !important;
+                    }
+                    html, body {
+                        width: 100%;
+                        height: 100%;
+                        margin: 0;
+                        padding: 0;
+                        background: #f1f5f9;
+                        overflow: auto;
+                    }
+                    .font-moul { font-family: 'Khmer OS Muol Light', 'Khmer OS Muol', 'Moul', serif !important; font-weight: normal !important; }
+                    .font-siemreap { font-family: 'Khmer OS Siemreap', 'Siemreap', sans-serif !important; }
+                    .font-battambang { font-family: 'Battambang', sans-serif !important; }
+                    .no-print, .drag-handle { display: none !important; }
+                    
+                    .print-helper-bar {
+                        background: #0f172a;
+                        color: #f8fafc;
+                        padding: 10px 18px;
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        font-family: 'Khmer OS Siemreap', 'Siemreap', sans-serif;
+                        font-size: 13px;
+                        border-bottom: 2px solid #3b82f6;
+                        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+                        position: sticky;
+                        top: 0;
+                        z-index: 9999;
+                    }
+                </style>
+            </head>
+            <body>
+                <div class="print-helper-bar no-print">
+                    <div style="display:flex;align-items:center;gap:12px;">
+                        <span style="font-size:20px;">🎖️</span>
+                        <div>
+                            <strong>បោះពុម្ពប័ណ្ណសរសើរជាក្រុម (${studentsToPrint.length} សន្លឹក)៖</strong>
+                            <span style="color:#fde047;margin-left:6px;">ជ្រើសរើស Layout: <b>${curSize.isLandscape ? 'Landscape (ផ្តេក)' : 'Portrait (បញ្ឈរ)'}</b> និង Margins: <b>None (គ្មានគែម)</b></span>
+                        </div>
+                    </div>
+                    <div style="display:flex;gap:10px;">
+                        <button onclick="window.print()" style="background:#059669;color:#fff;border:none;padding:7px 18px;border-radius:8px;font-weight:bold;cursor:pointer;font-family:'Siemreap',sans-serif;">🖨️ ចុចព្រីនឥឡូវនេះ (Print All)</button>
+                        <button onclick="window.close()" style="background:#475569;color:#fff;border:none;padding:7px 14px;border-radius:8px;cursor:pointer;font-family:'Siemreap',sans-serif;">បិទ (Close)</button>
+                    </div>
+                </div>
+
+                <div class="flex flex-col items-center gap-6 p-4">
+                    ${pagesHtml}
+                </div>
+
+                <script>
+                    window.onload = function() {
+                        setTimeout(function() {
+                            window.focus();
+                            window.print();
+                        }, 500);
+                    };
+                </script>
+            </body>
+            </html>
+        `;
+
+        const printWin = window.open('', '_blank', 'width=1100,height=800');
+        if (printWin) {
+            printWin.document.open();
+            printWin.document.write(printDoc);
+            printWin.document.close();
+        } else {
+            alert("⚠️ សូមអនុញ្ញាតឱ្យបើកផ្ទាំង Pop-up ក្នុងកម្មវិធីរុករក ដើម្បីអាចបោះពុម្ពប័ណ្ណសរសើរបាន!");
+        }
+    },
+
+    // 🏆 មុខងារទាញទិន្នន័យសិស្ស និងពិន្ទុជាក់ស្តែងសម្រាប់ប័ណ្ណសរសើរ (Accurate Score & Rank Fetcher)
+    getEvaluatedStudentsForCertificates: function(targetGrade = null, targetPeriodType = null, targetMonth = null, targetYear = null, targetRoom = null) {
+        const sInfo = window.appSettings || JSON.parse(localStorage.getItem('school_settings') || '{}');
+        const academicYear = targetYear || (typeof window.getReportAcademicYear === 'function' ? window.getReportAcademicYear() : (document.getElementById("globalAcademicYear")?.value || localStorage.getItem('selected_academic_year') || sInfo.academic_year || "2026-2027"));
+        const activeClass = typeof window.getCurrentSelectedClass === 'function' ? window.getCurrentSelectedClass() : { level: "ថ្នាក់ទី ៤", room: "«ក»" };
+        const curLevel = targetGrade || activeClass.level || "ថ្នាក់ទី ៤";
+        const curRoom = targetRoom || activeClass.room || "«ក»";
+        const periodType = targetPeriodType || localStorage.getItem('cert_eval_period_type') || document.getElementById("globalPeriodType")?.value || "monthly";
+        const periodMonth = targetMonth || localStorage.getItem('cert_eval_month') || localStorage.getItem('selected_assessment_month') || document.getElementById("globalPeriodValue")?.value || "មករា";
+
+        let students = [];
+        if (typeof window.getStudentsForClass === 'function') {
+            students = window.getStudentsForClass(curLevel, curRoom, academicYear);
+        }
+        if (!students || students.length === 0) {
+            const allStudents = window.allStudents || JSON.parse(localStorage.getItem('academic_students') || '[]');
+            students = allStudents.filter(s => {
+                if (!curLevel || curLevel === 'all') return true;
+                const norm = typeof window.normalizeGrade === 'function' ? window.normalizeGrade(s.grade) : s.grade;
+                return norm === curLevel;
+            });
+            if (curRoom && curRoom !== 'all') {
+                const roomFiltered = students.filter(s => s.room === curRoom || (s.room && s.room.replace(/[«»]/g, '') === curRoom.replace(/[«»]/g, '')));
+                if (roomFiltered.length > 0) students = roomFiltered;
+            }
+        }
+        if (!students || students.length === 0) {
+            students = window.allStudents || JSON.parse(localStorage.getItem('academic_students') || localStorage.getItem('students') || '[]');
+        }
+
+        let allScores = [];
+        try { allScores = JSON.parse(localStorage.getItem('academic_scores') || '[]'); } catch(e) {}
+
+        const cleanPeriodMonth = (periodMonth || '').replace(/^ខែ\s*/, '').trim();
+        const schoolLevel = typeof window.getSchoolLevel === 'function' ? window.getSchoolLevel(curLevel) : 'primary';
+
+        const evaluated = students.map(stu => {
+            let foundScore = null;
+            if (window.rankingsDataList && window.rankingsDataList.length > 0) {
+                foundScore = window.rankingsDataList.find(r => String(r.id) === String(stu.id));
+            }
+            if (!foundScore || !foundScore.hasScore) {
+                foundScore = allScores.find(sc => {
+                    const idMatch = String(sc.student_id || sc.id) === String(stu.id);
+                    if (!idMatch) return false;
+                    const normTargetP = (periodType === 'month' ? 'monthly' : periodType);
+                    const normScP = (sc.period_type === 'month' ? 'monthly' : sc.period_type);
+                    if (normScP && normTargetP && normScP !== normTargetP) return false;
+                    if (normTargetP === 'monthly') {
+                        const scMonth = (sc.month || '').replace(/^ខែ\s*/, '').trim();
+                        return scMonth === cleanPeriodMonth || scMonth === periodMonth;
+                    } else if (periodType === 'semester') {
+                        const isS2 = cleanPeriodMonth.includes('២');
+                        const scM = String(sc.month || '');
+                        return isS2 ? scM.includes('២') : scM.includes('១');
+                    } else if (periodType === 'annual') {
+                        return sc.period_type === 'annual' || String(sc.month || '').includes('ឆ្នាំ');
+                    }
+                    return true;
+                });
+            }
+
+            let avg = 0, total = 0, rank = null, gradeLetter = '-';
+            let hasScore = false;
+
+            if (foundScore) {
+                avg = parseFloat(foundScore.average || foundScore.avg || 0);
+                total = parseFloat(foundScore.total_score || foundScore.total_exam || foundScore.total || 0);
+                if (foundScore.rank && foundScore.rank !== '-' && !isNaN(parseInt(foundScore.rank, 10))) {
+                    rank = parseInt(foundScore.rank, 10);
+                }
+                gradeLetter = foundScore.grade_letter || foundScore.gradeLetter || '';
+                if (avg > 0 || total > 0 || rank !== null) hasScore = true;
+            }
+
+            if (hasScore && (!gradeLetter || gradeLetter === '-')) {
+                if (typeof window.getGradeLetter === 'function') {
+                    gradeLetter = window.getGradeLetter(avg, false, schoolLevel);
+                } else {
+                    gradeLetter = avg >= 9 ? 'A' : avg >= 8 ? 'B' : avg >= 7 ? 'C' : avg >= 6 ? 'D' : avg >= 5 ? 'E' : 'F';
+                }
+            }
+
+            let gradeLetterFull = gradeLetter;
+            if (gradeLetter === 'A') gradeLetterFull = 'A (ល្អប្រសើរ)';
+            else if (gradeLetter === 'B') gradeLetterFull = 'B (ល្អណាស់)';
+            else if (gradeLetter === 'C') gradeLetterFull = 'C (ល្អ)';
+            else if (gradeLetter === 'D') gradeLetterFull = 'D (ល្អបង្គួរ)';
+            else if (gradeLetter === 'E') gradeLetterFull = 'E (មធ្យម)';
+            else if (gradeLetter === 'F') gradeLetterFull = 'F (ខ្សោយ)';
+
+            return {
+                id: stu.id,
+                name: stu.name,
+                gender: stu.gender || 'ប្រុស',
+                grade: stu.grade || curLevel,
+                room: stu.room || curRoom,
+                photo: stu.photo || stu.photo_url || '',
+                avg: avg,
+                total: total,
+                rank: rank,
+                gradeLetter: gradeLetter,
+                gradeLetterFull: gradeLetterFull,
+                hasScore: hasScore
+            };
+        });
+
+        // Sort scored students
+        const scored = evaluated.filter(e => e.hasScore && e.avg > 0);
+        scored.sort((a, b) => {
+            if (b.avg !== a.avg) return b.avg - a.avg;
+            return (b.total || 0) - (a.total || 0);
+        });
+
+        // Competition rank: ties share rank
+        let currentRank = 1;
+        for (let i = 0; i < scored.length; i++) {
+            if (i > 0 && scored[i].avg === scored[i-1].avg && scored[i].total === scored[i-1].total) {
+                scored[i].rank = scored[i-1].rank;
+            } else {
+                scored[i].rank = currentRank;
+            }
+            currentRank++;
+        }
+
+        const unscored = evaluated.filter(e => !e.hasScore || e.avg <= 0);
+        unscored.forEach(u => { u.rank = null; });
+
+        return [...scored, ...unscored];
+    },
+
+    // 🎨 បង្កើតកូដ HTML សម្រាប់ប័ណ្ណសរសើរសិស្សម្នាក់ (Single Student Certificate Card Generator)
+    buildCertificateHtmlForStudent: function(student, activeRank, options = {}) {
+        const {
+            frameStyle = 'khmer-kbach-gold',
+            customFrameB64 = null,
+            customLogoB64 = null,
+            customPics = [],
+            customTexts = [],
+            certPadding = 36,
+            certFontScale = 100,
+            certFontFamily = 'font-moul',
+            certTitleColor = '#dc2626',
+            certBgColor = '#ffffff',
+            watermarkEnabled = true,
+            curPageSize = { width: '297mm', height: '210mm' },
+            titleType = 'ប័ណ្ណសរសើរ',
+            examSession = options.examSession || options.sessionText || '',
+            posHeaderLeft = { x: 0, y: 0 },
+            posHeaderCenter = { x: 0, y: 0 },
+            posTitle = { x: 0, y: 0 },
+            posBody = { x: 0, y: 0 },
+            posSigLeft = { x: 0, y: 0 },
+            posSigRight = { x: 0, y: 0 },
+            districtName = 'អង្គរជ័យ',
+            schoolName = 'វិទ្យាល័យ សម្តេច ជា ស៊ីម អង្គរជ័យ',
+            principalName = '',
+            teacherName = 'លុយ សុផល',
+            solarDateStr = '',
+            lunarDateStr = '',
+            cleanMonth = 'មករា',
+            curLevel = 'ថ្នាក់ទី ៤',
+            curRoom = '«ក»',
+            isPrintMode = false
+        } = options;
+
         const frameStylesMap = {
             'khmer-kbach-gold': {
                 name: '🏵️ ស៊ុមផ្កាក្បាច់ខ្មែរពណ៌មាស (Gold Kbach - ដូចរូបគំរូ)',
@@ -1556,6 +1906,502 @@ window.KrouDigital = {
 
         const activeFrame = frameStylesMap[frameStyle] || (customFrameB64 ? frameStylesMap['custom-uploaded'] : frameStylesMap['khmer-kbach-gold']);
 
+        const studentAvg = parseFloat(student.avg || 0);
+        const studentRank = student.rank || (['1','2','3','4','5'].includes(String(activeRank)) ? parseInt(activeRank, 10) : 1);
+        const gradeLetterFull = student.gradeLetterFull || (studentRank == 1 ? 'A (ល្អប្រសើរ)' : studentRank == 2 ? 'B (ល្អណាស់)' : studentRank == 3 ? 'C (ល្អ)' : 'A (ល្អប្រសើរ)');
+        const khmerRankStr = typeof window.toKhmerNum === 'function' ? window.toKhmerNum(studentRank.toString()) : studentRank;
+        const khmerAvgStr = typeof window.toKhmerNum === 'function' ? window.toKhmerNum(studentAvg.toFixed(2)) : studentAvg.toFixed(2);
+
+        let performanceTextHtml = '';
+        if (activeRank === 'month') {
+            performanceTextHtml = `
+                <span ${!isPrintMode ? 'contenteditable="true"' : ''} class="cert-editable">ដែលបានខិតខំប្រឹងប្រែងសិក្សារៀនសូត្រ និងគោរពវិន័យបានល្អប្រសើរ ជាប់ជា</span>
+                <span ${!isPrintMode ? 'contenteditable="true"' : ''} class="cert-editable font-moul text-[15px] md:text-[16px] text-red-600 font-bold px-1.5">សិស្សឆ្នើមប្រចាំខែ ${cleanMonth}</span>
+                ${studentAvg > 0 ? `
+                    <span ${!isPrintMode ? 'contenteditable="true"' : ''} class="cert-editable">មធ្យមភាគ</span>
+                    <span ${!isPrintMode ? 'contenteditable="true"' : ''} class="cert-editable font-moul text-[15px] md:text-[16px] text-red-600 font-bold px-1.5">${khmerAvgStr}</span>
+                ` : ''}
+                <span ${!isPrintMode ? 'contenteditable="true"' : ''} class="cert-editable">និទ្ទេស</span>
+                <span ${!isPrintMode ? 'contenteditable="true"' : ''} class="cert-editable font-moul text-[15px] md:text-[16px] text-red-600 font-bold px-1.5">${gradeLetterFull}</span>
+            `;
+        } else if (activeRank === 'year') {
+            performanceTextHtml = `
+                <span ${!isPrintMode ? 'contenteditable="true"' : ''} class="cert-editable">ដែលបានខិតខំប្រឹងប្រែងសិក្សារៀនសូត្រ និងគោរពវិន័យបានល្អប្រសើរ ជាប់ជា</span>
+                <span ${!isPrintMode ? 'contenteditable="true"' : ''} class="cert-editable font-moul text-[15px] md:text-[16px] text-red-600 font-bold px-1.5">សិស្សឆ្នើមប្រចាំឆ្នាំសិក្សា</span>
+                ${studentAvg > 0 ? `
+                    <span ${!isPrintMode ? 'contenteditable="true"' : ''} class="cert-editable">មធ្យមភាគ</span>
+                    <span ${!isPrintMode ? 'contenteditable="true"' : ''} class="cert-editable font-moul text-[15px] md:text-[16px] text-red-600 font-bold px-1.5">${khmerAvgStr}</span>
+                ` : ''}
+                <span ${!isPrintMode ? 'contenteditable="true"' : ''} class="cert-editable">និទ្ទេស</span>
+                <span ${!isPrintMode ? 'contenteditable="true"' : ''} class="cert-editable font-moul text-[15px] md:text-[16px] text-red-600 font-bold px-1.5">${gradeLetterFull}</span>
+            `;
+        } else if (activeRank === 'conduct') {
+            performanceTextHtml = `
+                <span ${!isPrintMode ? 'contenteditable="true"' : ''} class="cert-editable">ដែលជាសិស្សគំរូ មានសីលធម៌ គុណធម៌ វិន័យល្អប្រពៃ និងស្រឡាញ់មិត្តរួមថ្នាក់</span>
+                <span ${!isPrintMode ? 'contenteditable="true"' : ''} class="cert-editable font-moul text-[15px] md:text-[16px] text-red-600 font-bold px-1.5">សិស្សវិន័យ និងសីលធម៌ល្អ</span>
+            `;
+        } else {
+            performanceTextHtml = `
+                <span ${!isPrintMode ? 'contenteditable="true"' : ''} class="cert-editable">ដែលបានខិតខំប្រឹងប្រែងសិក្សារៀនសូត្រ និងគោរពវិន័យបានល្អប្រសើរ ទទួលបានចំណាត់ថ្នាក់លេខ</span>
+                <span ${!isPrintMode ? 'contenteditable="true"' : ''} class="cert-editable font-moul text-[15px] md:text-[16px] text-red-600 font-bold px-1.5">${khmerRankStr}</span>
+                ${studentAvg > 0 ? `
+                    <span ${!isPrintMode ? 'contenteditable="true"' : ''} class="cert-editable">មធ្យមភាគ</span>
+                    <span ${!isPrintMode ? 'contenteditable="true"' : ''} class="cert-editable font-moul text-[15px] md:text-[16px] text-red-600 font-bold px-1.5">${khmerAvgStr}</span>
+                ` : ''}
+                <span ${!isPrintMode ? 'contenteditable="true"' : ''} class="cert-editable">និទ្ទេស</span>
+                <span ${!isPrintMode ? 'contenteditable="true"' : ''} class="cert-editable font-moul text-[15px] md:text-[16px] text-red-600 font-bold px-1.5">${gradeLetterFull}</span>
+            `;
+        }
+
+        const roomDisplay = student.room || curRoom || '';
+        const gradeRoomStr = `${student.grade || curLevel} ${roomDisplay ? (roomDisplay.startsWith('«') ? roomDisplay : `«${roomDisplay}»`) : ''}`.trim();
+
+        return `
+            <div id="${isPrintMode ? '' : 'certificatePrintArea'}" class="${activeFrame.bgGradient} ${activeFrame.outerBorder} rounded-2xl relative text-center text-slate-900 overflow-hidden select-none print:shadow-none print:rounded-none" 
+                 style="width: ${curPageSize.width}; height: ${curPageSize.height}; min-height: ${curPageSize.height}; max-height: ${curPageSize.height}; max-width: ${curPageSize.width}; background-color: ${certBgColor}; font-size: ${certFontScale}%; ${activeFrame.styleExtra || ''}">
+                
+                <!-- Custom Uploaded Frame Layer -->
+                ${customFrameB64 ? `
+                    <img src="${customFrameB64}" alt="Certificate Frame" class="absolute inset-0 w-full h-full object-fill pointer-events-none select-none z-0" style="width: 100%; height: 100%;" />
+                ` : ''}
+
+                <!-- Built-in Khmer Kbach / Royal Borders -->
+                ${!customFrameB64 && activeFrame.innerBorder ? `
+                    <div class="absolute inset-2 sm:inset-3 ${activeFrame.innerBorder} rounded-xl pointer-events-none z-10"></div>
+                ` : ''}
+
+                <!-- Khmer Romduol Watermark Pattern -->
+                ${watermarkEnabled ? `
+                    <svg width="100%" height="100%" class="absolute inset-0 pointer-events-none select-none z-10 opacity-[0.065]" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <pattern id="khmerRomduolPattern" width="90" height="90" patternUnits="userSpaceOnUse">
+                                <circle cx="45" cy="45" r="4" fill="#92400e"/>
+                                <path d="M45,20 C42,32 42,38 45,41 C48,38 48,32 45,20 Z" fill="#92400e"/>
+                                <path d="M45,70 C42,58 42,52 45,49 C48,52 48,58 45,70 Z" fill="#92400e"/>
+                                <path d="M20,45 C32,42 38,42 41,45 C38,48 32,48 20,45 Z" fill="#92400e"/>
+                                <path d="M70,45 C58,42 52,42 49,45 C52,48 58,48 70,45 Z" fill="#92400e"/>
+                                <circle cx="45" cy="45" r="14" fill="none" stroke="#92400e" stroke-width="0.8" stroke-dasharray="2,2"/>
+                            </pattern>
+                        </defs>
+                        <rect width="100%" height="100%" fill="url(#khmerRomduolPattern)"/>
+                    </svg>
+                ` : ''}
+
+                <!-- Custom Added Pictures (Stamps, Signatures) -->
+                ${customPics.map(pic => `
+                    <div id="${pic.id}" class="drag-box absolute select-none z-30 group ${isPrintMode ? '' : 'cursor-move'} p-0.5 rounded" style="left: ${pic.x}px; top: ${pic.y}px; width: ${pic.width || 120}px;">
+                        ${!isPrintMode ? `
+                            <div class="drag-handle no-print flex items-center justify-between gap-1 px-1.5 py-0.5 bg-slate-900/95 text-amber-300 text-[9px] rounded shadow-md border border-amber-500/60 -top-6 left-0 absolute whitespace-nowrap opacity-80 group-hover:opacity-100 transition cursor-move">
+                                <span><i class="fa-solid fa-up-down-left-right"></i> អូស</span>
+                                <div class="flex items-center gap-1 ml-1 border-l border-slate-700 pl-1">
+                                    <button onclick="window.KrouDigital.resizePicture('${pic.id}', -15)" class="w-3.5 h-3.5 bg-slate-800 hover:bg-slate-700 text-white rounded text-[9px] flex items-center justify-center font-bold" title="បង្រួម">-</button>
+                                    <button onclick="window.KrouDigital.resizePicture('${pic.id}', 15)" class="w-3.5 h-3.5 bg-slate-800 hover:bg-slate-700 text-white rounded text-[9px] flex items-center justify-center font-bold" title="ពង្រីក">+</button>
+                                    <button onclick="window.KrouDigital.removePicture('${pic.id}')" class="text-rose-400 hover:text-rose-300 font-bold ml-1 text-xs" title="លុប">×</button>
+                                </div>
+                            </div>
+                        ` : ''}
+                        <img src="${pic.b64}" alt="${pic.name}" class="w-full h-auto object-contain pointer-events-none drop-shadow-sm" />
+                    </div>
+                `).join('')}
+
+                <!-- Custom Added Texts -->
+                ${customTexts.map(txt => `
+                    <div id="${txt.id}" class="drag-box absolute select-text z-30 group ${isPrintMode ? '' : 'cursor-move'} p-1 rounded" style="left: ${txt.x}px; top: ${txt.y}px;">
+                        ${!isPrintMode ? `
+                            <div class="drag-handle no-print flex items-center justify-between gap-1 px-2 py-0.5 bg-slate-900/90 text-amber-300 text-[10px] rounded shadow-md border border-amber-500/60 -top-6 left-0 absolute whitespace-nowrap opacity-75 group-hover:opacity-100 transition cursor-move">
+                                <span><i class="fa-solid fa-up-down-left-right"></i> អូស</span>
+                                <button onclick="window.KrouDigital.removeCustomText('${txt.id}')" class="text-rose-400 hover:text-rose-300 font-bold ml-1.5" title="លុប">×</button>
+                            </div>
+                        ` : ''}
+                        <div ${!isPrintMode ? 'contenteditable="true"' : ''} class="cert-editable font-bold ${txt.fontFamily}" style="font-size: ${txt.fontSize}px; color: ${txt.color}; outline: none; min-width: 60px;">
+                            ${txt.content}
+                        </div>
+                    </div>
+                `).join('')}
+
+                <!-- Internal Content Container -->
+                <div id="${isPrintMode ? '' : 'certificateInnerCanvas'}" class="relative z-20 flex flex-col justify-between h-full w-full" style="padding: ${certPadding}px; height: 100%; box-sizing: border-box;">
+                    
+                    <!-- MoEYS Header -->
+                    <div class="flex justify-between items-start text-xs px-2 pt-1">
+                        <!-- Left: Ministry & School -->
+                        <div id="cert_sec_header_left" class="canva-el canva-draggable-section text-left pt-0.5 space-y-1 max-w-[340px]" style="transform: translate(${posHeaderLeft.x}px, ${posHeaderLeft.y}px);">
+                            ${!isPrintMode ? `
+                                <div class="drag-handle no-print hidden items-center gap-1 px-1.5 py-0.5 bg-slate-900/90 text-amber-300 text-[9px] rounded shadow border border-amber-500/60 -top-5 left-0 absolute whitespace-nowrap cursor-move z-50">
+                                    <i class="fa-solid fa-up-down-left-right"></i> អូសទីតាំង
+                                </div>
+                            ` : ''}
+                            <div class="mb-1">
+                                ${customLogoB64 ? `
+                                    <img src="${customLogoB64}" alt="Logo" class="w-13 h-13 object-contain shadow-sm rounded-full" />
+                                ` : `
+                                    <div class="w-11 h-11 rounded-full border border-amber-500/80 bg-amber-50 flex items-center justify-center text-amber-700 text-lg shadow-sm">
+                                        <i class="fa-solid fa-award"></i>
+                                    </div>
+                                `}
+                            </div>
+                            <p ${!isPrintMode ? 'contenteditable="true"' : ''} class="cert-editable font-moul text-blue-950 text-[11px] leading-normal">ការិយាល័យអប់រំ យុវជន និងកីឡានៃរដ្ឋបាលស្រុក ${districtName}</p>
+                            <p ${!isPrintMode ? 'contenteditable="true"' : ''} class="cert-editable font-moul text-blue-950 text-[11.5px] leading-normal">${schoolName}</p>
+                        </div>
+
+                        <!-- Center: Kingdom of Cambodia -->
+                        <div id="cert_sec_header_center" class="canva-el canva-draggable-section text-center pt-1" style="transform: translate(${posHeaderCenter.x}px, ${posHeaderCenter.y}px);">
+                            ${!isPrintMode ? `
+                                <div class="drag-handle no-print hidden items-center gap-1 px-1.5 py-0.5 bg-slate-900/90 text-amber-300 text-[9px] rounded shadow border border-amber-500/60 -top-5 left-1/2 -translate-x-1/2 absolute whitespace-nowrap cursor-move z-50">
+                                    <i class="fa-solid fa-up-down-left-right"></i> អូសទីតាំង
+                                </div>
+                            ` : ''}
+                            <p ${!isPrintMode ? 'contenteditable="true"' : ''} class="cert-editable font-moul text-blue-950 text-[14px] md:text-[15px] tracking-wide">ព្រះរាជាណាចក្រកម្ពុជា</p>
+                            <p ${!isPrintMode ? 'contenteditable="true"' : ''} class="cert-editable font-moul text-blue-900 text-xs md:text-[13px] mt-0.5">ជាតិ សាសនា ព្រះមហាក្សត្រ</p>
+                            <img src="${window.CMS_HEADER_SYMBOL_B64 || 'assets/images/header-flourish.png'}" class="header-flourish-symbol" alt="symbol" style="display: block; margin: 3px auto 0 auto; width: 125px; height: 10px; object-fit: contain;" />
+                        </div>
+
+                        <div class="text-right min-w-[70px]"></div>
+                    </div>
+
+                    <!-- Title Banner -->
+                    <div id="cert_sec_title" class="canva-el canva-draggable-section my-1.5 text-center" style="transform: translate(${posTitle.x}px, ${posTitle.y}px);">
+                        ${!isPrintMode ? `
+                            <div class="drag-handle no-print hidden items-center gap-1 px-2 py-0.5 bg-slate-900/90 text-amber-300 text-[10px] rounded shadow border border-amber-500/60 -top-6 left-1/2 -translate-x-1/2 absolute whitespace-nowrap cursor-move z-50">
+                                <i class="fa-solid fa-up-down-left-right"></i> អូសចំណងជើង
+                            </div>
+                        ` : ''}
+                        <h1 id="certMainTitle" ${!isPrintMode ? 'contenteditable="true"' : ''} class="cert-editable ${certFontFamily} text-2xl sm:text-3xl md:text-[34px] drop-shadow-sm mb-1 tracking-wide leading-tight" style="color: ${certTitleColor};">
+                            ${titleType}
+                        </h1>
+                        <div class="flex items-center justify-center my-0.5">
+                            <img src="${window.CMS_TITLE_FLOURISH_B64 || 'assets/images/title-flourish.png'}" class="title-flourish-symbol" alt="flourish" style="display: block; margin: 0 auto; width: 160px; height: 10px; object-fit: contain;" />
+                        </div>
+                    </div>
+
+                    <!-- Body Content -->
+                    <div id="cert_sec_body" class="canva-el canva-draggable-section my-1 max-w-4xl mx-auto space-y-2 text-[13.5px] md:text-[14.5px] leading-relaxed text-slate-800" style="transform: translate(${posBody.x}px, ${posBody.y}px);">
+                        ${!isPrintMode ? `
+                            <div class="drag-handle no-print hidden items-center gap-1 px-2 py-0.5 bg-slate-900/90 text-amber-300 text-[10px] rounded shadow border border-amber-500/60 -top-6 left-1/2 -translate-x-1/2 absolute whitespace-nowrap cursor-move z-50">
+                                <i class="fa-solid fa-up-down-left-right"></i> អូសតួសេចក្តី
+                            </div>
+                        ` : ''}
+
+                        <p ${!isPrintMode ? 'contenteditable="true"' : ''} class="cert-editable font-moul text-blue-950 text-sm md:text-[15px]">
+                            គណៈគ្រប់គ្រង${schoolName}
+                        </p>
+                        
+                        <!-- Student Praise Line -->
+                        <div class="text-slate-800 flex flex-wrap items-center justify-center gap-1.5 pt-0.5">
+                            <span ${!isPrintMode ? 'contenteditable="true"' : ''} class="cert-editable">សូមសម្តែងនូវការកោតសរសើរចំពោះសិស្សឈ្មោះ៖</span>
+                            <span ${!isPrintMode ? 'contenteditable="true"' : ''} class="cert-editable font-moul text-base md:text-lg text-blue-950 px-2.5 border-b-2 border-amber-500/80 inline-block font-bold">
+                                ${student.name}
+                            </span>
+                            <span ${!isPrintMode ? 'contenteditable="true"' : ''} class="cert-editable">ភេទ</span>
+                            <span ${!isPrintMode ? 'contenteditable="true"' : ''} class="cert-editable font-bold text-slate-800 px-1">${student.gender || 'ប្រុស'}</span>
+                            <span ${!isPrintMode ? 'contenteditable="true"' : ''} class="cert-editable">រៀនថ្នាក់ទី</span>
+                            <span ${!isPrintMode ? 'contenteditable="true"' : ''} class="cert-editable font-bold text-blue-900 px-1.5 text-[14px] md:text-[15px]">${gradeRoomStr}</span>
+                        </div>
+
+                        <!-- Performance Evaluation Line -->
+                        <div class="text-slate-800 flex flex-wrap items-center justify-center gap-1.5">
+                            ${performanceTextHtml}
+                        </div>
+
+                        <!-- Exam Session Line -->
+                        <div class="pt-0.5">
+                            <p ${!isPrintMode ? 'contenteditable="true"' : ''} class="cert-editable font-moul text-red-600 text-[12px] md:text-[13.5px] tracking-wide">
+                                ${examSession}
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Signatures & Date -->
+                    <div class="flex justify-between items-end text-xs mt-3 px-4 sm:px-10">
+                        <!-- Left: Principal -->
+                        <div id="cert_sec_sig_left" class="canva-el canva-draggable-section text-center min-w-[150px]" style="transform: translate(${posSigLeft.x}px, ${posSigLeft.y}px);">
+                            ${!isPrintMode ? `
+                                <div class="drag-handle no-print hidden items-center gap-1 px-1.5 py-0.5 bg-slate-900/90 text-amber-300 text-[9px] rounded shadow border border-amber-500/60 -top-5 left-1/2 -translate-x-1/2 absolute whitespace-nowrap cursor-move z-50">
+                                    <i class="fa-solid fa-up-down-left-right"></i> អូស
+                                </div>
+                            ` : ''}
+                            <p ${!isPrintMode ? 'contenteditable="true"' : ''} class="cert-editable text-slate-700 text-[11.5px] font-bold">បានឃើញ និងឯកភាព</p>
+                            <p ${!isPrintMode ? 'contenteditable="true"' : ''} class="cert-editable font-moul text-blue-950 text-xs mt-0.5">នាយិកាសាលា</p>
+                            <div class="h-14 flex items-center justify-center relative my-1"></div>
+                            ${principalName ? `<p ${!isPrintMode ? 'contenteditable="true"' : ''} class="cert-editable font-moul text-slate-900 text-xs font-bold mt-1">${principalName}</p>` : ''}
+                        </div>
+
+                        <!-- Right: Lunar Date, Solar Date, Teacher Signature -->
+                        <div id="cert_sec_sig_right" class="canva-el canva-draggable-section text-center min-w-[170px] space-y-0.5" style="transform: translate(${posSigRight.x}px, ${posSigRight.y}px);">
+                            ${!isPrintMode ? `
+                                <div class="drag-handle no-print hidden items-center gap-1 px-1.5 py-0.5 bg-slate-900/90 text-amber-300 text-[9px] rounded shadow border border-amber-500/60 -top-5 left-1/2 -translate-x-1/2 absolute whitespace-nowrap cursor-move z-50">
+                                    <i class="fa-solid fa-up-down-left-right"></i> អូស
+                                </div>
+                            ` : ''}
+                            <p ${!isPrintMode ? 'contenteditable="true"' : ''} class="cert-editable text-slate-700 text-[10.5px]">${lunarDateStr}</p>
+                            <p ${!isPrintMode ? 'contenteditable="true"' : ''} class="cert-editable text-slate-700 text-[11px] font-bold">${solarDateStr}</p>
+                            <p ${!isPrintMode ? 'contenteditable="true"' : ''} class="cert-editable font-moul text-blue-950 text-xs mt-1">គ្រូទទួលបន្ទុកថ្នាក់</p>
+                            <div class="h-12 flex items-center justify-center"></div>
+                            <p ${!isPrintMode ? 'contenteditable="true"' : ''} class="cert-editable font-moul text-slate-900 text-xs font-bold">${teacherName}</p>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        `;
+    },
+
+    // 🔄 មុខងារផ្លាស់ប្តូរ និង Sync ពិន្ទុសម្រាប់ប័ណ្ណសរសើរ
+    onCertGradeChange: function(grade) {
+        this.renderCertificateModal(null, null, grade);
+    },
+
+    onCertPeriodTypeChange: function(pType) {
+        localStorage.setItem('cert_eval_period_type', pType);
+        let defaultVal = 'មករា';
+        if (pType === 'semester') defaultVal = 'ឆមាសទី១';
+        else if (pType === 'annual') defaultVal = 'ប្រចាំឆ្នាំ';
+        localStorage.setItem('cert_eval_month', defaultVal);
+        const curGrade = document.getElementById('certGradeSelect')?.value || null;
+        this.renderCertificateModal(null, null, curGrade, null, pType, defaultVal);
+    },
+
+    onCertPeriodValueChange: function(pVal) {
+        localStorage.setItem('cert_eval_month', pVal);
+        const curGrade = document.getElementById('certGradeSelect')?.value || null;
+        const pType = document.getElementById('certPeriodTypeSelect')?.value || localStorage.getItem('cert_eval_period_type') || 'monthly';
+        this.renderCertificateModal(null, null, curGrade, null, pType, pVal);
+    },
+
+    onCertStudentChange: function(studentId) {
+        const curGrade = document.getElementById('certGradeSelect')?.value || null;
+        const pType = document.getElementById('certPeriodTypeSelect')?.value || localStorage.getItem('cert_eval_period_type') || 'monthly';
+        const pVal = document.getElementById('certPeriodValueSelect')?.value || localStorage.getItem('cert_eval_month') || 'មករា';
+        const frameStyle = localStorage.getItem('cert_last_frame') || 'khmer-kbach-gold';
+        
+        const evaluatedStudents = this.getEvaluatedStudentsForCertificates(curGrade, pType, pVal);
+        const stu = evaluatedStudents.find(s => String(s.id) === String(studentId));
+        const rankToUse = (stu && stu.rank) ? stu.rank : (document.getElementById('certRankSelect')?.value || 1);
+        
+        this.renderCertificateModal(studentId, rankToUse, curGrade, frameStyle, pType, pVal);
+    },
+
+    onCertRankChange: function(rankVal) {
+        const curGrade = document.getElementById('certGradeSelect')?.value || null;
+        const pType = document.getElementById('certPeriodTypeSelect')?.value || localStorage.getItem('cert_eval_period_type') || 'monthly';
+        const pVal = document.getElementById('certPeriodValueSelect')?.value || localStorage.getItem('cert_eval_month') || 'មករា';
+        const frameStyle = localStorage.getItem('cert_last_frame') || 'khmer-kbach-gold';
+
+        const evaluatedStudents = this.getEvaluatedStudentsForCertificates(curGrade, pType, pVal);
+        let targetStudentId = document.getElementById('certStudentSelect')?.value || null;
+
+        if (['1', '2', '3', '4', '5'].includes(String(rankVal))) {
+            const studentForRank = evaluatedStudents.find(s => String(s.rank) === String(rankVal));
+            if (studentForRank) {
+                targetStudentId = studentForRank.id;
+            }
+        }
+        this.renderCertificateModal(targetStudentId, rankVal, curGrade, frameStyle, pType, pVal);
+    },
+
+    syncRealScoresForCertificates: function() {
+        if (typeof window.calculateAllScores === 'function') {
+            try { window.calculateAllScores(); } catch(e) {}
+        }
+        if (typeof window.showToast === 'function') {
+            window.showToast("✅ បានទាញយកលទ្ធផលពិន្ទុ និងចំណាត់ថ្នាក់ពិតប្រាកដជោគជ័យ!", "success");
+        }
+        const curGrade = document.getElementById('certGradeSelect')?.value || null;
+        const pType = document.getElementById('certPeriodTypeSelect')?.value || localStorage.getItem('cert_eval_period_type') || 'monthly';
+        const pVal = document.getElementById('certPeriodValueSelect')?.value || localStorage.getItem('cert_eval_month') || 'មករា';
+        this.renderCertificateModal(null, null, curGrade, null, pType, pVal);
+    },
+
+    openCertificatesFromScores: function() {
+        const activeClass = typeof window.getCurrentSelectedClass === 'function' ? window.getCurrentSelectedClass() : { level: "ថ្នាក់ទី ៤", room: "«ក»" };
+        const rawLevel = document.getElementById("honorLevelSelect")?.value || document.getElementById("globalLevelSelect")?.value || activeClass.level;
+        const pType = document.getElementById("globalPeriodType")?.value || localStorage.getItem('cert_eval_period_type') || "monthly";
+        const pMonth = localStorage.getItem("selected_assessment_month") || document.getElementById("globalPeriodValue")?.value || "មករា";
+        this.renderCertificateModal(null, 1, rawLevel, null, pType, pMonth);
+    },
+
+    addStudentPhotoToCert: function(photoUrl, stuName) {
+        if (!photoUrl) return;
+        const pics = JSON.parse(localStorage.getItem('custom_cert_pictures') || '[]');
+        pics.push({
+            id: 'pic_stu_' + Date.now(),
+            name: 'រូបថត៖ ' + (stuName || 'សិស្ស'),
+            b64: photoUrl,
+            width: 110,
+            x: 680,
+            y: 40
+        });
+        localStorage.setItem('custom_cert_pictures', JSON.stringify(pics));
+        if (typeof window.showToast === 'function') {
+            window.showToast("✅ បានដាក់រូបថតសិស្សលើប័ណ្ណសរសើរ! (អាចអូស ឬពង្រីក/បង្រួមបាន)", "success");
+        }
+        this.renderCertificateModal();
+    },
+
+    renderCertificateModal: function(studentId = null, rankNum = null, targetGrade = null, frameStyle = null, targetPeriodType = null, targetMonth = null) {
+        const customFrameB64 = localStorage.getItem('custom_cert_frame_b64');
+        if (!frameStyle) {
+            frameStyle = customFrameB64 ? 'custom-uploaded' : (localStorage.getItem('cert_last_frame') || 'khmer-kbach-gold');
+        }
+        localStorage.setItem('cert_last_frame', frameStyle);
+
+        const customLogoB64 = localStorage.getItem('custom_cert_logo_b64');
+        const customPics = JSON.parse(localStorage.getItem('custom_cert_pictures') || '[]');
+        const customTexts = JSON.parse(localStorage.getItem('custom_cert_texts') || '[]');
+        const certPadding = parseInt(localStorage.getItem('cert_padding') || '36', 10);
+        const certFontScale = parseInt(localStorage.getItem('cert_font_scale') || '100', 10);
+        const certFontFamily = localStorage.getItem('cert_font_family') || 'font-moul';
+        const certTitleColor = localStorage.getItem('cert_title_color') || '#dc2626';
+        const certBgColor = localStorage.getItem('cert_bg_color') || '#ffffff';
+        const watermarkEnabled = localStorage.getItem('cert_watermark_enabled') !== 'false';
+        const activeTab = localStorage.getItem('cert_active_tab') || 'design';
+        const studioZoom = parseInt(localStorage.getItem('cert_studio_zoom') || '85', 10);
+        const pageSizeKey = localStorage.getItem('cert_page_size') || 'A4-landscape';
+        const titleType = localStorage.getItem('cert_title_type') || 'ប័ណ្ណសរសើរ';
+
+        // Load section saved positions (Canva drag offsets)
+        const posHeaderLeft = JSON.parse(localStorage.getItem('cert_pos_sec_header_left') || '{"x":0,"y":0}');
+        const posHeaderCenter = JSON.parse(localStorage.getItem('cert_pos_sec_header_center') || '{"x":0,"y":0}');
+        const posTitle = JSON.parse(localStorage.getItem('cert_pos_sec_title') || '{"x":0,"y":0}');
+        const posBody = JSON.parse(localStorage.getItem('cert_pos_sec_body') || '{"x":0,"y":0}');
+        const posSigLeft = JSON.parse(localStorage.getItem('cert_pos_sec_sig_left') || '{"x":0,"y":0}');
+        const posSigRight = JSON.parse(localStorage.getItem('cert_pos_sec_sig_right') || '{"x":0,"y":0}');
+
+        // Page size mapping
+        const pageSizesMap = {
+            'A4-landscape': { name: 'A4 ផ្តេក (297 x 210 mm)', width: '297mm', height: '210mm', css: 'A4 landscape' },
+            'A4-portrait': { name: 'A4 បញ្ឈរ (210 x 297 mm)', width: '210mm', height: '297mm', css: 'A4 portrait' },
+            'A3-landscape': { name: 'A3 ផ្តេក (420 x 297 mm)', width: '420mm', height: '297mm', css: 'A3 landscape' },
+            'Letter-landscape': { name: 'Letter ផ្តេក (11 x 8.5 in)', width: '11in', height: '8.5in', css: 'Letter landscape' }
+        };
+        const curPageSize = pageSizesMap[pageSizeKey] || pageSizesMap['A4-landscape'];
+
+        const sInfo = window.appSettings || JSON.parse(localStorage.getItem('school_settings') || '{}');
+        const academicYear = (typeof window.getReportAcademicYear === 'function' ? window.getReportAcademicYear() : (document.getElementById("globalAcademicYear")?.value || localStorage.getItem('selected_academic_year') || sInfo.academic_year || "2026-2027"));
+        const activeClass = typeof window.getCurrentSelectedClass === 'function' ? window.getCurrentSelectedClass() : { level: "ថ្នាក់ទី ៤", room: "«ក»" };
+        const curLevel = targetGrade || activeClass.level || "ថ្នាក់ទី ៤";
+        const curRoom = activeClass.room || "«ក»";
+
+        const periodType = targetPeriodType || localStorage.getItem('cert_eval_period_type') || document.getElementById("globalPeriodType")?.value || "monthly";
+        localStorage.setItem('cert_eval_period_type', periodType);
+
+        const periodMonth = targetMonth || localStorage.getItem('cert_eval_month') || localStorage.getItem('selected_assessment_month') || document.getElementById("globalPeriodValue")?.value || "មករា";
+        localStorage.setItem('cert_eval_month', periodMonth);
+
+        // Fetch evaluated students with real scores and ranks
+        const evaluatedStudents = this.getEvaluatedStudentsForCertificates(curLevel, periodType, periodMonth, academicYear, curRoom);
+        const selectableStudents = evaluatedStudents.length > 0 ? evaluatedStudents : [{ name: "ណៃ ច័ន្ទសុផានី", gender: "ស្រី", grade: curLevel, room: curRoom, id: "STU-001", avg: 9.5, rank: 1, gradeLetter: "A", gradeLetterFull: "A (ល្អប្រសើរ)", hasScore: true }];
+
+        let student = null;
+        let activeRank = rankNum !== null ? String(rankNum) : (localStorage.getItem('cert_last_rank') || '1');
+
+        if (studentId) {
+            student = selectableStudents.find(s => String(s.id) === String(studentId)) || selectableStudents[0];
+            if (rankNum === null && student && student.rank) {
+                activeRank = String(student.rank);
+            }
+        } else if (['1', '2', '3', '4', '5'].includes(activeRank)) {
+            const foundByRank = selectableStudents.find(s => String(s.rank) === activeRank);
+            student = foundByRank || selectableStudents[0];
+        } else {
+            student = selectableStudents[0];
+        }
+
+        if (!student) {
+            student = { name: "ណៃ ច័ន្ទសុផានី", gender: "ស្រី", grade: curLevel, room: curRoom, id: "STU-001", avg: 9.5, rank: 1, gradeLetter: "A", gradeLetterFull: "A (ល្អប្រសើរ)" };
+        }
+        localStorage.setItem('cert_last_rank', activeRank);
+
+        const districtName = (sInfo.district || "អង្គរជ័យ").replace(/^ស្រុក\s*/, '').trim(); 
+        const schoolName = sInfo.school_name || "វិទ្យាល័យ សម្តេច ជា ស៊ីម អង្គរជ័យ";
+        const principalName = (sInfo.principal_name && sInfo.principal_name !== "នាយកសាលា") ? sInfo.principal_name : "";
+        const teacherName = (window.AuthState ? window.AuthState.teacherName : null) || localStorage.getItem('auth_teacher_name') || sInfo.teacher_name || "លុយ សុផល";
+
+        let locShort = "";
+        const rawLoc = document.getElementById('global_loc_input')?.value || localStorage.getItem('rc_location') || localStorage.getItem('rep_location');
+        if (rawLoc) {
+            locShort = rawLoc.replace(/^ធ្វើនៅ\s*/, '').replace(/,+$/, '').trim();
+        } else {
+            locShort = districtName || schoolName.replace(/^(សាលាបឋមសិក្សា|អនុវិទ្យាល័យ|វិទ្យាល័យ|សាលា)\s*/g, '').trim() || "ភ្នំពេញ";
+        }
+
+        let sDate = "";
+        const rawDate = document.getElementById('global_sol_input')?.value || localStorage.getItem('rc_solar_date') || localStorage.getItem('rep_solar_date');
+        if (rawDate && rawDate.trim()) {
+            sDate = rawDate.trim();
+        } else {
+            sDate = "ថ្ងៃទី២៥ ខែកុម្ភៈ ឆ្នាំ២០២៦";
+        }
+        if (sDate.includes("ថ្ងៃទី")) sDate = sDate.substring(sDate.indexOf("ថ្ងៃទី"));
+
+        const solarDateStr = `${locShort} ${sDate}`;
+        const lunarDateStr = "ថ្ងៃពុធ ៩កើត ខែផល្គុន ឆ្នាំម្សាញ់ សប្តស័ក ព.ស. ២៥៦៩";
+
+        const cleanMonth = (periodMonth || '').replace(/^ខែ\s*/, '').trim();
+        const khmerYearStr = typeof window.toKhmerNum === 'function' ? window.toKhmerNum(academicYear) : academicYear;
+
+        let autoExamSession = '';
+        if (periodType === 'monthly') {
+            autoExamSession = `ការវាយតម្លៃលទ្ធផលសិក្សាប្រចាំខែ ${cleanMonth} ឆ្នាំសិក្សា ${khmerYearStr}`;
+        } else if (periodType === 'semester') {
+            const semNum = cleanMonth.includes('២') ? '២' : '១';
+            autoExamSession = `ការប្រឡងឆមាសលើកទី${semNum} ឆ្នាំសិក្សា ${khmerYearStr}`;
+        } else {
+            autoExamSession = `ការវាយតម្លៃលទ្ធផលសិក្សាប្រចាំឆ្នាំ ឆ្នាំសិក្សា ${khmerYearStr}`;
+        }
+
+        let examSession = localStorage.getItem('cert_exam_session');
+        if (!examSession || examSession.includes('២០២៥ - ២០២៦') || examSession.includes('2025-2026')) {
+            examSession = autoExamSession;
+        }
+
+        const gradesList = typeof window.getAllGradesList === 'function' ? window.getAllGradesList() : ["ថ្នាក់ទី ១", "ថ្នាក់ទី ២", "ថ្នាក់ទី ៣", "ថ្នាក់ទី ៤", "ថ្នាក់ទី ៥", "ថ្នាក់ទី ៦", "10A", "10B", "11A", "12A"];
+
+        const frameStylesMap = {
+            'khmer-kbach-gold': { name: '🏵️ ស៊ុមផ្កាក្បាច់ខ្មែរពណ៌មាស (Gold Kbach - ដូចរូបគំរូ)' },
+            'custom-uploaded': { name: '🖼️ ស៊ុមផ្ទុកឡើងផ្ទាល់ខ្លួន (Custom Frame)' },
+            'royal-gold': { name: '👑 ស៊ុមមាសរាជការ (Royal Gold Double)' },
+            'emerald-formal': { name: '🌿 ស៊ុមត្បូងមរកត (Emerald Green)' },
+            'burgundy-classic': { name: '🍷 ស៊ុមក្រហមឈាមជ្រូក (Burgundy Luxury)' },
+            'navy-modern': { name: '🏛️ ស៊ុមខៀវរាជការទំនើប (Navy Executive)' },
+            'plain-blank': { name: '📄 គ្មានស៊ុម (សម្រាប់ក្រដាសមានស៊ុមស្រាប់)' }
+        };
+
+        const certCardOptions = {
+            frameStyle,
+            customFrameB64,
+            customLogoB64,
+            customPics,
+            customTexts,
+            certPadding,
+            certFontScale,
+            certFontFamily,
+            certTitleColor,
+            certBgColor,
+            watermarkEnabled,
+            curPageSize,
+            titleType,
+            examSession,
+            posHeaderLeft,
+            posHeaderCenter,
+            posTitle,
+            posBody,
+            posSigLeft,
+            posSigRight,
+            districtName,
+            schoolName,
+            principalName,
+            teacherName,
+            solarDateStr,
+            lunarDateStr,
+            cleanMonth,
+            curLevel,
+            curRoom,
+            isPrintMode: false
+        };
+
+        const certificateCardHtml = this.buildCertificateHtmlForStudent(student, activeRank, certCardOptions);
+
         let modal = document.getElementById("certificateModal");
         if (!modal) {
             modal = document.createElement("div");
@@ -1567,6 +2413,16 @@ window.KrouDigital = {
             if (modal.parentElement && modal.parentElement !== document.body) {
                 document.body.appendChild(modal);
             }
+        }
+
+        // Generate months / periods list for period value dropdown
+        let periodValuesList = [];
+        if (periodType === 'monthly') {
+            periodValuesList = ["មករា", "កុម្ភៈ", "មីនា", "មេសា", "ឧសភា", "មិថុនា", "កក្កដា", "សីហា", "កញ្ញា", "តុលា", "វិច្ឆិកា", "ធ្នូ"];
+        } else if (periodType === 'semester') {
+            periodValuesList = ["ឆមាសទី១", "ឆមាសទី២"];
+        } else {
+            periodValuesList = ["ប្រចាំឆ្នាំ"];
         }
 
         modal.innerHTML = `
@@ -1614,8 +2470,9 @@ window.KrouDigital = {
                                 <div class="flex items-center gap-2">
                                     <h3 class="font-moul text-xs sm:text-sm text-slate-800">ប័ណ្ណសរសើរផ្លូវការ (Certificate Studio)</h3>
                                     <span class="px-2 py-0.5 bg-slate-100 text-[10px] text-slate-600 border border-slate-200 rounded-md font-mono">${curPageSize.name}</span>
+                                    <span class="px-2 py-0.5 bg-amber-50 text-[10px] text-amber-800 border border-amber-200 rounded-md font-bold">${curLevel} (${periodType === 'monthly' ? `ខែ${cleanMonth}` : cleanMonth})</span>
                                 </div>
-                                <p class="text-[10px] text-amber-700 font-bold hidden sm:block">ស្ទូឌីយោរចនាប័ណ្ណសរសើរ អូសទីតាំង Text បានដោយសេរី និងព្រីនពេញក្រដាស A4 ១០០%</p>
+                                <p class="text-[10px] text-amber-700 font-bold hidden sm:block">ទាញលទ្ធផលពិន្ទុ មធ្យមភាគ និងចំណាត់ថ្នាក់ពិតប្រាកដស្វ័យប្រវត្តិតាមឆ្នាំសិក្សា</p>
                             </div>
                         </div>
                     </div>
@@ -1630,7 +2487,7 @@ window.KrouDigital = {
                         <button onclick="window.KrouDigital.zoomFit()" class="px-2 py-0.5 text-[10px] bg-white hover:bg-slate-200 text-slate-700 border border-slate-200 rounded font-bold transition" title="Fit to Screen">Fit</button>
                     </div>
 
-                    <!-- Right: Page Size & Action Buttons -->
+                    <!-- Right: Actions & Batch Print -->
                     <div class="flex items-center gap-1.5 shrink-0 ml-auto">
                         <!-- Set Page Size Dropdown -->
                         <div class="flex items-center gap-1 bg-slate-100 border border-slate-200 rounded-xl px-2.5 py-1.5 text-xs">
@@ -1643,15 +2500,21 @@ window.KrouDigital = {
                         </div>
 
                         <!-- Universal Preview Button -->
-                        <button onclick="window.KrouDigital.openPrintPreview()" class="px-3.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-indigo-700 border border-slate-200 rounded-xl text-xs font-bold transition flex items-center gap-1.5 active:scale-95 outline-none" title="បើកផ្ទាំងពិនិត្យមុនព្រីន (Universal Preview)">
+                        <button onclick="window.KrouDigital.openPrintPreview()" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-indigo-700 border border-slate-200 rounded-xl text-xs font-bold transition flex items-center gap-1.5 active:scale-95 outline-none" title="បើកផ្ទាំងពិនិត្យមុនព្រីន (Universal Preview)">
                             <i class="fa-solid fa-eye"></i>
                             <span>Preview</span>
                         </button>
 
-                        <!-- Print Button -->
-                        <button onclick="window.KrouDigital.printCertificate()" class="px-4 py-1.5 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white rounded-xl text-xs font-bold shadow-md shadow-amber-500/20 transition flex items-center gap-1.5 active:scale-95 outline-none" title="បោះពុម្ពពេញទំហំក្រដាស ១០០%">
+                        <!-- Batch Print Top 1-5 Button -->
+                        <button onclick="window.KrouDigital.printBatchCertificates(5)" class="px-3.5 py-1.5 bg-gradient-to-r from-amber-500 to-yellow-600 hover:from-amber-600 hover:to-yellow-700 text-white rounded-xl text-xs font-bold shadow-md shadow-amber-500/20 transition flex items-center gap-1.5 active:scale-95 outline-none" title="បោះពុម្ពប័ណ្ណសរសើរ Top 1 ដល់ Top 5 ទាំងអស់គ្នា">
+                            <i class="fa-solid fa-layer-group"></i>
+                            <span>ព្រីន Top 1-5</span>
+                        </button>
+
+                        <!-- Single Print Button -->
+                        <button onclick="window.KrouDigital.printCertificate()" class="px-4 py-1.5 bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 text-white rounded-xl text-xs font-bold shadow-md shadow-indigo-500/20 transition flex items-center gap-1.5 active:scale-95 outline-none" title="បោះពុម្ពប័ណ្ណសរសើរសិស្សនេះពេញក្រដាស A4 ១០០%">
                             <i class="fa-solid fa-print"></i>
-                            <span>ព្រីន (Print)</span>
+                            <span>ព្រីនសន្លឹកនេះ</span>
                         </button>
 
                         <!-- Close Button -->
@@ -1666,6 +2529,10 @@ window.KrouDigital = {
                 <div class="bg-slate-100/70 px-3 py-1.5 sm:py-2 border-b border-slate-200/80 flex items-center justify-between gap-2 text-xs no-print overflow-x-auto custom-scrollbar flex-nowrap whitespace-nowrap w-full shrink-0">
                     <!-- Tab Switcher Buttons -->
                     <div class="flex items-center gap-1.5 shrink-0 flex-nowrap">
+                        <button id="certTabBtn_data" onclick="window.KrouDigital.setActiveTab('data')" class="${activeTab === 'data' ? 'px-3.5 py-1.5 rounded-xl font-bold text-xs bg-indigo-600 text-white shadow-md shadow-indigo-500/30 flex items-center gap-1.5 transition' : 'px-3.5 py-1.5 rounded-xl font-bold text-xs bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 flex items-center gap-1.5 transition'}">
+                            <i class="fa-solid fa-user-graduate ${activeTab === 'data' ? 'text-amber-300' : 'text-purple-600'}"></i>
+                            <span>ទិន្នន័យសិស្ស និងពិន្ទុ (Auto-fill)</span>
+                        </button>
                         <button id="certTabBtn_design" onclick="window.KrouDigital.setActiveTab('design')" class="${activeTab === 'design' ? 'px-3.5 py-1.5 rounded-xl font-bold text-xs bg-indigo-600 text-white shadow-md shadow-indigo-500/30 flex items-center gap-1.5 transition' : 'px-3.5 py-1.5 rounded-xl font-bold text-xs bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 flex items-center gap-1.5 transition'}">
                             <i class="fa-solid fa-border-all ${activeTab === 'design' ? 'text-amber-300' : 'text-amber-500'}"></i>
                             <span>ស៊ុម & ផ្ទៃ (Borders)</span>
@@ -1677,10 +2544,6 @@ window.KrouDigital = {
                         <button id="certTabBtn_text" onclick="window.KrouDigital.setActiveTab('text')" class="${activeTab === 'text' ? 'px-3.5 py-1.5 rounded-xl font-bold text-xs bg-indigo-600 text-white shadow-md shadow-indigo-500/30 flex items-center gap-1.5 transition' : 'px-3.5 py-1.5 rounded-xl font-bold text-xs bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 flex items-center gap-1.5 transition'}">
                             <i class="fa-solid fa-font ${activeTab === 'text' ? 'text-teal-200' : 'text-teal-600'}"></i>
                             <span>អត្ថបទ & អូស Text (Drag)</span>
-                        </button>
-                        <button id="certTabBtn_data" onclick="window.KrouDigital.setActiveTab('data')" class="${activeTab === 'data' ? 'px-3.5 py-1.5 rounded-xl font-bold text-xs bg-indigo-600 text-white shadow-md shadow-indigo-500/30 flex items-center gap-1.5 transition' : 'px-3.5 py-1.5 rounded-xl font-bold text-xs bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 flex items-center gap-1.5 transition'}">
-                            <i class="fa-solid fa-user-graduate ${activeTab === 'data' ? 'text-purple-200' : 'text-purple-600'}"></i>
-                            <span>ទិន្នន័យសិស្ស (Auto-fill)</span>
                         </button>
                     </div>
 
@@ -1697,7 +2560,84 @@ window.KrouDigital = {
                 <!-- 🛠️ TAB CONTENT TOOLBAR PANES 🛠️ -->
                 <div class="bg-slate-900 px-3 py-2 border-b border-slate-700/60 text-xs no-print overflow-x-auto custom-scrollbar w-full shrink-0">
                     
-                    <!-- PANE 1: DESIGN & BORDERS -->
+                    <!-- PANE 1: DATA & AUTO-FILL -->
+                    <div id="certTabPane_data" class="${activeTab === 'data' ? 'flex items-center gap-2 flex-nowrap whitespace-nowrap' : 'hidden'}">
+                        <!-- Grade Select -->
+                        <div class="flex items-center gap-1.5 bg-slate-800 border border-slate-700 rounded-xl px-2.5 py-1.5 shrink-0">
+                            <span class="text-slate-400">ថ្នាក់៖</span>
+                            <select id="certGradeSelect" onchange="window.KrouDigital.onCertGradeChange(this.value)" class="bg-transparent text-indigo-300 font-bold outline-none cursor-pointer">
+                                <option value="all" class="bg-slate-900 text-white">គ្រប់ថ្នាក់</option>
+                                ${gradesList.map(g => `<option value="${g}" ${g === curLevel ? 'selected' : ''} class="bg-slate-900 text-white">${g}</option>`).join('')}
+                            </select>
+                        </div>
+
+                        <!-- Period Type Select (ខែ / ឆមាស / ឆ្នាំ) -->
+                        <div class="flex items-center gap-1.5 bg-slate-800 border border-slate-700 rounded-xl px-2.5 py-1.5 shrink-0">
+                            <span class="text-slate-400">ប្រភេទ៖</span>
+                            <select id="certPeriodTypeSelect" onchange="window.KrouDigital.onCertPeriodTypeChange(this.value)" class="bg-transparent text-emerald-400 font-bold outline-none cursor-pointer">
+                                <option value="monthly" ${periodType === 'monthly' ? 'selected' : ''} class="bg-slate-900 text-white">ប្រចាំខែ</option>
+                                <option value="semester" ${periodType === 'semester' ? 'selected' : ''} class="bg-slate-900 text-white">ប្រចាំឆមាស</option>
+                                <option value="annual" ${periodType === 'annual' ? 'selected' : ''} class="bg-slate-900 text-white">ប្រចាំឆ្នាំ</option>
+                            </select>
+                        </div>
+
+                        <!-- Period Value / Month Select -->
+                        <div class="flex items-center gap-1.5 bg-slate-800 border border-slate-700 rounded-xl px-2.5 py-1.5 shrink-0">
+                            <span class="text-slate-400">កាលបរិច្ឆេទ៖</span>
+                            <select id="certPeriodValueSelect" onchange="window.KrouDigital.onCertPeriodValueChange(this.value)" class="bg-transparent text-amber-300 font-bold outline-none cursor-pointer">
+                                ${periodValuesList.map(v => `<option value="${v}" ${v === periodMonth ? 'selected' : ''} class="bg-slate-900 text-white">${v}</option>`).join('')}
+                            </select>
+                        </div>
+
+                        <!-- Student Select with Real Ranks & Averages -->
+                        <div class="flex items-center gap-1.5 bg-slate-800 border border-slate-700 rounded-xl px-2.5 py-1.5 shrink-0">
+                            <span class="text-slate-400">សិស្ស៖</span>
+                            <select id="certStudentSelect" onchange="window.KrouDigital.onCertStudentChange(this.value)" class="bg-transparent text-white font-bold outline-none cursor-pointer max-w-[210px] truncate">
+                                ${selectableStudents.map(s => {
+                                    const rankTag = s.hasScore && s.rank ? `(លេខ ${typeof window.toKhmerNum === 'function' ? window.toKhmerNum(s.rank.toString()) : s.rank} - មធ្យម ${(s.avg || 0).toFixed(2)})` : '';
+                                    return `
+                                        <option value="${s.id}" ${s.id === student.id ? 'selected' : ''} class="bg-slate-900 text-white">
+                                            ${s.name} ${rankTag}
+                                        </option>
+                                    `;
+                                }).join("")}
+                            </select>
+                        </div>
+
+                        <!-- Rank Select -->
+                        <div class="flex items-center gap-1.5 bg-slate-800 border border-slate-700 rounded-xl px-2.5 py-1.5 shrink-0">
+                            <span class="text-slate-400">កិត្តិយស៖</span>
+                            <select id="certRankSelect" onchange="window.KrouDigital.onCertRankChange(this.value)" class="bg-transparent text-amber-400 font-bold outline-none cursor-pointer">
+                                ${[1, 2, 3, 4, 5].map(r => {
+                                    const stuForR = selectableStudents.find(s => String(s.rank) === String(r));
+                                    const labelKh = typeof window.toKhmerNum === 'function' ? window.toKhmerNum(r.toString()) : r;
+                                    const suffix = stuForR ? ` (${stuForR.name})` : '';
+                                    return `<option value="${r}" ${String(activeRank) === String(r) ? 'selected' : ''} class="bg-slate-900 text-white">ចំណាត់ថ្នាក់លេខ ${labelKh}${suffix}</option>`;
+                                }).join('')}
+                                <option value="month" ${activeRank == 'month' ? 'selected' : ''} class="bg-slate-900 text-white">សិស្សឆ្នើមប្រចាំខែ</option>
+                                <option value="year" ${activeRank == 'year' ? 'selected' : ''} class="bg-slate-900 text-white">សិស្សឆ្នើមប្រចាំឆ្នាំ</option>
+                                <option value="conduct" ${activeRank == 'conduct' ? 'selected' : ''} class="bg-slate-900 text-white">សិស្សមានវិន័យ និងសីលធម៌ល្អ</option>
+                            </select>
+                        </div>
+
+                        <!-- Title Type (លិខិតសរសើរ vs ប័ណ្ណសរសើរ) -->
+                        <div class="flex items-center gap-1.5 bg-slate-800 border border-slate-700 rounded-xl px-2.5 py-1.5 shrink-0">
+                            <span class="text-slate-400">ចំណងជើង៖</span>
+                            <select onchange="localStorage.setItem('cert_title_type', this.value); document.getElementById('certMainTitle').innerText = this.value;" class="bg-transparent text-amber-300 font-bold outline-none cursor-pointer">
+                                <option value="ប័ណ្ណសរសើរ" ${titleType === 'ប័ណ្ណសរសើរ' ? 'selected' : ''} class="bg-slate-900 text-white">ប័ណ្ណសរសើរ</option>
+                                <option value="លិខិតសរសើរ" ${titleType === 'លិខិតសរសើរ' ? 'selected' : ''} class="bg-slate-900 text-white">លិខិតសរសើរ</option>
+                                <option value="វិញ្ញាបនបត្រកិត្តិយស" ${titleType === 'វិញ្ញាបនបត្រកិត្តិយស' ? 'selected' : ''} class="bg-slate-900 text-white">វិញ្ញាបនបត្រកិត្តិយស</option>
+                            </select>
+                        </div>
+
+                        <!-- Sync Real Scores Button -->
+                        <button onclick="window.KrouDigital.syncRealScoresForCertificates()" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold transition flex items-center gap-1 shadow-sm active:scale-95 shrink-0" title="ទាញយកពិន្ទុ និងចំណាត់ថ្នាក់ពីតារាងពិន្ទុជាក់ស្តែង">
+                            <i class="fa-solid fa-arrows-rotate"></i>
+                            <span>ទាញពិន្ទុពិត</span>
+                        </button>
+                    </div>
+
+                    <!-- PANE 2: DESIGN & BORDERS -->
                     <div id="certTabPane_design" class="${activeTab === 'design' ? 'flex items-center gap-2.5 flex-nowrap whitespace-nowrap' : 'hidden'}">
                         <!-- Frame Selector -->
                         <div class="flex items-center gap-1.5 bg-slate-800 border border-slate-700 rounded-xl px-2.5 py-1.5 shrink-0">
@@ -1732,7 +2672,7 @@ window.KrouDigital = {
                         </label>
                     </div>
 
-                    <!-- PANE 2: UPLOADS (LOGO, FRAME, PICTURES) -->
+                    <!-- PANE 3: UPLOADS (LOGO, FRAME, PICTURES) -->
                     <div id="certTabPane_uploads" class="${activeTab === 'uploads' ? 'flex items-center gap-2.5 flex-nowrap whitespace-nowrap' : 'hidden'}">
                         <!-- Upload Custom Frame -->
                         <label class="cursor-pointer px-3 py-1.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white rounded-xl font-bold shadow transition flex items-center gap-1.5 active:scale-95 shrink-0" title="ផ្ទុកឡើងស៊ុមរូបភាព (JPG/PNG)">
@@ -1765,6 +2705,13 @@ window.KrouDigital = {
                             <input type="file" accept="image/*" class="hidden" onchange="window.KrouDigital.handleUploadPicture(event)">
                         </label>
 
+                        ${student.photo ? `
+                            <button onclick="window.KrouDigital.addStudentPhotoToCert('${student.photo}', '${student.name}')" class="px-3 py-1.5 bg-gradient-to-r from-blue-600 to-sky-600 hover:from-blue-700 hover:to-sky-700 text-white rounded-xl font-bold shadow transition flex items-center gap-1.5 active:scale-95 shrink-0" title="ដាក់រូបថតសិស្សនេះលើប័ណ្ណសរសើរ">
+                                <i class="fa-solid fa-id-badge text-amber-300"></i>
+                                <span>ដាក់រូបថត ${student.name}</span>
+                            </button>
+                        ` : ''}
+
                         <!-- Uploaded Pictures Thumbnails Count -->
                         ${customPics.length > 0 ? `
                             <div class="flex items-center gap-2 bg-slate-800 border border-slate-700 px-2.5 py-1 rounded-xl">
@@ -1781,7 +2728,7 @@ window.KrouDigital = {
                         ` : ''}
                     </div>
 
-                    <!-- PANE 3: TEXT & FONTS & DRAGGABLE TEXT -->
+                    <!-- PANE 4: TEXT & FONTS & DRAGGABLE TEXT -->
                     <div id="certTabPane_text" class="${activeTab === 'text' ? 'flex items-center gap-2.5 flex-nowrap whitespace-nowrap' : 'hidden'}">
                         <!-- Add Text Box Button -->
                         <button onclick="window.KrouDigital.addCustomText()" class="px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold shadow transition flex items-center gap-1.5 active:scale-95 shrink-0" title="បន្ថែមអត្ថបទថ្មីដែលអាចអូសទីតាំងបានសេរី">
@@ -1829,241 +2776,12 @@ window.KrouDigital = {
                         </div>
                     </div>
 
-                    <!-- PANE 4: DATA & AUTO-FILL -->
-                    <div id="certTabPane_data" class="${activeTab === 'data' ? 'flex items-center gap-2.5 flex-nowrap whitespace-nowrap' : 'hidden'}">
-                        <!-- Grade Select -->
-                        <div class="flex items-center gap-1.5 bg-slate-800 border border-slate-700 rounded-xl px-2.5 py-1.5 shrink-0">
-                            <span class="text-slate-400">ថ្នាក់៖</span>
-                            <select id="certGradeSelect" onchange="window.KrouDigital.renderCertificateModal(null, document.getElementById('certRankSelect')?.value, this.value, '${frameStyle}')" class="bg-transparent text-indigo-300 font-bold outline-none cursor-pointer">
-                                <option value="all" class="bg-slate-900 text-white">គ្រប់ថ្នាក់</option>
-                                ${gradesList.map(g => `<option value="${g}" ${g === curLevel ? 'selected' : ''} class="bg-slate-900 text-white">${g}</option>`).join('')}
-                            </select>
-                        </div>
-
-                        <!-- Student Select -->
-                        <div class="flex items-center gap-1.5 bg-slate-800 border border-slate-700 rounded-xl px-2.5 py-1.5 shrink-0">
-                            <span class="text-slate-400">សិស្ស៖</span>
-                            <select id="certStudentSelect" onchange="window.KrouDigital.renderCertificateModal(this.value, document.getElementById('certRankSelect')?.value, '${curLevel}', '${frameStyle}')" class="bg-transparent text-white font-bold outline-none cursor-pointer max-w-[170px] truncate">
-                                ${selectableStudents.map(s => `
-                                    <option value="${s.id}" ${s.id === student.id ? 'selected' : ''} class="bg-slate-900 text-white">${s.name} (${s.grade || ''} ${s.room || ''})</option>
-                                `).join("")}
-                            </select>
-                        </div>
-
-                        <!-- Title Type (លិខិតសរសើរ vs ប័ណ្ណសរសើរ) -->
-                        <div class="flex items-center gap-1.5 bg-slate-800 border border-slate-700 rounded-xl px-2.5 py-1.5 shrink-0">
-                            <span class="text-slate-400">ចំណងជើង៖</span>
-                            <select onchange="localStorage.setItem('cert_title_type', this.value); document.getElementById('certMainTitle').innerText = this.value;" class="bg-transparent text-amber-300 font-bold outline-none cursor-pointer">
-                                <option value="លិខិតសរសើរ" ${titleType === 'លិខិតសរសើរ' ? 'selected' : ''} class="bg-slate-900 text-white">លិខិតសរសើរ (ដូចរូបគំរូ)</option>
-                                <option value="ប័ណ្ណសរសើរ" ${titleType === 'ប័ណ្ណសរសើរ' ? 'selected' : ''} class="bg-slate-900 text-white">ប័ណ្ណសរសើរ</option>
-                                <option value="វិញ្ញាបនបត្រកិត្តិយស" ${titleType === 'វិញ្ញាបនបត្រកិត្តិយស' ? 'selected' : ''} class="bg-slate-900 text-white">វិញ្ញាបនបត្រកិត្តិយស</option>
-                            </select>
-                        </div>
-
-                        <!-- Rank Select -->
-                        <div class="flex items-center gap-1.5 bg-slate-800 border border-slate-700 rounded-xl px-2.5 py-1.5 shrink-0">
-                            <span class="text-slate-400">កិត្តិយស៖</span>
-                            <select id="certRankSelect" onchange="window.KrouDigital.renderCertificateModal('${student.id}', this.value, '${curLevel}', '${frameStyle}')" class="bg-transparent text-amber-400 font-bold outline-none cursor-pointer">
-                                <option value="1" ${activeRank == 1 ? 'selected' : ''} class="bg-slate-900 text-white">ចំណាត់ថ្នាក់លេខ ១</option>
-                                <option value="2" ${activeRank == 2 ? 'selected' : ''} class="bg-slate-900 text-white">ចំណាត់ថ្នាក់លេខ ២</option>
-                                <option value="3" ${activeRank == 3 ? 'selected' : ''} class="bg-slate-900 text-white">ចំណាត់ថ្នាក់លេខ ៣ (ដូចរូបគំរូ)</option>
-                                <option value="4" ${activeRank == 4 ? 'selected' : ''} class="bg-slate-900 text-white">ចំណាត់ថ្នាក់លេខ ៤</option>
-                                <option value="5" ${activeRank == 5 ? 'selected' : ''} class="bg-slate-900 text-white">ចំណាត់ថ្នាក់លេខ ៥</option>
-                                <option value="month" ${activeRank == 'month' ? 'selected' : ''} class="bg-slate-900 text-white">សិស្សឆ្នើមប្រចាំខែ</option>
-                                <option value="year" ${activeRank == 'year' ? 'selected' : ''} class="bg-slate-900 text-white">សិស្សឆ្នើមប្រចាំឆ្នាំ</option>
-                                <option value="conduct" ${activeRank == 'conduct' ? 'selected' : ''} class="bg-slate-900 text-white">សិស្សមានវិន័យ និងសីលធម៌ល្អ</option>
-                            </select>
-                        </div>
-                    </div>
-
                 </div>
 
                 <!-- 📜 CANVAS WORKSPACE AREA (ZOOMABLE) 📜 -->
                 <div class="w-full flex-1 overflow-auto custom-scrollbar flex justify-center items-start p-4 sm:p-8 bg-slate-200/70 min-h-[500px]">
                     <div id="certificatePrintWrapper" class="transition-transform duration-200 relative flex justify-center items-center shadow-2xl rounded-2xl" style="transform: scale(${studioZoom / 100}); transform-origin: top center;">
-                        
-                        <!-- ក្រដាសប័ណ្ណសរសើរ / លិខិតសរសើរ Canvas -->
-                        <div id="certificatePrintArea" class="${activeFrame.bgGradient} ${activeFrame.outerBorder} rounded-2xl relative text-center text-slate-900 overflow-hidden" 
-                             style="width: ${curPageSize.width}; height: ${curPageSize.height}; min-height: ${curPageSize.height}; max-height: ${curPageSize.height}; max-width: ${curPageSize.width}; background-color: ${certBgColor}; font-size: ${certFontScale}%; ${activeFrame.styleExtra || ''}">
-                            
-                            <!-- 🖼️ Custom Uploaded Frame Layer (Full Bleed Background) -->
-                            ${customFrameB64 ? `
-                                <img src="${customFrameB64}" alt="Certificate Frame" class="absolute inset-0 w-full h-full object-fill pointer-events-none select-none z-0" style="width: 100%; height: 100%;" />
-                            ` : ''}
-
-                            <!-- 🖼️ Built-in Khmer Kbach / Royal Borders -->
-                            ${!customFrameB64 && activeFrame.innerBorder ? `
-                                <div class="absolute inset-2 sm:inset-3 ${activeFrame.innerBorder} rounded-xl pointer-events-none z-10"></div>
-                            ` : ''}
-
-                            <!-- 🏵️ Khmer Romduol Watermark Pattern (Matching Sample Image!) -->
-                            ${watermarkEnabled ? `
-                                <svg width="100%" height="100%" class="absolute inset-0 pointer-events-none select-none z-10 opacity-[0.065]" xmlns="http://www.w3.org/2000/svg">
-                                    <defs>
-                                        <pattern id="khmerRomduolPattern" width="90" height="90" patternUnits="userSpaceOnUse">
-                                            <circle cx="45" cy="45" r="4" fill="#92400e"/>
-                                            <path d="M45,20 C42,32 42,38 45,41 C48,38 48,32 45,20 Z" fill="#92400e"/>
-                                            <path d="M45,70 C42,58 42,52 45,49 C48,52 48,58 45,70 Z" fill="#92400e"/>
-                                            <path d="M20,45 C32,42 38,42 41,45 C38,48 32,48 20,45 Z" fill="#92400e"/>
-                                            <path d="M70,45 C58,42 52,42 49,45 C52,48 58,48 70,45 Z" fill="#92400e"/>
-                                            <circle cx="45" cy="45" r="14" fill="none" stroke="#92400e" stroke-width="0.8" stroke-dasharray="2,2"/>
-                                        </pattern>
-                                    </defs>
-                                    <rect width="100%" height="100%" fill="url(#khmerRomduolPattern)"/>
-                                </svg>
-                            ` : ''}
-
-                            <!-- 🖼️ Additional Uploaded Pictures (Stamps, Signatures, Student Photo) Overlays - DRAGGABLE & RESIZABLE -->
-                            ${customPics.map(pic => `
-                                <div id="${pic.id}" class="drag-box absolute select-none z-30 group cursor-move p-0.5 rounded hover:ring-2 hover:ring-amber-500/70" style="left: ${pic.x}px; top: ${pic.y}px; width: ${pic.width || 120}px;">
-                                    <div class="drag-handle no-print flex items-center justify-between gap-1 px-1.5 py-0.5 bg-slate-900/95 text-amber-300 text-[9px] rounded shadow-md border border-amber-500/60 -top-6 left-0 absolute whitespace-nowrap opacity-80 group-hover:opacity-100 transition cursor-move">
-                                        <span><i class="fa-solid fa-up-down-left-right"></i> អូស</span>
-                                        <div class="flex items-center gap-1 ml-1 border-l border-slate-700 pl-1">
-                                            <button onclick="window.KrouDigital.resizePicture('${pic.id}', -15)" class="w-3.5 h-3.5 bg-slate-800 hover:bg-slate-700 text-white rounded text-[9px] flex items-center justify-center font-bold" title="បង្រួម">-</button>
-                                            <button onclick="window.KrouDigital.resizePicture('${pic.id}', 15)" class="w-3.5 h-3.5 bg-slate-800 hover:bg-slate-700 text-white rounded text-[9px] flex items-center justify-center font-bold" title="ពង្រីក">+</button>
-                                            <button onclick="window.KrouDigital.removePicture('${pic.id}')" class="text-rose-400 hover:text-rose-300 font-bold ml-1 text-xs" title="លុប">×</button>
-                                        </div>
-                                    </div>
-                                    <img src="${pic.b64}" alt="${pic.name}" class="w-full h-auto object-contain pointer-events-none drop-shadow-sm" />
-                                </div>
-                            `).join('')}
-
-                            <!-- 🔤 Additional Custom Added Texts Overlays - DRAGGABLE -->
-                            ${customTexts.map(txt => `
-                                <div id="${txt.id}" class="drag-box absolute select-text z-30 group cursor-move p-1 rounded hover:ring-2 hover:ring-amber-500/70" style="left: ${txt.x}px; top: ${txt.y}px;">
-                                    <div class="drag-handle no-print flex items-center justify-between gap-1 px-2 py-0.5 bg-slate-900/90 text-amber-300 text-[10px] rounded shadow-md border border-amber-500/60 -top-6 left-0 absolute whitespace-nowrap opacity-75 group-hover:opacity-100 transition cursor-move">
-                                        <span><i class="fa-solid fa-up-down-left-right"></i> អូស (Drag)</span>
-                                        <button onclick="window.KrouDigital.removeCustomText('${txt.id}')" class="text-rose-400 hover:text-rose-300 font-bold ml-1.5" title="លុប">×</button>
-                                    </div>
-                                    <div contenteditable="true" class="cert-editable font-bold ${txt.fontFamily}" style="font-size: ${txt.fontSize}px; color: ${txt.color}; outline: none; min-width: 60px;">
-                                        ${txt.content}
-                                    </div>
-                                </div>
-                            `).join('')}
-
-                            <!-- 📝 Internal Content Container with Dynamic Padding Slider -->
-                            <div id="certificateInnerCanvas" class="relative z-20 flex flex-col justify-between h-full w-full" style="padding: ${certPadding}px; height: 100%; box-sizing: border-box;">
-                                
-                                <!-- 🏛️ ក្បាលប័ណ្ណ (Official Header matching sample image) 🏛️ -->
-                                <div class="flex justify-between items-start text-xs px-2 pt-1">
-                                    <!-- Left: MoEYS Logo & Hierarchy (ដូចរូបគំរូ - DRAGGABLE SECTION) -->
-                                    <div id="cert_sec_header_left" class="canva-el canva-draggable-section text-left pt-0.5 space-y-1 max-w-[340px]" style="transform: translate(${posHeaderLeft.x}px, ${posHeaderLeft.y}px);">
-                                        <div class="drag-handle no-print hidden items-center gap-1 px-1.5 py-0.5 bg-slate-900/90 text-amber-300 text-[9px] rounded shadow border border-amber-500/60 -top-5 left-0 absolute whitespace-nowrap cursor-move z-50">
-                                            <i class="fa-solid fa-up-down-left-right"></i> អូសទីតាំង
-                                        </div>
-                                        <div class="mb-1">
-                                            ${customLogoB64 ? `
-                                                <img src="${customLogoB64}" alt="Logo" class="w-13 h-13 object-contain shadow-sm rounded-full" />
-                                            ` : `
-                                                <div class="w-11 h-11 rounded-full border border-amber-500/80 bg-amber-50 flex items-center justify-center text-amber-700 text-lg shadow-sm">
-                                                    <i class="fa-solid fa-award"></i>
-                                                </div>
-                                            `}
-                                        </div>
-                                        <p contenteditable="true" class="cert-editable font-moul text-blue-950 text-[11px] leading-normal">ការិយាល័យអប់រំ យុវជន និងកីឡានៃរដ្ឋបាលស្រុក ${districtName}</p>
-                                        <p contenteditable="true" class="cert-editable font-moul text-blue-950 text-[11.5px] leading-normal">${schoolName}</p>
-                                    </div>
-
-                                    <!-- Center: Kingdom of Cambodia & National Motto (DRAGGABLE SECTION) -->
-                                    <div id="cert_sec_header_center" class="canva-el canva-draggable-section text-center pt-1" style="transform: translate(${posHeaderCenter.x}px, ${posHeaderCenter.y}px);">
-                                        <div class="drag-handle no-print hidden items-center gap-1 px-1.5 py-0.5 bg-slate-900/90 text-amber-300 text-[9px] rounded shadow border border-amber-500/60 -top-5 left-1/2 -translate-x-1/2 absolute whitespace-nowrap cursor-move z-50">
-                                            <i class="fa-solid fa-up-down-left-right"></i> អូសទីតាំង
-                                        </div>
-                                        <p contenteditable="true" class="cert-editable font-moul text-blue-950 text-[14px] md:text-[15px] tracking-wide">ព្រះរាជាណាចក្រកម្ពុជា</p>
-                                        <p contenteditable="true" class="cert-editable font-moul text-blue-900 text-xs md:text-[13px] mt-0.5">ជាតិ សាសនា ព្រះមហាក្សត្រ</p>
-                                        <img src="${window.CMS_HEADER_SYMBOL_B64 || 'assets/images/header-flourish.png'}" class="header-flourish-symbol" alt="symbol" style="display: block; margin: 3px auto 0 auto; width: 125px; height: 10px; object-fit: contain;" />
-                                    </div>
-
-                                    <!-- Right spacer -->
-                                    <div class="text-right min-w-[70px]"></div>
-                                </div>
-
-                                <!-- 🎖️ ចំណងជើងប័ណ្ណសរសើរ / លិខិតសរសើរ (Title Banner - DRAGGABLE SECTION) 🎖️ -->
-                                <div id="cert_sec_title" class="canva-el canva-draggable-section my-1.5 text-center" style="transform: translate(${posTitle.x}px, ${posTitle.y}px);">
-                                    <div class="drag-handle no-print hidden items-center gap-1 px-2 py-0.5 bg-slate-900/90 text-amber-300 text-[10px] rounded shadow border border-amber-500/60 -top-6 left-1/2 -translate-x-1/2 absolute whitespace-nowrap cursor-move z-50">
-                                        <i class="fa-solid fa-up-down-left-right"></i> អូសចំណងជើង (Drag Title)
-                                    </div>
-                                    <h1 id="certMainTitle" contenteditable="true" class="cert-editable ${certFontFamily} text-2xl sm:text-3xl md:text-[34px] drop-shadow-sm mb-1 tracking-wide leading-tight" style="color: ${certTitleColor};">
-                                        ${titleType}
-                                    </h1>
-                                    <div class="flex items-center justify-center my-0.5">
-                                        <img src="${window.CMS_TITLE_FLOURISH_B64 || 'assets/images/title-flourish.png'}" class="title-flourish-symbol" alt="flourish" style="display: block; margin: 0 auto; width: 160px; height: 10px; object-fit: contain;" />
-                                    </div>
-                                </div>
-
-                                <!-- 📜 តួសេចក្តី (Body Content - DRAGGABLE SECTION) 📜 -->
-                                <div id="cert_sec_body" class="canva-el canva-draggable-section my-1 max-w-4xl mx-auto space-y-2 text-[13.5px] md:text-[14.5px] leading-relaxed text-slate-800" style="transform: translate(${posBody.x}px, ${posBody.y}px);">
-                                    <div class="drag-handle no-print hidden items-center gap-1 px-2 py-0.5 bg-slate-900/90 text-amber-300 text-[10px] rounded shadow border border-amber-500/60 -top-6 left-1/2 -translate-x-1/2 absolute whitespace-nowrap cursor-move z-50">
-                                        <i class="fa-solid fa-up-down-left-right"></i> អូសតួសេចក្តី (Drag Body)
-                                    </div>
-
-                                    <!-- Administration header line -->
-                                    <p contenteditable="true" class="cert-editable font-moul text-blue-950 text-sm md:text-[15px]">
-                                        គណៈគ្រប់គ្រង${schoolName}
-                                    </p>
-                                    
-                                    <!-- Praise to student line -->
-                                    <div class="text-slate-800 flex flex-wrap items-center justify-center gap-1.5 pt-0.5">
-                                        <span contenteditable="true" class="cert-editable">សូមសម្តែងនូវការកោតសរសើរចំពោះសិស្សឈ្មោះ៖</span>
-                                        <span contenteditable="true" class="cert-editable font-moul text-base md:text-lg text-blue-950 px-2.5 border-b-2 border-amber-500/80 inline-block font-bold">
-                                            ${student.name}
-                                        </span>
-                                        <span contenteditable="true" class="cert-editable">ភេទ</span>
-                                        <span contenteditable="true" class="cert-editable font-bold text-slate-800 px-1">${student.gender || 'ប្រុស'}</span>
-                                        <span contenteditable="true" class="cert-editable">រៀនថ្នាក់ទី</span>
-                                        <span contenteditable="true" class="cert-editable font-bold text-blue-900 px-1.5 text-[14px] md:text-[15px]">${student.grade || curLevel} ${student.room || ''}</span>
-                                    </div>
-
-                                    <!-- Study performance line -->
-                                    <div class="text-slate-800 flex flex-wrap items-center justify-center gap-1.5">
-                                        <span contenteditable="true" class="cert-editable">ដែលបានខិតខំប្រឹងប្រែងសិក្សារៀនសូត្រ និងគោរពវិន័យបានល្អប្រសើរ ទទួលបានចំណាត់ថ្នាក់លេខ</span>
-                                        <span contenteditable="true" class="cert-editable font-moul text-[15px] md:text-[16px] text-red-600 font-bold px-1.5">${typeof window.toKhmerNum === 'function' ? window.toKhmerNum(activeRank.toString()) : activeRank}</span>
-                                        <span contenteditable="true" class="cert-editable">និទ្ទេស</span>
-                                        <span contenteditable="true" class="cert-editable font-moul text-[15px] md:text-[16px] text-red-600 font-bold px-1.5">${activeRank == 1 ? 'A (ល្អប្រសើរ)' : activeRank == 2 ? 'B (ល្អណាស់)' : activeRank == 3 ? 'C (ល្អ)' : 'ល្អ'}</span>
-                                    </div>
-
-                                    <!-- Exam Session / Academic Year (in red Moul font matching image) -->
-                                    <div class="pt-0.5">
-                                        <p contenteditable="true" class="cert-editable font-moul text-red-600 text-[12px] md:text-[13.5px] tracking-wide">
-                                            ${examSession}
-                                        </p>
-                                    </div>
-                                </div>
-
-                                <!-- ✍️ ហត្ថលេខា និងកាលបរិច្ឆេទ (Signatures & Date - DRAGGABLE SECTIONS) ✍️ -->
-                                <div class="flex justify-between items-end text-xs mt-3 px-4 sm:px-10">
-                                    <!-- Left side: បានឃើញ និងឯកភាព / នាយករងបច្ចេកទេស -->
-                                    <div id="cert_sec_sig_left" class="canva-el canva-draggable-section text-center min-w-[150px]" style="transform: translate(${posSigLeft.x}px, ${posSigLeft.y}px);">
-                                        <div class="drag-handle no-print hidden items-center gap-1 px-1.5 py-0.5 bg-slate-900/90 text-amber-300 text-[9px] rounded shadow border border-amber-500/60 -top-5 left-1/2 -translate-x-1/2 absolute whitespace-nowrap cursor-move z-50">
-                                            <i class="fa-solid fa-up-down-left-right"></i> អូស
-                                        </div>
-                                        <p contenteditable="true" class="cert-editable text-slate-700 text-[11.5px] font-bold">បានឃើញ និងឯកភាព</p>
-                                        <p contenteditable="true" class="cert-editable font-moul text-blue-950 text-xs mt-0.5">នាយិកាសាលា</p>
-                                        
-                                        <!-- Stamp & Signature Space -->
-                                        <div class="h-14 flex items-center justify-center relative my-1"></div>
-
-                                        ${principalName ? `<p contenteditable="true" class="cert-editable font-moul text-slate-900 text-xs font-bold mt-1">${principalName}</p>` : ''}
-                                    </div>
-
-                                    <!-- Right side: Lunar Date, Solar Date, Teacher Signature -->
-                                    <div id="cert_sec_sig_right" class="canva-el canva-draggable-section text-center min-w-[170px] space-y-0.5" style="transform: translate(${posSigRight.x}px, ${posSigRight.y}px);">
-                                        <div class="drag-handle no-print hidden items-center gap-1 px-1.5 py-0.5 bg-slate-900/90 text-amber-300 text-[9px] rounded shadow border border-amber-500/60 -top-5 left-1/2 -translate-x-1/2 absolute whitespace-nowrap cursor-move z-50">
-                                            <i class="fa-solid fa-up-down-left-right"></i> អូស
-                                        </div>
-                                        <p contenteditable="true" class="cert-editable text-slate-700 text-[10.5px]">${lunarDateStr}</p>
-                                        <p contenteditable="true" class="cert-editable text-slate-700 text-[11px] font-bold">${solarDateStr}</p>
-                                        <p contenteditable="true" class="cert-editable font-moul text-blue-950 text-xs mt-1">គ្រូទទួលបន្ទុកថ្នាក់</p>
-                                        
-                                        <!-- Teacher Signature Space -->
-                                        <div class="h-12 flex items-center justify-center"></div>
-
-                                        <p contenteditable="true" class="cert-editable font-moul text-slate-900 text-xs font-bold">${teacherName}</p>
-                                    </div>
-                                </div>
-
-                            </div>
-                        </div>
+                        ${certificateCardHtml}
                     </div>
                 </div>
 
@@ -2098,7 +2816,7 @@ window.KrouDigital = {
             }
         }, 50);
     },
-    openParentPortalModal: function(query = "") {
+        openParentPortalModal: function(query = "") {
         let modal = document.getElementById("parentPortalModal");
         if (!modal) {
             modal = document.createElement("div");

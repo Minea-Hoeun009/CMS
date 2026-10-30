@@ -1750,6 +1750,7 @@ window.loadScoresView = async function() {
 
                   <button onclick="window.exportRankingsToExcel()" class="px-3.5 py-1.5 sm:py-2 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-sm shrink-0"><i class="fa-solid fa-file-excel"></i> <span>Export Excel</span></button>
                   <button onclick="window.printRankingTable()" class="px-3.5 py-1.5 sm:py-2 bg-gradient-to-r from-rose-500 to-pink-600 text-white rounded-xl text-xs font-black shadow-md flex items-center gap-1.5 shrink-0"><i class="fa-solid fa-file-pdf"></i> <span>PDF / Print</span></button>
+                  <button onclick="if(window.KrouDigital && typeof window.KrouDigital.openCertificatesFromScores === 'function'){ window.closeScoreModal('modal-rankings'); window.KrouDigital.openCertificatesFromScores(); }" class="px-3.5 py-1.5 sm:py-2 bg-gradient-to-r from-amber-500 to-yellow-600 text-white rounded-xl text-xs font-black shadow-md flex items-center gap-1.5 shrink-0 hover:from-amber-600 hover:to-yellow-700 active:scale-95 transition" title="ចេញប័ណ្ណសរសើរសម្រាប់សិស្ស"><i class="fa-solid fa-award"></i> <span>ប័ណ្ណសរសើរ</span></button>
               </div>
               <div id="modal-content-rankings" class="flex-1 overflow-auto bg-slate-100/30 p-2 md:p-6 custom-scrollbar"></div>
           </div>
@@ -4944,6 +4945,8 @@ window.renderHonorBoardContent = function() {
             </div>
 
             <div class="w-px h-5 bg-slate-200 mx-0.5 shrink-0"></div>
+
+            <button onclick="if(window.KrouDigital && typeof window.KrouDigital.openCertificatesFromScores === 'function'){ window.closeScoreModal('modal-honorboard'); window.KrouDigital.openCertificatesFromScores(); }" class="px-3 py-1.5 bg-gradient-to-r from-amber-500 to-yellow-600 hover:from-amber-600 hover:to-yellow-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shrink-0 shadow-sm active:scale-95" title="ចេញប័ណ្ណសរសើរផ្លូវការសម្រាប់សិស្សពូកែ"><i class="fa-solid fa-award"></i> <span>ប័ណ្ណសរសើរ</span></button>
 
             <button onclick="window.closeScoreModal('modal-honorboard'); window.openReportDetail('report_kha');" class="px-2.5 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 rounded-xl text-xs font-bold transition flex items-center gap-1 shrink-0 shadow-sm" title="ទម្រង់ក្រដាស A4 MoEYS">
               <i class="fa-solid fa-file-contract"></i> <span>MoEYS</span>

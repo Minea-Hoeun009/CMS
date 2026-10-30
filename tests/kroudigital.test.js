@@ -54,6 +54,10 @@ describe('KrouDigital 4.0 Standard Integration Tests', () => {
     assert.equal(typeof context.window.KrouDigital.calculateRowBmi, 'function');
     assert.equal(typeof context.window.KrouDigital.saveHealthRecords, 'function');
     assert.equal(typeof context.window.KrouDigital.renderCertificateModal, 'function');
+    assert.equal(typeof context.window.KrouDigital.getEvaluatedStudentsForCertificates, 'function');
+    assert.equal(typeof context.window.KrouDigital.buildCertificateHtmlForStudent, 'function');
+    assert.equal(typeof context.window.KrouDigital.printBatchCertificates, 'function');
+    assert.equal(typeof context.window.KrouDigital.openCertificatesFromScores, 'function');
     assert.equal(typeof context.window.KrouDigital.openParentPortalModal, 'function');
     assert.equal(typeof context.window.KrouDigital.searchStudentForParent, 'function');
   });
@@ -163,5 +167,81 @@ describe('KrouDigital 4.0 Standard Integration Tests', () => {
     assert.equal(loaded[1].student_id, 'STU-002');
     assert.equal(loaded[1].height, 142);
     assert.equal(loaded[1].weight, 36);
+  });
+
+  test('6. Certificate Studio accurately pulls real student evaluation scores and ranks', () => {
+    const { context, localStorageStore } = createKrouDigitalContext();
+    
+    // Setup test students in localStorage
+    const testStudents = [
+      { id: 'STU-001', name: 'ចាន់ សុខា', gender: 'ស្រី', grade: 'ថ្នាក់ទី ៧', room: '«ក»' },
+      { id: 'STU-002', name: 'សេង វិបុល', gender: 'ប្រុស', grade: 'ថ្នាក់ទី ៧', room: '«ក»' },
+      { id: 'STU-003', name: 'កែវ មករា', gender: 'ប្រុស', grade: 'ថ្នាក់ទី ៧', room: '«ក»' }
+    ];
+    localStorageStore['students'] = JSON.stringify(testStudents);
+
+    // Setup test scores
+    const testScores = [
+      { student_id: 'STU-001', grade: 'ថ្នាក់ទី ៧', period_type: 'month', month: 'មករា', academic_year: '២០២៥ - ២០២៦', average: 8.85, rank: 1, grade_letter: 'A' },
+      { student_id: 'STU-002', grade: 'ថ្នាក់ទី ៧', period_type: 'month', month: 'មករា', academic_year: '២០២៥ - ២០២៦', average: 7.40, rank: 2, grade_letter: 'B' },
+      { student_id: 'STU-003', grade: 'ថ្នាក់ទី ៧', period_type: 'month', month: 'មករា', academic_year: '២០២៥ - ២០២៦', average: 6.20, rank: 3, grade_letter: 'C' }
+    ];
+    localStorageStore['academic_scores'] = JSON.stringify(testScores);
+
+    // Call getEvaluatedStudentsForCertificates
+    const evaluated = context.window.KrouDigital.getEvaluatedStudentsForCertificates('ថ្នាក់ទី ៧', 'month', 'មករា', '២០២៥ - ២០២៦', '«ក»');
+    
+    assert.ok(Array.isArray(evaluated), 'Result must be an array');
+    assert.equal(evaluated.length, 3);
+    assert.equal(evaluated[0].id, 'STU-001');
+    assert.equal(evaluated[0].name, 'ចាន់ សុខា');
+    assert.equal(evaluated[0].rank, 1);
+    assert.equal(evaluated[0].avg, 8.85);
+    assert.equal(evaluated[0].gradeLetter, 'A');
+
+    assert.equal(evaluated[1].id, 'STU-002');
+    assert.equal(evaluated[1].rank, 2);
+    assert.equal(evaluated[1].avg, 7.4);
+
+    assert.equal(evaluated[2].id, 'STU-003');
+    assert.equal(evaluated[2].rank, 3);
+    assert.equal(evaluated[2].avg, 6.2);
+  });
+
+  test('7. Certificate HTML accurately displays student evaluation results', () => {
+    const { context } = createKrouDigitalContext();
+    
+    const student = {
+      id: 'STU-001',
+      name: 'ចាន់ សុខា',
+      gender: 'ស្រី',
+      grade: 'ថ្នាក់ទី ៧',
+      room: '«ក»',
+      avg: 9.15,
+      gradeLetter: 'A',
+      rank: 1
+    };
+
+    const certHtml = context.window.KrouDigital.buildCertificateHtmlForStudent(student, 1, {
+      grade: 'ថ្នាក់ទី ៧',
+      sessionText: 'ប្រចាំខែមករា ឆ្នាំសិក្សា ២០២៥ - ២០២៦',
+      reasonText: 'មានស្នាដៃឆ្នើមក្នុងការសិក្សា ទទួលបានចំណាត់ថ្នាក់កិត្តិយស',
+      schoolName: 'វិទ្យាល័យ ហ៊ុន សែន ភ្នំពេញ'
+    });
+
+    assert.ok(certHtml.includes('ចាន់ សុខា'), 'Must contain student name');
+    assert.ok(certHtml.includes('ប័ណ្ណសរសើរ'), 'Must contain Certificate header');
+    assert.ok(certHtml.includes('ថ្នាក់ទី ៧'), 'Must contain grade');
+    assert.ok(certHtml.includes('មករា'), 'Must contain period');
+    assert.ok(certHtml.includes('ចំណាត់ថ្នាក់លេខ'), 'Must contain rank text');
+    assert.ok(certHtml.includes('មធ្យមភាគ ៩.១៥') || certHtml.includes('9.15') || certHtml.includes('៩.១៥'), 'Must display average');
+    assert.ok(certHtml.includes('និទ្ទេស A') || certHtml.includes('និទ្ទេស'), 'Must display grade letter');
+  });
+
+  test('8. Certificate Batch Printing and Score Integration functions are available', () => {
+    const { context } = createKrouDigitalContext();
+    assert.equal(typeof context.window.KrouDigital.printBatchCertificates, 'function');
+    assert.equal(typeof context.window.KrouDigital.syncRealScoresForCertificates, 'function');
+    assert.equal(typeof context.window.KrouDigital.openCertificatesFromScores, 'function');
   });
 });
