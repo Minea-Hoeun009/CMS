@@ -5328,10 +5328,10 @@ window.renderClassInventoryReport = function(container, targetGrade, targetRoom)
     `).join('');
 
     container.innerHTML = `
-        <div class="a4-page bg-white shadow-2xl rounded-2xl mx-auto font-siemreap text-slate-800 relative w-[794px] min-h-[1123px] max-w-[210mm] text-[11px] leading-relaxed flex flex-col justify-between shrink-0 overflow-hidden print:w-[210mm] print:h-[297mm] print:min-h-[297mm] print:rounded-none print:shadow-none" style="box-sizing: border-box; padding: 18px 24px; position: relative;">
+        <div class="a4-page bg-white shadow-2xl rounded-2xl mx-auto font-siemreap text-slate-800 relative w-[794px] min-h-[1123px] max-w-[210mm] text-[11px] leading-relaxed flex flex-col justify-start shrink-0 overflow-hidden print:w-[210mm] print:h-[297mm] print:min-h-[297mm] print:rounded-none print:shadow-none" style="box-sizing: border-box; padding: 18px 24px; position: relative;">
             ${window.getReportBorderLayerHtml ? window.getReportBorderLayerHtml() : ''}
             <!-- Main Content Area -->
-            <div class="flex-1 flex flex-col justify-start" style="position: relative; z-index: 10;">
+            <div class="flex flex-col justify-start" style="position: relative; z-index: 10;">
                 <!-- Official Dual-Side Header matching User Model (Images 1 & 2) -->
                 <div class="flex justify-between items-start mb-4 text-xs">
                     <div class="text-left leading-relaxed pt-3.5 sm:pt-4">
@@ -5355,8 +5355,7 @@ window.renderClassInventoryReport = function(container, targetGrade, targetRoom)
             </div>
 
             <!-- 2-Column Split Table (Items 1-16 on Left, 17-32 on Right) -->
-            <div class="flex-1 my-auto flex flex-col justify-around gap-3">
-                <div class="grid grid-cols-2 gap-3">
+            <div class="grid grid-cols-2 gap-3 mb-2">
                 <!-- Column 1 (Items 1 to 16) -->
                 <div>
                     <table class="w-full border-collapse border border-slate-300 text-[10px]">
@@ -5420,7 +5419,6 @@ window.renderClassInventoryReport = function(container, targetGrade, targetRoom)
                     <span>ខូចខាត ៖ <b class="text-amber-800 text-sm">${grandTotalDamaged}</b></span>
                     <span>បាត់បង់ ៖ <b class="text-rose-800 text-sm">${grandTotalLost}</b></span>
                 </div>
-            </div>
             </div>
             <!-- Signatures -->
             <div class="mt-4 pt-2 px-8 pb-4 font-siemreap shrink-0" style="position: relative; z-index: 10;">
@@ -5501,10 +5499,10 @@ window.renderInternalRulesReport = function(container, targetGrade, targetRoom) 
     `;
 
     container.innerHTML = `
-        <div class="a4-page bg-white shadow-2xl rounded-2xl mx-auto font-siemreap text-slate-800 relative w-[794px] min-h-[1123px] max-w-[210mm] text-[11px] leading-relaxed flex flex-col justify-between shrink-0 overflow-hidden print:w-[210mm] print:h-[297mm] print:min-h-[297mm] print:rounded-none print:shadow-none" style="box-sizing: border-box; padding: 18px 24px; position: relative;">
+        <div class="a4-page bg-white shadow-2xl rounded-2xl mx-auto font-siemreap text-slate-800 relative w-[794px] min-h-[1123px] max-w-[210mm] text-[11px] leading-relaxed flex flex-col justify-start shrink-0 overflow-hidden print:w-[210mm] print:h-[297mm] print:min-h-[297mm] print:rounded-none print:shadow-none" style="box-sizing: border-box; padding: 18px 24px; position: relative;">
             ${window.getReportBorderLayerHtml ? window.getReportBorderLayerHtml() : ''}
             <!-- Main Content Area -->
-            <div class="flex-1 flex flex-col justify-start" style="position: relative; z-index: 10;">
+            <div class="flex flex-col justify-start" style="position: relative; z-index: 10;">
                 <!-- Official Dual-Side Header matching User Model (Images 1 & 2) -->
                 <div class="flex justify-between items-start mb-3 text-xs">
                     <div class="text-left leading-relaxed pt-3.5 sm:pt-4">
@@ -5533,7 +5531,7 @@ window.renderInternalRulesReport = function(container, targetGrade, targetRoom) 
             </div>
 
             <!-- 12 Articles Grid (2 Columns x 6 Articles) -->
-            <div class="grid grid-cols-2 gap-3 mb-3 flex-1 my-auto">
+            <div class="grid grid-cols-2 gap-3 mb-3">
                 <div class="flex flex-col justify-between gap-2.5 h-full">
                     ${leftCol.map(renderArticleCard).join('')}
                 </div>
@@ -5639,10 +5637,10 @@ window.renderClassPrinciplesReport = function(container, targetGrade, targetRoom
     `;
 
     container.innerHTML = `
-        <div class="a4-page bg-white shadow-2xl rounded-2xl mx-auto font-siemreap text-slate-800 relative w-[794px] min-h-[1123px] max-w-[210mm] text-[11px] leading-relaxed flex flex-col justify-between shrink-0 overflow-hidden print:w-[210mm] print:h-[297mm] print:min-h-[297mm] print:rounded-none print:shadow-none" style="box-sizing: border-box; padding: 18px 24px; position: relative;">
+        <div class="a4-page bg-white shadow-2xl rounded-2xl mx-auto font-siemreap text-slate-800 relative w-[794px] min-h-[1123px] max-w-[210mm] text-[11px] leading-relaxed flex flex-col justify-start shrink-0 overflow-hidden print:w-[210mm] print:h-[297mm] print:min-h-[297mm] print:rounded-none print:shadow-none" style="box-sizing: border-box; padding: 18px 24px; position: relative;">
             ${window.getReportBorderLayerHtml ? window.getReportBorderLayerHtml() : ''}
             <!-- Main Content Area -->
-            <div class="flex-1 flex flex-col justify-start" style="position: relative; z-index: 10;">
+            <div class="flex flex-col justify-start" style="position: relative; z-index: 10;">
                 <!-- Official Dual-Side Header matching User Model (Images 1 & 2) -->
                 <div class="flex justify-between items-start mb-2 text-xs">
                     <div class="text-left leading-relaxed pt-3.5 sm:pt-4">
@@ -5671,7 +5669,7 @@ window.renderClassPrinciplesReport = function(container, targetGrade, targetRoom
             </div>
 
                         <!-- 16 Principles Grid (2 Columns x 8 Items - Evenly distributed across page) -->
-            <div class="grid grid-cols-2 gap-3.5 mb-2 flex-1 my-auto">
+            <div class="grid grid-cols-2 gap-3 mb-3">
                 <div class="flex flex-col justify-between gap-2.5 h-full">
                     ${leftPrinciples.map(renderPrincipleCard).join('')}
                 </div>
@@ -5821,10 +5819,10 @@ window.renderCleaningScheduleReport = function(container, targetGrade, targetRoo
     };
 
     container.innerHTML = `
-        <div class="a4-page bg-white shadow-2xl rounded-2xl mx-auto font-siemreap text-slate-800 relative w-[794px] min-h-[1123px] max-w-[210mm] text-[11px] leading-relaxed flex flex-col justify-between shrink-0 overflow-hidden print:w-[210mm] print:h-[297mm] print:min-h-[297mm] print:rounded-none print:shadow-none" style="box-sizing: border-box; padding: 18px 24px; position: relative;">
+        <div class="a4-page bg-white shadow-2xl rounded-2xl mx-auto font-siemreap text-slate-800 relative w-[794px] min-h-[1123px] max-w-[210mm] text-[11px] leading-relaxed flex flex-col justify-start shrink-0 overflow-hidden print:w-[210mm] print:h-[297mm] print:min-h-[297mm] print:rounded-none print:shadow-none" style="box-sizing: border-box; padding: 18px 24px; position: relative;">
             ${window.getReportBorderLayerHtml ? window.getReportBorderLayerHtml() : ''}
             <!-- Main Content Area -->
-            <div class="flex-1 flex flex-col justify-start" style="position: relative; z-index: 10;">
+            <div class="flex flex-col justify-start" style="position: relative; z-index: 10;">
                 <!-- Official Dual-Side Header matching User Model (Images 1 & 2) -->
                 <div class="flex justify-between items-start mb-2 text-xs">
                     <div class="text-left leading-relaxed pt-3.5 sm:pt-4">
@@ -5857,7 +5855,7 @@ window.renderCleaningScheduleReport = function(container, targetGrade, targetRoo
             </div>
 
             <!-- 6 Day Tables (2 Rows x 3 Columns) -->
-            <div class="flex-1 my-auto flex flex-col justify-around gap-2.5">
+            <div class="flex flex-col gap-2.5 mb-2.5">
                 <div class="grid grid-cols-3 gap-2.5">
                     ${days.slice(0, 3).map(renderDayCard).join('')}
                 </div>
@@ -5973,10 +5971,10 @@ window.renderBranchCommitteeReport = function(container, targetGrade, targetRoom
     }).join('');
 
     container.innerHTML = `
-        <div class="a4-page bg-white shadow-2xl rounded-2xl mx-auto font-siemreap text-slate-800 relative w-[794px] min-h-[1123px] max-w-[210mm] text-[11px] leading-relaxed flex flex-col justify-between shrink-0 overflow-hidden print:w-[210mm] print:h-[297mm] print:min-h-[297mm] print:rounded-none print:shadow-none" style="box-sizing: border-box; padding: 18px 24px; position: relative;">
+        <div class="a4-page bg-white shadow-2xl rounded-2xl mx-auto font-siemreap text-slate-800 relative w-[794px] min-h-[1123px] max-w-[210mm] text-[11px] leading-relaxed flex flex-col justify-start shrink-0 overflow-hidden print:w-[210mm] print:h-[297mm] print:min-h-[297mm] print:rounded-none print:shadow-none" style="box-sizing: border-box; padding: 18px 24px; position: relative;">
             ${window.getReportBorderLayerHtml ? window.getReportBorderLayerHtml() : ''}
             <!-- Main Content Area -->
-            <div class="flex-1 flex flex-col justify-start" style="position: relative; z-index: 10;">
+            <div class="flex flex-col justify-start" style="position: relative; z-index: 10;">
                 <!-- Official Dual-Side Header matching User Model (Images 1 & 2) -->
                 <div class="flex justify-between items-start mb-3 text-xs">
                     <div class="text-left leading-relaxed pt-3.5 sm:pt-4">
@@ -6000,7 +5998,7 @@ window.renderBranchCommitteeReport = function(container, targetGrade, targetRoom
             </div>
 
             <!-- Hierarchy Tree & Table Container (Proportionally Spaced) -->
-            <div class="flex-1 my-auto flex flex-col justify-around gap-2">
+            <div class="flex flex-col gap-2 mb-2">
                 <!-- Hierarchy Tree Layout -->
                 <div>
                     <!-- Level 1: Advisor & Class Monitor -->

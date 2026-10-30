@@ -925,7 +925,7 @@ window.CMSPrintManager = {
                 p.style.setProperty('max-height', pageH, 'important');
                 p.style.setProperty('display', 'flex', 'important');
                 p.style.setProperty('flex-direction', 'column', 'important');
-                p.style.setProperty('justify-content', 'space-between', 'important');
+                p.style.setProperty('justify-content', 'flex-start', 'important');
                 p.style.setProperty('box-shadow', 'none', 'important');
                 p.style.setProperty('border-radius', '0', 'important');
                 p.style.setProperty('margin', '0 auto', 'important');
@@ -939,7 +939,7 @@ window.CMSPrintManager = {
             clone.style.setProperty('max-height', pageH, 'important');
             clone.style.setProperty('display', 'flex', 'important');
             clone.style.setProperty('flex-direction', 'column', 'important');
-            clone.style.setProperty('justify-content', 'space-between', 'important');
+            clone.style.setProperty('justify-content', 'flex-start', 'important');
             clone.style.setProperty('box-shadow', 'none', 'important');
             clone.style.setProperty('border-radius', '0', 'important');
             clone.style.setProperty('margin', '0 auto', 'important');
@@ -956,7 +956,7 @@ window.CMSPrintManager = {
                     clone.firstElementChild.style.setProperty('max-height', pageH, 'important');
                     clone.firstElementChild.style.setProperty('display', 'flex', 'important');
                     clone.firstElementChild.style.setProperty('flex-direction', 'column', 'important');
-                    clone.firstElementChild.style.setProperty('justify-content', 'space-between', 'important');
+                    clone.firstElementChild.style.setProperty('justify-content', 'flex-start', 'important');
                     clone.firstElementChild.style.setProperty('overflow', 'hidden', 'important');
                 }
                 if (!isA4Page) {
@@ -1042,7 +1042,7 @@ window.CMSPrintManager = {
                         max-height: ${orientation === 'landscape' ? '210mm' : '297mm'} !important;
                         display: flex !important;
                         flex-direction: column !important;
-                        justify-content: space-between !important;
+                        justify-content: flex-start !important;
                         position: relative !important;
                         padding: 18px 24px !important;
                         margin: 0 auto !important;

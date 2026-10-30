@@ -266,7 +266,7 @@ h6,
     max-height: 297mm !important;
     display: flex !important;
     flex-direction: column !important;
-    justify-content: space-between !important;
+    justify-content: flex-start !important;
     position: relative !important;
     padding: 18px 24px !important;
     margin: 0 auto !important;
