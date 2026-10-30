@@ -9,6 +9,47 @@ window.reportDateSettings = {
     showLunar: localStorage.getItem('rep_show_lunar') !== 'false'
 };
 
+window.getReportAcademicYear = function(customYear) {
+    if (customYear) return customYear;
+    const fromRepSelect = document.getElementById("reportAcademicYearSelect")?.value;
+    const fromGlobal = document.getElementById("globalAcademicYear")?.value;
+    const fromLocal = localStorage.getItem('selected_academic_year') || localStorage.getItem('academic_year');
+    const fromSettings = (typeof appSettings !== 'undefined' ? appSettings.academic_year : null);
+    return fromRepSelect || fromGlobal || fromLocal || fromSettings || "2026-2027";
+};
+
+window.handleReportYearChange = function(newYear) {
+    if (!newYear) return;
+    localStorage.setItem('selected_academic_year', newYear);
+    localStorage.setItem('academic_year', newYear);
+    if (typeof appSettings !== 'undefined') appSettings.academic_year = newYear;
+    try {
+        const s = JSON.parse(localStorage.getItem('school_settings') || '{}');
+        s.academic_year = newYear;
+        localStorage.setItem('school_settings', JSON.stringify(s));
+    } catch(e) {}
+    const currentTeacherId = (window.AuthState && window.AuthState.teacherId) || localStorage.getItem('auth_teacher_id');
+    if (currentTeacherId && typeof window.saveTeacherPersonalSettings === 'function') {
+        try { window.saveTeacherPersonalSettings({ academic_year: newYear }, currentTeacherId); } catch(e) {}
+    }
+    const globalSel = document.getElementById("globalAcademicYear");
+    if (globalSel && globalSel.value !== newYear) globalSel.value = newYear;
+    const dashYear = document.getElementById("dashFilterAcademicYear");
+    if (dashYear && dashYear.value !== newYear) dashYear.value = newYear;
+    const stuYear = document.getElementById("stu_academic_year");
+    if (stuYear && stuYear.value !== newYear) stuYear.value = newYear;
+
+    if (typeof window.showToast === 'function') window.showToast(`🔄 ប្តូរទៅឆ្នាំសិក្សា៖ ${newYear}`);
+
+    if (window.CMSEventBus && typeof window.CMSEventBus.emit === 'function' && window.CMSEventTypes?.ACADEMIC_YEAR_CHANGED) {
+        window.CMSEventBus.emit(window.CMSEventTypes.ACADEMIC_YEAR_CHANGED, { academic_year: newYear });
+    }
+    window.loadReportsView();
+    if (window.currentActiveReportType && document.getElementById("reportDetailContent") && !document.getElementById("reportDetailContent").classList.contains("hidden")) {
+        window.openReportDetail(window.currentActiveReportType);
+    }
+};
+
 window.handleReportClassChange = function() {
     const grade = document.getElementById("reportGradeSelect")?.value;
     const room = document.getElementById("reportRoomSelect")?.value;
@@ -40,6 +81,11 @@ window.loadReportsView = function() {
     const curLevel = activeClass.level;
     const curRoom = activeClass.room;
     const gradeFull = `${curLevel} ${curRoom}`.trim();
+    const curYear = window.getReportAcademicYear();
+
+    const structYears = (window.academicStructure && Array.isArray(window.academicStructure.academic_years)) ? window.academicStructure.academic_years : (window.defaultAcademicStructure && Array.isArray(window.defaultAcademicStructure.academic_years) ? window.defaultAcademicStructure.academic_years : []);
+    const rawYears = [...new Set([...structYears, "2024-2025", "2025-2026", "2026-2027", "2027-2028", "2028-2029", "2029-2030", "2030-2031"])];
+    const yearOptions = rawYears.map(y => `<option value="${y}" ${String(y) === String(curYear) ? 'selected' : ''}>${typeof window.toKhmerNum === 'function' ? window.toKhmerNum(y) : y}</option>`).join('');
 
     const gradesList = typeof window.getAllGradesList === 'function' ? window.getAllGradesList() : ["ថ្នាក់ទី ១", "ថ្នាក់ទី ២", "ថ្នាក់ទី ៣", "ថ្នាក់ទី ៤", "ថ្នាក់ទី ៥", "ថ្នាក់ទី ៦"];
     const roomsList = typeof window.getAllRoomsList === 'function' ? window.getAllRoomsList() : ["«ក»", "«ខ»", "«គ»", "«ឃ»"];
@@ -57,6 +103,7 @@ window.loadReportsView = function() {
                 subtitle: "មជ្ឈមណ្ឌលរបាយការណ៍រដ្ឋបាលគ្រូ សៀវភៅតាមដាន និងលទ្ធផលសិក្សា",
                 icon: "fa-solid fa-folder-open",
                 currentClass: gradeFull,
+                academicYear: curYear,
                 clockId: "reportsHeaderClock",
                 extraBadgesHtml: `
                     <span id="reportHeaderGradeDisplay" class="hidden">${gradeFull}</span>
@@ -77,6 +124,14 @@ window.loadReportsView = function() {
                         </select>
                     </div>
                 </div>
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs font-bold text-slate-500 dark:text-slate-400"><i class="fa-solid fa-calendar-days text-amber-500"></i> ឆ្នាំសិក្សា៖</span>
+                        <div class="flex items-center gap-1.5 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl px-3 py-1.5 shadow-inner">
+                            <select id="reportAcademicYearSelect" onchange="window.handleReportYearChange(this.value)" class="border-none bg-transparent text-xs sm:text-sm font-bold text-amber-600 dark:text-amber-400 outline-none cursor-pointer font-siemreap py-0">
+                                ${yearOptions}
+                            </select>
+                        </div>
+                    </div>
 
                 <div class="flex items-center gap-2">
                     <button type="button" id="btnSyncReportsGAS" onclick="window.syncReportsToGoogleSheets(this)" class="px-3.5 py-1.5 bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-700 hover:to-teal-800 text-white rounded-xl text-xs font-bold shadow-sm transition flex items-center gap-1.5 active:scale-95 outline-none" title="រក្សាទុករបាយការណ៍ទាំងអស់ទៅក្នុង Google Sheets"><i class="fa-solid fa-cloud-arrow-up text-amber-300"></i><span>រក្សាទុកក្នុង Sheets</span></button>
@@ -809,7 +864,8 @@ window.openReportDetail = function(reportType) {
 
     const titleEl = document.getElementById("reportDetailTitle");
     const subEl = document.getElementById("reportDetailSub");
-    if (subEl) subEl.textContent = `ថ្នាក់ ${gradeFull}`;
+    const repYear = window.getReportAcademicYear ? window.getReportAcademicYear() : (document.getElementById("globalAcademicYear")?.value || "2026-2027");
+    if (subEl) subEl.textContent = `ថ្នាក់ ${gradeFull} | ឆ្នាំសិក្សា ${typeof window.toKhmerNum === 'function' ? window.toKhmerNum(repYear) : repYear}`;
     const paperArea = document.getElementById("reportPaperArea");
     const extraControls = document.getElementById("reportExtraControls");
 
@@ -1125,7 +1181,7 @@ window.updateReportViewSettings = function() {
 // ==========================================================================
 window.renderStudentStatsReportHTML = function(container, targetGrade, targetRoom) {
     const sInfo = typeof appSettings !== 'undefined' ? appSettings : {};
-    const academicYear = document.getElementById("globalAcademicYear")?.value || sInfo.academic_year || "២០២៦-២០២៧";
+    const academicYear = window.getReportAcademicYear ? window.getReportAcademicYear() : (document.getElementById("globalAcademicYear")?.value || sInfo.academic_year || "2026-2027");
     const activeClass = typeof window.getCurrentSelectedClass === 'function' ? window.getCurrentSelectedClass() : { level: "ថ្នាក់ទី ៤", room: "«ក»" };
     const curLevel = targetGrade || window.currentReportTargetGrade || document.getElementById("reportGradeSelect")?.value || activeClass.level || sInfo.teacher_level || "ថ្នាក់ទី ៤";
     const curRoom = targetRoom || window.currentReportTargetRoom || document.getElementById("reportRoomSelect")?.value || activeClass.room || sInfo.teacher_room || "«ក»";
@@ -1303,7 +1359,7 @@ window.renderStudentStatsReportHTML = function(container, targetGrade, targetRoo
                 <!-- ចំណងជើងកណ្តាល (Centered Moul Titles) -->
                 <div class="text-center pt-1">
                     <h1 class="moeys-header-blue text-base sm:text-lg mb-0.5 tracking-wide">តារាងចំនួនសិស្សតាមថ្នាក់ (សម្រាប់គ្រូ)</h1>
-                    <h2 class="moeys-header-blue text-sm sm:text-base">ឆ្នាំសិក្សា ${window.toKhmerNum(academicYear.replace('-', '_'))}</h2>
+                    <h2 class="moeys-header-blue text-sm sm:text-base">ឆ្នាំសិក្សា ${window.toKhmerNum(academicYear)}</h2>
                 </div>
 
                 <!-- ព័ត៌មានទីតាំង (Location & Class Info Bar) -->
@@ -1379,7 +1435,7 @@ window.renderStudentStatsReportHTML = function(container, targetGrade, targetRoo
                     <div>
                         <div class="text-[10px] font-bold leading-tight mb-1">
                             ២.(ខ) សិស្សថ្មី សិស្សឡើងថ្នាក់ និង សិស្សត្រួតថ្នាក់<br>
-                            ក្នុងឆ្នាំសិក្សា ${window.toKhmerNum(academicYear.replace('-', '_'))} គិតត្រឹមថ្ងៃទី...........................
+                            ក្នុងឆ្នាំសិក្សា ${window.toKhmerNum(academicYear)} គិតត្រឹមថ្ងៃទី...........................
                         </div>
                         <table class="moeys-table">
                             <thead>
@@ -1732,7 +1788,7 @@ window.updateStudentListContent = function() {
     }
 
     const sInfo = typeof appSettings !== 'undefined' ? appSettings : {};
-    const academicYear = document.getElementById("globalAcademicYear")?.value || sInfo.academic_year || "២០២៦-២០២៧";
+    const academicYear = window.getReportAcademicYear ? window.getReportAcademicYear() : (document.getElementById("globalAcademicYear")?.value || sInfo.academic_year || "2026-2027");
     const activeClass = typeof window.getCurrentSelectedClass === 'function' ? window.getCurrentSelectedClass() : { level: "ថ្នាក់ទី ៤", room: "«ក»" };
     const curLevel = window.currentReportTargetGrade || document.getElementById("reportGradeSelect")?.value || activeClass.level || sInfo.teacher_level || "ថ្នាក់ទី ៤";
     const curRoom = window.currentReportTargetRoom || document.getElementById("reportRoomSelect")?.value || activeClass.room || sInfo.teacher_room || "«ក»";
@@ -2000,7 +2056,7 @@ window.updateStudentListContent = function() {
 // ==========================================================================
 window.renderClassStructureHTML = function(container, targetGrade, targetRoom) {
     const sInfo = typeof appSettings !== 'undefined' ? appSettings : {};
-    const academicYear = document.getElementById("globalAcademicYear")?.value || sInfo.academic_year || "២០២៦-២០២៧";
+    const academicYear = window.getReportAcademicYear ? window.getReportAcademicYear() : (document.getElementById("globalAcademicYear")?.value || sInfo.academic_year || "2026-2027");
     const activeClass = typeof window.getCurrentSelectedClass === 'function' ? window.getCurrentSelectedClass() : { level: "ថ្នាក់ទី ៤", room: "«ក»" };
     const curLevel = targetGrade || window.currentReportTargetGrade || document.getElementById("reportGradeSelect")?.value || activeClass.level || sInfo.teacher_level || "ថ្នាក់ទី ៤";
     const curRoom = targetRoom || window.currentReportTargetRoom || document.getElementById("reportRoomSelect")?.value || activeClass.room || sInfo.teacher_room || "«ក»";
@@ -2143,7 +2199,7 @@ window.renderAttendanceContent = function() {
     const value = document.getElementById("attReportValue").value;
 
     const sInfo = typeof appSettings !== 'undefined' ? appSettings : {};
-    const academicYear = document.getElementById("globalAcademicYear")?.value || sInfo.academic_year || "២០២៦-២០២៧";
+    const academicYear = window.getReportAcademicYear ? window.getReportAcademicYear() : (document.getElementById("globalAcademicYear")?.value || sInfo.academic_year || "2026-2027");
     const activeClass = typeof window.getCurrentSelectedClass === 'function' ? window.getCurrentSelectedClass() : { level: "ថ្នាក់ទី ៤", room: "«ក»" };
     const curLevel = window.currentReportTargetGrade || document.getElementById("reportGradeSelect")?.value || activeClass.level || sInfo.teacher_level || "ថ្នាក់ទី ៤";
     const curRoom = window.currentReportTargetRoom || document.getElementById("reportRoomSelect")?.value || activeClass.room || sInfo.teacher_room || "«ក»";
@@ -3208,12 +3264,13 @@ window.renderSikhaKarikBooklet = function(container, targetGrade, targetRoom, st
     const curRoom = targetRoom || activeClass.room;
     const gradeFull = `${curLevel} ${curRoom}`.trim();
 
+    const activeAcademicYear = window.getReportAcademicYear ? window.getReportAcademicYear() : (localStorage.getItem('selected_academic_year') || '2026-2027');
     const ctx = (window.CMSPrintManager && typeof window.CMSPrintManager.getStandardContext === 'function')
-        ? window.CMSPrintManager.getStandardContext({ grade: gradeFull })
+        ? window.CMSPrintManager.getStandardContext({ grade: gradeFull, academicYear: activeAcademicYear })
         : {};
 
     const schoolName = ctx.schoolName || localStorage.getItem('cms_school_name') || 'សាលាបឋមសិក្សា................................';
-    const academicYear = ctx.academicYear || localStorage.getItem('selected_academic_year') || '២០២៦-២០២៧';
+    const academicYear = ctx.academicYear || activeAcademicYear || '២០២៦-២០២៧';
     const communeName = ctx.communeName || localStorage.getItem('cms_school_commune') || '................';
     const districtName = ctx.districtName || localStorage.getItem('cms_school_district') || '................';
     const provinceName = ctx.provinceName || localStorage.getItem('cms_school_province') || '................';
@@ -4258,7 +4315,7 @@ window.renderAcademicResultsReport = function(container, targetGrade, targetRoom
     const formattedRoom = curRoom.startsWith('«') ? curRoom : `«${curRoom}»`;
     const gradeFull = `${toUniversalNum(curLevel)} ${formattedRoom}`.trim();
 
-    const academicYearRaw = document.getElementById("globalAcademicYear")?.value || sInfo.academic_year || "២០២៦-២០២៧";
+    const academicYearRaw = window.getReportAcademicYear ? window.getReportAcademicYear() : (document.getElementById("globalAcademicYear")?.value || sInfo.academic_year || "2026-2027");
     const academicYearUni = toUniversalNum(academicYearRaw);
     const academicYear = toKhmerDigits(academicYearRaw) || '២០២៦-២០២៧';
     const districtName = (sInfo.district_name || sInfo.district || "កៀនស្វាយ").replace(/^ស្រុក\s*/, '').trim(); 
@@ -5380,8 +5437,9 @@ window.renderClassInventoryReport = function(container, targetGrade, targetRoom)
     const curRoom = targetRoom || activeClass.room;
     const gradeFull = `${curLevel} ${curRoom}`.trim();
 
+    const targetRepYear = window.getReportAcademicYear ? window.getReportAcademicYear() : (localStorage.getItem('selected_academic_year') || '2026-2027');
     const ctx = (window.CMSPrintManager && typeof window.CMSPrintManager.getStandardContext === 'function')
-        ? window.CMSPrintManager.getStandardContext({ grade: gradeFull })
+        ? window.CMSPrintManager.getStandardContext({ grade: gradeFull, academicYear: targetRepYear })
         : {};
 
     const sInfo = typeof appSettings !== 'undefined' ? appSettings : {};
@@ -5389,7 +5447,7 @@ window.renderClassInventoryReport = function(container, targetGrade, targetRoom)
     try { storedSettings = JSON.parse(localStorage.getItem('school_settings') || '{}'); } catch(e) {}
     const districtName = ctx.districtName || (storedSettings.district_name || storedSettings.district || sInfo.district_name || sInfo.district || localStorage.getItem('cms_school_district') || "កៀនស្វាយ").replace(/^ស្រុក\s*/, '').trim();
     const schoolName = ctx.schoolName || storedSettings.school_name || sInfo.school_name || localStorage.getItem('cms_school_name') || 'សាលាបឋមសិក្សា ឃុំ';
-    const rawAcademicYear = ctx.academicYear || (storedSettings && storedSettings.academic_year) || sInfo.academic_year || localStorage.getItem('selected_academic_year') || '២០២៦-២០២៧';
+    const rawAcademicYear = targetRepYear || ctx.academicYear || '2026-2027';
     const academicYear = typeof window.toKhmerNum === 'function' ? window.toKhmerNum(rawAcademicYear) : '២០២៦-២០២៧';
     const teacherName = ctx.teacherName || localStorage.getItem('teacher_name') || '................................';
     const principalName = ctx.principalName || localStorage.getItem('school_principal') || '................................';
@@ -5611,8 +5669,9 @@ window.renderInternalRulesReport = function(container, targetGrade, targetRoom) 
     const curRoom = targetRoom || activeClass.room;
     const gradeFull = `${curLevel} ${curRoom}`.trim();
 
+    const targetRepYear = window.getReportAcademicYear ? window.getReportAcademicYear() : (localStorage.getItem('selected_academic_year') || '2026-2027');
     const ctx = (window.CMSPrintManager && typeof window.CMSPrintManager.getStandardContext === 'function')
-        ? window.CMSPrintManager.getStandardContext({ grade: gradeFull })
+        ? window.CMSPrintManager.getStandardContext({ grade: gradeFull, academicYear: targetRepYear })
         : {};
 
     const sInfo = typeof appSettings !== 'undefined' ? appSettings : {};
@@ -5620,7 +5679,7 @@ window.renderInternalRulesReport = function(container, targetGrade, targetRoom) 
     try { storedSettings = JSON.parse(localStorage.getItem('school_settings') || '{}'); } catch(e) {}
     const districtName = ctx.districtName || (storedSettings.district_name || storedSettings.district || sInfo.district_name || sInfo.district || localStorage.getItem('cms_school_district') || "កៀនស្វាយ").replace(/^ស្រុក\s*/, '').trim();
     const schoolName = ctx.schoolName || storedSettings.school_name || sInfo.school_name || localStorage.getItem('cms_school_name') || 'សាលាបឋមសិក្សា ឃុំ';
-    const rawAcademicYear = ctx.academicYear || (storedSettings && storedSettings.academic_year) || sInfo.academic_year || localStorage.getItem('selected_academic_year') || '២០២៦-២០២៧';
+    const rawAcademicYear = targetRepYear || ctx.academicYear || '2026-2027';
     const academicYear = typeof window.toKhmerNum === 'function' ? window.toKhmerNum(rawAcademicYear) : '២០២៦-២០២៧';
     const teacherName = ctx.teacherName || localStorage.getItem('teacher_name') || '................................';
     const principalName = ctx.principalName || localStorage.getItem('school_principal') || '................................';
@@ -5739,8 +5798,9 @@ window.renderClassPrinciplesReport = function(container, targetGrade, targetRoom
     const curRoom = targetRoom || activeClass.room;
     const gradeFull = `${curLevel} ${curRoom}`.trim();
 
+    const targetRepYear = window.getReportAcademicYear ? window.getReportAcademicYear() : (localStorage.getItem('selected_academic_year') || '2026-2027');
     const ctx = (window.CMSPrintManager && typeof window.CMSPrintManager.getStandardContext === 'function')
-        ? window.CMSPrintManager.getStandardContext({ grade: gradeFull })
+        ? window.CMSPrintManager.getStandardContext({ grade: gradeFull, academicYear: targetRepYear })
         : {};
 
     const sInfo = typeof appSettings !== 'undefined' ? appSettings : {};
@@ -5748,7 +5808,7 @@ window.renderClassPrinciplesReport = function(container, targetGrade, targetRoom
     try { storedSettings = JSON.parse(localStorage.getItem('school_settings') || '{}'); } catch(e) {}
     const districtName = ctx.districtName || (storedSettings.district_name || storedSettings.district || sInfo.district_name || sInfo.district || localStorage.getItem('cms_school_district') || "កៀនស្វាយ").replace(/^ស្រុក\s*/, '').trim();
     const schoolName = ctx.schoolName || storedSettings.school_name || sInfo.school_name || localStorage.getItem('cms_school_name') || 'សាលាបឋមសិក្សា ឃុំ';
-    const rawAcademicYear = ctx.academicYear || (storedSettings && storedSettings.academic_year) || sInfo.academic_year || localStorage.getItem('selected_academic_year') || '២០២៦-២០២៧';
+    const rawAcademicYear = targetRepYear || ctx.academicYear || '2026-2027';
     const academicYear = typeof window.toKhmerNum === 'function' ? window.toKhmerNum(rawAcademicYear) : '២០២៦-២០២៧';
     const teacherName = ctx.teacherName || localStorage.getItem('teacher_name') || '................................';
     const principalName = ctx.principalName || localStorage.getItem('school_principal') || '................................';
@@ -5875,8 +5935,9 @@ window.renderCleaningScheduleReport = function(container, targetGrade, targetRoo
     const curRoom = targetRoom || activeClass.room;
     const gradeFull = `${curLevel} ${curRoom}`.trim();
 
+    const targetRepYear = window.getReportAcademicYear ? window.getReportAcademicYear() : (localStorage.getItem('selected_academic_year') || '2026-2027');
     const ctx = (window.CMSPrintManager && typeof window.CMSPrintManager.getStandardContext === 'function')
-        ? window.CMSPrintManager.getStandardContext({ grade: gradeFull })
+        ? window.CMSPrintManager.getStandardContext({ grade: gradeFull, academicYear: targetRepYear })
         : {};
 
     const sInfo = typeof appSettings !== 'undefined' ? appSettings : {};
@@ -5884,7 +5945,7 @@ window.renderCleaningScheduleReport = function(container, targetGrade, targetRoo
     try { storedSettings = JSON.parse(localStorage.getItem('school_settings') || '{}'); } catch(e) {}
     const districtName = ctx.districtName || (storedSettings.district_name || storedSettings.district || sInfo.district_name || sInfo.district || localStorage.getItem('cms_school_district') || "កៀនស្វាយ").replace(/^ស្រុក\s*/, '').trim();
     const schoolName = ctx.schoolName || storedSettings.school_name || sInfo.school_name || localStorage.getItem('cms_school_name') || 'សាលាបឋមសិក្សា ឃុំ';
-    const rawAcademicYear = ctx.academicYear || (storedSettings && storedSettings.academic_year) || sInfo.academic_year || localStorage.getItem('selected_academic_year') || '២០២៦-២០២៧';
+    const rawAcademicYear = targetRepYear || ctx.academicYear || '2026-2027';
     const academicYear = typeof window.toKhmerNum === 'function' ? window.toKhmerNum(rawAcademicYear) : '២០២៦-២០២៧';
     const teacherName = ctx.teacherName || localStorage.getItem('teacher_name') || '................................';
     const principalName = ctx.principalName || localStorage.getItem('school_principal') || '................................';
@@ -6067,8 +6128,9 @@ window.renderBranchCommitteeReport = function(container, targetGrade, targetRoom
     const curRoom = targetRoom || activeClass.room;
     const gradeFull = `${curLevel} ${curRoom}`.trim();
 
+    const targetRepYear = window.getReportAcademicYear ? window.getReportAcademicYear() : (localStorage.getItem('selected_academic_year') || '2026-2027');
     const ctx = (window.CMSPrintManager && typeof window.CMSPrintManager.getStandardContext === 'function')
-        ? window.CMSPrintManager.getStandardContext({ grade: gradeFull })
+        ? window.CMSPrintManager.getStandardContext({ grade: gradeFull, academicYear: targetRepYear })
         : {};
 
     const sInfo = typeof appSettings !== 'undefined' ? appSettings : {};
@@ -6076,7 +6138,7 @@ window.renderBranchCommitteeReport = function(container, targetGrade, targetRoom
     try { storedSettings = JSON.parse(localStorage.getItem('school_settings') || '{}'); } catch(e) {}
     const districtName = ctx.districtName || (storedSettings.district_name || storedSettings.district || sInfo.district_name || sInfo.district || localStorage.getItem('cms_school_district') || "កៀនស្វាយ").replace(/^ស្រុក\s*/, '').trim();
     const schoolName = ctx.schoolName || storedSettings.school_name || sInfo.school_name || localStorage.getItem('cms_school_name') || 'សាលាបឋមសិក្សា ឃុំ';
-    const rawAcademicYear = ctx.academicYear || (storedSettings && storedSettings.academic_year) || sInfo.academic_year || localStorage.getItem('selected_academic_year') || '២០២៦-២០២៧';
+    const rawAcademicYear = targetRepYear || ctx.academicYear || '2026-2027';
     const academicYear = typeof window.toKhmerNum === 'function' ? window.toKhmerNum(rawAcademicYear) : '២០២៦-២០២៧';
     const teacherName = ctx.teacherName || localStorage.getItem('teacher_name') || '................................';
     const principalName = ctx.principalName || localStorage.getItem('school_principal') || '................................';

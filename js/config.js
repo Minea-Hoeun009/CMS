@@ -146,6 +146,11 @@ window.updateAllClassDropdowns = function() {
         });
         reportRoomSel.innerHTML = optHtml;
     }
+    const reportYearSel = document.getElementById("reportAcademicYearSelect");
+    if (reportYearSel) {
+        const curY = (typeof window.getReportAcademicYear === 'function' ? window.getReportAcademicYear() : (localStorage.getItem('selected_academic_year') || '2026-2027'));
+        if (reportYearSel.value !== curY) reportYearSel.value = curY;
+    }
 
     // 6. Update Library select #libGradeSelect and #libRoomSelect
     const libGradeSel = document.getElementById("libGradeSelect");

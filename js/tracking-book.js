@@ -189,7 +189,7 @@ function updateTbStudentSelect() {
   const select = document.getElementById("tbStudentSelect");
   if (!select) return;
 
-  const academicYear = document.getElementById("globalAcademicYear")?.value || "2026-2027";
+  const academicYear = (typeof window.getReportAcademicYear === 'function' ? window.getReportAcademicYear() : (document.getElementById("globalAcademicYear")?.value || localStorage.getItem('selected_academic_year') || "2026-2027"));
   const studentsInGrade = typeof window.getStudentsForClass === 'function'
       ? window.getStudentsForClass(level, room, academicYear)
       : (window.allStudents || []).filter(s => {
@@ -266,7 +266,11 @@ function renderTrackingBookPreview() {
   const schoolName = sInfo.school_name || savedSettings.school_name || "សាលាបឋមសិក្សា ខ្សុំ";
   const schoolPhone = sInfo.school_phone || savedSettings.school_phone || sInfo.phone || sInfo.teacher_phone || "";
   const clusterName = sInfo.school_cluster || savedSettings.school_cluster || sInfo.cluster || savedSettings.cluster || sInfo.cluster_name || "";
-  const academicYear = sInfo.academic_year || savedSettings.academic_year || document.getElementById("globalAcademicYear")?.value || "២០២៦-២០២៧";
+  const academicYear = (typeof window.getReportAcademicYear === 'function' ? window.getReportAcademicYear() : (document.getElementById("globalAcademicYear")?.value || localStorage.getItem('selected_academic_year') || sInfo.academic_year || "2026-2027"));
+  const cleanUniYear = (typeof window.toUniversalNum === 'function' ? window.toUniversalNum(academicYear) : String(academicYear)).replace(/[^\d-]/g, '');
+  const yParts = cleanUniYear.split('-');
+  const startY2 = yParts[0] ? yParts[0].slice(-2) : '26';
+  const endY2 = yParts[1] ? yParts[1].slice(-2) : '27';
   
   const levelSelect = document.getElementById("tbLevelSelect");
   const roomSelect = document.getElementById("tbRoomSelect");
@@ -574,7 +578,7 @@ function renderTrackingBookPreview() {
         <!-- Academic Year & Seal -->
         <div style="margin-bottom: 4px;">
           <div style="font-size: 10pt; font-weight: bold; color: #1e3a8a;">
-            ឆ្នាំសិក្សា ៖ ២០<span style="border-bottom: 1px dotted #1e3a8a; display: inline-block; width: 32px; text-align: center;" contenteditable="true">${toKhmerNum(academicYear.substring(2, 4))}</span> - ២០<span style="border-bottom: 1px dotted #1e3a8a; display: inline-block; width: 32px; text-align: center;" contenteditable="true">${toKhmerNum(academicYear.substring(7, 9))}</span>
+            ឆ្នាំសិក្សា ៖ ២០<span style="border-bottom: 1px dotted #1e3a8a; display: inline-block; width: 32px; text-align: center;" contenteditable="true">${toKhmerNum(startY2)}</span> - ២០<span style="border-bottom: 1px dotted #1e3a8a; display: inline-block; width: 32px; text-align: center;" contenteditable="true">${toKhmerNum(endY2)}</span>
           </div>
           <div style="font-size: 8pt; color: #64748b; margin-top: 4px; font-style: italic;">
             « ការអប់រំ គឺជាមូលដ្ឋានគ្រឹះដ៏រឹងមាំនៃការអភិវឌ្ឍធនធានមនុស្ស »
@@ -714,7 +718,7 @@ function renderTrackingBookPreview() {
         </div>
 
         <div class="pt-2 text-center text-[11.5px] font-bold">
-          ឆ្នាំសិក្សា &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ២០<span class="border-b border-dotted border-[#1e3a8a] inline-block w-[32px] text-center hover:bg-blue-50 outline-none cursor-text" contenteditable="true">${toKhmerNum(academicYear.substring(2, 4))}</span> - ២០<span class="border-b border-dotted border-[#1e3a8a] inline-block w-[32px] text-center hover:bg-blue-50 outline-none cursor-text" contenteditable="true">${toKhmerNum(academicYear.substring(7, 9))}</span>
+          ឆ្នាំសិក្សា &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ២០<span class="border-b border-dotted border-[#1e3a8a] inline-block w-[32px] text-center hover:bg-blue-50 outline-none cursor-text" contenteditable="true">${toKhmerNum(startY2)}</span> - ២០<span class="border-b border-dotted border-[#1e3a8a] inline-block w-[32px] text-center hover:bg-blue-50 outline-none cursor-text" contenteditable="true">${toKhmerNum(endY2)}</span>
         </div>
       </div>
     </div>
@@ -830,7 +834,7 @@ function renderTrackingBookPreview() {
     }).join("");
 
     const displayTitle = isAnnual 
-      ? `លទ្ធផលនៃការសិក្សាប្រចាំឆ្នាំសិក្សា  ២០<span contenteditable="true">${toKhmerNum(academicYear.substring(2, 4))}</span>-២០<span contenteditable="true">${toKhmerNum(academicYear.substring(7, 9))}</span>` 
+      ? `លទ្ធផលនៃការសិក្សាប្រចាំឆ្នាំសិក្សា  ២០<span contenteditable="true">${toKhmerNum(startY2)}</span>-២០<span contenteditable="true">${toKhmerNum(endY2)}</span>` 
       : `លទ្ធផលនៃការសិក្សាប្រចាំ  ${title}`;
 
     return `

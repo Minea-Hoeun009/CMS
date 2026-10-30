@@ -792,4 +792,55 @@ describe('MoEYS Sikha-karik Booklet & Centralized Reports Suite', () => {
         assert.ok(html.includes('min-h-[1123px]') || html.includes('297mm'), 'Class principles must define standard A4 height');
         assert.ok(html.includes('justify-between'), 'Class principles must use justify-between like Honor Board');
     });
+    test('19. Dynamic Academic Year Switching across Reports View, Executive Header, Tracking Book, and Booklets', () => {
+        assert.strictEqual(typeof context.window.getReportAcademicYear, 'function');
+        assert.strictEqual(typeof context.window.handleReportYearChange, 'function');
+
+        // 1. Initial State
+        context.localStorage.setItem('selected_academic_year', '2027-2028');
+        assert.strictEqual(context.window.getReportAcademicYear(), '2027-2028');
+
+        // 2. Switch Academic Year via handleReportYearChange
+        context.window.handleReportYearChange('2028-2029');
+        assert.strictEqual(context.localStorage.getItem('selected_academic_year'), '2028-2029');
+        assert.strictEqual(context.localStorage.getItem('academic_year'), '2028-2029');
+        assert.strictEqual(context.window.getReportAcademicYear(), '2028-2029');
+
+        // 3. Verify loadReportsView renders academic year selector with new year selected
+        const mockElements = {};
+        const getOrCreateEl = (id) => {
+            if (!mockElements[id]) {
+                mockElements[id] = { id, innerHTML: '', value: '', classList: { add: () => {}, remove: () => {}, contains: () => false }, style: {}, setAttribute: () => {}, removeAttribute: () => {} };
+            }
+            return mockElements[id];
+        };
+        const container = { innerHTML: '' };
+        context.document.getElementById = (id) => {
+            if (id === 'reportsContainer') return container;
+            return getOrCreateEl(id);
+        };
+        context.window.loadReportsView();
+        assert.ok(container.innerHTML.includes('id="reportAcademicYearSelect"'), 'Must render reportAcademicYearSelect');
+        assert.ok(container.innerHTML.includes('value="2028-2029" selected'), 'Must select active academic year 2028-2029');
+        assert.ok(container.innerHTML.includes('២០២៨-២០២៩') || container.innerHTML.includes('2028-2029'), 'Must format year options');
+
+        // 4. Verify Academic Results Report reflects switched year
+        const paperArea = { innerHTML: '' };
+        context.window.currentAcademicReportMonth = 'មករា';
+        context.window.renderAcademicResultsReport(paperArea, 'ថ្នាក់ទី ៤', '«ក»', 'monthly');
+        assert.ok(paperArea.innerHTML.includes('2028-2029') || paperArea.innerHTML.includes('២០២៨-២០២៩'), 'Academic Results Report must reflect active year');
+
+        // 5. Verify Tracking Book reflects switched year
+        context.document.body.insertAdjacentHTML = () => {};
+        context.window.openTrackingBookModal();
+        const studentSelect = context.document.getElementById('tbStudentSelect');
+        if (studentSelect) {
+            studentSelect.value = 'STU-001';
+            studentSelect.options = [{ text: 'សុខ ចាន់ដារ៉ា (ប្រុស)', value: 'STU-001' }];
+            studentSelect.selectedIndex = 0;
+        }
+        const previewContainer = context.document.getElementById('tbPreviewContainer');
+        context.window.renderTrackingBookPreview();
+        assert.ok(previewContainer && (previewContainer.innerHTML.includes('២៨') || previewContainer.innerHTML.includes('2028')), 'Tracking book must display updated academic year');
+    });
 });

@@ -35,7 +35,7 @@ window.KrouDigital = {
         const curRoom = targetRoom || activeClass.room;
         const gradeFull = `${curLevel} ${curRoom}`.trim();
 
-        const academicYear = document.getElementById("globalAcademicYear")?.value || sInfo.academic_year || "២០២៦-២០២៧";
+        const academicYear = (typeof window.getReportAcademicYear === 'function' ? window.getReportAcademicYear() : (document.getElementById("globalAcademicYear")?.value || localStorage.getItem('selected_academic_year') || sInfo.academic_year || "2026-2027"));
         const districtName = (sInfo.district || "កៀនស្វាយ").replace(/^ស្រុក\s*/, '').trim(); 
         const schoolName = sInfo.school_name || "សាលាបឋមសិក្សា ខ្សុំ";
         const principalName = sInfo.principal_name || "";
@@ -255,7 +255,7 @@ window.KrouDigital = {
         const curRoom = targetRoom || activeClass.room;
         const gradeFull = `${curLevel} ${curRoom}`.trim();
 
-        const academicYear = document.getElementById("globalAcademicYear")?.value || sInfo.academic_year || "២០២៦-២០២៧";
+        const academicYear = (typeof window.getReportAcademicYear === 'function' ? window.getReportAcademicYear() : (document.getElementById("globalAcademicYear")?.value || localStorage.getItem('selected_academic_year') || sInfo.academic_year || "2026-2027"));
         const districtName = (sInfo.district || "កៀនស្វាយ").replace(/^ស្រុក\s*/, '').trim(); 
         const schoolName = sInfo.school_name || "សាលាបឋមសិក្សា ខ្សុំ";
         const principalName = sInfo.principal_name || "";
@@ -427,7 +427,7 @@ window.KrouDigital = {
         const curRoom = targetRoom || activeClass.room;
         const gradeFull = `${curLevel} ${curRoom}`.trim();
 
-        const academicYear = document.getElementById("globalAcademicYear")?.value || sInfo.academic_year || "២០២៦-២០២៧";
+        const academicYear = (typeof window.getReportAcademicYear === 'function' ? window.getReportAcademicYear() : (document.getElementById("globalAcademicYear")?.value || localStorage.getItem('selected_academic_year') || sInfo.academic_year || "2026-2027"));
         const districtName = (sInfo.district || "កៀនស្វាយ").replace(/^ស្រុក\s*/, '').trim(); 
         const schoolName = sInfo.school_name || "សាលាបឋមសិក្សា ខ្សុំ";
         const principalName = sInfo.principal_name || "";
@@ -1444,7 +1444,7 @@ window.KrouDigital = {
         localStorage.setItem('cert_last_rank', activeRank);
 
         const sInfo = window.appSettings || JSON.parse(localStorage.getItem('school_settings') || '{}');
-        const academicYear = document.getElementById("globalAcademicYear")?.value || sInfo.academic_year || "២០២៥ - ២០២៦";
+        const academicYear = (typeof window.getReportAcademicYear === 'function' ? window.getReportAcademicYear() : (document.getElementById("globalAcademicYear")?.value || localStorage.getItem('selected_academic_year') || sInfo.academic_year || "2026-2027"));
         const districtName = (sInfo.district || "អង្គរជ័យ").replace(/^ស្រុក\s*/, '').trim(); 
         const provinceName = sInfo.province || "កំពត";
         const schoolName = sInfo.school_name || "វិទ្យាល័យ សម្តេច ជា ស៊ីម អង្គរជ័យ";

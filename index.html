@@ -1284,6 +1284,7 @@
         const year = document.getElementById("globalAcademicYear")?.value;
         if (year) {
             localStorage.setItem('selected_academic_year', year);
+            localStorage.setItem('academic_year', year);
             if (typeof appSettings !== 'undefined') {
                 appSettings.academic_year = year;
             }
@@ -1306,6 +1307,8 @@
             if (dashYear && dashYear.value !== year) dashYear.value = year;
             const stuYear = document.getElementById("stu_academic_year");
             if (stuYear && stuYear.value !== year) stuYear.value = year;
+            const repYear = document.getElementById("reportAcademicYearSelect");
+            if (repYear && repYear.value !== year) repYear.value = year;
 
             if (typeof window.showToast === 'function') window.showToast(`🔄 ប្តូរទៅឆ្នាំសិក្សា៖ ${year}`);
 
@@ -1330,6 +1333,14 @@
             }
             if (typeof window.updateAllClassDropdowns === 'function') {
                 window.updateAllClassDropdowns();
+            }
+            const reportsViewEl = document.getElementById("reportsView");
+            if (reportsViewEl && !reportsViewEl.classList.contains("hidden") && typeof window.loadReportsView === 'function') {
+                window.loadReportsView();
+            }
+            const reportModal = document.getElementById("reportDetailContent");
+            if (reportModal && !reportModal.classList.contains("hidden") && window.currentActiveReportType && typeof window.openReportDetail === 'function') {
+                window.openReportDetail(window.currentActiveReportType);
             }
         }
     };

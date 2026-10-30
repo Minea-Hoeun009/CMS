@@ -145,12 +145,22 @@ window.CMSOrchestrator = {
             case window.CMSEventTypes.ACADEMIC_YEAR_CHANGED:
                 console.log(`🔗 [Orchestrator] Rule 5: Academic year switched to [${payload.academic_year}]. Isolating historical datasets...`);
                 localStorage.setItem('selected_academic_year', payload.academic_year);
+                localStorage.setItem('academic_year', payload.academic_year);
+                if (typeof appSettings !== 'undefined') appSettings.academic_year = payload.academic_year;
                 if (typeof window.fetchStudentsForScores === 'function') window.fetchStudentsForScores();
                 if (typeof window.filterStudents === 'function') window.filterStudents();
                 if (typeof window.fetchMonthlyAttendance === 'function') window.fetchMonthlyAttendance();
                 if (typeof window.fetchLibraryData === 'function') window.fetchLibraryData();
                 if (typeof window.loadDashboard === 'function' && window.currentActiveView === 'dashboard') window.loadDashboard();
                 if (typeof window.updateAllClassDropdowns === 'function') window.updateAllClassDropdowns();
+                const repView = document.getElementById("reportsView");
+                if (repView && !repView.classList.contains("hidden") && typeof window.loadReportsView === 'function') {
+                    window.loadReportsView();
+                }
+                const repModal = document.getElementById("reportDetailContent");
+                if (repModal && !repModal.classList.contains("hidden") && window.currentActiveReportType && typeof window.openReportDetail === 'function') {
+                    window.openReportDetail(window.currentActiveReportType);
+                }
                 break;
 
             // Rule 6: Account Suspended -> Immediate session revocation
