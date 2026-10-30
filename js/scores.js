@@ -3775,7 +3775,7 @@ window.printRankingTable = function() {
     let failFPct = femaleStus > 0 ? ((failedF / femaleStus) * 100).toFixed(2) : "0.00";
 
     let headerHtml = '';
-    const thBase = `border: 1pt solid #cbd5e1; text-align: center; vertical-align: middle; font-family: 'Khmer OS Muol Light', 'Moul', serif; font-size: 9px; font-weight: normal; color: #ffffff; background-color: #233D6E; padding: 3px 1px;`;
+    const thBase = `border: 1pt solid #cbd5e1; text-align: center; vertical-align: middle; font-family: 'Khmer OS Muol Light', 'Moul', serif; font-size: 9px; font-weight: normal; color: #ffffff; background-color: #233D6E; padding: 6px 2px;`;
     
     const thV = (text, widthPct, isRightSide) => {
         const leftBorder = isRightSide ? 'border-left: 1.5pt solid #475569;' : '';
@@ -3784,7 +3784,7 @@ window.printRankingTable = function() {
 
     const thN = (text, widthPct, align, paddingLeft, isRightSide) => {
         const leftBorder = isRightSide ? 'border-left: 1.5pt solid #475569;' : '';
-        return `<th style="${thBase} ${leftBorder} width: ${widthPct}; height: 78px; text-align: ${align}; padding-left: ${paddingLeft};">${text}</th>`;
+        return `<th style="${thBase} ${leftBorder} width: ${widthPct}; height: 88px; text-align: ${align}; padding-left: ${paddingLeft}; padding-top: 6px; padding-bottom: 6px;">${text}</th>`;
     };
 
     if (type === "monthly") {
@@ -3940,9 +3940,9 @@ window.printRankingTable = function() {
           .header-right { text-align: center; padding-top: 4px; }
           .header-right p { margin: 0 0 3px 0; font-size: 11.5px; line-height: 1.5; font-family: 'Khmer OS Muol Light', 'Moul', serif; color: #0f172a; }
           
-          .title-box { text-align: center; margin: 4px 0 8px 0; }
-          .title-box h2 { margin: 0 0 3px 0; font-size: 14px; color: #1e3a8a; letter-spacing: 0.5px; font-family: 'Khmer OS Muol Light', 'Moul', serif; }
-          .title-box p { margin: 0; font-size: 11px; color: #dc2626; font-family: 'Khmer OS Muol Light', 'Moul', serif; }
+          .title-box { text-align: center; margin: 8px 0 14px 0; }
+          .title-box h2 { margin: 0 0 5px 0; font-size: 15px; color: #1e3a8a; letter-spacing: 0.5px; font-family: 'Khmer OS Muol Light', 'Moul', serif; }
+          .title-box p { margin: 4px 0 0 0; font-size: 11.5px; color: #dc2626; font-family: 'Khmer OS Muol Light', 'Moul', serif; }
           
           table.rnk-table { width: 100%; border-collapse: collapse !important; margin-bottom: 12px; text-align: center; table-layout: fixed; border: 1pt solid #475569; }
           
@@ -3952,8 +3952,8 @@ window.printRankingTable = function() {
           .sig-box-left { width: 42%; text-align: center; }
           .sig-box-right { width: 42%; text-align: center; }
           
-          .th-vert { height: 78px; vertical-align: middle; text-align: center; padding: 0; }
-          .div-vert { writing-mode: vertical-rl; transform: rotate(180deg); white-space: nowrap; height: 70px; display: flex; justify-content: center; align-items: center; text-align: center; margin: 0 auto; font-family: 'Khmer OS Muol Light', 'Moul', serif; font-size: 8px; font-weight: normal; color: #ffffff; padding: 2px 0; }
+          .th-vert { height: 88px; vertical-align: middle; text-align: center; padding: 4px 0; }
+          .div-vert { writing-mode: vertical-rl; transform: rotate(180deg); white-space: nowrap; height: 78px; display: flex; justify-content: center; align-items: center; text-align: center; margin: 0 auto; font-family: 'Khmer OS Muol Light', 'Moul', serif; font-size: 8.5px; font-weight: normal; color: #ffffff; padding: 4px 0; }
         </style>
       </head>
       <body>
@@ -4196,11 +4196,11 @@ function buildRankingsTable() {
 
     let colHtml = "";
     if (periodType === "monthly") {
-       colHtml = `<th class="p-3 w-12 font-moul text-[11px] md:text-xs text-slate-500 bg-slate-50">ល.រ</th><th class="p-3 w-64 text-left px-5 font-moul text-[11px] md:text-xs text-slate-800 sticky-col bg-slate-50">គោត្តនាម និងនាម</th><th class="p-3 w-14 text-[11px] md:text-xs font-moul text-slate-500 bg-slate-50">ភេទ</th><th class="p-3 w-28 bg-blue-50/80 text-blue-800 font-moul text-[11px] md:text-xs border-x border-white">មធ្យមភាគ</th><th class="p-3 w-28 bg-rose-50/80 text-rose-800 font-moul text-[11px] md:text-xs border-r border-white">ចំណាត់ថ្នាក់</th><th class="p-3 w-28 bg-emerald-50/80 text-emerald-800 font-moul text-[11px] md:text-xs">និទ្ទេស</th>`;
+       colHtml = `<th class="py-4 px-3 w-12 font-moul text-[11px] md:text-xs text-slate-500 bg-slate-50">ល.រ</th><th class="py-4 px-5 text-left font-moul text-[11px] md:text-xs text-slate-800 sticky-col bg-slate-50">គោត្តនាម និងនាម</th><th class="py-4 px-3 w-14 text-[11px] md:text-xs font-moul text-slate-500 bg-slate-50">ភេទ</th><th class="py-4 px-3 w-28 bg-blue-50/80 text-blue-800 font-moul text-[11px] md:text-xs border-x border-white">មធ្យមភាគ</th><th class="py-4 px-3 w-28 bg-rose-50/80 text-rose-800 font-moul text-[11px] md:text-xs border-r border-white">ចំណាត់ថ្នាក់</th><th class="py-4 px-3 w-28 bg-emerald-50/80 text-emerald-800 font-moul text-[11px] md:text-xs">និទ្ទេស</th>`;
     } else if (periodType === "semester") {
-       colHtml = `<th class="p-3 w-12 font-moul text-[11px] md:text-xs text-slate-500 bg-slate-50">ល.រ</th><th class="p-3 w-64 text-left px-5 font-moul text-[11px] md:text-xs text-slate-800 sticky-col bg-slate-50">គោត្តនាម និងនាម</th><th class="p-3 w-14 text-[11px] md:text-xs font-moul text-slate-500 bg-slate-50">ភេទ</th><th class="p-3 w-28 bg-orange-50/80 text-orange-800 font-moul text-[11px] md:text-xs border-l border-white">មធ្យមភាគប្រឡង</th><th class="p-3 w-28 bg-indigo-50/80 text-indigo-800 font-moul text-[11px] md:text-xs border-l border-white">មធ្យមភាគខែ</th><th class="p-3 w-32 bg-blue-50/80 text-blue-800 font-moul text-[11px] md:text-xs border-x border-white">មធ្យមភាគប្រចាំឆមាស</th><th class="p-3 w-28 bg-rose-50/80 text-rose-800 font-moul text-[11px] md:text-xs border-r border-white">ចំណាត់ថ្នាក់</th><th class="p-3 w-28 bg-emerald-50/80 text-emerald-800 font-moul text-[11px] md:text-xs">និទ្ទេស</th>`;
+       colHtml = `<th class="py-4 px-3 w-12 font-moul text-[11px] md:text-xs text-slate-500 bg-slate-50">ល.រ</th><th class="py-4 px-5 text-left font-moul text-[11px] md:text-xs text-slate-800 sticky-col bg-slate-50">គោត្តនាម និងនាម</th><th class="py-4 px-3 w-14 text-[11px] md:text-xs font-moul text-slate-500 bg-slate-50">ភេទ</th><th class="py-4 px-3 w-28 bg-orange-50/80 text-orange-800 font-moul text-[11px] md:text-xs border-l border-white">មធ្យមភាគប្រឡង</th><th class="py-4 px-3 w-28 bg-indigo-50/80 text-indigo-800 font-moul text-[11px] md:text-xs border-l border-white">មធ្យមភាគខែ</th><th class="py-4 px-3 w-32 bg-blue-50/80 text-blue-800 font-moul text-[11px] md:text-xs border-x border-white">មធ្យមភាគប្រចាំឆមាស</th><th class="py-4 px-3 w-28 bg-rose-50/80 text-rose-800 font-moul text-[11px] md:text-xs border-r border-white">ចំណាត់ថ្នាក់</th><th class="py-4 px-3 w-28 bg-emerald-50/80 text-emerald-800 font-moul text-[11px] md:text-xs">និទ្ទេស</th>`;
     } else {
-       colHtml = `<th class="p-3 w-12 font-moul text-[11px] md:text-xs text-slate-500 bg-slate-50">ល.រ</th><th class="p-3 w-64 text-left px-5 font-moul text-[11px] md:text-xs text-slate-800 sticky-col bg-slate-50">គោត្តនាម និងនាម</th><th class="p-3 w-14 text-[11px] md:text-xs font-moul text-slate-500 bg-slate-50">ភេទ</th><th class="p-3 w-28 bg-blue-50/80 text-blue-800 font-moul text-[11px] md:text-xs border-l border-white">មធ្យមភាគឆមាសទី១</th><th class="p-3 w-28 bg-indigo-50/80 text-indigo-800 font-moul text-[11px] md:text-xs border-l border-white">មធ្យមភាគឆមាសទី២</th><th class="p-3 w-32 bg-amber-50/80 text-amber-800 font-moul text-[11px] md:text-xs border-x border-white">មធ្យមភាគប្រចាំឆ្នាំ</th><th class="p-3 w-28 bg-rose-50/80 text-rose-800 font-moul text-[11px] md:text-xs border-r border-white">ចំណាត់ថ្នាក់</th><th class="p-3 w-28 bg-emerald-50/80 text-emerald-800 font-moul text-[11px] md:text-xs">និទ្ទេស</th>`;
+       colHtml = `<th class="py-4 px-3 w-12 font-moul text-[11px] md:text-xs text-slate-500 bg-slate-50">ល.រ</th><th class="py-4 px-5 text-left font-moul text-[11px] md:text-xs text-slate-800 sticky-col bg-slate-50">គោត្តនាម និងនាម</th><th class="py-4 px-3 w-14 text-[11px] md:text-xs font-moul text-slate-500 bg-slate-50">ភេទ</th><th class="py-4 px-3 w-28 bg-blue-50/80 text-blue-800 font-moul text-[11px] md:text-xs border-l border-white">មធ្យមភាគឆមាសទី១</th><th class="py-4 px-3 w-28 bg-indigo-50/80 text-indigo-800 font-moul text-[11px] md:text-xs border-l border-white">មធ្យមភាគឆមាសទី២</th><th class="py-4 px-3 w-32 bg-amber-50/80 text-amber-800 font-moul text-[11px] md:text-xs border-x border-white">មធ្យមភាគប្រចាំឆ្នាំ</th><th class="py-4 px-3 w-28 bg-rose-50/80 text-rose-800 font-moul text-[11px] md:text-xs border-r border-white">ចំណាត់ថ្នាក់</th><th class="py-4 px-3 w-28 bg-emerald-50/80 text-emerald-800 font-moul text-[11px] md:text-xs">និទ្ទេស</th>`;
     }
     th.innerHTML = `<tr class="shadow-sm tracking-wide bg-slate-50">${colHtml}</tr>`;
 
