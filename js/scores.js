@@ -590,20 +590,34 @@ window.calculateSectionScore = function(id, suffix, schoolLevel) {
     if (type === "semester") { 
         const autoMonthlyAvg = parseFloat(window.calculateDynamicMonthlyAverage(id, suffix));
         const monthlyAvgInput = document.getElementById(`monthly_avg_${id}`);
+        let monthlyVal = 0;
         if (monthlyAvgInput) {
             if (!monthlyAvgInput.value && autoMonthlyAvg > 0) monthlyAvgInput.value = autoMonthlyAvg.toFixed(2);
             const monthlyAvgStr = monthlyAvgInput.value.trim();
             if (monthlyAvgStr !== "" && !isNaN(parseFloat(monthlyAvgStr))) {
-                finalAvgToGrade = (examAvg + parseFloat(monthlyAvgStr)) / 2;
+                monthlyVal = parseFloat(monthlyAvgStr);
             }
+        } else if (autoMonthlyAvg > 0) {
+            monthlyVal = autoMonthlyAvg;
         }
+
+        if (divisorCount > 0 && monthlyVal > 0) {
+            finalAvgToGrade = (examAvg + monthlyVal) / 2;
+        } else if (divisorCount > 0) {
+            finalAvgToGrade = examAvg;
+        } else if (monthlyVal > 0) {
+            finalAvgToGrade = monthlyVal;
+        } else {
+            finalAvgToGrade = 0;
+        }
+
         const totExEl = document.getElementById(`total_exam_${id}`);
         if (totExEl) totExEl.textContent = divisorCount > 0 ? totalScore.toFixed(2) : '';
         const avgExEl = document.getElementById(`avg_exam_${id}`);
         if (avgExEl) avgExEl.textContent = divisorCount > 0 ? examAvg.toFixed(2) : '';
         const avgDomEl = document.getElementById(`avg_${id}`);
         if (avgDomEl) {
-            avgDomEl.textContent = divisorCount > 0 ? finalAvgToGrade.toFixed(2) : '';
+            avgDomEl.textContent = finalAvgToGrade > 0 ? finalAvgToGrade.toFixed(2) : '';
             avgDomEl.className = `p-1 border-r border-slate-300 print:border-black text-center font-black bg-emerald-50 font-mono text-[14px] ${finalAvgToGrade >= 5 ? 'text-emerald-700' : 'text-rose-600'}`;
         }
     } else if (type === "annual") {
@@ -907,6 +921,18 @@ window.updateRanksInMemory = function() {
                 }
                 if (monthlyAvg <= 0 && typeof window.calculateDynamicMonthlyAverage === 'function') {
                     monthlyAvg = parseFloat(window.calculateDynamicMonthlyAverage(s.id, semSuffix)) || 0;
+                }
+                if (avg <= 0) {
+                    if (examAvg > 0 && monthlyAvg > 0) {
+                        avg = parseFloat(((examAvg + monthlyAvg) / 2).toFixed(2));
+                        hasScore = true;
+                    } else if (examAvg > 0) {
+                        avg = examAvg;
+                        hasScore = true;
+                    } else if (monthlyAvg > 0) {
+                        avg = monthlyAvg;
+                        hasScore = true;
+                    }
                 }
             }
         } else if (type === "annual") {
@@ -3717,7 +3743,20 @@ window.printRankingTable = function() {
     let lun = document.getElementById('global_lun_input')?.value || localStorage.getItem('rc_lunar_date') || localStorage.getItem('rep_lunar_date') || "ថ្ងៃ....................ខែ..................ឆ្នាំ...............ព.ស.២៥៧០";
     const lunarDateStr = isLunarChecked ? lun : "";
 
-    let stus = [...window.rankingsDataList].sort((a, b) => a.rank - b.rank);
+    let stus = [...window.rankingsDataList].sort((a, b) => {
+        const rankA = (typeof a.rank === 'number' && !isNaN(a.rank) && a.rank > 0) ? a.rank : 
+                      (!isNaN(parseInt(a.rank)) && parseInt(a.rank) > 0 ? parseInt(a.rank) : 999999);
+        const rankB = (typeof b.rank === 'number' && !isNaN(b.rank) && b.rank > 0) ? b.rank : 
+                      (!isNaN(parseInt(b.rank)) && parseInt(b.rank) > 0 ? parseInt(b.rank) : 999999);
+        if (rankA !== rankB) return rankA - rankB;
+        const avgA = (typeof a.avg === 'number' && !isNaN(a.avg)) ? a.avg : 0;
+        const avgB = (typeof b.avg === 'number' && !isNaN(b.avg)) ? b.avg : 0;
+        if (avgB !== avgA) return avgB - avgA;
+        const moA = (typeof a.monthly_avg === 'number' && !isNaN(a.monthly_avg)) ? a.monthly_avg : 0;
+        const moB = (typeof b.monthly_avg === 'number' && !isNaN(b.monthly_avg)) ? b.monthly_avg : 0;
+        if (moB !== moA) return moB - moA;
+        return String(a.name || '').localeCompare(String(b.name || ''), 'km');
+    });
     const half = Math.ceil(stus.length / 2);
 
     let totalStus = stus.length;
@@ -3736,7 +3775,7 @@ window.printRankingTable = function() {
     let failFPct = femaleStus > 0 ? ((failedF / femaleStus) * 100).toFixed(2) : "0.00";
 
     let headerHtml = '';
-    const thBase = `border: 1pt solid #cbd5e1; text-align: center; vertical-align: middle; font-family: 'Khmer OS Muol Light', 'Moul', serif; font-size: 9px; font-weight: normal; color: #ffffff; background-color: #233D6E; padding: 2px 1px;`;
+    const thBase = `border: 1pt solid #cbd5e1; text-align: center; vertical-align: middle; font-family: 'Khmer OS Muol Light', 'Moul', serif; font-size: 9px; font-weight: normal; color: #ffffff; background-color: #233D6E; padding: 3px 1px;`;
     
     const thV = (text, widthPct, isRightSide) => {
         const leftBorder = isRightSide ? 'border-left: 1.5pt solid #475569;' : '';
@@ -3745,7 +3784,7 @@ window.printRankingTable = function() {
 
     const thN = (text, widthPct, align, paddingLeft, isRightSide) => {
         const leftBorder = isRightSide ? 'border-left: 1.5pt solid #475569;' : '';
-        return `<th style="${thBase} ${leftBorder} width: ${widthPct}; text-align: ${align}; padding-left: ${paddingLeft};">${text}</th>`;
+        return `<th style="${thBase} ${leftBorder} width: ${widthPct}; height: 68px; text-align: ${align}; padding-left: ${paddingLeft};">${text}</th>`;
     };
 
     if (type === "monthly") {
@@ -3913,8 +3952,8 @@ window.printRankingTable = function() {
           .sig-box-left { width: 42%; text-align: center; }
           .sig-box-right { width: 42%; text-align: center; }
           
-          .th-vert { height: 50px; vertical-align: middle; text-align: center; padding: 0; }
-          .div-vert { writing-mode: vertical-rl; transform: rotate(180deg); white-space: nowrap; height: 46px; display: flex; justify-content: center; align-items: center; text-align: center; margin: 0 auto; font-family: 'Khmer OS Muol Light', 'Moul', serif; font-size: 8.5px; font-weight: normal; color: #ffffff; }
+          .th-vert { height: 68px; vertical-align: middle; text-align: center; padding: 0; }
+          .div-vert { writing-mode: vertical-rl; transform: rotate(180deg); white-space: nowrap; height: 58px; display: flex; justify-content: center; align-items: center; text-align: center; margin: 0 auto; font-family: 'Khmer OS Muol Light', 'Moul', serif; font-size: 8.5px; font-weight: normal; color: #ffffff; padding: 2px 0; }
         </style>
       </head>
       <body>
@@ -3982,8 +4021,7 @@ window.printRankingTable = function() {
             <div class="bottom-sig-container">
                 <div class="sig-box-left">
                     <p style="margin: 0 0 4px 0; font-family: 'Siemreap', sans-serif;">បានឃើញ និងឯកភាព</p>
-                    <p style="margin: 0 0 50px 0; font-family: 'Khmer OS Muol Light', 'Moul', serif; font-size: 11.5px;">នាយិកាសាលា</p>
-                    <p style="margin: 0; font-family: 'Khmer OS Muol Light', 'Moul', serif; font-size: 12px; color: #0f172a;">${principalName}</p>
+                    <p style="margin: 0 0 65px 0; font-family: 'Khmer OS Muol Light', 'Moul', serif; font-size: 11.5px;">នាយិកាសាលា</p>
                 </div>
                 <div class="sig-box-right">
                     ${lunarDateStr ? `<p style="margin: 0 0 2px 0; font-size: 10.5px; color: #475569;">${lunarDateStr}</p>` : ''}

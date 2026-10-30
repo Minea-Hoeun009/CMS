@@ -4567,12 +4567,12 @@ window.renderAcademicResultsReport = function(container, targetGrade, targetRoom
                                     <th class="border border-slate-300 p-1.5 w-10 text-center text-white" style="background-color: #233D6E;">ល.រ</th>
                                     <th class="border border-slate-300 p-1.5 text-left px-3 text-white" style="background-color: #233D6E;">គោត្តនាម និងនាម</th>
                                     <th class="border border-slate-300 p-1.5 w-10 text-center text-white" style="background-color: #233D6E;">ភេទ</th>
-                                    <th class="border border-slate-300 p-1 w-14 text-center align-middle text-white" style="height: 50px; background-color: #233D6E;">
-                                        <div style="writing-mode: vertical-rl; transform: rotate(180deg); white-space: nowrap; margin: 0 auto; display: inline-block; font-size: 8.5px;">មធ្យមភាគ</div>
+                                    <th class="border border-slate-300 p-1 w-14 text-center align-middle text-white" style="height: 68px; background-color: #233D6E;">
+                                        <div style="writing-mode: vertical-rl; transform: rotate(180deg); white-space: nowrap; margin: 0 auto; display: inline-block; font-size: 8.5px; height: 58px; display: inline-flex; align-items: center; justify-content: center;">មធ្យមភាគ</div>
                                         <span class="hidden">ពិន្ទុសរុប</span>
                                     </th>
-                                    <th class="border border-slate-300 p-1 w-14 text-center align-middle text-white" style="height: 50px; background-color: #233D6E;">
-                                        <div style="writing-mode: vertical-rl; transform: rotate(180deg); white-space: nowrap; margin: 0 auto; display: inline-block; font-size: 8.5px;">ចំណាត់ថ្នាក់</div>
+                                    <th class="border border-slate-300 p-1 w-14 text-center align-middle text-white" style="height: 68px; background-color: #233D6E;">
+                                        <div style="writing-mode: vertical-rl; transform: rotate(180deg); white-space: nowrap; margin: 0 auto; display: inline-block; font-size: 8.5px; height: 58px; display: inline-flex; align-items: center; justify-content: center;">ចំណាត់ថ្នាក់</div>
                                     </th>
                                 </tr>
                             </thead>
@@ -4588,11 +4588,11 @@ window.renderAcademicResultsReport = function(container, targetGrade, targetRoom
                                     <th class="border border-slate-300 p-1.5 w-10 text-center text-white" style="background-color: #233D6E;">ល.រ</th>
                                     <th class="border border-slate-300 p-1.5 text-left px-3 text-white" style="background-color: #233D6E;">គោត្តនាម និងនាម</th>
                                     <th class="border border-slate-300 p-1.5 w-10 text-center text-white" style="background-color: #233D6E;">ភេទ</th>
-                                    <th class="border border-slate-300 p-1 w-14 text-center align-middle text-white" style="height: 50px; background-color: #233D6E;">
-                                        <div style="writing-mode: vertical-rl; transform: rotate(180deg); white-space: nowrap; margin: 0 auto; display: inline-block; font-size: 8.5px;">មធ្យមភាគ</div>
+                                    <th class="border border-slate-300 p-1 w-14 text-center align-middle text-white" style="height: 68px; background-color: #233D6E;">
+                                        <div style="writing-mode: vertical-rl; transform: rotate(180deg); white-space: nowrap; margin: 0 auto; display: inline-block; font-size: 8.5px; height: 58px; display: inline-flex; align-items: center; justify-content: center;">មធ្យមភាគ</div>
                                     </th>
-                                    <th class="border border-slate-300 p-1 w-14 text-center align-middle text-white" style="height: 50px; background-color: #233D6E;">
-                                        <div style="writing-mode: vertical-rl; transform: rotate(180deg); white-space: nowrap; margin: 0 auto; display: inline-block; font-size: 8.5px;">ចំណាត់ថ្នាក់</div>
+                                    <th class="border border-slate-300 p-1 w-14 text-center align-middle text-white" style="height: 68px; background-color: #233D6E;">
+                                        <div style="writing-mode: vertical-rl; transform: rotate(180deg); white-space: nowrap; margin: 0 auto; display: inline-block; font-size: 8.5px; height: 58px; display: inline-flex; align-items: center; justify-content: center;">ចំណាត់ថ្នាក់</div>
                                     </th>
                                 </tr>
                             </thead>
@@ -4881,20 +4881,20 @@ window.renderAcademicResultsReport = function(container, targetGrade, targetRoom
                                     <th class="border border-slate-300 p-1.5 w-7 text-center text-white" style="background-color: #233D6E;">ល.រ</th>
                                     <th class="border border-slate-300 p-1.5 text-left px-2 text-white" style="background-color: #233D6E;">គោត្តនាម និងនាម</th>
                                     <th class="border border-slate-300 p-1.5 w-6 text-center text-white" style="background-color: #233D6E;">ភេទ</th>
-                                    <th class="border border-slate-300 p-1 w-10 text-center align-middle text-white" style="height: 50px; background-color: #233D6E;">
-                                        <div style="writing-mode: vertical-rl; transform: rotate(180deg); white-space: nowrap; margin: 0 auto; display: inline-block; font-size: 8.5px;">មធ្យមប្រឡង</div>
+                                    <th class="border border-slate-300 p-1 w-10 text-center align-middle text-white" style="height: 68px; background-color: #233D6E;">
+                                        <div style="writing-mode: vertical-rl; transform: rotate(180deg); white-space: nowrap; margin: 0 auto; display: inline-block; font-size: 8.5px; height: 58px; display: inline-flex; align-items: center; justify-content: center;">មធ្យមប្រឡង</div>
                                         <span class="hidden">មធ្យមភាគប្រឡង ម.ប្រឡង</span>
                                     </th>
-                                    <th class="border border-slate-300 p-1 w-10 text-center align-middle text-white" style="height: 50px; background-color: #233D6E;">
-                                        <div style="writing-mode: vertical-rl; transform: rotate(180deg); white-space: nowrap; margin: 0 auto; display: inline-block; font-size: 8.5px;">មធ្យមខែ</div>
+                                    <th class="border border-slate-300 p-1 w-10 text-center align-middle text-white" style="height: 68px; background-color: #233D6E;">
+                                        <div style="writing-mode: vertical-rl; transform: rotate(180deg); white-space: nowrap; margin: 0 auto; display: inline-block; font-size: 8.5px; height: 58px; display: inline-flex; align-items: center; justify-content: center;">មធ្យមខែ</div>
                                         <span class="hidden">មធ្យមភាគខែ</span>
                                     </th>
-                                    <th class="border border-slate-300 p-1 w-10 text-center align-middle text-white" style="height: 50px; background-color: #233D6E;">
-                                        <div style="writing-mode: vertical-rl; transform: rotate(180deg); white-space: nowrap; margin: 0 auto; display: inline-block; font-size: 8.5px;">មធ្យមឆមាស</div>
+                                    <th class="border border-slate-300 p-1 w-10 text-center align-middle text-white" style="height: 68px; background-color: #233D6E;">
+                                        <div style="writing-mode: vertical-rl; transform: rotate(180deg); white-space: nowrap; margin: 0 auto; display: inline-block; font-size: 8.5px; height: 58px; display: inline-flex; align-items: center; justify-content: center;">មធ្យមឆមាស</div>
                                         <span class="hidden">មធ្យមភាគប្រចាំឆមាស មធ្យមភាគឆមាស ម.ប្រចាំឆមាស</span>
                                     </th>
-                                    <th class="border border-slate-300 p-1 w-9 text-center align-middle text-white" style="height: 50px; background-color: #233D6E;">
-                                        <div style="writing-mode: vertical-rl; transform: rotate(180deg); white-space: nowrap; margin: 0 auto; display: inline-block; font-size: 8.5px;">ចំណាត់ថ្នាក់</div>
+                                    <th class="border border-slate-300 p-1 w-9 text-center align-middle text-white" style="height: 68px; background-color: #233D6E;">
+                                        <div style="writing-mode: vertical-rl; transform: rotate(180deg); white-space: nowrap; margin: 0 auto; display: inline-block; font-size: 8.5px; height: 58px; display: inline-flex; align-items: center; justify-content: center;">ចំណាត់ថ្នាក់</div>
                                     </th>
                                 </tr>
                             </thead>
@@ -4910,17 +4910,17 @@ window.renderAcademicResultsReport = function(container, targetGrade, targetRoom
                                     <th class="border border-slate-300 p-1.5 w-7 text-center text-white" style="background-color: #233D6E;">ល.រ</th>
                                     <th class="border border-slate-300 p-1.5 text-left px-2 text-white" style="background-color: #233D6E;">គោត្តនាម និងនាម</th>
                                     <th class="border border-slate-300 p-1.5 w-6 text-center text-white" style="background-color: #233D6E;">ភេទ</th>
-                                    <th class="border border-slate-300 p-1 w-10 text-center align-middle text-white" style="height: 50px; background-color: #233D6E;">
-                                        <div style="writing-mode: vertical-rl; transform: rotate(180deg); white-space: nowrap; margin: 0 auto; display: inline-block; font-size: 8.5px;">មធ្យមប្រឡង</div>
+                                    <th class="border border-slate-300 p-1 w-10 text-center align-middle text-white" style="height: 68px; background-color: #233D6E;">
+                                        <div style="writing-mode: vertical-rl; transform: rotate(180deg); white-space: nowrap; margin: 0 auto; display: inline-block; font-size: 8.5px; height: 58px; display: inline-flex; align-items: center; justify-content: center;">មធ្យមប្រឡង</div>
                                     </th>
-                                    <th class="border border-slate-300 p-1 w-10 text-center align-middle text-white" style="height: 50px; background-color: #233D6E;">
-                                        <div style="writing-mode: vertical-rl; transform: rotate(180deg); white-space: nowrap; margin: 0 auto; display: inline-block; font-size: 8.5px;">មធ្យមខែ</div>
+                                    <th class="border border-slate-300 p-1 w-10 text-center align-middle text-white" style="height: 68px; background-color: #233D6E;">
+                                        <div style="writing-mode: vertical-rl; transform: rotate(180deg); white-space: nowrap; margin: 0 auto; display: inline-block; font-size: 8.5px; height: 58px; display: inline-flex; align-items: center; justify-content: center;">មធ្យមខែ</div>
                                     </th>
-                                    <th class="border border-slate-300 p-1 w-10 text-center align-middle text-white" style="height: 50px; background-color: #233D6E;">
-                                        <div style="writing-mode: vertical-rl; transform: rotate(180deg); white-space: nowrap; margin: 0 auto; display: inline-block; font-size: 8.5px;">មធ្យមឆមាស</div>
+                                    <th class="border border-slate-300 p-1 w-10 text-center align-middle text-white" style="height: 68px; background-color: #233D6E;">
+                                        <div style="writing-mode: vertical-rl; transform: rotate(180deg); white-space: nowrap; margin: 0 auto; display: inline-block; font-size: 8.5px; height: 58px; display: inline-flex; align-items: center; justify-content: center;">មធ្យមឆមាស</div>
                                     </th>
-                                    <th class="border border-slate-300 p-1 w-9 text-center align-middle text-white" style="height: 50px; background-color: #233D6E;">
-                                        <div style="writing-mode: vertical-rl; transform: rotate(180deg); white-space: nowrap; margin: 0 auto; display: inline-block; font-size: 8.5px;">ចំណាត់ថ្នាក់</div>
+                                    <th class="border border-slate-300 p-1 w-9 text-center align-middle text-white" style="height: 68px; background-color: #233D6E;">
+                                        <div style="writing-mode: vertical-rl; transform: rotate(180deg); white-space: nowrap; margin: 0 auto; display: inline-block; font-size: 8.5px; height: 58px; display: inline-flex; align-items: center; justify-content: center;">ចំណាត់ថ្នាក់</div>
                                     </th>
                                 </tr>
                             </thead>
@@ -5216,17 +5216,17 @@ window.renderAcademicResultsReport = function(container, targetGrade, targetRoom
                                 <th class="border border-slate-300 p-1.5 w-7 text-center text-white" style="background-color: #233D6E;">ល.រ</th>
                                 <th class="border border-slate-300 p-1.5 text-left px-2 text-white" style="background-color: #233D6E;">គោត្តនាម និងនាម</th>
                                 <th class="border border-slate-300 p-1.5 w-6 text-center text-white" style="background-color: #233D6E;">ភេទ</th>
-                                <th class="border border-slate-300 p-1 w-10 text-center align-middle text-white" style="height: 50px; background-color: #233D6E;">
-                                    <div style="writing-mode: vertical-rl; transform: rotate(180deg); white-space: nowrap; margin: 0 auto; display: inline-block; font-size: 8.5px;">មធ្យមឆមាសទី១</div>
+                                <th class="border border-slate-300 p-1 w-10 text-center align-middle text-white" style="height: 68px; background-color: #233D6E;">
+                                    <div style="writing-mode: vertical-rl; transform: rotate(180deg); white-space: nowrap; margin: 0 auto; display: inline-block; font-size: 8.5px; height: 58px; display: inline-flex; align-items: center; justify-content: center;">មធ្យមឆមាសទី១</div>
                                 </th>
-                                <th class="border border-slate-300 p-1 w-10 text-center align-middle text-white" style="height: 50px; background-color: #233D6E;">
-                                    <div style="writing-mode: vertical-rl; transform: rotate(180deg); white-space: nowrap; margin: 0 auto; display: inline-block; font-size: 8.5px;">មធ្យមឆមាសទី២</div>
+                                <th class="border border-slate-300 p-1 w-10 text-center align-middle text-white" style="height: 68px; background-color: #233D6E;">
+                                    <div style="writing-mode: vertical-rl; transform: rotate(180deg); white-space: nowrap; margin: 0 auto; display: inline-block; font-size: 8.5px; height: 58px; display: inline-flex; align-items: center; justify-content: center;">មធ្យមឆមាសទី២</div>
                                 </th>
-                                <th class="border border-slate-300 p-1 w-10 text-center align-middle text-white" style="height: 50px; background-color: #233D6E;">
-                                    <div style="writing-mode: vertical-rl; transform: rotate(180deg); white-space: nowrap; margin: 0 auto; display: inline-block; font-size: 8.5px;">មធ្យមប្រចាំឆ្នាំ</div>
+                                <th class="border border-slate-300 p-1 w-10 text-center align-middle text-white" style="height: 68px; background-color: #233D6E;">
+                                    <div style="writing-mode: vertical-rl; transform: rotate(180deg); white-space: nowrap; margin: 0 auto; display: inline-block; font-size: 8.5px; height: 58px; display: inline-flex; align-items: center; justify-content: center;">មធ្យមប្រចាំឆ្នាំ</div>
                                 </th>
-                                <th class="border border-slate-300 p-1 w-9 text-center align-middle text-white" style="height: 50px; background-color: #233D6E;">
-                                    <div style="writing-mode: vertical-rl; transform: rotate(180deg); white-space: nowrap; margin: 0 auto; display: inline-block; font-size: 8.5px;">ចំណាត់ថ្នាក់</div>
+                                <th class="border border-slate-300 p-1 w-9 text-center align-middle text-white" style="height: 68px; background-color: #233D6E;">
+                                    <div style="writing-mode: vertical-rl; transform: rotate(180deg); white-space: nowrap; margin: 0 auto; display: inline-block; font-size: 8.5px; height: 58px; display: inline-flex; align-items: center; justify-content: center;">ចំណាត់ថ្នាក់</div>
                                 </th>
                             </tr>
                         </thead>
@@ -5242,17 +5242,17 @@ window.renderAcademicResultsReport = function(container, targetGrade, targetRoom
                                 <th class="border border-slate-300 p-1.5 w-7 text-center text-white" style="background-color: #233D6E;">ល.រ</th>
                                 <th class="border border-slate-300 p-1.5 text-left px-2 text-white" style="background-color: #233D6E;">គោត្តនាម និងនាម</th>
                                 <th class="border border-slate-300 p-1.5 w-6 text-center text-white" style="background-color: #233D6E;">ភេទ</th>
-                                <th class="border border-slate-300 p-1 w-10 text-center align-middle text-white" style="height: 50px; background-color: #233D6E;">
-                                    <div style="writing-mode: vertical-rl; transform: rotate(180deg); white-space: nowrap; margin: 0 auto; display: inline-block; font-size: 8.5px;">មធ្យមឆមាសទី១</div>
+                                <th class="border border-slate-300 p-1 w-10 text-center align-middle text-white" style="height: 68px; background-color: #233D6E;">
+                                    <div style="writing-mode: vertical-rl; transform: rotate(180deg); white-space: nowrap; margin: 0 auto; display: inline-block; font-size: 8.5px; height: 58px; display: inline-flex; align-items: center; justify-content: center;">មធ្យមឆមាសទី១</div>
                                 </th>
-                                <th class="border border-slate-300 p-1 w-10 text-center align-middle text-white" style="height: 50px; background-color: #233D6E;">
-                                    <div style="writing-mode: vertical-rl; transform: rotate(180deg); white-space: nowrap; margin: 0 auto; display: inline-block; font-size: 8.5px;">មធ្យមឆមាសទី២</div>
+                                <th class="border border-slate-300 p-1 w-10 text-center align-middle text-white" style="height: 68px; background-color: #233D6E;">
+                                    <div style="writing-mode: vertical-rl; transform: rotate(180deg); white-space: nowrap; margin: 0 auto; display: inline-block; font-size: 8.5px; height: 58px; display: inline-flex; align-items: center; justify-content: center;">មធ្យមឆមាសទី២</div>
                                 </th>
-                                <th class="border border-slate-300 p-1 w-10 text-center align-middle text-white" style="height: 50px; background-color: #233D6E;">
-                                    <div style="writing-mode: vertical-rl; transform: rotate(180deg); white-space: nowrap; margin: 0 auto; display: inline-block; font-size: 8.5px;">មធ្យមប្រចាំឆ្នាំ</div>
+                                <th class="border border-slate-300 p-1 w-10 text-center align-middle text-white" style="height: 68px; background-color: #233D6E;">
+                                    <div style="writing-mode: vertical-rl; transform: rotate(180deg); white-space: nowrap; margin: 0 auto; display: inline-block; font-size: 8.5px; height: 58px; display: inline-flex; align-items: center; justify-content: center;">មធ្យមប្រចាំឆ្នាំ</div>
                                 </th>
-                                <th class="border border-slate-300 p-1 w-9 text-center align-middle text-white" style="height: 50px; background-color: #233D6E;">
-                                    <div style="writing-mode: vertical-rl; transform: rotate(180deg); white-space: nowrap; margin: 0 auto; display: inline-block; font-size: 8.5px;">ចំណាត់ថ្នាក់</div>
+                                <th class="border border-slate-300 p-1 w-9 text-center align-middle text-white" style="height: 68px; background-color: #233D6E;">
+                                    <div style="writing-mode: vertical-rl; transform: rotate(180deg); white-space: nowrap; margin: 0 auto; display: inline-block; font-size: 8.5px; height: 58px; display: inline-flex; align-items: center; justify-content: center;">ចំណាត់ថ្នាក់</div>
                                 </th>
                             </tr>
                         </thead>
