@@ -5337,7 +5337,6 @@ window.renderClassInventoryReport = function(container, targetGrade, targetRoom)
                     <div class="text-left leading-relaxed pt-3.5 sm:pt-4">
                         <p class="font-moul text-slate-900 text-[11px] mb-0.5">ការិយាល័យ អប់រំ យុវជននិងកីឡានៃរដ្ឋបាលស្រុក ${districtName}</p>
                         <p class="font-moul text-slate-900 text-[11px]">${schoolName}</p>
-                        <p class="text-slate-600 mt-1 font-bold text-[10.5px]">ថ្នាក់ទី ៖ <span class="text-indigo-700 font-bold">${gradeFull}</span></p>
                     </div>
                     <div class="text-center pt-0 -mt-1">
                         <p class="font-moul text-slate-900 text-[12px] mb-0.5">ព្រះរាជាណាចក្រកម្ពុជា</p>
@@ -5508,7 +5507,6 @@ window.renderInternalRulesReport = function(container, targetGrade, targetRoom) 
                     <div class="text-left leading-relaxed pt-3.5 sm:pt-4">
                         <p class="font-moul text-slate-900 text-[11px] mb-0.5">ការិយាល័យ អប់រំ យុវជននិងកីឡានៃរដ្ឋបាលស្រុក ${districtName}</p>
                         <p class="font-moul text-slate-900 text-[11px]">${schoolName}</p>
-                        <p class="text-slate-600 mt-1 font-bold text-[10.5px]">ថ្នាក់ទី ៖ <span class="text-rose-700 font-bold">${gradeFull}</span></p>
                     </div>
                     <div class="text-center pt-0 -mt-1">
                         <p class="font-moul text-slate-900 text-[12px] mb-0.5">ព្រះរាជាណាចក្រកម្ពុជា</p>
@@ -5646,7 +5644,6 @@ window.renderClassPrinciplesReport = function(container, targetGrade, targetRoom
                     <div class="text-left leading-relaxed pt-3.5 sm:pt-4">
                         <p class="font-moul text-slate-900 text-[11px] mb-0.5">ការិយាល័យ អប់រំ យុវជននិងកីឡានៃរដ្ឋបាលស្រុក ${districtName}</p>
                         <p class="font-moul text-slate-900 text-[11px]">${schoolName}</p>
-                        <p class="text-slate-600 mt-1 font-bold text-[10.5px]">ថ្នាក់ទី ៖ <span class="text-sky-700 font-bold">${gradeFull}</span></p>
                     </div>
                     <div class="text-center pt-0 -mt-1">
                         <p class="font-moul text-slate-900 text-[12px] mb-0.5">ព្រះរាជាណាចក្រកម្ពុជា</p>
@@ -5828,7 +5825,6 @@ window.renderCleaningScheduleReport = function(container, targetGrade, targetRoo
                     <div class="text-left leading-relaxed pt-3.5 sm:pt-4">
                         <p class="font-moul text-slate-900 text-[11px] mb-0.5">ការិយាល័យ អប់រំ យុវជននិងកីឡានៃរដ្ឋបាលស្រុក ${districtName}</p>
                         <p class="font-moul text-slate-900 text-[11px]">${schoolName}</p>
-                        <p class="text-slate-600 mt-1 font-bold text-[10.5px]">ថ្នាក់ទី ៖ <span class="text-emerald-700 font-bold">${gradeFull}</span></p>
                     </div>
                     <div class="text-center pt-0 -mt-1">
                         <p class="font-moul text-slate-900 text-[12px] mb-0.5">ព្រះរាជាណាចក្រកម្ពុជា</p>
@@ -5980,7 +5976,6 @@ window.renderBranchCommitteeReport = function(container, targetGrade, targetRoom
                     <div class="text-left leading-relaxed pt-3.5 sm:pt-4">
                         <p class="font-moul text-slate-900 text-[11px] mb-0.5">ការិយាល័យ អប់រំ យុវជននិងកីឡានៃរដ្ឋបាលស្រុក ${districtName}</p>
                         <p class="font-moul text-slate-900 text-[11px]">${schoolName}</p>
-                        <p class="text-slate-600 mt-1 font-bold text-[10.5px]">ថ្នាក់ទី ៖ <span class="text-purple-700 font-bold">${gradeFull}</span></p>
                     </div>
                     <div class="text-center pt-0 -mt-1">
                         <p class="font-moul text-slate-900 text-[12px] mb-0.5">ព្រះរាជាណាចក្រកម្ពុជា</p>
