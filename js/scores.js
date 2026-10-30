@@ -3784,7 +3784,7 @@ window.printRankingTable = function() {
 
     const thN = (text, widthPct, align, paddingLeft, isRightSide) => {
         const leftBorder = isRightSide ? 'border-left: 1.5pt solid #475569;' : '';
-        return `<th style="${thBase} ${leftBorder} width: ${widthPct}; height: 68px; text-align: ${align}; padding-left: ${paddingLeft};">${text}</th>`;
+        return `<th style="${thBase} ${leftBorder} width: ${widthPct}; height: 78px; text-align: ${align}; padding-left: ${paddingLeft};">${text}</th>`;
     };
 
     if (type === "monthly") {
@@ -3805,16 +3805,16 @@ window.printRankingTable = function() {
             ${thN('ល.រ', '4.5%', 'center', '0', false)}
             ${thN('គោត្តនាម និងនាម', '20.5%', 'left', '6px', false)}
             ${thN('ភេទ', '4.5%', 'center', '0', false)}
-            ${thV('មធ្យមប្រឡង', '5%', false)}
-            ${thV('មធ្យមខែ', '5%', false)}
-            ${thV('មធ្យមឆមាស', '5.5%', false)}
+            ${thV('មធ្យមភាគប្រឡង', '5%', false)}
+            ${thV('មធ្យមភាគខែ', '5%', false)}
+            ${thV('មធ្យមភាគប្រចាំឆមាស', '5.5%', false)}
             ${thV('ចំណាត់ថ្នាក់', '5%', false)}
             ${thN('ល.រ', '4.5%', 'center', '0', true)}
             ${thN('គោត្តនាម និងនាម', '20.5%', 'left', '6px', false)}
             ${thN('ភេទ', '4.5%', 'center', '0', false)}
-            ${thV('មធ្យមប្រឡង', '5%', false)}
-            ${thV('មធ្យមខែ', '5%', false)}
-            ${thV('មធ្យមឆមាស', '5.5%', false)}
+            ${thV('មធ្យមភាគប្រឡង', '5%', false)}
+            ${thV('មធ្យមភាគខែ', '5%', false)}
+            ${thV('មធ្យមភាគប្រចាំឆមាស', '5.5%', false)}
             ${thV('ចំណាត់ថ្នាក់', '5%', false)}
         </tr>`;
     } else {
@@ -3822,16 +3822,16 @@ window.printRankingTable = function() {
             ${thN('ល.រ', '4.5%', 'center', '0', false)}
             ${thN('គោត្តនាម និងនាម', '20.5%', 'left', '6px', false)}
             ${thN('ភេទ', '4.5%', 'center', '0', false)}
-            ${thV('មធ្យមឆមាសទី១', '5%', false)}
-            ${thV('មធ្យមឆមាសទី២', '5%', false)}
-            ${thV('មធ្យមប្រចាំឆ្នាំ', '5.5%', false)}
+            ${thV('មធ្យមភាគឆមាសទី១', '5%', false)}
+            ${thV('មធ្យមភាគឆមាសទី២', '5%', false)}
+            ${thV('មធ្យមភាគប្រចាំឆ្នាំ', '5.5%', false)}
             ${thV('ចំណាត់ថ្នាក់', '5%', false)}
             ${thN('ល.រ', '4.5%', 'center', '0', true)}
             ${thN('គោត្តនាម និងនាម', '20.5%', 'left', '6px', false)}
             ${thN('ភេទ', '4.5%', 'center', '0', false)}
-            ${thV('មធ្យមឆមាសទី១', '5%', false)}
-            ${thV('មធ្យមឆមាសទី២', '5%', false)}
-            ${thV('មធ្យមប្រចាំឆ្នាំ', '5.5%', false)}
+            ${thV('មធ្យមភាគឆមាសទី១', '5%', false)}
+            ${thV('មធ្យមភាគឆមាសទី២', '5%', false)}
+            ${thV('មធ្យមភាគប្រចាំឆ្នាំ', '5.5%', false)}
             ${thV('ចំណាត់ថ្នាក់', '5%', false)}
         </tr>`;
     }
@@ -3952,8 +3952,8 @@ window.printRankingTable = function() {
           .sig-box-left { width: 42%; text-align: center; }
           .sig-box-right { width: 42%; text-align: center; }
           
-          .th-vert { height: 68px; vertical-align: middle; text-align: center; padding: 0; }
-          .div-vert { writing-mode: vertical-rl; transform: rotate(180deg); white-space: nowrap; height: 58px; display: flex; justify-content: center; align-items: center; text-align: center; margin: 0 auto; font-family: 'Khmer OS Muol Light', 'Moul', serif; font-size: 8.5px; font-weight: normal; color: #ffffff; padding: 2px 0; }
+          .th-vert { height: 78px; vertical-align: middle; text-align: center; padding: 0; }
+          .div-vert { writing-mode: vertical-rl; transform: rotate(180deg); white-space: nowrap; height: 70px; display: flex; justify-content: center; align-items: center; text-align: center; margin: 0 auto; font-family: 'Khmer OS Muol Light', 'Moul', serif; font-size: 8px; font-weight: normal; color: #ffffff; padding: 2px 0; }
         </style>
       </head>
       <body>
@@ -4198,9 +4198,9 @@ function buildRankingsTable() {
     if (periodType === "monthly") {
        colHtml = `<th class="p-3 w-12 font-moul text-[11px] md:text-xs text-slate-500 bg-slate-50">ល.រ</th><th class="p-3 w-64 text-left px-5 font-moul text-[11px] md:text-xs text-slate-800 sticky-col bg-slate-50">គោត្តនាម និងនាម</th><th class="p-3 w-14 text-[11px] md:text-xs font-moul text-slate-500 bg-slate-50">ភេទ</th><th class="p-3 w-28 bg-blue-50/80 text-blue-800 font-moul text-[11px] md:text-xs border-x border-white">មធ្យមភាគ</th><th class="p-3 w-28 bg-rose-50/80 text-rose-800 font-moul text-[11px] md:text-xs border-r border-white">ចំណាត់ថ្នាក់</th><th class="p-3 w-28 bg-emerald-50/80 text-emerald-800 font-moul text-[11px] md:text-xs">និទ្ទេស</th>`;
     } else if (periodType === "semester") {
-       colHtml = `<th class="p-3 w-12 font-moul text-[11px] md:text-xs text-slate-500 bg-slate-50">ល.រ</th><th class="p-3 w-64 text-left px-5 font-moul text-[11px] md:text-xs text-slate-800 sticky-col bg-slate-50">គោត្តនាម និងនាម</th><th class="p-3 w-14 text-[11px] md:text-xs font-moul text-slate-500 bg-slate-50">ភេទ</th><th class="p-3 w-24 bg-orange-50/80 text-orange-800 font-moul text-[11px] md:text-xs border-l border-white">ម.ប្រឡង</th><th class="p-3 w-24 bg-indigo-50/80 text-indigo-800 font-moul text-[11px] md:text-xs border-l border-white">មធ្យមខែ</th><th class="p-3 w-28 bg-blue-50/80 text-blue-800 font-moul text-[11px] md:text-xs border-x border-white">ម.ប្រចាំឆមាស</th><th class="p-3 w-28 bg-rose-50/80 text-rose-800 font-moul text-[11px] md:text-xs border-r border-white">ចំណាត់ថ្នាក់</th><th class="p-3 w-28 bg-emerald-50/80 text-emerald-800 font-moul text-[11px] md:text-xs">និទ្ទេស</th>`;
+       colHtml = `<th class="p-3 w-12 font-moul text-[11px] md:text-xs text-slate-500 bg-slate-50">ល.រ</th><th class="p-3 w-64 text-left px-5 font-moul text-[11px] md:text-xs text-slate-800 sticky-col bg-slate-50">គោត្តនាម និងនាម</th><th class="p-3 w-14 text-[11px] md:text-xs font-moul text-slate-500 bg-slate-50">ភេទ</th><th class="p-3 w-28 bg-orange-50/80 text-orange-800 font-moul text-[11px] md:text-xs border-l border-white">មធ្យមភាគប្រឡង</th><th class="p-3 w-28 bg-indigo-50/80 text-indigo-800 font-moul text-[11px] md:text-xs border-l border-white">មធ្យមភាគខែ</th><th class="p-3 w-32 bg-blue-50/80 text-blue-800 font-moul text-[11px] md:text-xs border-x border-white">មធ្យមភាគប្រចាំឆមាស</th><th class="p-3 w-28 bg-rose-50/80 text-rose-800 font-moul text-[11px] md:text-xs border-r border-white">ចំណាត់ថ្នាក់</th><th class="p-3 w-28 bg-emerald-50/80 text-emerald-800 font-moul text-[11px] md:text-xs">និទ្ទេស</th>`;
     } else {
-       colHtml = `<th class="p-3 w-12 font-moul text-[11px] md:text-xs text-slate-500 bg-slate-50">ល.រ</th><th class="p-3 w-64 text-left px-5 font-moul text-[11px] md:text-xs text-slate-800 sticky-col bg-slate-50">គោត្តនាម និងនាម</th><th class="p-3 w-14 text-[11px] md:text-xs font-moul text-slate-500 bg-slate-50">ភេទ</th><th class="p-3 w-24 bg-blue-50/80 text-blue-800 font-moul text-[11px] md:text-xs border-l border-white">ម.ឆមាសទី១</th><th class="p-3 w-24 bg-indigo-50/80 text-indigo-800 font-moul text-[11px] md:text-xs border-l border-white">ម.ឆមាសទី២</th><th class="p-3 w-28 bg-amber-50/80 text-amber-800 font-moul text-[11px] md:text-xs border-x border-white">ម.ប្រចាំឆ្នាំ</th><th class="p-3 w-28 bg-rose-50/80 text-rose-800 font-moul text-[11px] md:text-xs border-r border-white">ចំណាត់ថ្នាក់</th><th class="p-3 w-28 bg-emerald-50/80 text-emerald-800 font-moul text-[11px] md:text-xs">និទ្ទេស</th>`;
+       colHtml = `<th class="p-3 w-12 font-moul text-[11px] md:text-xs text-slate-500 bg-slate-50">ល.រ</th><th class="p-3 w-64 text-left px-5 font-moul text-[11px] md:text-xs text-slate-800 sticky-col bg-slate-50">គោត្តនាម និងនាម</th><th class="p-3 w-14 text-[11px] md:text-xs font-moul text-slate-500 bg-slate-50">ភេទ</th><th class="p-3 w-28 bg-blue-50/80 text-blue-800 font-moul text-[11px] md:text-xs border-l border-white">មធ្យមភាគឆមាសទី១</th><th class="p-3 w-28 bg-indigo-50/80 text-indigo-800 font-moul text-[11px] md:text-xs border-l border-white">មធ្យមភាគឆមាសទី២</th><th class="p-3 w-32 bg-amber-50/80 text-amber-800 font-moul text-[11px] md:text-xs border-x border-white">មធ្យមភាគប្រចាំឆ្នាំ</th><th class="p-3 w-28 bg-rose-50/80 text-rose-800 font-moul text-[11px] md:text-xs border-r border-white">ចំណាត់ថ្នាក់</th><th class="p-3 w-28 bg-emerald-50/80 text-emerald-800 font-moul text-[11px] md:text-xs">និទ្ទេស</th>`;
     }
     th.innerHTML = `<tr class="shadow-sm tracking-wide bg-slate-50">${colHtml}</tr>`;
 
