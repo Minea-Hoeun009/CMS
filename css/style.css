@@ -182,16 +182,12 @@ h6,
 
   /* ៣. បង្ហាញតែផ្ទាំងក្រដាសឯកសារសុទ្ធសាធ ដោយដកស្រមោល និង Border ចេញ */
   #reportPaperArea, 
-  #reportKaPrintArea, 
-  #reportKhaPrintArea, 
-  #reportKoKhoPrintArea, 
   #healthTrackerArea, 
   #certificatePrintArea, 
   #studentProfilePrintArea, 
-  #printableReportCard,
-  #studentListPrintWrapper,
-  #attendancePrintWrapper,
-  #structurePrintArea,
+  #studentListPrintWrapper, 
+  #attendancePrintWrapper, 
+  #structurePrintArea, 
   #homeworkPrintArea {
     box-shadow: none !important;
     border: none !important;

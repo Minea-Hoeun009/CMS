@@ -561,10 +561,15 @@ window.getStudentsForClass = function(gradeInput, roomInput, academicYearInput) 
             return false;
         }
 
-        // ពិនិត្យឆ្នាំសិក្សា (បើមានកំណត់ក្នុងសិស្ស)
+        // ពិនិត្យឆ្នាំសិក្សា (បើមានកំណត់ក្នុងសិស្ស - បំលែងលេខខ្មែរ/សកលដើម្បីធានាភាពត្រូវគ្នា)
         const sYear = String(s.academic_year || '').trim();
-        if (sYear && sYear !== 'undefined' && currentAcademicYear && !sYear.includes(currentAcademicYear) && !currentAcademicYear.includes(sYear)) {
-            return false;
+        if (sYear && sYear !== 'undefined' && currentAcademicYear && currentAcademicYear !== 'all') {
+            const toUni = (str) => String(str || '').replace(/[០-៩]/g, d => "0123456789"["០១២៣៤៥៦៧៨៩".indexOf(d)]);
+            const sUni = toUni(sYear);
+            const cUni = toUni(currentAcademicYear);
+            if (!sUni.includes(cUni) && !cUni.includes(sUni)) {
+                return false;
+            }
         }
 
         // ពិនិត្យកម្រិតថ្នាក់ (Grade/Level)

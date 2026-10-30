@@ -4294,15 +4294,26 @@ window.renderAcademicResultsReport = function(container, targetGrade, targetRoom
     let lun = document.getElementById('global_lun_input')?.value || localStorage.getItem('rc_lunar_date') || localStorage.getItem('rep_lunar_date') || "ថ្ងៃ....................ខែ..................ឆ្នាំ...............ព.ស.២៥៧០";
     const lunarDateStr = isLunarChecked ? toKhmerDigits(lun) : "";
 
-    // Students in Grade
+    // Students in Grade (Fallback ស្វែងរកតាមកម្រិតថ្នាក់ និងបន្ទប់ ធានាមិនឱ្យបាត់ទិន្នន័យ)
     const allStudents = window.allStudents || (typeof window.getMasterStudents === 'function' ? window.getMasterStudents() : []) || JSON.parse(localStorage.getItem('academic_students') || '[]');
-    const classStudents = typeof window.getStudentsForClass === 'function'
+    let classStudents = typeof window.getStudentsForClass === 'function'
         ? window.getStudentsForClass(curLevel, curRoom, academicYearUni)
-        : allStudents.filter(s => {
-            if (s.status === "Dropped" || s.status === "Withdrawn") return false;
-            return (s.grade || "").replace(/\s+/g, '') === curLevel.replace(/\s+/g, '') &&
-                   (s.room || "").replace(/[«»\s]/g, '') === curRoom.replace(/[«»\s]/g, '');
+        : [];
+    if (!classStudents || classStudents.length === 0) {
+        if (typeof window.getStudentsForClass === 'function') {
+            classStudents = window.getStudentsForClass(curLevel, curRoom);
+        }
+    }
+    if (!classStudents || classStudents.length === 0) {
+        classStudents = allStudents.filter(s => {
+            if (s.status === "Dropped" || s.status === "Withdrawn" || s.status === "ឈប់រៀន") return false;
+            const normG = typeof window.normalizeGrade === 'function' ? window.normalizeGrade(s.grade) : (s.grade || "").replace(/\s+/g, '');
+            const targetNormG = typeof window.normalizeGrade === 'function' ? window.normalizeGrade(curLevel) : curLevel.replace(/\s+/g, '');
+            const sRoom = (s.room || "").replace(/[«»\s]/g, '');
+            const tRoom = curRoom.replace(/[«»\s]/g, '');
+            return normG === targetNormG && (!tRoom || sRoom === tRoom || sRoom === 'ក');
         });
+    }
 
     let allScores = [];
     try { allScores = JSON.parse(localStorage.getItem('academic_scores') || '[]'); } catch(e) {}
@@ -4521,13 +4532,15 @@ window.renderAcademicResultsReport = function(container, targetGrade, targetRoom
         container.innerHTML = `
             <div id="reportKoKhoPrintArea" class="a4-page bg-white w-full shadow-2xl rounded-2xl border border-slate-200 text-slate-800 relative overflow-hidden print:w-[210mm] print:h-[297mm] print:min-h-[297mm] print:rounded-none print:shadow-none" style="box-sizing: border-box; padding: 1.5cm !important; max-width: 210mm; min-height: 297mm; font-family: 'Khmer OS Siemreap', 'Siemreap', sans-serif; position: relative;">
             ${window.getReportBorderLayerHtml ? window.getReportBorderLayerHtml() : ''}
+            <!-- Main Content Area with z-index above border/watermark -->
+            <div class="flex flex-col justify-start w-full" style="position: relative; z-index: 10;">
                 
                 <div class="flex justify-between items-start mb-4 text-xs">
                     <div class="text-left leading-relaxed pt-3.5 sm:pt-4">
                         <p class="font-moul text-slate-900 text-[11.5px] mb-0.5">ការិយាល័យ អប់រំ យុវជន និងកីឡានៃរដ្ឋបាលស្រុក ${districtName}</p>
                         <p class="font-moul text-slate-900 text-[11.5px]">${schoolName}</p>
                     </div>
-                    <div class="text-center pt-0 -mt-1">
+                    <div class="text-center pt-3.5 sm:pt-4">
                         <p class="font-moul text-slate-900 text-[12px] mb-0.5">ព្រះរាជាណាចក្រកម្ពុជា</p>
                         <p class="font-moul text-slate-900 text-[12px]">ជាតិ សាសនា ព្រះមហាក្សត្រ</p>
                         <div class="flex items-center justify-center mt-1 mx-auto">
@@ -4598,15 +4611,16 @@ window.renderAcademicResultsReport = function(container, targetGrade, targetRoom
                 <div class="flex justify-between items-end text-xs pt-2 px-8 pb-4 font-siemreap">
                     <div class="text-center w-2/5">
                         <p class="mb-1 text-slate-700">បានឃើញ និងឯកភាព</p>
-                        <p class="font-moul text-slate-900 mb-12">នាយិកាសាលា</p>
+                        <p class="font-moul text-slate-900 mb-16">នាយិកាសាលា</p>
                     </div>
                     <div class="text-center w-2/5">
                         <p class="mb-0.5 text-slate-700 text-[10.5px]">${lunarDateStr}</p>
                         <p class="mb-1 text-slate-700 font-bold text-[10.5px]">${solarDateStr}</p>
-                        <p class="font-moul text-slate-900 mb-12">គ្រូបន្ទុកថ្នាក់</p>
+                        <p class="font-moul text-slate-900 mb-16">គ្រូបន្ទុកថ្នាក់</p>
                         <p class="font-moul text-slate-900 text-xs">${teacherName}</p>
                     </div>
                 </div>
+            </div>
             </div>
         `;
         if (typeof window.applyAcademicReportPaperSettings === 'function') {
@@ -4794,13 +4808,15 @@ window.renderAcademicResultsReport = function(container, targetGrade, targetRoom
         container.innerHTML = `
             <div id="reportKoKhoPrintArea" class="a4-page bg-white w-full shadow-2xl rounded-2xl border border-slate-200 text-slate-800 relative overflow-hidden print:w-[210mm] print:h-[297mm] print:min-h-[297mm] print:rounded-none print:shadow-none" style="box-sizing: border-box; padding: 1.5cm !important; max-width: 210mm; min-height: 297mm; font-family: 'Khmer OS Siemreap', 'Siemreap', sans-serif; position: relative;">
             ${window.getReportBorderLayerHtml ? window.getReportBorderLayerHtml() : ''}
+            <!-- Main Content Area with z-index above border/watermark -->
+            <div class="flex flex-col justify-start w-full" style="position: relative; z-index: 10;">
                 
                 <div class="flex justify-between items-start mb-4 text-xs">
                     <div class="text-left leading-relaxed pt-3.5 sm:pt-4">
                         <p class="font-moul text-slate-900 text-[11.5px] mb-0.5">ការិយាល័យ អប់រំ យុវជន និងកីឡានៃរដ្ឋបាលស្រុក ${districtName}</p>
                         <p class="font-moul text-slate-900 text-[11.5px]">${schoolName}</p>
                     </div>
-                    <div class="text-center pt-0 -mt-1">
+                    <div class="text-center pt-3.5 sm:pt-4">
                         <p class="font-moul text-slate-900 text-[12px] mb-0.5">ព្រះរាជាណាចក្រកម្ពុជា</p>
                         <p class="font-moul text-slate-900 text-[12px]">ជាតិ សាសនា ព្រះមហាក្សត្រ</p>
                         <div class="flex items-center justify-center mt-1 mx-auto">
@@ -4858,15 +4874,16 @@ window.renderAcademicResultsReport = function(container, targetGrade, targetRoom
                 <div class="flex justify-between items-end text-xs pt-2 px-8 pb-4 font-siemreap">
                     <div class="text-center w-2/5">
                         <p class="mb-1 text-slate-700">បានឃើញ និងឯកភាព</p>
-                        <p class="font-moul text-slate-900 mb-12">នាយិកាសាលា</p>
+                        <p class="font-moul text-slate-900 mb-16">នាយិកាសាលា</p>
                     </div>
                     <div class="text-center w-2/5">
                         <p class="mb-0.5 text-slate-700 text-[10.5px]">${lunarDateStr}</p>
                         <p class="mb-1 text-slate-700 font-bold text-[10.5px]">${solarDateStr}</p>
-                        <p class="font-moul text-slate-900 mb-12">គ្រូបន្ទុកថ្នាក់</p>
+                        <p class="font-moul text-slate-900 mb-16">គ្រូបន្ទុកថ្នាក់</p>
                         <p class="font-moul text-slate-900 text-xs">${teacherName}</p>
                     </div>
                 </div>
+            </div>
             </div>
         `;
         if (typeof window.applyAcademicReportPaperSettings === 'function') {
@@ -5060,13 +5077,15 @@ window.renderAcademicResultsReport = function(container, targetGrade, targetRoom
     container.innerHTML = `
         <div id="reportKoKhoPrintArea" class="a4-page bg-white w-full shadow-2xl rounded-2xl border border-slate-200 text-slate-800 relative overflow-hidden print:w-[210mm] print:h-[297mm] print:min-h-[297mm] print:rounded-none print:shadow-none" style="box-sizing: border-box; padding: 1.5cm !important; max-width: 210mm; min-height: 297mm; font-family: 'Khmer OS Siemreap', 'Siemreap', sans-serif; position: relative;">
             ${window.getReportBorderLayerHtml ? window.getReportBorderLayerHtml() : ''}
+            <!-- Main Content Area with z-index above border/watermark -->
+            <div class="flex flex-col justify-start w-full" style="position: relative; z-index: 10;">
             
             <div class="flex justify-between items-start mb-4 text-xs">
                 <div class="text-left leading-relaxed pt-3.5 sm:pt-4">
                     <p class="font-moul text-slate-900 text-[11.5px] mb-0.5">ការិយាល័យ អប់រំ យុវជន និងកីឡានៃរដ្ឋបាលស្រុក ${districtName}</p>
                     <p class="font-moul text-slate-900 text-[11.5px]">${schoolName}</p>
                 </div>
-                <div class="text-center pt-0 -mt-1">
+                <div class="text-center pt-3.5 sm:pt-4">
                     <p class="font-moul text-slate-900 text-[12px] mb-0.5">ព្រះរាជាណាចក្រកម្ពុជា</p>
                     <p class="font-moul text-slate-900 text-[12px]">ជាតិ សាសនា ព្រះមហាក្សត្រ</p>
                     <div class="flex items-center justify-center mt-1 mx-auto">
@@ -5121,15 +5140,16 @@ window.renderAcademicResultsReport = function(container, targetGrade, targetRoom
             <div class="flex justify-between items-end text-xs pt-2 px-8 pb-4 font-siemreap">
                     <div class="text-center w-2/5">
                         <p class="mb-1 text-slate-700">បានឃើញ និងឯកភាព</p>
-                        <p class="font-moul text-slate-900 mb-12">នាយិកាសាលា</p>
+                        <p class="font-moul text-slate-900 mb-16">នាយិកាសាលា</p>
                     </div>
                     <div class="text-center w-2/5">
                         <p class="mb-0.5 text-slate-700 text-[10.5px]">${lunarDateStr}</p>
                         <p class="mb-1 text-slate-700 font-bold text-[10.5px]">${solarDateStr}</p>
-                        <p class="font-moul text-slate-900 mb-12">គ្រូបន្ទុកថ្នាក់</p>
+                        <p class="font-moul text-slate-900 mb-16">គ្រូបន្ទុកថ្នាក់</p>
                         <p class="font-moul text-slate-900 text-xs">${teacherName}</p>
                     </div>
                 </div>
+            </div>
         </div>
     `;
 
@@ -5338,7 +5358,7 @@ window.renderClassInventoryReport = function(container, targetGrade, targetRoom)
                         <p class="font-moul text-slate-900 text-[11px] mb-0.5">ការិយាល័យ អប់រំ យុវជននិងកីឡានៃរដ្ឋបាលស្រុក ${districtName}</p>
                         <p class="font-moul text-slate-900 text-[11px]">${schoolName}</p>
                     </div>
-                    <div class="text-center pt-0 -mt-1">
+                    <div class="text-center pt-3.5 sm:pt-4">
                         <p class="font-moul text-slate-900 text-[12px] mb-0.5">ព្រះរាជាណាចក្រកម្ពុជា</p>
                         <p class="font-moul text-slate-900 text-[12px]">ជាតិ សាសនា ព្រះមហាក្សត្រ</p>
                         <div class="flex items-center justify-center mt-1 mx-auto">
@@ -5424,12 +5444,12 @@ window.renderClassInventoryReport = function(container, targetGrade, targetRoom)
                 <div class="flex justify-between items-end text-xs">
                     <div class="text-center w-2/5">
                         <p class="mb-1 text-slate-700">បានឃើញ និងឯកភាព</p>
-                        <p class="font-moul text-slate-900 mb-12">នាយិកាសាលា</p>
+                        <p class="font-moul text-slate-900 mb-16">នាយិកាសាលា</p>
                     </div>
                     <div class="text-center w-2/5">
                         <p class="mb-0.5 text-slate-700 text-[10.5px]">${lunarDateStr}</p>
                         <p class="mb-1 text-slate-700 font-bold text-[10.5px]">${solarDateStr}</p>
-                        <p class="font-moul text-slate-900 mb-12">គ្រូបន្ទុកថ្នាក់</p>
+                        <p class="font-moul text-slate-900 mb-16">គ្រូបន្ទុកថ្នាក់</p>
                         <p class="font-moul text-slate-900 text-xs">${teacherName}</p>
                     </div>
                 </div>
@@ -5508,7 +5528,7 @@ window.renderInternalRulesReport = function(container, targetGrade, targetRoom) 
                         <p class="font-moul text-slate-900 text-[11px] mb-0.5">ការិយាល័យ អប់រំ យុវជននិងកីឡានៃរដ្ឋបាលស្រុក ${districtName}</p>
                         <p class="font-moul text-slate-900 text-[11px]">${schoolName}</p>
                     </div>
-                    <div class="text-center pt-0 -mt-1">
+                    <div class="text-center pt-3.5 sm:pt-4">
                         <p class="font-moul text-slate-900 text-[12px] mb-0.5">ព្រះរាជាណាចក្រកម្ពុជា</p>
                         <p class="font-moul text-slate-900 text-[12px]">ជាតិ សាសនា ព្រះមហាក្សត្រ</p>
                         <div class="flex items-center justify-center mt-1 mx-auto">
@@ -5549,12 +5569,12 @@ window.renderInternalRulesReport = function(container, targetGrade, targetRoom) 
                 <div class="flex justify-between items-end text-xs">
                     <div class="text-center w-2/5">
                         <p class="mb-1 text-slate-700">បានឃើញ និងឯកភាព</p>
-                        <p class="font-moul text-slate-900 mb-12">នាយិកាសាលា</p>
+                        <p class="font-moul text-slate-900 mb-16">នាយិកាសាលា</p>
                     </div>
                     <div class="text-center w-2/5">
                         <p class="mb-0.5 text-slate-700 text-[10.5px]">${lunarDateStr}</p>
                         <p class="mb-1 text-slate-700 font-bold text-[10.5px]">${solarDateStr}</p>
-                        <p class="font-moul text-slate-900 mb-12">គ្រូបន្ទុកថ្នាក់</p>
+                        <p class="font-moul text-slate-900 mb-16">គ្រូបន្ទុកថ្នាក់</p>
                         <p class="font-moul text-slate-900 text-xs">${teacherName}</p>
                     </div>
                 </div>
@@ -5624,13 +5644,13 @@ window.renderClassPrinciplesReport = function(container, targetGrade, targetRoom
     const rightPrinciples = principles.slice(8, 16);
 
     const renderPrincipleCard = (p) => `
-        <div class="p-2 rounded-xl border border-sky-200 bg-sky-50/40 hover:bg-sky-50/80 transition flex items-center gap-2.5">
-            <span class="w-6 h-6 rounded-lg bg-gradient-to-br from-sky-500 to-indigo-600 text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-sm">${p.num}</span>
-            <div class="flex-1">
-                <p class="font-bold text-sky-950 text-xs">${p.title}</p>
-                <p class="text-[10px] text-slate-500 leading-tight">${p.desc}</p>
+        <div class="py-2.5 px-3 rounded-xl border border-sky-200 bg-sky-50/40 hover:bg-sky-50/80 transition flex items-center gap-3 shadow-xs">
+            <span class="w-7 h-7 rounded-lg bg-gradient-to-br from-sky-500 to-indigo-600 text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-sm">${p.num}</span>
+            <div class="flex-1 min-w-0">
+                <p class="font-bold text-sky-950 text-[11.5px] leading-snug">${p.title}</p>
+                <p class="text-[10px] text-slate-500 leading-tight truncate mt-0.5">${p.desc}</p>
             </div>
-            <i class="${p.icon} text-sky-400 text-xs"></i>
+            <i class="${p.icon} text-sky-400 text-sm shrink-0"></i>
         </div>
     `;
 
@@ -5645,7 +5665,7 @@ window.renderClassPrinciplesReport = function(container, targetGrade, targetRoom
                         <p class="font-moul text-slate-900 text-[11px] mb-0.5">ការិយាល័យ អប់រំ យុវជននិងកីឡានៃរដ្ឋបាលស្រុក ${districtName}</p>
                         <p class="font-moul text-slate-900 text-[11px]">${schoolName}</p>
                     </div>
-                    <div class="text-center pt-0 -mt-1">
+                    <div class="text-center pt-3.5 sm:pt-4">
                         <p class="font-moul text-slate-900 text-[12px] mb-0.5">ព្រះរាជាណាចក្រកម្ពុជា</p>
                         <p class="font-moul text-slate-900 text-[12px]">ជាតិ សាសនា ព្រះមហាក្សត្រ</p>
                         <div class="flex items-center justify-center mt-1 mx-auto">
@@ -5681,13 +5701,13 @@ window.renderClassPrinciplesReport = function(container, targetGrade, targetRoom
                 <div class="flex justify-between items-end text-xs">
                     <div class="text-center w-2/5">
                         <p class="mb-1 text-slate-700">បានឃើញ និងឯកភាព</p>
-                        <p class="font-moul text-slate-900 mb-12">គ្រូបន្ទុកថ្នាក់</p>
+                        <p class="font-moul text-slate-900 mb-16">គ្រូបន្ទុកថ្នាក់</p>
                         <p class="font-moul text-slate-900 text-xs">${teacherName}</p>
                     </div>
                     <div class="text-center w-2/5">
                         <p class="mb-0.5 text-slate-700 text-[10.5px]">${lunarDateStr}</p>
                         <p class="mb-1 text-slate-700 font-bold text-[10.5px]">${solarDateStr}</p>
-                        <p class="font-moul text-slate-900 mb-12">តំណាងសិស្ស / ប្រធានថ្នាក់</p>
+                        <p class="font-moul text-slate-900 mb-16">តំណាងសិស្ស / ប្រធានថ្នាក់</p>
                         <p class="font-moul text-slate-900 text-xs">${monitorStudent}</p>
                     </div>
                 </div>
@@ -5826,7 +5846,7 @@ window.renderCleaningScheduleReport = function(container, targetGrade, targetRoo
                         <p class="font-moul text-slate-900 text-[11px] mb-0.5">ការិយាល័យ អប់រំ យុវជននិងកីឡានៃរដ្ឋបាលស្រុក ${districtName}</p>
                         <p class="font-moul text-slate-900 text-[11px]">${schoolName}</p>
                     </div>
-                    <div class="text-center pt-0 -mt-1">
+                    <div class="text-center pt-3.5 sm:pt-4">
                         <p class="font-moul text-slate-900 text-[12px] mb-0.5">ព្រះរាជាណាចក្រកម្ពុជា</p>
                         <p class="font-moul text-slate-900 text-[12px]">ជាតិ សាសនា ព្រះមហាក្សត្រ</p>
                         <div class="flex items-center justify-center mt-1 mx-auto">
@@ -5871,12 +5891,12 @@ window.renderCleaningScheduleReport = function(container, targetGrade, targetRoo
                 <div class="flex justify-between items-end text-xs">
                     <div class="text-center w-2/5">
                         <p class="mb-1 text-slate-700">បានឃើញ និងឯកភាព</p>
-                        <p class="font-moul text-slate-900 mb-12">នាយិកាសាលា</p>
+                        <p class="font-moul text-slate-900 mb-16">នាយិកាសាលា</p>
                     </div>
                     <div class="text-center w-2/5">
                         <p class="mb-0.5 text-slate-700 text-[10.5px]">${lunarDateStr}</p>
                         <p class="mb-1 text-slate-700 font-bold text-[10.5px]">${solarDateStr}</p>
-                        <p class="font-moul text-slate-900 mb-12">គ្រូបន្ទុកថ្នាក់</p>
+                        <p class="font-moul text-slate-900 mb-16">គ្រូបន្ទុកថ្នាក់</p>
                         <p class="font-moul text-slate-900 text-xs">${teacherName}</p>
                     </div>
                 </div>
@@ -5977,7 +5997,7 @@ window.renderBranchCommitteeReport = function(container, targetGrade, targetRoom
                         <p class="font-moul text-slate-900 text-[11px] mb-0.5">ការិយាល័យ អប់រំ យុវជននិងកីឡានៃរដ្ឋបាលស្រុក ${districtName}</p>
                         <p class="font-moul text-slate-900 text-[11px]">${schoolName}</p>
                     </div>
-                    <div class="text-center pt-0 -mt-1">
+                    <div class="text-center pt-3.5 sm:pt-4">
                         <p class="font-moul text-slate-900 text-[12px] mb-0.5">ព្រះរាជាណាចក្រកម្ពុជា</p>
                         <p class="font-moul text-slate-900 text-[12px]">ជាតិ សាសនា ព្រះមហាក្សត្រ</p>
                         <div class="flex items-center justify-center mt-1 mx-auto">
@@ -6076,12 +6096,12 @@ window.renderBranchCommitteeReport = function(container, targetGrade, targetRoom
                 <div class="flex justify-between items-end text-xs">
                     <div class="text-center w-2/5">
                         <p class="mb-1 text-slate-700">បានឃើញ និងឯកភាព</p>
-                        <p class="font-moul text-slate-900 mb-12">នាយិកាសាលា</p>
+                        <p class="font-moul text-slate-900 mb-16">នាយិកាសាលា</p>
                     </div>
                     <div class="text-center w-2/5">
                         <p class="mb-0.5 text-slate-700 text-[10.5px]">${lunarDateStr}</p>
                         <p class="mb-1 text-slate-700 font-bold text-[10.5px]">${solarDateStr}</p>
-                        <p class="font-moul text-slate-900 mb-12">គ្រូបន្ទុកថ្នាក់</p>
+                        <p class="font-moul text-slate-900 mb-16">គ្រូបន្ទុកថ្នាក់</p>
                         <p class="font-moul text-slate-900 text-xs">${teacherName}</p>
                     </div>
                 </div>
