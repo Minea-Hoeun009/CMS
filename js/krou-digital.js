@@ -1947,22 +1947,22 @@ window.KrouDigital = {
                                 <!-- 🏛️ ក្បាលប័ណ្ណ (Official Header matching sample image) 🏛️ -->
                                 <div class="flex justify-between items-start text-xs px-2 pt-1">
                                     <!-- Left: MoEYS Logo & Hierarchy (ដូចរូបគំរូ - DRAGGABLE SECTION) -->
-                                    <div id="cert_sec_header_left" class="canva-el canva-draggable-section text-left pt-0.5 space-y-0.5 max-w-[270px]" style="transform: translate(${posHeaderLeft.x}px, ${posHeaderLeft.y}px);">
+                                    <div id="cert_sec_header_left" class="canva-el canva-draggable-section text-left pt-0.5 space-y-1 max-w-[280px]" style="transform: translate(${posHeaderLeft.x}px, ${posHeaderLeft.y}px);">
                                         <div class="drag-handle no-print hidden items-center gap-1 px-1.5 py-0.5 bg-slate-900/90 text-amber-300 text-[9px] rounded shadow border border-amber-500/60 -top-5 left-0 absolute whitespace-nowrap cursor-move z-50">
                                             <i class="fa-solid fa-up-down-left-right"></i> អូសទីតាំង
                                         </div>
                                         <div class="mb-1">
                                             ${customLogoB64 ? `
-                                                <img src="${customLogoB64}" alt="Logo" class="w-14 h-14 object-contain shadow-sm rounded-full" />
+                                                <img src="${customLogoB64}" alt="Logo" class="w-13 h-13 object-contain shadow-sm rounded-full" />
                                             ` : `
-                                                <div class="w-12 h-12 rounded-full border border-amber-500/80 bg-amber-50 flex items-center justify-center text-amber-700 text-xl shadow-sm">
+                                                <div class="w-11 h-11 rounded-full border border-amber-500/80 bg-amber-50 flex items-center justify-center text-amber-700 text-lg shadow-sm">
                                                     <i class="fa-solid fa-award"></i>
                                                 </div>
                                             `}
                                         </div>
-                                        <p contenteditable="true" class="cert-editable font-moul text-blue-950 text-[10.5px] leading-tight">មន្ទីរអប់រំ យុវជន និងកីឡាខេត្ត${provinceName}</p>
-                                        <p contenteditable="true" class="cert-editable font-moul text-blue-950 text-[10px] leading-tight">ការិយាល័យអប់រំ យុវជន និងកីឡានៃរដ្ឋបាលស្រុក${districtName}</p>
-                                        <p contenteditable="true" class="cert-editable font-moul text-blue-950 text-[10px] leading-tight">${schoolName}</p>
+                                        <p contenteditable="true" class="cert-editable font-moul text-blue-950 text-[11px] leading-normal">មន្ទីរអប់រំ យុវជន និងកីឡាខេត្ត${provinceName}</p>
+                                        <p contenteditable="true" class="cert-editable font-moul text-blue-950 text-[10.5px] leading-normal">ការិយាល័យអប់រំ យុវជន និងកីឡានៃរដ្ឋបាលស្រុក${districtName}</p>
+                                        <p contenteditable="true" class="cert-editable font-moul text-blue-950 text-[11.5px] leading-normal">${schoolName}</p>
                                     </div>
 
                                     <!-- Center: Kingdom of Cambodia & National Motto (DRAGGABLE SECTION) -->
@@ -1970,9 +1970,9 @@ window.KrouDigital = {
                                         <div class="drag-handle no-print hidden items-center gap-1 px-1.5 py-0.5 bg-slate-900/90 text-amber-300 text-[9px] rounded shadow border border-amber-500/60 -top-5 left-1/2 -translate-x-1/2 absolute whitespace-nowrap cursor-move z-50">
                                             <i class="fa-solid fa-up-down-left-right"></i> អូសទីតាំង
                                         </div>
-                                        <p contenteditable="true" class="cert-editable font-moul text-blue-950 text-sm md:text-base tracking-wide">ព្រះរាជាណាចក្រកម្ពុជា</p>
-                                        <p contenteditable="true" class="cert-editable font-moul text-blue-900 text-xs md:text-sm mt-0.5">ជាតិ សាសនា ព្រះមហាក្សត្រ</p>
-                                        <img src="${window.CMS_HEADER_SYMBOL_B64 || 'assets/images/header-flourish.png'}" class="header-flourish-symbol" alt="symbol" style="display: block; margin: 3px auto 0 auto; width: 130px; height: 10px; object-fit: contain;" />
+                                        <p contenteditable="true" class="cert-editable font-moul text-blue-950 text-[14px] md:text-[15px] tracking-wide">ព្រះរាជាណាចក្រកម្ពុជា</p>
+                                        <p contenteditable="true" class="cert-editable font-moul text-blue-900 text-xs md:text-[13px] mt-0.5">ជាតិ សាសនា ព្រះមហាក្សត្រ</p>
+                                        <img src="${window.CMS_HEADER_SYMBOL_B64 || 'assets/images/header-flourish.png'}" class="header-flourish-symbol" alt="symbol" style="display: block; margin: 3px auto 0 auto; width: 125px; height: 10px; object-fit: contain;" />
                                     </div>
 
                                     <!-- Right spacer -->
@@ -1980,67 +1980,71 @@ window.KrouDigital = {
                                 </div>
 
                                 <!-- 🎖️ ចំណងជើងប័ណ្ណសរសើរ / លិខិតសរសើរ (Title Banner - DRAGGABLE SECTION) 🎖️ -->
-                                <div id="cert_sec_title" class="canva-el canva-draggable-section my-2 text-center" style="transform: translate(${posTitle.x}px, ${posTitle.y}px);">
+                                <div id="cert_sec_title" class="canva-el canva-draggable-section my-1.5 text-center" style="transform: translate(${posTitle.x}px, ${posTitle.y}px);">
                                     <div class="drag-handle no-print hidden items-center gap-1 px-2 py-0.5 bg-slate-900/90 text-amber-300 text-[10px] rounded shadow border border-amber-500/60 -top-6 left-1/2 -translate-x-1/2 absolute whitespace-nowrap cursor-move z-50">
                                         <i class="fa-solid fa-up-down-left-right"></i> អូសចំណងជើង (Drag Title)
                                     </div>
-                                    <h1 id="certMainTitle" contenteditable="true" class="cert-editable ${certFontFamily} text-3xl sm:text-4xl md:text-5xl drop-shadow-sm mb-1 tracking-wide" style="color: ${certTitleColor};">
+                                    <h1 id="certMainTitle" contenteditable="true" class="cert-editable ${certFontFamily} text-2xl sm:text-3xl md:text-[34px] drop-shadow-sm mb-1 tracking-wide leading-tight" style="color: ${certTitleColor};">
                                         ${titleType}
                                     </h1>
+                                    <div class="flex items-center justify-center my-0.5">
+                                        <img src="${window.CMS_TITLE_FLOURISH_B64 || 'assets/images/title-flourish.png'}" class="title-flourish-symbol" alt="flourish" style="display: block; margin: 0 auto; width: 160px; height: 10px; object-fit: contain;" />
+                                    </div>
                                 </div>
 
                                 <!-- 📜 តួសេចក្តី (Body Content - DRAGGABLE SECTION) 📜 -->
-                                <div id="cert_sec_body" class="canva-el canva-draggable-section my-1.5 max-w-4xl mx-auto space-y-2.5 text-sm md:text-base leading-relaxed text-slate-800" style="transform: translate(${posBody.x}px, ${posBody.y}px);">
+                                <div id="cert_sec_body" class="canva-el canva-draggable-section my-1 max-w-4xl mx-auto space-y-2 text-[13.5px] md:text-[14.5px] leading-relaxed text-slate-800" style="transform: translate(${posBody.x}px, ${posBody.y}px);">
                                     <div class="drag-handle no-print hidden items-center gap-1 px-2 py-0.5 bg-slate-900/90 text-amber-300 text-[10px] rounded shadow border border-amber-500/60 -top-6 left-1/2 -translate-x-1/2 absolute whitespace-nowrap cursor-move z-50">
                                         <i class="fa-solid fa-up-down-left-right"></i> អូសតួសេចក្តី (Drag Body)
                                     </div>
 
                                     <!-- Administration header line -->
-                                    <p contenteditable="true" class="cert-editable font-moul text-blue-950 text-base md:text-lg">
+                                    <p contenteditable="true" class="cert-editable font-moul text-blue-950 text-sm md:text-[15px]">
                                         គណៈគ្រប់គ្រង${schoolName}
                                     </p>
                                     
                                     <!-- Praise to student line -->
-                                    <div class="text-slate-800 text-sm md:text-base flex flex-wrap items-center justify-center gap-1.5 pt-0.5">
-                                        <span contenteditable="true" class="cert-editable">សរសើរចំពោះសិស្សឈ្មោះ៖</span>
-                                        <span contenteditable="true" class="cert-editable font-moul text-xl md:text-2xl text-blue-950 px-3 border-b-2 border-dashed border-amber-600 inline-block font-bold">
+                                    <div class="text-slate-800 flex flex-wrap items-center justify-center gap-1.5 pt-0.5">
+                                        <span contenteditable="true" class="cert-editable">សូមសម្តែងនូវការកោតសរសើរចំពោះសិស្សឈ្មោះ៖</span>
+                                        <span contenteditable="true" class="cert-editable font-moul text-base md:text-lg text-blue-950 px-2.5 border-b-2 border-amber-500/80 inline-block font-bold">
                                             ${student.name}
                                         </span>
+                                        <span contenteditable="true" class="cert-editable">ភេទ</span>
+                                        <span contenteditable="true" class="cert-editable font-bold text-slate-800 px-1">${student.gender || 'ប្រុស'}</span>
                                         <span contenteditable="true" class="cert-editable">រៀនថ្នាក់ទី</span>
-                                        <span contenteditable="true" class="cert-editable font-bold text-blue-900 px-1.5 text-base md:text-lg">${student.grade || curLevel} ${student.room || ''}</span>
-                                        <span contenteditable="true" class="cert-editable">ដែលបានយកចិត្តទុកដាក់</span>
+                                        <span contenteditable="true" class="cert-editable font-bold text-blue-900 px-1.5 text-[14px] md:text-[15px]">${student.grade || curLevel} ${student.room || ''}</span>
                                     </div>
 
                                     <!-- Study performance line -->
-                                    <div class="text-slate-800 text-sm md:text-base flex flex-wrap items-center justify-center gap-1.5">
-                                        <span contenteditable="true" class="cert-editable">ខិតខំសិក្សារៀនសូត្រ ទទួលបានចំណាត់ថ្នាក់លេខ</span>
-                                        <span contenteditable="true" class="cert-editable font-moul text-lg md:text-xl text-red-600 font-bold px-1.5">${activeRank}</span>
+                                    <div class="text-slate-800 flex flex-wrap items-center justify-center gap-1.5">
+                                        <span contenteditable="true" class="cert-editable">ដែលបានខិតខំប្រឹងប្រែងសិក្សារៀនសូត្រ និងគោរពវិន័យបានល្អប្រសើរ ទទួលបានចំណាត់ថ្នាក់លេខ</span>
+                                        <span contenteditable="true" class="cert-editable font-moul text-[15px] md:text-[16px] text-red-600 font-bold px-1.5">${typeof window.toKhmerNum === 'function' ? window.toKhmerNum(activeRank.toString()) : activeRank}</span>
                                         <span contenteditable="true" class="cert-editable">និទ្ទេស</span>
-                                        <span contenteditable="true" class="cert-editable font-moul text-lg md:text-xl text-red-600 font-bold px-1.5">${activeRank == 1 ? 'A' : activeRank == 2 ? 'B' : activeRank == 3 ? 'C' : 'ល្អ'}</span>
+                                        <span contenteditable="true" class="cert-editable font-moul text-[15px] md:text-[16px] text-red-600 font-bold px-1.5">${activeRank == 1 ? 'A (ល្អប្រសើរ)' : activeRank == 2 ? 'B (ល្អណាស់)' : activeRank == 3 ? 'C (ល្អ)' : 'ល្អ'}</span>
                                     </div>
 
                                     <!-- Exam Session / Academic Year (in red Moul font matching image) -->
-                                    <div class="pt-1">
-                                        <p contenteditable="true" class="cert-editable font-moul text-red-600 text-sm md:text-base tracking-wide">
+                                    <div class="pt-0.5">
+                                        <p contenteditable="true" class="cert-editable font-moul text-red-600 text-[12px] md:text-[13.5px] tracking-wide">
                                             ${examSession}
                                         </p>
                                     </div>
                                 </div>
 
                                 <!-- ✍️ ហត្ថលេខា និងកាលបរិច្ឆេទ (Signatures & Date - DRAGGABLE SECTIONS) ✍️ -->
-                                <div class="flex justify-between items-end text-xs mt-4 px-4 sm:px-10">
+                                <div class="flex justify-between items-end text-xs mt-3 px-4 sm:px-10">
                                     <!-- Left side: បានឃើញ និងឯកភាព / នាយករងបច្ចេកទេស -->
                                     <div id="cert_sec_sig_left" class="canva-el canva-draggable-section text-center min-w-[150px]" style="transform: translate(${posSigLeft.x}px, ${posSigLeft.y}px);">
                                         <div class="drag-handle no-print hidden items-center gap-1 px-1.5 py-0.5 bg-slate-900/90 text-amber-300 text-[9px] rounded shadow border border-amber-500/60 -top-5 left-1/2 -translate-x-1/2 absolute whitespace-nowrap cursor-move z-50">
                                             <i class="fa-solid fa-up-down-left-right"></i> អូស
                                         </div>
-                                        <p contenteditable="true" class="cert-editable text-slate-700 text-[11px] font-bold">បានឃើញ និងឯកភាព</p>
-                                        <p contenteditable="true" class="cert-editable font-moul text-blue-950 text-xs mt-0.5">នាយក/នាយិកាសាលា</p>
+                                        <p contenteditable="true" class="cert-editable text-slate-700 text-[11.5px] font-bold">បានឃើញ និងឯកភាព</p>
+                                        <p contenteditable="true" class="cert-editable font-moul text-blue-950 text-xs mt-0.5">នាយិកាសាលា</p>
                                         
                                         <!-- Stamp & Signature Space -->
-                                        <div class="h-16 flex items-center justify-center relative my-1"></div>
+                                        <div class="h-14 flex items-center justify-center relative my-1"></div>
 
-                                        ${principalName ? `<p contenteditable="true" class="cert-editable font-moul text-red-600 text-sm font-bold mt-1">${principalName}</p>` : ''}
+                                        ${principalName ? `<p contenteditable="true" class="cert-editable font-moul text-slate-900 text-xs font-bold mt-1">${principalName}</p>` : ''}
                                     </div>
 
                                     <!-- Right side: Lunar Date, Solar Date, Teacher Signature -->
@@ -2053,9 +2057,9 @@ window.KrouDigital = {
                                         <p contenteditable="true" class="cert-editable font-moul text-blue-950 text-xs mt-1">គ្រូទទួលបន្ទុកថ្នាក់</p>
                                         
                                         <!-- Teacher Signature Space -->
-                                        <div class="h-14 flex items-center justify-center"></div>
+                                        <div class="h-12 flex items-center justify-center"></div>
 
-                                        <p contenteditable="true" class="cert-editable font-moul text-blue-950 text-sm font-bold">${teacherName}</p>
+                                        <p contenteditable="true" class="cert-editable font-moul text-slate-900 text-xs font-bold">${teacherName}</p>
                                     </div>
                                 </div>
 

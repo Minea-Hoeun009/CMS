@@ -3558,7 +3558,6 @@ window.printScoreList = function() {
 // ១២. បង្ហាញ និងបោះពុម្ពតារាងចំណាត់ថ្នាក់ (បានជួសជុលការទាញយកកាលបរិច្ឆេទ)
 // ==========================================
 window.printRankingTable = function() {
-    if(typeof window.calculateAllScores === 'function') window.calculateAllScores();
     if(!window.rankingsDataList || window.rankingsDataList.length === 0) return alert("⚠️ គ្មានទិន្នន័យដើម្បីបោះពុម្ពទេ!");
 
     const type = document.getElementById("globalPeriodType")?.value || "monthly";
@@ -3583,7 +3582,7 @@ window.printRankingTable = function() {
         locShort = rawLoc.replace(/^ធ្វើនៅ\s*/, '').replace(/,+$/, '').trim();
     } else {
         locShort = schoolName.replace(/^(សាលាបឋមសិក្សា|អនុវិទ្យាល័យ|វិទ្យាល័យ|សាលា)\s*/g, '').trim();
-        if (!locShort) locShort = districtName || "ភ្នំ";
+        if (!locShort) locShort = districtName || "ខ្សុំ";
     }
 
     let sDate = "";
@@ -3594,7 +3593,6 @@ window.printRankingTable = function() {
         sDate = "ថ្ងៃទី.......ខែ..........ឆ្នាំ២០២៦";
     }
     if (sDate.includes("ថ្ងៃទី")) sDate = sDate.substring(sDate.indexOf("ថ្ងៃទី"));
-
     const solarDateStr = `ធ្វើនៅ ${locShort}, ${sDate}`;
 
     let isLunarChecked = true;
@@ -3619,76 +3617,74 @@ window.printRankingTable = function() {
     let failedF = femaleStus - passedF;
 
     let passPct = totalStus > 0 ? ((passed / totalStus) * 100).toFixed(2) : "0.00";
-    let failPct = totalStus > 0 ? ((failed / totalStus) * 100).toFixed(2) : "0.00";
     let passFPct = femaleStus > 0 ? ((passedF / femaleStus) * 100).toFixed(2) : "0.00";
+    let failPct = totalStus > 0 ? ((failed / totalStus) * 100).toFixed(2) : "0.00";
     let failFPct = femaleStus > 0 ? ((failedF / femaleStus) * 100).toFixed(2) : "0.00";
 
-    let passLabel = "សិស្សជាប់មធ្យមភាគ";
-    let failLabel = "សិស្សធ្លាក់មធ្យមភាគ";
-
     let headerHtml = '';
-    const thBase = `border: 1pt solid #cbd5e1; text-align: center; vertical-align: middle; font-family: 'Khmer OS Muol Light', 'Moul', serif; font-size: 10.5px; font-weight: normal; color: #ffffff; background-color: #233D6E;`;
+    const thBase = `border: 1pt solid #cbd5e1; text-align: center; vertical-align: middle; font-family: 'Khmer OS Muol Light', 'Moul', serif; font-size: 10px; font-weight: normal; color: #ffffff; background-color: #233D6E;`;
     
-    const thV = (text, isRightSide) => {
+    const thV = (text, widthPct, isRightSide) => {
         const leftBorder = isRightSide ? 'border-left: 1.5pt solid #475569;' : '';
-        return `<th class="th-vert" style="${thBase} ${leftBorder} padding: 0;"><div class="div-vert">${text}</div></th>`;
+        return `<th class="th-vert" style="${thBase} ${leftBorder} width: ${widthPct};"><div class="div-vert">${text}</div></th>`;
     };
-    const thN = (text, w, align, padding, isRightSide) => {
+
+    const thN = (text, widthPct, align, paddingLeft, isRightSide) => {
         const leftBorder = isRightSide ? 'border-left: 1.5pt solid #475569;' : '';
-        return `<th style="${thBase} width: ${w}; text-align: ${align}; padding-left: ${padding}; ${leftBorder}">${text}</th>`;
+        return `<th style="${thBase} ${leftBorder} width: ${widthPct}; text-align: ${align}; padding-left: ${paddingLeft};">${text}</th>`;
     };
-    
+
     if (type === "monthly") {
         headerHtml = `<tr>
             ${thN('ល.រ', '5%', 'center', '0', false)}
-            ${thN('គោត្តនាម និងនាម', '23%', 'left', '8px', false)}
+            ${thN('គោត្តនាម និងនាម', '26%', 'left', '6px', false)}
             ${thN('ភេទ', '5%', 'center', '0', false)}
-            ${thV('មធ្យមភាគ', false)}
-            ${thV('ចំណាត់ថ្នាក់', false)}
+            ${thV('មធ្យមភាគ', '7%', false)}
+            ${thV('ចំណាត់ថ្នាក់', '7%', false)}
             ${thN('ល.រ', '5%', 'center', '0', true)}
-            ${thN('គោត្តនាម និងនាម', '23%', 'left', '8px', false)}
+            ${thN('គោត្តនាម និងនាម', '26%', 'left', '6px', false)}
             ${thN('ភេទ', '5%', 'center', '0', false)}
-            ${thV('មធ្យមភាគ', false)}
-            ${thV('ចំណាត់ថ្នាក់', false)}
+            ${thV('មធ្យមភាគ', '7%', false)}
+            ${thV('ចំណាត់ថ្នាក់', '7%', false)}
         </tr>`;
     } else if (type === "semester") {
         headerHtml = `<tr>
-            ${thN('ល.រ', '4%', 'center', '0', false)}
-            ${thN('គោត្តនាម និងនាម', '19%', 'left', '6px', false)}
+            ${thN('ល.រ', '4.5%', 'center', '0', false)}
+            ${thN('គោត្តនាម និងនាម', '20.5%', 'left', '6px', false)}
             ${thN('ភេទ', '4.5%', 'center', '0', false)}
-            ${thV('មធ្យមប្រឡង', false)}
-            ${thV('មធ្យមភាគខែ', false)}
-            ${thV('មធ្យមភាគប្រចាំឆមាស', false)}
-            ${thV('ចំណាត់ថ្នាក់', false)}
-            ${thN('ល.រ', '4%', 'center', '0', true)}
-            ${thN('គោត្តនាម និងនាម', '19%', 'left', '6px', false)}
+            ${thV('មធ្យមប្រឡង', '5%', false)}
+            ${thV('មធ្យមភាគខែ', '5%', false)}
+            ${thV('មធ្យមភាគប្រចាំឆមាស', '5.5%', false)}
+            ${thV('ចំណាត់ថ្នាក់', '5%', false)}
+            ${thN('ល.រ', '4.5%', 'center', '0', true)}
+            ${thN('គោត្តនាម និងនាម', '20.5%', 'left', '6px', false)}
             ${thN('ភេទ', '4.5%', 'center', '0', false)}
-            ${thV('មធ្យមប្រឡង', false)}
-            ${thV('មធ្យមភាគខែ', false)}
-            ${thV('មធ្យមភាគប្រចាំឆមាស', false)}
-            ${thV('ចំណាត់ថ្នាក់', false)}
+            ${thV('មធ្យមប្រឡង', '5%', false)}
+            ${thV('មធ្យមភាគខែ', '5%', false)}
+            ${thV('មធ្យមភាគប្រចាំឆមាស', '5.5%', false)}
+            ${thV('ចំណាត់ថ្នាក់', '5%', false)}
         </tr>`;
     } else {
         headerHtml = `<tr>
-            ${thN('ល.រ', '4%', 'center', '0', false)}
-            ${thN('គោត្តនាម និងនាម', '19%', 'left', '6px', false)}
+            ${thN('ល.រ', '4.5%', 'center', '0', false)}
+            ${thN('គោត្តនាម និងនាម', '20.5%', 'left', '6px', false)}
             ${thN('ភេទ', '4.5%', 'center', '0', false)}
-            ${thV('មធ្យមឆមាសទី១', false)}
-            ${thV('មធ្យមឆមាសទី២', false)}
-            ${thV('មធ្យមភាគប្រចាំឆ្នាំ', false)}
-            ${thV('ចំណាត់ថ្នាក់', false)}
-            ${thN('ល.រ', '4%', 'center', '0', true)}
-            ${thN('គោត្តនាម និងនាម', '19%', 'left', '6px', false)}
+            ${thV('មធ្យមឆមាសទី១', '5%', false)}
+            ${thV('មធ្យមឆមាសទី២', '5%', false)}
+            ${thV('មធ្យមភាគប្រចាំឆ្នាំ', '5.5%', false)}
+            ${thV('ចំណាត់ថ្នាក់', '5%', false)}
+            ${thN('ល.រ', '4.5%', 'center', '0', true)}
+            ${thN('គោត្តនាម និងនាម', '20.5%', 'left', '6px', false)}
             ${thN('ភេទ', '4.5%', 'center', '0', false)}
-            ${thV('មធ្យមឆមាសទី១', false)}
-            ${thV('មធ្យមឆមាសទី២', false)}
-            ${thV('មធ្យមភាគប្រចាំឆ្នាំ', false)}
-            ${thV('ចំណាត់ថ្នាក់', false)}
+            ${thV('មធ្យមឆមាសទី១', '5%', false)}
+            ${thV('មធ្យមឆមាសទី២', '5%', false)}
+            ${thV('មធ្យមភាគប្រចាំឆ្នាំ', '5.5%', false)}
+            ${thV('ចំណាត់ថ្នាក់', '5%', false)}
         </tr>`;
     }
 
     let rowsHtml = "";
-    const tdBase = `border: 1pt solid #cbd5e1; padding: 4px 2px; font-family: 'Khmer OS Siemreap', 'Siemreap', sans-serif; font-size: 11px; text-align: center; vertical-align: middle;`;
+    const tdBase = `border: 1pt solid #cbd5e1; padding: 4.5px 2px; font-family: 'Khmer OS Siemreap', 'Siemreap', sans-serif; font-size: 11px; text-align: center; vertical-align: middle;`;
 
     for (let i = 0; i < half; i++) {
         const s1 = stus[i];
@@ -3748,8 +3744,22 @@ window.printRankingTable = function() {
           
           @media print {
               .no-print { display: none !important; }
-              body { background: #fff; padding-top: 0 !important; }
-              #print-wrapper { margin: 0 !important; box-shadow: none !important; border-radius: 0 !important; width: 100% !important; height: auto !important; padding: 15mm !important; }
+              html, body { background: #fff !important; padding: 0 !important; margin: 0 !important; width: 100% !important; }
+              #print-wrapper { 
+                  margin: 0 !important; 
+                  padding: 0 !important; 
+                  box-shadow: none !important; 
+                  border: none !important; 
+                  border-radius: 0 !important; 
+                  width: 100% !important; 
+                  max-width: 100% !important; 
+                  height: auto !important; 
+                  overflow: visible !important;
+              }
+              #content-scaler {
+                  width: 100% !important;
+                  zoom: 1 !important;
+              }
           }
           
           #print-wrapper { 
@@ -3760,6 +3770,7 @@ window.printRankingTable = function() {
               background: white; 
               box-shadow: 0 10px 30px rgba(0,0,0,0.1); 
               border-radius: 8px; 
+              box-sizing: border-box;
               overflow: hidden;
           }
 
@@ -3769,25 +3780,26 @@ window.printRankingTable = function() {
               zoom: 1.0;
           }
           
-          .header-box { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; width: 100%; }
-          .header-left { text-align: left; }
-          .header-left p { margin: 0 0 4px 0; font-size: 11.5px; line-height: 1.6; font-family: 'Khmer OS Muol Light', 'Moul', serif; color: #0f172a; }
-          .header-right { text-align: center; }
-          .header-right p { margin: 0 0 4px 0; font-size: 12px; line-height: 1.6; font-family: 'Khmer OS Muol Light', 'Moul', serif; color: #0f172a; }
-          .title-box { text-align: center; margin: 8px 0 14px 0; }
-          .title-box h2 { margin: 0 0 4px 0; font-size: 16px; color: #1e3a8a; letter-spacing: 0.5px; font-family: 'Khmer OS Muol Light', 'Moul', serif; }
-          .title-box p { margin: 0; font-size: 12px; color: #dc2626; font-family: 'Khmer OS Muol Light', 'Moul', serif; }
+          .header-box { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px; width: 100%; }
+          .header-left { text-align: left; padding-top: 36px; }
+          .header-left p { margin: 0 0 3px 0; font-size: 11px; line-height: 1.5; font-family: 'Khmer OS Muol Light', 'Moul', serif; color: #0f172a; }
+          .header-right { text-align: center; padding-top: 4px; }
+          .header-right p { margin: 0 0 3px 0; font-size: 11.5px; line-height: 1.5; font-family: 'Khmer OS Muol Light', 'Moul', serif; color: #0f172a; }
           
-          table.rnk-table { width: 100%; border-collapse: collapse !important; margin-bottom: 14px; text-align: center; table-layout: fixed; border: 1pt solid #475569; }
+          .title-box { text-align: center; margin: 4px 0 10px 0; }
+          .title-box h2 { margin: 0 0 3px 0; font-size: 15px; color: #1e3a8a; letter-spacing: 0.5px; font-family: 'Khmer OS Muol Light', 'Moul', serif; }
+          .title-box p { margin: 0; font-size: 11.5px; color: #dc2626; font-family: 'Khmer OS Muol Light', 'Moul', serif; }
           
-          .summary-table { width: 100%; font-size: 12px; color: #1e293b; border-collapse: collapse; margin-bottom: 16px; line-height: 1.8; }
-          .summary-table td { padding: 3px 2px !important; border: none !important; text-align: left; font-family: 'Khmer OS Siemreap', 'Siemreap', sans-serif; }
-          .bottom-sig-container { font-size: 12px; display: flex; color: #1e293b; justify-content: space-between; align-items: flex-start; width: 100%; page-break-inside: avoid; padding: 0 24px; margin-top: 15px; }
-          .sig-box-left { width: 40%; text-align: center; }
-          .sig-box-right { width: 40%; text-align: center; }
+          table.rnk-table { width: 100%; border-collapse: collapse !important; margin-bottom: 12px; text-align: center; table-layout: fixed; border: 1pt solid #475569; }
           
-          .th-vert { height: 80px; max-height: 80px; vertical-align: middle; text-align: center; padding: 0; width: 34px; }
-          .div-vert { writing-mode: vertical-rl; transform: rotate(180deg); white-space: nowrap; height: 75px; display: flex; justify-content: center; align-items: center; text-align: center; margin: 0 auto; font-family: 'Khmer OS Muol Light', 'Moul', serif; font-size: 10.5px; font-weight: normal; color: #ffffff; }
+          .summary-table { width: 100%; font-size: 11.5px; color: #1e293b; border-collapse: collapse; margin-top: 8px; margin-bottom: 14px; line-height: 1.8; }
+          .summary-table td { padding: 2px 2px !important; border: none !important; text-align: left; font-family: 'Khmer OS Siemreap', 'Siemreap', sans-serif; }
+          .bottom-sig-container { font-size: 11.5px; display: flex; color: #1e293b; justify-content: space-between; align-items: flex-start; width: 100%; page-break-inside: avoid; padding: 0 20px; margin-top: 14px; }
+          .sig-box-left { width: 42%; text-align: center; }
+          .sig-box-right { width: 42%; text-align: center; }
+          
+          .th-vert { height: 75px; vertical-align: middle; text-align: center; padding: 0; }
+          .div-vert { writing-mode: vertical-rl; transform: rotate(180deg); white-space: nowrap; height: 70px; display: flex; justify-content: center; align-items: center; text-align: center; margin: 0 auto; font-family: 'Khmer OS Muol Light', 'Moul', serif; font-size: 10px; font-weight: normal; color: #ffffff; }
         </style>
       </head>
       <body>
@@ -3826,20 +3838,20 @@ window.printRankingTable = function() {
         <div id="print-wrapper">
           <div id="content-scaler">
             <div class="header-box">
-              <div class="header-left" style="padding-top: 40px;">
+              <div class="header-left">
                 <p>ការិយាល័យ អប់រំ យុវជន និងកីឡានៃរដ្ឋបាលស្រុក ${districtName}</p>
                 <p>${schoolName}</p>
               </div>
-              <div class="header-right" style="padding-top: 6px;">
+              <div class="header-right">
                 <p>ព្រះរាជាណាចក្រកម្ពុជា</p>
                 <p>ជាតិ សាសនា ព្រះមហាក្សត្រ</p>
-                <img src="${window.CMS_HEADER_SYMBOL_B64 || 'assets/images/header-flourish.png'}" class="header-flourish-symbol" alt="symbol" style="display: block; margin: 4px auto 0 auto; width: 135px; height: 11px; object-fit: contain;" />
+                <img src="${window.CMS_HEADER_SYMBOL_B64 || 'assets/images/header-flourish.png'}" class="header-flourish-symbol" alt="symbol" style="display: block; margin: 3px auto 0 auto; width: 120px; height: 10px; object-fit: contain;" />
               </div>
             </div>
             <div class="title-box">
               <h2>${titleText}</h2>
-              <div style="display: flex; justify-content: center; margin: 4px 0 6px 0;">
-                <img src="${window.CMS_TITLE_FLOURISH_B64 || 'assets/images/title-flourish.png'}" class="title-flourish-symbol" alt="flourish" style="display: block; margin: 0 auto; width: 230px; height: 14px; object-fit: contain;" />
+              <div style="display: flex; justify-content: center; margin: 2px 0 4px 0;">
+                <img src="${window.CMS_TITLE_FLOURISH_B64 || 'assets/images/title-flourish.png'}" class="title-flourish-symbol" alt="flourish" style="display: block; margin: 0 auto; width: 170px; height: 11px; object-fit: contain;" />
               </div>
               <p>${grade} | ឆ្នាំសិក្សា ${academicYear}</p>
             </div>
@@ -3848,20 +3860,21 @@ window.printRankingTable = function() {
             
             <table class="summary-table">
                 <tr><td>❖ បញ្ឈប់បញ្ជីត្រឹមលេខរៀង <b>${totalStus}</b> |  សិស្សសរុប <b>${totalStus}</b> នាក់ ស្រី <b>${femaleStus}</b> នាក់</td></tr>
-                <tr><td>❖ ${passLabel} <b>${passed}</b> នាក់ ( <b>${passPct}%</b> ) ស្រី <b>${passedF}</b> នាក់ ( <b>${passFPct}%</b> )</td></tr>
-                <tr><td>❖ ${failLabel} <b>${failed}</b> នាក់ ( <b>${failPct}%</b> ) ស្រី <b>${failedF}</b> នាក់ ( <b>${failFPct}%</b> )</td></tr>
+                <tr><td>❖ សិស្សជាប់មធ្យមភាគ <b>${passed}</b> នាក់ ( <b>${passPct}%</b> ) ស្រី <b>${passedF}</b> នាក់ ( <b>${passFPct}%</b> )</td></tr>
+                <tr><td>❖ សិស្សធ្លាក់មធ្យមភាគ <b>${failed}</b> នាក់ ( <b>${failPct}%</b> ) ស្រី <b>${failedF}</b> នាក់ ( <b>${failFPct}%</b> )</td></tr>
             </table>
+
             <div class="bottom-sig-container">
                 <div class="sig-box-left">
-                    <p style="margin: 0 0 4px 0; font-size: 12px; font-family: 'Siemreap', sans-serif;">បានឃើញ និងឯកភាព</p>
-                    <p style="margin: 0 0 60px 0; font-size: 12px; font-family: 'Khmer OS Muol Light', 'Moul', serif;">${sInfo.principal_role || "នាយក/នាយិកាសាលា"}</p>
-                    <p style="margin: 0; font-size: 12px; font-family: 'Khmer OS Muol Light', 'Moul', serif;">${principalName}</p>
+                    <p style="margin: 0 0 4px 0; font-family: 'Siemreap', sans-serif;">បានឃើញ និងឯកភាព</p>
+                    <p style="margin: 0 0 50px 0; font-family: 'Khmer OS Muol Light', 'Moul', serif; font-size: 11.5px;">នាយិកាសាលា</p>
+                    <p style="margin: 0; font-family: 'Khmer OS Muol Light', 'Moul', serif; font-size: 12px; color: #0f172a;">${principalName}</p>
                 </div>
                 <div class="sig-box-right">
-                    <p style="margin: 0 0 4px 0; font-size: 11px; font-family: 'Siemreap', sans-serif;">${lunarDateStr || 'ថ្ងៃ....................ខែ..................ឆ្នាំ...............ព.ស.២៥៧០'}</p>
-                    <p style="margin: 0 0 6px 0; font-size: 11px; font-family: 'Siemreap', sans-serif; font-weight: bold;">${solarDateStr}</p>
-                    <p style="margin: 0 0 60px 0; font-size: 12px; font-family: 'Khmer OS Muol Light', 'Moul', serif;">គ្រូបន្ទុកថ្នាក់</p>
-                    <p style="margin: 0; font-size: 12px; font-family: 'Khmer OS Muol Light', 'Moul', serif;">${teacherName}</p>
+                    ${lunarDateStr ? `<p style="margin: 0 0 2px 0; font-size: 10.5px; color: #475569;">${lunarDateStr}</p>` : ''}
+                    <p style="margin: 0 0 4px 0; font-size: 11px; font-weight: bold; color: #334155;">${solarDateStr}</p>
+                    <p style="margin: 0 0 50px 0; font-family: 'Khmer OS Muol Light', 'Moul', serif; font-size: 11.5px;">គ្រូប្រចាំថ្នាក់</p>
+                    <p style="margin: 0; font-family: 'Khmer OS Muol Light', 'Moul', serif; font-size: 12px; color: #0f172a;">${teacherName}</p>
                 </div>
             </div>
           </div>
@@ -3871,8 +3884,8 @@ window.printRankingTable = function() {
             function updateSettings() {
                 const size = document.getElementById('paperSize').value;
                 const orientation = document.getElementById('paperOrientation').value;
-                const zoom = document.getElementById('zoomLevel').value;
-                
+                const zoom = parseFloat(document.getElementById('zoomLevel').value);
+          
                 document.getElementById('dynamic-page-style').innerHTML = '@page { size: ' + size + ' ' + orientation + '; margin: 15mm; }';
                 
                 let wrapperWidth = "210mm";
