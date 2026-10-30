@@ -4605,9 +4605,9 @@ window.renderAcademicResultsReport = function(container, targetGrade, targetRoom
 
                 <!-- ស្ថិតិសង្ខេបក្រោមតារាង (Summary Statistics - ដូចទម្រង់គំរូជាក់ស្តែង) -->
                 <div class="mb-5 text-xs font-siemreap leading-relaxed text-slate-800 text-left px-1 space-y-1">
-                    <div>❖ បញ្ឈប់បញ្ជីត្រឹមលេខរៀង <b>${totalCount}</b> |  សិស្សសរុប <b>${totalCount}</b> នាក់ ស្រី <b>${femaleCount}</b> នាក់ ប្រុស <b>${maleCount}</b> នាក់<span class="hidden">សិស្សសរុបក្នុងថ្នាក់៖</span></div>
-                    <div>❖ សិស្សជាប់មធ្យមភាគ <b>${passCount}</b> នាក់ គិតជាភាគរយ <b>${passPct}%</b> (ស្រី <b>${passFemales}</b> នាក់ គិតជាភាគរយ <b>${passFemalesPct}%</b> )<span class="hidden">សិស្សជាប់មធ្យមភាគ (≥ 5.00)៖</span></div>
-                    <div>❖ សិស្សធ្លាក់មធ្យមភាគ <b>${failCount}</b> នាក់ គិតជាភាគរយ <b>${failPct}%</b> (ស្រី <b>${failFemales}</b> នាក់ គិតជាភាគរយ <b>${failFemalesPct}%</b> )<span class="hidden">សិស្សធ្លាក់មធ្យមភាគ (< 5.00)៖</span></div>
+                    <div>❖ បញ្ឈប់បញ្ជីត្រឹមលេខរៀង <b>${totalCount}</b> |  សិស្សសរុប <b>${totalCount}</b> នាក់ ស្រី <b>${femaleCount}</b> នាក់<span class="hidden"> ប្រុស ${maleCount} នាក់ សិស្សសរុបក្នុងថ្នាក់៖</span></div>
+                    <div>❖ សិស្សជាប់មធ្យមភាគ <b>${passCount}</b> នាក់ ( <b>${passPct}%</b> ) ស្រី <b>${passFemales}</b> នាក់ ( <b>${passFemalesPct}%</b> )<span class="hidden">សិស្សជាប់មធ្យមភាគ (≥ 5.00)៖</span></div>
+                    <div>❖ សិស្សធ្លាក់មធ្យមភាគ <b>${failCount}</b> នាក់ ( <b>${failPct}%</b> ) ស្រី <b>${failFemales}</b> នាក់ ( <b>${failFemalesPct}%</b> )<span class="hidden">សិស្សធ្លាក់មធ្យមភាគ (< 5.00)៖</span></div>
                 </div>
 
                 <!-- ហត្ថលេខា និងកាលបរិច្ឆេទផ្លូវការ -->
