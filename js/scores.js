@@ -4519,7 +4519,7 @@ window.printReportCards = function() {
       <title>បោះពុម្ពសៀវភៅតាមដានការសិក្សា</title>
       <style>
         @import url('https://fonts.googleapis.com/css2?family=Moul&family=Siemreap&display=swap');
-        @page { size: A4 portrait; margin: 0mm !important; }
+        @page { size: A4 portrait; margin: 1.5mm !important; }
         * { box-sizing: border-box; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
         html, body { margin: 0 !important; padding: 0 !important; background: #fff; font-family: 'Siemreap', sans-serif; display: flex; flex-direction: column; align-items: center; }
         .font-moul { font-family: 'Moul', serif !important; }
@@ -4959,7 +4959,7 @@ window.printOfficialHonorBoard = function() {
         <script src="https://cdn.tailwindcss.com"></script>
         <style>
           @import url('https://fonts.googleapis.com/css2?family=Moul&family=Siemreap&display=swap');
-          @page { size: A4 portrait; margin: 0mm !important; }
+          @page { size: A4 portrait; margin: 1.5mm !important; }
           * { box-sizing: border-box !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
           html, body { margin: 0 !important; padding: 0 !important; display: flex; justify-content: center; background: #fff; font-family: 'Siemreap', sans-serif; }
           .font-moul { font-family: 'Moul', serif !important; }

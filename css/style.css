@@ -253,10 +253,10 @@ h6,
     break-inside: avoid !important;
   }
 
-  /* A4 Structured Document Frame (Exact Fit with 0.5mm - 1mm Thin Margin matching Honor Board) */
+  /* A4 Structured Document Frame (Exact Fit with 1.5mm Margin & Portrait Default) */
   @page {
     size: A4 portrait;
-    margin: 0mm !important;
+    margin: 1.5mm !important;
   }
   .a4-page {
     box-sizing: border-box !important;

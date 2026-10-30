@@ -500,8 +500,8 @@ window.currentBorderSelection = localStorage.getItem('cms_report_border_mode') |
 window.getReportBorderLayerHtml = function() {
     const mode = localStorage.getItem('cms_report_border_mode') || 'none';
     let rawInset = localStorage.getItem('cms_report_border_inset');
-    if (!rawInset || rawInset === '4') {
-        rawInset = '1mm'; // Default to 1mm to match Honor Board thin margin (0.5mm - 1mm)
+    if (!rawInset || rawInset === '4' || rawInset === '1mm') {
+        rawInset = '1.5mm'; // Default to 1.5mm as requested by user
     }
     const inset = rawInset.endsWith('mm') || rawInset.endsWith('px') ? rawInset : rawInset + 'px';
     const opacityVal = (parseInt(localStorage.getItem('cms_report_border_opacity') || '100', 10) / 100);

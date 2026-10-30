@@ -862,7 +862,7 @@ window.CMSPrintManager = {
         const paperSize = options.paperSize || 'A4';
         const orientation = options.orientation || 'portrait';
         const scale = options.scale ? parseInt(options.scale, 10) : 100;
-        const margin = options.margin !== undefined ? options.margin : (paperSize === 'A3' ? '10mm' : '0mm');
+        const margin = options.margin !== undefined ? options.margin : (paperSize === 'A3' ? '10mm' : '1.5mm');
         const title = options.title || document.title || "បោះពុម្ពឯកសារ";
 
         let oldIframe = document.getElementById("cms_print_frame_helper");
@@ -1104,8 +1104,8 @@ window.CMSPrintManager = {
 
                 <span class="font-bold text-slate-500 ml-1">ទិស៖</span>
                 <select id="print_orient_${targetElementId}" onchange="window.CMSPrintManager.applyLivePreview('${targetElementId}')" class="bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg px-2 py-1 font-bold text-indigo-600 dark:text-indigo-400 outline-none cursor-pointer">
-                    <option value="landscape" ${defaultOrientation === 'landscape' ? 'selected' : ''}>ផ្តេក (Landscape)</option>
                     <option value="portrait" ${defaultOrientation === 'portrait' ? 'selected' : ''}>បញ្ឈរ (Portrait)</option>
+                    <option value="landscape" ${defaultOrientation === 'landscape' ? 'selected' : ''}>ផ្តេក (Landscape)</option>
                 </select>
 
                 <div class="flex items-center gap-1.5 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg px-2 py-1 ml-1 shadow-inner">
@@ -1347,7 +1347,7 @@ window.CMSPrintManager = {
         const ctx = this.getStandardContext(options);
         const titleText = options.title || "ឯកសារបោះពុម្ព";
         const paperSize = options.paperSize || "A4";
-        const orientation = options.orientation || "landscape";
+        const orientation = options.orientation || "portrait";
         const defaultZoom = options.defaultZoom || 1.0;
         const extraStyles = options.extraStyles || "";
         
@@ -1382,7 +1382,7 @@ window.CMSPrintManager = {
             <script src="https://cdn.tailwindcss.com"></script>
             <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
             <style id="dynamic-page-style">
-              @page { size: ${paperSize} ${orientation}; margin: 6mm; }
+              @page { size: ${paperSize} ${orientation}; margin: 1.5mm; }
             </style>
             <style>
               @import url('https://fonts.googleapis.com/css2?family=Moul&family=Siemreap:wght@400;700&display=swap');
@@ -1480,7 +1480,7 @@ window.CMSPrintManager = {
                     const orientation = document.getElementById('paperOrientation').value;
                     const zoom = document.getElementById('zoomLevel').value;
                     
-                    document.getElementById('dynamic-page-style').innerHTML = '@page { size: ' + size + ' ' + orientation + '; margin: 6mm; }';
+                    document.getElementById('dynamic-page-style').innerHTML = '@page { size: ' + size + ' ' + orientation + '; margin: 1.5mm; }';
                     
                     let wrapperWidth = "297mm";
                     if (orientation === 'landscape') {
