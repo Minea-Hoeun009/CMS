@@ -4598,12 +4598,12 @@ window.renderAcademicResultsReport = function(container, targetGrade, targetRoom
                 <div class="flex justify-between items-end text-xs pt-2 px-8 pb-4 font-siemreap">
                     <div class="text-center w-2/5">
                         <p class="mb-1 text-slate-700">បានឃើញ និងឯកភាព</p>
-                        <p class="font-moul text-slate-900 mb-6">នាយិកាសាលា</p>
+                        <p class="font-moul text-slate-900 mb-12">នាយិកាសាលា</p>
                     </div>
                     <div class="text-center w-2/5">
                         <p class="mb-0.5 text-slate-700 text-[10.5px]">${lunarDateStr}</p>
                         <p class="mb-1 text-slate-700 font-bold text-[10.5px]">${solarDateStr}</p>
-                        <p class="font-moul text-slate-900 mb-6">គ្រូបន្ទុកថ្នាក់</p>
+                        <p class="font-moul text-slate-900 mb-12">គ្រូបន្ទុកថ្នាក់</p>
                         <p class="font-moul text-slate-900 text-xs">${teacherName}</p>
                     </div>
                 </div>
@@ -4858,12 +4858,12 @@ window.renderAcademicResultsReport = function(container, targetGrade, targetRoom
                 <div class="flex justify-between items-end text-xs pt-2 px-8 pb-4 font-siemreap">
                     <div class="text-center w-2/5">
                         <p class="mb-1 text-slate-700">បានឃើញ និងឯកភាព</p>
-                        <p class="font-moul text-slate-900 mb-6">នាយិកាសាលា</p>
+                        <p class="font-moul text-slate-900 mb-12">នាយិកាសាលា</p>
                     </div>
                     <div class="text-center w-2/5">
                         <p class="mb-0.5 text-slate-700 text-[10.5px]">${lunarDateStr}</p>
                         <p class="mb-1 text-slate-700 font-bold text-[10.5px]">${solarDateStr}</p>
-                        <p class="font-moul text-slate-900 mb-6">គ្រូបន្ទុកថ្នាក់</p>
+                        <p class="font-moul text-slate-900 mb-12">គ្រូបន្ទុកថ្នាក់</p>
                         <p class="font-moul text-slate-900 text-xs">${teacherName}</p>
                     </div>
                 </div>
@@ -5121,12 +5121,12 @@ window.renderAcademicResultsReport = function(container, targetGrade, targetRoom
             <div class="flex justify-between items-end text-xs pt-2 px-8 pb-4 font-siemreap">
                     <div class="text-center w-2/5">
                         <p class="mb-1 text-slate-700">បានឃើញ និងឯកភាព</p>
-                        <p class="font-moul text-slate-900 mb-6">នាយិកាសាលា</p>
+                        <p class="font-moul text-slate-900 mb-12">នាយិកាសាលា</p>
                     </div>
                     <div class="text-center w-2/5">
                         <p class="mb-0.5 text-slate-700 text-[10.5px]">${lunarDateStr}</p>
                         <p class="mb-1 text-slate-700 font-bold text-[10.5px]">${solarDateStr}</p>
-                        <p class="font-moul text-slate-900 mb-6">គ្រូបន្ទុកថ្នាក់</p>
+                        <p class="font-moul text-slate-900 mb-12">គ្រូបន្ទុកថ្នាក់</p>
                         <p class="font-moul text-slate-900 text-xs">${teacherName}</p>
                     </div>
                 </div>
@@ -5425,12 +5425,12 @@ window.renderClassInventoryReport = function(container, targetGrade, targetRoom)
                 <div class="flex justify-between items-end text-xs">
                     <div class="text-center w-2/5">
                         <p class="mb-1 text-slate-700">បានឃើញ និងឯកភាព</p>
-                        <p class="font-moul text-slate-900 mb-5">នាយិកាសាលា</p>
+                        <p class="font-moul text-slate-900 mb-12">នាយិកាសាលា</p>
                     </div>
                     <div class="text-center w-2/5">
                         <p class="mb-0.5 text-slate-700 text-[10.5px]">${lunarDateStr}</p>
                         <p class="mb-1 text-slate-700 font-bold text-[10.5px]">${solarDateStr}</p>
-                        <p class="font-moul text-slate-900 mb-5">គ្រូបន្ទុកថ្នាក់</p>
+                        <p class="font-moul text-slate-900 mb-12">គ្រូបន្ទុកថ្នាក់</p>
                         <p class="font-moul text-slate-900 text-xs">${teacherName}</p>
                     </div>
                 </div>
@@ -5551,12 +5551,12 @@ window.renderInternalRulesReport = function(container, targetGrade, targetRoom) 
                 <div class="flex justify-between items-end text-xs">
                     <div class="text-center w-2/5">
                         <p class="mb-1 text-slate-700">បានឃើញ និងឯកភាព</p>
-                        <p class="font-moul text-slate-900 mb-5">នាយិកាសាលា</p>
+                        <p class="font-moul text-slate-900 mb-12">នាយិកាសាលា</p>
                     </div>
                     <div class="text-center w-2/5">
                         <p class="mb-0.5 text-slate-700 text-[10.5px]">${lunarDateStr}</p>
                         <p class="mb-1 text-slate-700 font-bold text-[10.5px]">${solarDateStr}</p>
-                        <p class="font-moul text-slate-900 mb-5">គ្រូបន្ទុកថ្នាក់</p>
+                        <p class="font-moul text-slate-900 mb-12">គ្រូបន្ទុកថ្នាក់</p>
                         <p class="font-moul text-slate-900 text-xs">${teacherName}</p>
                     </div>
                 </div>
@@ -5684,13 +5684,13 @@ window.renderClassPrinciplesReport = function(container, targetGrade, targetRoom
                 <div class="flex justify-between items-end text-xs">
                     <div class="text-center w-2/5">
                         <p class="mb-1 text-slate-700">បានឃើញ និងឯកភាព</p>
-                        <p class="font-moul text-slate-900 mb-5">គ្រូបន្ទុកថ្នាក់</p>
+                        <p class="font-moul text-slate-900 mb-12">គ្រូបន្ទុកថ្នាក់</p>
                         <p class="font-moul text-slate-900 text-xs">${teacherName}</p>
                     </div>
                     <div class="text-center w-2/5">
                         <p class="mb-0.5 text-slate-700 text-[10.5px]">${lunarDateStr}</p>
                         <p class="mb-1 text-slate-700 font-bold text-[10.5px]">${solarDateStr}</p>
-                        <p class="font-moul text-slate-900 mb-5">តំណាងសិស្ស / ប្រធានថ្នាក់</p>
+                        <p class="font-moul text-slate-900 mb-12">តំណាងសិស្ស / ប្រធានថ្នាក់</p>
                         <p class="font-moul text-slate-900 text-xs">${monitorStudent}</p>
                     </div>
                 </div>
@@ -5875,12 +5875,12 @@ window.renderCleaningScheduleReport = function(container, targetGrade, targetRoo
                 <div class="flex justify-between items-end text-xs">
                     <div class="text-center w-2/5">
                         <p class="mb-1 text-slate-700">បានឃើញ និងឯកភាព</p>
-                        <p class="font-moul text-slate-900 mb-5">នាយិកាសាលា</p>
+                        <p class="font-moul text-slate-900 mb-12">នាយិកាសាលា</p>
                     </div>
                     <div class="text-center w-2/5">
                         <p class="mb-0.5 text-slate-700 text-[10.5px]">${lunarDateStr}</p>
                         <p class="mb-1 text-slate-700 font-bold text-[10.5px]">${solarDateStr}</p>
-                        <p class="font-moul text-slate-900 mb-5">គ្រូបន្ទុកថ្នាក់</p>
+                        <p class="font-moul text-slate-900 mb-12">គ្រូបន្ទុកថ្នាក់</p>
                         <p class="font-moul text-slate-900 text-xs">${teacherName}</p>
                     </div>
                 </div>
@@ -6081,12 +6081,12 @@ window.renderBranchCommitteeReport = function(container, targetGrade, targetRoom
                 <div class="flex justify-between items-end text-xs">
                     <div class="text-center w-2/5">
                         <p class="mb-1 text-slate-700">បានឃើញ និងឯកភាព</p>
-                        <p class="font-moul text-slate-900 mb-5">នាយិកាសាលា</p>
+                        <p class="font-moul text-slate-900 mb-12">នាយិកាសាលា</p>
                     </div>
                     <div class="text-center w-2/5">
                         <p class="mb-0.5 text-slate-700 text-[10.5px]">${lunarDateStr}</p>
                         <p class="mb-1 text-slate-700 font-bold text-[10.5px]">${solarDateStr}</p>
-                        <p class="font-moul text-slate-900 mb-5">គ្រូបន្ទុកថ្នាក់</p>
+                        <p class="font-moul text-slate-900 mb-12">គ្រូបន្ទុកថ្នាក់</p>
                         <p class="font-moul text-slate-900 text-xs">${teacherName}</p>
                     </div>
                 </div>
