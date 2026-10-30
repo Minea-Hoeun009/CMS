@@ -538,7 +538,7 @@ window.getReportBorderLayerHtml = function() {
 window.applyReportBorderToContainer = function(container) {
     const target = container || document.getElementById('reportPaperArea');
     if (!target) return;
-    const a4Pages = target.querySelectorAll('.a4-page');
+    const a4Pages = target.querySelectorAll ? target.querySelectorAll('.a4-page, #reportKoKhoPrintArea') : [];
     const borderHtml = window.getReportBorderLayerHtml();
     a4Pages.forEach(page => {
         const existing = page.querySelector('.cms-report-border-layer');
@@ -4519,7 +4519,8 @@ window.renderAcademicResultsReport = function(container, targetGrade, targetRoom
         }).join('');
 
         container.innerHTML = `
-            <div id="reportKoKhoPrintArea" class="bg-white p-6 md:p-8 w-full shadow-2xl rounded-2xl border border-slate-200 text-slate-800" style="max-width: 210mm; min-height: 297mm; font-family: 'Khmer OS Siemreap', 'Siemreap', sans-serif;">
+            <div id="reportKoKhoPrintArea" class="a4-page bg-white p-6 md:p-8 w-full shadow-2xl rounded-2xl border border-slate-200 text-slate-800 relative overflow-hidden print:w-[210mm] print:h-[297mm] print:min-h-[297mm] print:rounded-none print:shadow-none" style="max-width: 210mm; min-height: 297mm; font-family: 'Khmer OS Siemreap', 'Siemreap', sans-serif; position: relative;">
+            ${window.getReportBorderLayerHtml ? window.getReportBorderLayerHtml() : ''}
                 
                 <div class="flex justify-between items-start mb-4 text-xs">
                     <div class="text-left leading-relaxed pt-3.5 sm:pt-4">
@@ -4594,15 +4595,15 @@ window.renderAcademicResultsReport = function(container, targetGrade, targetRoom
                 </div>
 
                 <!-- ហត្ថលេខា និងកាលបរិច្ឆេទផ្លូវការ -->
-                <div class="flex justify-between items-start text-xs pt-2 px-8 font-siemreap">
+                <div class="flex justify-between items-end text-xs pt-2 px-8 pb-4 font-siemreap">
                     <div class="text-center w-2/5">
                         <p class="mb-1 text-slate-700">បានឃើញ និងឯកភាព</p>
-                        <p class="font-moul text-slate-900 mb-14">នាយិកាសាលា</p>
+                        <p class="font-moul text-slate-900 mb-6">នាយិកាសាលា</p>
                     </div>
                     <div class="text-center w-2/5">
-                        <p class="mb-1 text-slate-700">${lunarDateStr}</p>
-                        <p class="mb-1 text-slate-700 font-bold">${solarDateStr}</p>
-                        <p class="font-moul text-slate-900 mb-14">គ្រូបន្ទុកថ្នាក់</p>
+                        <p class="mb-0.5 text-slate-700 text-[10.5px]">${lunarDateStr}</p>
+                        <p class="mb-1 text-slate-700 font-bold text-[10.5px]">${solarDateStr}</p>
+                        <p class="font-moul text-slate-900 mb-6">គ្រូបន្ទុកថ្នាក់</p>
                         <p class="font-moul text-slate-900 text-xs">${teacherName}</p>
                     </div>
                 </div>
@@ -4791,7 +4792,8 @@ window.renderAcademicResultsReport = function(container, targetGrade, targetRoom
         }
 
         container.innerHTML = `
-            <div id="reportKoKhoPrintArea" class="bg-white p-6 md:p-8 w-full shadow-2xl rounded-2xl border border-slate-200 text-slate-800" style="max-width: 210mm; min-height: 297mm; font-family: 'Khmer OS Siemreap', 'Siemreap', sans-serif;">
+            <div id="reportKoKhoPrintArea" class="a4-page bg-white p-6 md:p-8 w-full shadow-2xl rounded-2xl border border-slate-200 text-slate-800 relative overflow-hidden print:w-[210mm] print:h-[297mm] print:min-h-[297mm] print:rounded-none print:shadow-none" style="max-width: 210mm; min-height: 297mm; font-family: 'Khmer OS Siemreap', 'Siemreap', sans-serif; position: relative;">
+            ${window.getReportBorderLayerHtml ? window.getReportBorderLayerHtml() : ''}
                 
                 <div class="flex justify-between items-start mb-4 text-xs">
                     <div class="text-left leading-relaxed pt-3.5 sm:pt-4">
@@ -4853,15 +4855,15 @@ window.renderAcademicResultsReport = function(container, targetGrade, targetRoom
                 </div>
 
                 <!-- ហត្ថលេខា និងកាលបរិច្ឆេទផ្លូវការ -->
-                <div class="flex justify-between items-start text-xs pt-2 px-8 font-siemreap">
+                <div class="flex justify-between items-end text-xs pt-2 px-8 pb-4 font-siemreap">
                     <div class="text-center w-2/5">
                         <p class="mb-1 text-slate-700">បានឃើញ និងឯកភាព</p>
-                        <p class="font-moul text-slate-900 mb-14">នាយិកាសាលា</p>
+                        <p class="font-moul text-slate-900 mb-6">នាយិកាសាលា</p>
                     </div>
                     <div class="text-center w-2/5">
-                        <p class="mb-1 text-slate-700">${lunarDateStr}</p>
-                        <p class="mb-1 text-slate-700 font-bold">${solarDateStr}</p>
-                        <p class="font-moul text-slate-900 mb-14">គ្រូបន្ទុកថ្នាក់</p>
+                        <p class="mb-0.5 text-slate-700 text-[10.5px]">${lunarDateStr}</p>
+                        <p class="mb-1 text-slate-700 font-bold text-[10.5px]">${solarDateStr}</p>
+                        <p class="font-moul text-slate-900 mb-6">គ្រូបន្ទុកថ្នាក់</p>
                         <p class="font-moul text-slate-900 text-xs">${teacherName}</p>
                     </div>
                 </div>
@@ -5056,7 +5058,8 @@ window.renderAcademicResultsReport = function(container, targetGrade, targetRoom
     }
 
     container.innerHTML = `
-        <div id="reportKoKhoPrintArea" class="bg-white p-6 md:p-8 w-full shadow-2xl rounded-2xl border border-slate-200 text-slate-800" style="max-width: 210mm; min-height: 297mm; font-family: 'Khmer OS Siemreap', 'Siemreap', sans-serif;">
+        <div id="reportKoKhoPrintArea" class="a4-page bg-white p-6 md:p-8 w-full shadow-2xl rounded-2xl border border-slate-200 text-slate-800 relative overflow-hidden print:w-[210mm] print:h-[297mm] print:min-h-[297mm] print:rounded-none print:shadow-none" style="max-width: 210mm; min-height: 297mm; font-family: 'Khmer OS Siemreap', 'Siemreap', sans-serif; position: relative;">
+            ${window.getReportBorderLayerHtml ? window.getReportBorderLayerHtml() : ''}
             
             <div class="flex justify-between items-start mb-4 text-xs">
                 <div class="text-left leading-relaxed pt-3.5 sm:pt-4">
@@ -5115,18 +5118,18 @@ window.renderAcademicResultsReport = function(container, targetGrade, targetRoom
             </div>
 
             <!-- ហត្ថលេខា និងកាលបរិច្ឆេទផ្លូវការ -->
-            <div class="flex justify-between items-start text-xs pt-2 px-8 font-siemreap">
-                <div class="text-center w-2/5">
-                    <p class="mb-1 text-slate-700">បានឃើញ និងឯកភាព</p>
-                    <p class="font-moul text-slate-900 mb-14">នាយិកាសាលា</p>
+            <div class="flex justify-between items-end text-xs pt-2 px-8 pb-4 font-siemreap">
+                    <div class="text-center w-2/5">
+                        <p class="mb-1 text-slate-700">បានឃើញ និងឯកភាព</p>
+                        <p class="font-moul text-slate-900 mb-6">នាយិកាសាលា</p>
+                    </div>
+                    <div class="text-center w-2/5">
+                        <p class="mb-0.5 text-slate-700 text-[10.5px]">${lunarDateStr}</p>
+                        <p class="mb-1 text-slate-700 font-bold text-[10.5px]">${solarDateStr}</p>
+                        <p class="font-moul text-slate-900 mb-6">គ្រូបន្ទុកថ្នាក់</p>
+                        <p class="font-moul text-slate-900 text-xs">${teacherName}</p>
+                    </div>
                 </div>
-                <div class="text-center w-2/5">
-                    <p class="mb-1 text-slate-700">${lunarDateStr}</p>
-                    <p class="mb-1 text-slate-700 font-bold">${solarDateStr}</p>
-                    <p class="font-moul text-slate-900 mb-14">គ្រូបន្ទុកថ្នាក់</p>
-                    <p class="font-moul text-slate-900 text-xs">${teacherName}</p>
-                </div>
-            </div>
         </div>
     `;
 
@@ -5315,12 +5318,12 @@ window.renderClassInventoryReport = function(container, targetGrade, targetRoom)
 
     const renderTableCol = (items, startIdx) => items.map((it, idx) => `
         <tr data-inv-id="${it.id}" class="hover:bg-amber-50/40 transition">
-            <td class="border border-slate-300 px-1 py-0.5 text-center font-bold text-slate-700 w-7">${startIdx + idx}</td>
-            <td class="border border-slate-300 px-2 py-0.5 text-left text-slate-800 inv-name" contenteditable="true">${it.name}</td>
-            <td class="border border-slate-300 px-1 py-0.5 text-center font-bold text-indigo-700 w-10 inv-qty" contenteditable="true">${it.qty}</td>
-            <td class="border border-slate-300 px-1 py-0.5 text-center font-bold text-amber-700 w-9 inv-damaged" contenteditable="true">${it.damaged}</td>
-            <td class="border border-slate-300 px-1 py-0.5 text-center font-bold text-rose-700 w-9 inv-lost" contenteditable="true">${it.lost}</td>
-            <td class="border border-slate-300 px-1.5 py-0.5 text-left text-slate-500 inv-note" contenteditable="true">${it.note || ''}</td>
+            <td class="border border-slate-300 px-1 py-1.5 text-center font-bold text-slate-700 w-7">${startIdx + idx}</td>
+            <td class="border border-slate-300 px-2 py-1.5 text-left text-slate-800 inv-name text-[10.5px]" contenteditable="true">${it.name}</td>
+            <td class="border border-slate-300 px-1 py-1.5 text-center font-bold text-indigo-700 w-10 inv-qty" contenteditable="true">${it.qty}</td>
+            <td class="border border-slate-300 px-1 py-1.5 text-center font-bold text-amber-700 w-9 inv-damaged" contenteditable="true">${it.damaged}</td>
+            <td class="border border-slate-300 px-1 py-1.5 text-center font-bold text-rose-700 w-9 inv-lost" contenteditable="true">${it.lost}</td>
+            <td class="border border-slate-300 px-1.5 py-1.5 text-left text-slate-500 inv-note text-[10px]" contenteditable="true">${it.note || ''}</td>
         </tr>
     `).join('');
 
@@ -5352,7 +5355,8 @@ window.renderClassInventoryReport = function(container, targetGrade, targetRoom)
             </div>
 
             <!-- 2-Column Split Table (Items 1-16 on Left, 17-32 on Right) -->
-            <div class="grid grid-cols-2 gap-3 mb-3">
+            <div class="flex-1 my-auto flex flex-col justify-around gap-3">
+                <div class="grid grid-cols-2 gap-3">
                 <!-- Column 1 (Items 1 to 16) -->
                 <div>
                     <table class="w-full border-collapse border border-slate-300 text-[10px]">
@@ -5418,17 +5422,16 @@ window.renderClassInventoryReport = function(container, targetGrade, targetRoom)
                 </div>
             </div>
             </div>
-
             <!-- Signatures -->
             <div class="mt-4 pt-2 px-8 pb-4 font-siemreap shrink-0" style="position: relative; z-index: 10;">
-                <div class="flex justify-between items-start text-xs">
+                <div class="flex justify-between items-end text-xs">
                     <div class="text-center w-2/5">
                         <p class="mb-1 text-slate-700">បានឃើញ និងឯកភាព</p>
                         <p class="font-moul text-slate-900 mb-5">នាយិកាសាលា</p>
                     </div>
                     <div class="text-center w-2/5">
-                        <p class="mb-1 text-slate-700">${lunarDateStr}</p>
-                        <p class="mb-1 text-slate-700 font-bold">${solarDateStr}</p>
+                        <p class="mb-0.5 text-slate-700 text-[10.5px]">${lunarDateStr}</p>
+                        <p class="mb-1 text-slate-700 font-bold text-[10.5px]">${solarDateStr}</p>
                         <p class="font-moul text-slate-900 mb-5">គ្រូបន្ទុកថ្នាក់</p>
                         <p class="font-moul text-slate-900 text-xs">${teacherName}</p>
                     </div>
@@ -5489,7 +5492,7 @@ window.renderInternalRulesReport = function(container, targetGrade, targetRoom) 
     const rightCol = articles.slice(6, 12);
 
     const renderArticleCard = (art) => `
-        <div class="p-2.5 rounded-xl border border-rose-200/80 bg-rose-50/30 hover:bg-rose-50/70 transition flex items-start gap-2.5">
+        <div class="py-2.5 px-3 rounded-xl border border-rose-200/90 bg-rose-50/50 hover:bg-rose-50/80 transition flex items-start gap-2.5 shadow-xs">
             <span class="w-6 h-6 rounded-lg bg-rose-600 text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-sm">${art.num}</span>
             <div class="text-slate-800 text-xs leading-relaxed">
                 <b class="text-rose-900 font-siemreap">ប្រការ ${art.num} ៖</b> ${art.text}
@@ -5530,11 +5533,11 @@ window.renderInternalRulesReport = function(container, targetGrade, targetRoom) 
             </div>
 
             <!-- 12 Articles Grid (2 Columns x 6 Articles) -->
-            <div class="grid grid-cols-2 gap-3 mb-4">
-                <div class="space-y-2.5">
+            <div class="grid grid-cols-2 gap-3 mb-3 flex-1 my-auto">
+                <div class="flex flex-col justify-between gap-2.5 h-full">
                     ${leftCol.map(renderArticleCard).join('')}
                 </div>
-                <div class="space-y-2.5">
+                <div class="flex flex-col justify-between gap-2.5 h-full">
                     ${rightCol.map(renderArticleCard).join('')}
                 </div>
             </div>
@@ -5547,14 +5550,14 @@ window.renderInternalRulesReport = function(container, targetGrade, targetRoom) 
 
             <!-- Signatures -->
             <div class="mt-4 pt-2 px-8 pb-4 font-siemreap shrink-0" style="position: relative; z-index: 10;">
-                <div class="flex justify-between items-start text-xs">
+                <div class="flex justify-between items-end text-xs">
                     <div class="text-center w-2/5">
                         <p class="mb-1 text-slate-700">បានឃើញ និងឯកភាព</p>
                         <p class="font-moul text-slate-900 mb-5">នាយិកាសាលា</p>
                     </div>
                     <div class="text-center w-2/5">
-                        <p class="mb-1 text-slate-700">${lunarDateStr}</p>
-                        <p class="mb-1 text-slate-700 font-bold">${solarDateStr}</p>
+                        <p class="mb-0.5 text-slate-700 text-[10.5px]">${lunarDateStr}</p>
+                        <p class="mb-1 text-slate-700 font-bold text-[10.5px]">${solarDateStr}</p>
                         <p class="font-moul text-slate-900 mb-5">គ្រូបន្ទុកថ្នាក់</p>
                         <p class="font-moul text-slate-900 text-xs">${teacherName}</p>
                     </div>
@@ -5787,10 +5790,10 @@ window.renderCleaningScheduleReport = function(container, targetGrade, targetRoo
         const rows = dayGroups[d.key] || [];
         const rowsHtml = rows.map((r, idx) => `
             <tr class="hover:bg-emerald-50/40 transition">
-                <td class="border border-slate-300 px-1 py-1 text-center font-bold text-slate-700 w-6">${idx + 1}</td>
-                <td class="border border-slate-300 px-1.5 py-1 text-left text-slate-800 duty-name" contenteditable="true">${r.name || ''}</td>
-                <td class="border border-slate-300 px-1 py-1 text-center text-slate-600 w-8 duty-gender" contenteditable="true">${r.gender || ''}</td>
-                <td class="border border-slate-300 px-1 py-1 text-center text-emerald-800 font-bold w-16 duty-role" contenteditable="true">${r.role || 'សមាជិក'}</td>
+                <td class="border border-slate-300 px-1 py-1.5 text-center font-bold text-slate-700 w-6">${idx + 1}</td>
+                <td class="border border-slate-300 px-1.5 py-1.5 text-left text-slate-800 duty-name" contenteditable="true">${r.name || ''}</td>
+                <td class="border border-slate-300 px-1 py-1.5 text-center text-slate-600 w-8 duty-gender" contenteditable="true">${r.gender || ''}</td>
+                <td class="border border-slate-300 px-1 py-1.5 text-center text-emerald-800 font-bold w-16 duty-role" contenteditable="true">${r.role || 'សមាជិក'}</td>
             </tr>
         `).join('');
 
@@ -5854,11 +5857,13 @@ window.renderCleaningScheduleReport = function(container, targetGrade, targetRoo
             </div>
 
             <!-- 6 Day Tables (2 Rows x 3 Columns) -->
-            <div class="grid grid-cols-3 gap-2.5 mb-3">
-                ${days.slice(0, 3).map(renderDayCard).join('')}
-            </div>
-            <div class="grid grid-cols-3 gap-2.5 mb-3">
-                ${days.slice(3, 6).map(renderDayCard).join('')}
+            <div class="flex-1 my-auto flex flex-col justify-around gap-2.5">
+                <div class="grid grid-cols-3 gap-2.5">
+                    ${days.slice(0, 3).map(renderDayCard).join('')}
+                </div>
+                <div class="grid grid-cols-3 gap-2.5">
+                    ${days.slice(3, 6).map(renderDayCard).join('')}
+                </div>
             </div>
 
             <!-- Duty Scope Note -->
@@ -5869,14 +5874,14 @@ window.renderCleaningScheduleReport = function(container, targetGrade, targetRoo
 
             <!-- Signatures -->
             <div class="mt-4 pt-2 px-8 pb-4 font-siemreap shrink-0" style="position: relative; z-index: 10;">
-                <div class="flex justify-between items-start text-xs">
+                <div class="flex justify-between items-end text-xs">
                     <div class="text-center w-2/5">
                         <p class="mb-1 text-slate-700">បានឃើញ និងឯកភាព</p>
                         <p class="font-moul text-slate-900 mb-5">នាយិកាសាលា</p>
                     </div>
                     <div class="text-center w-2/5">
-                        <p class="mb-1 text-slate-700">${lunarDateStr}</p>
-                        <p class="mb-1 text-slate-700 font-bold">${solarDateStr}</p>
+                        <p class="mb-0.5 text-slate-700 text-[10.5px]">${lunarDateStr}</p>
+                        <p class="mb-1 text-slate-700 font-bold text-[10.5px]">${solarDateStr}</p>
                         <p class="font-moul text-slate-900 mb-5">គ្រូបន្ទុកថ្នាក់</p>
                         <p class="font-moul text-slate-900 text-xs">${teacherName}</p>
                     </div>
@@ -5994,92 +5999,95 @@ window.renderBranchCommitteeReport = function(container, targetGrade, targetRoom
                 <h4 class="font-moul text-xs text-red-600 mt-1">${gradeFull} | ឆ្នាំសិក្សា ${academicYear}</h4>
             </div>
 
-            <!-- Hierarchy Tree Layout (ដូចគំរូរូបភាពជាក់ស្តែង) -->
-            <div class="mb-4">
-                <!-- Level 1: Advisor & Class Monitor -->
-                <div class="flex justify-center gap-6 mb-2 relative">
-                    <div class="w-48 p-2 rounded-xl border-2 border-indigo-500 bg-indigo-50 text-center shadow-sm">
-                        <p class="text-[10px] text-indigo-700 font-bold uppercase">ទីប្រឹក្សាថ្នាក់រៀន</p>
-                        <p id="branchAdvisorName" class="font-moul text-xs text-indigo-950 mt-0.5" contenteditable="true">${advisorName}</p>
+            <!-- Hierarchy Tree & Table Container (Proportionally Spaced) -->
+            <div class="flex-1 my-auto flex flex-col justify-around gap-2">
+                <!-- Hierarchy Tree Layout -->
+                <div>
+                    <!-- Level 1: Advisor & Class Monitor -->
+                    <div class="flex justify-center gap-6 mb-2 relative">
+                        <div class="w-52 p-2.5 rounded-xl border-2 border-indigo-500 bg-indigo-50 text-center shadow-xs">
+                            <p class="text-[10px] text-indigo-700 font-bold uppercase">ទីប្រឹក្សាថ្នាក់រៀន</p>
+                            <p id="branchAdvisorName" class="font-moul text-xs text-indigo-950 mt-0.5" contenteditable="true">${advisorName}</p>
+                        </div>
+                        <div class="w-52 p-2.5 rounded-xl border-2 border-purple-600 bg-purple-50 text-center shadow-xs">
+                            <p class="text-[10px] text-purple-700 font-bold uppercase">ប្រធានថ្នាក់រួម</p>
+                            <p id="branchMonitorName" class="font-moul text-xs text-purple-950 mt-0.5" contenteditable="true">${monitorName}</p>
+                        </div>
                     </div>
-                    <div class="w-48 p-2 rounded-xl border-2 border-purple-600 bg-purple-50 text-center shadow-sm">
-                        <p class="text-[10px] text-purple-700 font-bold uppercase">ប្រធានថ្នាក់រួម</p>
-                        <p id="branchMonitorName" class="font-moul text-xs text-purple-950 mt-0.5" contenteditable="true">${monitorName}</p>
+
+                    <!-- Connector Line -->
+                    <div class="w-24 h-2.5 border-l-2 border-r-2 border-purple-300 mx-auto"></div>
+
+                    <!-- Level 2: 2 Deputies -->
+                    <div class="flex justify-center gap-6 mb-2">
+                        <div class="w-56 p-2 rounded-xl border border-teal-500 bg-teal-50 text-center shadow-xs">
+                            <p class="text-[10px] text-teal-700 font-bold">អនុប្រធានទី ១ (សិក្សា-វិន័យ)</p>
+                            <p id="branchDeputy1Name" class="font-bold text-xs text-teal-950 mt-0.5" contenteditable="true">${deputy1Name}</p>
+                        </div>
+                        <div class="w-56 p-2 rounded-xl border border-emerald-500 bg-emerald-50 text-center shadow-xs">
+                            <p class="text-[10px] text-emerald-700 font-bold">អនុប្រធានទី ២ (អនាម័យ-កីឡា)</p>
+                            <p id="branchDeputy2Name" class="font-bold text-xs text-emerald-950 mt-0.5" contenteditable="true">${deputy2Name}</p>
+                        </div>
+                    </div>
+
+                    <!-- Connector Line -->
+                    <div class="w-80 h-2 border-t-2 border-purple-300 mx-auto"></div>
+
+                    <!-- Level 3: 4 Department Officers -->
+                    <div class="grid grid-cols-4 gap-2 mt-1">
+                        <div class="p-2 rounded-lg border border-slate-300 bg-slate-50 text-center shadow-xs">
+                            <p class="text-[9px] text-slate-500 font-bold">សមាជិកទី ១ (សិក្សា)</p>
+                            <p id="branchMember1Name" class="font-bold text-[10.5px] text-slate-800" contenteditable="true">${member1Name}</p>
+                        </div>
+                        <div class="p-2 rounded-lg border border-slate-300 bg-slate-50 text-center shadow-xs">
+                            <p class="text-[9px] text-slate-500 font-bold">សមាជិកទី ២ (វិន័យ-វត្តមាន)</p>
+                            <p id="branchMember2Name" class="font-bold text-[10.5px] text-slate-800" contenteditable="true">${member2Name}</p>
+                        </div>
+                        <div class="p-2 rounded-lg border border-slate-300 bg-slate-50 text-center shadow-xs">
+                            <p class="text-[9px] text-slate-500 font-bold">សមាជិកទី ៣ (អនាម័យ)</p>
+                            <p id="branchMember3Name" class="font-bold text-[10.5px] text-slate-800" contenteditable="true">${member3Name}</p>
+                        </div>
+                        <div class="p-2 rounded-lg border border-slate-300 bg-slate-50 text-center shadow-xs">
+                            <p class="text-[9px] text-slate-500 font-bold">សមាជិកទី ៤ (ព័ត៌មាន-សិល្បៈ)</p>
+                            <p id="branchMember4Name" class="font-bold text-[10.5px] text-slate-800" contenteditable="true">${member4Name}</p>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Connector Line -->
-                <div class="w-24 h-3 border-l-2 border-r-2 border-purple-300 mx-auto"></div>
-
-                <!-- Level 2: 2 Deputies -->
-                <div class="flex justify-center gap-6 mb-2">
-                    <div class="w-52 p-2 rounded-xl border border-teal-500 bg-teal-50 text-center shadow-sm">
-                        <p class="text-[10px] text-teal-700 font-bold">អនុប្រធានទី ១ (សិក្សា-វិន័យ)</p>
-                        <p id="branchDeputy1Name" class="font-bold text-xs text-teal-950 mt-0.5" contenteditable="true">${deputy1Name}</p>
+                <!-- Level 4: 6 Sub-Branch Groups Table (អនុសាខាទាំង ៦) -->
+                <div>
+                    <div class="bg-purple-100/80 px-3 py-1 rounded-t-lg font-moul text-xs text-purple-950 flex justify-between items-center border border-slate-300 border-b-0">
+                        <span>តារាងបែងចែកសិស្សតាមអនុសាខាទាំង ៦</span>
+                        <span class="font-siemreap text-[10px] text-purple-800 font-bold">កុមារ និងយុវជន</span>
                     </div>
-                    <div class="w-52 p-2 rounded-xl border border-emerald-500 bg-emerald-50 text-center shadow-sm">
-                        <p class="text-[10px] text-emerald-700 font-bold">អនុប្រធានទី ២ (អនាម័យ-កីឡា)</p>
-                        <p id="branchDeputy2Name" class="font-bold text-xs text-emerald-950 mt-0.5" contenteditable="true">${deputy2Name}</p>
-                    </div>
+                    <table class="w-full border-collapse border border-slate-300 text-[10px]">
+                        <thead>
+                            <tr class="bg-slate-100 text-slate-900 font-bold text-[9.5px]">
+                                <th class="border border-slate-300 p-1 w-24 text-center">អនុសាខា</th>
+                                <th class="border border-slate-300 p-1 w-32 text-center">ប្រធានសាខា</th>
+                                <th class="border border-slate-300 p-1 w-28 text-center">អនុប្រធាន</th>
+                                <th class="border border-slate-300 p-1 text-center">សមាជិកក្នុងក្រុម</th>
+                                <th class="border border-slate-300 p-1 w-44 text-center">ភារកិច្ចទទួលខុសត្រូវ</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${groupRowsHtml}
+                        </tbody>
+                    </table>
                 </div>
-
-                <!-- Connector Line -->
-                <div class="w-80 h-2 border-t-2 border-purple-300 mx-auto"></div>
-
-                <!-- Level 3: 4 Department Officers -->
-                <div class="grid grid-cols-4 gap-2 mb-3 mt-1">
-                    <div class="p-1.5 rounded-lg border border-slate-300 bg-slate-50 text-center shadow-xs">
-                        <p class="text-[9px] text-slate-500 font-bold">សមាជិកទី ១ (សិក្សា)</p>
-                        <p id="branchMember1Name" class="font-bold text-[10.5px] text-slate-800" contenteditable="true">${member1Name}</p>
-                    </div>
-                    <div class="p-1.5 rounded-lg border border-slate-300 bg-slate-50 text-center shadow-xs">
-                        <p class="text-[9px] text-slate-500 font-bold">សមាជិកទី ២ (វិន័យ-វត្តមាន)</p>
-                        <p id="branchMember2Name" class="font-bold text-[10.5px] text-slate-800" contenteditable="true">${member2Name}</p>
-                    </div>
-                    <div class="p-1.5 rounded-lg border border-slate-300 bg-slate-50 text-center shadow-xs">
-                        <p class="text-[9px] text-slate-500 font-bold">សមាជិកទី ៣ (អនាម័យ)</p>
-                        <p id="branchMember3Name" class="font-bold text-[10.5px] text-slate-800" contenteditable="true">${member3Name}</p>
-                    </div>
-                    <div class="p-1.5 rounded-lg border border-slate-300 bg-slate-50 text-center shadow-xs">
-                        <p class="text-[9px] text-slate-500 font-bold">សមាជិកទី ៤ (ព័ត៌មាន-សិល្បៈ)</p>
-                        <p id="branchMember4Name" class="font-bold text-[10.5px] text-slate-800" contenteditable="true">${member4Name}</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Level 4: 6 Sub-Branch Groups Table (អនុសាខាទាំង ៦) -->
-            <div class="mb-3">
-                <div class="bg-purple-100/80 px-3 py-1 rounded-t-lg font-moul text-xs text-purple-950 flex justify-between items-center border border-slate-300 border-b-0">
-                    <span>តារាងបែងចែកសិស្សតាមអនុសាខាទាំង ៦</span>
-                    <span class="font-siemreap text-[10px] text-purple-800 font-bold">កុមារ និងយុវជន</span>
-                </div>
-                <table class="w-full border-collapse border border-slate-300 text-[10px]">
-                    <thead>
-                        <tr class="bg-slate-100 text-slate-900 font-bold text-[9.5px]">
-                            <th class="border border-slate-300 p-1 w-24 text-center">អនុសាខា</th>
-                            <th class="border border-slate-300 p-1 w-32 text-center">ប្រធានសាខា</th>
-                            <th class="border border-slate-300 p-1 w-28 text-center">អនុប្រធាន</th>
-                            <th class="border border-slate-300 p-1 text-center">សមាជិកក្នុងក្រុម</th>
-                            <th class="border border-slate-300 p-1 w-44 text-center">ភារកិច្ចទទួលខុសត្រូវ</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${groupRowsHtml}
-                    </tbody>
-                </table>
             </div>
             </div>
 
             <!-- Signatures -->
             <div class="mt-4 pt-2 px-8 pb-4 font-siemreap shrink-0" style="position: relative; z-index: 10;">
-                <div class="flex justify-between items-start text-xs">
+                <div class="flex justify-between items-end text-xs">
                     <div class="text-center w-2/5">
                         <p class="mb-1 text-slate-700">បានឃើញ និងឯកភាព</p>
                         <p class="font-moul text-slate-900 mb-5">នាយិកាសាលា</p>
                     </div>
                     <div class="text-center w-2/5">
-                        <p class="mb-1 text-slate-700">${lunarDateStr}</p>
-                        <p class="mb-1 text-slate-700 font-bold">${solarDateStr}</p>
+                        <p class="mb-0.5 text-slate-700 text-[10.5px]">${lunarDateStr}</p>
+                        <p class="mb-1 text-slate-700 font-bold text-[10.5px]">${solarDateStr}</p>
                         <p class="font-moul text-slate-900 mb-5">គ្រូបន្ទុកថ្នាក់</p>
                         <p class="font-moul text-slate-900 text-xs">${teacherName}</p>
                     </div>
