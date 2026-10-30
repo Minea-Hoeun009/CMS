@@ -124,14 +124,6 @@ window.loadReportsView = function() {
                         </select>
                     </div>
                 </div>
-                    <div class="flex items-center gap-2">
-                        <span class="text-xs font-bold text-slate-500 dark:text-slate-400"><i class="fa-solid fa-calendar-days text-amber-500"></i> ឆ្នាំសិក្សា៖</span>
-                        <div class="flex items-center gap-1.5 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl px-3 py-1.5 shadow-inner">
-                            <select id="reportAcademicYearSelect" onchange="window.handleReportYearChange(this.value)" class="border-none bg-transparent text-xs sm:text-sm font-bold text-amber-600 dark:text-amber-400 outline-none cursor-pointer font-siemreap py-0">
-                                ${yearOptions}
-                            </select>
-                        </div>
-                    </div>
 
                 <div class="flex items-center gap-2">
                     <button type="button" id="btnSyncReportsGAS" onclick="window.syncReportsToGoogleSheets(this)" class="px-3.5 py-1.5 bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-700 hover:to-teal-800 text-white rounded-xl text-xs font-bold shadow-sm transition flex items-center gap-1.5 active:scale-95 outline-none" title="រក្សាទុករបាយការណ៍ទាំងអស់ទៅក្នុង Google Sheets"><i class="fa-solid fa-cloud-arrow-up text-amber-300"></i><span>រក្សាទុកក្នុង Sheets</span></button>

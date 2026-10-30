@@ -776,21 +776,6 @@
               <span class="hidden xl:inline">Sync Sheet</span>
             </button>
 
-            <!-- ជម្រើសឆ្នាំសិក្សា (Academic Year Dropdown) -->
-            <div class="hidden sm:flex items-center gap-1 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl px-2.5 py-1.5 shadow-sm">
-               <i class="fa-solid fa-calendar text-blue-500 text-xs"></i>
-               <select id="globalAcademicYear" onchange="window.handleYearChange()" class="bg-transparent text-xs font-bold text-slate-700 dark:text-slate-200 outline-none cursor-pointer font-siemreap">
-                  <option value="all">គ្រប់ឆ្នាំសិក្សា</option>
-                  <option value="2024-2025">២០២៤-២០២៥</option>
-                  <option value="2025-2026">២០២៥-២០២៦</option>
-                  <option value="2026-2027" selected>២០២៦-២០២៧</option>
-                  <option value="2027-2028">២០២៧-២០២៨</option>
-                  <option value="2028-2029">២០២៨-២០២៩</option>
-                  <option value="2029-2030">២០២៩-២០៣០</option>
-                  <option value="2030-2031">២០៣០-២០៣១</option>
-               </select>
-            </div>
-
             <!-- កំណត់កាលបរិច្ឆេទប្រព័ន្ធ (System Date Modal Trigger) -->
             <button id="btnHeaderDateSettings" type="button" onclick="window.toggleSharedDatePanel()" class="hidden sm:flex items-center gap-1.5 bg-slate-50 dark:bg-slate-700 hover:bg-slate-100 dark:hover:bg-slate-600 border border-slate-200 dark:border-slate-600 rounded-xl px-2.5 py-1.5 shadow-sm text-xs font-bold text-slate-700 dark:text-slate-200 transition outline-none" title="កំណត់កាលបរិច្ឆេទប្រព័ន្ធ (រត់បំពេញគ្រប់ផ្នែក)">
                <i class="fa-solid fa-calendar-day text-indigo-500 text-xs"></i>
@@ -801,6 +786,21 @@
             <button type="button" onclick="toggleDarkMode()" title="ប្តូរពណ៌" class="w-8 h-8 flex items-center justify-center rounded-xl bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-700 dark:text-amber-400 transition-colors outline-none shadow-sm">
               <i id="darkModeIcon" class="fa-solid fa-moon"></i>
             </button>
+
+                        <!-- ជម្រើសឆ្នាំសិក្សា (Academic Year Dropdown - កំណត់តែមួយកន្លែងសម្រាប់ប្រព័ន្ធទាំងមូល ដាក់នៅជិតការជូនដំណឹង) -->
+            <div class="flex items-center gap-1.5 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl px-2.5 py-1.5 shadow-sm">
+               <i class="fa-solid fa-calendar text-blue-500 text-xs"></i>
+               <select id="globalAcademicYear" onchange="window.handleYearChange()" class="bg-transparent text-xs font-bold text-slate-700 dark:text-slate-200 outline-none cursor-pointer font-siemreap" title="កំណត់ឆ្នាំសិក្សាសម្រាប់ប្រព័ន្ធទាំងមូល">
+                  <option value="all">គ្រប់ឆ្នាំសិក្សា</option>
+                  <option value="2024-2025">២០២៤-២០២៥</option>
+                  <option value="2025-2026">២០២៥-២០២៦</option>
+                  <option value="2026-2027" selected>២០២៦-២០២៧</option>
+                  <option value="2027-2028">២០២៧-២០២៨</option>
+                  <option value="2028-2029">២០២៨-២០២៩</option>
+                  <option value="2029-2030">២០២៩-២០៣០</option>
+                  <option value="2030-2031">២០៣០-២០៣១</option>
+               </select>
+            </div>
 
             <!-- Notification Bell -->
             <button id="btnNotificationCenter" type="button" onclick="window.openNotificationCenter()" title="មជ្ឈមណ្ឌលដំណឹង" class="relative w-8 h-8 flex items-center justify-center rounded-xl bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-700 dark:text-slate-200 transition-colors outline-none shadow-sm">

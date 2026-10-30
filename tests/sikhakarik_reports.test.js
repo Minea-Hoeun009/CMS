@@ -820,9 +820,7 @@ describe('MoEYS Sikha-karik Booklet & Centralized Reports Suite', () => {
             return getOrCreateEl(id);
         };
         context.window.loadReportsView();
-        assert.ok(container.innerHTML.includes('id="reportAcademicYearSelect"'), 'Must render reportAcademicYearSelect');
-        assert.ok(container.innerHTML.includes('value="2028-2029" selected'), 'Must select active academic year 2028-2029');
-        assert.ok(container.innerHTML.includes('២០២៨-២០២៩') || container.innerHTML.includes('2028-2029'), 'Must format year options');
+        assert.ok(container.innerHTML.includes('២០២៨-២០២៩') || container.innerHTML.includes('2028-2029'), 'Reports View must reflect active academic year 2028-2029 in executive header');
 
         // 4. Verify Academic Results Report reflects switched year
         const paperArea = { innerHTML: '' };
