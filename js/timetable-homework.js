@@ -850,8 +850,7 @@ window.TimetableHomeworkManager = {
                                             <td>
                                                 ${slot.subject ? `
                                                     <div class="sub-name">${slot.subject}</div>
-                                                    ${slot.teacher_name ? `<div class="teacher-name">គ្រូ៖ ${slot.teacher_name}</div>` : ''}
-                                                    ${slot.room ? `<div style="font-size: 8.5pt; color: #64748b;">បន្ទប់ ${slot.room}</div>` : ''}
+                                                    
                                                 ` : `<span style="color: #cbd5e1;">- ទំនេរ -</span>`}
                                             </td>
                                         `;
@@ -895,8 +894,7 @@ window.TimetableHomeworkManager = {
                                             <td>
                                                 ${slot.subject ? `
                                                     <div class="sub-name">${slot.subject}</div>
-                                                    ${slot.teacher_name ? `<div class="teacher-name">គ្រូ៖ ${slot.teacher_name}</div>` : ''}
-                                                    ${slot.room ? `<div style="font-size: 8.5pt; color: #64748b;">បន្ទប់ ${slot.room}</div>` : ''}
+                                                    
                                                 ` : `<span style="color: #cbd5e1;">- ទំនេរ -</span>`}
                                             </td>
                                         `;
@@ -1033,8 +1031,7 @@ window.TimetableHomeworkManager = {
                                             <td>
                                                 ${slot.subject ? `
                                                     <div class="sub-name">${slot.subject}</div>
-                                                    ${slot.teacher_name ? `<div class="teacher-name">គ្រូ៖ ${slot.teacher_name}</div>` : ''}
-                                                    ${slot.room ? `<div style="font-size: 8.5pt; color: #64748b;">បន្ទប់ ${slot.room}</div>` : ''}
+                                                    
                                                 ` : `<span style="color: #cbd5e1;">- ទំនេរ -</span>`}
                                             </td>
                                         `;
@@ -1078,8 +1075,7 @@ window.TimetableHomeworkManager = {
                                             <td>
                                                 ${slot.subject ? `
                                                     <div class="sub-name">${slot.subject}</div>
-                                                    ${slot.teacher_name ? `<div class="teacher-name">គ្រូ៖ ${slot.teacher_name}</div>` : ''}
-                                                    ${slot.room ? `<div style="font-size: 8.5pt; color: #64748b;">បន្ទប់ ${slot.room}</div>` : ''}
+                                                    
                                                 ` : `<span style="color: #cbd5e1;">- ទំនេរ -</span>`}
                                             </td>
                                         `;
@@ -2026,17 +2022,8 @@ window.TimetableHomeworkManager = {
                                         <span>${slotData.subject}</span>
                                         <i class="fa-solid fa-pen-to-square text-[10px] opacity-0 group-hover:opacity-100 transition"></i>
                                     </div>
-                                    ${slotData.teacher_name ? `
-                                        <div class="text-[10.5px] opacity-90 truncate mt-1 flex items-center gap-1 font-medium">
-                                            <i class="fa-solid fa-user-tie text-[9px]"></i>
-                                            <span>${slotData.teacher_name}</span>
-                                        </div>
-                                    ` : ''}
-                                    ${slotData.room ? `
-                                        <div class="text-[9.5px] opacity-75 truncate mt-0.5 font-mono">
-                                            <i class="fa-solid fa-door-open text-[8px] mr-0.5"></i>${slotData.room}
-                                        </div>
-                                    ` : ''}
+                                    
+                                    
                                 </div>
                             ` : `
                                 <div class="py-3 text-slate-300 dark:text-slate-600 text-[11px] group-hover:text-emerald-600 flex flex-col items-center justify-center gap-1">

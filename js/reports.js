@@ -5315,7 +5315,7 @@ window.renderClassInventoryReport = function(container, targetGrade, targetRoom)
     `).join('');
 
     container.innerHTML = `
-        <div class="a4-page bg-white shadow-xl rounded-lg mx-auto p-6 md:p-8 font-siemreap text-slate-800 relative w-full min-h-[297mm] text-[11px] leading-relaxed flex flex-col justify-start" style="box-sizing: border-box; max-width: 210mm;">
+        <div class="a4-page bg-white shadow-xl rounded-lg mx-auto p-6 md:p-8 font-siemreap text-slate-800 relative w-full text-[11px] leading-relaxed flex flex-col justify-start" style="box-sizing: border-box; max-width: 210mm; min-height: auto !important; height: auto !important; justify-content: flex-start !important;">
             ${window.getReportBorderLayerHtml ? window.getReportBorderLayerHtml() : ''}
             <!-- Main Content Area -->
             <div style="position: relative; z-index: 10;">
@@ -5488,7 +5488,7 @@ window.renderInternalRulesReport = function(container, targetGrade, targetRoom) 
     `;
 
     container.innerHTML = `
-        <div class="a4-page bg-white shadow-xl rounded-lg mx-auto p-6 md:p-8 font-siemreap text-slate-800 relative w-full min-h-[297mm] text-[11px] leading-relaxed flex flex-col justify-start" style="box-sizing: border-box; max-width: 210mm;">
+        <div class="a4-page bg-white shadow-xl rounded-lg mx-auto p-6 md:p-8 font-siemreap text-slate-800 relative w-full text-[11px] leading-relaxed flex flex-col justify-start" style="box-sizing: border-box; max-width: 210mm; min-height: auto !important; height: auto !important; justify-content: flex-start !important;">
             ${window.getReportBorderLayerHtml ? window.getReportBorderLayerHtml() : ''}
             <!-- Main Content Area -->
             <div style="position: relative; z-index: 10;">
@@ -5626,7 +5626,7 @@ window.renderClassPrinciplesReport = function(container, targetGrade, targetRoom
     `;
 
     container.innerHTML = `
-        <div class="a4-page bg-white shadow-xl rounded-lg mx-auto p-6 md:p-8 font-siemreap text-slate-800 relative w-full min-h-[297mm] text-[11px] leading-relaxed flex flex-col justify-start" style="box-sizing: border-box; max-width: 210mm;">
+        <div class="a4-page bg-white shadow-xl rounded-lg mx-auto p-6 md:p-8 font-siemreap text-slate-800 relative w-full text-[11px] leading-relaxed flex flex-col justify-start" style="box-sizing: border-box; max-width: 210mm; min-height: auto !important; height: auto !important; justify-content: flex-start !important;">
             ${window.getReportBorderLayerHtml ? window.getReportBorderLayerHtml() : ''}
             <!-- Main Content Area -->
             <div style="position: relative; z-index: 10;">
@@ -5808,7 +5808,7 @@ window.renderCleaningScheduleReport = function(container, targetGrade, targetRoo
     };
 
     container.innerHTML = `
-        <div class="a4-page bg-white shadow-xl rounded-lg mx-auto p-6 md:p-8 font-siemreap text-slate-800 relative w-full min-h-[297mm] text-[11px] leading-relaxed flex flex-col justify-start" style="box-sizing: border-box; max-width: 210mm;">
+        <div class="a4-page bg-white shadow-xl rounded-lg mx-auto p-6 md:p-8 font-siemreap text-slate-800 relative w-full text-[11px] leading-relaxed flex flex-col justify-start" style="box-sizing: border-box; max-width: 210mm; min-height: auto !important; height: auto !important; justify-content: flex-start !important;">
             ${window.getReportBorderLayerHtml ? window.getReportBorderLayerHtml() : ''}
             <!-- Main Content Area -->
             <div style="position: relative; z-index: 10;">
@@ -5958,7 +5958,7 @@ window.renderBranchCommitteeReport = function(container, targetGrade, targetRoom
     }).join('');
 
     container.innerHTML = `
-        <div class="a4-page bg-white shadow-xl rounded-lg mx-auto p-6 md:p-8 font-siemreap text-slate-800 relative w-full min-h-[297mm] text-[11px] leading-relaxed flex flex-col justify-start" style="box-sizing: border-box; max-width: 210mm;">
+        <div class="a4-page bg-white shadow-xl rounded-lg mx-auto p-6 md:p-8 font-siemreap text-slate-800 relative w-full text-[11px] leading-relaxed flex flex-col justify-start" style="box-sizing: border-box; max-width: 210mm; min-height: auto !important; height: auto !important; justify-content: flex-start !important;">
             ${window.getReportBorderLayerHtml ? window.getReportBorderLayerHtml() : ''}
             <!-- Main Content Area -->
             <div style="position: relative; z-index: 10;">

@@ -911,12 +911,31 @@ window.CMSPrintManager = {
             clone.style.padding = "0";
             clone.style.minHeight = "auto";
         }
+        // Enforce natural compact flow for all .a4-page elements so signatures stay close to content
+        const a4Pages = clone.querySelectorAll ? clone.querySelectorAll('.a4-page') : [];
+        if (a4Pages.length > 0) {
+            a4Pages.forEach(p => {
+                p.style.setProperty('min-height', 'auto', 'important');
+                p.style.setProperty('height', 'auto', 'important');
+                p.style.setProperty('justify-content', 'flex-start', 'important');
+                p.classList.remove('min-h-[297mm]', 'justify-between');
+                p.classList.add('justify-start');
+            });
+        }
+        if (clone.classList && clone.classList.contains('a4-page')) {
+            clone.style.setProperty('min-height', 'auto', 'important');
+            clone.style.setProperty('height', 'auto', 'important');
+            clone.style.setProperty('justify-content', 'flex-start', 'important');
+            clone.classList.remove('min-h-[297mm]', 'justify-between');
+            clone.classList.add('justify-start');
+        }
         if (clone.firstElementChild) {
             const isA4Page = clone.firstElementChild.classList && clone.firstElementChild.classList.contains('a4-page');
             if (clone.firstElementChild.style) {
                 clone.firstElementChild.style.boxShadow = "none";
-                clone.firstElementChild.style.minHeight = "auto";
-                clone.firstElementChild.style.height = "auto";
+                clone.firstElementChild.style.setProperty('min-height', 'auto', 'important');
+                clone.firstElementChild.style.setProperty('height', 'auto', 'important');
+                clone.firstElementChild.style.setProperty('justify-content', 'flex-start', 'important');
                 if (!isA4Page) {
                     clone.firstElementChild.style.border = "none";
                     clone.firstElementChild.style.borderRadius = "0";
@@ -992,7 +1011,7 @@ window.CMSPrintManager = {
                     tfoot { display: table-footer-group !important; }
                     
                     /* A4 Page Structured Layout - Compact & Natural Flow without Bottom-Dropping */
-                    .a4-page {
+                    .a4-page, [class*="min-h-"] {
                         box-sizing: border-box !important;
                         width: 100% !important;
                         max-width: 100% !important;
