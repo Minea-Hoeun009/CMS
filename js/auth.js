@@ -442,6 +442,11 @@ window.AppAuth = {
         localStorage.removeItem('auth_roles');
         localStorage.removeItem('auth_assigned_grade');
         localStorage.removeItem('auth_assigned_room');
+        localStorage.removeItem('auth_teacher_grade');
+        localStorage.removeItem('auth_teacher_room');
+        localStorage.removeItem('auth_teacher_level');
+        localStorage.removeItem('selected_level');
+        localStorage.removeItem('selected_room');
         localStorage.removeItem('auth_school_id');
         localStorage.removeItem('auth_status');
         localStorage.removeItem('auth_session_active');
@@ -1338,7 +1343,15 @@ window.renderAccountModal = function() {
                             </div>
                             <div>
                                 <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1 uppercase tracking-wider">ឆ្នាំសិក្សា</label>
-                                <input type="text" id="acc_academic_year" placeholder="២០២៦-២០២៧" class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-xs font-bold outline-none focus:ring-2 focus:ring-indigo-500 text-slate-800 dark:text-white font-mono text-center">
+                                <select id="acc_academic_year" class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-xs font-bold outline-none focus:ring-2 focus:ring-indigo-500 text-slate-800 dark:text-white font-mono text-center cursor-pointer">
+        <option value="2024-2025">២០២៤-២០២៥</option>
+        <option value="2025-2026">២០២៥-២០២៦</option>
+        <option value="2026-2027" selected>២០២៦-២០២៧</option>
+        <option value="2027-2028">២០២៧-២០២៨</option>
+        <option value="2028-2029">២០២៨-២០២៩</option>
+        <option value="2029-2030">២០២៩-២០៣០</option>
+        <option value="2030-2031">២០៣០-២០៣១</option>
+    </select>
                             </div>
                         </div>
 

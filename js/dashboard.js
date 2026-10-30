@@ -298,9 +298,13 @@
                                 <div class="flex items-center gap-2">
                                     <span class="text-xs font-bold text-slate-500 dark:text-slate-400"><i class="fa-solid fa-graduation-cap text-blue-600"></i> ${t('academicYear', 'ឆ្នាំសិក្សា')}៖</span>
                                     <select id="dashFilterAcademicYear" onchange="window.handleDashboardFilterChange('academicYear', this.value)" class="text-xs font-bold bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 py-1.5 px-3 rounded-xl border-0 focus:ring-2 focus:ring-blue-500 cursor-pointer outline-none">
-                                        <option value="2026-2027" ${academicYear === '2026-2027' ? 'selected' : ''}>២០២៦-២០២៧</option>
-                                        <option value="2025-2026" ${academicYear === '2025-2026' ? 'selected' : ''}>២០២៥-២០២៦</option>
                                         <option value="2024-2025" ${academicYear === '2024-2025' ? 'selected' : ''}>២០២៤-២០២៥</option>
+                                        <option value="2025-2026" ${academicYear === '2025-2026' ? 'selected' : ''}>២០២៥-២០២៦</option>
+                                        <option value="2026-2027" ${academicYear === '2026-2027' ? 'selected' : ''}>២០២៦-២០២៧</option>
+                                        <option value="2027-2028" ${academicYear === '2027-2028' ? 'selected' : ''}>២០២៧-២០២៨</option>
+                                        <option value="2028-2029" ${academicYear === '2028-2029' ? 'selected' : ''}>២០២៨-២០២៩</option>
+                                        <option value="2029-2030" ${academicYear === '2029-2030' ? 'selected' : ''}>២០២៩-២០៣០</option>
+                                        <option value="2030-2031" ${academicYear === '2030-2031' ? 'selected' : ''}>២០៣០-២០៣១</option>
                                     </select>
                                 </div>
                                 

@@ -18,7 +18,10 @@ window.defaultAcademicStructure = {
         { year: "2024-2025", start: "2024-10-01", end: "2025-07-31", status: "archived" },
         { year: "2025-2026", start: "2025-10-01", end: "2026-07-31", status: "archived" },
         { year: "2026-2027", start: "2026-10-01", end: "2027-07-31", status: "active" },
-        { year: "2027-2028", start: "2027-10-01", end: "2028-07-31", status: "archived" }
+        { year: "2027-2028", start: "2027-10-01", end: "2028-07-31", status: "upcoming" },
+        { year: "2028-2029", start: "2028-10-01", end: "2029-07-31", status: "upcoming" },
+        { year: "2029-2030", start: "2029-10-01", end: "2030-07-31", status: "upcoming" },
+        { year: "2030-2031", start: "2030-10-01", end: "2031-07-31", status: "upcoming" }
     ],
     active_year: "2026-2027",
     semesters: {
@@ -165,6 +168,12 @@ window.loadAndApplyTeacherSettings = function(teacherId) {
     if (personal.teacher_name) window.appSettings.teacher_name = personal.teacher_name;
     if (personal.teacher_level) window.appSettings.teacher_level = personal.teacher_level;
     if (personal.teacher_room) window.appSettings.teacher_room = personal.teacher_room;
+    if (personal.academic_year) {
+        window.appSettings.academic_year = personal.academic_year;
+        localStorage.setItem('selected_academic_year', personal.academic_year);
+        const yEl = document.getElementById("globalAcademicYear");
+        if (yEl && yEl.value !== personal.academic_year) yEl.value = personal.academic_year;
+    }
     if (personal.teacher_email) window.appSettings.teacher_email = personal.teacher_email;
     if (personal.telegram_username) window.appSettings.telegram_username = personal.telegram_username;
     if (personal.telegram_id) window.appSettings.telegram_id = personal.telegram_id;
@@ -297,6 +306,11 @@ window.saveTeacherPersonalSettings = async function(teacherId, settings) {
     if (payload.telegram_id) localStorage.setItem('auth_telegram_id', payload.telegram_id);
     if (payload.teacher_level) localStorage.setItem('auth_teacher_grade', payload.teacher_level);
     if (payload.teacher_room) localStorage.setItem('auth_teacher_room', payload.teacher_room);
+    if (payload.academic_year) {
+        localStorage.setItem('selected_academic_year', payload.academic_year);
+        const yEl = document.getElementById("globalAcademicYear");
+        if (yEl && yEl.value !== payload.academic_year) yEl.value = payload.academic_year;
+    }
     if (payload.avatar_url) {
         localStorage.setItem('auth_teacher_avatar', payload.avatar_url);
     } else {
@@ -1379,7 +1393,7 @@ window.renderAcademicManagementTab = function() {
 
     const data = window.academicStructure || window.defaultAcademicStructure;
     const activeYear = data.active_year || "2026-2027";
-    const rawYears = data.academic_years || ["2024-2025", "2025-2026", "2026-2027", "2027-2028"];
+    const rawYears = data.academic_years || ["2024-2025", "2025-2026", "2026-2027", "2027-2028", "2028-2029", "2029-2030", "2030-2031"];
     const grades = data.grades || [];
     const pSubjects = data.primary_subjects || [];
     const sSubjects = data.secondary_subjects || [];
