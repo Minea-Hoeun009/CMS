@@ -3631,7 +3631,7 @@ window.printScoreList = function() {
             <div class="bottom-sig-container" style="display: flex; justify-content: space-between; align-items: flex-start; width: 100%; page-break-inside: avoid; padding: 0 20px; margin-top: 15px;">
                 <div class="sig-box-left" style="width: 40%; text-align: center;">
                     <p style="margin: 0 0 4px 0; font-size: 11pt; font-family: 'Siemreap', sans-serif; color: #000;">បានឃើញ និងឯកភាព</p>
-                    <p style="margin: 0 0 55px 0; font-size: 11pt; font-family: 'Khmer OS Muol Light', 'Moul', serif; color: #000;">នាយិកាសាលា</p>
+                    <p style="margin: 0 0 55px 0; font-size: 11pt; font-family: 'Khmer OS Muol Light', 'Moul', serif; color: #000;">នាយក/នាយិកាសាលា</p>
                 </div>
                 <div class="sig-box-right" style="width: 40%; text-align: center;">
                     <p style="margin: 0 0 4px 0; font-size: 11pt; font-family: 'Siemreap', sans-serif; color: #000;">${lunarDateStr || 'ថ្ងៃ....................ខែ..................ឆ្នាំ...............ព.ស.២៥៧០'}</p>
@@ -4021,7 +4021,7 @@ window.printRankingTable = function() {
             <div class="bottom-sig-container">
                 <div class="sig-box-left">
                     <p style="margin: 0 0 4px 0; font-family: 'Siemreap', sans-serif;">បានឃើញ និងឯកភាព</p>
-                    <p style="margin: 0 0 65px 0; font-family: 'Khmer OS Muol Light', 'Moul', serif; font-size: 11.5px;">នាយិកាសាលា</p>
+                    <p style="margin: 0 0 65px 0; font-family: 'Khmer OS Muol Light', 'Moul', serif; font-size: 11.5px;">នាយក/នាយិកាសាលា</p>
                 </div>
                 <div class="sig-box-right">
                     ${lunarDateStr ? `<p style="margin: 0 0 2px 0; font-size: 10.5px; color: #475569;">${lunarDateStr}</p>` : ''}
@@ -4556,7 +4556,7 @@ window.generateMonthlySheetHTML = function(stu, periodOverride = null) {
          </div>
        </div>
        <div style="display: flex; justify-content: space-between; align-items: flex-start; text-align: center; margin-bottom: 2mm;">
-         <div style="width: 40%;"><p style="margin: 0 0 3px 0; font-size: 11.5px; font-weight: bold;">បានឃើញ និងឯកភាព</p><p style="margin: 0 0 40px 0; font-family: 'Moul', serif; font-size: 11.5px; color: #1e3a8a;">នាយិកាសាលា</p><p style="margin: 0; color: #64748b;">................................................</p></div>
+         <div style="width: 40%;"><p style="margin: 0 0 3px 0; font-size: 11.5px; font-weight: bold;">បានឃើញ និងឯកភាព</p><p style="margin: 0 0 40px 0; font-family: 'Moul', serif; font-size: 11.5px; color: #1e3a8a;">នាយក/នាយិកាសាលា</p><p style="margin: 0; color: #64748b;">................................................</p></div>
          <div style="width: 50%;">
             <p class="rc-lunar-date-lbl" style="margin: 0 0 2px 0; font-size: 10.5px; color: #1e293b; display: ${rDates.showLunar ? 'block' : 'none'};">${lunarDateStr}</p>
             <p class="rc-solar-date-lbl" style="margin: 0 0 3px 0; font-size: 11px; color: #1e293b;">${solarDateStr}</p>

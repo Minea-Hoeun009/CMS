@@ -1926,7 +1926,7 @@ window.updateStudentListContent = function() {
                 <div class="flex justify-between items-start mt-6 px-10 text-[11.5px] font-siemreap text-slate-800">
                     <div class="text-center w-2/5">
                         <p class="mb-1 text-slate-700">បានឃើញ និងឯកភាព</p>
-                        <p class="font-moul text-slate-900 mb-16">នាយិកាសាលា</p>
+                        <p class="font-moul text-slate-900 mb-16">នាយក/នាយិកាសាលា</p>
                     </div>
                     <div class="text-center w-2/5">
                         <p class="mb-1 text-slate-700">${lunarDateStr || 'ថ្ងៃ....................ខែ..................ឆ្នាំ...............ព.ស.២៥៧០'}</p>
@@ -2679,7 +2679,7 @@ window.renderAttendanceContent = function() {
                 <div class="flex justify-between items-start mt-6 px-10 text-[11px] font-siemreap text-slate-800">
                     <div class="text-center w-2/5">
                         <p class="mb-1 text-slate-700">បានឃើញ និងឯកភាព</p>
-                        <p class="font-moul text-slate-900 mb-16">នាយិកាសាលា</p>
+                        <p class="font-moul text-slate-900 mb-16">នាយក/នាយិកាសាលា</p>
                     </div>
                     <div class="text-center w-2/5">
                         <p class="mb-1 text-slate-700">${lunarDateStr || 'ថ្ងៃ....................ខែ..................ឆ្នាំ...............ព.ស.២៥៧០'}</p>
@@ -4614,7 +4614,7 @@ window.renderAcademicResultsReport = function(container, targetGrade, targetRoom
                 <div class="flex justify-between items-end text-xs pt-2 px-8 pb-4 font-siemreap">
                     <div class="text-center w-2/5">
                         <p class="mb-1 text-slate-700">បានឃើញ និងឯកភាព</p>
-                        <p class="font-moul text-slate-900 mb-16">នាយិកាសាលា</p>
+                        <p class="font-moul text-slate-900 mb-16">នាយក/នាយិកាសាលា</p>
                     </div>
                     <div class="text-center w-2/5">
                         <p class="mb-0.5 text-slate-700 text-[10.5px]">${lunarDateStr}</p>
@@ -5582,7 +5582,7 @@ window.renderClassInventoryReport = function(container, targetGrade, targetRoom)
                 <div class="flex justify-between items-end text-xs">
                     <div class="text-center w-2/5">
                         <p class="mb-1 text-slate-700">បានឃើញ និងឯកភាព</p>
-                        <p class="font-moul text-slate-900 mb-16">នាយិកាសាលា</p>
+                        <p class="font-moul text-slate-900 mb-16">នាយក/នាយិកាសាលា</p>
                     </div>
                     <div class="text-center w-2/5">
                         <p class="mb-0.5 text-slate-700 text-[10.5px]">${lunarDateStr}</p>
@@ -5710,7 +5710,7 @@ window.renderInternalRulesReport = function(container, targetGrade, targetRoom) 
                 <div class="flex justify-between items-end text-xs">
                     <div class="text-center w-2/5">
                         <p class="mb-1 text-slate-700">បានឃើញ និងឯកភាព</p>
-                        <p class="font-moul text-slate-900 mb-16">នាយិកាសាលា</p>
+                        <p class="font-moul text-slate-900 mb-16">នាយក/នាយិកាសាលា</p>
                     </div>
                     <div class="text-center w-2/5">
                         <p class="mb-0.5 text-slate-700 text-[10.5px]">${lunarDateStr}</p>
@@ -6038,7 +6038,7 @@ window.renderCleaningScheduleReport = function(container, targetGrade, targetRoo
                 <div class="flex justify-between items-end text-xs">
                     <div class="text-center w-2/5">
                         <p class="mb-1 text-slate-700">បានឃើញ និងឯកភាព</p>
-                        <p class="font-moul text-slate-900 mb-16">នាយិកាសាលា</p>
+                        <p class="font-moul text-slate-900 mb-16">នាយក/នាយិកាសាលា</p>
                     </div>
                     <div class="text-center w-2/5">
                         <p class="mb-0.5 text-slate-700 text-[10.5px]">${lunarDateStr}</p>
@@ -6246,7 +6246,7 @@ window.renderBranchCommitteeReport = function(container, targetGrade, targetRoom
                 <div class="flex justify-between items-end text-xs">
                     <div class="text-center w-2/5">
                         <p class="mb-1 text-slate-700">បានឃើញ និងឯកភាព</p>
-                        <p class="font-moul text-slate-900 mb-16">នាយិកាសាលា</p>
+                        <p class="font-moul text-slate-900 mb-16">នាយក/នាយិកាសាលា</p>
                     </div>
                     <div class="text-center w-2/5">
                         <p class="mb-0.5 text-slate-700 text-[10.5px]">${lunarDateStr}</p>
