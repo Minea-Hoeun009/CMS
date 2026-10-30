@@ -170,6 +170,10 @@ window.AppAuth = {
         // ស្តាប់ Realtime Permission Changes លើ Teacher Doc
         this.startPermissionSyncListener(this.state.teacherId);
 
+        // ជម្រះ Cache រូបថតចាស់ ដើម្បីកុំឱ្យច្រឡំឆ្លងកាត់រវាងគណនីគ្រូផ្សេងៗគ្នា (Strict Avatar Isolation)
+        localStorage.removeItem('auth_teacher_avatar');
+        if (window.appSettings) delete window.appSettings.profile_avatar;
+
         // ផ្ទុក និងអនុវត្តការកំណត់ផ្ទាល់ខ្លួនរបស់គ្រូម្នាក់ៗ (Teacher Personal Workspace & Features)
         if (typeof window.loadAndApplyTeacherSettings === 'function') {
             try { window.loadAndApplyTeacherSettings(this.state.teacherId); } catch(e) { console.warn("Load teacher settings note:", e); }
@@ -451,6 +455,15 @@ window.AppAuth = {
         localStorage.removeItem('auth_status');
         localStorage.removeItem('auth_session_active');
         localStorage.removeItem('activeMenu');
+        localStorage.removeItem('auth_teacher_avatar');
+        if (window.appSettings) delete window.appSettings.profile_avatar;
+        const headerAvatar = document.getElementById("headerUserAvatarImg");
+        const headerIcon = document.getElementById("headerUserAvatarIcon");
+        if (headerAvatar) {
+            headerAvatar.src = "";
+            headerAvatar.classList.add('hidden');
+            if (headerIcon) headerIcon.classList.remove('hidden');
+        }
     },
 
     // ត្រួតពិនិត្យរយៈពេលអសកម្ម (AUTH-04: Session Security Inactivity Timeout)

@@ -131,6 +131,23 @@ window.getTeacherPersonalSettings = function(teacherId) {
     const s = typeof window.appSettings !== 'undefined' ? window.appSettings : {};
     const authState = window.AuthState || {};
 
+    // 🟢 Strict Avatar Isolation:
+    // Only return avatar_url if specifically saved for THIS teacher ID,
+    // or if this teacher's account doc in cached_teachers_list has a photo.
+    // If not found, returns "" (resetting to default avatar).
+    let resolvedAvatar = "";
+    if (saved && typeof saved.avatar_url === 'string') {
+        resolvedAvatar = saved.avatar_url;
+    } else {
+        try {
+            const cachedList = JSON.parse(localStorage.getItem('cached_teachers_list') || '[]');
+            const tDoc = Array.isArray(cachedList) ? cachedList.find(t => t.teacher_id === tId) : null;
+            if (tDoc && (tDoc.avatar_url || tDoc.photo_url || tDoc.photo)) {
+                resolvedAvatar = tDoc.avatar_url || tDoc.photo_url || tDoc.photo || "";
+            }
+        } catch(e) {}
+    }
+
     return {
         teacher_id: tId,
         teacher_name: (saved && saved.teacher_name) || (isCurrentTeacher ? (authState.teacherName || s.teacher_name || localStorage.getItem('auth_teacher_name')) : "") || "",
@@ -155,8 +172,8 @@ window.getTeacherPersonalSettings = function(teacherId) {
             auto_sync: saved?.features?.auto_sync !== false
         },
         grading_scale: (saved && saved.grading_scale) || "primary",
-        signature_url: (saved && saved.signature_url) || s.signature_url || "",
-        avatar_url: (saved && saved.avatar_url) || s.profile_avatar || localStorage.getItem('auth_teacher_avatar') || ""
+        signature_url: (saved && saved.signature_url) || (isCurrentTeacher ? s.signature_url : "") || "",
+        avatar_url: resolvedAvatar
     };
 };
 
@@ -179,7 +196,29 @@ window.loadAndApplyTeacherSettings = function(teacherId) {
     if (personal.telegram_id) window.appSettings.telegram_id = personal.telegram_id;
     if (personal.teacher_phone) window.appSettings.teacher_phone = personal.teacher_phone;
     if (personal.signature_url) window.appSettings.signature_url = personal.signature_url;
-    if (personal.avatar_url) window.appSettings.profile_avatar = personal.avatar_url;
+
+    // 🟢 Strict Avatar Application & Reset to Default 🟢
+    if (personal.avatar_url) {
+        window.appSettings.profile_avatar = personal.avatar_url;
+        localStorage.setItem('auth_teacher_avatar', personal.avatar_url);
+    } else {
+        delete window.appSettings.profile_avatar;
+        localStorage.removeItem('auth_teacher_avatar');
+    }
+
+    const headerAvatar = document.getElementById("headerUserAvatarImg");
+    const headerIcon = document.getElementById("headerUserAvatarIcon");
+    if (headerAvatar) {
+        if (personal.avatar_url) {
+            headerAvatar.src = personal.avatar_url;
+            headerAvatar.classList.remove('hidden');
+            if (headerIcon) headerIcon.classList.add('hidden');
+        } else {
+            headerAvatar.src = "";
+            headerAvatar.classList.add('hidden');
+            if (headerIcon) headerIcon.classList.remove('hidden');
+        }
+    }
 
     if (typeof window.setSelectedClass === 'function') {
         window.setSelectedClass(personal.teacher_level, personal.teacher_room);
@@ -558,11 +597,11 @@ window.renderPersonalSettingsTab = function() {
                     <img id="pers_avatar_preview" src="${personal.avatar_url || 'https://ui-avatars.com/api/?name=Teacher&background=6366f1&color=fff&size=150'}" class="w-full h-full object-cover rounded-xl bg-indigo-950">
                 </div>
                 <div>
-                    <h3 class="font-moul text-lg text-white">${personal.teacher_name || 'លោកគ្រូ អ្នកគ្រូ'}</h3>
+                    <h3 id="pers_banner_teacher_name" class="font-moul text-lg text-white">${personal.teacher_name || 'លោកគ្រូ អ្នកគ្រូ'}</h3>
                     <p class="text-xs text-indigo-200 mt-1 flex flex-wrap items-center gap-2 font-bold">
                         <span>អត្តលេខគ្រូ៖ <strong class="font-mono text-white">${personal.teacher_id}</strong></span>
                         <span class="text-white/40">•</span>
-                        <span>គ្រូបន្ទុកថ្នាក់៖ <strong class="text-white font-moul">${personal.teacher_name || 'លោកគ្រូ អ្នកគ្រូ'}</strong></span>
+                        <span>គ្រូបន្ទុកថ្នាក់៖ <strong id="pers_banner_homeroom_name" class="text-white font-moul">${personal.teacher_name || 'លោកគ្រូ អ្នកគ្រូ'}</strong></span>
                         <span class="text-white/40">•</span>
                         <span class="text-amber-300 font-moul">${personal.teacher_level || 'ថ្នាក់ទី ១'} ${typeof window.normalizeRoomName === 'function' ? window.normalizeRoomName(personal.teacher_room) : (personal.teacher_room || '«ក»')}</span>
                     </p>
@@ -624,9 +663,9 @@ window.renderPersonalSettingsTab = function() {
                                 <i class="fa-solid fa-arrow-up-from-bracket"></i>
                                 <span>ជ្រើសរើសរូបថតថ្មី</span>
                             </label>
-                            <button type="button" onclick="window.removeTeacherPhoto()" class="inline-flex items-center gap-2 px-3.5 py-2 bg-slate-200 hover:bg-rose-100 hover:text-rose-600 dark:bg-slate-600 dark:hover:bg-rose-900/40 dark:hover:text-rose-300 text-slate-700 dark:text-slate-200 rounded-xl text-xs font-bold transition-all">
-                                <i class="fa-solid fa-trash-can"></i>
-                                <span>ដករូបថតចេញ</span>
+                            <button type="button" onclick="window.removeTeacherPhoto()" class="inline-flex items-center gap-2 px-3.5 py-2 bg-slate-200 hover:bg-rose-100 hover:text-rose-600 dark:bg-slate-600 dark:hover:bg-rose-900/40 dark:hover:text-rose-300 text-slate-700 dark:text-slate-200 rounded-xl text-xs font-bold transition-all" title="កំណត់ជារូបថតទម្រង់ដើមវិញ">
+                                <i class="fa-solid fa-rotate-left"></i>
+                                <span>កំណត់ជាទម្រង់ដើម</span>
                             </button>
                         </div>
                         <input type="hidden" id="val_profile_avatar" value="${personal.avatar_url || ''}">
@@ -636,7 +675,7 @@ window.renderPersonalSettingsTab = function() {
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-5 text-xs">
                     <div>
                         <label class="block font-bold text-slate-700 dark:text-slate-300 mb-2">ឈ្មោះគ្រូបង្រៀន (Full Name) *</label>
-                        <input type="text" id="pers_teacher_name" required value="${personal.teacher_name || ''}" placeholder="បញ្ចូលឈ្មោះលោកគ្រូ/អ្នកគ្រូ..." class="w-full bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl px-4 py-2.5 font-bold outline-none focus:ring-2 focus:ring-indigo-400 text-slate-800 dark:text-white">
+                        <input type="text" id="pers_teacher_name" required value="${personal.teacher_name || ''}" placeholder="បញ្ចូលឈ្មោះលោកគ្រូ/អ្នកគ្រូ..." oninput="window.handleTeacherNameChange(this.value)" class="w-full bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl px-4 py-2.5 font-bold outline-none focus:ring-2 focus:ring-indigo-400 text-slate-800 dark:text-white">
                     </div>
 
                     <div>
@@ -3038,6 +3077,28 @@ window.handleTeacherPhotoUpload = function(inputEl) {
     reader.readAsDataURL(file);
 };
 
+window.handleTeacherNameChange = function(newName) {
+    const cleanName = (newName || '').trim();
+    const bannerName = document.getElementById("pers_banner_teacher_name");
+    if (bannerName) bannerName.textContent = cleanName || "លោកគ្រូ អ្នកគ្រូ";
+    const homeroomName = document.getElementById("pers_banner_homeroom_name");
+    if (homeroomName) homeroomName.textContent = cleanName || "លោកគ្រូ អ្នកគ្រូ";
+
+    const hiddenAvatar = document.getElementById("val_profile_avatar");
+    const currentAvatarVal = hiddenAvatar ? hiddenAvatar.value : "";
+
+    // If no custom uploaded image is set (or if it was a generated default avatar), refresh default avatar with new name
+    if (!currentAvatarVal || currentAvatarVal.includes("ui-avatars.com")) {
+        const defaultAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(cleanName || 'Teacher')}&background=6366f1&color=fff&size=200`;
+        const formPreview = document.getElementById("pers_avatar_form_preview");
+        if (formPreview) formPreview.src = defaultAvatar;
+        const bannerPreview = document.getElementById("pers_avatar_preview");
+        if (bannerPreview) bannerPreview.src = defaultAvatar;
+        const accAvatar = document.getElementById("acc_avatar_img");
+        if (accAvatar) accAvatar.src = defaultAvatar;
+    }
+};
+
 window.removeTeacherPhoto = function() {
     const inputEl = document.getElementById("pers_teacher_photo_input");
     if (inputEl) inputEl.value = "";
@@ -3070,8 +3131,19 @@ window.removeTeacherPhoto = function() {
         if (headerIcon) headerIcon.classList.remove('hidden');
     }
 
+    // Persist immediately to active teacher settings in localStorage
+    try {
+        const tId = localStorage.getItem('auth_teacher_id') || (window.AppAuth?.state?.teacherId) || "TCH-001";
+        const raw = localStorage.getItem(`teacher_settings_${tId}`);
+        if (raw) {
+            const parsed = JSON.parse(raw);
+            parsed.avatar_url = "";
+            localStorage.setItem(`teacher_settings_${tId}`, JSON.stringify(parsed));
+        }
+    } catch(e) {}
+
     if (typeof window.showToast === 'function') {
-        window.showToast("🗑️ បានដករូបថតចេញ! សូមចុច «រក្សាទុកការកំណត់»។");
+        window.showToast("🔄 បានកំណត់រូបថតជាទម្រង់ដើមរួចរាល់!");
     }
 };
 

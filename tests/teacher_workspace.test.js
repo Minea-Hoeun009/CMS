@@ -91,11 +91,12 @@ describe('Teacher Personal Workspace & Authentication Preferences Tests', () => 
     assert.equal(def.features.scores, true);
     assert.equal(def.features.library, true);
 
-    // Save custom settings for T-001
+    // Save custom settings for T-001 with custom avatar
     const customT1 = {
       teacher_name: 'អ្នកគ្រូ កុសល',
       teacher_level: 'ថ្នាក់ទី ៥',
       teacher_room: '«ខ»',
+      avatar_url: 'data:image/jpeg;base64,customPhotoT1',
       features: {
         attendance: true,
         scores: true,
@@ -105,18 +106,20 @@ describe('Teacher Personal Workspace & Authentication Preferences Tests', () => 
     };
     context.saveTeacherPersonalSettings('T-001', customT1);
 
-    // Verify T-001 has custom settings
+    // Verify T-001 has custom settings and custom avatar
     const loadedT1 = context.getTeacherPersonalSettings('T-001');
     assert.equal(loadedT1.teacher_name, 'អ្នកគ្រូ កុសល');
     assert.equal(loadedT1.teacher_level, 'ថ្នាក់ទី ៥');
     assert.equal(loadedT1.teacher_room, '«ខ»');
+    assert.equal(loadedT1.avatar_url, 'data:image/jpeg;base64,customPhotoT1');
     assert.equal(loadedT1.features.library, false);
     assert.equal(loadedT1.features.parent_portal, true);
 
-    // Verify T-002 is isolated and still gets defaults
+    // Verify T-002 is isolated: defaults restored and photo resets to default (does NOT leak T-001's photo)
     const loadedT2 = context.getTeacherPersonalSettings('T-002');
     assert.equal(loadedT2.teacher_level, 'ថ្នាក់ទី ១');
     assert.equal(loadedT2.features.library, true);
+    assert.equal(loadedT2.avatar_url, '', 'New teacher without photo must have empty avatar_url (reset to default)');
   });
 
   test('2. applyTeacherFeatureVisibility dynamically toggles sidebar navigation elements', () => {
