@@ -3671,6 +3671,7 @@ window.printScoreList = function() {
 // ១២. បង្ហាញ និងបោះពុម្ពតារាងចំណាត់ថ្នាក់ (បានជួសជុលការទាញយកកាលបរិច្ឆេទ)
 // ==========================================
 window.printRankingTable = function() {
+
     if(!window.rankingsDataList || window.rankingsDataList.length === 0) return alert("⚠️ គ្មានទិន្នន័យដើម្បីបោះពុម្ពទេ!");
 
     const type = document.getElementById("globalPeriodType")?.value || "monthly";
@@ -3735,7 +3736,7 @@ window.printRankingTable = function() {
     let failFPct = femaleStus > 0 ? ((failedF / femaleStus) * 100).toFixed(2) : "0.00";
 
     let headerHtml = '';
-    const thBase = `border: 1pt solid #cbd5e1; text-align: center; vertical-align: middle; font-family: 'Khmer OS Muol Light', 'Moul', serif; font-size: 10px; font-weight: normal; color: #ffffff; background-color: #233D6E;`;
+    const thBase = `border: 1pt solid #cbd5e1; text-align: center; vertical-align: middle; font-family: 'Khmer OS Muol Light', 'Moul', serif; font-size: 9px; font-weight: normal; color: #ffffff; background-color: #233D6E; padding: 2px 1px;`;
     
     const thV = (text, widthPct, isRightSide) => {
         const leftBorder = isRightSide ? 'border-left: 1.5pt solid #475569;' : '';
@@ -3766,15 +3767,15 @@ window.printRankingTable = function() {
             ${thN('គោត្តនាម និងនាម', '20.5%', 'left', '6px', false)}
             ${thN('ភេទ', '4.5%', 'center', '0', false)}
             ${thV('មធ្យមប្រឡង', '5%', false)}
-            ${thV('មធ្យមភាគខែ', '5%', false)}
-            ${thV('មធ្យមភាគប្រចាំឆមាស', '5.5%', false)}
+            ${thV('មធ្យមខែ', '5%', false)}
+            ${thV('មធ្យមឆមាស', '5.5%', false)}
             ${thV('ចំណាត់ថ្នាក់', '5%', false)}
             ${thN('ល.រ', '4.5%', 'center', '0', true)}
             ${thN('គោត្តនាម និងនាម', '20.5%', 'left', '6px', false)}
             ${thN('ភេទ', '4.5%', 'center', '0', false)}
             ${thV('មធ្យមប្រឡង', '5%', false)}
-            ${thV('មធ្យមភាគខែ', '5%', false)}
-            ${thV('មធ្យមភាគប្រចាំឆមាស', '5.5%', false)}
+            ${thV('មធ្យមខែ', '5%', false)}
+            ${thV('មធ្យមឆមាស', '5.5%', false)}
             ${thV('ចំណាត់ថ្នាក់', '5%', false)}
         </tr>`;
     } else {
@@ -3784,14 +3785,14 @@ window.printRankingTable = function() {
             ${thN('ភេទ', '4.5%', 'center', '0', false)}
             ${thV('មធ្យមឆមាសទី១', '5%', false)}
             ${thV('មធ្យមឆមាសទី២', '5%', false)}
-            ${thV('មធ្យមភាគប្រចាំឆ្នាំ', '5.5%', false)}
+            ${thV('មធ្យមប្រចាំឆ្នាំ', '5.5%', false)}
             ${thV('ចំណាត់ថ្នាក់', '5%', false)}
             ${thN('ល.រ', '4.5%', 'center', '0', true)}
             ${thN('គោត្តនាម និងនាម', '20.5%', 'left', '6px', false)}
             ${thN('ភេទ', '4.5%', 'center', '0', false)}
             ${thV('មធ្យមឆមាសទី១', '5%', false)}
             ${thV('មធ្យមឆមាសទី២', '5%', false)}
-            ${thV('មធ្យមភាគប្រចាំឆ្នាំ', '5.5%', false)}
+            ${thV('មធ្យមប្រចាំឆ្នាំ', '5.5%', false)}
             ${thV('ចំណាត់ថ្នាក់', '5%', false)}
         </tr>`;
     }
@@ -3900,9 +3901,9 @@ window.printRankingTable = function() {
           .header-right { text-align: center; padding-top: 4px; }
           .header-right p { margin: 0 0 3px 0; font-size: 11.5px; line-height: 1.5; font-family: 'Khmer OS Muol Light', 'Moul', serif; color: #0f172a; }
           
-          .title-box { text-align: center; margin: 4px 0 10px 0; }
-          .title-box h2 { margin: 0 0 3px 0; font-size: 15px; color: #1e3a8a; letter-spacing: 0.5px; font-family: 'Khmer OS Muol Light', 'Moul', serif; }
-          .title-box p { margin: 0; font-size: 11.5px; color: #dc2626; font-family: 'Khmer OS Muol Light', 'Moul', serif; }
+          .title-box { text-align: center; margin: 4px 0 8px 0; }
+          .title-box h2 { margin: 0 0 3px 0; font-size: 14px; color: #1e3a8a; letter-spacing: 0.5px; font-family: 'Khmer OS Muol Light', 'Moul', serif; }
+          .title-box p { margin: 0; font-size: 11px; color: #dc2626; font-family: 'Khmer OS Muol Light', 'Moul', serif; }
           
           table.rnk-table { width: 100%; border-collapse: collapse !important; margin-bottom: 12px; text-align: center; table-layout: fixed; border: 1pt solid #475569; }
           
@@ -3912,8 +3913,8 @@ window.printRankingTable = function() {
           .sig-box-left { width: 42%; text-align: center; }
           .sig-box-right { width: 42%; text-align: center; }
           
-          .th-vert { height: 75px; vertical-align: middle; text-align: center; padding: 0; }
-          .div-vert { writing-mode: vertical-rl; transform: rotate(180deg); white-space: nowrap; height: 70px; display: flex; justify-content: center; align-items: center; text-align: center; margin: 0 auto; font-family: 'Khmer OS Muol Light', 'Moul', serif; font-size: 10px; font-weight: normal; color: #ffffff; }
+          .th-vert { height: 50px; vertical-align: middle; text-align: center; padding: 0; }
+          .div-vert { writing-mode: vertical-rl; transform: rotate(180deg); white-space: nowrap; height: 46px; display: flex; justify-content: center; align-items: center; text-align: center; margin: 0 auto; font-family: 'Khmer OS Muol Light', 'Moul', serif; font-size: 8.5px; font-weight: normal; color: #ffffff; }
         </style>
       </head>
       <body>
@@ -3965,7 +3966,7 @@ window.printRankingTable = function() {
             <div class="title-box">
               <h2>${titleText}</h2>
               <div style="display: flex; justify-content: center; margin: 2px 0 4px 0;">
-                <img src="${window.CMS_TITLE_FLOURISH_B64 || 'assets/images/title-flourish.png'}" class="title-flourish-symbol" alt="flourish" style="display: block; margin: 0 auto; width: 170px; height: 11px; object-fit: contain;" />
+                <img src="${window.CMS_TITLE_FLOURISH_B64 || 'assets/images/title-flourish.png'}" class="title-flourish-symbol" alt="flourish" style="display: block; margin: 0 auto; width: 140px; height: 9px; object-fit: contain;" />
               </div>
               <p>${grade} | ឆ្នាំសិក្សា ${academicYear}</p>
             </div>
@@ -6540,3 +6541,4 @@ window.resetSchemaToDefault = async function() {
     await window.fetchStudentsForScores();
     window.calculateAllScores();
 };
+window.printRankings = window.printRankingTable;
