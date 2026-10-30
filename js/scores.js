@@ -4826,152 +4826,271 @@ function renderTop5HonorBoard() {
 
     const sInfo = typeof appSettings !== 'undefined' ? appSettings : {};
     const activeClass = typeof window.getCurrentSelectedClass === 'function' ? window.getCurrentSelectedClass() : null;
-    const defaultLevel = (activeClass && activeClass.level) || sInfo.teacher_level || localStorage.getItem('auth_teacher_grade') || localStorage.getItem('selected_level') || "ថ្នាក់ទី ១";
+    const defaultLevel = (activeClass && activeClass.level) || sInfo.teacher_level || localStorage.getItem('auth_teacher_grade') || localStorage.getItem('selected_level') || "ថ្នាក់ទី ២";
     const defaultRoom = (activeClass && activeClass.room) || sInfo.teacher_room || localStorage.getItem('auth_teacher_room') || localStorage.getItem('selected_room') || "«ក»";
 
-    const rawLevel = document.getElementById("globalLevelSelect")?.value;
-    const rawRoom = document.getElementById("globalRoomSelect")?.value;
+    const rawLevel = document.getElementById("honorLevelSelect")?.value || document.getElementById("globalLevelSelect")?.value;
+    const rawRoom = document.getElementById("honorRoomSelect")?.value || document.getElementById("globalRoomSelect")?.value;
     const level = (rawLevel && rawLevel !== 'all' && rawLevel !== 'ថ្នាក់ទី') ? rawLevel : defaultLevel;
     const room = (rawRoom && rawRoom !== 'all') ? rawRoom : defaultRoom;
     const formattedRoom = room ? (room.startsWith('«') ? room : `«${room}»`) : '«ក»';
     const gradeClassDisplay = `${level} ${formattedRoom}`.trim();
 
     const periodType = document.getElementById("globalPeriodType")?.value || "monthly";
-    const periodVal = document.getElementById("globalPeriodValue")?.value || localStorage.getItem("selected_assessment_month") || "មករា";
+    const rawMonth = localStorage.getItem("selected_assessment_month") || document.getElementById("globalPeriodValue")?.value || "មករា";
+    const cleanMonth = rawMonth.replace(/^ខែ\s*/, '').trim();
+
     const districtName = (sInfo.district_name || sInfo.district || sInfo.cluster || "កៀនស្វាយ").replace(/^ស្រុក\s*/, '').trim();
     const school_name = sInfo.school_name || "សាលាបឋមសិក្សា ខ្សុំ";
-    const teacher_name = sInfo.teacher_name || "គ្រូបន្ទុកថ្នាក់";
+    const teacher_name = sInfo.teacher_name || (window.AuthState ? window.AuthState.teacherName : null) || localStorage.getItem('auth_teacher_name') || "";
     const principal_name = (sInfo.principal_name && sInfo.principal_name !== "នាយកសាលា") ? sInfo.principal_name : "";
-    const academic_year = sInfo.academic_year || "២០២៦-២០២៧";
+    const academic_year = sInfo.academic_year || localStorage.getItem('selected_academic_year') || "២០២៦-២០២៧";
     const current_year = new Date().getFullYear();
 
-    let periodTitleText = periodType === "monthly" ? `លទ្ធផលសិក្សាប្រចាំខែ ${periodVal}` : (periodType === "semester" ? `លទ្ធផលសិក្សាប្រចាំ${periodVal}` : `លទ្ធផលសិក្សាប្រចាំឆ្នាំសិក្សា ${window.toKhmerNum(academic_year)}`);
+    let periodTitleText = periodType === "monthly" 
+        ? `ប្រចាំខែ ${cleanMonth}` 
+        : (periodType === "semester" 
+            ? (rawMonth.includes("២") ? "ប្រចាំឆមាសលើកទី២" : "ប្រចាំឆមាសលើកទី១") 
+            : `ប្រចាំឆ្នាំសិក្សា ${window.toKhmerNum(academic_year)}`);
 
-    const topStudents = window.rankingsDataList.filter(s => s.rank >= 1 && s.rank <= window.honorBoardTopCount);
+    // Real-time Date Fetching
+    let locShort = "";
+    const rawLoc = document.getElementById('global_loc_input')?.value || localStorage.getItem('rc_location') || localStorage.getItem('rep_location');
+    if (rawLoc) {
+        locShort = rawLoc.replace(/^ធ្វើនៅ\s*/, '').replace(/,+$/, '').trim();
+    } else {
+        locShort = school_name.replace(/^(សាលាបឋមសិក្សា|អនុវិទ្យាល័យ|វិទ្យាល័យ|សាលា)\s*/g, '').trim();
+        if (!locShort) locShort = districtName || "ខ្សុំ";
+    }
+
+    let sDate = "";
+    const rawDate = document.getElementById('global_sol_input')?.value || localStorage.getItem('rc_solar_date') || localStorage.getItem('rep_solar_date');
+    if (rawDate && rawDate.trim()) {
+        sDate = rawDate.trim();
+    } else {
+        sDate = `ថ្ងៃទី...... ខែ...... ឆ្នាំ${window.toKhmerNum(current_year.toString())}`;
+    }
+    if (sDate.includes("ថ្ងៃទី")) sDate = sDate.substring(sDate.indexOf("ថ្ងៃទី"));
+    const solarDateStr = `ធ្វើនៅ ${locShort}, ${sDate}`;
+
+    let isLunarChecked = true;
+    const chkBox = document.getElementById('global_lun_chk');
+    if (chkBox) isLunarChecked = chkBox.checked;
+    else isLunarChecked = (localStorage.getItem('rc_show_lunar') !== 'false' && localStorage.getItem('rep_show_lunar') !== 'false');
+
+    let lun = document.getElementById('global_lun_input')?.value || localStorage.getItem('rc_lunar_date') || localStorage.getItem('rep_lunar_date') || "ថ្ងៃ....................ខែ..................ឆ្នាំ...............ព.ស.២៥......";
+    const lunarDateStr = isLunarChecked ? lun : "";
+
+    const topStudents = (window.rankingsDataList || []).filter(s => s.rank >= 1 && s.rank <= (window.honorBoardTopCount || 5));
     const getS = (r) => topStudents.find(s => s.rank === r) || null;
 
-    const renderStudentCard = (stu, rankNum, isChampion = false) => {
-        let theme = {};
-        if (rankNum === 1) theme = { border: 'border-amber-400', ring: 'ring-amber-200', badge: 'bg-gradient-to-br from-amber-400 via-amber-500 to-yellow-600', shadow: 'shadow-amber-500/40', medal: '🥇' };
-        else if (rankNum === 2) theme = { border: 'border-slate-300', ring: 'ring-slate-200', badge: 'bg-gradient-to-br from-slate-300 via-slate-400 to-slate-500', shadow: 'shadow-slate-500/30', medal: '🥈' };
-        else if (rankNum === 3) theme = { border: 'border-orange-400', ring: 'ring-orange-200', badge: 'bg-gradient-to-br from-orange-400 via-amber-500 to-orange-600', shadow: 'shadow-orange-500/40', medal: '🥉' };
-        else theme = { border: 'border-indigo-400', ring: 'ring-indigo-200', badge: 'bg-gradient-to-br from-indigo-500 to-indigo-700', shadow: 'shadow-indigo-500/30', medal: '⭐' };
-
-        const cardScale = isChampion ? 'w-[145px]' : 'w-[125px]';
-        const photoBox = isChampion ? 'w-[115px] h-[150px]' : 'w-[100px] h-[130px]';
-        const badgeSize = isChampion ? 'w-11 h-11 text-sm -top-3 -right-3' : 'w-9 h-9 text-xs -top-2.5 -right-2.5';
-        
-        if (!stu) return `<div class="canva-el cursor-grab flex flex-col items-center justify-center ${photoBox} border-2 border-dashed border-slate-400 bg-white/40 text-slate-500 text-xs font-bold rounded-2xl opacity-60 mx-auto backdrop-blur-sm"><i class="fa-solid fa-user-slash text-xl mb-2"></i> ទទេ</div>`;
-
-        const photoSrc = stu.photo_url || stu.photo || `https://ui-avatars.com/api/?name=${encodeURIComponent(stu.name)}&background=random&size=200`;
+    // Helper: Red Pleated Ribbon Rosette SVG Medal with Khmer rank numeral
+    const getRosetteSvg = (rankNum) => {
+        const khmerNum = ['០','១','២','៣','៤','៥','៦','៧','៨','៩'][rankNum] || rankNum;
+        const cx = 25, cy = 25, rOuter = 21, rInner = 17, petals = 24;
+        let pathD = '';
+        for (let i = 0; i < petals * 2; i++) {
+            const angle = (i * Math.PI) / petals;
+            const r = (i % 2 === 0) ? rOuter : rInner;
+            const x = cx + r * Math.cos(angle);
+            const y = cy + r * Math.sin(angle);
+            pathD += (i === 0 ? 'M' : 'L') + ' ' + x.toFixed(2) + ' ' + y.toFixed(2) + ' ';
+        }
+        pathD += 'Z';
 
         return `
-          <div class="canva-el cursor-grab flex flex-col items-center relative z-10 ${cardScale} mx-auto transition-transform duration-200 hover:scale-105 group hover:z-50">
-            <div class="relative">
-              <div class="absolute ${badgeSize} rounded-full ${theme.badge} text-white font-black flex items-center justify-center shadow-xl border-[2.5px] border-white z-20 font-moul pointer-events-none transition-transform group-hover:rotate-12">${theme.medal} ${window.toKhmerNum(rankNum.toString())}</div>
-              <label class="cursor-pointer group/photo relative ${photoBox} rounded-2xl overflow-hidden border-[3.5px] ${theme.border} shadow-xl ${theme.shadow} ring-[3px] ${theme.ring} bg-white block" title="ចុចដើម្បីប្តូររូបថត">
-                <img src="${photoSrc}" id="stu_photo_${stu.id}" class="w-full h-full object-cover">
-                <div class="absolute inset-0 bg-black/40 opacity-0 group-hover/photo:opacity-100 flex flex-col items-center justify-center text-white text-[10px] font-bold transition-opacity"><i class="fa-solid fa-camera text-sm mb-1"></i>ប្តូររូប</div>
-                <input type="file" accept="image/*" class="hidden" onchange="window.updateStudentPhotoOnHonorBoard('${stu.id}', event)">
-              </label>
-            </div>
-            <div class="mt-3 bg-white/95 backdrop-blur-md border border-white rounded-2xl w-[115%] p-2.5 text-center shadow-lg relative z-10 hover:ring-2 hover:ring-dashed hover:ring-blue-400">
-              <h4 contenteditable="true" spellcheck="false" class="font-moul text-[12px] truncate outline-none hover:bg-slate-100 px-1 rounded text-slate-900 drop-shadow-sm">${stu.name}</h4>
-              <div class="inline-flex bg-slate-100 border border-slate-200 px-2 py-0.5 rounded-lg text-[10px] font-bold text-slate-600 shadow-inner mt-1.5 pointer-events-none">
-                 មធ្យម៖ <span class="text-indigo-700 font-mono text-[11px] font-black pointer-events-auto ml-1" contenteditable="true" spellcheck="false">${stu.avg.toFixed(2)}</span>
-              </div>
-            </div>
-          </div>
+        <svg viewBox="0 0 50 64" width="46" height="58" class="overflow-visible" style="filter: drop-shadow(0 2px 4px rgba(0,0,0,0.28));">
+          <defs>
+            <radialGradient id="rosetteGrad_${rankNum}" cx="38%" cy="32%" r="68%">
+              <stop offset="0%" stop-color="#f87171" />
+              <stop offset="35%" stop-color="#dc2626" />
+              <stop offset="100%" stop-color="#991b1b" />
+            </radialGradient>
+            <linearGradient id="ribbonTailGrad_${rankNum}" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#dc2626" />
+              <stop offset="100%" stop-color="#7f1d1d" />
+            </linearGradient>
+          </defs>
+          <!-- Left Ribbon Tail with swallowtail notch -->
+          <polygon points="17,30 11,58 18,52 24,58 20,30" fill="url(#ribbonTailGrad_${rankNum})" stroke="#7f1d1d" stroke-width="0.75" />
+          <!-- Right Ribbon Tail with swallowtail notch -->
+          <polygon points="28,30 24,58 30,52 37,58 31,30" fill="url(#ribbonTailGrad_${rankNum})" stroke="#7f1d1d" stroke-width="0.75" />
+          <!-- Pleated Rosette Disc -->
+          <path d="${pathD}" fill="url(#rosetteGrad_${rankNum})" stroke="#7f1d1d" stroke-width="0.8" />
+          <!-- Inner White Medallion -->
+          <circle cx="25" cy="25" r="11.5" fill="#ffffff" stroke="#b91c1c" stroke-width="1.5" />
+          <!-- Khmer Rank Numeral -->
+          <text x="25" y="26" text-anchor="middle" dominant-baseline="central" fill="#b91c1c" font-family="'Khmer OS Muol Light', 'Moul', serif" font-size="14.5" font-weight="bold">${khmerNum}</text>
+        </svg>
         `;
     };
 
+    // Helper: Classic Ribbon Banner with swallowtail folded side ribbons
+    const getRibbonBannerHtml = (name, avg) => {
+        return `
+        <div class="relative w-[184px] h-[48px] flex items-center justify-center -mt-6 z-20">
+          <svg viewBox="0 0 184 48" class="absolute inset-0 w-full h-full pointer-events-none" style="filter: drop-shadow(0 2px 3px rgba(0,0,0,0.12));">
+            <!-- Left Tail with Swallowtail Notch -->
+            <path d="M 24 14 L 0 14 L 11 26 L 0 38 L 24 38 Z" fill="#f1f5f9" stroke="#334155" stroke-width="1.2" stroke-linejoin="round" />
+            <polygon points="24,28 24,38 32,28" fill="#475569" stroke="#334155" stroke-width="0.8" />
+            <!-- Right Tail with Swallowtail Notch -->
+            <path d="M 160 14 L 184 14 L 173 26 L 184 38 L 160 38 Z" fill="#f1f5f9" stroke="#334155" stroke-width="1.2" stroke-linejoin="round" />
+            <polygon points="160,28 160,38 152,28" fill="#475569" stroke="#334155" stroke-width="0.8" />
+            <!-- Center Banner Plate -->
+            <rect x="22" y="5" width="140" height="36" rx="4" fill="#ffffff" stroke="#334155" stroke-width="1.3" />
+          </svg>
+          <div class="relative z-10 w-[136px] text-center px-1">
+            <div class="font-moul text-[11px] text-slate-900 truncate leading-tight outline-none" contenteditable="true" spellcheck="false" title="ចុចដើម្បីកែឈ្មោះ">${name || 'ឈ្មោះសិស្ស'}</div>
+            <div class="text-[9.5px] font-bold text-slate-600 leading-tight mt-0.5">
+              មធ្យម៖ <span class="font-mono text-indigo-700 font-bold outline-none" contenteditable="true" spellcheck="false">${typeof avg === 'number' ? avg.toFixed(2) : (avg || '0.00')}</span>
+            </div>
+          </div>
+        </div>
+        `;
+    };
+
+    // Helper: Single Student Card Component
+    const renderStudentCard = (stu, rankNum, posStyle = '') => {
+        const name = stu ? stu.name : '';
+        const avg = stu ? stu.avg : 0;
+        const photoSrc = (stu && (stu.photo_url || stu.photo)) ? (stu.photo_url || stu.photo) : '';
+        
+        const photoContent = photoSrc
+            ? `<img src="${photoSrc}" id="stu_photo_${stu ? stu.id : rankNum}" class="w-full h-full object-cover">`
+            : `<div class="w-full h-full flex flex-col items-center justify-center bg-slate-50 text-slate-400 group-hover:text-slate-600">
+                 <i class="fa-solid fa-camera text-2xl mb-1 text-sky-400"></i>
+                 <span class="text-[9px] font-bold">ដាក់រូបថត</span>
+               </div>`;
+
+        return `
+        <div class="canva-el absolute flex flex-col items-center z-20 group" style="${posStyle}">
+          <!-- Photo Box + Medal Container -->
+          <div class="relative w-[116px] h-[146px]">
+            <!-- Red Rosette Medal at Top-Right -->
+            <div class="absolute -top-3.5 -right-3.5 z-30 pointer-events-none transition-transform group-hover:scale-110">
+              ${getRosetteSvg(rankNum)}
+            </div>
+            <!-- Photo Frame -->
+            <label class="cursor-pointer block w-full h-full rounded-t-[18px] rounded-b-[6px] overflow-hidden border-[2.2px] border-[#0284c7] bg-white shadow-md relative" title="ចុចដើម្បីប្តូររូបថត">
+              ${photoContent}
+              <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex flex-col items-center justify-center text-white text-[10px] font-bold transition-opacity">
+                <i class="fa-solid fa-camera text-sm mb-1"></i>ប្តូររូប
+              </div>
+              <input type="file" accept="image/*" class="hidden" onchange="window.updateStudentPhotoOnHonorBoard('${stu ? stu.id : ''}', event)">
+            </label>
+          </div>
+          <!-- Ribbon Banner -->
+          ${getRibbonBannerHtml(name, avg)}
+        </div>
+        `;
+    };
+
+    // Theme Background & Borders
     let themeBg = "";
-    let wrapperBorder = "";
+    let wrapperBorder = "border border-slate-200 bg-white";
+
     if (window.currentHonorBg) {
         themeBg = `<img src="${window.currentHonorBg}" class="absolute inset-0 w-full h-full object-fill z-0 print:object-fill">`;
         wrapperBorder = "border-none bg-white";
+    } else if (window.honorBoardTheme === 'gold') {
+        themeBg = `
+          <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-amber-100/60 via-white to-orange-50/50 z-0"></div>
+          <div class="absolute inset-5 border-[6px] border-double border-amber-600/30 rounded-3xl z-0 pointer-events-none"></div>
+          <div class="absolute top-8 left-8 text-amber-500/40 text-2xl pointer-events-none">❖</div><div class="absolute top-8 right-8 text-amber-500/40 text-2xl pointer-events-none">❖</div>
+          <div class="absolute bottom-8 left-8 text-amber-500/40 text-2xl pointer-events-none">❖</div><div class="absolute bottom-8 right-8 text-amber-500/40 text-2xl pointer-events-none">❖</div>
+        `;
+        wrapperBorder = "border-[12px] border-double border-amber-700 bg-white";
+    } else if (window.honorBoardTheme === 'blue') {
+        themeBg = `<div class="absolute inset-0 bg-gradient-to-b from-blue-50 via-white to-slate-100 z-0"></div><div class="absolute inset-4 border-[4px] border-double border-blue-600/30 rounded-3xl z-0 pointer-events-none"></div>`;
+        wrapperBorder = "border-[8px] border-solid border-blue-900/10 bg-white";
+    } else if (window.honorBoardTheme === 'slate') {
+        themeBg = `<div class="absolute inset-0 bg-gradient-to-br from-slate-100 via-white to-slate-200 z-0"></div><div class="absolute inset-4 border-[2px] border-slate-300 rounded-3xl z-0 pointer-events-none"></div>`;
+        wrapperBorder = "border border-slate-300 bg-white";
+    } else if (window.honorBoardTheme === 'clean') {
+        themeBg = `<div class="absolute inset-0 bg-white z-0"></div>`;
+        wrapperBorder = "border border-slate-200 bg-white";
     } else {
-        if (window.honorBoardTheme === 'blue') {
-            themeBg = `<div class="absolute inset-0 bg-gradient-to-b from-blue-50 via-white to-slate-100 z-0"></div><div class="absolute inset-4 border-[4px] border-double border-blue-600/30 rounded-3xl z-0 pointer-events-none"></div>`;
-            wrapperBorder = "border-[8px] border-solid border-blue-900/10 bg-white";
-        } else if (window.honorBoardTheme === 'slate') {
-            themeBg = `<div class="absolute inset-0 bg-gradient-to-br from-slate-100 via-white to-slate-200 z-0"></div><div class="absolute inset-4 border-[2px] border-slate-300 rounded-3xl z-0 pointer-events-none"></div>`;
-            wrapperBorder = "border border-slate-300 bg-white";
-        } else if (window.honorBoardTheme === 'clean') {
-            themeBg = `<div class="absolute inset-0 bg-white z-0"></div>`;
-            wrapperBorder = "border border-slate-200 bg-white";
-        } else {
-            themeBg = `
-              <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-amber-100/60 via-white to-orange-50/50 z-0"></div>
-              <div class="absolute inset-5 border-[6px] border-double border-amber-600/30 rounded-3xl z-0 pointer-events-none"></div>
-              <div class="absolute top-8 left-8 text-amber-500/40 text-2xl pointer-events-none">❖</div><div class="absolute top-8 right-8 text-amber-500/40 text-2xl pointer-events-none">❖</div>
-              <div class="absolute bottom-8 left-8 text-amber-500/40 text-2xl pointer-events-none">❖</div><div class="absolute bottom-8 right-8 text-amber-500/40 text-2xl pointer-events-none">❖</div>
-            `;
-            wrapperBorder = "border-[12px] border-double border-amber-700 bg-white";
-        }
+        // Default: Official Royal Cyan Ornate Model
+        const borderSrc = window.CMS_HONORBOARD_BORDER_B64 || 'assets/images/honorboard-border.png';
+        themeBg = `
+          <img src="${borderSrc}" class="absolute inset-0 w-full h-full object-fill pointer-events-none z-10 print:object-fill" />
+          <div class="absolute inset-0 bg-white z-0"></div>
+        `;
+        wrapperBorder = "border border-slate-200 bg-white";
     }
 
+    // Student Cards Grid (Open 'V' Formation matching user template)
     let studentGridHtml = "";
     if (window.honorBoardTopCount === 3) {
         studentGridHtml = `
-          <div class="flex-1 flex flex-col justify-center items-center gap-10 relative z-10 w-full my-auto">
-            <div class="flex justify-center w-full z-20">${renderStudentCard(getS(1), 1, true)}</div>
-            <div class="flex justify-center gap-24 w-full z-10">${renderStudentCard(getS(2), 2)} ${renderStudentCard(getS(3), 3)}</div>
+          <div class="relative w-full flex-1 my-auto" style="min-height: 520px;">
+            ${renderStudentCard(getS(1), 1, "left: 50%; transform: translateX(-50%); top: 20px;")}
+            ${renderStudentCard(getS(2), 2, "left: 100px; top: 260px;")}
+            ${renderStudentCard(getS(3), 3, "right: 100px; top: 260px;")}
           </div>
         `;
     } else {
         studentGridHtml = `
-          <div class="flex-1 flex flex-col justify-center items-center gap-4 relative z-10 w-full my-auto">
-            <div class="flex justify-center w-full z-30">${renderStudentCard(getS(1), 1, true)}</div>
-            <div class="flex justify-center gap-16 w-full z-20">${renderStudentCard(getS(2), 2)} ${renderStudentCard(getS(3), 3)}</div>
-            <div class="flex justify-center gap-24 w-full z-10">${renderStudentCard(getS(4), 4)} ${renderStudentCard(getS(5), 5)}</div>
+          <div class="relative w-full flex-1 my-auto" style="min-height: 540px;">
+            ${renderStudentCard(getS(1), 1, "left: 50%; transform: translateX(-50%); top: 10px;")}
+            ${renderStudentCard(getS(2), 2, "left: 50px; top: 125px;")}
+            ${renderStudentCard(getS(3), 3, "right: 50px; top: 125px;")}
+            ${renderStudentCard(getS(4), 4, "left: 50px; top: 350px;")}
+            ${renderStudentCard(getS(5), 5, "right: 50px; top: 350px;")}
           </div>
         `;
     }
 
-    const paddingClass = window.currentHonorBg ? 'px-[75px] py-[65px]' : 'px-14 py-12';
-    
     container.innerHTML = `
-      <div id="top5HonorPrintArea" class="w-[794px] h-[1123px] relative flex flex-col justify-between print:w-[210mm] print:h-[297mm] shadow-2xl print:shadow-none text-slate-900 font-siemreap shrink-0 box-border overflow-hidden rounded-xl print:rounded-none ${wrapperBorder}" style="transform: scale(${window.honorBoardScale}); transform-origin: top center; transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);">
+      <div id="top5HonorPrintArea" class="w-[794px] h-[1123px] relative flex flex-col justify-between print:w-[210mm] print:h-[297mm] shadow-2xl print:shadow-none text-slate-900 font-siemreap shrink-0 box-border overflow-hidden rounded-xl print:rounded-none ${wrapperBorder}" style="transform: scale(${window.honorBoardScale || 1}); transform-origin: top center; transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1); background-color: #ffffff;">
         ${themeBg}
-        <div class="w-full h-full relative z-10 flex flex-col ${paddingClass}">
-            <div class="shrink-0 relative flex justify-between items-start w-full z-20">
-                <div class="canva-el cursor-grab hover:ring-2 hover:ring-dashed hover:ring-blue-400 p-2 rounded-xl text-left leading-tight transition-colors hover:bg-white/40 backdrop-blur-sm z-20" style="padding-top: 24px;">
-                  <p contenteditable="true" spellcheck="false" class="font-moul text-amber-950 text-[11px] mb-1 outline-none hover:bg-white/60 px-1 py-0.5 rounded">ការិយាល័យ អប់រំ យុវជន និងកីឡានៃរដ្ឋបាលស្រុក ${districtName}</p>
-                  <p contenteditable="true" spellcheck="false" class="font-moul text-amber-950 text-[12px] outline-none hover:bg-white/60 px-1 py-0.5 rounded">${school_name}</p>
+        <div class="w-full h-full relative z-20 flex flex-col px-14 py-11 justify-between">
+            <!-- Top Header -->
+            <div class="shrink-0 relative flex justify-between items-start w-full z-20 pt-1">
+                <div class="canva-el cursor-grab hover:ring-2 hover:ring-dashed hover:ring-blue-400 p-2 rounded-xl text-left leading-tight transition-colors hover:bg-white/40 backdrop-blur-sm z-20">
+                  <p contenteditable="true" spellcheck="false" class="font-moul text-slate-900 text-[11px] mb-1 outline-none">ការិយាល័យអប់រំ យុវជន និងកីឡានៃរដ្ឋបាលស្រុក ${districtName}</p>
+                  <p contenteditable="true" spellcheck="false" class="font-moul text-slate-900 text-[12px] outline-none">${school_name}</p>
                 </div>
                 <div class="canva-el cursor-grab hover:ring-2 hover:ring-dashed hover:ring-blue-400 p-2 rounded-xl text-center transition-colors hover:bg-white/40 backdrop-blur-sm z-20">
-                  <p contenteditable="true" spellcheck="false" class="font-moul text-[13px] text-slate-900 outline-none drop-shadow-sm">ព្រះរាជាណាចក្រកម្ពុជា</p>
-                  <p contenteditable="true" spellcheck="false" class="font-moul text-[13px] mt-1 text-slate-800 outline-none drop-shadow-sm">ជាតិ សាសនា ព្រះមហាក្សត្រ</p>
+                  <p contenteditable="true" spellcheck="false" class="font-moul text-[12px] text-slate-900 outline-none">ព្រះរាជាណាចក្រកម្ពុជា</p>
+                  <p contenteditable="true" spellcheck="false" class="font-moul text-[12px] mt-0.5 text-slate-900 outline-none">ជាតិ សាសនា ព្រះមហាក្សត្រ</p>
                   <img src="${window.CMS_HEADER_SYMBOL_B64 || 'assets/images/header-flourish.png'}" class="header-flourish-symbol" alt="symbol" style="display: block; margin: 3px auto 0 auto; width: 125px; height: 10px; object-fit: contain;" />
                 </div>
             </div>
 
-            <div class="text-center mt-3 mb-1 relative z-20 flex flex-col items-center gap-2">
-                <div class="canva-el cursor-grab hover:ring-2 hover:ring-dashed hover:ring-blue-400 p-2 rounded-xl transition-colors hover:bg-white/30 z-20">
-                    <h1 contenteditable="true" spellcheck="false" class="font-moul text-[42px] text-transparent bg-clip-text bg-gradient-to-r from-amber-600 via-orange-600 to-red-600 tracking-wider drop-shadow-sm outline-none inline-block px-4 py-1" style="-webkit-text-stroke: 0.5px rgba(255,255,255,0.7);">តារាងកិត្តិយស</h1>
+            <!-- Title Block -->
+            <div class="text-center mt-2 mb-1 relative z-20 flex flex-col items-center">
+                <div class="canva-el cursor-grab hover:ring-2 hover:ring-dashed hover:ring-blue-400 p-1.5 rounded-xl transition-colors hover:bg-white/30 z-20">
+                    <h1 contenteditable="true" spellcheck="false" class="font-moul text-[36px] tracking-wider outline-none inline-block px-4 py-0.5" style="background: linear-gradient(180deg, #38bdf8 0%, #0284c7 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; -webkit-text-stroke: 0.8px #ffffff; filter: drop-shadow(0 3px 5px rgba(2, 132, 199, 0.35));">តារាងកិត្តិយស</h1>
                 </div>
                 <div class="canva-el cursor-grab hover:ring-2 hover:ring-dashed hover:ring-blue-400 p-1 rounded-full transition-transform z-20">
-                    <p contenteditable="true" spellcheck="false" class="font-bold text-[14px] text-amber-950 bg-white/90 inline-block px-6 py-1.5 rounded-full border border-amber-200 backdrop-blur-md shadow-sm outline-none">${periodTitleText}</p>
+                    <div class="inline-block px-7 py-0.5 rounded-full border-[1.5px] border-[#0284c7] bg-[#e0f2fe] shadow-sm my-0.5">
+                        <span contenteditable="true" spellcheck="false" class="font-moul text-[12.5px] text-[#0284c7] outline-none">${periodTitleText}</span>
+                    </div>
                 </div>
-                <div class="canva-el cursor-grab hover:ring-2 hover:ring-dashed hover:ring-blue-400 p-2 rounded-xl transition-colors hover:bg-white/40 z-20">
-                    <p class="text-amber-900 font-bold text-[13px]">ថ្នាក់ ៖ <span contenteditable="true" class="text-[14px] outline-none font-moul text-rose-700 bg-white/50 px-2 rounded">${gradeClassDisplay}</span> <span class="mx-2 text-slate-400">|</span> ឆ្នាំសិក្សា ៖ <span contenteditable="true" class="font-bold outline-none font-mono text-[14px] bg-white/50 px-2 rounded">${window.toKhmerNum(academic_year)}</span></p>
+                <div class="canva-el cursor-grab hover:ring-2 hover:ring-dashed hover:ring-blue-400 p-1 rounded-xl transition-colors hover:bg-white/40 z-20">
+                    <p class="font-moul text-[12px] text-[#dc2626] font-bold tracking-wide mt-0.5">
+                      <span contenteditable="true" class="outline-none">${gradeClassDisplay}</span> <span class="mx-1 text-[#dc2626]">|</span> ឆ្នាំសិក្សា <span contenteditable="true" class="outline-none">${window.toKhmerNum(academic_year)}</span>
+                    </p>
                 </div>
             </div>
 
+            <!-- Student Cards Formation -->
             ${studentGridHtml}
 
-            <div class="shrink-0 mt-auto pt-4 relative z-10">
-              <div class="flex justify-between items-end text-[13px] font-bold px-8">
-                <div class="text-center canva-el cursor-grab hover:ring-2 hover:ring-dashed hover:ring-blue-400 p-3 rounded-xl transition-colors hover:bg-white/50 backdrop-blur-sm">
-                  <p contenteditable="true" spellcheck="false" class="mb-2 text-slate-800 outline-none font-normal">បានឃើញ និងឯកភាព</p>
+            <!-- Bottom Signatures -->
+            <div class="shrink-0 mt-auto pt-2 relative z-20">
+              <div class="flex justify-between items-end text-[13px] font-bold px-6">
+                <div class="text-center canva-el cursor-grab hover:ring-2 hover:ring-dashed hover:ring-blue-400 p-2.5 rounded-xl transition-colors hover:bg-white/50 backdrop-blur-sm">
+                  <p contenteditable="true" spellcheck="false" class="mb-1 text-slate-800 outline-none font-normal text-[12px]">បានឃើញ និងឯកភាព</p>
                   <p contenteditable="true" spellcheck="false" class="font-moul text-[12px] text-slate-900 mb-10 outline-none">នាយិកាសាលា</p>
-                  <div contenteditable="true" spellcheck="false" class="font-moul text-[14px] text-indigo-950 outline-none min-w-[120px] border-b border-dashed border-transparent hover:border-slate-400 pb-1">${principal_name}</div>
+                  <div contenteditable="true" spellcheck="false" class="font-moul text-[13px] text-slate-900 outline-none min-w-[120px] pb-1">${principal_name}</div>
                 </div>
-                <div class="text-center canva-el cursor-grab hover:ring-2 hover:ring-dashed hover:ring-blue-400 p-3 rounded-xl transition-colors hover:bg-white/50 backdrop-blur-sm">
-                  <p contenteditable="true" spellcheck="false" class="font-normal text-[11px] text-slate-700 mb-2 outline-none">ធ្វើនៅ....................., ថ្ងៃទី........ខែ........ឆ្នាំ ${window.toKhmerNum(current_year.toString())}</p>
-                  <p contenteditable="true" spellcheck="false" class="font-moul text-[12px] text-slate-900 mb-10 outline-none">គ្រូទទួលបន្ទុកថ្នាក់</p>
-                  <div contenteditable="true" spellcheck="false" class="font-moul text-[14px] text-indigo-950 outline-none min-w-[120px] border-b border-dashed border-transparent hover:border-slate-400 pb-1">${teacher_name}</div>
+                <div class="text-center canva-el cursor-grab hover:ring-2 hover:ring-dashed hover:ring-blue-400 p-2.5 rounded-xl transition-colors hover:bg-white/50 backdrop-blur-sm">
+                  <p contenteditable="true" spellcheck="false" class="font-normal text-[11px] text-slate-700 mb-1 outline-none">${lunarDateStr}</p>
+                  <p contenteditable="true" spellcheck="false" class="font-normal text-[11px] text-slate-700 mb-1 outline-none">${solarDateStr}</p>
+                  <p contenteditable="true" spellcheck="false" class="font-moul text-[12px] text-slate-900 mb-10 outline-none">គ្រូប្រចាំថ្នាក់</p>
+                  <div contenteditable="true" spellcheck="false" class="font-moul text-[13px] text-slate-900 outline-none min-w-[120px] pb-1">${teacher_name}</div>
                 </div>
               </div>
             </div>
@@ -4993,6 +5112,8 @@ window.printOfficialHonorBoard = function() {
     clonedPrintArea.style.height = '297mm';
     clonedPrintArea.style.boxShadow = 'none';
     clonedPrintArea.style.borderRadius = '0';
+    clonedPrintArea.style.border = 'none';
+    clonedPrintArea.style.margin = '0';
     
     const printContent = clonedPrintArea.outerHTML;
 
@@ -5005,11 +5126,12 @@ window.printOfficialHonorBoard = function() {
         <script src="https://cdn.tailwindcss.com"></script>
         <style>
           @import url('https://fonts.googleapis.com/css2?family=Moul&family=Siemreap&display=swap');
-          @page { size: A4 portrait; margin: 1.5mm !important; }
+          @page { size: A4 portrait; margin: 0 !important; }
           * { box-sizing: border-box !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-          html, body { margin: 0 !important; padding: 0 !important; display: flex; justify-content: center; background: #fff; font-family: 'Siemreap', sans-serif; }
-          .font-moul { font-family: 'Moul', serif !important; }
-          #top5HonorPrintArea { width: 210mm !important; height: 297mm !important; margin: 0 !important; border-radius: 0 !important; }
+          html, body { margin: 0 !important; padding: 0 !important; width: 210mm !important; height: 297mm !important; background: #ffffff !important; font-family: 'Khmer OS Siemreap', 'Siemreap', sans-serif; overflow: hidden; }
+          .font-moul { font-family: 'Khmer OS Muol Light', 'Moul', serif !important; }
+          .font-siemreap { font-family: 'Khmer OS Siemreap', 'Siemreap', sans-serif !important; }
+          #top5HonorPrintArea { width: 210mm !important; height: 297mm !important; margin: 0 !important; border-radius: 0 !important; box-shadow: none !important; border: none !important; }
           .canva-el { outline: none !important; box-shadow: none !important; border: none !important; background: transparent !important; }
         </style>
       </head>
@@ -5020,14 +5142,18 @@ window.printOfficialHonorBoard = function() {
     `;
 
     const printWindow = window.open('', '_blank', 'width=1000,height=900');
-    printWindow.document.open();
-    printWindow.document.write(printDocument);
-    printWindow.document.close();
+    if (printWindow) {
+        printWindow.document.open();
+        printWindow.document.write(printDocument);
+        printWindow.document.close();
 
-    setTimeout(() => {
-      printWindow.focus();
-      printWindow.print();
-    }, 800);
+        setTimeout(() => {
+          printWindow.focus();
+          printWindow.print();
+        }, 600);
+    } else {
+        alert("⚠️ សូមអនុញ្ញាត Pop-up ក្នុងកម្មវិធីរុករក (Browser) ដើម្បីអាចបើកផ្ទាំងបោះពុម្ពបាន!");
+    }
 };
 
 let activeEl = null;
