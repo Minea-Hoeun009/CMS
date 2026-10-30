@@ -4549,9 +4549,12 @@ window.renderAcademicResultsReport = function(container, targetGrade, targetRoom
                     </div>
                 </div>
 
-                <div class="text-center mb-4">
+                <div class="text-center mb-3">
                     <h3 class="font-moul text-base text-blue-900">ចំណាត់ថ្នាក់ប្រចាំខែ ${currentMonth} <span class="hidden">របាយការណ៍លទ្ធផលនៃការសិក្សាប្រចាំខែ ${currentMonth}</span></h3>
-                    <h4 class="font-moul text-xs text-red-600 mt-1">${gradeFull} | ឆ្នាំសិក្សា ${academicYear}</h4>
+                    <div class="flex items-center justify-center my-1.5">
+                        <img src="${window.CMS_TITLE_FLOURISH_B64 || 'assets/images/title-flourish.png'}" class="title-flourish-symbol" alt="flourish" style="display: block; margin: 0 auto; width: 230px; height: 14px; object-fit: contain;" />
+                    </div>
+                    <h4 class="font-moul text-xs text-red-600 mt-1">${(typeof window.toKhmerNum === 'function' ? window.toKhmerNum(gradeFull) : gradeFull)} | ឆ្នាំសិក្សា ${(typeof window.toKhmerNum === 'function' ? window.toKhmerNum(academicYear) : academicYear)}</h4>
                 </div>
 
                 <!-- តារាងចំណាត់ថ្នាក់ទម្រង់ ២ ជួរស្មើស្អាត (Dual-Column Split Table) តាមគំរូរូបភាពជាក់ស្តែង -->
@@ -4825,9 +4828,12 @@ window.renderAcademicResultsReport = function(container, targetGrade, targetRoom
                     </div>
                 </div>
 
-                <div class="text-center mb-4">
+                <div class="text-center mb-3">
                     <h3 class="font-moul text-base text-blue-900">ចំណាត់ថ្នាក់ប្រចាំឆមាសលើកទី ${semNumKhmer} <span class="hidden">របាយការណ៍លទ្ធផលនៃការសិក្សាប្រចាំ ${currentSemester}</span></h3>
-                    <h4 class="font-moul text-xs text-red-600 mt-1">${gradeFull} | ឆ្នាំសិក្សា ${academicYear}</h4>
+                    <div class="flex items-center justify-center my-1.5">
+                        <img src="${window.CMS_TITLE_FLOURISH_B64 || 'assets/images/title-flourish.png'}" class="title-flourish-symbol" alt="flourish" style="display: block; margin: 0 auto; width: 230px; height: 14px; object-fit: contain;" />
+                    </div>
+                    <h4 class="font-moul text-xs text-red-600 mt-1">${(typeof window.toKhmerNum === 'function' ? window.toKhmerNum(gradeFull) : gradeFull)} | ឆ្នាំសិក្សា ${(typeof window.toKhmerNum === 'function' ? window.toKhmerNum(academicYear) : academicYear)}</h4>
                 </div>
 
                 <div class="overflow-x-auto mb-4">
@@ -5094,10 +5100,13 @@ window.renderAcademicResultsReport = function(container, targetGrade, targetRoom
                 </div>
             </div>
 
-            <div class="text-center mb-4">
-                <h3 class="font-moul text-base text-blue-900">ចំណាត់ថ្នាក់ប្រចាំឆ្នាំ <span class="hidden">សេចក្តីសម្រេចលទ្ធផលសិក្សាប្រចាំឆ្នាំ (ការឡើងថ្នាក់-ត្រួតថ្នាក់)</span></h3>
-                <h4 class="font-moul text-xs text-red-600 mt-1">${gradeFull} | ឆ្នាំសិក្សា ${academicYear}</h4>
-            </div>
+            <div class="text-center mb-3">
+                    <h3 class="font-moul text-base text-blue-900">ចំណាត់ថ្នាក់ប្រចាំឆ្នាំ <span class="hidden">សេចក្តីសម្រេចលទ្ធផលសិក្សាប្រចាំឆ្នាំ (ការឡើងថ្នាក់-ត្រួតថ្នាក់)</span></h3>
+                    <div class="flex items-center justify-center my-1.5">
+                        <img src="${window.CMS_TITLE_FLOURISH_B64 || 'assets/images/title-flourish.png'}" class="title-flourish-symbol" alt="flourish" style="display: block; margin: 0 auto; width: 230px; height: 14px; object-fit: contain;" />
+                    </div>
+                    <h4 class="font-moul text-xs text-red-600 mt-1">${(typeof window.toKhmerNum === 'function' ? window.toKhmerNum(gradeFull) : gradeFull)} | ឆ្នាំសិក្សា ${(typeof window.toKhmerNum === 'function' ? window.toKhmerNum(academicYear) : academicYear)}</h4>
+                </div>
 
             <div class="overflow-x-auto mb-4">
                 <table class="w-full text-xs text-center border-collapse border border-slate-300">
@@ -5368,9 +5377,13 @@ window.renderClassInventoryReport = function(container, targetGrade, targetRoom)
                 </div>
 
             <!-- Main Title -->
-            <div class="text-center mb-4">
-                <h2 class="font-moul text-base text-amber-900 inline-block px-4 pb-1 border-b-2 border-amber-600">បញ្ជីសារពើភ័ណ្ឌសម្ភារក្នុងថ្នាក់រៀន</h2>
-                <h4 class="font-moul text-xs text-red-600 mt-1">${gradeFull} | ឆ្នាំសិក្សា ${academicYear}</h4>
+            <div class="text-center mb-3">
+                <h2 class="font-moul text-base text-blue-900 tracking-wide">បញ្ជីសារពើភ័ណ្ឌ</h2>
+                <span class="hidden">បញ្ជីសារពើភ័ណ្ឌសម្ភារក្នុងថ្នាក់រៀន</span>
+                <div class="flex items-center justify-center my-1.5">
+                    <img src="${window.CMS_TITLE_FLOURISH_B64 || 'assets/images/title-flourish.png'}" class="title-flourish-symbol" alt="flourish" style="display: block; margin: 0 auto; width: 230px; height: 14px; object-fit: contain;" />
+                </div>
+                <h4 class="font-moul text-xs text-red-600 mt-1">${(typeof window.toKhmerNum === 'function' ? window.toKhmerNum(gradeFull) : gradeFull)} | ឆ្នាំសិក្សា ${(typeof window.toKhmerNum === 'function' ? window.toKhmerNum(academicYear) : academicYear)}</h4>
             </div>
 
             <!-- 2-Column Split Table (Items 1-16 on Left, 17-32 on Right) -->
@@ -5539,8 +5552,11 @@ window.renderInternalRulesReport = function(container, targetGrade, targetRoom) 
 
             <!-- Main Title -->
             <div class="text-center mb-3">
-                <h2 class="font-moul text-base text-rose-900 inline-block px-4 pb-1 border-b-2 border-rose-600">បទបញ្ជាផ្ទៃក្នុងក្នុងថ្នាក់រៀន</h2>
-                <h4 class="font-moul text-xs text-red-600 mt-1">${gradeFull} | ឆ្នាំសិក្សា ${academicYear}</h4>
+                <h2 class="font-moul text-base text-blue-900 tracking-wide">បទបញ្ជាផ្ទៃក្នុងក្នុងថ្នាក់រៀន</h2>
+                <div class="flex items-center justify-center my-1.5">
+                    <img src="${window.CMS_TITLE_FLOURISH_B64 || 'assets/images/title-flourish.png'}" class="title-flourish-symbol" alt="flourish" style="display: block; margin: 0 auto; width: 230px; height: 14px; object-fit: contain;" />
+                </div>
+                <h4 class="font-moul text-xs text-red-600 mt-1">${(typeof window.toKhmerNum === 'function' ? window.toKhmerNum(gradeFull) : gradeFull)} | ឆ្នាំសិក្សា ${(typeof window.toKhmerNum === 'function' ? window.toKhmerNum(academicYear) : academicYear)}</h4>
             </div>
 
             <!-- Preamble -->
@@ -5676,8 +5692,11 @@ window.renderClassPrinciplesReport = function(container, targetGrade, targetRoom
 
             <!-- Main Title -->
             <div class="text-center mb-2">
-                <h2 class="font-moul text-base text-sky-950 inline-block px-4 pb-1 border-b-2 border-sky-600">គោលការណ៍ថ្នាក់រៀន</h2>
-                <h4 class="font-moul text-xs text-red-600 mt-1">${gradeFull} | ឆ្នាំសិក្សា ${academicYear}</h4>
+                <h2 class="font-moul text-base text-blue-900 tracking-wide">គោលការណ៍ថ្នាក់រៀន</h2>
+                <div class="flex items-center justify-center my-1.5">
+                    <img src="${window.CMS_TITLE_FLOURISH_B64 || 'assets/images/title-flourish.png'}" class="title-flourish-symbol" alt="flourish" style="display: block; margin: 0 auto; width: 230px; height: 14px; object-fit: contain;" />
+                </div>
+                <h4 class="font-moul text-xs text-red-600 mt-1">${(typeof window.toKhmerNum === 'function' ? window.toKhmerNum(gradeFull) : gradeFull)} | ឆ្នាំសិក្សា ${(typeof window.toKhmerNum === 'function' ? window.toKhmerNum(academicYear) : academicYear)}</h4>
             </div>
 
             <!-- Motto Banner (ដូចក្នុងរូបភាពគំរូ) -->
@@ -5857,8 +5876,11 @@ window.renderCleaningScheduleReport = function(container, targetGrade, targetRoo
 
             <!-- Main Title -->
             <div class="text-center mb-2">
-                <h2 class="font-moul text-base text-emerald-950 inline-block px-4 pb-1 border-b-2 border-emerald-600">តារាងវេនសម្អាតប្រចាំសប្ដាហ៍</h2>
-                <h4 class="font-moul text-xs text-red-600 mt-1">${gradeFull} | ឆ្នាំសិក្សា ${academicYear}</h4>
+                <h2 class="font-moul text-base text-blue-900 tracking-wide">តារាងវេនសម្អាតប្រចាំសប្ដាហ៍</h2>
+                <div class="flex items-center justify-center my-1.5">
+                    <img src="${window.CMS_TITLE_FLOURISH_B64 || 'assets/images/title-flourish.png'}" class="title-flourish-symbol" alt="flourish" style="display: block; margin: 0 auto; width: 230px; height: 14px; object-fit: contain;" />
+                </div>
+                <h4 class="font-moul text-xs text-red-600 mt-1">${typeof window.toKhmerNum === 'function' ? window.toKhmerNum(gradeFull) : gradeFull} | ឆ្នាំសិក្សា ${academicYear}</h4>
             </div>
 
             <!-- Committee Leadership Header (ប្រធានថ្នាក់ និងអនុប្រធាន) -->
@@ -6008,8 +6030,11 @@ window.renderBranchCommitteeReport = function(container, targetGrade, targetRoom
 
             <!-- Main Title -->
             <div class="text-center mb-3">
-                <h2 class="font-moul text-sm sm:text-base text-purple-950 inline-block px-4 pb-1 border-b-2 border-purple-600">រចនាសម្ព័ន្ធគណៈកម្មការសាខា និងក្រុមប្រឹក្សាកុមារប្រចាំថ្នាក់</h2>
-                <h4 class="font-moul text-xs text-red-600 mt-1">${gradeFull} | ឆ្នាំសិក្សា ${academicYear}</h4>
+                <h2 class="font-moul text-base text-blue-900 tracking-wide">រចនាសម្ព័ន្ធគណៈកម្មការសាខា និងក្រុមប្រឹក្សាកុមារប្រចាំថ្នាក់</h2>
+                <div class="flex items-center justify-center my-1.5">
+                    <img src="${window.CMS_TITLE_FLOURISH_B64 || 'assets/images/title-flourish.png'}" class="title-flourish-symbol" alt="flourish" style="display: block; margin: 0 auto; width: 230px; height: 14px; object-fit: contain;" />
+                </div>
+                <h4 class="font-moul text-xs text-red-600 mt-1">${typeof window.toKhmerNum === 'function' ? window.toKhmerNum(gradeFull) : gradeFull} | ឆ្នាំសិក្សា ${academicYear}</h4>
             </div>
 
             <!-- Hierarchy Tree & Table Container (Proportionally Spaced) -->

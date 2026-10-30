@@ -144,9 +144,12 @@ window.KrouDigital = {
                     </div>
                 </div>
 
-                <div class="text-center mb-6">
-                    <h3 class="font-moul text-base text-blue-900">តារាងស្រង់ពិន្ទុ និងការវាយតម្លៃលទ្ធផលសិក្សាសិស្ស</h3>
-                    <h4 class="font-moul text-sm text-red-600 mt-1">${gradeFull} | ឆ្នាំសិក្សា ${academicYear} (ខែ ${selectedMonth})</h4>
+                <div class="text-center mb-3">
+                    <h3 class="font-moul text-base text-blue-900 tracking-wide">តារាងស្រង់ពិន្ទុ និងការវាយតម្លៃលទ្ធផលសិក្សាសិស្ស</h3>
+                    <div class="flex items-center justify-center my-1.5">
+                        <img src="${window.CMS_TITLE_FLOURISH_B64 || 'assets/images/title-flourish.png'}" class="title-flourish-symbol" alt="flourish" style="display: block; margin: 0 auto; width: 230px; height: 14px; object-fit: contain;" />
+                    </div>
+                    <h4 class="font-moul text-xs text-red-600 mt-1">${window.toKhmerNum ? window.toKhmerNum(gradeFull) : gradeFull} | ឆ្នាំសិក្សា ${academicYear} (ខែ ${selectedMonth})</h4>
                 </div>
 
                 <!-- តារាងពិន្ទុផ្លូវការ -->
@@ -486,9 +489,12 @@ window.KrouDigital = {
                     </div>
                 </div>
 
-                <div class="text-center mb-6">
-                    <h3 class="font-moul text-base text-blue-900">សេចក្តីសម្រេចលទ្ធផលសិក្សាប្រចាំឆមាស និងប្រចាំឆ្នាំ</h3>
-                    <h4 class="font-moul text-sm text-red-600 mt-1">${gradeFull} | ឆ្នាំសិក្សា ${academicYear}</h4>
+                <div class="text-center mb-3">
+                    <h3 class="font-moul text-base text-blue-900 tracking-wide">សេចក្តីសម្រេចលទ្ធផលសិក្សាប្រចាំឆមាស និងប្រចាំឆ្នាំ</h3>
+                    <div class="flex items-center justify-center my-1.5">
+                        <img src="${window.CMS_TITLE_FLOURISH_B64 || 'assets/images/title-flourish.png'}" class="title-flourish-symbol" alt="flourish" style="display: block; margin: 0 auto; width: 230px; height: 14px; object-fit: contain;" />
+                    </div>
+                    <h4 class="font-moul text-xs text-red-600 mt-1">${window.toKhmerNum ? window.toKhmerNum(gradeFull) : gradeFull} | ឆ្នាំសិក្សា ${academicYear}</h4>
                 </div>
 
                 <div class="overflow-x-auto mb-6">
