@@ -862,7 +862,7 @@ window.CMSPrintManager = {
         const paperSize = options.paperSize || 'A4';
         const orientation = options.orientation || 'portrait';
         const scale = options.scale ? parseInt(options.scale, 10) : 100;
-        const margin = options.margin !== undefined ? options.margin : (paperSize === 'A3' ? '10mm' : '1.5mm');
+        const margin = options.margin !== undefined ? options.margin : (paperSize === 'A3' ? '10mm' : '1.5cm');
         const title = options.title || document.title || "បោះពុម្ពឯកសារ";
 
         let oldIframe = document.getElementById("cms_print_frame_helper");
@@ -929,6 +929,8 @@ window.CMSPrintManager = {
                 p.style.setProperty('box-shadow', 'none', 'important');
                 p.style.setProperty('border-radius', '0', 'important');
                 p.style.setProperty('margin', '0 auto', 'important');
+                p.style.setProperty('padding', '1.5cm', 'important');
+                p.style.setProperty('box-sizing', 'border-box', 'important');
                 p.style.setProperty('overflow', 'hidden', 'important');
             });
         }
@@ -943,6 +945,8 @@ window.CMSPrintManager = {
             clone.style.setProperty('box-shadow', 'none', 'important');
             clone.style.setProperty('border-radius', '0', 'important');
             clone.style.setProperty('margin', '0 auto', 'important');
+            clone.style.setProperty('padding', '1.5cm', 'important');
+            clone.style.setProperty('box-sizing', 'border-box', 'important');
             clone.style.setProperty('overflow', 'hidden', 'important');
         }
         if (clone.firstElementChild) {
@@ -1002,7 +1006,7 @@ window.CMSPrintManager = {
                 <style>
                     @page {
                         size: ${paperSize} ${orientation};
-                        margin: ${margin};
+                        margin: ${options.margin !== undefined ? options.margin : (a4Pages.length > 0 || (clone.classList && clone.classList.contains('a4-page')) ? '0 !important' : '1.5cm !important')};
                     }
                     * {
                         box-sizing: border-box !important;
@@ -1044,7 +1048,7 @@ window.CMSPrintManager = {
                         flex-direction: column !important;
                         justify-content: flex-start !important;
                         position: relative !important;
-                        padding: 18px 24px !important;
+                        padding: 1.5cm !important;
                         margin: 0 auto !important;
                         page-break-inside: avoid !important;
                         page-break-after: avoid !important;
@@ -1382,7 +1386,7 @@ window.CMSPrintManager = {
             <script src="https://cdn.tailwindcss.com"></script>
             <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
             <style id="dynamic-page-style">
-              @page { size: ${paperSize} ${orientation}; margin: 1.5mm; }
+              @page { size: ${paperSize} ${orientation}; margin: 1.5cm; }
             </style>
             <style>
               @import url('https://fonts.googleapis.com/css2?family=Moul&family=Siemreap:wght@400;700&display=swap');
@@ -1402,7 +1406,7 @@ window.CMSPrintManager = {
               
               /* ការកំណត់ប្រអប់ក្រដាស (Print Wrapper) ឱ្យស្គាល់ខ្នាតទំហំថេរ */
               #print-wrapper { 
-                  padding: 10mm; 
+                  padding: 1.5cm; 
                   width: ${defaultWidth}; 
                   min-height: 210mm;
                   margin: 20px auto; 
@@ -1480,7 +1484,7 @@ window.CMSPrintManager = {
                     const orientation = document.getElementById('paperOrientation').value;
                     const zoom = document.getElementById('zoomLevel').value;
                     
-                    document.getElementById('dynamic-page-style').innerHTML = '@page { size: ' + size + ' ' + orientation + '; margin: 1.5mm; }';
+                    document.getElementById('dynamic-page-style').innerHTML = '@page { size: ' + size + ' ' + orientation + '; margin: 1.5cm; }';
                     
                     let wrapperWidth = "297mm";
                     if (orientation === 'landscape') {

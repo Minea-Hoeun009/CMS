@@ -1277,7 +1277,7 @@ window.renderStudentStatsReportHTML = function(container, targetGrade, targetRoo
                     background-color: #eff6ff;
                 }
                 @media print {
-                    @page { size: A4 portrait; margin: 6mm; }
+                    @page { size: A4 portrait; margin: 1.5cm; }
                     body * { visibility: hidden !important; }
                     #studentStatsPrintArea, #studentStatsPrintArea * { visibility: visible !important; }
                     #studentStatsPrintArea {
@@ -1629,7 +1629,7 @@ window.printStudentStatsReport = function() {
     });
 
     const extraMoeysStyles = `
-        @page { size: A4 portrait; margin: 5mm; }
+        @page { size: A4 portrait; margin: 1.5cm; }
         .moeys-table { width: 100% !important; border-collapse: collapse !important; font-size: 9.8px !important; border: 1.5px solid #002b66 !important; }
         .moeys-table th, .moeys-table td { border: 1px solid #002b66 !important; padding: 2px 3px !important; vertical-align: middle !important; }
         .moeys-table th { font-family: 'Khmer OS Siemreap', 'Siemreap', sans-serif !important; font-weight: bold !important; background-color: #ffffff !important; text-align: center !important; color: #002b66 !important; }
@@ -1662,7 +1662,7 @@ window.printStudentStatsReport = function() {
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
         <link href="https://fonts.googleapis.com/css2?family=Moul&family=Siemreap&display=swap" rel="stylesheet">
         <style>
-          @page { size: A4 portrait; margin: 5mm; }
+          @page { size: A4 portrait; margin: 1.5cm; }
           * { box-sizing: border-box !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; font-family: 'Khmer OS Siemreap', 'Siemreap', sans-serif; }
           html, body { background: #fff; width: 100%; margin: 0; padding: 0; }
           .font-moul { font-family: 'Khmer OS Muol Light', 'Khmer OS Muol', 'Moul', serif !important; font-weight: normal !important; }
@@ -2911,7 +2911,7 @@ window.printReportArea = function(areaId, orientation = 'portrait') {
         <script src="https://cdn.tailwindcss.com"></script>
         <style>
           @import url('https://fonts.googleapis.com/css2?family=Moul&family=Siemreap&display=swap');
-          @page { size: A4 ${orientation}; margin: 8mm; }
+          @page { size: A4 ${orientation}; margin: 1.5cm; }
           * { box-sizing: border-box !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; font-family: 'Khmer OS Siemreap', 'Siemreap', sans-serif; }
           html, body { background: #fff; width: 100%; height: 100%; color: #000; }
           .font-moul { font-family: 'Khmer OS Muol Light', 'Khmer OS Muol', 'Moul', serif !important; font-weight: normal !important; }
@@ -4519,7 +4519,7 @@ window.renderAcademicResultsReport = function(container, targetGrade, targetRoom
         }).join('');
 
         container.innerHTML = `
-            <div id="reportKoKhoPrintArea" class="a4-page bg-white p-6 md:p-8 w-full shadow-2xl rounded-2xl border border-slate-200 text-slate-800 relative overflow-hidden print:w-[210mm] print:h-[297mm] print:min-h-[297mm] print:rounded-none print:shadow-none" style="max-width: 210mm; min-height: 297mm; font-family: 'Khmer OS Siemreap', 'Siemreap', sans-serif; position: relative;">
+            <div id="reportKoKhoPrintArea" class="a4-page bg-white w-full shadow-2xl rounded-2xl border border-slate-200 text-slate-800 relative overflow-hidden print:w-[210mm] print:h-[297mm] print:min-h-[297mm] print:rounded-none print:shadow-none" style="box-sizing: border-box; padding: 1.5cm !important; max-width: 210mm; min-height: 297mm; font-family: 'Khmer OS Siemreap', 'Siemreap', sans-serif; position: relative;">
             ${window.getReportBorderLayerHtml ? window.getReportBorderLayerHtml() : ''}
                 
                 <div class="flex justify-between items-start mb-4 text-xs">
@@ -4792,7 +4792,7 @@ window.renderAcademicResultsReport = function(container, targetGrade, targetRoom
         }
 
         container.innerHTML = `
-            <div id="reportKoKhoPrintArea" class="a4-page bg-white p-6 md:p-8 w-full shadow-2xl rounded-2xl border border-slate-200 text-slate-800 relative overflow-hidden print:w-[210mm] print:h-[297mm] print:min-h-[297mm] print:rounded-none print:shadow-none" style="max-width: 210mm; min-height: 297mm; font-family: 'Khmer OS Siemreap', 'Siemreap', sans-serif; position: relative;">
+            <div id="reportKoKhoPrintArea" class="a4-page bg-white w-full shadow-2xl rounded-2xl border border-slate-200 text-slate-800 relative overflow-hidden print:w-[210mm] print:h-[297mm] print:min-h-[297mm] print:rounded-none print:shadow-none" style="box-sizing: border-box; padding: 1.5cm !important; max-width: 210mm; min-height: 297mm; font-family: 'Khmer OS Siemreap', 'Siemreap', sans-serif; position: relative;">
             ${window.getReportBorderLayerHtml ? window.getReportBorderLayerHtml() : ''}
                 
                 <div class="flex justify-between items-start mb-4 text-xs">
@@ -5058,7 +5058,7 @@ window.renderAcademicResultsReport = function(container, targetGrade, targetRoom
     }
 
     container.innerHTML = `
-        <div id="reportKoKhoPrintArea" class="a4-page bg-white p-6 md:p-8 w-full shadow-2xl rounded-2xl border border-slate-200 text-slate-800 relative overflow-hidden print:w-[210mm] print:h-[297mm] print:min-h-[297mm] print:rounded-none print:shadow-none" style="max-width: 210mm; min-height: 297mm; font-family: 'Khmer OS Siemreap', 'Siemreap', sans-serif; position: relative;">
+        <div id="reportKoKhoPrintArea" class="a4-page bg-white w-full shadow-2xl rounded-2xl border border-slate-200 text-slate-800 relative overflow-hidden print:w-[210mm] print:h-[297mm] print:min-h-[297mm] print:rounded-none print:shadow-none" style="box-sizing: border-box; padding: 1.5cm !important; max-width: 210mm; min-height: 297mm; font-family: 'Khmer OS Siemreap', 'Siemreap', sans-serif; position: relative;">
             ${window.getReportBorderLayerHtml ? window.getReportBorderLayerHtml() : ''}
             
             <div class="flex justify-between items-start mb-4 text-xs">
@@ -5328,7 +5328,7 @@ window.renderClassInventoryReport = function(container, targetGrade, targetRoom)
     `).join('');
 
     container.innerHTML = `
-        <div class="a4-page bg-white shadow-2xl rounded-2xl mx-auto font-siemreap text-slate-800 relative w-[794px] min-h-[1123px] max-w-[210mm] text-[11px] leading-relaxed flex flex-col justify-start shrink-0 overflow-hidden print:w-[210mm] print:h-[297mm] print:min-h-[297mm] print:rounded-none print:shadow-none" style="box-sizing: border-box; padding: 18px 24px; position: relative;">
+        <div class="a4-page bg-white shadow-2xl rounded-2xl mx-auto font-siemreap text-slate-800 relative w-[794px] min-h-[1123px] max-w-[210mm] text-[11px] leading-relaxed flex flex-col justify-start shrink-0 overflow-hidden print:w-[210mm] print:h-[297mm] print:min-h-[297mm] print:rounded-none print:shadow-none" style="box-sizing: border-box; padding: 1.5cm; position: relative;">
             ${window.getReportBorderLayerHtml ? window.getReportBorderLayerHtml() : ''}
             <!-- Main Content Area -->
             <div class="flex flex-col justify-start" style="position: relative; z-index: 10;">
@@ -5498,7 +5498,7 @@ window.renderInternalRulesReport = function(container, targetGrade, targetRoom) 
     `;
 
     container.innerHTML = `
-        <div class="a4-page bg-white shadow-2xl rounded-2xl mx-auto font-siemreap text-slate-800 relative w-[794px] min-h-[1123px] max-w-[210mm] text-[11px] leading-relaxed flex flex-col justify-start shrink-0 overflow-hidden print:w-[210mm] print:h-[297mm] print:min-h-[297mm] print:rounded-none print:shadow-none" style="box-sizing: border-box; padding: 18px 24px; position: relative;">
+        <div class="a4-page bg-white shadow-2xl rounded-2xl mx-auto font-siemreap text-slate-800 relative w-[794px] min-h-[1123px] max-w-[210mm] text-[11px] leading-relaxed flex flex-col justify-start shrink-0 overflow-hidden print:w-[210mm] print:h-[297mm] print:min-h-[297mm] print:rounded-none print:shadow-none" style="box-sizing: border-box; padding: 1.5cm; position: relative;">
             ${window.getReportBorderLayerHtml ? window.getReportBorderLayerHtml() : ''}
             <!-- Main Content Area -->
             <div class="flex flex-col justify-start" style="position: relative; z-index: 10;">
@@ -5635,7 +5635,7 @@ window.renderClassPrinciplesReport = function(container, targetGrade, targetRoom
     `;
 
     container.innerHTML = `
-        <div class="a4-page bg-white shadow-2xl rounded-2xl mx-auto font-siemreap text-slate-800 relative w-[794px] min-h-[1123px] max-w-[210mm] text-[11px] leading-relaxed flex flex-col justify-start shrink-0 overflow-hidden print:w-[210mm] print:h-[297mm] print:min-h-[297mm] print:rounded-none print:shadow-none" style="box-sizing: border-box; padding: 18px 24px; position: relative;">
+        <div class="a4-page bg-white shadow-2xl rounded-2xl mx-auto font-siemreap text-slate-800 relative w-[794px] min-h-[1123px] max-w-[210mm] text-[11px] leading-relaxed flex flex-col justify-start shrink-0 overflow-hidden print:w-[210mm] print:h-[297mm] print:min-h-[297mm] print:rounded-none print:shadow-none" style="box-sizing: border-box; padding: 1.5cm; position: relative;">
             ${window.getReportBorderLayerHtml ? window.getReportBorderLayerHtml() : ''}
             <!-- Main Content Area -->
             <div class="flex flex-col justify-start" style="position: relative; z-index: 10;">
@@ -5816,7 +5816,7 @@ window.renderCleaningScheduleReport = function(container, targetGrade, targetRoo
     };
 
     container.innerHTML = `
-        <div class="a4-page bg-white shadow-2xl rounded-2xl mx-auto font-siemreap text-slate-800 relative w-[794px] min-h-[1123px] max-w-[210mm] text-[11px] leading-relaxed flex flex-col justify-start shrink-0 overflow-hidden print:w-[210mm] print:h-[297mm] print:min-h-[297mm] print:rounded-none print:shadow-none" style="box-sizing: border-box; padding: 18px 24px; position: relative;">
+        <div class="a4-page bg-white shadow-2xl rounded-2xl mx-auto font-siemreap text-slate-800 relative w-[794px] min-h-[1123px] max-w-[210mm] text-[11px] leading-relaxed flex flex-col justify-start shrink-0 overflow-hidden print:w-[210mm] print:h-[297mm] print:min-h-[297mm] print:rounded-none print:shadow-none" style="box-sizing: border-box; padding: 1.5cm; position: relative;">
             ${window.getReportBorderLayerHtml ? window.getReportBorderLayerHtml() : ''}
             <!-- Main Content Area -->
             <div class="flex flex-col justify-start" style="position: relative; z-index: 10;">
@@ -5967,7 +5967,7 @@ window.renderBranchCommitteeReport = function(container, targetGrade, targetRoom
     }).join('');
 
     container.innerHTML = `
-        <div class="a4-page bg-white shadow-2xl rounded-2xl mx-auto font-siemreap text-slate-800 relative w-[794px] min-h-[1123px] max-w-[210mm] text-[11px] leading-relaxed flex flex-col justify-start shrink-0 overflow-hidden print:w-[210mm] print:h-[297mm] print:min-h-[297mm] print:rounded-none print:shadow-none" style="box-sizing: border-box; padding: 18px 24px; position: relative;">
+        <div class="a4-page bg-white shadow-2xl rounded-2xl mx-auto font-siemreap text-slate-800 relative w-[794px] min-h-[1123px] max-w-[210mm] text-[11px] leading-relaxed flex flex-col justify-start shrink-0 overflow-hidden print:w-[210mm] print:h-[297mm] print:min-h-[297mm] print:rounded-none print:shadow-none" style="box-sizing: border-box; padding: 1.5cm; position: relative;">
             ${window.getReportBorderLayerHtml ? window.getReportBorderLayerHtml() : ''}
             <!-- Main Content Area -->
             <div class="flex flex-col justify-start" style="position: relative; z-index: 10;">

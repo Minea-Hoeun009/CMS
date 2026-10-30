@@ -253,10 +253,10 @@ h6,
     break-inside: avoid !important;
   }
 
-  /* A4 Structured Document Frame (Exact Fit with 1.5mm Margin & Portrait Default) */
+  /* A4 Structured Document Frame (Exact Fit with 1.5cm Margin & Portrait Default) */
   @page {
     size: A4 portrait;
-    margin: 1.5mm !important;
+    margin: 0 !important;
   }
   .a4-page {
     box-sizing: border-box !important;
@@ -268,7 +268,7 @@ h6,
     flex-direction: column !important;
     justify-content: flex-start !important;
     position: relative !important;
-    padding: 18px 24px !important;
+    padding: 1.5cm !important;
     margin: 0 auto !important;
     page-break-inside: avoid !important;
     page-break-after: avoid !important;
@@ -277,6 +277,12 @@ h6,
     box-shadow: none !important;
     overflow: hidden !important;
   }
+}
+
+/* Standard 1.5cm Margin on Display & Screen for A4 Pages */
+.a4-page {
+  box-sizing: border-box;
+  padding: 1.5cm;
 }
 
 /* បន្ថែមនៅខាងក្រោមគេនៃ style.css របស់អ្នក */
