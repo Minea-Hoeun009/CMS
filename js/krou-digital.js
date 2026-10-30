@@ -1947,7 +1947,7 @@ window.KrouDigital = {
                                 <!-- 🏛️ ក្បាលប័ណ្ណ (Official Header matching sample image) 🏛️ -->
                                 <div class="flex justify-between items-start text-xs px-2 pt-1">
                                     <!-- Left: MoEYS Logo & Hierarchy (ដូចរូបគំរូ - DRAGGABLE SECTION) -->
-                                    <div id="cert_sec_header_left" class="canva-el canva-draggable-section text-left pt-0.5 space-y-1 max-w-[280px]" style="transform: translate(${posHeaderLeft.x}px, ${posHeaderLeft.y}px);">
+                                    <div id="cert_sec_header_left" class="canva-el canva-draggable-section text-left pt-0.5 space-y-1 max-w-[340px]" style="transform: translate(${posHeaderLeft.x}px, ${posHeaderLeft.y}px);">
                                         <div class="drag-handle no-print hidden items-center gap-1 px-1.5 py-0.5 bg-slate-900/90 text-amber-300 text-[9px] rounded shadow border border-amber-500/60 -top-5 left-0 absolute whitespace-nowrap cursor-move z-50">
                                             <i class="fa-solid fa-up-down-left-right"></i> អូសទីតាំង
                                         </div>
@@ -1960,8 +1960,7 @@ window.KrouDigital = {
                                                 </div>
                                             `}
                                         </div>
-                                        <p contenteditable="true" class="cert-editable font-moul text-blue-950 text-[11px] leading-normal">មន្ទីរអប់រំ យុវជន និងកីឡាខេត្ត${provinceName}</p>
-                                        <p contenteditable="true" class="cert-editable font-moul text-blue-950 text-[10.5px] leading-normal">ការិយាល័យអប់រំ យុវជន និងកីឡានៃរដ្ឋបាលស្រុក${districtName}</p>
+                                        <p contenteditable="true" class="cert-editable font-moul text-blue-950 text-[11px] leading-normal">ការិយាល័យអប់រំ យុវជន និងកីឡានៃរដ្ឋបាលស្រុក ${districtName}</p>
                                         <p contenteditable="true" class="cert-editable font-moul text-blue-950 text-[11.5px] leading-normal">${schoolName}</p>
                                     </div>
 

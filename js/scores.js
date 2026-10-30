@@ -5687,90 +5687,158 @@ window.CanvaEngine = {
         return this.activeEl.querySelector('[contenteditable="true"]') || this.activeEl;
     },
 
-    setFontFamily: function(font) {
-        const target = this.getTargetText();
-        if (!target) return;
-        target.classList.remove('font-moul', 'font-siemreap', 'font-battambang');
-        if (font.startsWith('font-')) {
-            target.classList.add(font);
-            target.style.fontFamily = '';
-        } else {
-            target.style.fontFamily = font;
+    getAllTargetTexts: function() {
+        if (!this.activeEl) return [];
+        if (this.activeEl.hasAttribute('contenteditable')) {
+            return [this.activeEl];
         }
+        const editables = this.activeEl.querySelectorAll('[contenteditable="true"]');
+        if (editables.length > 0) {
+            return Array.from(editables);
+        }
+        return [this.activeEl];
+    },
+
+    setFontFamily: function(font) {
+        const targets = this.getAllTargetTexts();
+        if (targets.length === 0) return;
+        targets.forEach(target => {
+            target.classList.remove('font-moul', 'font-siemreap', 'font-battambang');
+            if (font.startsWith('font-')) {
+                target.classList.add(font);
+                target.style.fontFamily = '';
+            } else {
+                target.style.fontFamily = font;
+            }
+        });
     },
 
     setFontSize: function(val) {
-        const target = this.getTargetText();
-        if (!target) return;
-        const size = Math.max(10, Math.min(120, parseInt(val, 10) || 24));
-        target.style.fontSize = size + 'px';
+        const targets = this.getAllTargetTexts();
+        if (targets.length === 0) return;
+        const newSize = Math.max(8, Math.min(120, parseFloat(val) || 24));
+        
+        if (targets.length === 1) {
+            targets[0].style.fontSize = newSize + 'px';
+        } else {
+            const primary = targets[0];
+            const oldPrimarySize = parseFloat(window.getComputedStyle(primary).fontSize) || newSize;
+            const ratio = (oldPrimarySize > 0) ? (newSize / oldPrimarySize) : 1;
+            targets.forEach(t => {
+                const cur = parseFloat(window.getComputedStyle(t).fontSize) || oldPrimarySize;
+                const scaled = Math.max(8, Math.min(120, Math.round(cur * ratio * 10) / 10));
+                t.style.fontSize = scaled + 'px';
+            });
+        }
+        
+        if (this.activeEl) {
+            if (this.activeEl.style.maxWidth || this.activeEl.classList.contains('max-w-[280px]') || this.activeEl.classList.contains('max-w-[340px]')) {
+                this.activeEl.style.maxWidth = 'none';
+            }
+        }
+
         const input = document.getElementById('canva-size-input');
-        if (input) input.value = size;
+        if (input) input.value = Math.round(newSize);
     },
 
     adjustFontSize: function(delta) {
-        const target = this.getTargetText();
-        if (!target) return;
-        const cur = parseFloat(window.getComputedStyle(target).fontSize) || 24;
-        this.setFontSize(cur + delta);
+        const targets = this.getAllTargetTexts();
+        if (targets.length === 0) return;
+        
+        targets.forEach(t => {
+            const cur = parseFloat(window.getComputedStyle(t).fontSize) || 24;
+            const newS = Math.max(8, Math.min(120, Math.round((cur + delta) * 10) / 10));
+            t.style.fontSize = newS + 'px';
+        });
+
+        if (this.activeEl) {
+            if (this.activeEl.style.maxWidth || this.activeEl.classList.contains('max-w-[280px]') || this.activeEl.classList.contains('max-w-[340px]')) {
+                this.activeEl.style.maxWidth = 'none';
+            }
+        }
+
+        const primary = targets[0];
+        if (primary) {
+            const input = document.getElementById('canva-size-input');
+            if (input) input.value = Math.round(parseFloat(window.getComputedStyle(primary).fontSize)) || 24;
+        }
     },
 
     setTextColor: function(colorHex) {
-        const target = this.getTargetText();
-        if (!target) return;
-        target.style.color = colorHex;
-        target.style.webkitTextFillColor = colorHex;
+        const targets = this.getAllTargetTexts();
+        if (targets.length === 0) return;
+        targets.forEach(target => {
+            target.style.color = colorHex;
+            target.style.webkitTextFillColor = colorHex;
+        });
         const colorBar = document.getElementById('canva-color-bar');
         if (colorBar) colorBar.style.backgroundColor = colorHex;
     },
 
     toggleBold: function() {
-        const target = this.getTargetText();
-        if (!target) return;
-        const isBold = (target.style.fontWeight === 'bold' || window.getComputedStyle(target).fontWeight === 'bold' || parseInt(window.getComputedStyle(target).fontWeight, 10) >= 600);
-        target.style.fontWeight = isBold ? 'normal' : 'bold';
+        const primary = this.getTargetText();
+        if (!primary) return;
+        const isBold = (primary.style.fontWeight === 'bold' || window.getComputedStyle(primary).fontWeight === 'bold' || parseInt(window.getComputedStyle(primary).fontWeight, 10) >= 600);
+        const nextWeight = isBold ? 'normal' : 'bold';
+        this.getAllTargetTexts().forEach(target => {
+            target.style.fontWeight = nextWeight;
+        });
         this.syncToolbar();
     },
 
     toggleItalic: function() {
-        const target = this.getTargetText();
-        if (!target) return;
-        const isItalic = (target.style.fontStyle === 'italic' || window.getComputedStyle(target).fontStyle === 'italic');
-        target.style.fontStyle = isItalic ? 'normal' : 'italic';
+        const primary = this.getTargetText();
+        if (!primary) return;
+        const isItalic = (primary.style.fontStyle === 'italic' || window.getComputedStyle(primary).fontStyle === 'italic');
+        const nextStyle = isItalic ? 'normal' : 'italic';
+        this.getAllTargetTexts().forEach(target => {
+            target.style.fontStyle = nextStyle;
+        });
         this.syncToolbar();
     },
 
     toggleUnderline: function() {
-        const target = this.getTargetText();
-        if (!target) return;
-        const cur = window.getComputedStyle(target).textDecorationLine || '';
-        target.style.textDecoration = cur.includes('underline') ? 'none' : 'underline';
+        const primary = this.getTargetText();
+        if (!primary) return;
+        const cur = window.getComputedStyle(primary).textDecorationLine || '';
+        const nextDeco = cur.includes('underline') ? 'none' : 'underline';
+        this.getAllTargetTexts().forEach(target => {
+            target.style.textDecoration = nextDeco;
+        });
         this.syncToolbar();
     },
 
     toggleStrikethrough: function() {
-        const target = this.getTargetText();
-        if (!target) return;
-        const cur = window.getComputedStyle(target).textDecorationLine || '';
-        target.style.textDecoration = cur.includes('line-through') ? 'none' : 'line-through';
+        const primary = this.getTargetText();
+        if (!primary) return;
+        const cur = window.getComputedStyle(primary).textDecorationLine || '';
+        const nextDeco = cur.includes('line-through') ? 'none' : 'line-through';
+        this.getAllTargetTexts().forEach(target => {
+            target.style.textDecoration = nextDeco;
+        });
         this.syncToolbar();
     },
 
     toggleCase: function() {
-        const target = this.getTargetText();
-        if (!target) return;
-        const cur = window.getComputedStyle(target).textTransform;
-        target.style.textTransform = (cur === 'uppercase') ? 'none' : 'uppercase';
+        const primary = this.getTargetText();
+        if (!primary) return;
+        const cur = window.getComputedStyle(primary).textTransform;
+        const nextTransform = (cur === 'uppercase') ? 'none' : 'uppercase';
+        this.getAllTargetTexts().forEach(target => {
+            target.style.textTransform = nextTransform;
+        });
         this.syncToolbar();
     },
 
     cycleAlignment: function() {
-        const target = this.getTargetText();
-        if (!target) return;
-        const cur = window.getComputedStyle(target).textAlign;
+        const primary = this.getTargetText();
+        if (!primary) return;
+        const cur = window.getComputedStyle(primary).textAlign;
         const alignments = ['center', 'left', 'right', 'justify'];
         const next = alignments[(alignments.indexOf(cur) + 1) % alignments.length] || 'center';
-        target.style.textAlign = next;
+        this.getAllTargetTexts().forEach(target => {
+            target.style.textAlign = next;
+        });
         if (this.activeEl) this.activeEl.style.textAlign = next;
         const icon = document.querySelector('#canva-btn-align i');
         if (icon) icon.className = `fa-solid fa-align-${next === 'justify' ? 'justify' : next}`;
@@ -5783,35 +5851,41 @@ window.CanvaEngine = {
     },
 
     setLetterSpacing: function(val) {
-        const target = this.getTargetText();
-        if (!target) return;
-        target.style.letterSpacing = val + 'px';
+        const targets = this.getAllTargetTexts();
+        if (targets.length === 0) return;
+        targets.forEach(target => {
+            target.style.letterSpacing = val + 'px';
+        });
         const lbl = document.getElementById('canva-letter-sp-val');
         if (lbl) lbl.textContent = val + 'px';
     },
 
     setLineHeight: function(val) {
-        const target = this.getTargetText();
-        if (!target) return;
-        target.style.lineHeight = val;
+        const targets = this.getAllTargetTexts();
+        if (targets.length === 0) return;
+        targets.forEach(target => {
+            target.style.lineHeight = val;
+        });
         const lbl = document.getElementById('canva-line-h-val');
         if (lbl) lbl.textContent = val;
     },
 
     setEffect: function(effectName) {
-        const target = this.getTargetText();
-        if (!target) return;
+        const targets = this.getAllTargetTexts();
+        if (targets.length === 0) return;
+        let shadowValue = 'none';
         if (effectName === 'shadow') {
-            target.style.textShadow = '2px 3px 6px rgba(0,0,0,0.35)';
+            shadowValue = '2px 3px 6px rgba(0,0,0,0.35)';
         } else if (effectName === 'glow') {
-            target.style.textShadow = '0 0 10px rgba(245, 158, 11, 0.6), 0 0 20px rgba(245, 158, 11, 0.4)';
+            shadowValue = '0 0 10px rgba(245, 158, 11, 0.6), 0 0 20px rgba(245, 158, 11, 0.4)';
         } else if (effectName === 'neon') {
-            target.style.textShadow = '0 0 5px #fff, 0 0 12px #ec4899, 0 0 25px #ec4899';
+            shadowValue = '0 0 5px #fff, 0 0 12px #ec4899, 0 0 25px #ec4899';
         } else if (effectName === 'gold') {
-            target.style.textShadow = '1px 1px 0 #b45309, 2px 2px 0 #92400e, 3px 3px 6px rgba(0,0,0,0.4)';
-        } else {
-            target.style.textShadow = 'none';
+            shadowValue = '1px 1px 0 #b45309, 2px 2px 0 #92400e, 3px 3px 6px rgba(0,0,0,0.4)';
         }
+        targets.forEach(target => {
+            target.style.textShadow = shadowValue;
+        });
         this.hidePopovers();
     },
 
@@ -5980,11 +6054,16 @@ window.CanvaEngine = {
         const target = e.target;
         if (target.closest('#canva-text-toolbar') || target.closest('.canva-mini-bar')) return;
 
-        // Check if resizing via bottom-right corner
+        // Check if resizing via bottom-right corner or any corner handle
         if (target.classList.contains('canva-corner-br') || target.classList.contains('canva-corner-handle')) {
             window.CanvaEngine.isResizing = true;
             window.CanvaEngine.startX = e.clientX;
             window.CanvaEngine.startY = e.clientY;
+            const textTargets = window.CanvaEngine.getAllTargetTexts();
+            window.CanvaEngine.resizeTargets = textTargets.map(t => ({
+                el: t,
+                initialSize: parseFloat(window.getComputedStyle(t).fontSize) || 14
+            }));
             const textTarget = window.CanvaEngine.getTargetText();
             window.CanvaEngine.initialFontSize = textTarget ? (parseFloat(window.getComputedStyle(textTarget).fontSize) || 24) : 24;
             e.preventDefault();
@@ -6026,8 +6105,27 @@ window.CanvaEngine = {
         if (window.CanvaEngine.isResizing && window.CanvaEngine.activeEl) {
             e.preventDefault();
             const deltaX = e.clientX - window.CanvaEngine.startX;
-            const newSize = Math.max(10, Math.min(120, window.CanvaEngine.initialFontSize + (deltaX * 0.25)));
-            window.CanvaEngine.setFontSize(newSize);
+            const baseInitial = window.CanvaEngine.initialFontSize || 24;
+            const newBaseSize = Math.max(8, Math.min(120, baseInitial + (deltaX * 0.25)));
+            const scaleRatio = newBaseSize / baseInitial;
+
+            if (window.CanvaEngine.resizeTargets && window.CanvaEngine.resizeTargets.length > 0) {
+                window.CanvaEngine.resizeTargets.forEach(item => {
+                    const scaled = Math.max(8, Math.min(120, Math.round(item.initialSize * scaleRatio * 10) / 10));
+                    item.el.style.fontSize = scaled + 'px';
+                });
+            } else {
+                window.CanvaEngine.setFontSize(newBaseSize);
+            }
+
+            if (window.CanvaEngine.activeEl) {
+                if (window.CanvaEngine.activeEl.style.maxWidth || window.CanvaEngine.activeEl.classList.contains('max-w-[280px]') || window.CanvaEngine.activeEl.classList.contains('max-w-[340px]')) {
+                    window.CanvaEngine.activeEl.style.maxWidth = 'none';
+                }
+            }
+
+            const input = document.getElementById('canva-size-input');
+            if (input) input.value = Math.round(newBaseSize);
             return;
         }
 
@@ -6055,6 +6153,7 @@ window.CanvaEngine = {
         }
         window.CanvaEngine.isDragging = false;
         window.CanvaEngine.isResizing = false;
+        window.CanvaEngine.resizeTargets = null;
     }
 };
 
