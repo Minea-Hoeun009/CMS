@@ -5420,16 +5420,16 @@ window.renderClassInventoryReport = function(container, targetGrade, targetRoom)
             </div>
 
             <!-- Signatures -->
-            <div class="mt-4 pt-2 px-8 font-siemreap shrink-0" style="position: relative; z-index: 10;">
+            <div class="mt-4 pt-2 px-8 pb-4 font-siemreap shrink-0" style="position: relative; z-index: 10;">
                 <div class="flex justify-between items-start text-xs">
                     <div class="text-center w-2/5">
                         <p class="mb-1 text-slate-700">បានឃើញ និងឯកភាព</p>
-                        <p class="font-moul text-slate-900 mb-8">នាយិកាសាលា</p>
+                        <p class="font-moul text-slate-900 mb-5">នាយិកាសាលា</p>
                     </div>
                     <div class="text-center w-2/5">
                         <p class="mb-1 text-slate-700">${lunarDateStr}</p>
                         <p class="mb-1 text-slate-700 font-bold">${solarDateStr}</p>
-                        <p class="font-moul text-slate-900 mb-8">គ្រូបន្ទុកថ្នាក់</p>
+                        <p class="font-moul text-slate-900 mb-5">គ្រូបន្ទុកថ្នាក់</p>
                         <p class="font-moul text-slate-900 text-xs">${teacherName}</p>
                     </div>
                 </div>
@@ -5546,16 +5546,16 @@ window.renderInternalRulesReport = function(container, targetGrade, targetRoom) 
             </div>
 
             <!-- Signatures -->
-            <div class="mt-4 pt-2 px-8 font-siemreap shrink-0" style="position: relative; z-index: 10;">
+            <div class="mt-4 pt-2 px-8 pb-4 font-siemreap shrink-0" style="position: relative; z-index: 10;">
                 <div class="flex justify-between items-start text-xs">
                     <div class="text-center w-2/5">
                         <p class="mb-1 text-slate-700">បានឃើញ និងឯកភាព</p>
-                        <p class="font-moul text-slate-900 mb-8">នាយិកាសាលា</p>
+                        <p class="font-moul text-slate-900 mb-5">នាយិកាសាលា</p>
                     </div>
                     <div class="text-center w-2/5">
                         <p class="mb-1 text-slate-700">${lunarDateStr}</p>
                         <p class="mb-1 text-slate-700 font-bold">${solarDateStr}</p>
-                        <p class="font-moul text-slate-900 mb-8">គ្រូបន្ទុកថ្នាក់</p>
+                        <p class="font-moul text-slate-900 mb-5">គ្រូបន្ទុកថ្នាក់</p>
                         <p class="font-moul text-slate-900 text-xs">${teacherName}</p>
                     </div>
                 </div>
@@ -5667,29 +5667,29 @@ window.renderClassPrinciplesReport = function(container, targetGrade, targetRoom
                 ✨ « វិន័យនាំមកនូវសេចក្តីថ្លៃថ្នូរ • ការសិក្សានាំមកនូវចំណេះដឹង • អនាម័យនាំមកនូវសុខភាពល្អ » ✨
             </div>
 
-            <!-- 16 Principles Grid (2 Columns x 8 Items) -->
-            <div class="grid grid-cols-2 gap-3 mb-4">
-                <div class="space-y-2">
+                        <!-- 16 Principles Grid (2 Columns x 8 Items - Evenly distributed across page) -->
+            <div class="grid grid-cols-2 gap-3.5 mb-2 flex-1 my-auto">
+                <div class="flex flex-col justify-between gap-2.5 h-full">
                     ${leftPrinciples.map(renderPrincipleCard).join('')}
                 </div>
-                <div class="space-y-2">
+                <div class="flex flex-col justify-between gap-2.5 h-full">
                     ${rightPrinciples.map(renderPrincipleCard).join('')}
                 </div>
             </div>
             </div>
 
-            <!-- Signatures -->
-            <div class="mt-4 pt-2 px-8 font-siemreap shrink-0" style="position: relative; z-index: 10;">
-                <div class="flex justify-between items-start text-xs">
+            <!-- Signatures (Well-spaced without border clipping) -->
+            <div class="mt-2 pt-2 px-8 pb-4 font-siemreap shrink-0" style="position: relative; z-index: 10;">
+                <div class="flex justify-between items-end text-xs">
                     <div class="text-center w-2/5">
                         <p class="mb-1 text-slate-700">បានឃើញ និងឯកភាព</p>
-                        <p class="font-moul text-slate-900 mb-8">គ្រូបន្ទុកថ្នាក់</p>
+                        <p class="font-moul text-slate-900 mb-5">គ្រូបន្ទុកថ្នាក់</p>
                         <p class="font-moul text-slate-900 text-xs">${teacherName}</p>
                     </div>
                     <div class="text-center w-2/5">
-                        <p class="mb-1 text-slate-700">${lunarDateStr}</p>
-                        <p class="mb-1 text-slate-700 font-bold">${solarDateStr}</p>
-                        <p class="font-moul text-slate-900 mb-8">តំណាងសិស្ស / ប្រធានថ្នាក់</p>
+                        <p class="mb-0.5 text-slate-700 text-[10.5px]">${lunarDateStr}</p>
+                        <p class="mb-1 text-slate-700 font-bold text-[10.5px]">${solarDateStr}</p>
+                        <p class="font-moul text-slate-900 mb-5">តំណាងសិស្ស / ប្រធានថ្នាក់</p>
                         <p class="font-moul text-slate-900 text-xs">${monitorStudent}</p>
                     </div>
                 </div>
@@ -5868,16 +5868,16 @@ window.renderCleaningScheduleReport = function(container, targetGrade, targetRoo
             </div>
 
             <!-- Signatures -->
-            <div class="mt-4 pt-2 px-8 font-siemreap shrink-0" style="position: relative; z-index: 10;">
+            <div class="mt-4 pt-2 px-8 pb-4 font-siemreap shrink-0" style="position: relative; z-index: 10;">
                 <div class="flex justify-between items-start text-xs">
                     <div class="text-center w-2/5">
                         <p class="mb-1 text-slate-700">បានឃើញ និងឯកភាព</p>
-                        <p class="font-moul text-slate-900 mb-8">នាយិកាសាលា</p>
+                        <p class="font-moul text-slate-900 mb-5">នាយិកាសាលា</p>
                     </div>
                     <div class="text-center w-2/5">
                         <p class="mb-1 text-slate-700">${lunarDateStr}</p>
                         <p class="mb-1 text-slate-700 font-bold">${solarDateStr}</p>
-                        <p class="font-moul text-slate-900 mb-8">គ្រូបន្ទុកថ្នាក់</p>
+                        <p class="font-moul text-slate-900 mb-5">គ្រូបន្ទុកថ្នាក់</p>
                         <p class="font-moul text-slate-900 text-xs">${teacherName}</p>
                     </div>
                 </div>
@@ -6071,16 +6071,16 @@ window.renderBranchCommitteeReport = function(container, targetGrade, targetRoom
             </div>
 
             <!-- Signatures -->
-            <div class="mt-4 pt-2 px-8 font-siemreap shrink-0" style="position: relative; z-index: 10;">
+            <div class="mt-4 pt-2 px-8 pb-4 font-siemreap shrink-0" style="position: relative; z-index: 10;">
                 <div class="flex justify-between items-start text-xs">
                     <div class="text-center w-2/5">
                         <p class="mb-1 text-slate-700">បានឃើញ និងឯកភាព</p>
-                        <p class="font-moul text-slate-900 mb-8">នាយិកាសាលា</p>
+                        <p class="font-moul text-slate-900 mb-5">នាយិកាសាលា</p>
                     </div>
                     <div class="text-center w-2/5">
                         <p class="mb-1 text-slate-700">${lunarDateStr}</p>
                         <p class="mb-1 text-slate-700 font-bold">${solarDateStr}</p>
-                        <p class="font-moul text-slate-900 mb-8">គ្រូបន្ទុកថ្នាក់</p>
+                        <p class="font-moul text-slate-900 mb-5">គ្រូបន្ទុកថ្នាក់</p>
                         <p class="font-moul text-slate-900 text-xs">${teacherName}</p>
                     </div>
                 </div>
