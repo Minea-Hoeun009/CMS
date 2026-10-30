@@ -1318,7 +1318,12 @@
             }
 
             if (typeof window.fetchStudentsForScores === 'function') window.fetchStudentsForScores();
-            if (typeof window.filterStudents === 'function') window.filterStudents();
+            const stuViewEl = document.getElementById("studentsView");
+            if (stuViewEl && !stuViewEl.classList.contains("hidden") && typeof window.loadStudentsView === 'function') {
+                window.loadStudentsView();
+            } else if (typeof window.filterStudents === 'function') {
+                window.filterStudents();
+            }
             if (typeof window.fetchMonthlyAttendance === 'function') window.fetchMonthlyAttendance();
             if (typeof window.fetchLibraryData === 'function') window.fetchLibraryData();
             if (typeof window.loadLibraryView === 'function' && document.getElementById('libraryView') && !document.getElementById('libraryView').classList.contains('hidden')) {

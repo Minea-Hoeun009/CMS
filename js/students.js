@@ -516,15 +516,22 @@ window.filterStudents = function() {
     window.filteredStudents = baseStudents.filter(s => {
         if (!s || typeof s !== 'object') return false;
 
-        // Year check: match if academic_year matches currentYear, or if student doesn't have an academic_year set
-        const sYear = String(s.academic_year || "").trim();
-        if (currentYear && currentYear !== "all" && sYear && sYear !== "undefined" && !sYear.includes(currentYear) && !currentYear.includes(sYear)) {
-            const hasMatchingYearStudents = baseStudents.some(st => {
-                const y = String(st.academic_year || '').trim();
-                return y && (y.includes(currentYear) || currentYear.includes(y));
-            });
-            if (hasMatchingYearStudents && (!isSchoolOrSysAdmin || (grade !== "all"))) {
-                return false;
+                // 🟢 Academic Year check: strictly isolate historical data across years 🟢
+        const toUniYear = (str) => String(str || '').replace(/[០-៩]/g, d => "0123456789"["០១២៣៤៥៦៧៨៩".indexOf(d)]).trim();
+        const curYearUni = toUniYear(currentYear);
+        if (curYearUni && curYearUni !== "all") {
+            const sYearRaw = String(s.academic_year || s.academicYear || "").trim();
+            const sYearUni = toUniYear(sYearRaw);
+            if (sYearUni) {
+                if (!sYearUni.includes(curYearUni) && !curYearUni.includes(sYearUni)) {
+                    return false;
+                }
+            } else {
+                // If student has no explicit academic_year recorded (legacy baseline from initial 2026-2027 year):
+                // Only consider it part of 2026-2027; for other years, isolate them!
+                if (!curYearUni.includes("2026-2027") && !curYearUni.includes("2026_2027")) {
+                    return false;
+                }
             }
         }
 
@@ -595,23 +602,38 @@ window.filterStudents = function() {
         return matchSearch && matchGrade && matchRoom && matchGender && matchStatus;
     });
 
-    // 🟢 Single-Classroom UX Guard: ដំណើរការតែក្នុងករណី Admin ឬ Legacy Test ដែលគ្មានកំណត់វិសាលភាពថ្នាក់ជាក់លាក់
+        // 🟢 Single-Classroom UX Guard: ដំណើរការតែក្នុងករណី Admin ឬ Legacy Test ដែលគ្មានកំណត់វិសាលភាពថ្នាក់ជាក់លាក់
+    // UX Guard MUST strictly respect academic year to prevent cross-year historical leakage!
+    const toUniYear = (str) => String(str || '').replace(/[០-៩]/g, d => "0123456789"["០១២៣៤៥៦៧៨៩".indexOf(d)]).trim();
+    const curYearUni = toUniYear(currentYear);
+
+    const isMatchYear = (s) => {
+        if (!curYearUni || curYearUni === "all") return true;
+        const sYearUni = toUniYear(s?.academic_year || s?.academicYear || "");
+        if (sYearUni) return sYearUni.includes(curYearUni) || curYearUni.includes(sYearUni);
+        return curYearUni.includes("2026-2027") || curYearUni.includes("2026_2027");
+    };
+
     const hasTeacherScope = !isSchoolOrSysAdmin && !isReportViewer && scope && scope.grade && scope.grade !== "all" && scope.grade !== "គ្រប់ថ្នាក់";
     if (!hasTeacherScope && window.filteredStudents.length === 0 && baseStudents.length > 0 && search === "" && gender === "all") {
         const activeList = baseStudents.filter(s => {
             const st = String(s?.status || '').toLowerCase().trim();
-            return !inactiveStatuses.includes(st);
+            return !inactiveStatuses.includes(st) && isMatchYear(s);
         });
-        window.filteredStudents = activeList.length > 0 ? activeList : [...baseStudents];
+        if (activeList.length > 0) {
+            window.filteredStudents = activeList;
+        }
     }
 
+    const yearFilteredBase = baseStudents.filter(s => isMatchYear(s));
+
     const activeClassStus = hasTeacherScope
-        ? baseStudents.filter(s => {
+        ? yearFilteredBase.filter(s => {
             const sg = typeof window.normalizeGrade === 'function' ? window.normalizeGrade(s.grade) : s.grade;
             const ag = typeof window.normalizeGrade === 'function' ? window.normalizeGrade(scope.grade) : scope.grade;
             return sg === ag;
         })
-        : baseStudents;
+        : yearFilteredBase;
 
     if (document.getElementById("hdrTotal")) document.getElementById("hdrTotal").innerText = activeClassStus.length;
     if (document.getElementById("hdrActive")) document.getElementById("hdrActive").innerText = window.filteredStudents.length;

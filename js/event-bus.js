@@ -113,7 +113,12 @@ window.CMSOrchestrator = {
             // Rule 1: Student Enrolled -> Invalidate cache, update roster, bind to attendance & scores
             case window.CMSEventTypes.STUDENT_ENROLLED:
                 console.log("🔗 [Orchestrator] Rule 1: Synchronizing newly enrolled student to class rosters...");
-                if (typeof window.filterStudents === 'function') window.filterStudents();
+                const stuView = document.getElementById("studentsView");
+                if (stuView && !stuView.classList.contains("hidden") && typeof window.loadStudentsView === 'function') {
+                    window.loadStudentsView();
+                } else if (typeof window.filterStudents === 'function') {
+                    window.filterStudents();
+                }
                 if (typeof window.updateAllClassDropdowns === 'function') window.updateAllClassDropdowns();
                 if (typeof window.loadDashboard === 'function' && window.currentActiveView === 'dashboard') window.loadDashboard();
                 break;
