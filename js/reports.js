@@ -457,13 +457,13 @@ window.loadReportsView = function() {
                     <div class="space-y-1.5 text-xs">
                         <div class="flex justify-between font-bold text-slate-700 dark:text-slate-300">
                             <span>គម្លាតស៊ុមពីគែមក្រដាស (Border Inset) ៖</span>
-                            <span id="borderInsetDisplay" class="font-mono text-amber-600 font-bold">4px</span>
+                            <span id="borderInsetDisplay" class="font-mono text-amber-600 font-bold">1.0mm</span>
                         </div>
-                        <input type="range" id="reportBorderInsetSlider" min="0" max="20" step="1" value="4" oninput="document.getElementById('borderInsetDisplay').textContent = this.value + 'px'" class="w-full h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-amber-600">
+                        <input type="range" id="reportBorderInsetSlider" min="0" max="10" step="1" value="3" oninput="const mm = (this.value * 0.35).toFixed(1); document.getElementById('borderInsetDisplay').textContent = mm + 'mm (' + this.value + 'px)'" class="w-full h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-amber-600">
                         <div class="flex justify-between text-[10px] text-slate-400">
-                            <span>0px (ជាប់គែម)</span>
-                            <span>4px (ស្តង់ដារ)</span>
-                            <span>20px (ឆ្ងាយ)</span>
+                            <span>0mm (ជាប់គែម)</span>
+                            <span class="text-amber-600 font-bold">0.5mm - 1.0mm (ស្តង់ដារដូចតារាងកិត្តិយស)</span>
+                            <span>3.5mm (ឆ្ងាយ)</span>
                         </div>
                     </div>
 
@@ -499,7 +499,11 @@ window.currentBorderSelection = localStorage.getItem('cms_report_border_mode') |
 
 window.getReportBorderLayerHtml = function() {
     const mode = localStorage.getItem('cms_report_border_mode') || 'none';
-    const inset = (localStorage.getItem('cms_report_border_inset') || '4') + 'px';
+    let rawInset = localStorage.getItem('cms_report_border_inset');
+    if (!rawInset || rawInset === '4') {
+        rawInset = '1mm'; // Default to 1mm to match Honor Board thin margin (0.5mm - 1mm)
+    }
+    const inset = rawInset.endsWith('mm') || rawInset.endsWith('px') ? rawInset : rawInset + 'px';
     const opacityVal = (parseInt(localStorage.getItem('cms_report_border_opacity') || '100', 10) / 100);
     const customType = localStorage.getItem('cms_report_border_custom_type') || 'frame';
     const borderWidth = (localStorage.getItem('cms_report_border_width') || '28') + 'px';
@@ -515,8 +519,8 @@ window.getReportBorderLayerHtml = function() {
             // Cut out the center completely: middle is 100% transparent, only decorative frame is shown
             return `<div class="cms-report-border-layer" style="position: absolute; inset: ${inset}; pointer-events: none; border-style: solid; border-width: ${borderWidth}; border-image-source: url('${customImg}'); border-image-slice: 16%; border-image-repeat: round; background-color: transparent; opacity: ${opacityVal}; z-index: 1;"></div>`;
         } else {
-            // Background Watermark mode: placed strictly BEHIND the content (z-index: 0)
-            return `<div class="cms-report-border-layer" style="position: absolute; inset: ${inset}; pointer-events: none; background-image: url('${customImg}'); background-size: 100% 100%; background-repeat: no-repeat; opacity: ${opacityVal}; z-index: 0;"></div>`;
+            // Background Watermark mode: placed strictly BEHIND the content (z-index: 0) like Honor Board
+            return `<img src="${customImg}" class="cms-report-border-layer" style="position: absolute; inset: ${inset}; width: calc(100% - (${inset} * 2)); height: calc(100% - (${inset} * 2)); object-fit: fill; pointer-events: none; opacity: ${opacityVal}; z-index: 0;" alt="Background" />`;
         }
     }
     if (mode === 'gold_flourish') {
@@ -587,11 +591,17 @@ window.openReportBorderModal = function() {
     const curMode = localStorage.getItem('cms_report_border_mode') || 'none';
     window.selectReportBorderPreset(curMode, false);
 
-    const inset = parseInt(localStorage.getItem('cms_report_border_inset') || '4', 10);
+    const storedInset = localStorage.getItem('cms_report_border_inset') || '1mm';
+    let numericSliderVal = 3;
+    if (storedInset.endsWith('mm')) {
+        numericSliderVal = Math.round(parseFloat(storedInset) / 0.35);
+    } else {
+        numericSliderVal = parseInt(storedInset, 10) || 3;
+    }
     const slider = document.getElementById('reportBorderInsetSlider');
     const display = document.getElementById('borderInsetDisplay');
-    if (slider) slider.value = inset;
-    if (display) display.textContent = inset + 'px';
+    if (slider) slider.value = numericSliderVal;
+    if (display) display.textContent = (numericSliderVal * 0.35).toFixed(1) + 'mm';
 
     const curType = localStorage.getItem('cms_report_border_custom_type') || 'frame';
     const radioFrame = document.getElementById('radio_type_frame');
@@ -5315,10 +5325,10 @@ window.renderClassInventoryReport = function(container, targetGrade, targetRoom)
     `).join('');
 
     container.innerHTML = `
-        <div class="a4-page bg-white shadow-xl rounded-lg mx-auto p-6 md:p-8 font-siemreap text-slate-800 relative w-full text-[11px] leading-relaxed flex flex-col justify-start" style="box-sizing: border-box; max-width: 210mm; min-height: auto !important; height: auto !important; justify-content: flex-start !important;">
+        <div class="a4-page bg-white shadow-2xl rounded-2xl mx-auto font-siemreap text-slate-800 relative w-[794px] min-h-[1123px] max-w-[210mm] text-[11px] leading-relaxed flex flex-col justify-between shrink-0 overflow-hidden print:w-[210mm] print:h-[297mm] print:min-h-[297mm] print:rounded-none print:shadow-none" style="box-sizing: border-box; padding: 18px 24px; position: relative;">
             ${window.getReportBorderLayerHtml ? window.getReportBorderLayerHtml() : ''}
             <!-- Main Content Area -->
-            <div style="position: relative; z-index: 10;">
+            <div class="flex-1 flex flex-col justify-start" style="position: relative; z-index: 10;">
                 <!-- Official Dual-Side Header matching User Model (Images 1 & 2) -->
                 <div class="flex justify-between items-start mb-4 text-xs">
                     <div class="text-left leading-relaxed pt-3.5 sm:pt-4">
@@ -5409,8 +5419,8 @@ window.renderClassInventoryReport = function(container, targetGrade, targetRoom)
             </div>
             </div>
 
-            <!-- Signatures (រំកិលឡើងលើឱ្យជិតតារាង) -->
-            <div class="mt-4 pt-2 px-8 font-siemreap" style="position: relative; z-index: 10;">
+            <!-- Signatures -->
+            <div class="mt-4 pt-2 px-8 font-siemreap shrink-0" style="position: relative; z-index: 10;">
                 <div class="flex justify-between items-start text-xs">
                     <div class="text-center w-2/5">
                         <p class="mb-1 text-slate-700">បានឃើញ និងឯកភាព</p>
@@ -5488,10 +5498,10 @@ window.renderInternalRulesReport = function(container, targetGrade, targetRoom) 
     `;
 
     container.innerHTML = `
-        <div class="a4-page bg-white shadow-xl rounded-lg mx-auto p-6 md:p-8 font-siemreap text-slate-800 relative w-full text-[11px] leading-relaxed flex flex-col justify-start" style="box-sizing: border-box; max-width: 210mm; min-height: auto !important; height: auto !important; justify-content: flex-start !important;">
+        <div class="a4-page bg-white shadow-2xl rounded-2xl mx-auto font-siemreap text-slate-800 relative w-[794px] min-h-[1123px] max-w-[210mm] text-[11px] leading-relaxed flex flex-col justify-between shrink-0 overflow-hidden print:w-[210mm] print:h-[297mm] print:min-h-[297mm] print:rounded-none print:shadow-none" style="box-sizing: border-box; padding: 18px 24px; position: relative;">
             ${window.getReportBorderLayerHtml ? window.getReportBorderLayerHtml() : ''}
             <!-- Main Content Area -->
-            <div style="position: relative; z-index: 10;">
+            <div class="flex-1 flex flex-col justify-start" style="position: relative; z-index: 10;">
                 <!-- Official Dual-Side Header matching User Model (Images 1 & 2) -->
                 <div class="flex justify-between items-start mb-3 text-xs">
                     <div class="text-left leading-relaxed pt-3.5 sm:pt-4">
@@ -5535,8 +5545,8 @@ window.renderInternalRulesReport = function(container, targetGrade, targetRoom) 
             </div>
             </div>
 
-            <!-- Signatures (រំកិលឡើងលើឱ្យជិតតារាង) -->
-            <div class="mt-4 pt-2 px-8 font-siemreap" style="position: relative; z-index: 10;">
+            <!-- Signatures -->
+            <div class="mt-4 pt-2 px-8 font-siemreap shrink-0" style="position: relative; z-index: 10;">
                 <div class="flex justify-between items-start text-xs">
                     <div class="text-center w-2/5">
                         <p class="mb-1 text-slate-700">បានឃើញ និងឯកភាព</p>
@@ -5626,10 +5636,10 @@ window.renderClassPrinciplesReport = function(container, targetGrade, targetRoom
     `;
 
     container.innerHTML = `
-        <div class="a4-page bg-white shadow-xl rounded-lg mx-auto p-6 md:p-8 font-siemreap text-slate-800 relative w-full text-[11px] leading-relaxed flex flex-col justify-start" style="box-sizing: border-box; max-width: 210mm; min-height: auto !important; height: auto !important; justify-content: flex-start !important;">
+        <div class="a4-page bg-white shadow-2xl rounded-2xl mx-auto font-siemreap text-slate-800 relative w-[794px] min-h-[1123px] max-w-[210mm] text-[11px] leading-relaxed flex flex-col justify-between shrink-0 overflow-hidden print:w-[210mm] print:h-[297mm] print:min-h-[297mm] print:rounded-none print:shadow-none" style="box-sizing: border-box; padding: 18px 24px; position: relative;">
             ${window.getReportBorderLayerHtml ? window.getReportBorderLayerHtml() : ''}
             <!-- Main Content Area -->
-            <div style="position: relative; z-index: 10;">
+            <div class="flex-1 flex flex-col justify-start" style="position: relative; z-index: 10;">
                 <!-- Official Dual-Side Header matching User Model (Images 1 & 2) -->
                 <div class="flex justify-between items-start mb-2 text-xs">
                     <div class="text-left leading-relaxed pt-3.5 sm:pt-4">
@@ -5668,8 +5678,8 @@ window.renderClassPrinciplesReport = function(container, targetGrade, targetRoom
             </div>
             </div>
 
-            <!-- Signatures (រំកិលឡើងលើឱ្យជិតតារាង) -->
-            <div class="mt-4 pt-2 px-8 font-siemreap" style="position: relative; z-index: 10;">
+            <!-- Signatures -->
+            <div class="mt-4 pt-2 px-8 font-siemreap shrink-0" style="position: relative; z-index: 10;">
                 <div class="flex justify-between items-start text-xs">
                     <div class="text-center w-2/5">
                         <p class="mb-1 text-slate-700">បានឃើញ និងឯកភាព</p>
@@ -5808,10 +5818,10 @@ window.renderCleaningScheduleReport = function(container, targetGrade, targetRoo
     };
 
     container.innerHTML = `
-        <div class="a4-page bg-white shadow-xl rounded-lg mx-auto p-6 md:p-8 font-siemreap text-slate-800 relative w-full text-[11px] leading-relaxed flex flex-col justify-start" style="box-sizing: border-box; max-width: 210mm; min-height: auto !important; height: auto !important; justify-content: flex-start !important;">
+        <div class="a4-page bg-white shadow-2xl rounded-2xl mx-auto font-siemreap text-slate-800 relative w-[794px] min-h-[1123px] max-w-[210mm] text-[11px] leading-relaxed flex flex-col justify-between shrink-0 overflow-hidden print:w-[210mm] print:h-[297mm] print:min-h-[297mm] print:rounded-none print:shadow-none" style="box-sizing: border-box; padding: 18px 24px; position: relative;">
             ${window.getReportBorderLayerHtml ? window.getReportBorderLayerHtml() : ''}
             <!-- Main Content Area -->
-            <div style="position: relative; z-index: 10;">
+            <div class="flex-1 flex flex-col justify-start" style="position: relative; z-index: 10;">
                 <!-- Official Dual-Side Header matching User Model (Images 1 & 2) -->
                 <div class="flex justify-between items-start mb-2 text-xs">
                     <div class="text-left leading-relaxed pt-3.5 sm:pt-4">
@@ -5857,8 +5867,8 @@ window.renderCleaningScheduleReport = function(container, targetGrade, targetRoo
             </div>
             </div>
 
-            <!-- Signatures (រំកិលឡើងលើឱ្យជិតតារាង) -->
-            <div class="mt-4 pt-2 px-8 font-siemreap" style="position: relative; z-index: 10;">
+            <!-- Signatures -->
+            <div class="mt-4 pt-2 px-8 font-siemreap shrink-0" style="position: relative; z-index: 10;">
                 <div class="flex justify-between items-start text-xs">
                     <div class="text-center w-2/5">
                         <p class="mb-1 text-slate-700">បានឃើញ និងឯកភាព</p>
@@ -5958,10 +5968,10 @@ window.renderBranchCommitteeReport = function(container, targetGrade, targetRoom
     }).join('');
 
     container.innerHTML = `
-        <div class="a4-page bg-white shadow-xl rounded-lg mx-auto p-6 md:p-8 font-siemreap text-slate-800 relative w-full text-[11px] leading-relaxed flex flex-col justify-start" style="box-sizing: border-box; max-width: 210mm; min-height: auto !important; height: auto !important; justify-content: flex-start !important;">
+        <div class="a4-page bg-white shadow-2xl rounded-2xl mx-auto font-siemreap text-slate-800 relative w-[794px] min-h-[1123px] max-w-[210mm] text-[11px] leading-relaxed flex flex-col justify-between shrink-0 overflow-hidden print:w-[210mm] print:h-[297mm] print:min-h-[297mm] print:rounded-none print:shadow-none" style="box-sizing: border-box; padding: 18px 24px; position: relative;">
             ${window.getReportBorderLayerHtml ? window.getReportBorderLayerHtml() : ''}
             <!-- Main Content Area -->
-            <div style="position: relative; z-index: 10;">
+            <div class="flex-1 flex flex-col justify-start" style="position: relative; z-index: 10;">
                 <!-- Official Dual-Side Header matching User Model (Images 1 & 2) -->
                 <div class="flex justify-between items-start mb-3 text-xs">
                     <div class="text-left leading-relaxed pt-3.5 sm:pt-4">
@@ -6060,8 +6070,8 @@ window.renderBranchCommitteeReport = function(container, targetGrade, targetRoom
             </div>
             </div>
 
-            <!-- Signatures (រំកិលឡើងលើឱ្យជិតតារាង) -->
-            <div class="mt-4 pt-2 px-8 font-siemreap" style="position: relative; z-index: 10;">
+            <!-- Signatures -->
+            <div class="mt-4 pt-2 px-8 font-siemreap shrink-0" style="position: relative; z-index: 10;">
                 <div class="flex justify-between items-start text-xs">
                     <div class="text-center w-2/5">
                         <p class="mb-1 text-slate-700">បានឃើញ និងឯកភាព</p>

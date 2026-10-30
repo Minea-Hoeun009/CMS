@@ -775,7 +775,7 @@ describe('MoEYS Sikha-karik Booklet & Centralized Reports Suite', () => {
         assert.strictEqual(context.localStorage.getItem('cms_report_border_mode'), 'none', 'removeAllReportBorders must set mode to none');
     });
 
-    test('18. Timetable periods exclude teacher and room, and report pages enforce natural compact height', () => {
+    test('18. Timetable periods exclude teacher and room, and report pages match Honor Board standard sizing', () => {
         const timetableCode = fs.readFileSync(path.join(__dirname, '../js/timetable-homework.js'), 'utf8');
         vm.runInContext(timetableCode, context);
 
@@ -783,12 +783,13 @@ describe('MoEYS Sikha-karik Booklet & Centralized Reports Suite', () => {
         assert.ok(!timetableCode.includes('class="teacher-name"'), 'Timetable code must exclude teacher-name inside period slots');
         assert.ok(!timetableCode.includes('fa-door-open'), 'Timetable code must exclude room door icon inside period slots');
 
-        // Verify Class Principles report enforces inline height: auto and justify-start
+        // Verify Class Principles report matches Honor Board standard A4 dimensions
         const dummyContainer = { innerHTML: '' };
         context.window.renderClassPrinciplesReport(dummyContainer, 'ថ្នាក់ទី ៤', '«ក»');
         const html = dummyContainer.innerHTML;
-        assert.ok(html.includes('min-height: auto !important'), 'Class principles .a4-page must have inline min-height: auto !important');
-        assert.ok(html.includes('justify-content: flex-start !important'), 'Class principles .a4-page must have inline justify-content: flex-start !important');
-        assert.ok(!html.includes('min-h-[297mm]'), 'Class principles .a4-page must not have min-h-[297mm]');
+        assert.ok(html.includes('a4-page'), 'Class principles must contain a4-page');
+        assert.ok(html.includes('w-[794px]') || html.includes('210mm'), 'Class principles must define standard A4 width');
+        assert.ok(html.includes('min-h-[1123px]') || html.includes('297mm'), 'Class principles must define standard A4 height');
+        assert.ok(html.includes('justify-between'), 'Class principles must use justify-between like Honor Board');
     });
 });

@@ -862,7 +862,7 @@ window.CMSPrintManager = {
         const paperSize = options.paperSize || 'A4';
         const orientation = options.orientation || 'portrait';
         const scale = options.scale ? parseInt(options.scale, 10) : 100;
-        const margin = options.margin || (paperSize === 'A3' ? '10mm' : '6mm');
+        const margin = options.margin || (paperSize === 'A3' ? '10mm' : '1mm');
         const title = options.title || document.title || "បោះពុម្ពឯកសារ";
 
         let oldIframe = document.getElementById("cms_print_frame_helper");
@@ -1013,19 +1013,20 @@ window.CMSPrintManager = {
                     /* A4 Page Structured Layout - Compact & Natural Flow without Bottom-Dropping */
                     .a4-page, [class*="min-h-"] {
                         box-sizing: border-box !important;
-                        width: 100% !important;
-                        max-width: 100% !important;
-                        height: auto !important;
-                        min-height: auto !important;
+                        width: ${orientation === 'landscape' ? '295mm' : '208mm'} !important;
+                        height: ${orientation === 'landscape' ? '208mm' : '295mm'} !important;
+                        min-height: ${orientation === 'landscape' ? '208mm' : '295mm'} !important;
                         display: flex !important;
                         flex-direction: column !important;
-                        justify-content: flex-start !important;
+                        justify-content: space-between !important;
                         position: relative !important;
-                        padding: 6mm 8mm !important;
+                        padding: 5mm 6mm !important;
                         margin: 0 auto !important;
                         page-break-inside: avoid !important;
                         page-break-after: avoid !important;
                         background: white !important;
+                        border-radius: 0 !important;
+                        box-shadow: none !important;
                     }
 
                     /* Scale / Zoom Support */
