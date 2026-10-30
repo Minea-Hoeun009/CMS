@@ -643,12 +643,60 @@ window.calculateStudentScore = function(id) {
   const schoolLevel = window.getSchoolLevel(levelStr);
 
   if (type === "annual") {
-     const s1 = window.calculateSectionScore(id, "s1", schoolLevel);
-     const s2 = window.calculateSectionScore(id, "s2", schoolLevel);
+     let s1 = window.calculateSectionScore(id, "s1", schoolLevel);
+     let s2 = window.calculateSectionScore(id, "s2", schoolLevel);
+     
+     // Fallback to in-memory/stored semester scores or dynamic monthly averages
+     if (s1.avg <= 0) {
+         let sc1 = (window.s1Scores || []).find(x => String(x.student_id) === String(id));
+         if (!sc1) {
+             const allScores = JSON.parse(localStorage.getItem('academic_scores')) || [];
+             sc1 = allScores.find(x => (String(x.student_id) === String(id) || String(x.id) === String(id)) && x.period_type === "semester" && (x.month === "ឆមាសទី១" || x.month === "ឆមាសលើកទី១" || String(x.month).includes("១")));
+         }
+         let s1SavedAvg = sc1 ? parseFloat(sc1.average || sc1.avg || 0) : 0;
+         if (s1SavedAvg <= 0 && typeof window.calculateDynamicMonthlyAverage === 'function') {
+             s1SavedAvg = parseFloat(window.calculateDynamicMonthlyAverage(id, "s1")) || 0;
+         }
+         if (s1SavedAvg > 0) {
+             s1.avg = s1SavedAvg;
+             const avgDomEl = document.getElementById(`avg_s1_${id}`);
+             if (avgDomEl) avgDomEl.textContent = s1SavedAvg.toFixed(2);
+         }
+     }
+     
+     if (s2.avg <= 0) {
+         let sc2 = (window.s2Scores || []).find(x => String(x.student_id) === String(id));
+         if (!sc2) {
+             const allScores = JSON.parse(localStorage.getItem('academic_scores')) || [];
+             sc2 = allScores.find(x => (String(x.student_id) === String(id) || String(x.id) === String(id)) && x.period_type === "semester" && (x.month === "ឆមាសទី២" || x.month === "ឆមាសលើកទី២" || String(x.month).includes("២")));
+         }
+         let s2SavedAvg = sc2 ? parseFloat(sc2.average || sc2.avg || 0) : 0;
+         if (s2SavedAvg <= 0 && typeof window.calculateDynamicMonthlyAverage === 'function') {
+             s2SavedAvg = parseFloat(window.calculateDynamicMonthlyAverage(id, "s2")) || 0;
+         }
+         if (s2SavedAvg > 0) {
+             s2.avg = s2SavedAvg;
+             const avgDomEl = document.getElementById(`avg_s2_${id}`);
+             if (avgDomEl) avgDomEl.textContent = s2SavedAvg.toFixed(2);
+         }
+     }
+
      let annualAvg = 0, divider = 0;
      if (s1.avg > 0) { annualAvg += s1.avg; divider++; }
      if (s2.avg > 0) { annualAvg += s2.avg; divider++; }
      annualAvg = divider > 0 ? (annualAvg / divider) : 0;
+
+     if (annualAvg <= 0) {
+         let scA = (window.currentScores || []).find(x => String(x.student_id) === String(id));
+         if (!scA) {
+             const allScores = JSON.parse(localStorage.getItem('academic_scores')) || [];
+             scA = allScores.find(x => (String(x.student_id) === String(id) || String(x.id) === String(id)) && (x.period_type === "annual" || x.month === "ប្រចាំឆ្នាំ"));
+         }
+         if (scA && parseFloat(scA.average || scA.avg || 0) > 0) {
+             annualAvg = parseFloat(scA.average || scA.avg);
+             divider = 1;
+         }
+     }
      
      let letter = "-", color = "text-slate-500";
      if (divider > 0 && annualAvg > 0) {
@@ -657,10 +705,10 @@ window.calculateStudentScore = function(id) {
      }
 
      const annAvgEl = document.getElementById(`avg_annual_${id}`);
-     if (annAvgEl) annAvgEl.textContent = divider > 0 ? annualAvg.toFixed(2) : '';
+     if (annAvgEl && (divider > 0 || annualAvg > 0)) annAvgEl.textContent = annualAvg.toFixed(2);
      const annGradeEl = document.getElementById(`grade_annual_${id}`);
-     if (annGradeEl) { 
-        annGradeEl.textContent = divider > 0 ? letter : ""; 
+     if (annGradeEl && (divider > 0 || annualAvg > 0)) { 
+        annGradeEl.textContent = letter; 
         annGradeEl.className = `p-1.5 border-r border-slate-300 print:border-black text-center font-black font-moul text-[13px] bg-amber-50 ${color}`; 
      }
   } else if (type === "semester") {
@@ -822,14 +870,19 @@ window.renderSubjectAveragesRow = function() {
 window.updateRanksInMemory = function() {
     const type = document.getElementById("globalPeriodType")?.value || "monthly";
     const month = document.getElementById("globalPeriodValue")?.value || "មករា";
+    const levelStr = document.getElementById("globalLevelSelect")?.value || "";
+    const schoolLevel = window.getSchoolLevel(levelStr);
     let evaluatedStudents = [];
     let unenteredStudents = [];
+
+    let allStoredScores = [];
+    try { allStoredScores = JSON.parse(localStorage.getItem('academic_scores')) || []; } catch(e) {}
 
     window.scoresStudentList.forEach(s => {
         let avgId = type === "annual" ? `avg_annual_${s.id}` : `avg_${s.id}`;
         let avgEl = document.getElementById(avgId);
         let avgText = avgEl ? avgEl.textContent.trim() : "";
-        let hasScore = avgText !== "" && !isNaN(parseFloat(avgText));
+        let hasScore = avgText !== "" && !isNaN(parseFloat(avgText)) && parseFloat(avgText) > 0;
         let avg = hasScore ? parseFloat(avgText) : 0;
         
         let gradeId = type === "annual" ? `grade_annual_${s.id}` : `grade_${s.id}`;
@@ -841,11 +894,71 @@ window.updateRanksInMemory = function() {
             tExam = parseFloat(document.getElementById(`total_exam_${s.id}`)?.textContent) || 0;
             examAvg = parseFloat(document.getElementById(`avg_exam_${s.id}`)?.textContent) || 0;
             monthlyAvg = parseFloat(document.getElementById(`monthly_avg_${s.id}`)?.value) || 0;
+            if (examAvg <= 0 || monthlyAvg <= 0 || avg <= 0) {
+                const semSuffix = month.includes("២") ? "s2" : "s1";
+                const sc = allStoredScores.find(x => (String(x.student_id) === String(s.id) || String(x.id) === String(s.id)) && x.period_type === "semester" && (x.month === month || (semSuffix === "s1" ? String(x.month).includes("១") : String(x.month).includes("២"))));
+                if (sc) {
+                    if (avg <= 0 && parseFloat(sc.average || sc.avg || 0) > 0) {
+                        avg = parseFloat(sc.average || sc.avg);
+                        hasScore = true;
+                    }
+                    if (examAvg <= 0 && sc.exam_avg) examAvg = parseFloat(sc.exam_avg);
+                    if (monthlyAvg <= 0 && sc.monthly_avg) monthlyAvg = parseFloat(sc.monthly_avg);
+                }
+                if (monthlyAvg <= 0 && typeof window.calculateDynamicMonthlyAverage === 'function') {
+                    monthlyAvg = parseFloat(window.calculateDynamicMonthlyAverage(s.id, semSuffix)) || 0;
+                }
+            }
         } else if (type === "annual") {
             s1Avg = parseFloat(document.getElementById(`avg_s1_${s.id}`)?.textContent) || 0;
             s2Avg = parseFloat(document.getElementById(`avg_s2_${s.id}`)?.textContent) || 0;
+            
+            if (s1Avg <= 0) {
+                let sc1 = (window.s1Scores || []).find(x => String(x.student_id) === String(s.id));
+                if (!sc1) sc1 = allStoredScores.find(x => (String(x.student_id) === String(s.id) || String(x.id) === String(s.id)) && x.period_type === "semester" && (x.month === "ឆមាសទី១" || x.month === "ឆមាសលើកទី១" || String(x.month).includes("១")));
+                if (sc1 && parseFloat(sc1.average || sc1.avg || 0) > 0) s1Avg = parseFloat(sc1.average || sc1.avg);
+                else if (typeof window.calculateDynamicMonthlyAverage === 'function') {
+                    s1Avg = parseFloat(window.calculateDynamicMonthlyAverage(s.id, "s1")) || 0;
+                }
+            }
+            if (s2Avg <= 0) {
+                let sc2 = (window.s2Scores || []).find(x => String(x.student_id) === String(s.id));
+                if (!sc2) sc2 = allStoredScores.find(x => (String(x.student_id) === String(s.id) || String(x.id) === String(s.id)) && x.period_type === "semester" && (x.month === "ឆមាសទី២" || x.month === "ឆមាសលើកទី២" || String(x.month).includes("២")));
+                if (sc2 && parseFloat(sc2.average || sc2.avg || 0) > 0) s2Avg = parseFloat(sc2.average || sc2.avg);
+                else if (typeof window.calculateDynamicMonthlyAverage === 'function') {
+                    s2Avg = parseFloat(window.calculateDynamicMonthlyAverage(s.id, "s2")) || 0;
+                }
+            }
+            if (avg <= 0) {
+                let scA = (window.currentScores || []).find(x => String(x.student_id) === String(s.id));
+                if (!scA) scA = allStoredScores.find(x => (String(x.student_id) === String(s.id) || String(x.id) === String(s.id)) && (x.period_type === "annual" || x.month === "ប្រចាំឆ្នាំ"));
+                if (scA && parseFloat(scA.average || scA.avg || 0) > 0) {
+                    avg = parseFloat(scA.average || scA.avg);
+                    hasScore = true;
+                } else if (s1Avg > 0 && s2Avg > 0) {
+                    avg = parseFloat(((s1Avg + s2Avg) / 2).toFixed(2));
+                    hasScore = true;
+                } else if (s1Avg > 0) {
+                    avg = s1Avg;
+                    hasScore = true;
+                } else if (s2Avg > 0) {
+                    avg = s2Avg;
+                    hasScore = true;
+                }
+            }
+            if (hasScore && (gradeLetter === "-" || !gradeLetter)) {
+                gradeLetter = window.getGradeLetter(avg, false, schoolLevel);
+            }
         } else {
             tScore = parseFloat(document.getElementById(`total_${s.id}`)?.textContent) || 0;
+            if (avg <= 0) {
+                const sc = allStoredScores.find(x => (String(x.student_id) === String(s.id) || String(x.id) === String(s.id)) && x.period_type === "monthly" && (x.month === month || (x.month || '').replace(/^ខែ\s*/, '') === month.replace(/^ខែ\s*/, '')));
+                if (sc && parseFloat(sc.average || sc.avg || 0) > 0) {
+                    avg = parseFloat(sc.average || sc.avg);
+                    hasScore = true;
+                    if (gradeLetter === "-" || !gradeLetter) gradeLetter = sc.grade_letter || window.getGradeLetter(avg, false, schoolLevel);
+                }
+            }
         }
 
         let fullStuObj = { 
@@ -3699,22 +3812,23 @@ window.printRankingTable = function() {
             
             const isF = stu.gender === 'ស្រី' || stu.gender === 'F';
             const genColor = isF ? 'color: #e11d48; font-weight: bold;' : 'color: #1e293b; font-weight: bold;';
-            const avgScore = (stu.avg !== undefined && !isNaN(stu.avg) && stu.avg > 0) ? stu.avg.toFixed(2) : '0.00';
-            const avgColor = (stu.avg >= passMark) ? 'color: #047857; font-weight: bold;' : 'color: #e11d48; font-weight: bold;';
-            const rankVal = (stu.rank !== undefined && stu.rank !== null && stu.rank !== "") ? stu.rank : '-';
+            const avgScore = (stu.avg !== undefined && !isNaN(stu.avg) && stu.avg > 0) ? stu.avg.toFixed(2) : '-';
+            const avgColor = (stu.avg >= passMark) ? 'color: #047857; font-weight: bold;' : ((stu.avg > 0) ? 'color: #e11d48; font-weight: bold;' : 'color: #64748b; font-weight: normal;');
+            const rankVal = (stu.rank !== undefined && stu.rank !== null && stu.rank !== "" && stu.rank !== 0 && stu.rank !== "-") ? stu.rank : '-';
+            const rankColor = (rankVal !== '-') ? 'color: #e11d48; font-weight: bold;' : 'color: #64748b; font-weight: normal;';
             
             let row = `<td style="${tdBase} ${leftBorder} font-weight: bold; color: #475569;">${index}</td><td style="${tdBase} text-align: left; padding-left: 8px; font-weight: bold; color: #1e293b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${stu.name}</td><td style="${tdBase} ${genColor}">${isF ? 'ស' : 'ប'}</td>`;
             
             if (type === "monthly") {
-                row += `<td style="${tdBase} ${avgColor}">${avgScore}</td><td style="${tdBase} font-weight: bold; color: #e11d48;">${rankVal}</td>`;
+                row += `<td style="${tdBase} ${avgColor}">${avgScore}</td><td style="${tdBase} ${rankColor}">${rankVal}</td>`;
             } else if (type === "semester") {
-                const exAvg = (stu.exam_avg !== undefined && !isNaN(stu.exam_avg) && stu.exam_avg > 0) ? parseFloat(stu.exam_avg).toFixed(2) : '0.00';
-                const moAvg = (stu.monthly_avg !== undefined && !isNaN(stu.monthly_avg) && stu.monthly_avg > 0) ? parseFloat(stu.monthly_avg).toFixed(2) : '0.00';
-                row += `<td style="${tdBase} font-weight: bold; color: #1e293b;">${exAvg}</td><td style="${tdBase} font-weight: bold; color: #1e293b;">${moAvg}</td><td style="${tdBase} ${avgColor}">${avgScore}</td><td style="${tdBase} font-weight: bold; color: #e11d48;">${rankVal}</td>`;
+                const exAvg = (stu.exam_avg !== undefined && !isNaN(stu.exam_avg) && stu.exam_avg > 0) ? parseFloat(stu.exam_avg).toFixed(2) : '-';
+                const moAvg = (stu.monthly_avg !== undefined && !isNaN(stu.monthly_avg) && stu.monthly_avg > 0) ? parseFloat(stu.monthly_avg).toFixed(2) : '-';
+                row += `<td style="${tdBase} font-weight: bold; color: #1e293b;">${exAvg}</td><td style="${tdBase} font-weight: bold; color: #1e293b;">${moAvg}</td><td style="${tdBase} ${avgColor}">${avgScore}</td><td style="${tdBase} ${rankColor}">${rankVal}</td>`;
             } else {
-                const s1 = (stu.sem1_avg !== undefined && !isNaN(stu.sem1_avg) && stu.sem1_avg > 0) ? parseFloat(stu.sem1_avg).toFixed(2) : '0.00';
-                const s2 = (stu.sem2_avg !== undefined && !isNaN(stu.sem2_avg) && stu.sem2_avg > 0) ? parseFloat(stu.sem2_avg).toFixed(2) : '0.00';
-                row += `<td style="${tdBase} font-weight: bold; color: #1e293b;">${s1}</td><td style="${tdBase} font-weight: bold; color: #1e293b;">${s2}</td><td style="${tdBase} ${avgColor}">${avgScore}</td><td style="${tdBase} font-weight: bold; color: #e11d48;">${rankVal}</td>`;
+                const s1 = (stu.sem1_avg !== undefined && !isNaN(stu.sem1_avg) && stu.sem1_avg > 0) ? parseFloat(stu.sem1_avg).toFixed(2) : '-';
+                const s2 = (stu.sem2_avg !== undefined && !isNaN(stu.sem2_avg) && stu.sem2_avg > 0) ? parseFloat(stu.sem2_avg).toFixed(2) : '-';
+                row += `<td style="${tdBase} font-weight: bold; color: #1e293b;">${s1}</td><td style="${tdBase} font-weight: bold; color: #1e293b;">${s2}</td><td style="${tdBase} ${avgColor}">${avgScore}</td><td style="${tdBase} ${rankColor}">${rankVal}</td>`;
             }
             return row;
         };
@@ -4059,11 +4173,21 @@ function buildRankingsTable() {
        
        let trData = "";
        if (periodType === "monthly") {
-         trData = `<td class="p-3 text-slate-400 font-bold font-mono text-xs">${idx + 1}</td><td class="p-3 text-left px-5 font-bold text-slate-800 text-[13px] font-siemreap sticky-col ${bgClass}">${s.name}</td><td class="p-3 text-center ${genderClass} font-siemreap">${isF ? 'ស' : 'ប'}</td><td class="p-3 font-siemreap font-black text-blue-700 bg-blue-50/30 border-l border-white text-[13px] md:text-[14px]">${s.avg.toFixed(2)}</td><td class="p-3 text-center font-siemreap font-black text-rose-600 bg-rose-50/30 text-[13px] md:text-[14px] border-x border-white">${s.rank}</td><td class="p-3 text-center bg-white/50">${getGradeBadge(s.gradeLetter)}</td>`;
+         const avgStr = (s.avg > 0) ? s.avg.toFixed(2) : '-';
+         const rankStr = (s.rank && s.rank !== '-') ? s.rank : '-';
+         trData = `<td class="p-3 text-slate-400 font-bold font-mono text-xs">${idx + 1}</td><td class="p-3 text-left px-5 font-bold text-slate-800 text-[13px] font-siemreap sticky-col ${bgClass}">${s.name}</td><td class="p-3 text-center ${genderClass} font-siemreap">${isF ? 'ស' : 'ប'}</td><td class="p-3 font-siemreap font-black text-blue-700 bg-blue-50/30 border-l border-white text-[13px] md:text-[14px]">${avgStr}</td><td class="p-3 text-center font-siemreap font-black text-rose-600 bg-rose-50/30 text-[13px] md:text-[14px] border-x border-white">${rankStr}</td><td class="p-3 text-center bg-white/50">${getGradeBadge(s.gradeLetter)}</td>`;
        } else if (periodType === "semester") {
-         trData = `<td class="p-3 text-slate-400 font-bold font-mono text-xs">${idx + 1}</td><td class="p-3 text-left px-5 font-bold text-slate-800 text-[13px] font-siemreap sticky-col ${bgClass}">${s.name}</td><td class="p-3 text-center ${genderClass} font-siemreap">${isF ? 'ស' : 'ប'}</td><td class="p-3 font-siemreap text-orange-700 bg-orange-50/30 font-bold border-l border-white">${s.exam_avg.toFixed(2)}</td><td class="p-3 font-siemreap text-indigo-700 bg-indigo-50/30 font-bold border-l border-white">${s.monthly_avg.toFixed(2)}</td><td class="p-3 font-siemreap font-black text-blue-700 bg-blue-50/30 text-[13px] md:text-[14px] border-x border-white">${s.avg.toFixed(2)}</td><td class="p-3 text-center font-black font-siemreap text-rose-600 bg-rose-50/30 text-[13px] md:text-[14px] border-r border-white">${s.rank}</td><td class="p-3 text-center bg-white/50">${getGradeBadge(s.gradeLetter)}</td>`;
+         const exStr = (s.exam_avg > 0) ? s.exam_avg.toFixed(2) : '-';
+         const moStr = (s.monthly_avg > 0) ? s.monthly_avg.toFixed(2) : '-';
+         const avgStr = (s.avg > 0) ? s.avg.toFixed(2) : '-';
+         const rankStr = (s.rank && s.rank !== '-') ? s.rank : '-';
+         trData = `<td class="p-3 text-slate-400 font-bold font-mono text-xs">${idx + 1}</td><td class="p-3 text-left px-5 font-bold text-slate-800 text-[13px] font-siemreap sticky-col ${bgClass}">${s.name}</td><td class="p-3 text-center ${genderClass} font-siemreap">${isF ? 'ស' : 'ប'}</td><td class="p-3 font-siemreap text-orange-700 bg-orange-50/30 font-bold border-l border-white">${exStr}</td><td class="p-3 font-siemreap text-indigo-700 bg-indigo-50/30 font-bold border-l border-white">${moStr}</td><td class="p-3 font-siemreap font-black text-blue-700 bg-blue-50/30 text-[13px] md:text-[14px] border-x border-white">${avgStr}</td><td class="p-3 text-center font-black font-siemreap text-rose-600 bg-rose-50/30 text-[13px] md:text-[14px] border-r border-white">${rankStr}</td><td class="p-3 text-center bg-white/50">${getGradeBadge(s.gradeLetter)}</td>`;
        } else {
-         trData = `<td class="p-3 text-slate-400 font-bold font-mono text-xs">${idx + 1}</td><td class="p-3 text-left px-5 font-bold text-slate-800 text-[13px] font-siemreap sticky-col ${bgClass}">${s.name}</td><td class="p-3 text-center ${genderClass} font-siemreap">${isF ? 'ស' : 'ប'}</td><td class="p-3 font-siemreap text-blue-700 bg-blue-50/30 font-bold border-l border-white">${s.sem1_avg.toFixed(2)}</td><td class="p-3 font-siemreap text-indigo-700 bg-indigo-50/30 font-bold border-l border-white">${s.sem2_avg.toFixed(2)}</td><td class="p-3 font-siemreap font-black text-amber-700 bg-amber-50/30 text-[13px] md:text-[14px] border-x border-white">${s.avg.toFixed(2)}</td><td class="p-3 text-center font-black font-siemreap text-rose-600 bg-rose-50/30 text-[13px] md:text-[14px] border-r border-white">${s.rank}</td><td class="p-3 text-center bg-white/50">${getGradeBadge(s.gradeLetter)}</td>`;
+         const s1Str = (s.sem1_avg > 0) ? s.sem1_avg.toFixed(2) : '-';
+         const s2Str = (s.sem2_avg > 0) ? s.sem2_avg.toFixed(2) : '-';
+         const avgStr = (s.avg > 0) ? s.avg.toFixed(2) : '-';
+         const rankStr = (s.rank && s.rank !== '-') ? s.rank : '-';
+         trData = `<td class="p-3 text-slate-400 font-bold font-mono text-xs">${idx + 1}</td><td class="p-3 text-left px-5 font-bold text-slate-800 text-[13px] font-siemreap sticky-col ${bgClass}">${s.name}</td><td class="p-3 text-center ${genderClass} font-siemreap">${isF ? 'ស' : 'ប'}</td><td class="p-3 font-siemreap text-blue-700 bg-blue-50/30 font-bold border-l border-white">${s1Str}</td><td class="p-3 font-siemreap text-indigo-700 bg-indigo-50/30 font-bold border-l border-white">${s2Str}</td><td class="p-3 font-siemreap font-black text-amber-700 bg-amber-50/30 text-[13px] md:text-[14px] border-x border-white">${avgStr}</td><td class="p-3 text-center font-black font-siemreap text-rose-600 bg-rose-50/30 text-[13px] md:text-[14px] border-r border-white">${rankStr}</td><td class="p-3 text-center bg-white/50">${getGradeBadge(s.gradeLetter)}</td>`;
        }
        rowsHtml += `<tr class="hover:bg-slate-100 transition-colors border-b border-slate-100/50 ${bgClass}">${trData}</tr>`;
     });
