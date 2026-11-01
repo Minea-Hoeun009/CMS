@@ -293,7 +293,7 @@
                         }) : ''}
 
                         <!-- 2. Filter & Quick Scope Bar -->
-                        <div class="bg-white dark:bg-slate-800 px-4 py-3 rounded-2xl shadow-sm border border-slate-200/80 dark:border-slate-700 flex flex-wrap items-center justify-between gap-3">
+<div class="bg-white dark:bg-slate-800 px-4 py-3 rounded-2xl shadow-sm border border-slate-200/80 dark:border-slate-700 flex flex-wrap items-center justify-between gap-3">
                             <div class="flex flex-wrap items-center gap-3">
                                 <div class="flex items-center gap-2">
                                     <span class="text-xs font-bold text-slate-500 dark:text-slate-400"><i class="fa-solid fa-graduation-cap text-blue-600"></i> ${t('academicYear', 'ឆ្នាំសិក្សា')}៖</span>
@@ -310,15 +310,6 @@
                                     <span class="text-xs font-bold text-slate-500 dark:text-slate-400"><i class="fa-regular fa-clock text-amber-500"></i> កាលបរិច្ឆេទ៖</span>
                                     <input type="date" id="dashFilterDate" value="${currentFilter.selectedDate}" onchange="window.handleDashboardFilterChange('selectedDate', this.value)" class="text-xs font-bold bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 py-1.5 px-3 rounded-xl border-0 focus:ring-2 focus:ring-blue-500 cursor-pointer outline-none">
                                 </div>
-                            </div>
-
-                            <div class="flex items-center gap-2">
-                                <span class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 border border-blue-200/60 dark:border-blue-800">
-                                    <i class="fa-solid fa-chalkboard-user text-xs"></i> គ្រូបន្ទុកថ្នាក់ ${currentClassFull}
-                                </span>
-                                <button onclick="window.refreshDashboardData()" title="ទាញយកទិន្នន័យស្រស់" class="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-blue-50 hover:text-blue-600 flex items-center justify-center transition outline-none">
-                                    <i class="fa-solid fa-arrows-rotate text-xs"></i>
-                                </button>
                             </div>
                         </div>
 
@@ -466,7 +457,7 @@
                                                     <i class="fa-solid fa-clipboard-user text-emerald-500"></i>
                                                     <span data-i18n="attendanceStats">${t('attendanceStats', 'ស្ថិតិវត្តមានថ្ងៃនេះ')}</span>
                                                 </h3>
-                                                <p class="text-[11px] text-slate-400 font-medium">ស្ថានភាពវត្តមានសិស្សក្នុង${currentClassFull}</p>
+                                                <p class="text-[11px] text-slate-400 font-medium">ស្ថានភាពវត្តមានសិស្សប្រចាំថ្ងៃ</p>
                                             </div>
                                             <span class="w-8 h-8 rounded-xl bg-emerald-50 dark:bg-emerald-950 text-emerald-600 flex items-center justify-center text-xs">
                                                 <i class="fa-solid fa-chart-simple"></i>
@@ -634,7 +625,7 @@
                                     <!-- Status Description -->
                                     <div class="p-3 bg-blue-50/60 dark:bg-slate-700/60 rounded-xl border border-blue-100 dark:border-slate-600 text-left mt-3">
                                         <p class="text-xs font-bold text-slate-700 dark:text-slate-200 leading-relaxed font-siemreap" data-i18n="dailyStatusNote">
-                                            ${t('dailyStatusNote', 'សូមត្រួតពិនិត្យវត្តមាន និងកិច្ចការប្រឡងសិស្ស! គ្រប់យ៉ាងដំណើរការល្អប្រសើរ')}
+                                            ${t('dailyStatusNote', 'ទិន្នន័យថ្នាក់រៀនត្រូវបានកត់ត្រា និងដំណើរការល្អប្រសើរ')}
                                         </p>
                                     </div>
                                 </div>
@@ -650,7 +641,7 @@
                                         <button onclick="window.switchView('students')" class="w-full flex items-center justify-between p-3 rounded-xl bg-slate-50 dark:bg-slate-700/50 hover:bg-blue-50 hover:text-blue-600 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 transition text-left group">
                                             <div class="flex items-center gap-2.5">
                                                 <span class="w-7 h-7 rounded-lg bg-blue-100 dark:bg-blue-900/60 text-blue-600 dark:text-blue-300 flex items-center justify-center text-xs group-hover:scale-105 transition"><i class="fa-solid fa-user-graduate"></i></span>
-                                                <span data-i18n="shortcutStudents">${t('shortcutStudents', 'សិស្ស (បញ្ជីសិស្សថ្មី)')}</span>
+                                                <span data-i18n="shortcutStudents">${t('shortcutStudents', 'បញ្ជីឈ្មោះសិស្ស')}</span>
                                             </div>
                                             <i class="fa-solid fa-chevron-right text-slate-400 text-[10px] group-hover:translate-x-0.5 transition"></i>
                                         </button>
@@ -659,7 +650,7 @@
                                         <button onclick="window.switchView('scores')" class="w-full flex items-center justify-between p-3 rounded-xl bg-slate-50 dark:bg-slate-700/50 hover:bg-purple-50 hover:text-purple-600 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 transition text-left group">
                                             <div class="flex items-center gap-2.5">
                                                 <span class="w-7 h-7 rounded-lg bg-purple-100 dark:bg-purple-900/60 text-purple-600 dark:text-purple-300 flex items-center justify-center text-xs group-hover:scale-105 transition"><i class="fa-solid fa-pen-to-square"></i></span>
-                                                <span data-i18n="shortcutEnterGrades">${t('shortcutEnterGrades', 'ចូលកត់ពិន្ទុ (Mathematics)')}</span>
+                                                <span data-i18n="shortcutEnterGrades">${t('shortcutEnterGrades', 'បញ្ចូលពិន្ទុសិស្ស')}</span>
                                             </div>
                                             <i class="fa-solid fa-chevron-right text-slate-400 text-[10px] group-hover:translate-x-0.5 transition"></i>
                                         </button>
@@ -668,7 +659,7 @@
                                         <button onclick="window.switchView('timetable-homework')" class="w-full flex items-center justify-between p-3 rounded-xl bg-slate-50 dark:bg-slate-700/50 hover:bg-teal-50 hover:text-teal-600 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 transition text-left group">
                                             <div class="flex items-center gap-2.5">
                                                 <span class="w-7 h-7 rounded-lg bg-teal-100 dark:bg-teal-900/60 text-teal-600 dark:text-teal-300 flex items-center justify-center text-xs group-hover:scale-105 transition"><i class="fa-solid fa-calendar-days"></i></span>
-                                                <span data-i18n="shortcutTimetable">${t('shortcutTimetable', 'កាលវិភាគបង្រៀន')}</span>
+                                                <span data-i18n="shortcutTimetable">${t('shortcutTimetable', 'កាលវិភាគសិក្សា')}</span>
                                             </div>
                                             <i class="fa-solid fa-chevron-right text-slate-400 text-[10px] group-hover:translate-x-0.5 transition"></i>
                                         </button>
@@ -677,7 +668,7 @@
                                         <button onclick="window.openNotificationCenter()" class="w-full flex items-center justify-between p-3 rounded-xl bg-slate-50 dark:bg-slate-700/50 hover:bg-rose-50 hover:text-rose-600 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 transition text-left group">
                                             <div class="flex items-center gap-2.5">
                                                 <span class="w-7 h-7 rounded-lg bg-rose-100 dark:bg-rose-900/60 text-rose-600 dark:text-rose-300 flex items-center justify-center text-xs group-hover:scale-105 transition"><i class="fa-solid fa-bell"></i></span>
-                                                <span data-i18n="shortcutNotifications">${t('shortcutNotifications', 'សារជូនដំណឹងថ្មី')}</span>
+                                                <span data-i18n="shortcutNotifications">${t('shortcutNotifications', 'ការជូនដំណឹង')}</span>
                                             </div>
                                             <i class="fa-solid fa-chevron-right text-slate-400 text-[10px] group-hover:translate-x-0.5 transition"></i>
                                         </button>

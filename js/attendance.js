@@ -244,11 +244,7 @@ window.loadAttendanceView = async function() {
                              class="pl-10 pr-4 py-2.5 border border-slate-200 rounded-xl text-[13px] font-bold focus:ring-2 focus:ring-rose-500/30 focus:border-rose-400 focus:bg-white outline-none w-full sm:w-44 bg-slate-50 transition shadow-inner font-siemreap">
                     </div>
 
-                    <!-- Single Classroom Locked Display -->
-                    <div class="flex items-center gap-2 bg-rose-50 border border-rose-200 text-rose-700 px-3.5 py-2 rounded-xl text-xs font-bold shadow-sm">
-                      <i class="fa-solid fa-chalkboard-user text-rose-500"></i>
-                      <span>${initialGrade} ${initialRoom}</span>
-                    </div>
+
 
                     <!-- Hidden Grade and Room Selectors for Single Classroom Mode -->
                     <div class="hidden" aria-hidden="true">
@@ -316,9 +312,7 @@ window.loadAttendanceView = async function() {
                 </div>
 
                 <div class="flex flex-wrap items-center gap-2 w-full md:w-auto mt-2 md:mt-0">
-                  <button onclick="if(typeof window.toggleSharedDatePanel === 'function') window.toggleSharedDatePanel('datePanel-attendance');" class="px-4 py-2.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 rounded-xl text-[13px] font-bold transition flex items-center gap-2 hover:shadow-sm">
-                    <i class="fa-solid fa-calendar-week text-indigo-500"></i> កាលបរិច្ឆេទ
-                  </button>
+                  
                   <button onclick="if(typeof window.openAnnualReportModal === 'function') window.openAnnualReportModal();" class="px-4 py-2.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 rounded-xl text-[13px] font-bold transition flex items-center gap-2 hover:shadow-sm">
                     <i class="fa-solid fa-file-contract text-emerald-500"></i> របាយការណ៍ឆ្នាំ
                   </button>
@@ -332,7 +326,7 @@ window.loadAttendanceView = async function() {
                 </div>
               </div>
 
-              ${typeof window.getDateSettingsPanelHTML === 'function' ? window.getDateSettingsPanelHTML('attendance') : ''}
+              
 
               <!-- ផ្ទៃតារាងវត្តមាន -->
               <div class="bg-white rounded-[2rem] border border-slate-200 shadow-sm relative flex flex-col w-full print:border-none print:shadow-none min-h-[400px]" id="attendanceWebArea">

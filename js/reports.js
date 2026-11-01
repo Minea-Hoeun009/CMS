@@ -145,7 +145,7 @@ window.loadReportsView = function() {
                         </div>
                         <div class="relative z-10">
                             <h3 class="font-moul text-[15px] text-slate-900 mb-1.5 group-hover:text-blue-700">សៀវភៅសិក្ខាគារិក</h3>
-                            <p class="text-slate-500 text-[11px] leading-relaxed">សៀវភៅសិក្ខាគារិកផ្លូវការក្រសួងអប់រំ រួមមាន ក្របមុខ សេចក្តីណែនាំ ប្រវត្តិរូប និងលទ្ធផលប្រឡងឆមាស។</p>
+                            <p class="text-slate-500 text-[11px] leading-relaxed">ក្របមុខ ប្រវត្តិរូប និងលទ្ធផលប្រឡងឆមាសផ្លូវការ</p>
                         </div>
                     </div>
 
@@ -158,7 +158,7 @@ window.loadReportsView = function() {
                         </div>
                         <div class="relative z-10">
                             <h3 class="font-moul text-[15px] text-slate-900 mb-1.5 group-hover:text-indigo-600">សៀវភៅតាមដានការសិក្សា</h3>
-                            <p class="text-slate-500 text-[11px] leading-relaxed">តាមដានការសិក្សា វិន័យ និងព្រឹត្តិបត្រពិន្ទុសិស្សប្រចាំខែ ឆមាស និងប្រចាំឆ្នាំតាមស្តង់ដារក្រសួង។</p>
+                            <p class="text-slate-500 text-[11px] leading-relaxed">តាមដានការសិក្សា វិន័យ និងព្រឹត្តិបត្រពិន្ទុរួម</p>
                         </div>
                     </div>
 
@@ -171,7 +171,7 @@ window.loadReportsView = function() {
                         </div>
                         <div class="relative z-10">
                             <h3 class="font-moul text-[15px] text-slate-900 mb-1.5 group-hover:text-amber-600">តារាងកិត្តិយស</h3>
-                            <p class="text-slate-500 text-[11px] leading-relaxed">តារាងកិត្តិយសសិស្សឆ្នើម Top 3 / Top 5 អាចកែសម្រួលអត្ថបទ រូបថត និងរចនាដោយដៃបានភ្លាមៗ។</p>
+                            <p class="text-slate-500 text-[11px] leading-relaxed">តារាងកិត្តិយសសិស្សឆ្នើម Top 5 និងប័ណ្ណសរសើរ</p>
                         </div>
                     </div>
 
@@ -184,7 +184,7 @@ window.loadReportsView = function() {
                         </div>
                         <div class="relative z-10">
                             <h3 class="font-moul text-[15px] text-slate-900 mb-1.5 group-hover:text-amber-600">ប័ណ្ណសរសើរផ្លូវការ</h3>
-                            <p class="text-slate-500 text-[11px] leading-relaxed">បង្កើតប័ណ្ណសរសើរសិស្សពូកែ និងវិន័យល្អ ជ្រើសរើសស៊ុមបានច្រើនម៉ូដ និងកែប្រែបាន។</p>
+                            <p class="text-slate-500 text-[11px] leading-relaxed">ប័ណ្ណសរសើរសិស្សពូកែ និងបោះពុម្ពជាបាច់ Top 1 ដល់ 5</p>
                         </div>
                     </div>
 
@@ -197,7 +197,7 @@ window.loadReportsView = function() {
                         </div>
                         <div class="relative z-10">
                             <h3 class="font-moul text-[15px] text-slate-900 mb-1.5 group-hover:text-emerald-600">របាយការណ៍វត្តមាន</h3>
-                            <p class="text-slate-500 text-[11px] leading-relaxed">ស្ថិតិវត្តមាន-អវត្តមានសិស្សប្រចាំខែ ឆមាស និងប្រចាំឆ្នាំ ដោយទាញទិន្នន័យជាក់ស្តែង។</p>
+                            <p class="text-slate-500 text-[11px] leading-relaxed">ស្ថិតិវត្តមាន និងអវត្តមានសិស្សប្រចាំខែ និងឆ្នាំ</p>
                         </div>
                     </div>
 
@@ -210,7 +210,7 @@ window.loadReportsView = function() {
                         </div>
                         <div class="relative z-10">
                             <h3 class="font-moul text-[15px] text-slate-900 mb-1.5 group-hover:text-emerald-600">លទ្ធផលសិក្សា (ប្រចាំខែ ឆមាស ប្រចាំឆ្នាំ)</h3>
-                            <p class="text-slate-500 text-[11px] leading-relaxed">លទ្ធផលសិក្សាផ្លូវការ ៣ ផ្នែក៖ ប្រចាំខែ ប្រចាំឆមាស (ឆ១ & ឆ២) និងប្រចាំឆ្នាំ (ឡើង/ត្រួតថ្នាក់)។</p>
+                            <p class="text-slate-500 text-[11px] leading-relaxed">តារាងលទ្ធផលសិក្សាប្រចាំខែ ឆមាស និងប្រចាំឆ្នាំ</p>
                         </div>
                     </div>
 
@@ -223,7 +223,7 @@ window.loadReportsView = function() {
                         </div>
                         <div class="relative z-10">
                             <h3 class="font-moul text-[15px] text-slate-900 mb-1.5 group-hover:text-rose-600">របាយការណ៍សុខភាព</h3>
-                            <p class="text-slate-500 text-[11px] leading-relaxed">គណនា BMI ស្វ័យប្រវត្ត (កម្ពស់-ទម្ងន់) ការពិនិត្យភ្នែក និងវ៉ាក់សាំង។</p>
+                            <p class="text-slate-500 text-[11px] leading-relaxed">តាមដានទម្ងន់ កម្ពស់ និងសន្ទស្សន៍ BMI សិស្ស</p>
                         </div>
                     </div>
 
@@ -231,7 +231,7 @@ window.loadReportsView = function() {
                     <div onclick="window.openReportDetail('stats')" class="bg-white/90 backdrop-blur-md rounded-[2rem] p-6 shadow-sm hover:shadow-[0_20px_40px_rgb(59,130,246,0.15)] hover:-translate-y-1.5 transition-all duration-300 cursor-pointer border border-slate-100 group flex flex-col justify-between h-[210px] relative overflow-hidden">
                         <div class="absolute -right-4 -top-4 w-24 h-24 bg-blue-50 rounded-full group-hover:scale-150 transition-transform duration-500 ease-out pointer-events-none"></div>
                         <div class="w-14 h-14 bg-gradient-to-br from-blue-500 to-indigo-600 text-white rounded-2xl flex items-center justify-center text-2xl shadow-md shadow-blue-500/30 group-hover:scale-110 transition-transform relative z-10"><i class="fa-solid fa-chart-pie"></i></div>
-                        <div class="relative z-10"><h3 class="font-moul text-[15px] text-slate-800 mb-1.5 group-hover:text-blue-700">តារាងស្ថិតិសិស្ស</h3><p class="text-slate-500 text-[11px] leading-relaxed">របាយការណ៍ចំនួនសិស្សដើមឆ្នាំ/ចុងឆ្នាំ បែងចែកតាមអាយុ និងភេទ។</p></div>
+                        <div class="relative z-10"><h3 class="font-moul text-[15px] text-slate-800 mb-1.5 group-hover:text-blue-700">តារាងស្ថិតិសិស្ស</h3><p class="text-slate-500 text-[11px] leading-relaxed">ស្ថិតិចំនួនសិស្សតាមអាយុ និងភេទ</p></div>
                     </div>
 
                     <!-- Card 10: នាំចេញ Master Excel -->

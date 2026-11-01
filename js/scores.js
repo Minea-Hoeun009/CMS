@@ -1668,19 +1668,17 @@ window.loadScoresView = async function() {
                   <div class="w-16 h-16 bg-gradient-to-br from-rose-400 to-rose-600 text-white rounded-2xl flex items-center justify-center text-3xl shadow-md shadow-rose-500/30 group-hover:scale-110 group-hover:-rotate-3 transition-transform duration-300 relative z-10"><i class="fa-solid fa-ranking-star"></i></div>
                   <div class="relative z-10"><h3 class="font-moul text-[16px] text-slate-800 mb-1.5 group-hover:text-rose-600 transition-colors">តារាងចំណាត់ថ្នាក់</h3><p class="text-slate-500 text-xs font-siemreap leading-relaxed">មើលចំណាត់ថ្នាក់ និងទាញយកជា Excel។</p></div>
               </div>
-              <div onclick="if(typeof switchView === 'function') { switchView('reports'); } else if (typeof window.loadReportsView === 'function') { window.loadReportsView(); }" class="bg-white/90 backdrop-blur-md rounded-[2rem] p-6 shadow-sm hover:shadow-[0_20px_40px_rgb(99,102,241,0.18)] hover:-translate-y-1.5 transition-all duration-300 cursor-pointer border-2 border-indigo-100 hover:border-indigo-400 group flex flex-col justify-between h-[220px] relative overflow-hidden">
-                  <div class="absolute -right-4 -top-4 w-24 h-24 bg-indigo-50 rounded-full group-hover:scale-150 transition-transform duration-500 ease-out pointer-events-none"></div>
+              <div onclick="if(window.KrouDigital && typeof window.KrouDigital.openCertificatesFromScores === 'function'){ window.KrouDigital.openCertificatesFromScores(); } else if (window.KrouDigital && typeof window.KrouDigital.renderCertificateModal === 'function') { window.KrouDigital.renderCertificateModal(); }" class="bg-white/90 backdrop-blur-md rounded-[2rem] p-6 shadow-sm hover:shadow-[0_20px_40px_rgb(245,158,11,0.18)] hover:-translate-y-1.5 transition-all duration-300 cursor-pointer border-2 border-amber-100 hover:border-amber-400 group flex flex-col justify-between h-[220px] relative overflow-hidden">
+                  <div class="absolute -right-4 -top-4 w-24 h-24 bg-amber-50 rounded-full group-hover:scale-150 transition-transform duration-500 ease-out pointer-events-none"></div>
                   <div class="flex items-center justify-between relative z-10">
-                      <div class="w-16 h-16 bg-gradient-to-br from-indigo-500 to-purple-600 text-white rounded-2xl flex items-center justify-center text-3xl shadow-md shadow-indigo-500/30 group-hover:scale-110 transition-transform duration-300"><i class="fa-solid fa-folder-open"></i></div>
-                      <span class="text-[10px] bg-indigo-100 text-indigo-700 font-bold px-2 py-0.5 rounded-full uppercase">Reports & Records</span>
+                      <div class="w-16 h-16 bg-gradient-to-br from-amber-400 to-amber-600 text-white rounded-2xl flex items-center justify-center text-3xl shadow-md shadow-amber-500/30 group-hover:scale-110 transition-transform duration-300"><i class="fa-solid fa-award"></i></div>
+                      <span class="text-[10px] bg-amber-100 text-amber-800 font-bold px-2 py-0.5 rounded-full uppercase">Certificate Studio</span>
                   </div>
                   <div class="relative z-10">
-                      <h3 class="font-moul text-[16px] text-slate-800 mb-1.5 group-hover:text-indigo-600 transition-colors">របាយការណ៍ & សៀវភៅតាមដាន</h3>
-                      <p class="text-slate-500 text-xs font-siemreap leading-relaxed">សៀវភៅសិក្ខាគារិក សៀវភៅតាមដាន តារាងកិត្តិយស និងព្រឹត្តិបត្រពិន្ទុ។</p>
+                      <h3 class="font-moul text-[16px] text-slate-800 mb-1.5 group-hover:text-amber-600 transition-colors">ប័ណ្ណសរសើរផ្លូវការ</h3>
+                      <p class="text-slate-500 text-xs font-siemreap leading-relaxed">ចេញប័ណ្ណសរសើរសិស្សពូកែ និងបោះពុម្ពជាបាច់ Top 1 ដល់ 5។</p>
                   </div>
               </div>
-            </div>
-          </div>
       </div>
 
       <!-- MODALS ទី១៖ បញ្ចូលពិន្ទុ -->
