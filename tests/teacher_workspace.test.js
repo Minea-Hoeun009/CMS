@@ -288,4 +288,25 @@ describe('Teacher Personal Workspace & Authentication Preferences Tests', () => 
     assert.equal(codeGs.includes("action === 'registerUser'"), true);
     assert.equal(codeGs.includes("upsertRecords(SHEETS.TEACHERS, [teacher], 'teacher_id')"), true);
   });
+
+  test('10. Separate Welcome and Auth Portals & Telegram OTP and Direct Gmail verification', () => {
+    const html = fs.readFileSync(path.resolve(__dirname, '../index.html'), 'utf8');
+
+    // 1. Separate Portal Views
+    assert.equal(html.includes('id="welcome-portal-view"'), true);
+    assert.equal(html.includes('id="auth-portal-view"'), true);
+    assert.equal(html.includes('window.navigateToAuthScreen(\'login\')'), true);
+    assert.equal(html.includes('window.navigateToAuthScreen(\'register\')'), true);
+    assert.equal(html.includes('window.navigateToWelcome()'), true);
+
+    // 2. Auth handlers and Telegram OTP system in auth.js
+    const authCode = fs.readFileSync(path.resolve(__dirname, '../js/auth.js'), 'utf8');
+    assert.equal(authCode.includes('window.navigateToAuthScreen ='), true);
+    assert.equal(authCode.includes('window.navigateToWelcome ='), true);
+    assert.equal(authCode.includes('window.sendTelegramOtp ='), true);
+    assert.equal(authCode.includes('window.verifyTelegramOtp ='), true);
+    assert.equal(authCode.includes('window.telegramOtpSession'), true);
+    assert.equal(authCode.includes('Telegram OTP Notification'), true);
+    assert.equal(authCode.includes('id="tg_otp_input"'), true);
+  });
 });

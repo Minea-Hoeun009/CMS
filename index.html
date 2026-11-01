@@ -140,6 +140,11 @@
                     </div>
 
                     <!-- Dark Mode Toggle -->
+                    <button type="button" onclick="window.navigateToAuthScreen('login')" class="px-3.5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition shadow-md shadow-indigo-500/25 flex items-center gap-1.5 active:scale-95">
+                        <i class="fa-solid fa-arrow-right-to-bracket"></i>
+                        <span class="hidden sm:inline">ចូលប្រព័ន្ធ</span>
+                    </button>
+
                     <button type="button" onclick="toggleDarkMode()" title="ប្តូរពណ៌ Dark/Light" class="w-9 h-9 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-amber-400 flex items-center justify-center transition-colors outline-none shadow-sm">
                         <i class="fa-solid fa-moon"></i>
                     </button>
@@ -150,13 +155,16 @@
         <!-- 2. Main Hero & Interactive Login Section -->
         <main class="relative z-10 flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12 w-full flex flex-col justify-center">
             
-            <div id="welcome-hero" class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
+            <!-- ========================================== -->
+            <!-- VIEW A: ផ្ទាំងស្វាគមន៍ (WELCOME PORTAL VIEW) -->
+            <!-- ========================================== -->
+            <div id="welcome-portal-view" class="w-full flex flex-col justify-center animate-fade-in">
                 
-                <!-- Left Hero: Greeting & Platform Highlights (7 Cols on LG) -->
-                <div class="lg:col-span-7 space-y-6 text-left">
+                <!-- Welcome Hero (Full Width Showcase) -->
+                <div id="welcome-hero" class="max-w-4xl mx-auto text-center space-y-6 pt-2 pb-6">
                     
                     <!-- Pre-title Pill -->
-                    <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-indigo-50/90 dark:bg-indigo-950/70 border border-indigo-200 dark:border-indigo-800 text-indigo-700 dark:text-indigo-300 text-xs font-bold shadow-sm">
+                    <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-indigo-50/90 dark:bg-indigo-950/70 border border-indigo-200 dark:border-indigo-800 text-indigo-700 dark:text-indigo-300 text-xs font-bold shadow-sm">
                         <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
                         <i class="fa-solid fa-school-flag text-indigo-500"></i>
                         <span>ប្រព័ន្ធគ្រប់គ្រងថ្នាក់រៀនឌីជីថល</span>
@@ -164,7 +172,7 @@
 
                     <!-- Grand Headline -->
                     <div>
-                        <h2 class="font-moul text-2xl sm:text-3xl lg:text-4xl text-slate-900 dark:text-white leading-[1.35] tracking-wide mb-3">
+                        <h2 class="font-moul text-2xl sm:text-3xl lg:text-4xl text-slate-900 dark:text-white leading-[1.4] tracking-wide mb-3">
                             សូមស្វាគមន៍មកកាន់<br>
                             <span class="font-moul text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 via-blue-600 to-purple-600">ប្រព័ន្ធគ្រប់គ្រងថ្នាក់រៀនឌីជីថល</span>
                         </h2>
@@ -179,9 +187,25 @@
                             </span>
                         </div>
 
-                        <p class="text-slate-600 dark:text-slate-300 text-sm sm:text-base leading-relaxed font-siemreap font-medium max-w-2xl">
+                        <p class="text-slate-600 dark:text-slate-300 text-sm sm:text-base leading-relaxed font-siemreap font-medium max-w-2xl mx-auto">
                             ដំណោះស្រាយឌីជីថលស្តង់ដារសម្រាប់គ្រឹះស្ថានសិក្សា៖ គ្រប់គ្រងព័ត៌មានសិស្ស ស្រង់វត្តមានប្រចាំថ្ងៃ បញ្ចូលពិន្ទុ & ចំណាត់ថ្នាក់ កាលវិភាគ បណ្ណាល័យ និងរបាយការណ៍ស្វ័យប្រវត្តិតាមស្តង់ដារក្រសួង។ បង្ហាញទិន្នន័យភ្លាមៗ (0ms Latency) និងធ្វើសមកាលកម្មទិន្នន័យដោយផ្ទាល់ជាមួយ Google Sheets & Cloud។
                         </p>
+                    </div>
+
+                    <!-- Primary Action Buttons (Navigate to Auth Screen or Parent Portal) -->
+                    <div class="flex flex-wrap items-center justify-center gap-3 pt-2">
+                        <button type="button" onclick="window.navigateToAuthScreen('login')" class="px-7 py-3.5 bg-gradient-to-r from-indigo-600 via-blue-600 to-indigo-700 hover:from-indigo-700 hover:to-blue-800 text-white rounded-2xl font-bold text-sm shadow-xl shadow-indigo-500/25 active:scale-95 transition-all flex items-center gap-2.5">
+                            <i class="fa-solid fa-arrow-right-to-bracket text-base"></i>
+                            <span>ចូលប្រើប្រាស់ប្រព័ន្ធ (Sign In)</span>
+                        </button>
+                        <button type="button" onclick="window.navigateToAuthScreen('register')" class="px-6 py-3.5 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-800 dark:text-white border border-slate-200 dark:border-slate-700 rounded-2xl font-bold text-sm shadow-md hover:shadow-lg active:scale-95 transition-all flex items-center gap-2.5">
+                            <i class="fa-solid fa-user-plus text-emerald-500 text-base"></i>
+                            <span>ចុះឈ្មោះគ្រូថ្មី (Register)</span>
+                        </button>
+                        <button type="button" onclick="window.KrouDigital && window.KrouDigital.openParentPortalModal()" class="px-5 py-3.5 bg-sky-50 dark:bg-sky-950/60 hover:bg-sky-100 dark:hover:bg-sky-900/60 text-sky-700 dark:text-sky-300 border border-sky-200 dark:border-sky-800 rounded-2xl font-bold text-sm shadow-sm active:scale-95 transition-all flex items-center gap-2">
+                            <i class="fa-solid fa-magnifying-glass-chart text-sky-500 text-base"></i>
+                            <span>ច្រកទស្សនាមាតាបិតា</span>
+                        </button>
                     </div>
 
                     <!-- Hidden Bypass Action Buttons for Test Compatibility -->
@@ -192,26 +216,26 @@
                     </div>
 
                     <!-- 4 Interactive Feature Highlights -->
-                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2">
-                        <div class="p-3.5 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-2xl border border-slate-200/80 dark:border-slate-700/80 shadow-sm">
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-4 max-w-4xl mx-auto">
+                        <div class="p-3.5 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-2xl border border-slate-200/80 dark:border-slate-700/80 shadow-sm text-left">
                             <div class="w-8 h-8 rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center text-sm mb-2"><i class="fa-solid fa-user-graduate"></i></div>
                             <div class="text-xs font-bold text-slate-800 dark:text-white">គ្រប់គ្រងសិស្ស</div>
                             <div class="text-[11px] text-slate-500 dark:text-slate-400">ជីវប្រវត្តិ & ថ្នាក់រៀន</div>
                         </div>
 
-                        <div class="p-3.5 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-2xl border border-slate-200/80 dark:border-slate-700/80 shadow-sm">
+                        <div class="p-3.5 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-2xl border border-slate-200/80 dark:border-slate-700/80 shadow-sm text-left">
                             <div class="w-8 h-8 rounded-xl bg-rose-500/10 text-rose-600 dark:text-rose-400 flex items-center justify-center text-sm mb-2"><i class="fa-solid fa-clipboard-check"></i></div>
                             <div class="text-xs font-bold text-slate-800 dark:text-white">ស្រង់វត្តមាន</div>
                             <div class="text-[11px] text-slate-500 dark:text-slate-400">ប្រចាំថ្ងៃ & ខែរហ័ស</div>
                         </div>
 
-                        <div class="p-3.5 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-2xl border border-slate-200/80 dark:border-slate-700/80 shadow-sm">
+                        <div class="p-3.5 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-2xl border border-slate-200/80 dark:border-slate-700/80 shadow-sm text-left">
                             <div class="w-8 h-8 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center text-sm mb-2"><i class="fa-solid fa-award"></i></div>
                             <div class="text-xs font-bold text-slate-800 dark:text-white">ពិន្ទុ & ចំណាត់ថ្នាក់</div>
                             <div class="text-[11px] text-slate-500 dark:text-slate-400">គណនាមធ្យមភាគ Auto</div>
                         </div>
 
-                        <div class="p-3.5 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-2xl border border-slate-200/80 dark:border-slate-700/80 shadow-sm">
+                        <div class="p-3.5 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-2xl border border-slate-200/80 dark:border-slate-700/80 shadow-sm text-left">
                             <div class="w-8 h-8 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center text-sm mb-2"><i class="fa-solid fa-table-cells"></i></div>
                             <div class="text-xs font-bold text-slate-800 dark:text-white">Google Sheets</div>
                             <div class="text-[11px] text-slate-500 dark:text-slate-400">Instant Sync 0ms</div>
@@ -220,334 +244,345 @@
 
                 </div>
 
-                <!-- Right Column: Interactive Login / Register Portal (5 Cols on LG) -->
-                <div class="lg:col-span-5 w-full max-w-md mx-auto">
-                    
-                    <div class="welcome-glass-card rounded-[2.2rem] shadow-[0_20px_50px_rgba(0,0,0,0.12)] p-6 sm:p-8 relative">
+                <!-- 3. Core Modules Showcase Section (មុខងារសំខាន់ៗទាំង ៦) -->
+                <section id="welcome-features" class="pt-12 pb-8">
+                    <div class="text-center max-w-2xl mx-auto mb-8">
+                        <span class="text-xs font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-widest bg-indigo-50 dark:bg-indigo-950/60 px-3 py-1 rounded-full border border-indigo-200 dark:border-indigo-800">✨ មុខងារស្នូលនៃប្រព័ន្ធ</span>
+                        <h3 class="font-moul text-xl sm:text-2xl text-slate-900 dark:text-white mt-2">ដំណោះស្រាយគ្រប់គ្រងគ្រប់ជ្រុងជ្រោយ</h3>
+                        <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 font-siemreap mt-1">រចនាឡើងដើម្បីជួយសម្រួលការងារគ្រូបង្រៀន និងរដ្ឋបាលសាលារៀនឱ្យកាន់តែមានប្រសិទ្ធភាព</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                         
-                        <!-- Navigation Segment Tabs -->
-                        <div class="grid grid-cols-2 p-1.5 bg-slate-100 dark:bg-slate-800/90 rounded-2xl mb-5 border border-slate-200/80 dark:border-slate-700/80 shadow-inner">
-                            <button type="button" id="tabAuthLogin" onclick="window.toggleAuthBox('login')" class="py-2.5 rounded-xl font-bold transition-all outline-none flex items-center justify-center gap-2 text-sm text-indigo-600 dark:text-indigo-400 bg-white dark:bg-slate-700 shadow-sm border border-slate-200/60 dark:border-slate-600/60">
-                                <i class="fa-solid fa-arrow-right-to-bracket"></i>
-                                <span>ចូលប្រព័ន្ធ</span>
-                            </button>
-                            <button type="button" id="tabAuthRegister" onclick="window.toggleAuthBox('register')" class="py-2.5 rounded-xl font-bold transition-all outline-none flex items-center justify-center gap-2 text-sm text-slate-500 dark:text-slate-400 hover:text-indigo-600 border border-transparent">
-                                <i class="fa-solid fa-user-plus"></i>
-                                <span>ចុះឈ្មោះគ្រូថ្មី</span>
-                            </button>
-                            <div class="hidden" aria-hidden="true">
-                                <button type="button" id="tabAuthHelp" onclick="window.toggleAuthBox('help')"><span>ជំនួយ</span></button>
+                        <!-- 1. Students -->
+                        <div class="welcome-feature-card p-5 rounded-2xl bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border border-slate-200/80 dark:border-slate-700/80 text-left">
+                            <div class="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center text-lg mb-3">
+                                <i class="fa-solid fa-user-graduate"></i>
                             </div>
-                        </div>
-
-                        <!-- ផ្ទាំងចូលគណនី (Login Box - Clean Standard Teacher Login) -->
-                        <div id="authLoginBox" class="text-left space-y-4">
-                            
-                            <!-- Error Alert Box -->
-                            <div id="loginError" class="hidden p-3 bg-rose-50 dark:bg-rose-950/50 border border-rose-200 dark:border-rose-800 text-rose-600 dark:text-rose-400 rounded-xl text-xs font-bold text-center"></div>
-
-                            <form onsubmit="window.handleLogin(event)" class="space-y-4">
-                                <div>
-                                    <label class="block text-[11px] font-bold text-slate-600 dark:text-slate-300 mb-1.5">ឈ្មោះគណនី ឬ លេខសម្គាល់គ្រូ</label>
-                                    <div class="relative group">
-                                        <i class="fa-regular fa-user absolute left-4 top-3.5 text-slate-400 text-sm group-focus-within:text-indigo-600 transition-colors"></i>
-                                        <input type="text" id="usernameOrPhone" required placeholder="ឧ. admin ឬ TCH-001" class="w-full pl-11 pr-4 py-3 bg-slate-50 dark:bg-slate-700/60 border border-slate-200 dark:border-slate-600 rounded-2xl text-sm font-bold text-slate-700 dark:text-white outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 focus:bg-white dark:focus:bg-slate-700 transition-all shadow-inner">
-                                    </div>
-                                </div>
-                                
-                                <div>
-                                    <label class="block text-[11px] font-bold text-slate-600 dark:text-slate-300 mb-1.5">លេខសម្ងាត់</label>
-                                    <div class="relative group">
-                                        <i class="fa-solid fa-lock absolute left-4 top-3.5 text-slate-400 text-sm group-focus-within:text-indigo-600 transition-colors"></i>
-                                        <input type="password" id="password" required placeholder="••••••••" class="w-full pl-11 pr-11 py-3 bg-slate-50 dark:bg-slate-700/60 border border-slate-200 dark:border-slate-600 rounded-2xl text-sm font-bold text-slate-700 dark:text-white outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 focus:bg-white dark:focus:bg-slate-700 transition-all shadow-inner">
-                                        <button type="button" onclick="window.togglePasswordVisibility('password', 'eyeIconLogin')" class="absolute right-4 top-3.5 text-slate-400 hover:text-indigo-600 transition outline-none"><i id="eyeIconLogin" class="fa-regular fa-eye"></i></button>
-                                    </div>
-                                </div>
-
-                                <!-- Hidden Grade & Room Selectors for compatibility -->
-                                <div class="hidden" aria-hidden="true">
-                                    <select id="loginGrade"><option value="" selected></option></select>
-                                    <select id="loginRoom">
-                                        <option value="«ក»" selected>«ក»</option>
-                                        <option value="«ខ»">«ខ»</option>
-                                        <option value="«គ»">«គ»</option>
-                                        <option value="«ឃ»">«ឃ»</option>
-                                        <option value="«ង»">«ង»</option>
-                                    </select>
-                                </div>
-
-                                <button type="submit" id="btnLogin" class="w-full bg-gradient-to-r from-indigo-600 via-blue-600 to-indigo-700 hover:from-indigo-700 hover:to-blue-800 text-white font-bold py-3.5 rounded-2xl transition-all shadow-lg shadow-indigo-500/25 active:scale-95 flex items-center justify-center gap-2 outline-none text-sm">
-                                    <i class="fa-solid fa-right-to-bracket"></i> ចូលប្រព័ន្ធ
-                                </button>
-                            </form>
-
-                            <!-- បន្ទាត់ខណ្ឌ (Divider) -->
-                            <div class="relative my-3 flex items-center justify-center">
-                                <div class="border-t border-slate-200 dark:border-slate-700 w-full"></div>
-                                <span class="bg-white dark:bg-slate-800 px-3 text-[10px] font-bold text-slate-400 uppercase tracking-wider relative">ជម្រើសផ្សេងទៀត</span>
-                            </div>
-
-                            <!-- ប៊ូតុងចូលតាម Google (Gmail) & Telegram -->
-                            <div class="space-y-2">
-                                <button type="button" id="btnGoogleLogin" onclick="window.handleGoogleLogin()" class="w-full flex items-center justify-center gap-2.5 py-2.5 px-4 bg-white dark:bg-slate-700/90 hover:bg-slate-50 dark:hover:bg-slate-600 border border-slate-200 dark:border-slate-600 hover:border-slate-300 dark:hover:border-slate-500 rounded-xl font-bold text-xs text-slate-700 dark:text-white transition-all shadow-sm active:scale-[0.99]">
-                                    <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24">
-                                        <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                                        <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                                        <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
-                                        <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
-                                    </svg>
-                                    <span>បន្តជាមួយ Google (Gmail)</span>
-                                </button>
-
-                                <button type="button" id="btnTelegramLogin" onclick="window.handleTelegramLogin('login')" class="w-full flex items-center justify-center gap-2 py-2 px-4 bg-[#229ED9]/10 hover:bg-[#229ED9]/20 border border-[#229ED9]/30 text-[#0088cc] dark:text-[#229ED9] rounded-xl font-bold text-xs transition-all shadow-sm active:scale-[0.99]">
-                                    <i class="fa-brands fa-telegram text-[#229ED9] text-base"></i>
-                                    <span>ចូលតាមរយៈ Telegram</span>
-                                </button>
-                            </div>
-
-                            <p class="text-center text-xs text-slate-500 dark:text-slate-400 mt-4 font-bold">
-                                មិនទាន់មានគណនីមែនទេ? 
-                                <button type="button" onclick="window.toggleAuthBox('register')" class="text-indigo-600 dark:text-indigo-400 hover:underline ml-1 font-bold">
-                                    ចុះឈ្មោះថ្មី
-                                </button>
+                            <h4 class="font-bold text-sm text-slate-800 dark:text-white mb-1">១. គ្រប់គ្រងព័ត៌មានសិស្ស (Students)</h4>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+                                ចុះឈ្មោះសិស្ស បែងចែកកម្រិតថ្នាក់ បន្ទប់ រូបថត ព័ត៌មានអាណាព្យាបាល ព្រមទាំងនាំចេញទិន្នន័យជា Excel និង PDF។
                             </p>
                         </div>
 
-                        <!-- ផ្ទាំងចុះឈ្មោះ (Register Box) -->
-                        <div id="authRegisterBox" class="text-left hidden">
-                            <!-- Banner Google Sheets Auto Sync -->
-                            <div class="p-2.5 bg-gradient-to-r from-emerald-500/10 via-teal-500/10 to-emerald-500/10 border border-emerald-500/20 rounded-xl mb-3 flex items-center justify-between text-xs">
-                                <span class="flex items-center gap-1.5 font-bold text-emerald-800 dark:text-emerald-300">
-                                    <i class="fa-solid fa-cloud-arrow-up text-emerald-600"></i> ចុះឈ្មោះ និងរក្សាទុកក្នុង Google Sheets
-                                </span>
-                                <span class="text-[10px] px-2 py-0.5 bg-emerald-600 text-white rounded-full font-bold">Auto Sync</span>
+                        <!-- 2. Attendance -->
+                        <div class="welcome-feature-card p-5 rounded-2xl bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border border-slate-200/80 dark:border-slate-700/80 text-left">
+                            <div class="w-10 h-10 rounded-xl bg-rose-500/10 text-rose-600 dark:text-rose-400 flex items-center justify-center text-lg mb-3">
+                                <i class="fa-solid fa-clipboard-user"></i>
                             </div>
-
-                            <form onsubmit="window.handleRegister(event)" class="space-y-3">
-                                <div>
-                                    <label class="block text-xs font-bold text-slate-700 dark:text-slate-200 mb-1">ឈ្មោះ និងនាមត្រកូល *</label>
-                                    <div class="relative group">
-                                        <i class="fa-regular fa-id-card absolute left-4 top-3 text-slate-400 text-sm group-focus-within:text-emerald-500 transition-colors"></i>
-                                        <input type="text" id="regFullName" required placeholder="ឧ. សុខ សាន្ត" class="w-full pl-10 pr-4 py-2.5 bg-slate-50/70 dark:bg-slate-700/60 border border-slate-200 dark:border-slate-600 rounded-xl text-sm font-bold text-slate-700 dark:text-white outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-all">
-                                    </div>
-                                </div>
-                                
-                                <div>
-                                    <label class="block text-xs font-bold text-slate-700 dark:text-slate-200 mb-1">ឈ្មោះគណនី (Username) *</label>
-                                    <div class="relative group">
-                                        <i class="fa-regular fa-user absolute left-4 top-3 text-slate-400 text-sm group-focus-within:text-emerald-500 transition-colors"></i>
-                                        <input type="text" id="regUsername" required placeholder="ឧ. soksan" class="w-full pl-10 pr-4 py-2.5 bg-slate-50/70 dark:bg-slate-700/60 border border-slate-200 dark:border-slate-600 rounded-xl text-sm font-bold text-slate-700 dark:text-white outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-all lowercase">
-                                    </div>
-                                </div>
-
-                                <div>
-                                    <label class="block text-xs font-bold text-slate-700 dark:text-slate-200 mb-1">លេខទូរស័ព្ទ ឬ អ៊ីមែល *</label>
-                                    <div class="relative group">
-                                        <i class="fa-solid fa-phone absolute left-4 top-3 text-slate-400 text-sm group-focus-within:text-emerald-500 transition-colors"></i>
-                                        <input type="text" id="regContact" required placeholder="ឧ. 012345678" class="w-full pl-10 pr-4 py-2.5 bg-slate-50/70 dark:bg-slate-700/60 border border-slate-200 dark:border-slate-600 rounded-xl text-sm font-bold text-slate-700 dark:text-white outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-all">
-                                    </div>
-                                </div>
-
-                                <!-- កំណត់ថ្នាក់ និងបន្ទប់រៀនទទួលបន្ទុក (Homeroom Classroom Setup) -->
-                                <div class="p-3 bg-emerald-50/70 dark:bg-emerald-950/30 border border-emerald-200/80 dark:border-emerald-800/80 rounded-2xl space-y-2.5 shadow-sm">
-                                    <div class="flex items-center justify-between text-emerald-800 dark:text-emerald-300 font-bold text-xs">
-                                        <span class="flex items-center gap-1.5"><i class="fa-solid fa-chalkboard-user"></i> កំណត់ថ្នាក់ និងបន្ទប់រៀនទទួលបន្ទុក *</span>
-                                        <span class="text-[10px] text-emerald-600 dark:text-emerald-400 font-normal">ទាមទារ</span>
-                                    </div>
-                                    <div class="grid grid-cols-2 gap-2">
-                                        <div>
-                                            <label class="block text-[11px] font-bold text-slate-600 dark:text-slate-300 mb-1">ថ្នាក់ទី *</label>
-                                            <select id="regGrade" class="w-full px-2.5 py-2 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-xs font-bold text-slate-700 dark:text-white outline-none focus:ring-2 focus:ring-emerald-500">
-                                                <option value="ថ្នាក់ទី ១" selected>ថ្នាក់ទី ១</option>
-                                                <option value="ថ្នាក់ទី ២">ថ្នាក់ទី ២</option>
-                                                <option value="ថ្នាក់ទី ៣">ថ្នាក់ទី ៣</option>
-                                                <option value="ថ្នាក់ទី ៤">ថ្នាក់ទី ៤</option>
-                                                <option value="ថ្នាក់ទី ៥">ថ្នាក់ទី ៥</option>
-                                                <option value="ថ្នាក់ទី ៦">ថ្នាក់ទី ៦</option>
-                                                <option value="ថ្នាក់ទី ៧">ថ្នាក់ទី ៧</option>
-                                                <option value="ថ្នាក់ទី ៨">ថ្នាក់ទី ៨</option>
-                                                <option value="ថ្នាក់ទី ៩">ថ្នាក់ទី ៩</option>
-                                                <option value="ថ្នាក់ទី ១០">ថ្នាក់ទី ១០</option>
-                                                <option value="ថ្នាក់ទី ១១">ថ្នាក់ទី ១១</option>
-                                                <option value="ថ្នាក់ទី ១២">ថ្នាក់ទី ១២</option>
-                                            </select>
-                                        </div>
-                                        <div>
-                                            <label class="block text-[11px] font-bold text-slate-600 dark:text-slate-300 mb-1">បន្ទប់ *</label>
-                                            <select id="regRoom" class="w-full px-2.5 py-2 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-xs font-bold text-slate-700 dark:text-white outline-none focus:ring-2 focus:ring-emerald-500">
-                                                <option value="«ក»" selected>«ក»</option>
-                                                <option value="«ខ»">«ខ»</option>
-                                                <option value="«គ»">«គ»</option>
-                                                <option value="«ឃ»">«ឃ»</option>
-                                                <option value="«ង»">«ង»</option>
-                                            </select>
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <label class="block text-[11px] font-bold text-slate-600 dark:text-slate-300 mb-1">ឈ្មោះសាលារៀន</label>
-                                        <input type="text" id="regSchool" placeholder="ឧ. សាលាបឋមសិក្សា ខ្សុំ" class="w-full px-3 py-1.5 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-xs font-bold text-slate-700 dark:text-white outline-none focus:ring-2 focus:ring-emerald-500">
-                                    </div>
-                                </div>
-
-                                <div>
-                                    <label class="block text-xs font-bold text-slate-700 dark:text-slate-200 mb-1">លេខសម្ងាត់ *</label>
-                                    <div class="relative group">
-                                        <i class="fa-solid fa-lock absolute left-4 top-3 text-slate-400 text-sm group-focus-within:text-emerald-500 transition-colors"></i>
-                                        <input type="password" id="regPassword" required minlength="8" placeholder="យ៉ាងតិច ៨ តួអក្សរ" class="w-full pl-10 pr-10 py-2.5 bg-slate-50/70 dark:bg-slate-700/60 border border-slate-200 dark:border-slate-600 rounded-xl text-sm font-bold text-slate-700 dark:text-white outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-all" oninput="window.checkPasswordStrength(this.value)">
-                                        <button type="button" onclick="window.togglePasswordVisibility('regPassword', 'eyeIcon1')" class="absolute right-4 top-3 text-slate-400 hover:text-emerald-600 transition outline-none"><i id="eyeIcon1" class="fa-regular fa-eye"></i></button>
-                                    </div>
-                                    <div class="mt-2 flex gap-1 h-1.5 w-full bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
-                                        <div id="strBar1" class="h-full w-1/3 bg-slate-200 dark:bg-slate-600 transition-all"></div>
-                                        <div id="strBar2" class="h-full w-1/3 bg-slate-200 dark:bg-slate-600 transition-all"></div>
-                                        <div id="strBar3" class="h-full w-1/3 bg-slate-200 dark:bg-slate-600 transition-all"></div>
-                                    </div>
-                                    <p id="strText" class="text-[9px] text-slate-400 mt-1 font-bold">កម្រិតសុវត្ថិភាព: មិនទាន់មាន</p>
-                                </div>
-
-                                <div>
-                                    <label class="block text-xs font-bold text-slate-700 dark:text-slate-200 mb-1">បញ្ជាក់លេខសម្ងាត់ *</label>
-                                    <div class="relative group">
-                                        <i class="fa-solid fa-shield-halved absolute left-4 top-3 text-slate-400 text-sm group-focus-within:text-emerald-500 transition-colors"></i>
-                                        <input type="password" id="regConfirmPassword" required minlength="8" placeholder="វាយលេខសម្ងាត់ម្ដងទៀត" class="w-full pl-10 pr-10 py-2.5 bg-slate-50/70 dark:bg-slate-700/60 border border-slate-200 dark:border-slate-600 rounded-xl text-sm font-bold text-slate-700 dark:text-white outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-all">
-                                        <button type="button" onclick="window.togglePasswordVisibility('regConfirmPassword', 'eyeIcon2')" class="absolute right-4 top-3 text-slate-400 hover:text-emerald-600 transition outline-none"><i id="eyeIcon2" class="fa-regular fa-eye"></i></button>
-                                    </div>
-                                </div>
-
-                                <div class="flex items-start gap-2.5 p-2.5 bg-emerald-50/50 dark:bg-emerald-950/30 rounded-xl border border-emerald-100 dark:border-emerald-900">
-                                    <input type="checkbox" id="regTerms" required class="mt-0.5 border-slate-300 text-emerald-600 rounded focus:ring-emerald-500 cursor-pointer w-4 h-4">
-                                    <label for="regTerms" class="text-[11px] text-slate-600 dark:text-slate-300 leading-relaxed cursor-pointer font-bold">ខ្ញុំយល់ព្រមតាម <span class="text-emerald-600 dark:text-emerald-400 underline">លក្ខខណ្ឌប្រើប្រាស់</span> និងរក្សាការសម្ងាត់ទិន្នន័យ។</label>
-                                </div>
-
-                                <button type="submit" id="btnRegister" class="w-full bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-bold py-3.5 rounded-2xl transition-all shadow-lg shadow-emerald-500/20 active:scale-95 text-sm flex items-center justify-center gap-2">
-                                    <i class="fa-solid fa-user-plus"></i> បង្កើតគណនីឥឡូវនេះ
-                                </button>
-                            </form>
-
-                            <p class="text-center text-xs text-slate-500 dark:text-slate-400 mt-3 font-bold">
-                                មានគណនីរួចហើយ? 
-                                <button type="button" onclick="window.toggleAuthBox('login')" class="text-emerald-600 dark:text-emerald-400 hover:underline ml-1 font-bold">
-                                    ចូលគណនី
-                                </button>
+                            <h4 class="font-bold text-sm text-slate-800 dark:text-white mb-1">២. វត្តមានឌីជីថល (Attendance)</h4>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+                                ស្រង់វត្តមានប្រចាំថ្ងៃរហ័សទាន់ចិត្ត (វត្តមាន, ច្បាប់, អវត្តមាន, យឺត) និងបូកសរុបអវត្តមានប្រចាំខែដោយស្វ័យប្រវត្តិ។
                             </p>
                         </div>
 
-                        <!-- ផ្ទាំងជំនួយ (Help Box) -->
-                        <div id="authHelpBox" class="text-left hidden space-y-3.5">
-                            <div class="flex items-center gap-2.5 p-3 rounded-2xl bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-100 dark:border-indigo-900 text-xs text-indigo-900 dark:text-indigo-200">
-                                <i class="fa-solid fa-crown text-amber-500 text-base shrink-0"></i>
-                                <div>
-                                    <span class="font-bold">ចូលជា Administrator:</span>
-                                    <p class="text-[11px] text-slate-600 dark:text-slate-400">ចុចប៊ូតុង "ចូលប្រើប្រាស់ជា Admin ភ្លាមៗ" ដើម្បីមើលឃើញថ្នាក់ និងរបាយការណ៍ទាំងអស់។</p>
-                                </div>
+                        <!-- 3. Scores & Ranking -->
+                        <div class="welcome-feature-card p-5 rounded-2xl bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border border-slate-200/80 dark:border-slate-700/80 text-left">
+                            <div class="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center text-lg mb-3">
+                                <i class="fa-solid fa-award"></i>
                             </div>
+                            <h4 class="font-bold text-sm text-slate-800 dark:text-white mb-1">៣. ពិន្ទុ & ចំណាត់ថ្នាក់ (Scores)</h4>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+                                បញ្ចូលពិន្ទុតាមមុខវិជ្ជា គណនាមធ្យមភាគ ចំណាត់ថ្នាក់ និងនិទ្ទេសស្វ័យប្រវត្តិតាមស្តង់ដារក្រសួងអប់រំ។
+                            </p>
+                        </div>
 
-                            <div class="flex items-center gap-2.5 p-3 rounded-2xl bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 text-xs text-slate-800 dark:text-slate-200">
-                                <i class="fa-solid fa-chalkboard-user text-blue-500 text-base shrink-0"></i>
-                                <div>
-                                    <span class="font-bold">គណនីគ្រូទទួលបន្ទុក:</span>
-                                    <p class="text-[11px] text-slate-600 dark:text-slate-400">ប្រើឈ្មោះ Username ឬ Teacher ID ដើម្បីស្រង់វត្តមាន និងបញ្ចូលពិន្ទុក្នុងថ្នាក់របស់ខ្លួន។</p>
-                                </div>
+                        <!-- 4. Timetable & Homework -->
+                        <div class="welcome-feature-card p-5 rounded-2xl bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border border-slate-200/80 dark:border-slate-700/80 text-left">
+                            <div class="w-10 h-10 rounded-xl bg-teal-500/10 text-teal-600 dark:text-teal-400 flex items-center justify-center text-lg mb-3">
+                                <i class="fa-solid fa-calendar-days"></i>
                             </div>
+                            <h4 class="font-bold text-sm text-slate-800 dark:text-white mb-1">៤. កាលវិភាគ & កិច្ចការផ្ទះ (Timetable)</h4>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+                                រៀបចំកាលវិភាគបង្រៀនប្រចាំសប្តាហ៍ កត់ត្រាកិច្ចការផ្ទះ និងតាមដានការបំពេញការងាររបស់សិស្ស។
+                            </p>
+                        </div>
 
-                            <div class="flex items-center gap-2.5 p-3 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-100 dark:border-emerald-900 text-xs text-emerald-900 dark:text-emerald-200">
-                                <i class="fa-solid fa-table text-emerald-600 text-base shrink-0"></i>
-                                <div>
-                                    <span class="font-bold">Google Sheets Sync:</span>
-                                    <p class="text-[11px] text-slate-600 dark:text-slate-400">រាល់ការផ្លាស់ប្តូរត្រូវបានបញ្ជូនទៅ Google Sheets ដោយស្វ័យប្រវត្តិតាម Apps Script API។</p>
-                                </div>
+                        <!-- 5. Library -->
+                        <div class="welcome-feature-card p-5 rounded-2xl bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border border-slate-200/80 dark:border-slate-700/80 text-left">
+                            <div class="w-10 h-10 rounded-xl bg-fuchsia-500/10 text-fuchsia-600 dark:text-fuchsia-400 flex items-center justify-center text-lg mb-3">
+                                <i class="fa-solid fa-book-bookmark"></i>
                             </div>
+                            <h4 class="font-bold text-sm text-slate-800 dark:text-white mb-1">៥. បណ្ណាល័យសាលា (Library)</h4>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+                                ចុះបញ្ជីសៀវភៅ កត់ត្រាការខ្ចី-សងសៀវភៅរបស់សិស្ស និងតាមដានសៀវភៅដែលហួសកាលកំណត់។
+                            </p>
+                        </div>
 
-                            <button type="button" onclick="window.toggleAuthBox('login')" class="w-full py-2.5 bg-slate-200 hover:bg-slate-300 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-700 dark:text-white rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2">
-                                <i class="fa-solid fa-arrow-left"></i>
-                                <span>ត្រឡប់ទៅផ្ទាំងចូលប្រព័ន្ធ</span>
-                            </button>
+                        <!-- 6. Google Sheets & Cloud Sync -->
+                        <div class="welcome-feature-card p-5 rounded-2xl bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border border-slate-200/80 dark:border-slate-700/80 text-left">
+                            <div class="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center text-lg mb-3">
+                                <i class="fa-solid fa-cloud-arrow-up"></i>
+                            </div>
+                            <h4 class="font-bold text-sm text-slate-800 dark:text-white mb-1">៦. Real-time Google Sheets Sync</h4>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+                                តភ្ជាប់ និងបញ្ជូនទិន្នន័យដោយផ្ទាល់ទៅ Google Sheets តាមរយៈ Apps Script ភ្លាមៗ (0ms UI Latency)។
+                            </p>
                         </div>
 
                     </div>
-                </div>
+                </section>
 
             </div>
 
-            <!-- 3. Core Modules Showcase Section (មុខងារសំខាន់ៗទាំង ៦) -->
-            <section id="welcome-features" class="pt-16 pb-8">
-                <div class="text-center max-w-2xl mx-auto mb-8">
-                    <span class="text-xs font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-widest bg-indigo-50 dark:bg-indigo-950/60 px-3 py-1 rounded-full border border-indigo-200 dark:border-indigo-800">✨ មុខងារស្នូលនៃប្រព័ន្ធ</span>
-                    <h3 class="font-moul text-xl sm:text-2xl text-slate-900 dark:text-white mt-2">ដំណោះស្រាយគ្រប់គ្រងគ្រប់ជ្រុងជ្រោយ</h3>
-                    <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 font-siemreap mt-1">រចនាឡើងដើម្បីជួយសម្រួលការងារគ្រូបង្រៀន និងរដ្ឋបាលសាលារៀនឱ្យកាន់តែមានប្រសិទ្ធភាព</p>
+            <!-- ========================================== -->
+            <!-- VIEW B: ផ្ទាំងចូល និងចុះឈ្មោះគណនី (DEDICATED AUTH PORTAL VIEW) -->
+            <!-- ========================================== -->
+            <div id="auth-portal-view" class="w-full max-w-md mx-auto py-4 hidden animate-scale-up">
+                
+                <!-- Back to Welcome Navigation Bar -->
+                <div class="flex items-center justify-between mb-4 px-1">
+                    <button type="button" onclick="window.navigateToWelcome()" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white/90 dark:bg-slate-800/90 border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-700 dark:text-slate-200 hover:text-indigo-600 dark:hover:text-indigo-400 hover:border-indigo-300 dark:hover:border-indigo-600 shadow-sm transition active:scale-95">
+                        <i class="fa-solid fa-arrow-left"></i>
+                        <span>← ត្រឡប់ទៅទំព័រដើម</span>
+                    </button>
+                    <span class="text-xs font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/60 px-3 py-1 rounded-full border border-indigo-200 dark:border-indigo-800">
+                        <i class="fa-solid fa-shield-halved mr-1"></i> សុវត្ថិភាពខ្ពស់
+                    </span>
                 </div>
 
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+                <div class="welcome-glass-card rounded-[2.2rem] shadow-[0_20px_50px_rgba(0,0,0,0.12)] p-6 sm:p-8 relative">
                     
-                    <!-- 1. Students -->
-                    <div class="welcome-feature-card p-5 rounded-2xl bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border border-slate-200/80 dark:border-slate-700/80 text-left">
-                        <div class="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center text-lg mb-3">
-                            <i class="fa-solid fa-user-graduate"></i>
+                    <!-- Navigation Segment Tabs -->
+                    <div class="grid grid-cols-2 p-1.5 bg-slate-100 dark:bg-slate-800/90 rounded-2xl mb-5 border border-slate-200/80 dark:border-slate-700/80 shadow-inner">
+                        <button type="button" id="tabAuthLogin" onclick="window.toggleAuthBox('login')" class="py-2.5 rounded-xl font-bold transition-all outline-none flex items-center justify-center gap-2 text-sm text-indigo-600 dark:text-indigo-400 bg-white dark:bg-slate-700 shadow-sm border border-slate-200/60 dark:border-slate-600/60">
+                            <i class="fa-solid fa-arrow-right-to-bracket"></i>
+                            <span>ចូលប្រព័ន្ធ</span>
+                        </button>
+                        <button type="button" id="tabAuthRegister" onclick="window.toggleAuthBox('register')" class="py-2.5 rounded-xl font-bold transition-all outline-none flex items-center justify-center gap-2 text-sm text-slate-500 dark:text-slate-400 hover:text-indigo-600 border border-transparent">
+                            <i class="fa-solid fa-user-plus"></i>
+                            <span>ចុះឈ្មោះគ្រូថ្មី</span>
+                        </button>
+                        <div class="hidden" aria-hidden="true">
+                            <button type="button" id="tabAuthHelp" onclick="window.toggleAuthBox('help')"><span>ជំនួយ</span></button>
                         </div>
-                        <h4 class="font-bold text-sm text-slate-800 dark:text-white mb-1">១. គ្រប់គ្រងព័ត៌មានសិស្ស (Students)</h4>
-                        <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
-                            ចុះឈ្មោះសិស្ស បែងចែកកម្រិតថ្នាក់ បន្ទប់ រូបថត ព័ត៌មានអាណាព្យាបាល ព្រមទាំងនាំចេញទិន្នន័យជា Excel និង PDF។
+                    </div>
+
+                    <!-- ផ្ទាំងចូលគណនី (Login Box - Clean Standard Teacher Login) -->
+                    <div id="authLoginBox" class="text-left space-y-4">
+                        
+                        <!-- Error Alert Box -->
+                        <div id="loginError" class="hidden p-3 bg-rose-50 dark:bg-rose-950/50 border border-rose-200 dark:border-rose-800 text-rose-600 dark:text-rose-400 rounded-xl text-xs font-bold text-center"></div>
+
+                        <form onsubmit="window.handleLogin(event)" class="space-y-4">
+                            <div>
+                                <label class="block text-[11px] font-bold text-slate-600 dark:text-slate-300 mb-1.5">ឈ្មោះគណនី ឬ លេខសម្គាល់គ្រូ</label>
+                                <div class="relative group">
+                                    <i class="fa-regular fa-user absolute left-4 top-3.5 text-slate-400 text-sm group-focus-within:text-indigo-600 transition-colors"></i>
+                                    <input type="text" id="usernameOrPhone" required placeholder="ឧ. admin ឬ TCH-001" class="w-full pl-11 pr-4 py-3 bg-slate-50 dark:bg-slate-700/60 border border-slate-200 dark:border-slate-600 rounded-2xl text-sm font-bold text-slate-700 dark:text-white outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 focus:bg-white dark:focus:bg-slate-700 transition-all shadow-inner">
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-[11px] font-bold text-slate-600 dark:text-slate-300 mb-1.5">លេខសម្ងាត់</label>
+                                <div class="relative group">
+                                    <i class="fa-solid fa-lock absolute left-4 top-3.5 text-slate-400 text-sm group-focus-within:text-indigo-600 transition-colors"></i>
+                                    <input type="password" id="password" required placeholder="••••••••" class="w-full pl-11 pr-11 py-3 bg-slate-50 dark:bg-slate-700/60 border border-slate-200 dark:border-slate-600 rounded-2xl text-sm font-bold text-slate-700 dark:text-white outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 focus:bg-white dark:focus:bg-slate-700 transition-all shadow-inner">
+                                    <button type="button" onclick="window.togglePasswordVisibility('password', 'eyeIconLogin')" class="absolute right-4 top-3.5 text-slate-400 hover:text-indigo-600 transition outline-none"><i id="eyeIconLogin" class="fa-regular fa-eye"></i></button>
+                                </div>
+                            </div>
+
+                            <!-- Hidden Grade & Room Selectors for compatibility -->
+                            <div class="hidden" aria-hidden="true">
+                                <select id="loginGrade"><option value="" selected></option></select>
+                                <select id="loginRoom">
+                                    <option value="«ក»" selected>«ក»</option>
+                                    <option value="«ខ»">«ខ»</option>
+                                    <option value="«គ»">«គ»</option>
+                                    <option value="«ឃ»">«ឃ»</option>
+                                    <option value="«ង»">«ង»</option>
+                                </select>
+                            </div>
+
+                            <button type="submit" id="btnLogin" class="w-full bg-gradient-to-r from-indigo-600 via-blue-600 to-indigo-700 hover:from-indigo-700 hover:to-blue-800 text-white font-bold py-3.5 rounded-2xl transition-all shadow-lg shadow-indigo-500/25 active:scale-95 flex items-center justify-center gap-2 outline-none text-sm">
+                                <i class="fa-solid fa-right-to-bracket"></i> ចូលប្រព័ន្ធ
+                            </button>
+                        </form>
+
+                        <!-- បន្ទាត់ខណ្ឌ (Divider) -->
+                        <div class="relative my-3 flex items-center justify-center">
+                            <div class="border-t border-slate-200 dark:border-slate-700 w-full"></div>
+                            <span class="bg-white dark:bg-slate-800 px-3 text-[10px] font-bold text-slate-400 uppercase tracking-wider relative">ជម្រើសផ្សេងទៀត</span>
+                        </div>
+
+                        <!-- ប៊ូតុងចូលតាម Google (Gmail) & Telegram -->
+                        <div class="space-y-2">
+                            <button type="button" id="btnGoogleLogin" onclick="window.handleGoogleLogin()" class="w-full flex items-center justify-center gap-2.5 py-2.5 px-4 bg-white dark:bg-slate-700/90 hover:bg-slate-50 dark:hover:bg-slate-600 border border-slate-200 dark:border-slate-600 hover:border-slate-300 dark:hover:border-slate-500 rounded-xl font-bold text-xs text-slate-700 dark:text-white transition-all shadow-sm active:scale-[0.99]">
+                                <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24">
+                                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                                    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+                                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+                                </svg>
+                                <span>បន្តជាមួយ Google (Gmail)</span>
+                            </button>
+
+                            <button type="button" id="btnTelegramLogin" onclick="window.handleTelegramLogin('login')" class="w-full flex items-center justify-center gap-2 py-2 px-4 bg-[#229ED9]/10 hover:bg-[#229ED9]/20 border border-[#229ED9]/30 text-[#0088cc] dark:text-[#229ED9] rounded-xl font-bold text-xs transition-all shadow-sm active:scale-[0.99]">
+                                <i class="fa-brands fa-telegram text-[#229ED9] text-base"></i>
+                                <span>ចូលតាមរយៈ Telegram</span>
+                            </button>
+                        </div>
+
+                        <p class="text-center text-xs text-slate-500 dark:text-slate-400 mt-4 font-bold">
+                            មិនទាន់មានគណនីមែនទេ? 
+                            <button type="button" onclick="window.toggleAuthBox('register')" class="text-indigo-600 dark:text-indigo-400 hover:underline ml-1 font-bold">
+                                ចុះឈ្មោះថ្មី
+                            </button>
                         </p>
                     </div>
 
-                    <!-- 2. Attendance -->
-                    <div class="welcome-feature-card p-5 rounded-2xl bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border border-slate-200/80 dark:border-slate-700/80 text-left">
-                        <div class="w-10 h-10 rounded-xl bg-rose-500/10 text-rose-600 dark:text-rose-400 flex items-center justify-center text-lg mb-3">
-                            <i class="fa-solid fa-clipboard-user"></i>
+                    <!-- ផ្ទាំងចុះឈ្មោះ (Register Box) -->
+                    <div id="authRegisterBox" class="text-left hidden">
+                        <!-- Banner Google Sheets Auto Sync -->
+                        <div class="p-2.5 bg-gradient-to-r from-emerald-500/10 via-teal-500/10 to-emerald-500/10 border border-emerald-500/20 rounded-xl mb-3 flex items-center justify-between text-xs">
+                            <span class="flex items-center gap-1.5 font-bold text-emerald-800 dark:text-emerald-300">
+                                <i class="fa-solid fa-cloud-arrow-up text-emerald-600"></i> ចុះឈ្មោះ និងរក្សាទុកក្នុង Google Sheets
+                            </span>
+                            <span class="text-[10px] px-2 py-0.5 bg-emerald-600 text-white rounded-full font-bold">Auto Sync</span>
                         </div>
-                        <h4 class="font-bold text-sm text-slate-800 dark:text-white mb-1">២. វត្តមានឌីជីថល (Attendance)</h4>
-                        <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
-                            ស្រង់វត្តមានប្រចាំថ្ងៃរហ័សទាន់ចិត្ត (វត្តមាន, ច្បាប់, អវត្តមាន, យឺត) និងបូកសរុបអវត្តមានប្រចាំខែដោយស្វ័យប្រវត្តិ។
+
+                        <form onsubmit="window.handleRegister(event)" class="space-y-3">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 dark:text-slate-200 mb-1">ឈ្មោះ និងនាមត្រកូល *</label>
+                                <div class="relative group">
+                                    <i class="fa-regular fa-id-card absolute left-4 top-3 text-slate-400 text-sm group-focus-within:text-emerald-500 transition-colors"></i>
+                                    <input type="text" id="regFullName" required placeholder="ឧ. សុខ សាន្ត" class="w-full pl-10 pr-4 py-2.5 bg-slate-50/70 dark:bg-slate-700/60 border border-slate-200 dark:border-slate-600 rounded-xl text-sm font-bold text-slate-700 dark:text-white outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-all">
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 dark:text-slate-200 mb-1">ឈ្មោះគណនី (Username) *</label>
+                                <div class="relative group">
+                                    <i class="fa-regular fa-user absolute left-4 top-3 text-slate-400 text-sm group-focus-within:text-emerald-500 transition-colors"></i>
+                                    <input type="text" id="regUsername" required placeholder="ឧ. soksan" class="w-full pl-10 pr-4 py-2.5 bg-slate-50/70 dark:bg-slate-700/60 border border-slate-200 dark:border-slate-600 rounded-xl text-sm font-bold text-slate-700 dark:text-white outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-all lowercase">
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 dark:text-slate-200 mb-1">លេខទូរស័ព្ទ ឬ អ៊ីមែល *</label>
+                                <div class="relative group">
+                                    <i class="fa-solid fa-phone absolute left-4 top-3 text-slate-400 text-sm group-focus-within:text-emerald-500 transition-colors"></i>
+                                    <input type="text" id="regContact" required placeholder="ឧ. 012345678" class="w-full pl-10 pr-4 py-2.5 bg-slate-50/70 dark:bg-slate-700/60 border border-slate-200 dark:border-slate-600 rounded-xl text-sm font-bold text-slate-700 dark:text-white outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-all">
+                                </div>
+                            </div>
+
+                            <!-- កំណត់ថ្នាក់ និងបន្ទប់រៀនទទួលបន្ទុក (Homeroom Classroom Setup) -->
+                            <div class="p-3 bg-emerald-50/70 dark:bg-emerald-950/30 border border-emerald-200/80 dark:border-emerald-800/80 rounded-2xl space-y-2.5 shadow-sm">
+                                <div class="flex items-center justify-between text-emerald-800 dark:text-emerald-300 font-bold text-xs">
+                                    <span class="flex items-center gap-1.5"><i class="fa-solid fa-chalkboard-user"></i> កំណត់ថ្នាក់ និងបន្ទប់រៀនទទួលបន្ទុក *</span>
+                                    <span class="text-[10px] text-emerald-600 dark:text-emerald-400 font-normal">ទាមទារ</span>
+                                </div>
+                                <div class="grid grid-cols-2 gap-2">
+                                    <div>
+                                        <label class="block text-[11px] font-bold text-slate-600 dark:text-slate-300 mb-1">ថ្នាក់ទី *</label>
+                                        <select id="regGrade" class="w-full px-2.5 py-2 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-xs font-bold text-slate-700 dark:text-white outline-none focus:ring-2 focus:ring-emerald-500">
+                                            <option value="ថ្នាក់ទី ១" selected>ថ្នាក់ទី ១</option>
+                                            <option value="ថ្នាក់ទី ២">ថ្នាក់ទី ២</option>
+                                            <option value="ថ្នាក់ទី ៣">ថ្នាក់ទី ៣</option>
+                                            <option value="ថ្នាក់ទី ៤">ថ្នាក់ទី ៤</option>
+                                            <option value="ថ្នាក់ទី ៥">ថ្នាក់ទី ៥</option>
+                                            <option value="ថ្នាក់ទី ៦">ថ្នាក់ទី ៦</option>
+                                            <option value="ថ្នាក់ទី ៧">ថ្នាក់ទី ៧</option>
+                                            <option value="ថ្នាក់ទី ៨">ថ្នាក់ទី ៨</option>
+                                            <option value="ថ្នាក់ទី ៩">ថ្នាក់ទី ៩</option>
+                                            <option value="ថ្នាក់ទី ១០">ថ្នាក់ទី ១០</option>
+                                            <option value="ថ្នាក់ទី ១១">ថ្នាក់ទី ១១</option>
+                                            <option value="ថ្នាក់ទី ១២">ថ្នាក់ទី ១២</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-[11px] font-bold text-slate-600 dark:text-slate-300 mb-1">បន្ទប់ *</label>
+                                        <select id="regRoom" class="w-full px-2.5 py-2 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-xs font-bold text-slate-700 dark:text-white outline-none focus:ring-2 focus:ring-emerald-500">
+                                            <option value="«ក»" selected>«ក»</option>
+                                            <option value="«ខ»">«ខ»</option>
+                                            <option value="«គ»">«គ»</option>
+                                            <option value="«ឃ»">«ឃ»</option>
+                                            <option value="«ង»">«ង»</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block text-[11px] font-bold text-slate-600 dark:text-slate-300 mb-1">ឈ្មោះសាលារៀន</label>
+                                    <input type="text" id="regSchool" placeholder="ឧ. សាលាបឋមសិក្សា ខ្សុំ" class="w-full px-3 py-1.5 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-xs font-bold text-slate-700 dark:text-white outline-none focus:ring-2 focus:ring-emerald-500">
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 dark:text-slate-200 mb-1">លេខសម្ងាត់ *</label>
+                                <div class="relative group">
+                                    <i class="fa-solid fa-lock absolute left-4 top-3 text-slate-400 text-sm group-focus-within:text-emerald-500 transition-colors"></i>
+                                    <input type="password" id="regPassword" required minlength="8" placeholder="យ៉ាងតិច ៨ តួអក្សរ" class="w-full pl-10 pr-10 py-2.5 bg-slate-50/70 dark:bg-slate-700/60 border border-slate-200 dark:border-slate-600 rounded-xl text-sm font-bold text-slate-700 dark:text-white outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-all" oninput="window.checkPasswordStrength(this.value)">
+                                    <button type="button" onclick="window.togglePasswordVisibility('regPassword', 'eyeIcon1')" class="absolute right-4 top-3 text-slate-400 hover:text-emerald-600 transition outline-none"><i id="eyeIcon1" class="fa-regular fa-eye"></i></button>
+                                </div>
+                                <div class="mt-2 flex gap-1 h-1.5 w-full bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
+                                    <div id="strBar1" class="h-full w-1/3 bg-slate-200 dark:bg-slate-600 transition-all"></div>
+                                    <div id="strBar2" class="h-full w-1/3 bg-slate-200 dark:bg-slate-600 transition-all"></div>
+                                    <div id="strBar3" class="h-full w-1/3 bg-slate-200 dark:bg-slate-600 transition-all"></div>
+                                </div>
+                                <p id="strText" class="text-[9px] text-slate-400 mt-1 font-bold">កម្រិតសុវត្ថិភាព: មិនទាន់មាន</p>
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 dark:text-slate-200 mb-1">បញ្ជាក់លេខសម្ងាត់ *</label>
+                                <div class="relative group">
+                                    <i class="fa-solid fa-shield-halved absolute left-4 top-3 text-slate-400 text-sm group-focus-within:text-emerald-500 transition-colors"></i>
+                                    <input type="password" id="regConfirmPassword" required minlength="8" placeholder="វាយលេខសម្ងាត់ម្ដងទៀត" class="w-full pl-10 pr-10 py-2.5 bg-slate-50/70 dark:bg-slate-700/60 border border-slate-200 dark:border-slate-600 rounded-xl text-sm font-bold text-slate-700 dark:text-white outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-all">
+                                    <button type="button" onclick="window.togglePasswordVisibility('regConfirmPassword', 'eyeIcon2')" class="absolute right-4 top-3 text-slate-400 hover:text-emerald-600 transition outline-none"><i id="eyeIcon2" class="fa-regular fa-eye"></i></button>
+                                </div>
+                            </div>
+
+                            <div class="flex items-start gap-2.5 p-2.5 bg-emerald-50/50 dark:bg-emerald-950/30 rounded-xl border border-emerald-100 dark:border-emerald-900">
+                                <input type="checkbox" id="regTerms" required class="mt-0.5 border-slate-300 text-emerald-600 rounded focus:ring-emerald-500 cursor-pointer w-4 h-4">
+                                <label for="regTerms" class="text-[11px] text-slate-600 dark:text-slate-300 leading-relaxed cursor-pointer font-bold">ខ្ញុំយល់ព្រមតាម <span class="text-emerald-600 dark:text-emerald-400 underline">លក្ខខណ្ឌប្រើប្រាស់</span> និងរក្សាការសម្ងាត់ទិន្នន័យ។</label>
+                            </div>
+
+                            <button type="submit" id="btnRegister" class="w-full bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-bold py-3.5 rounded-2xl transition-all shadow-lg shadow-emerald-500/20 active:scale-95 text-sm flex items-center justify-center gap-2">
+                                <i class="fa-solid fa-user-plus"></i> បង្កើតគណនីឥឡូវនេះ
+                            </button>
+                        </form>
+
+                        <p class="text-center text-xs text-slate-500 dark:text-slate-400 mt-3 font-bold">
+                            មានគណនីរួចហើយ? 
+                            <button type="button" onclick="window.toggleAuthBox('login')" class="text-emerald-600 dark:text-emerald-400 hover:underline ml-1 font-bold">
+                                ចូលគណនី
+                            </button>
                         </p>
                     </div>
 
-                    <!-- 3. Scores & Ranking -->
-                    <div class="welcome-feature-card p-5 rounded-2xl bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border border-slate-200/80 dark:border-slate-700/80 text-left">
-                        <div class="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center text-lg mb-3">
-                            <i class="fa-solid fa-award"></i>
+                    <!-- ផ្ទាំងជំនួយ (Help Box) -->
+                    <div id="authHelpBox" class="text-left hidden space-y-3.5">
+                        <div class="flex items-center gap-2.5 p-3 rounded-2xl bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-100 dark:border-indigo-900 text-xs text-indigo-900 dark:text-indigo-200">
+                            <i class="fa-solid fa-crown text-amber-500 text-base shrink-0"></i>
+                            <div>
+                                <span class="font-bold">ចូលជា Administrator:</span>
+                                <p class="text-[11px] text-slate-600 dark:text-slate-400">ចុចប៊ូតុង "ចូលប្រើប្រាស់ជា Admin ភ្លាមៗ" ដើម្បីមើលឃើញថ្នាក់ និងរបាយការណ៍ទាំងអស់។</p>
+                            </div>
                         </div>
-                        <h4 class="font-bold text-sm text-slate-800 dark:text-white mb-1">៣. ពិន្ទុ & ចំណាត់ថ្នាក់ (Scores)</h4>
-                        <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
-                            បញ្ចូលពិន្ទុតាមមុខវិជ្ជា គណនាមធ្យមភាគ ចំណាត់ថ្នាក់ និងនិទ្ទេសស្វ័យប្រវត្តិតាមស្តង់ដារក្រសួងអប់រំ។
-                        </p>
-                    </div>
 
-                    <!-- 4. Timetable & Homework -->
-                    <div class="welcome-feature-card p-5 rounded-2xl bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border border-slate-200/80 dark:border-slate-700/80 text-left">
-                        <div class="w-10 h-10 rounded-xl bg-teal-500/10 text-teal-600 dark:text-teal-400 flex items-center justify-center text-lg mb-3">
-                            <i class="fa-solid fa-calendar-days"></i>
+                        <div class="flex items-center gap-2.5 p-3 rounded-2xl bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 text-xs text-slate-800 dark:text-slate-200">
+                            <i class="fa-solid fa-chalkboard-user text-blue-500 text-base shrink-0"></i>
+                            <div>
+                                <span class="font-bold">គណនីគ្រូទទួលបន្ទុក:</span>
+                                <p class="text-[11px] text-slate-600 dark:text-slate-400">ប្រើឈ្មោះ Username ឬ Teacher ID ដើម្បីស្រង់វត្តមាន និងបញ្ចូលពិន្ទុក្នុងថ្នាក់របស់ខ្លួន។</p>
+                            </div>
                         </div>
-                        <h4 class="font-bold text-sm text-slate-800 dark:text-white mb-1">៤. កាលវិភាគ & កិច្ចការផ្ទះ (Timetable)</h4>
-                        <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
-                            រៀបចំកាលវិភាគបង្រៀនប្រចាំសប្តាហ៍ កត់ត្រាកិច្ចការផ្ទះ និងតាមដានការបំពេញការងាររបស់សិស្ស។
-                        </p>
-                    </div>
 
-                    <!-- 5. Library -->
-                    <div class="welcome-feature-card p-5 rounded-2xl bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border border-slate-200/80 dark:border-slate-700/80 text-left">
-                        <div class="w-10 h-10 rounded-xl bg-fuchsia-500/10 text-fuchsia-600 dark:text-fuchsia-400 flex items-center justify-center text-lg mb-3">
-                            <i class="fa-solid fa-book-bookmark"></i>
+                        <div class="flex items-center gap-2.5 p-3 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-100 dark:border-emerald-900 text-xs text-emerald-900 dark:text-emerald-200">
+                            <i class="fa-solid fa-table text-emerald-600 text-base shrink-0"></i>
+                            <div>
+                                <span class="font-bold">Google Sheets Sync:</span>
+                                <p class="text-[11px] text-slate-600 dark:text-slate-400">រាល់ការផ្លាស់ប្តូរត្រូវបានបញ្ជូនទៅ Google Sheets ដោយស្វ័យប្រវត្តិតាម Apps Script API។</p>
+                            </div>
                         </div>
-                        <h4 class="font-bold text-sm text-slate-800 dark:text-white mb-1">៥. បណ្ណាល័យសាលា (Library)</h4>
-                        <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
-                            ចុះបញ្ជីសៀវភៅ កត់ត្រាការខ្ចី-សងសៀវភៅរបស់សិស្ស និងតាមដានសៀវភៅដែលហួសកាលកំណត់។
-                        </p>
-                    </div>
 
-                    <!-- 6. Google Sheets & Cloud Sync -->
-                    <div class="welcome-feature-card p-5 rounded-2xl bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border border-slate-200/80 dark:border-slate-700/80 text-left">
-                        <div class="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center text-lg mb-3">
-                            <i class="fa-solid fa-cloud-arrow-up"></i>
-                        </div>
-                        <h4 class="font-bold text-sm text-slate-800 dark:text-white mb-1">៦. Real-time Google Sheets Sync</h4>
-                        <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
-                            តភ្ជាប់ និងបញ្ជូនទិន្នន័យដោយផ្ទាល់ទៅ Google Sheets តាមរយៈ Apps Script ភ្លាមៗ (0ms UI Latency)។
-                        </p>
+                        <button type="button" onclick="window.toggleAuthBox('login')" class="w-full py-2.5 bg-slate-200 hover:bg-slate-300 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-700 dark:text-white rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-arrow-left"></i>
+                            <span>ត្រឡប់ទៅផ្ទាំងចូលប្រព័ន្ធ</span>
+                        </button>
                     </div>
 
                 </div>
-            </section>
-
-        </main>
+            </div>
 
         <!-- 4. Footer នៃ Welcome Screen -->
         <footer id="welcome-about" class="relative z-10 w-full border-t border-slate-200/80 dark:border-slate-800/80 bg-white/60 dark:bg-slate-900/60 backdrop-blur-md py-4 text-center">
