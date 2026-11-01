@@ -269,8 +269,8 @@ describe('Teacher Personal Workspace & Authentication Preferences Tests', () => 
 
   test('9. Google Sheets Teacher Accounts Integration & Live Modal Verification', () => {
     const html = fs.readFileSync(path.resolve(__dirname, '../index.html'), 'utf8');
-    assert.equal(html.includes('window.openGoogleSheetAccountsModal()'), true);
-    assert.equal(html.includes('ទាញ និងពិនិត្យគណនីពី Google Sheets'), true);
+    // Ensure the Google Sheets buttons are removed from the login box per user request
+    assert.equal(html.includes('window.openGoogleSheetAccountsModal()'), false);
     assert.equal(html.includes('id="regFullName"'), true);
     assert.equal(html.includes('id="regUsername"'), true);
     assert.equal(html.includes('id="regContact"'), true);
