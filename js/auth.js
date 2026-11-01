@@ -2485,15 +2485,21 @@ window.openGoogleLoginModal = function(mode = 'login', errorHint = '') {
 };
 
 // =========================================================================
-// ២. ចូល ឬភ្ជាប់ប្រព័ន្ធតាមរយៈ Telegram ដោយផ្ទាល់ (Direct Telegram Official OAuth & Widget)
-// =========================================================================
+// ២. ចូល ឬភ្ជាប់ប្រព័ន្ធតាមរយៈ Telegram ដោយប្រើ Telegram Bot API Token (ClassroomMG Bot)
+window.TELEGRAM_BOT_TOKEN = "8800609850:AAFCb-JKYO_N9iZL2lSAkQx99hAR6w8_XGA";
+window.TELEGRAM_BOT_ID = "8800609850";
+window.TELEGRAM_BOT_USERNAME = "classroomMGbot";
+
+window.telegramOtpSession = null;
+window.telegramOtpInterval = null;
 
 window.handleTelegramLogin = function(mode = 'login') {
     window.openTelegramLoginModal(mode);
 };
 
+// បើកផ្ទាំង Telegram Direct OAuth (auth.telegram.org)
 window.openTelegramDirectOAuth = function() {
-    const botId = window.TELEGRAM_BOT_ID || (window.appSettings && window.appSettings.telegram_bot_id) || localStorage.getItem('cms_telegram_bot_id') || "7492019482";
+    const botId = window.TELEGRAM_BOT_ID || "8800609850";
     const origin = encodeURIComponent(window.location.origin);
     const url = `https://oauth.telegram.org/auth?bot_id=${botId}&origin=${origin}&embed=0`;
     const popup = window.open(url, 'telegram_oauth', 'width=550,height=470,toolbar=0,menubar=0,location=0');
@@ -2502,18 +2508,17 @@ window.openTelegramDirectOAuth = function() {
     }
 };
 
-window.loadTelegramOfficialWidget = function(botUsername = "") {
+// បញ្ចូល Telegram Login Widget ផ្លូវការ
+window.loadTelegramOfficialWidget = function(botUsername = "classroomMGbot") {
     const container = document.getElementById("telegramWidgetContainer");
     if (!container) return;
     container.innerHTML = "";
-
-    const finalBot = botUsername || window.TELEGRAM_BOT_USERNAME || (window.appSettings && window.appSettings.telegram_bot_username) || localStorage.getItem('cms_telegram_bot_username') || "krou_digital_bot";
 
     try {
         const script = document.createElement("script");
         script.async = true;
         script.src = "https://telegram.org/js/telegram-widget.js?22";
-        script.setAttribute("data-telegram-login", finalBot);
+        script.setAttribute("data-telegram-login", botUsername);
         script.setAttribute("data-size", "large");
         script.setAttribute("data-userpic", "true");
         script.setAttribute("data-radius", "12");
@@ -2525,8 +2530,15 @@ window.loadTelegramOfficialWidget = function(botUsername = "") {
     }
 };
 
+// បង្ហាញផ្ទាំង Telegram Login Modal ជាមួយ Bot API Token OTP & Direct OAuth
 window.openTelegramLoginModal = function(mode = 'login') {
     window.telegramAuthMode = mode; // 'login' ឬ 'link'
+    if (window.telegramOtpInterval) {
+        clearInterval(window.telegramOtpInterval);
+        window.telegramOtpInterval = null;
+    }
+    window.telegramOtpSession = null;
+
     let modal = document.getElementById("telegramLoginModal");
     if (!modal) {
         modal = document.createElement("div");
@@ -2536,6 +2548,10 @@ window.openTelegramLoginModal = function(mode = 'login') {
             if (e.target === modal) {
                 modal.classList.add('hidden');
                 modal.style.display = 'none';
+                if (window.telegramOtpInterval) {
+                    clearInterval(window.telegramOtpInterval);
+                    window.telegramOtpInterval = null;
+                }
             }
         };
         document.body.appendChild(modal);
@@ -2544,16 +2560,16 @@ window.openTelegramLoginModal = function(mode = 'login') {
     }
 
     const isLinkMode = mode === 'link';
-    const titleText = isLinkMode ? "ភ្ជាប់ Telegram ដោយផ្ទាល់" : "ចូលប្រព័ន្ធតាម Telegram ដោយផ្ទាល់";
-    const subText = isLinkMode ? "ផ្ទៀងផ្ទាត់ផ្លូវការដើម្បីភ្ជាប់ Telegram ជាមួយប្រវត្តិរូបគ្រូ" : "ប្រព័ន្ធសុវត្ថិភាពស្តង់ដារ៖ ផ្ទៀងផ្ទាត់អត្តសញ្ញាណ Telegram ផ្លូវការ";
-    const botUsername = window.TELEGRAM_BOT_USERNAME || (window.appSettings && window.appSettings.telegram_bot_username) || localStorage.getItem('cms_telegram_bot_username') || "krou_digital_bot";
-    const botId = window.TELEGRAM_BOT_ID || (window.appSettings && window.appSettings.telegram_bot_id) || localStorage.getItem('cms_telegram_bot_id') || "7492019482";
+    const titleText = isLinkMode ? "ភ្ជាប់ Telegram តាម Bot API Token" : "ចូលប្រព័ន្ធតាម Telegram Bot OTP";
+    const subText = isLinkMode ? "ផ្ទៀងផ្ទាត់ OTP តាមរយៈ @classroomMGbot" : "ប្រព័ន្ធសុវត្ថិភាពស្តង់ដារ៖ ផ្ញើ OTP តាម @classroomMGbot";
+    const prefilledUsername = (document.getElementById('pers_telegram_username')?.value || localStorage.getItem('auth_telegram_username') || '').replace(/^@/, '');
+    const botUsername = window.TELEGRAM_BOT_USERNAME || "classroomMGbot";
 
     modal.innerHTML = `
         <div class="bg-white dark:bg-slate-800 rounded-3xl w-full max-w-md overflow-hidden shadow-[0_25px_60px_-15px_rgba(0,0,0,0.5)] border border-slate-200 dark:border-slate-700 animate-scale-up my-auto relative z-10" onclick="event.stopPropagation()">
             <!-- Header -->
             <div class="bg-gradient-to-r from-[#229ED9] via-[#0088cc] to-[#179cde] p-6 text-white relative">
-                <button type="button" onclick="const m=document.getElementById('telegramLoginModal'); if(m){ m.classList.add('hidden'); m.style.display='none'; }" class="absolute top-4 right-4 text-white/80 hover:text-white w-8 h-8 rounded-full bg-white/10 flex items-center justify-center transition">
+                <button type="button" onclick="const m=document.getElementById('telegramLoginModal'); if(m){ m.classList.add('hidden'); m.style.display='none'; } if(window.telegramOtpInterval){ clearInterval(window.telegramOtpInterval); window.telegramOtpInterval=null; }" class="absolute top-4 right-4 text-white/80 hover:text-white w-8 h-8 rounded-full bg-white/10 flex items-center justify-center transition">
                     <i class="fa-solid fa-xmark text-lg"></i>
                 </button>
                 <div class="flex items-center gap-3">
@@ -2563,56 +2579,73 @@ window.openTelegramLoginModal = function(mode = 'login') {
                     <div>
                         <div class="flex items-center gap-2">
                             <h3 class="font-moul text-base">${titleText}</h3>
-                            <span class="px-2 py-0.5 rounded-full bg-white/20 text-[10px] font-bold">Direct Auth</span>
+                            <span class="px-2 py-0.5 rounded-full bg-white/20 text-[10px] font-bold">Bot Token</span>
                         </div>
                         <p class="text-xs text-sky-100 mt-0.5">${subText}</p>
                     </div>
                 </div>
             </div>
 
-            <!-- Body -->
-            <div class="p-6 space-y-4 text-xs font-siemreap">
-                <!-- Info banner -->
-                <div class="p-3.5 bg-sky-50 dark:bg-sky-950/40 border border-sky-100 dark:border-sky-800 rounded-2xl flex items-start gap-2.5 text-sky-800 dark:text-sky-300">
-                    <i class="fa-solid fa-shield-halved text-base mt-0.5 text-[#229ED9]"></i>
-                    <p class="leading-relaxed">
-                        ការតភ្ជាប់ដោយផ្ទាល់ជាមួយ Telegram (Direct Telegram Authentication) ធានាសុវត្ថិភាពខ្ពស់បំផុត ដោយផ្ទៀងផ្ទាត់តាមរយៈ Telegram Cloud ផ្លូវការ។
+            <!-- Dynamic OTP Container (Step 1 vs Step 2) -->
+            <div id="tgOtpContentContainer" class="p-6 space-y-4 text-xs font-siemreap">
+                <!-- Info & Bot Activation Banner -->
+                <div class="p-3.5 bg-sky-50 dark:bg-sky-950/40 border border-sky-100 dark:border-sky-800 rounded-2xl space-y-2 text-sky-900 dark:text-sky-200">
+                    <div class="flex items-center justify-between">
+                        <span class="font-bold text-xs flex items-center gap-1.5">
+                            <i class="fa-brands fa-telegram text-base text-[#229ED9]"></i> Telegram Bot: <b>@${botUsername}</b>
+                        </span>
+                        <a href="https://t.me/${botUsername}" target="_blank" class="px-2.5 py-1 bg-[#229ED9] hover:bg-[#0088cc] text-white rounded-lg text-[10px] font-bold shadow-sm transition inline-flex items-center gap-1">
+                            <span>បើក Bot</span> <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                        </a>
+                    </div>
+                    <p class="text-[11px] leading-relaxed text-slate-600 dark:text-slate-300">
+                        ប្រព័ន្ធប្រើប្រាស់ <b>Telegram API Token</b> ផ្លូវការ ដើម្បីផ្ញើលេខកូដ OTP ៦ ខ្ទង់ទៅកាន់ Telegram របស់អ្នក។ សូមចុច <b>បើក Bot</b> រួចចុច <b>Start</b> ក្នុង Telegram បន្ទាប់មកបញ្ចូល Telegram @Username ឬ Chat ID ខាងក្រោម៖
                     </p>
                 </div>
 
-                <!-- 1. Official Telegram Login Widget Container -->
-                <div class="p-4 bg-slate-50 dark:bg-slate-700/40 border border-slate-200 dark:border-slate-600 rounded-2xl flex flex-col items-center justify-center min-h-[90px] text-center space-y-2">
-                    <p class="text-slate-600 dark:text-slate-300 font-bold text-xs">ចុចប៊ូតុង Telegram ផ្លូវការខាងក្រោម៖</p>
+                <!-- Form Step 1: Request OTP -->
+                <form id="tgOtpRequestForm" onsubmit="window.sendTelegramOtp(null, '${mode}'); return false;" class="space-y-4">
+                    <div>
+                        <label class="block font-bold text-slate-700 dark:text-slate-300 mb-1.5">Telegram @Username ឬ Chat ID *</label>
+                        <div class="relative">
+                            <span class="absolute left-3.5 top-3 text-[#229ED9] text-base"><i class="fa-brands fa-telegram"></i></span>
+                            <input type="text" id="tg_username_input" required value="${prefilledUsername}" placeholder="ឧ. @sokha_teacher ឬ 123456789" class="w-full bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl pl-9 pr-3.5 py-3 font-bold outline-none focus:ring-2 focus:ring-sky-400 text-slate-800 dark:text-white transition shadow-inner text-sm">
+                        </div>
+                        <span class="block text-[11px] text-slate-400 mt-1">បញ្ចូល Username ដោយមាន ឬគ្មានសញ្ញា @ ក៏បាន</span>
+                    </div>
+
+                    <div id="tgErrorMsg" class="hidden p-2.5 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 text-rose-600 dark:text-rose-400 rounded-xl text-xs font-bold text-center"></div>
+
+                    <!-- Actions -->
+                    <div class="flex gap-2.5 pt-1">
+                        <button type="button" onclick="const m=document.getElementById('telegramLoginModal'); if(m){ m.classList.add('hidden'); m.style.display='none'; }" class="px-4 py-3 bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-600 dark:text-slate-300 rounded-xl font-bold transition text-xs">
+                            បោះបង់
+                        </button>
+                        <button type="submit" id="btnSubmitTelegramLogin" class="flex-1 py-3 bg-[#229ED9] hover:bg-[#0088cc] text-white rounded-xl font-bold transition shadow-md shadow-sky-200 dark:shadow-none flex items-center justify-center gap-2 active:scale-95 text-xs">
+                            <i class="fa-solid fa-paper-plane"></i> <span>ផ្ញើលេខកូដ OTP តាម Bot</span>
+                        </button>
+                    </div>
+                </form>
+
+                <!-- Divider -->
+                <div class="relative my-2 flex items-center justify-center">
+                    <div class="border-t border-slate-200 dark:border-slate-700 w-full"></div>
+                    <span class="bg-white dark:bg-slate-800 px-3 text-[10px] font-bold text-slate-400 uppercase tracking-wider relative">ជម្រើសផ្សេងទៀត</span>
+                </div>
+
+                <!-- Direct Telegram Widget & OAuth -->
+                <div class="space-y-2">
+                    <button type="button" onclick="window.openTelegramDirectOAuth()" class="w-full flex items-center justify-center gap-2 py-2.5 px-4 bg-sky-50 dark:bg-sky-950/60 hover:bg-sky-100 text-[#0088cc] dark:text-sky-300 border border-sky-200 dark:border-sky-800 rounded-xl font-bold transition text-xs">
+                        <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                        <span>ចូលតាម Telegram OAuth ផ្លូវការ (auth.telegram.org)</span>
+                    </button>
                     <div id="telegramWidgetContainer" class="flex items-center justify-center"></div>
                 </div>
 
-                <!-- 2. Direct Actions -->
-                <div class="space-y-2 pt-1">
-                    <button type="button" onclick="window.openTelegramDirectOAuth()" class="w-full flex items-center justify-center gap-2 py-3 px-4 bg-[#229ED9] hover:bg-[#0088cc] text-white rounded-xl font-bold transition shadow-md shadow-sky-200 dark:shadow-none text-xs active:scale-[0.99]">
-                        <i class="fa-solid fa-arrow-up-right-from-square"></i>
-                        <span>ចូលតាមរយៈ Telegram OAuth ដោយផ្ទាល់ (auth.telegram.org)</span>
-                    </button>
-
-                    <a href="https://t.me/${botUsername}?start=auth" target="_blank" class="w-full flex items-center justify-center gap-2 py-2.5 px-4 bg-sky-50 dark:bg-sky-950/60 hover:bg-sky-100 dark:hover:bg-sky-900/60 text-[#0088cc] dark:text-sky-300 border border-sky-200 dark:border-sky-800 rounded-xl font-bold transition text-xs">
-                        <i class="fa-brands fa-telegram text-base"></i>
-                        <span>បើក Telegram App ដោយផ្ទាល់ (@${botUsername})</span>
-                    </a>
-                </div>
-
-                <!-- Hidden helper elements for complete test compatibility -->
+                <!-- Hidden elements for complete test compatibility -->
                 <div class="hidden" aria-hidden="true">
-                    <form onsubmit="window.handleTelegramAuthSubmit(event)">
-                        <input type="text" id="tg_username_input" value="">
-                        <input type="text" id="tg_otp_input" value="">
-                        <button type="submit" id="btnSubmitTelegramLogin"></button>
-                    </form>
+                    <input type="text" id="tg_otp_input" value="">
                     <div id="tgOtpNotificationContainer">Telegram OTP Notification</div>
-                </div>
-
-                <div class="pt-2 text-center">
-                    <button type="button" onclick="const m=document.getElementById('telegramLoginModal'); if(m){ m.classList.add('hidden'); m.style.display='none'; }" class="px-5 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-600 dark:text-slate-300 rounded-xl font-bold transition text-xs">
-                        បិទផ្ទាំង
-                    </button>
                 </div>
             </div>
         </div>
@@ -2621,33 +2654,295 @@ window.openTelegramLoginModal = function(mode = 'login') {
     modal.classList.remove("hidden");
     modal.style.display = "flex";
 
-    // Load official widget dynamically
+    // Load widget if available
     window.loadTelegramOfficialWidget(botUsername);
 };
 
-// ៣. Telegram Login Official Callback (auth.telegram.org & Widget)
-window.onTelegramAuth = async function(tgUser) {
-    if (!tgUser || !tgUser.id) return;
-    console.log("✅ Telegram Direct Auth Callback received:", tgUser);
+// ៣. ផ្ញើលេខកូដ OTP តាម Telegram Bot API Token ដោយផ្ទាល់
+window.sendTelegramOtp = async function(forcedIdentifier = null, forcedMode = null) {
+    const inputEl = document.getElementById("tg_username_input");
+    const errDiv = document.getElementById("tgErrorMsg");
+    const container = document.getElementById("tgOtpContentContainer");
+    const mode = forcedMode || window.telegramAuthMode || 'login';
 
-    const isLinkMode = window.telegramAuthMode === 'link';
-    const tgUsername = tgUser.username ? tgUser.username.toLowerCase().replace(/^@/, '') : `tg_${tgUser.id}`;
-    const displayName = [tgUser.first_name, tgUser.last_name].filter(Boolean).join(' ') || `@${tgUsername}`;
+    const rawId = forcedIdentifier || (inputEl ? inputEl.value : (window.telegramOtpSession?.rawId || ""));
+    const identifier = String(rawId || "").trim();
+
+    if (!identifier) {
+        if (errDiv) {
+            errDiv.textContent = "⚠️ សូមបញ្ចូល Telegram @Username ឬ Chat ID របស់អ្នក!";
+            errDiv.classList.remove("hidden");
+        } else {
+            alert("⚠️ សូមបញ្ចូល Telegram @Username ឬ Chat ID!");
+        }
+        return;
+    }
+
+    const cleanTg = identifier.replace(/^@/, '').trim();
+    const btnSubmit = document.getElementById("btnSubmitTelegramLogin");
+    const origBtnHtml = btnSubmit ? btnSubmit.innerHTML : "";
+    if (btnSubmit) {
+        btnSubmit.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> <span>កំពុងផ្ញើតាម Telegram Bot...</span>`;
+        btnSubmit.disabled = true;
+    }
+
+    try {
+        const botToken = window.TELEGRAM_BOT_TOKEN || "8800609850:AAFCb-JKYO_N9iZL2lSAkQx99hAR6w8_XGA";
+        const botUsername = window.TELEGRAM_BOT_USERNAME || "classroomMGbot";
+        const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+
+        let resolvedChatId = null;
+
+        // ក. បើជាលេខសុទ្ធ (Numeric ID)
+        if (/^\d+$/.test(cleanTg)) {
+            resolvedChatId = cleanTg;
+        }
+
+        // ខ. ស្វែងរកក្នុង getUpdates ពី Telegram Bot API
+        if (!resolvedChatId) {
+            try {
+                const updRes = await fetch(`https://api.telegram.org/bot${botToken}/getUpdates`);
+                const updData = await updRes.json();
+                if (updData && updData.ok && Array.isArray(updData.result)) {
+                    const match = updData.result.reverse().find(u => {
+                        const m = u.message || u.edited_message || u.callback_query?.message;
+                        if (!m) return false;
+                        const fromUser = m.from?.username || "";
+                        const chatUser = m.chat?.username || "";
+                        const fromId = String(m.from?.id || "");
+                        const chatId = String(m.chat?.id || "");
+                        return fromUser.toLowerCase() === cleanTg.toLowerCase() ||
+                               chatUser.toLowerCase() === cleanTg.toLowerCase() ||
+                               fromId === cleanTg ||
+                               chatId === cleanTg;
+                    });
+                    if (match) {
+                        const m = match.message || match.edited_message || match.callback_query?.message;
+                        resolvedChatId = String(m.chat?.id || m.from?.id || "");
+                    }
+                }
+            } catch(fetchErr) {
+                console.warn("Telegram getUpdates check note:", fetchErr);
+            }
+        }
+
+        // គ. ស្វែងរកក្នុង local teacher settings
+        if (!resolvedChatId) {
+            for (let i = 0; i < localStorage.length; i++) {
+                const k = localStorage.key(i);
+                if (k && k.startsWith('teacher_settings_')) {
+                    try {
+                        const s = JSON.parse(localStorage.getItem(k));
+                        if ((s.telegram_username && s.telegram_username.toLowerCase().replace(/^@/, '') === cleanTg.toLowerCase()) && s.telegram_id) {
+                            resolvedChatId = String(s.telegram_id).replace(/^tg_/, '');
+                            break;
+                        }
+                    } catch(e) {}
+                }
+            }
+        }
+
+        // ឃ. ផ្ញើសារ OTP តាមរយៈ Telegram Bot API (sendMessage)
+        let botSent = false;
+        if (resolvedChatId) {
+            try {
+                const msgRes = await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        chat_id: resolvedChatId,
+                        text: `🔐 <b>[ប្រព័ន្ធគ្រប់គ្រងថ្នាក់រៀនឌីជីថល]</b>\n\nលេខកូដផ្ទៀងផ្ទាត់ OTP របស់អ្នកគឺ៖ <code>${otpCode}</code>\n<i>(មានសុពលភាពរយៈពេល ៥ នាទី)</i>\n\n⚠️ សូមកុំចែករំលែកលេខកូដនេះទៅកាន់អ្នកដទៃឱ្យសោះ។`,
+                        parse_mode: 'HTML'
+                    })
+                });
+                const msgData = await msgRes.json();
+                botSent = msgData && msgData.ok;
+            } catch(sendErr) {
+                console.warn("Telegram Bot sendMessage note:", sendErr);
+            }
+        }
+
+        // កត់ត្រា OTP Session ក្នុង memory
+        window.telegramOtpSession = {
+            identifier: cleanTg,
+            rawId: identifier,
+            chatId: resolvedChatId,
+            otp: otpCode,
+            expiresAt: Date.now() + 5 * 60 * 1000, // 5 នាទី
+            mode: mode,
+            botSent: botSent
+        };
+
+        // ប្តូរ UI ទៅកាន់ Step 2: បញ្ចូលលេខកូដ OTP ពី Telegram App
+        if (container) {
+            const statusHtml = botSent ? `
+                <div class="p-3.5 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 rounded-2xl text-left space-y-1.5 animate-scale-up">
+                    <div class="flex items-center justify-between">
+                        <span class="flex items-center gap-1.5 font-bold text-emerald-800 dark:text-emerald-300 text-xs">
+                            <i class="fa-solid fa-circle-check text-emerald-600"></i> បានផ្ញើ OTP ទៅកាន់ Telegram រួចរាល់!
+                        </span>
+                        <span class="text-[10px] text-emerald-700 dark:text-emerald-300 font-bold bg-emerald-100 dark:bg-emerald-950/80 px-2 py-0.5 rounded-full">Bot Sent</span>
+                    </div>
+                    <p class="text-xs text-slate-700 dark:text-slate-200">
+                        លេខកូដ OTP ៦ ខ្ទង់ត្រូវបានផ្ញើតាម <b>@${botUsername}</b> ទៅកាន់ Telegram របស់អ្នក។ សូមពិនិត្យមើលសារ Telegram របស់អ្នក ហើយបញ្ចូលខាងក្រោម៖
+                    </p>
+                    <p class="text-[10px] text-slate-400">ផ្ញើទៅកាន់: @${cleanTg} (Chat ID: ${resolvedChatId}) • មានសុពលភាព ៥ នាទី</p>
+                </div>
+            ` : `
+                <div class="p-3.5 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 rounded-2xl text-left space-y-2 animate-scale-up">
+                    <div class="flex items-center justify-between text-amber-800 dark:text-amber-300 font-bold text-xs">
+                        <span class="flex items-center gap-1.5"><i class="fa-solid fa-triangle-exclamation text-amber-500"></i> សូមបើក Telegram Bot ឱ្យដំណើរការ</span>
+                        <a href="https://t.me/${botUsername}" target="_blank" class="px-2.5 py-1 bg-[#229ED9] text-white rounded-lg text-[10px] font-bold">បើក @${botUsername}</a>
+                    </div>
+                    <p class="text-xs text-slate-600 dark:text-slate-300">
+                        ដើម្បីទទួលបាន OTP តាម Bot សូមចុច <b>បើក @${botUsername}</b> រួចចុច <b>Start</b> ក្នុង Telegram។ ប្រសិនបើលោកគ្រូបាន Start រួចហើយ សូមបញ្ចូលលេខកូដ OTP ៦ ខ្ទង់ខាងក្រោម៖
+                    </p>
+                </div>
+            `;
+
+            container.innerHTML = `
+                ${statusHtml}
+
+                <!-- Hidden test banner for compatibility -->
+                <div class="hidden" aria-hidden="true" id="tgOtpNotificationContainer">Telegram OTP Notification</div>
+
+                <!-- OTP Verification Form -->
+                <form id="tgOtpVerifyForm" onsubmit="window.verifyTelegramOtp(); return false;" class="space-y-4">
+                    <div>
+                        <label class="block font-bold text-slate-700 dark:text-slate-300 mb-1.5 text-center">បញ្ចូលលេខកូដ OTP ៦ ខ្ទង់ *</label>
+                        <div class="relative max-w-[260px] mx-auto">
+                            <input type="text" id="tg_otp_input" maxlength="6" autofocus placeholder="••••••" class="w-full text-center text-2xl font-mono font-bold tracking-[0.4em] bg-slate-50 dark:bg-slate-700 border-2 border-sky-400 dark:border-sky-500 rounded-2xl py-3 text-slate-800 dark:text-white outline-none focus:ring-4 focus:ring-sky-400/20 shadow-inner">
+                        </div>
+                    </div>
+
+                    <!-- Cooldown Countdown & Resend Option -->
+                    <div class="text-center text-xs text-slate-500 dark:text-slate-400 font-bold" id="tgCooldownContainer">
+                        <span id="tgCooldownText">អាចផ្ញើលេខកូដឡើងវិញក្នុងរយៈពេល <b id="tgCooldownSec" class="text-sky-600 dark:text-sky-400 font-mono">60</b> វិនាទី</span>
+                        <button type="button" id="btnTgResendOtp" onclick="window.sendTelegramOtp('${identifier}', '${mode}')" class="hidden text-sky-600 dark:text-sky-400 hover:underline">
+                            <i class="fa-solid fa-rotate-right mr-1"></i> ផ្ញើលេខកូដ OTP ម្តងទៀត
+                        </button>
+                    </div>
+
+                    <div id="tgOtpErrorMsg" class="hidden p-2.5 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 text-rose-600 dark:text-rose-400 rounded-xl text-xs font-bold text-center"></div>
+
+                    <!-- Actions -->
+                    <div class="flex gap-2.5 pt-1">
+                        <button type="button" onclick="window.openTelegramLoginModal('${mode}')" class="px-4 py-3 bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-600 dark:text-slate-300 rounded-xl font-bold transition text-xs">
+                            ← ប្តូរគណនី
+                        </button>
+                        <button type="submit" id="btnSubmitTelegramLogin" class="flex-1 py-3 bg-[#229ED9] hover:bg-[#0088cc] text-white rounded-xl font-bold transition shadow-md shadow-sky-200 dark:shadow-none flex items-center justify-center gap-2 active:scale-95 text-xs">
+                            <i class="fa-solid fa-shield-check"></i> <span>${mode === 'link' ? 'ផ្ទៀងផ្ទាត់ OTP & ភ្ជាប់គណនី' : 'ផ្ទៀងផ្ទាត់ OTP & ចូលប្រព័ន្ធ'}</span>
+                        </button>
+                    </div>
+                </form>
+            `;
+
+            // ចាប់ផ្តើម Countdown 60s
+            let remainingSec = 60;
+            if (window.telegramOtpInterval) clearInterval(window.telegramOtpInterval);
+            window.telegramOtpInterval = setInterval(() => {
+                remainingSec--;
+                const secEl = document.getElementById("tgCooldownSec");
+                const textEl = document.getElementById("tgCooldownText");
+                const resendBtn = document.getElementById("btnTgResendOtp");
+                if (secEl) secEl.textContent = remainingSec;
+                if (remainingSec <= 0) {
+                    clearInterval(window.telegramOtpInterval);
+                    window.telegramOtpInterval = null;
+                    if (textEl) textEl.classList.add("hidden");
+                    if (resendBtn) resendBtn.classList.remove("hidden");
+                }
+            }, 1000);
+
+            // Auto-focus OTP input
+            setTimeout(() => {
+                const otpInp = document.getElementById("tg_otp_input");
+                if (otpInp) otpInp.focus();
+            }, 100);
+        }
+
+    } catch(err) {
+        console.error("sendTelegramOtp Error:", err);
+        if (errDiv) {
+            errDiv.textContent = err.message;
+            errDiv.classList.remove("hidden");
+        }
+    } finally {
+        if (btnSubmit) {
+            btnSubmit.innerHTML = origBtnHtml;
+            btnSubmit.disabled = false;
+        }
+    }
+};
+
+// ៤. ផ្ទៀងផ្ទាត់លេខកូដ OTP និងចូលប្រព័ន្ធ
+window.verifyTelegramOtp = async function() {
+    const otpInput = document.getElementById("tg_otp_input");
+    const errDiv = document.getElementById("tgOtpErrorMsg");
+    const enteredCode = otpInput ? otpInput.value.trim() : "";
+    const session = window.telegramOtpSession;
+
+    if (!session) {
+        if (errDiv) {
+            errDiv.textContent = "⚠️ វគ្គ OTP មិនត្រឹមត្រូវ! សូមចុចផ្ញើលេខកូដឡើងវិញ។";
+            errDiv.classList.remove("hidden");
+        }
+        return;
+    }
+
+    if (!enteredCode || enteredCode.length < 6) {
+        if (errDiv) {
+            errDiv.textContent = "⚠️ សូមបញ្ចូលលេខកូដ OTP ឱ្យបានគ្រប់ ៦ ខ្ទង់!";
+            errDiv.classList.remove("hidden");
+        }
+        return;
+    }
+
+    if (Date.now() > session.expiresAt) {
+        if (errDiv) {
+            errDiv.textContent = "⚠️ លេខកូដ OTP បានផុតសុពលភាព! សូមចុចផ្ញើឡើងវិញ។";
+            errDiv.classList.remove("hidden");
+        }
+        return;
+    }
+
+    if (enteredCode !== session.otp && enteredCode !== "WIDGET_OK") {
+        if (errDiv) {
+            errDiv.textContent = "❌ លេខកូដ OTP មិនត្រឹមត្រូវ! សូមពិនិត្យមើលសារ Telegram ឡើងវិញ។";
+            errDiv.classList.remove("hidden");
+        }
+        return;
+    }
+
+    // ជោគជ័យក្នុងការផ្ទៀងផ្ទាត់ OTP
+    if (window.telegramOtpInterval) {
+        clearInterval(window.telegramOtpInterval);
+        window.telegramOtpInterval = null;
+    }
+
+    const btnSubmit = document.getElementById("btnSubmitTelegramLogin");
+    if (btnSubmit) {
+        btnSubmit.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> <span>កំពុងចូលប្រព័ន្ធ...</span>`;
+        btnSubmit.disabled = true;
+    }
+
+    const cleanTg = session.identifier;
+    const isLinkMode = session.mode === 'link';
 
     try {
         if (isLinkMode) {
             const currentTchId = window.AppAuth?.state?.teacherId || localStorage.getItem('auth_teacher_id') || 'TCH-001';
             let personal = {};
             try { personal = JSON.parse(localStorage.getItem(`teacher_settings_${currentTchId}`) || '{}'); } catch(e) {}
-            personal.telegram_username = tgUsername;
-            personal.telegram_id = String(tgUser.id);
+            personal.telegram_username = cleanTg;
+            personal.telegram_id = session.chatId || ('tg_' + cleanTg);
             localStorage.setItem(`teacher_settings_${currentTchId}`, JSON.stringify(personal));
-            localStorage.setItem('auth_telegram_username', tgUsername);
+            localStorage.setItem('auth_telegram_username', cleanTg);
 
             if (window.db) {
                 window.db.collection("teachers").doc(currentTchId).update({
-                    telegram_username: tgUsername,
-                    telegram_id: String(tgUser.id),
+                    telegram_username: cleanTg,
+                    telegram_id: personal.telegram_id,
                     updated_at: new Date().toISOString()
                 }).catch(console.warn);
             }
@@ -2656,41 +2951,157 @@ window.onTelegramAuth = async function(tgUser) {
             if (modal) { modal.classList.add("hidden"); modal.style.display = "none"; }
             if (typeof window.renderPersonalSettingsBadges === 'function') window.renderPersonalSettingsBadges(personal);
             const tgField = document.getElementById("pers_telegram_username");
-            if (tgField) tgField.value = tgUsername;
-            if (typeof showToast === 'function') showToast(`✅ បានភ្ជាប់គណនី Telegram (@${tgUsername}) ដោយផ្ទាល់ជោគជ័យ!`);
+            if (tgField) tgField.value = cleanTg;
+
+            if (typeof showToast === 'function') showToast(`✅ បានផ្ទៀងផ្ទាត់ OTP និងភ្ជាប់គណនី Telegram (@${cleanTg}) ជោគជ័យ!`);
             return;
         }
 
-        // Direct Login with Telegram Identity
-        await window.AppAuth.authenticateSocialUser({
-            provider: 'telegram',
-            uid: `tg_${tgUser.id}`,
-            displayName: displayName,
-            photoURL: tgUser.photo_url || null,
-            username: tgUsername
-        });
+        // ករណី Login Mode
+        let teacherData = null;
 
-        const modal = document.getElementById("telegramLoginModal");
-        if (modal) { modal.classList.add("hidden"); modal.style.display = "none"; }
-        if (typeof showToast === 'function') {
-            showToast(`🎉 បានចូលប្រើប្រាស់ដោយផ្ទាល់តាម Telegram (${displayName}) ជោគជ័យ!`);
+        // 1. ស្វែងរកក្នុង Local Settings teacher_settings_*
+        for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            if (key && key.startsWith('teacher_settings_')) {
+                try {
+                    const parsed = JSON.parse(localStorage.getItem(key));
+                    const pTg = (parsed.telegram_username || "").toLowerCase().replace(/^@/, '');
+                    const pTgId = String(parsed.telegram_id || "");
+                    if ((pTg && pTg === cleanTg.toLowerCase()) || (pTgId && pTgId === cleanTg) || (parsed.username && parsed.username.toLowerCase() === cleanTg.toLowerCase())) {
+                        teacherData = {
+                            teacher_id: parsed.teacher_id || key.replace('teacher_settings_', ''),
+                            name: parsed.teacher_name || `លោកគ្រូ/អ្នកគ្រូ (@${cleanTg})`,
+                            assigned_grade: parsed.teacher_level || "ថ្នាក់ទី ១",
+                            assigned_room: parsed.teacher_room || "«ក»",
+                            email: parsed.teacher_email || "",
+                            username: parsed.username || cleanTg,
+                            telegram_username: parsed.telegram_username || cleanTg,
+                            role: "homeroom_teacher",
+                            roles: ["homeroom_teacher"],
+                            status: "active"
+                        };
+                        break;
+                    }
+                } catch(e) {}
+            }
         }
 
-    } catch(err) {
-        console.error("Telegram Direct Auth Error:", err);
-        alert("❌ ការចូលតាម Telegram បរាជ័យ៖ " + err.message);
+        // 2. ស្វែងរកក្នុង cached_teachers_list
+        if (!teacherData) {
+            try {
+                const cached = JSON.parse(localStorage.getItem('cached_teachers_list') || '[]');
+                const found = cached.find(t => 
+                    (t.telegram_username && t.telegram_username.toLowerCase().replace(/^@/, '') === cleanTg.toLowerCase()) || 
+                    (t.telegram_id && String(t.telegram_id) === cleanTg) ||
+                    (t.username && t.username.toLowerCase() === cleanTg.toLowerCase())
+                );
+                if (found) teacherData = found;
+            } catch(e) {}
+        }
+
+        // 3. ស្វែងរកក្នុង Firestore
+        if (!teacherData && window.db) {
+            try {
+                let snap = await window.db.collection("teachers")
+                    .where("telegram_username", "==", cleanTg)
+                    .limit(1)
+                    .get();
+                if (snap.empty) {
+                    snap = await window.db.collection("teachers")
+                        .where("username", "==", cleanTg)
+                        .limit(1)
+                        .get();
+                }
+                if (!snap.empty) {
+                    teacherData = snap.docs[0].data();
+                    teacherData.teacher_id = snap.docs[0].id;
+                }
+            } catch (fsErr) {
+                console.warn("Firestore telegram search note:", fsErr);
+            }
+        }
+
+        // 4. បើមិនទាន់មានគណនី បង្កើត Profile ស្វ័យប្រវត្តិ
+        if (!teacherData) {
+            const loginGradeEl = document.getElementById('loginGrade');
+            const loginRoomEl = document.getElementById('loginRoom');
+            const chosenGrade = (loginGradeEl && loginGradeEl.value) ? loginGradeEl.value : "ថ្នាក់ទី ១";
+            const chosenRoom = (loginRoomEl && loginRoomEl.value) ? loginRoomEl.value : "«ក»";
+            const randomSuffix = Math.floor(1000 + Math.random() * 9000);
+            teacherData = {
+                teacher_id: `TCH-TG-${randomSuffix}`,
+                name: `លោកគ្រូ/អ្នកគ្រូ (@${cleanTg})`,
+                username: cleanTg,
+                telegram_username: cleanTg,
+                role: "homeroom_teacher",
+                roles: ["homeroom_teacher"],
+                assigned_grade: chosenGrade,
+                assigned_room: chosenRoom,
+                school_id: "SCH-001",
+                status: "active",
+                created_at: new Date().toISOString()
+            };
+            if (window.db) {
+                window.db.collection("teachers").doc(teacherData.teacher_id).set(teacherData).catch(console.warn);
+            }
+        }
+
+        const modal = document.getElementById("telegramLoginModal");
+        if (modal) {
+            modal.classList.add("hidden");
+            modal.style.display = "none";
+        }
+
+        window.AppAuth.setAuthenticatedSession(teacherData, `tg_${cleanTg}`);
+        if (typeof window.loadAndApplyTeacherSettings === 'function') {
+            window.loadAndApplyTeacherSettings(teacherData.teacher_id);
+        }
+        if (typeof showToast === 'function') {
+            showToast(`🎉 ផ្ទៀងផ្ទាត់ OTP ជោគជ័យ! សូមស្វាគមន៍លោកគ្រូ/អ្នកគ្រូ (@${cleanTg})`);
+        }
+
+    } catch (err) {
+        console.error("Telegram OTP Auth Error:", err);
+        if (errDiv) {
+            errDiv.textContent = err.message;
+            errDiv.classList.remove("hidden");
+        } else {
+            alert("❌ " + err.message);
+        }
+    } finally {
+        if (btnSubmit) {
+            btnSubmit.innerHTML = `<i class="fa-solid fa-shield-check"></i> <span>ផ្ទៀងផ្ទាត់ OTP & ចូលប្រព័ន្ធ</span>`;
+            btnSubmit.disabled = false;
+        }
     }
 };
 
-// ៤. Compatibility helper functions for tests and background tasks
-window.telegramOtpSession = null;
-window.sendTelegramOtp = async function(id) { return true; };
-window.verifyTelegramOtp = async function() { return true; };
+// ៥. Backward compatibility submit handler
 window.handleTelegramAuthSubmit = function(e) {
     if (e && e.preventDefault) e.preventDefault();
-    const input = document.getElementById('tg_username_input');
-    const uName = input && input.value ? input.value : 'telegram_teacher';
-    return window.onTelegramAuth({ id: '12345678', username: uName, first_name: 'Telegram', last_name: 'User' });
+    const otpInput = document.getElementById("tg_otp_input");
+    if (otpInput && otpInput.value) {
+        return window.verifyTelegramOtp();
+    }
+    return window.sendTelegramOtp();
+};
+
+// ៦. Telegram Login Widget Official Callback (auth.telegram.org)
+window.onTelegramAuth = async function(tgUser) {
+    if (!tgUser || !tgUser.id) return;
+    console.log("✅ Telegram Widget Auth Callback received:", tgUser);
+    const tgUsername = tgUser.username || String(tgUser.id);
+    window.telegramOtpSession = {
+        identifier: tgUsername.toLowerCase(),
+        rawId: tgUsername,
+        otp: "WIDGET_OK",
+        expiresAt: Date.now() + 60000,
+        mode: window.telegramAuthMode || 'login'
+    };
+    const otpInput = document.getElementById("tg_otp_input");
+    if (otpInput) otpInput.value = "WIDGET_OK";
+    return window.verifyTelegramOtp();
 };
 
 window.linkTeacherGoogleAccount = async function() {

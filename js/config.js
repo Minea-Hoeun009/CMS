@@ -3,6 +3,12 @@
 // ==========================================
 
 // 👉 URL របស់ Google Apps Script (Connected & Standardized)
+
+// ⚡ Telegram Official Bot Configuration (ClassroomMG)
+window.TELEGRAM_BOT_TOKEN = "8800609850:AAFCb-JKYO_N9iZL2lSAkQx99hAR6w8_XGA";
+window.TELEGRAM_BOT_ID = "8800609850";
+window.TELEGRAM_BOT_USERNAME = "classroomMGbot";
+
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby65mFS_22-jsctxEJSLS_ebuAiWuPOrhcm1-_IVu3Xn_dePOIqPkfqDYwjc0JlU0TA/exec";
 window.SCRIPT_URL = SCRIPT_URL;
 window.getScriptUrl = function() {
