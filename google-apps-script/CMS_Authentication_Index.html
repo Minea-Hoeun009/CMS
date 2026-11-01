@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+  <base target="_top">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Classroom Management System - Authentication</title>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: #f1f5f9;
+      color: #0f172a;
+      font-family: Arial, "Noto Sans Khmer", "Siemreap", sans-serif;
+    }
+    .container {
+      max-width: 850px;
+      margin: 40px auto;
+      padding: 16px;
+    }
+    .card {
+      background: white;
+      padding: 28px;
+      border-radius: 20px;
+      box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.08);
+      margin-bottom: 20px;
+      border: 1px solid #e2e8f0;
+    }
+    h1, h2 { margin-top: 0; color: #1e293b; }
+    h1 { font-size: 22px; font-weight: 800; }
+    h2 { font-size: 18px; font-weight: 700; }
+    button, input, select {
+      font: inherit;
+      padding: 11px 16px;
+      border-radius: 12px;
+      border: 1px solid #cbd5e1;
+      margin: 6px 0;
+      font-size: 14px;
+    }
+    button {
+      background: #2563eb;
+      color: white;
+      cursor: pointer;
+      font-weight: 700;
+      border: none;
+      transition: all 0.2s;
+    }
+    button:hover { background: #1d4ed8; }
+    button:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn-secondary {
+      background: #f8fafc;
+      color: #334155;
+      border: 1px solid #cbd5e1;
+    }
+    .btn-secondary:hover { background: #f1f5f9; }
+    .btn-danger { background: #dc2626; color: white; }
+    .btn-danger:hover { background: #b91c1c; }
+    .hidden { display: none !important; }
+    .muted { color: #64748b; font-size: 13px; line-height: 1.6; }
+    .message {
+      padding: 14px 18px;
+      border-radius: 12px;
+      margin: 14px 0;
+      font-size: 14px;
+      font-weight: 600;
+    }
+    .error { color: #991b1b; background: #fee2e2; border: 1px solid #fecaca; }
+    .success { color: #166534; background: #dcfce7; border: 1px solid #bbf7d0; }
+    .row { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 12px; }
+    .table-wrap { overflow-x: auto; margin-top: 16px; border-radius: 12px; border: 1px solid #e2e8f0; }
+    table { border-collapse: collapse; width: 100%; min-width: 650px; font-size: 13px; }
+    td, th { text-align: left; padding: 12px 14px; border-bottom: 1px solid #f1f5f9; }
+    th { background: #f8fafc; font-weight: 700; color: #475569; }
+    tr:hover { background: #f8fafc; }
+    .tag { display: inline-block; padding: 4px 10px; border-radius: 9999px; font-size: 11px; font-weight: 700; }
+    .tag-pending { background: #fef3c7; color: #92400e; }
+    .tag-approved { background: #dcfce7; color: #166534; }
+    .tag-google { background: #fee2e2; color: #991b1b; }
+    .tag-telegram { background: #e0f2fe; color: #075985; }
+    @media(max-width:600px) {
+      .container { margin: 12px auto; padding: 10px; }
+      .card { padding: 18px; border-radius: 16px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="card">
+      <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
+        <div style="width: 44px; height: 44px; border-radius: 12px; background: linear-gradient(135deg, #2563eb, #4f46e5); display: flex; align-items: center; justify-content: center; color: white; font-size: 20px;">
+          <i class="fa-solid fa-graduation-cap"></i>
+        </div>
+        <div>
+          <h1>Classroom Management System (CMS)</h1>
+          <p class="muted" style="margin: 0;">ប្រព័ន្ធចូលប្រើប្រាស់ និងស្នើសុំគណនី (Google & Telegram Auth)</p>
+        </div>
+      </div>
+
+      <div id="loginPanel" style="margin-top: 24px;">
+        <h2>ចូល ឬស្នើសុំបង្កើតគណនី</h2>
+        <p class="muted">
+          សូមជ្រើសរើសការចូលប្រើប្រាស់តាម Google (Gmail) ឬ Telegram។ ប្រសិនបើលោកគ្រូ-អ្នកគ្រូមិនទាន់មានគណនី សូមប្រើប៊ូតុងស្នើសុំចុះឈ្មោះដើម្បីរង់ចាំ Admin អនុម័ត។
+        </p>
+
+        <div style="display: flex; flex-direction: column; gap: 14px; margin: 20px 0; max-width: 380px;">
+          <!-- Google Sign-In Button Container -->
+          <div id="googleButton"></div>
+
+          <!-- Telegram Login Widget Container -->
+          <div id="telegramButton"></div>
+        </div>
+
+        <div style="border-top: 1px solid #e2e8f0; padding-top: 16px; margin-top: 16px;">
+          <p class="muted" style="margin-bottom: 8px; font-weight: 700;">សម្រាប់គ្រូដែលមិនទាន់មានគណនី៖</p>
+          <div class="row">
+            <button type="button" class="btn-secondary" onclick="googleRegister()">
+              <i class="fa-brands fa-google" style="color: #ea4335; margin-right: 6px;"></i> ស្នើសុំចុះឈ្មោះដោយ Google
+            </button>
+            <button type="button" class="btn-secondary" onclick="telegramRegister()">
+              <i class="fa-brands fa-telegram" style="color: #0088cc; margin-right: 6px;"></i> ស្នើសុំចុះឈ្មោះដោយ Telegram
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div id="profilePanel" class="hidden">
+        <h2>គណនីរបស់ខ្ញុំ</h2>
+        <p id="profile" style="font-weight: 700; color: #1e293b; font-size: 16px;"></p>
+        <button type="button" class="btn-danger" onclick="logout()">
+          <i class="fa-solid fa-arrow-right-from-bracket mr-1"></i> ចាកចេញ
+        </button>
+      </div>
+    </div>
+
+    <div id="message" class="hidden message"></div>
+
+    <!-- Admin Panel: សំណើចុះឈ្មោះ -->
+    <div id="adminPanel" class="card hidden">
+      <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+        <h2><i class="fa-solid fa-user-shield text-amber-500 mr-2"></i> Admin — សំណើចុះឈ្មោះដែលរង់ចាំអនុម័ត</h2>
+        <button type="button" onclick="loadRequests()">
+          <i class="fa-solid fa-rotate mr-1"></i> Refresh Requests
+        </button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Provider</th>
+              <th>ឈ្មោះគ្រូ</th>
+              <th>អ៊ីមែល</th>
+              <th>កាលបរិច្ឆេទស្នើសុំ</th>
+              <th>ស្ថានភាព</th>
+              <th>សកម្មភាព (Action)</th>
+            </tr>
+          </thead>
+          <tbody id="requestsBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Teacher Dashboard Link -->
+    <div id="teacherPanel" class="card hidden">
+      <h2><i class="fa-solid fa-chalkboard-user text-blue-600 mr-2"></i> Teacher Workspace</h2>
+      <p class="muted">សូមស្វាគមន៍លោកគ្រូ-អ្នកគ្រូ! គណនីត្រូវបានអនុម័តរួចរាល់ លោកគ្រូអាចចូលទៅកាន់ប្រព័ន្ធ CMS បាន។</p>
+    </div>
+  </div>
+
+  <script>
+    // ⚙️ Credentials Configuration (Update GOOGLE_CLIENT_ID if using Custom OAuth Client)
+    const GOOGLE_CLIENT_ID = '306883664792-web.apps.googleusercontent.com';
+    const TELEGRAM_BOT_USERNAME = 'classmsbot';
+
+    let googleCredential = '';
+    let telegramPayload = null;
+    let appSession = '';
+    let currentUser = null;
+
+    function msg(text, type = 'error') {
+      const el = document.getElementById('message');
+      el.textContent = text;
+      el.className = 'message ' + type;
+      el.classList.remove('hidden');
+    }
+
+    function hideMsg() {
+      const el = document.getElementById('message');
+      el.className = 'hidden';
+    }
+
+    function server(method, ...args) {
+      return new Promise((resolve, reject) => {
+        if (!window.google || !google.script || !google.script.run) {
+          reject(new Error('Google Apps Script Environment Not Detected. Run inside Apps Script Web App.'));
+          return;
+        }
+        google.script.run
+          .withSuccessHandler(resolve)
+          .withFailureHandler(e => reject(new Error(e.message || 'Server error')))
+          [method](...args);
+      });
+    }
+
+    function googleCallback(response) {
+      googleCredential = response.credential;
+      authenticate('Google', googleCredential);
+    }
+
+    function onTelegramAuth(user) {
+      telegramPayload = user;
+      authenticate('Telegram', user);
+    }
+
+    async function authenticate(provider, credential) {
+      hideMsg();
+      try {
+        const result = await server('apiCreateSession', provider, credential);
+        if (result.status !== 'Approved') {
+          msg(result.message || result.status, 'error');
+          return;
+        }
+        appSession = result.session;
+        currentUser = result.user;
+        showDashboard();
+      } catch (e) {
+        msg(e.message, 'error');
+      }
+    }
+
+    async function googleRegister() {
+      if (!googleCredential) {
+        msg('សូមចុចប៊ូតុង Google Sign-In ខាងលើជាមុនសិនដើម្បីបញ្ជាក់អត្តសញ្ញាណ។', 'error');
+        return;
+      }
+      try {
+        const r = await server('apiRegisterGoogle', googleCredential);
+        msg(r.message, 'success');
+      } catch(e) {
+        msg(e.message, 'error');
+      }
+    }
+
+    async function telegramRegister() {
+      if (!telegramPayload) {
+        msg('សូមចូលតាមរយៈ Telegram Widget ខាងលើជាមុនសិនដើម្បីបញ្ជាក់អត្តសញ្ញាណ។', 'error');
+        return;
+      }
+      try {
+        const r = await server('apiRegisterTelegram', telegramPayload);
+        msg(r.message, 'success');
+      } catch(e) {
+        msg(e.message, 'error');
+      }
+    }
+
+    function showDashboard() {
+      document.getElementById('loginPanel').classList.add('hidden');
+      document.getElementById('profilePanel').classList.remove('hidden');
+      document.getElementById('profile').textContent = currentUser.name + ' (' + currentUser.role + ')';
+      
+      if (currentUser.role === 'Admin') {
+        document.getElementById('adminPanel').classList.remove('hidden');
+        loadRequests();
+      } else {
+        document.getElementById('teacherPanel').classList.remove('hidden');
+      }
+    }
+
+    async function loadRequests() {
+      if (!appSession || !currentUser || currentUser.role !== 'Admin') return;
+      try {
+        const list = await server('apiAdminListRequests', appSession);
+        const body = document.getElementById('requestsBody');
+        body.replaceChildren();
+
+        if (list.length === 0) {
+          const tr = document.createElement('tr');
+          tr.innerHTML = '<td colspan="6" style="text-align:center; padding: 20px;" class="muted">ពុំមានសំណើរង់ចាំការអនុម័តនៅឡើយទេ។</td>';
+          body.appendChild(tr);
+          return;
+        }
+
+        list.forEach(item => {
+          const tr = document.createElement('tr');
+          const providerTag = `<span class="tag ${item.provider === 'Google' ? 'tag-google' : 'tag-telegram'}">${item.provider}</span>`;
+          const statusTag = `<span class="tag tag-pending">${item.status}</span>`;
+          const reqDate = item.requestedAt ? new Date(item.requestedAt).toLocaleString('km-KH') : '—';
+
+          tr.innerHTML = `
+            <td>${providerTag}</td>
+            <td><strong>${item.name}</strong></td>
+            <td>${item.email || '—'}</td>
+            <td>${reqDate}</td>
+            <td>${statusTag}</td>
+            <td style="white-space: nowrap;">
+              <select id="role_${item.requestId}" style="padding: 6px 10px; margin-right: 6px;">
+                <option value="Teacher" selected>Teacher</option>
+                <option value="Admin">Admin</option>
+              </select>
+              <button type="button" style="padding: 6px 12px; background: #16a34a;" onclick="review('${item.requestId}', 'Approved')">Approve</button>
+              <button type="button" style="padding: 6px 12px; background: #dc2626;" onclick="review('${item.requestId}', 'Rejected')">Reject</button>
+            </td>
+          `;
+          body.appendChild(tr);
+        });
+      } catch(e) {
+        msg(e.message, 'error');
+      }
+    }
+
+    async function review(requestId, decision) {
+      try {
+        const roleSel = document.getElementById('role_' + requestId);
+        const role = roleSel ? roleSel.value : 'Teacher';
+        await server('apiAdminReviewRequest', appSession, requestId, decision, role);
+        msg('បានធ្វើបច្ចុប្បន្នភាពសំណើជោគជ័យ៖ ' + decision, 'success');
+        loadRequests();
+      } catch(e) {
+        msg(e.message, 'error');
+      }
+    }
+
+    function logout() {
+      appSession = '';
+      currentUser = null;
+      googleCredential = '';
+      telegramPayload = null;
+      document.getElementById('loginPanel').classList.remove('hidden');
+      document.getElementById('profilePanel').classList.add('hidden');
+      document.getElementById('adminPanel').classList.add('hidden');
+      document.getElementById('teacherPanel').classList.add('hidden');
+      msg('បានចាកចេញពី CMS ដោយជោគជ័យ។', 'success');
+    }
+
+    function initGoogle() {
+      if (!window.google || !google.accounts || !google.accounts.id) {
+        setTimeout(initGoogle, 300);
+        return;
+      }
+      google.accounts.id.initialize({
+        client_id: GOOGLE_CLIENT_ID,
+        callback: googleCallback
+      });
+      google.accounts.id.renderButton(
+        document.getElementById('googleButton'),
+        { theme: 'outline', size: 'large', text: 'signin_with', shape: 'pill' }
+      );
+    }
+
+    function initTelegram() {
+      const container = document.getElementById('telegramButton');
+      if (!container) return;
+      container.innerHTML = '';
+      const script = document.createElement('script');
+      script.src = 'https://telegram.org/js/telegram-widget.js?22';
+      script.async = true;
+      script.setAttribute('data-telegram-login', TELEGRAM_BOT_USERNAME);
+      script.setAttribute('data-size', 'large');
+      script.setAttribute('data-radius', '12');
+      script.setAttribute('data-userpic', 'false');
+      script.setAttribute('data-onauth', 'onTelegramAuth(user)');
+      script.setAttribute('data-request-access', 'write');
+      container.appendChild(script);
+    }
+
+    window.addEventListener('load', () => {
+      initGoogle();
+      initTelegram();
+    });
+  </script>
+</body>
+</html>

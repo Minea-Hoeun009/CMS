@@ -2686,9 +2686,9 @@ window.openGoogleLoginModal = function(mode = 'login', errorHint = '') {
 
 // =========================================================================
 // ២. ចូល ឬភ្ជាប់ប្រព័ន្ធតាមរយៈ Telegram ដោយប្រើ Telegram Bot API Token (ClassroomMG Bot)
-window.TELEGRAM_BOT_TOKEN = "8800609850:AAFCb-JKYO_N9iZL2lSAkQx99hAR6w8_XGA";
-window.TELEGRAM_BOT_ID = "8800609850";
-window.TELEGRAM_BOT_USERNAME = "classroomMGbot";
+window.TELEGRAM_BOT_TOKEN = "9197469089:AAGmv6S5HANBW-6USnZ10U8uGZXKQadaYNw";
+window.TELEGRAM_BOT_ID = "9197469089";
+window.TELEGRAM_BOT_USERNAME = "classmsbot";
 
 window.telegramOtpSession = null;
 window.telegramOtpInterval = null;
@@ -2699,7 +2699,7 @@ window.handleTelegramLogin = function(mode = 'login') {
 
 // បើកផ្ទាំង Telegram Direct OAuth (auth.telegram.org)
 window.openTelegramDirectOAuth = function() {
-    const botId = window.TELEGRAM_BOT_ID || "8800609850";
+    const botId = window.TELEGRAM_BOT_ID || "9197469089";
     const origin = encodeURIComponent(window.location.origin);
     const url = `https://oauth.telegram.org/auth?bot_id=${botId}&origin=${origin}&embed=0`;
     const popup = window.open(url, 'telegram_oauth', 'width=550,height=470,toolbar=0,menubar=0,location=0');
@@ -2709,7 +2709,7 @@ window.openTelegramDirectOAuth = function() {
 };
 
 // បញ្ចូល Telegram Login Widget ផ្លូវការ
-window.loadTelegramOfficialWidget = function(botUsername = "classroomMGbot") {
+window.loadTelegramOfficialWidget = function(botUsername = "classmsbot") {
     const container = document.getElementById("telegramWidgetContainer");
     if (!container) return;
     container.innerHTML = "";
@@ -2761,9 +2761,9 @@ window.openTelegramLoginModal = function(mode = 'login') {
 
     const isLinkMode = mode === 'link';
     const titleText = isLinkMode ? "ភ្ជាប់ Telegram តាម Bot API Token" : "ចូលប្រព័ន្ធតាម Telegram Bot OTP";
-    const subText = isLinkMode ? "ផ្ទៀងផ្ទាត់ OTP តាមរយៈ @classroomMGbot" : "ប្រព័ន្ធសុវត្ថិភាពស្តង់ដារ៖ ផ្ញើ OTP តាម @classroomMGbot";
+    const subText = isLinkMode ? "ផ្ទៀងផ្ទាត់ OTP តាមរយៈ @classmsbot" : "ប្រព័ន្ធសុវត្ថិភាពស្តង់ដារ៖ ផ្ញើ OTP តាម @classmsbot";
     const prefilledUsername = (document.getElementById('pers_telegram_username')?.value || localStorage.getItem('auth_telegram_username') || '').replace(/^@/, '');
-    const botUsername = window.TELEGRAM_BOT_USERNAME || "classroomMGbot";
+    const botUsername = window.TELEGRAM_BOT_USERNAME || "classmsbot";
 
     modal.innerHTML = `
         <div class="bg-white dark:bg-slate-800 rounded-3xl w-full max-w-md overflow-hidden shadow-[0_25px_60px_-15px_rgba(0,0,0,0.5)] border border-slate-200 dark:border-slate-700 animate-scale-up my-auto relative z-10" onclick="event.stopPropagation()">
@@ -2887,8 +2887,8 @@ window.sendTelegramOtp = async function(forcedIdentifier = null, forcedMode = nu
     }
 
     try {
-        const botToken = window.TELEGRAM_BOT_TOKEN || "8800609850:AAFCb-JKYO_N9iZL2lSAkQx99hAR6w8_XGA";
-        const botUsername = window.TELEGRAM_BOT_USERNAME || "classroomMGbot";
+        const botToken = window.TELEGRAM_BOT_TOKEN || "9197469089:AAGmv6S5HANBW-6USnZ10U8uGZXKQadaYNw";
+        const botUsername = window.TELEGRAM_BOT_USERNAME || "classmsbot";
         const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
 
         let resolvedChatId = null;
