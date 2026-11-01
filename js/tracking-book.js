@@ -461,7 +461,7 @@ function renderTrackingBookPreview() {
   const ctx = (window.CMSPrintManager && typeof window.CMSPrintManager.getStandardContext === 'function')
     ? window.CMSPrintManager.getStandardContext({ academicYear, grade })
     : null;
-  const solarDateStr = ctx?.solarDateStr || (typeof window.getFormattedSolarDate === 'function' ? window.getFormattedSolarDate() : "ថ្ងៃទី.......ខែ..........ឆ្នាំ២០២៦");
+  const solarDateStr = ctx?.solarDateStr || (typeof window.getFormattedSolarDate === 'function' ? window.getFormattedSolarDate() : "ធ្វើនៅ..... ថ្ងៃទី.......ខែ..........ឆ្នាំ២០២៦");
   const savedConduct = localStorage.getItem(`conduct_${student.id}`) || student.conduct || "ល្អប្រសើរ";
 
   // ទំហំក្រដាស និងទិសដៅពី Controls (A4 Landscape Default)
@@ -973,7 +973,7 @@ function renderTrackingBookPreview() {
 
       <div class="mt-auto pt-2 border-t border-dotted border-[#1e3a8a] text-center">
          <div class="flex justify-between items-center text-[9.5px] px-2 text-[#1e3a8a]">
-           <span class="font-bold">កាលបរិច្ឆេទពិនិត្យ៖ ថ្ងៃទី.......ខែ..........ឆ្នាំ២០.......</span>
+           <span class="font-bold">ធ្វើនៅ..... ថ្ងៃទី.......ខែ..........ឆ្នាំ២០.......</span>
            <span class="font-moul text-[8.5px]">ហត្ថលេខា ឬស្នាមមេដៃអាណាព្យាបាល</span>
          </div>
       </div>

@@ -188,19 +188,6 @@ window.loadReportsView = function() {
                         </div>
                     </div>
 
-                    <!-- KrouDigital Card 6: របាយការណ៍វត្តមាន -->
-                    <div onclick="window.openReportDetail('attendance')" class="bg-white/90 backdrop-blur-md rounded-[2rem] p-6 shadow-sm hover:shadow-[0_20px_40px_rgb(16,185,129,0.18)] hover:-translate-y-1.5 transition-all duration-300 cursor-pointer border-2 border-emerald-100 hover:border-emerald-400 group flex flex-col justify-between h-[210px] relative overflow-hidden">
-                        <div class="absolute -right-4 -top-4 w-24 h-24 bg-emerald-50 rounded-full group-hover:scale-150 transition-transform duration-500 ease-out pointer-events-none"></div>
-                        <div class="flex items-center justify-between relative z-10">
-                            <div class="w-14 h-14 bg-gradient-to-br from-emerald-500 to-teal-600 text-white rounded-2xl flex items-center justify-center text-2xl shadow-md shadow-emerald-500/30 group-hover:scale-110 transition-transform"><i class="fa-solid fa-calendar-check"></i></div>
-                            <span class="text-[10px] bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded-full uppercase">Attendance</span>
-                        </div>
-                        <div class="relative z-10">
-                            <h3 class="font-moul text-[15px] text-slate-900 mb-1.5 group-hover:text-emerald-600">របាយការណ៍វត្តមាន</h3>
-                            <p class="text-slate-500 text-[11px] leading-relaxed">ស្ថិតិវត្តមាន និងអវត្តមានសិស្សប្រចាំខែ និងឆ្នាំ</p>
-                        </div>
-                    </div>
-
                     <!-- KrouDigital Card 7: លទ្ធផលសិក្សា (ប្រចាំខែ ឆមាស ប្រចាំឆ្នាំ) -->
                     <div onclick="window.openReportDetail('report_ko_kho')" class="bg-white/90 backdrop-blur-md rounded-[2rem] p-6 shadow-sm hover:shadow-[0_20px_40px_rgb(16,185,129,0.18)] hover:-translate-y-1.5 transition-all duration-300 cursor-pointer border-2 border-emerald-100 hover:border-emerald-400 group flex flex-col justify-between h-[210px] relative overflow-hidden">
                         <div class="absolute -right-4 -top-4 w-24 h-24 bg-emerald-50 rounded-full group-hover:scale-150 transition-transform duration-500 ease-out pointer-events-none"></div>
@@ -239,19 +226,6 @@ window.loadReportsView = function() {
                         <div class="absolute -right-4 -top-4 w-24 h-24 bg-teal-50 rounded-full group-hover:scale-150 transition-transform duration-500 ease-out pointer-events-none"></div>
                         <div class="w-14 h-14 bg-gradient-to-br from-teal-400 to-emerald-600 text-white rounded-2xl flex items-center justify-center text-2xl shadow-md shadow-emerald-500/30 group-hover:scale-110 transition-transform relative z-10"><i class="fa-solid fa-file-excel"></i></div>
                         <div class="relative z-10"><h3 class="font-moul text-[15px] text-slate-800 mb-1.5 group-hover:text-teal-600">Master Excel</h3><p class="text-slate-500 text-[11px] leading-relaxed">នាំចេញឯកសារ Excel ច្រើន Sheet រួមមាន បញ្ជីសិស្ស និងពិន្ទុ។</p></div>
-                    </div>
-
-                    <!-- Card 11: ច្រកពិនិត្យលទ្ធផលមាតាបិតា -->
-                    <div onclick="window.KrouDigital && window.KrouDigital.openParentPortalModal()" class="bg-white/90 backdrop-blur-md rounded-[2rem] p-6 shadow-sm hover:shadow-[0_20px_40px_rgb(14,165,233,0.18)] hover:-translate-y-1.5 transition-all duration-300 cursor-pointer border-2 border-sky-100 hover:border-sky-400 group flex flex-col justify-between h-[210px] relative overflow-hidden">
-                        <div class="absolute -right-4 -top-4 w-24 h-24 bg-sky-50 rounded-full group-hover:scale-150 transition-transform duration-500 ease-out pointer-events-none"></div>
-                        <div class="flex items-center justify-between relative z-10">
-                            <div class="w-14 h-14 bg-gradient-to-br from-sky-400 to-blue-600 text-white rounded-2xl flex items-center justify-center text-2xl shadow-md shadow-sky-500/30 group-hover:scale-110 transition-transform"><i class="fa-solid fa-magnifying-glass-chart"></i></div>
-                            <span class="text-[10px] bg-sky-100 text-sky-800 font-bold px-2 py-0.5 rounded-full uppercase">Parent Portal</span>
-                        </div>
-                        <div class="relative z-10">
-                            <h3 class="font-moul text-[15px] text-slate-900 mb-1.5 group-hover:text-sky-600">ច្រកមាតាបិតា & សិស្ស</h3>
-                            <p class="text-slate-500 text-[11px] leading-relaxed">ស្វែងរកពិន្ទុ និងទាញយកព្រឹត្តិបត្រពិន្ទុសម្រាប់មាតាបិតា។</p>
-                        </div>
                     </div>
 
                     <!-- Card 12: បញ្ជីសារពើភ័ណ្ឌ (Classroom Inventory List) -->
@@ -1066,12 +1040,34 @@ window.openReportDetail = function(reportType) {
             }
         } else if (reportType === 'internal_rules') {
             titleEl.textContent = `បទបញ្ជាផ្ទៃក្នុង (${gradeFull})`;
+            if (extraControls) {
+                extraControls.classList.remove("hidden");
+                extraControls.innerHTML = `
+                    <button onclick="window.saveInternalRulesData('${curLevel}', '${curRoom}')" class="px-3 py-1 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold shadow flex items-center gap-1.5 transition active:scale-95">
+                        <i class="fa-solid fa-floppy-disk"></i> <span>រក្សាទុកខ្លឹមសារ</span>
+                    </button>
+                    <button onclick="window.resetInternalRulesData('${curLevel}', '${curRoom}')" class="px-2.5 py-1 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-xl text-xs font-medium transition active:scale-95" title="កំណត់ដើមវិញ">
+                        <i class="fa-solid fa-arrow-rotate-left"></i>
+                    </button>
+                `;
+            }
             if (window.CMSPrintManager) window.CMSPrintManager.updateToolbarDefaults('reportPaperArea', 'portrait', 'A4', 100);
             if (typeof window.renderInternalRulesReport === 'function') {
                 window.renderInternalRulesReport(paperArea, curLevel, curRoom);
             }
         } else if (reportType === 'class_principles') {
             titleEl.textContent = `គោលការណ៍ថ្នាក់រៀន (${gradeFull})`;
+            if (extraControls) {
+                extraControls.classList.remove("hidden");
+                extraControls.innerHTML = `
+                    <button onclick="window.saveClassPrinciplesData('${curLevel}', '${curRoom}')" class="px-3 py-1 bg-sky-600 hover:bg-sky-700 text-white rounded-xl text-xs font-bold shadow flex items-center gap-1.5 transition active:scale-95">
+                        <i class="fa-solid fa-floppy-disk"></i> <span>រក្សាទុកខ្លឹមសារ</span>
+                    </button>
+                    <button onclick="window.resetClassPrinciplesData('${curLevel}', '${curRoom}')" class="px-2.5 py-1 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-xl text-xs font-medium transition active:scale-95" title="កំណត់ដើមវិញ">
+                        <i class="fa-solid fa-arrow-rotate-left"></i>
+                    </button>
+                `;
+            }
             if (window.CMSPrintManager) window.CMSPrintManager.updateToolbarDefaults('reportPaperArea', 'portrait', 'A4', 100);
             if (typeof window.renderClassPrinciplesReport === 'function') {
                 window.renderClassPrinciplesReport(paperArea, curLevel, curRoom);
@@ -1198,7 +1194,7 @@ window.renderStudentStatsReportHTML = function(container, targetGrade, targetRoo
         locShort = rawLoc.replace(/^ធ្វើនៅ\s*/, '').replace(/,+$/, '').trim();
     } else {
         locShort = schoolName.replace(/^(សាលាបឋមសិក្សា|អនុវិទ្យាល័យ|វិទ្យាល័យ|សាលា)\s*/g, '').trim();
-        if (!locShort) locShort = districtName || "ដង្កោ";
+        if (!locShort) locShort = districtName || ".....";
     }
 
     let sDate = "";
@@ -1210,7 +1206,7 @@ window.renderStudentStatsReportHTML = function(container, targetGrade, targetRoo
     }
     if (sDate.includes("ថ្ងៃទី")) sDate = sDate.substring(sDate.indexOf("ថ្ងៃទី"));
 
-    const solarDateStr = `ធ្វើនៅ ${locShort} ${sDate}`;
+    const solarDateStr = `ធ្វើនៅ ${locShort || "....."}, ${sDate}`;
     const lunarDateStr = document.getElementById('global_lun_input')?.value || localStorage.getItem('rc_lunar_date') || localStorage.getItem('rep_lunar_date') || "ថ្ងៃចន្ទ ១៤រោច ខែកត្តិក ឆ្នាំថោះ បញ្ចស័ក ព.ស. ២៥៦៧";
 
     // គណនាទិន្នន័យអាយុសិស្សក្នុងថ្នាក់
@@ -3743,7 +3739,7 @@ window.renderSikhaKarikBooklet = function(container, targetGrade, targetRoom, st
 
                     <!-- ហត្ថលេខានាយកសាលា -->
                     <div style="text-align: right; margin-top: 6px; padding-right: 15px; font-size: 8pt;">
-                        <div>${ctx.solarDateStr || 'ថ្ងៃទី..........ខែ...........ឆ្នាំ២០..........'}</div>
+                        <div>${ctx.solarDateStr || 'ធ្វើនៅ..... ថ្ងៃទី..........ខែ...........ឆ្នាំ២០..........'}</div>
                         <div style="font-family: 'Khmer OS Muol Light', serif; color: #1e3a8a; margin-top: 3px; font-size: 9pt;">នាយកសាលា</div>
                         <div style="height: 20px;"></div>
                         <div style="font-family: 'Khmer OS Muol Light', serif; font-size: 8pt; color: #1e3a8a;">${principalName}</div>
@@ -3959,7 +3955,7 @@ window.renderSikhaKarikBooklet = function(container, targetGrade, targetRoom, st
                         </div>
                     </div>
                     <div style="text-align: right; margin-top: 6px; padding-right: 15px; font-size: 7.5pt;">
-                        <div>${ctx.solarDateStr || 'ថ្ងៃទី..........ខែ...........ឆ្នាំ២០..........'}</div>
+                        <div>${ctx.solarDateStr || 'ធ្វើនៅ..... ថ្ងៃទី..........ខែ...........ឆ្នាំ២០..........'}</div>
                         <div style="font-family: 'Khmer OS Muol Light', serif; color: #1e3a8a; margin-top: 2px;">គ្រូបន្ទុកថ្នាក់</div>
                         <div style="height: 18px;"></div>
                         <div style="font-family: 'Khmer OS Muol Light', serif; color: #1e3a8a;">${teacherName}</div>
@@ -3972,7 +3968,7 @@ window.renderSikhaKarikBooklet = function(container, targetGrade, targetRoom, st
                     <div style="border-bottom: 1px dotted #1e3a8a; height: 15px;"></div>
                     <div style="border-bottom: 1px dotted #1e3a8a; height: 15px;"></div>
                     <div style="text-align: right; margin-top: 6px; padding-right: 15px; font-size: 7.5pt;">
-                        <div>${ctx.solarDateStr || 'ថ្ងៃទី..........ខែ...........ឆ្នាំ២០..........'}</div>
+                        <div>${ctx.solarDateStr || 'ធ្វើនៅ..... ថ្ងៃទី..........ខែ...........ឆ្នាំ២០..........'}</div>
                         <div style="font-family: 'Khmer OS Muol Light', serif; color: #1e3a8a; margin-top: 2px;">នាយកសាលា</div>
                         <div style="height: 18px;"></div>
                         <div style="font-family: 'Khmer OS Muol Light', serif; color: #1e3a8a;">${principalName}</div>
@@ -5443,7 +5439,7 @@ window.renderClassInventoryReport = function(container, targetGrade, targetRoom)
     const academicYear = typeof window.toKhmerNum === 'function' ? window.toKhmerNum(rawAcademicYear) : '២០២៦-២០២៧';
     const teacherName = ctx.teacherName || localStorage.getItem('teacher_name') || '................................';
     const principalName = ctx.principalName || localStorage.getItem('school_principal') || '................................';
-    const solarDateStr = ctx.solarDate || (window.reportDateSettings ? window.reportDateSettings.solarDate : "ថ្ងៃទី....... ខែ....... ឆ្នាំ២០....");
+    const solarDateStr = ctx.solarDateStr || (window.reportDateSettings && window.reportDateSettings.location ? `ធ្វើនៅ ${window.reportDateSettings.location}, ${window.reportDateSettings.solarDate || 'ថ្ងៃទី....... ខែ....... ឆ្នាំ២០....'}` : "ធ្វើនៅ..... ថ្ងៃទី....... ខែ....... ឆ្នាំ២០....");
     const lunarDateStr = ctx.lunarDate || (window.reportDateSettings ? window.reportDateSettings.lunarDate : "ថ្ងៃ................. ខែ............. ឆ្នាំ......... ........ស័ក ព.ស.២៥....");
 
     // បញ្ជីសម្ភារស្តង់ដារ ៣២ មុខ តាមគំរូរូបភាពជាក់ស្តែង
@@ -5675,11 +5671,11 @@ window.renderInternalRulesReport = function(container, targetGrade, targetRoom) 
     const academicYear = typeof window.toKhmerNum === 'function' ? window.toKhmerNum(rawAcademicYear) : '២០២៦-២០២៧';
     const teacherName = ctx.teacherName || localStorage.getItem('teacher_name') || '................................';
     const principalName = ctx.principalName || localStorage.getItem('school_principal') || '................................';
-    const solarDateStr = ctx.solarDate || (window.reportDateSettings ? window.reportDateSettings.solarDate : "ថ្ងៃទី....... ខែ....... ឆ្នាំ២០....");
+    const solarDateStr = ctx.solarDateStr || (window.reportDateSettings && window.reportDateSettings.location ? `ធ្វើនៅ ${window.reportDateSettings.location}, ${window.reportDateSettings.solarDate || 'ថ្ងៃទី....... ខែ....... ឆ្នាំ២០....'}` : "ធ្វើនៅ..... ថ្ងៃទី....... ខែ....... ឆ្នាំ២០....");
     const lunarDateStr = ctx.lunarDate || (window.reportDateSettings ? window.reportDateSettings.lunarDate : "ថ្ងៃ................. ខែ............. ឆ្នាំ......... ........ស័ក ព.ស.២៥....");
 
     // ១២ ប្រការពេញលេញ តាមគំរូរូបភាពជាក់ស្តែង
-    const articles = [
+    const defaultArticles = [
         { num: "១", text: "ត្រូវមកសាលារៀនឱ្យបានទៀងទាត់ពេលវេលា យ៉ាងតិច ១៥ នាទីមុនចូលរៀន និងចូលរួមគោរពទង់ជាតិជារៀងរាល់ព្រឹក។" },
         { num: "២", text: "ត្រូវស្លៀកពាក់ឯកសណ្ឋានសិស្សឱ្យបានត្រឹមត្រូវ ស្អាតបាត សមរម្យ និងពាក់ផ្លាកឈ្មោះតាមការកំណត់របស់សាលារៀន។" },
         { num: "៣", text: "ត្រូវមានអាកប្បកិរិយាសមរម្យ សុភាពរាបសារ គោរពគំនាប់ចំពោះលោកគ្រូ អ្នកគ្រូ មាតាបិតា អាណាព្យាបាល និងចាស់ទុំ។" },
@@ -5694,14 +5690,24 @@ window.renderInternalRulesReport = function(container, targetGrade, targetRoom) 
         { num: "១២", text: "ករណីសិស្សឈប់សម្រាក ត្រូវមានច្បាប់សុំការអនុញ្ញាតពីគ្រូបន្ទុកថ្នាក់ជាលាយលក្ខណ៍អក្សរពីមាតាបិតា ឬអាណាព្យាបាល។" }
     ];
 
+    let articles = defaultArticles;
+    try {
+        const savedRules = localStorage.getItem(`custom_internal_rules_${curLevel}_${curRoom}`) || localStorage.getItem('custom_internal_rules');
+        if (savedRules) {
+            const parsed = JSON.parse(savedRules);
+            if (Array.isArray(parsed) && parsed.length > 0) articles = parsed;
+        }
+    } catch(e) {}
+
     const leftCol = articles.slice(0, 6);
     const rightCol = articles.slice(6, 12);
 
     const renderArticleCard = (art) => `
-        <div class="py-2.5 px-3 rounded-xl border border-rose-200/90 bg-rose-50/50 hover:bg-rose-50/80 transition flex items-start gap-2.5 shadow-xs">
+        <div class="py-2.5 px-3 rounded-xl border border-rose-200/90 bg-rose-50/50 hover:bg-rose-50/80 transition flex items-start gap-2.5 shadow-xs group">
             <span class="w-6 h-6 rounded-lg bg-rose-600 text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-sm">${art.num}</span>
-            <div class="text-slate-800 text-xs leading-relaxed">
-                <b class="text-rose-900 font-siemreap">ប្រការ ${art.num} ៖</b> ${art.text}
+            <div class="text-slate-800 text-xs leading-relaxed flex-1">
+                <b class="text-rose-900 font-siemreap">ប្រការ ${art.num} ៖</b>
+                <span contenteditable="true" spellcheck="false" class="rule-editable-text outline-none focus:bg-white focus:ring-1 focus:ring-rose-400 focus:rounded px-1 transition-all inline cursor-text" data-rule-num="${art.num}">${art.text}</span>
             </div>
         </div>
     `;
@@ -5804,7 +5810,7 @@ window.renderClassPrinciplesReport = function(container, targetGrade, targetRoom
     const academicYear = typeof window.toKhmerNum === 'function' ? window.toKhmerNum(rawAcademicYear) : '២០២៦-២០២៧';
     const teacherName = ctx.teacherName || localStorage.getItem('teacher_name') || '................................';
     const principalName = ctx.principalName || localStorage.getItem('school_principal') || '................................';
-    const solarDateStr = ctx.solarDate || (window.reportDateSettings ? window.reportDateSettings.solarDate : "ថ្ងៃទី....... ខែ....... ឆ្នាំ២០....");
+    const solarDateStr = ctx.solarDateStr || (window.reportDateSettings && window.reportDateSettings.location ? `ធ្វើនៅ ${window.reportDateSettings.location}, ${window.reportDateSettings.solarDate || 'ថ្ងៃទី....... ខែ....... ឆ្នាំ២០....'}` : "ធ្វើនៅ..... ថ្ងៃទី....... ខែ....... ឆ្នាំ២០....");
     const lunarDateStr = ctx.lunarDate || (window.reportDateSettings ? window.reportDateSettings.lunarDate : "ថ្ងៃ................. ខែ............. ឆ្នាំ......... ........ស័ក ព.ស.២៥....");
 
     // រកឈ្មោះប្រធានថ្នាក់
@@ -5814,7 +5820,7 @@ window.renderClassPrinciplesReport = function(container, targetGrade, targetRoom
     const monitorStudent = classStudents[0] ? (classStudents[0].name || classStudents[0].name_khmer || '................................') : '................................';
 
     // ១៦ ចំណុចគោលការណ៍ថ្នាក់រៀន តាមគំរូរូបភាពជាក់ស្តែង
-    const principles = [
+    const defaultPrinciples = [
         { num: 1, title: "មកឱ្យទាន់ពេលវេលា", desc: "មកដល់សាលា និងថ្នាក់រៀនយ៉ាងហោច ១៥ នាទីមុនចូលរៀន", icon: "fa-regular fa-clock" },
         { num: 2, title: "ស្លៀកពាក់ស្អាតបាត និងសមរម្យ", desc: "ស្លៀកពាក់ឯកសណ្ឋានសិស្សឱ្យបានត្រឹមត្រូវ និងមានរបៀប", icon: "fa-solid fa-shirt" },
         { num: 3, title: "គោរពលោកគ្រូ អ្នកគ្រូ និងចាស់ទុំ", desc: "លើកដៃសំពះ និងមានសុជីវធម៌ទន់ភ្លន់គ្រប់ពេលវេលា", icon: "fa-solid fa-hands-praying" },
@@ -5833,17 +5839,26 @@ window.renderClassPrinciplesReport = function(container, targetGrade, targetRoom
         { num: 16, title: "សុំច្បាប់ពេលឈប់សម្រាក", desc: "មានលិខិតសុំច្បាប់ពីមាតាបិតាពេលមានធុរៈ ឬឈឺ", icon: "fa-solid fa-file-signature" }
     ];
 
+    let principles = defaultPrinciples;
+    try {
+        const savedPrinc = localStorage.getItem(`custom_class_principles_${curLevel}_${curRoom}`) || localStorage.getItem('custom_class_principles');
+        if (savedPrinc) {
+            const parsed = JSON.parse(savedPrinc);
+            if (Array.isArray(parsed) && parsed.length > 0) principles = parsed;
+        }
+    } catch(e) {}
+
     const leftPrinciples = principles.slice(0, 8);
     const rightPrinciples = principles.slice(8, 16);
 
     const renderPrincipleCard = (p) => `
-        <div class="py-2.5 px-3 rounded-xl border border-sky-200 bg-sky-50/40 hover:bg-sky-50/80 transition flex items-center gap-3 shadow-xs">
+        <div class="py-2.5 px-3 rounded-xl border border-sky-200 bg-sky-50/40 hover:bg-sky-50/80 transition flex items-center gap-3 shadow-xs group">
             <span class="w-7 h-7 rounded-lg bg-gradient-to-br from-sky-500 to-indigo-600 text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-sm">${p.num}</span>
             <div class="flex-1 min-w-0">
-                <p class="font-bold text-sky-950 text-[11.5px] leading-snug">${p.title}</p>
-                <p class="text-[10px] text-slate-500 leading-tight truncate mt-0.5">${p.desc}</p>
+                <p contenteditable="true" spellcheck="false" class="principle-editable-title font-bold text-sky-950 text-[11.5px] leading-snug outline-none focus:bg-white focus:ring-1 focus:ring-sky-400 focus:rounded px-1 transition-all cursor-text" data-p-num="${p.num}">${p.title}</p>
+                <p contenteditable="true" spellcheck="false" class="principle-editable-desc text-[10px] text-slate-500 leading-tight outline-none focus:bg-white focus:ring-1 focus:ring-sky-400 focus:rounded px-1 transition-all truncate mt-0.5 cursor-text" data-p-num="${p.num}">${p.desc}</p>
             </div>
-            <i class="${p.icon} text-sky-400 text-sm shrink-0"></i>
+            <i class="${p.icon || 'fa-solid fa-check'} text-sky-400 text-sm shrink-0"></i>
         </div>
     `;
 
@@ -5881,7 +5896,7 @@ window.renderClassPrinciplesReport = function(container, targetGrade, targetRoom
                 ✨ « វិន័យនាំមកនូវសេចក្តីថ្លៃថ្នូរ • ការសិក្សានាំមកនូវចំណេះដឹង • អនាម័យនាំមកនូវសុខភាពល្អ » ✨
             </div>
 
-                        <!-- 16 Principles Grid (2 Columns x 8 Items - Evenly distributed across page) -->
+            <!-- 16 Principles Grid (2 Columns x 8 Items - Evenly distributed across page) -->
             <div class="grid grid-cols-2 gap-3 mb-3">
                 <div class="flex flex-col justify-between gap-2.5 h-full">
                     ${leftPrinciples.map(renderPrincipleCard).join('')}
@@ -5941,7 +5956,7 @@ window.renderCleaningScheduleReport = function(container, targetGrade, targetRoo
     const academicYear = typeof window.toKhmerNum === 'function' ? window.toKhmerNum(rawAcademicYear) : '២០២៦-២០២៧';
     const teacherName = ctx.teacherName || localStorage.getItem('teacher_name') || '................................';
     const principalName = ctx.principalName || localStorage.getItem('school_principal') || '................................';
-    const solarDateStr = ctx.solarDate || (window.reportDateSettings ? window.reportDateSettings.solarDate : "ថ្ងៃទី....... ខែ....... ឆ្នាំ២០....");
+    const solarDateStr = ctx.solarDateStr || (window.reportDateSettings && window.reportDateSettings.location ? `ធ្វើនៅ ${window.reportDateSettings.location}, ${window.reportDateSettings.solarDate || 'ថ្ងៃទី....... ខែ....... ឆ្នាំ២០....'}` : "ធ្វើនៅ..... ថ្ងៃទី....... ខែ....... ឆ្នាំ២០....");
     const lunarDateStr = ctx.lunarDate || (window.reportDateSettings ? window.reportDateSettings.lunarDate : "ថ្ងៃ................. ខែ............. ឆ្នាំ......... ........ស័ក ព.ស.២៥....");
 
     // សិស្សក្នុងថ្នាក់ជាក់ស្តែង
@@ -6134,7 +6149,7 @@ window.renderBranchCommitteeReport = function(container, targetGrade, targetRoom
     const academicYear = typeof window.toKhmerNum === 'function' ? window.toKhmerNum(rawAcademicYear) : '២០២៦-២០២៧';
     const teacherName = ctx.teacherName || localStorage.getItem('teacher_name') || '................................';
     const principalName = ctx.principalName || localStorage.getItem('school_principal') || '................................';
-    const solarDateStr = ctx.solarDate || (window.reportDateSettings ? window.reportDateSettings.solarDate : "ថ្ងៃទី....... ខែ....... ឆ្នាំ២០....");
+    const solarDateStr = ctx.solarDateStr || (window.reportDateSettings && window.reportDateSettings.location ? `ធ្វើនៅ ${window.reportDateSettings.location}, ${window.reportDateSettings.solarDate || 'ថ្ងៃទី....... ខែ....... ឆ្នាំ២០....'}` : "ធ្វើនៅ..... ថ្ងៃទី....... ខែ....... ឆ្នាំ២០....");
     const lunarDateStr = ctx.lunarDate || (window.reportDateSettings ? window.reportDateSettings.lunarDate : "ថ្ងៃ................. ខែ............. ឆ្នាំ......... ........ស័ក ព.ស.២៥....");
 
     // សិស្សក្នុងថ្នាក់

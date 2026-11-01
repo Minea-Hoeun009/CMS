@@ -1271,7 +1271,7 @@ window.CMSPrintManager = {
                 locShort = rawLoc.replace(/^ធ្វើនៅ\s*/, '').replace(/,+$/, '').trim();
             } else {
                 locShort = schoolName.replace(/^(សាលាបឋមសិក្សា|អនុវិទ្យាល័យ|វិទ្យាល័យ|សាលា)\s*/g, '').trim();
-                if (!locShort) locShort = districtName || "ភ្នំ";
+                if (!locShort) locShort = districtName || ".....";
             }
         }
 
@@ -1288,7 +1288,8 @@ window.CMSPrintManager = {
         }
         if (sDate.includes("ថ្ងៃទី")) sDate = sDate.substring(sDate.indexOf("ថ្ងៃទី"));
 
-        const solarDateStr = `ធ្វើនៅ ${locShort}, ${sDate}`;
+        const locPrefix = locShort ? `ធ្វើនៅ ${locShort}, ` : 'ធ្វើនៅ..... ';
+        const solarDateStr = `${locPrefix}${sDate}`;
 
         let lunarDateStr = "";
         let isLunarChecked = true;
