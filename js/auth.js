@@ -85,6 +85,62 @@ window.AppAuth = {
         }
     },
 
+    authenticateSocialUser: async function(profile) {
+        if (!profile) return;
+        const email = profile.email || "";
+        const name = profile.displayName || profile.name || (email ? email.split("@")[0] : "គ្រូបង្រៀន");
+        const uid = profile.uid || "";
+        const photoURL = profile.photoURL || null;
+
+        console.log("🔑 Authenticating Social User:", email, name);
+
+        // 1. ស្វែងរកគណនីគ្រូតាម Email ក្នុង Firestore
+        let matchedTeacher = null;
+        if (window.db && email) {
+            try {
+                const snap = await window.db.collection("teachers").where("email", "==", email).get();
+                if (!snap.empty) {
+                    matchedTeacher = snap.docs[0].data();
+                }
+            } catch (e) {
+                console.warn("Firestore lookup failed:", e);
+            }
+        }
+
+        // 2. ពិនិត្យសិទ្ធិ Admin ឬបង្កើតគណនីគ្រូថ្មីស្វ័យប្រវត្តិ
+        const eLower = email.toLowerCase();
+        const isAdmin = eLower.includes("sithpongrin") || eLower.includes("admin") || eLower.includes("hoeun");
+
+        if (!matchedTeacher) {
+            matchedTeacher = {
+                teacher_id: isAdmin ? "TCH-SYSADMIN" : `TCH-${uid ? uid.slice(0, 6).toUpperCase() : 'G' + Date.now().toString().slice(-4)}`,
+                name: name,
+                email: email,
+                username: email ? email.split("@")[0] : "teacher",
+                role: isAdmin ? "system_admin" : "teacher",
+                roles: isAdmin ? ["system_admin", "school_admin"] : ["teacher"],
+                assigned_grade: isAdmin ? "all" : "ថ្នាក់ទី ១",
+                assigned_room: isAdmin ? "all" : "«ក»",
+                school_id: "SCH-001",
+                status: "active",
+                photo_url: photoURL,
+                provider: profile.provider || "google",
+                created_at: new Date().toISOString()
+            };
+
+            // រក្សាទុកក្នុង Firestore
+            if (window.db) {
+                window.db.collection("teachers").doc(matchedTeacher.teacher_id).set(matchedTeacher, { merge: true }).catch(console.warn);
+            }
+        }
+
+        // 3. កំណត់ Session ចូលប្រព័ន្ធភ្លាមៗ
+        this.setAuthenticatedSession(matchedTeacher, uid);
+        if (typeof showToast === 'function') {
+            showToast(`ស្វាគមន៍ ${name}! ចូលប្រព័ន្ធជោគជ័យ ✅`);
+        }
+    },
+
     setAuthenticatedSession: function(teacherData, firebaseUid = null) {
         if (!teacherData) return;
 
