@@ -1193,29 +1193,36 @@ window.toggleAuthBox = function(type) {
     }
 };
 
-// ចូលទស្សនាប្រព័ន្ធជាភ្ញៀវ (Guest Mode / Read-Only Explore)
-window.loginAsGuest = function() {
-    const guestData = {
-        teacher_id: "TCH-GUEST",
-        name: "ភ្ញៀវកិត្តិយស (Guest)",
-        username: "guest",
-        role: "viewer",
-        roles: ["viewer"],
-        assigned_grade: "all",
-        assigned_room: "all",
+// ចូលប្រើជា គណនីគ្រូ (សាកល្បង) - Demo Teacher Account (KruHub Standard)
+window.loginAsTeacherDemo = function() {
+    const teacherData = {
+        teacher_id: "TCH-DEMO-01",
+        name: "លោកគ្រូ សុខ សាន្ត (គ្រូបន្ទុកថ្នាក់)",
+        email: "teacher@kruhub.com",
+        username: "teacher_demo",
+        role: "teacher",
+        roles: ["teacher", "homeroom_teacher"],
+        assigned_grade: "ថ្នាក់ទី ១",
+        assigned_room: "«ក»",
         school_id: "SCH-001",
         status: "active"
     };
     if (window.AppAuth && typeof window.AppAuth.setAuthenticatedSession === 'function') {
-        window.AppAuth.setAuthenticatedSession(guestData, null);
+        window.AppAuth.setAuthenticatedSession(teacherData, null);
     }
 };
 
-// ចូលប្រើជា Admin ភ្លាមៗ (Quick Admin Login)
+// ចូលទស្សនាប្រព័ន្ធជាភ្ញៀវ / គ្រូសាកល្បង (Guest Mode / Teacher Demo)
+window.loginAsGuest = function() {
+    return window.loginAsTeacherDemo();
+};
+
+// ចូលប្រើជា គណនី Admin (សាកល្បង) - Demo Admin Account (KruHub Standard)
 window.quickLoginAsAdmin = function() {
     const adminData = {
         teacher_id: "TCH-SYSADMIN",
-        name: "អ្នកគ្រប់គ្រងប្រព័ន្ធ (System Admin)",
+        name: "ស៊ីត ពង្សរិន (System Admin)",
+        email: "sithpongrin4@gmail.com",
         username: "admin",
         role: "system_admin",
         roles: ["system_admin", "school_admin"],
@@ -2464,10 +2471,53 @@ window.handleGoogleLogin = async function() {
     } catch (error) {
         console.error("Google Sign-In Error:", error);
         const errStr = String(error.code || error.message || error);
-        if (errStr.includes("configuration-not-found") || errStr.includes("unauthorized-domain")) {
-            window.showGoogleConfigModal(error.code, error.message);
+        const loginErr = document.getElementById("loginError");
+        
+        if (errStr.includes("configuration-not-found") || errStr.includes("unauthorized-domain") || errStr.includes("operation-not-allowed")) {
+            if (loginErr) {
+                loginErr.innerHTML = `
+                    <div class="space-y-2">
+                        <div class="flex items-start gap-2">
+                            <i class="fa-solid fa-triangle-exclamation text-amber-500 text-base shrink-0 mt-0.5"></i>
+                            <div>
+                                <p class="font-bold text-amber-900 dark:text-amber-200">មិនទាន់បានបើកដំណើរការ Google Sign-In ក្នុង Firebase ទេ</p>
+                                <p class="text-[11px] text-amber-800/90 dark:text-amber-300/80 leading-relaxed mt-0.5">គម្រោង Firebase (cms-v01) ត្រូវការ Enable Google Provider ក្នុង Firebase Console។ សូមជ្រើសរើសគណនីសាកល្បងខាងក្រោមដើម្បីចូលប្រើភ្លាមៗ៖</p>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2 pt-1">
+                            <button type="button" onclick="window.quickLoginAsAdmin()" class="py-2 px-3 bg-amber-500 hover:bg-amber-600 text-white rounded-xl font-bold text-xs shadow-sm transition active:scale-95 text-center">
+                                ⚡ Admin (សាកល្បង)
+                            </button>
+                            <button type="button" onclick="window.loginAsTeacherDemo()" class="py-2 px-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold text-xs shadow-sm transition active:scale-95 text-center">
+                                ⚡ គ្រូ (សាកល្បង)
+                            </button>
+                        </div>
+                        <div class="text-right pt-0.5">
+                            <a href="https://console.firebase.google.com/project/cms-v01/authentication/providers" target="_blank" class="text-[10px] text-indigo-600 dark:text-indigo-400 hover:underline">
+                                ⚙️ បើក Google Sign-In ក្នុង Firebase Console →
+                            </a>
+                        </div>
+                    </div>
+                `;
+                loginErr.classList.remove("hidden");
+            } else if (typeof window.showGoogleConfigModal === 'function') {
+                window.showGoogleConfigModal(error.code, error.message);
+            }
         } else {
-            alert("❌ ការភ្ជាប់ Google បរាជ័យ៖ " + (error.message || error));
+            if (loginErr) {
+                loginErr.innerHTML = `
+                    <div class="flex items-start gap-2">
+                        <i class="fa-solid fa-circle-exclamation text-rose-500 text-base shrink-0 mt-0.5"></i>
+                        <div class="flex-1">
+                            <p class="font-bold text-rose-800 dark:text-rose-200">ការភ្ជាប់ Google បរាជ័យ</p>
+                            <p class="text-[11px] text-rose-700/90 dark:text-rose-300/80 leading-relaxed mt-0.5">${error.message || error}</p>
+                        </div>
+                    </div>
+                `;
+                loginErr.classList.remove("hidden");
+            } else {
+                console.warn("Google Sign-In failed:", error.message || error);
+            }
         }
     } finally {
         if (btn) {
