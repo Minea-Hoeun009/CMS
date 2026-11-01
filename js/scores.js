@@ -1725,30 +1725,32 @@ window.loadScoresView = async function() {
       <!-- Modal ទី២៖ តារាងចំណាត់ថ្នាក់ -->
       <div id="modal-rankings" class="fixed inset-0 z-[2000] hidden bg-slate-900/60 p-3 md:p-6 transition-all duration-300 font-siemreap" style="backdrop-filter: none !important;">
           <div id="modal-rankings-container" class="bg-slate-50 w-full h-full rounded-[2.5rem] flex flex-col overflow-hidden shadow-2xl relative border border-white/40 transform scale-95 opacity-0 transition-all duration-300 data-[open=true]:scale-100 data-[open=true]:opacity-100">
-              <div class="bg-white p-2 sm:p-2.5 md:p-3 border-b border-slate-200/80 flex items-center gap-2 shrink-0 z-20 overflow-x-auto custom-scrollbar flex-nowrap whitespace-nowrap w-full">
-                  <button onclick="window.closeScoreModal('modal-rankings')" class="px-3 py-1.5 sm:py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 flex items-center gap-1.5 font-bold text-xs transition shadow-sm active:scale-95 shrink-0" title="ថយក្រោយ"><i class="fa-solid fa-arrow-left text-sm"></i> <span>ថយក្រោយ</span></button>
-                  
-                  <div class="hidden sm:flex items-center gap-2 border-r border-slate-200 pr-3 shrink-0">
-                      <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-rose-400 to-rose-600 text-white flex items-center justify-center shadow-sm text-xs"><i class="fa-solid fa-ranking-star"></i></div>
-                      <h2 class="font-moul text-xs text-slate-800">តារាងចំណាត់ថ្នាក់</h2>
+              <div class="bg-white p-2 sm:p-2.5 md:p-3 border-b border-slate-200/80 flex items-center justify-between gap-2 shrink-0 z-20 overflow-x-auto custom-scrollbar flex-nowrap whitespace-nowrap w-full">
+                  <div class="flex items-center gap-2 shrink-0">
+                      <button onclick="window.closeScoreModal('modal-rankings')" class="px-3 py-1.5 sm:py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 flex items-center gap-1.5 font-bold text-xs transition shadow-sm active:scale-95 shrink-0" title="ថយក្រោយ"><i class="fa-solid fa-arrow-left text-sm"></i> <span>ថយក្រោយ</span></button>
+                      
+                      <div class="hidden sm:flex items-center gap-2 border-r border-slate-200 pr-3 shrink-0">
+                          <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-rose-400 to-rose-600 text-white flex items-center justify-center shadow-sm text-xs"><i class="fa-solid fa-ranking-star"></i></div>
+                          <h2 class="font-moul text-xs text-slate-800">តារាងចំណាត់ថ្នាក់</h2>
+                      </div>
+
+                      <div class="relative w-36 sm:w-44 shrink-0">
+                          <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                          <input type="text" placeholder="ស្វែងរកឈ្មោះ..." value="${window.rankingsSearchQuery}" oninput="window.filterRankingsTable(this.value, window.rankingsGenderFilter)" class="pl-8 pr-3 py-1.5 sm:py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold outline-none w-full focus:ring-2 focus:ring-indigo-500">
+                      </div>
+
+                      <select onchange="window.filterRankingsTable(window.rankingsSearchQuery, this.value)" class="bg-white border border-slate-200 rounded-xl px-2.5 py-1.5 sm:py-2 text-xs font-bold outline-none cursor-pointer shrink-0">
+                          <option value="all" ${window.rankingsGenderFilter==='all'?'selected':''}>👥 ភេទទាំងអស់</option>
+                          <option value="ស្រី" ${window.rankingsGenderFilter==='ស្រី'?'selected':''}>👩 សិស្សស្រី</option>
+                          <option value="ប្រុស" ${window.rankingsGenderFilter==='ប្រុស'?'selected':''}>👨 សិស្សប្រុស</option>
+                      </select>
+
+                      <div class="w-px h-5 bg-slate-200 mx-0.5 shrink-0"></div>
+
+                      <button onclick="window.exportRankingsToExcel()" class="px-3.5 py-1.5 sm:py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-sm shrink-0 transition active:scale-95" title="នាំចេញជាឯកសារ Excel"><i class="fa-solid fa-file-excel"></i> <span>Export Excel</span></button>
+                      <button onclick="window.printRankingTable()" class="px-3.5 py-1.5 sm:py-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-xl text-xs font-bold shadow-md flex items-center gap-1.5 shrink-0 active:scale-95 transition" title="បោះពុម្ព / ព្រីនតារាងចំណាត់ថ្នាក់ A4"><i class="fa-solid fa-print"></i> <span>ព្រីន</span></button>
                   </div>
-
-                  <div class="relative w-36 sm:w-44 shrink-0">
-                      <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
-                      <input type="text" placeholder="ស្វែងរកឈ្មោះ..." value="${window.rankingsSearchQuery}" oninput="window.filterRankingsTable(this.value, window.rankingsGenderFilter)" class="pl-8 pr-3 py-1.5 sm:py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold outline-none w-full focus:ring-2 focus:ring-indigo-500">
-                  </div>
-
-                  <select onchange="window.filterRankingsTable(window.rankingsSearchQuery, this.value)" class="bg-white border border-slate-200 rounded-xl px-2.5 py-1.5 sm:py-2 text-xs font-bold outline-none cursor-pointer shrink-0">
-                      <option value="all" ${window.rankingsGenderFilter==='all'?'selected':''}>👥 ភេទទាំងអស់</option>
-                      <option value="ស្រី" ${window.rankingsGenderFilter==='ស្រី'?'selected':''}>👩 សិស្សស្រី</option>
-                      <option value="ប្រុស" ${window.rankingsGenderFilter==='ប្រុស'?'selected':''}>👨 សិស្សប្រុស</option>
-                  </select>
-
-                  <div class="w-px h-5 bg-slate-200 mx-0.5 shrink-0"></div>
-
-                  <button onclick="window.exportRankingsToExcel()" class="px-3.5 py-1.5 sm:py-2 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-sm shrink-0"><i class="fa-solid fa-file-excel"></i> <span>Export Excel</span></button>
-                  <button onclick="window.printRankingTable()" class="px-3.5 py-1.5 sm:py-2 bg-gradient-to-r from-rose-500 to-pink-600 text-white rounded-xl text-xs font-black shadow-md flex items-center gap-1.5 shrink-0"><i class="fa-solid fa-file-pdf"></i> <span>PDF / Print</span></button>
-                  <button onclick="if(window.KrouDigital && typeof window.KrouDigital.openCertificatesFromScores === 'function'){ window.closeScoreModal('modal-rankings'); window.KrouDigital.openCertificatesFromScores(); }" class="px-3.5 py-1.5 sm:py-2 bg-gradient-to-r from-amber-500 to-yellow-600 text-white rounded-xl text-xs font-black shadow-md flex items-center gap-1.5 shrink-0 hover:from-amber-600 hover:to-yellow-700 active:scale-95 transition" title="ចេញប័ណ្ណសរសើរសម្រាប់សិស្ស"><i class="fa-solid fa-award"></i> <span>ប័ណ្ណសរសើរ</span></button>
+                  <button onclick="window.closeScoreModal('modal-rankings')" class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 flex items-center justify-center transition shadow-sm active:scale-95 shrink-0 ml-auto" title="ចាកចេញ / បិទ (Close)"><i class="fa-solid fa-xmark text-lg"></i></button>
               </div>
               <div id="modal-content-rankings" class="flex-1 overflow-auto bg-slate-100/30 p-2 md:p-6 custom-scrollbar"></div>
           </div>
