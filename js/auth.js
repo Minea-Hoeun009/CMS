@@ -4084,6 +4084,7 @@ window.openGoogleSheetAccountsModal = async function() {
         modal = document.createElement("div");
         modal.id = "googleSheetAccountsModal";
         modal.className = "fixed inset-0 z-[9999] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4";
+        modal.onclick = function(ev) { if (ev.target === modal) window.closeGoogleSheetAccountsModal(); };
         modal.innerHTML = `
             <div class="bg-white dark:bg-slate-800 rounded-[2rem] shadow-2xl border border-slate-200 dark:border-slate-700 w-full max-w-2xl overflow-hidden animate-scaleIn">
                 <!-- Header -->
@@ -4097,7 +4098,7 @@ window.openGoogleSheetAccountsModal = async function() {
                             <p class="text-xs text-emerald-100">ទិន្នន័យគណនីដែលបានរក្សាទុកក្នុង Google Sheets</p>
                         </div>
                     </div>
-                    <button type="button" onclick="document.getElementById('googleSheetAccountsModal').classList.add('hidden')" class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition text-white outline-none">
+                    <button type="button" onclick="window.closeGoogleSheetAccountsModal()" class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition text-white outline-none">
                         <i class="fa-solid fa-xmark"></i>
                     </button>
                 </div>
@@ -4127,7 +4128,7 @@ window.openGoogleSheetAccountsModal = async function() {
                 <!-- Footer -->
                 <div class="p-4 bg-slate-50 dark:bg-slate-700/50 border-t border-slate-200 dark:border-slate-700 flex justify-between items-center text-xs">
                     <span id="gsheetAccountsCount" class="text-slate-500 dark:text-slate-400 font-bold">សរុប៖ ០ គណនី</span>
-                    <button type="button" onclick="document.getElementById('googleSheetAccountsModal').classList.add('hidden')" class="px-4 py-2 bg-slate-200 dark:bg-slate-600 hover:bg-slate-300 dark:hover:bg-slate-500 text-slate-700 dark:text-white rounded-xl font-bold transition">
+                    <button type="button" onclick="window.closeGoogleSheetAccountsModal()" class="px-4 py-2 bg-slate-200 dark:bg-slate-600 hover:bg-slate-300 dark:hover:bg-slate-500 text-slate-700 dark:text-white rounded-xl font-bold transition">
                         បិទ
                     </button>
                 </div>
@@ -4236,9 +4237,16 @@ window.filterGsheetAccountsModal = function() {
     }).join("");
 };
 
-window.selectTeacherAccountToLogin = function(username, grade, room) {
+window.closeGoogleSheetAccountsModal = function() {
     const modal = document.getElementById("googleSheetAccountsModal");
-    if (modal) modal.classList.add("hidden");
+    if (modal) {
+        modal.classList.remove("flex");
+        modal.classList.add("hidden");
+    }
+};
+
+window.selectTeacherAccountToLogin = function(username, grade, room) {
+    window.closeGoogleSheetAccountsModal();
 
     window.toggleAuthBox('login');
     const uInput = document.getElementById("usernameOrPhone");
