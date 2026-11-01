@@ -213,6 +213,17 @@ function setupDatabaseSheets() {
     usersSheet.getRange(2, 1, 1, SCHEMAS[SHEETS.USERS].length).setValues([adminUser]);
   }
 
+  // បង្កើត Default Teacher ក្នុង Teachers តារាង ប្រសិនបើនៅទទេ
+  const teachersSheet = ss.getSheetByName(SHEETS.TEACHERS);
+  if (teachersSheet && teachersSheet.getLastRow() <= 1) {
+    const nowIso = new Date().toISOString();
+    const adminTeacher = [
+      'TCH-SYSADMIN', 'admin', '', '', 'អ្នកគ្រប់គ្រងប្រព័ន្ធ (System Admin)',
+      'system_admin', 'គ្រប់ថ្នាក់', 'ទូទៅ', '012345678', 'admin@cms.school.local', 'active', nowIso, nowIso
+    ];
+    teachersSheet.getRange(2, 1, 1, SCHEMAS[SHEETS.TEACHERS].length).setValues([adminTeacher]);
+  }
+
   // សម្អាត Sheet1 ប្រសិនបើមានតារាង CMS រួច
   const defaultSheet = ss.getSheetByName('Sheet1') || ss.getSheetByName('សន្លឹក១');
   if (defaultSheet && ss.getSheets().length > 1) {
@@ -1787,15 +1798,47 @@ function doPost(e) {
       return createJsonResponse({ status: 'success', data: matched });
     }
 
-    // ៣.១១ Register User (Legacy)
+    // ៣.១១ Register User (Legacy & Modern Google Sheets sync)
     if (action === 'registerUser') {
-      const teacher = data;
+      const teacher = Object.assign({}, data);
       if (!teacher.teacher_id) teacher.teacher_id = `TCH-${Date.now()}`;
+      if (!teacher.username && teacher.user) teacher.username = teacher.user;
+      if (!teacher.grade && teacher.assigned_grade) teacher.grade = teacher.assigned_grade;
+      if (!teacher.room && teacher.assigned_room) teacher.room = teacher.assigned_room;
+      if (!teacher.phone && (teacher.contact || teacher.teacher_phone)) teacher.phone = teacher.contact || teacher.teacher_phone;
+      if (!teacher.email) {
+        if (teacher.phone && String(teacher.phone).includes('@')) {
+          teacher.email = teacher.phone;
+        } else if (teacher.username) {
+          teacher.email = String(teacher.username).toLowerCase() + '@school.gov.kh';
+        }
+      }
+      if (!teacher.role) teacher.role = 'teacher';
+      if (!teacher.status) teacher.status = 'active';
       teacher.updated_at = new Date().toISOString();
       if (!teacher.created_at) teacher.created_at = teacher.updated_at;
 
       upsertRecords(SHEETS.TEACHERS, [teacher], 'teacher_id');
-      return createJsonResponse({ status: 'success', message: 'បានចុះឈ្មោះគ្រូជោគជ័យ', teacher_id: teacher.teacher_id });
+
+      // Sync into SHEETS.USERS for RBAC compatibility
+      try {
+        const userRec = {
+          user_id: teacher.teacher_id,
+          display_name: teacher.name || teacher.username || 'គ្រូបង្រៀន',
+          email: teacher.email || '',
+          role: teacher.role || 'teacher',
+          status: teacher.status || 'active',
+          assigned_grade: teacher.grade || teacher.assigned_grade || '',
+          assigned_room: teacher.room || teacher.assigned_room || '',
+          created_at: teacher.created_at,
+          updated_at: teacher.updated_at
+        };
+        upsertRecords(SHEETS.USERS, [userRec], 'user_id');
+      } catch (uErr) {
+        // Ignored if USERS table not initialized
+      }
+
+      return createJsonResponse({ status: 'success', message: 'បានចុះឈ្មោះគ្រូជោគជ័យ', teacher_id: teacher.teacher_id, data: teacher });
     }
 
     // ៣.១២ Log Audit (Explicit)

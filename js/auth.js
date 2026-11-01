@@ -310,6 +310,25 @@ window.AppAuth = {
             }
         }
 
+        // 3. ស្វែងរកក្នុង Google Sheets តាមរយៈ fetchTeacherAccounts
+        if (typeof window.fetchTeacherAccounts === 'function') {
+            try {
+                const freshList = await window.fetchTeacherAccounts();
+                if (Array.isArray(freshList)) {
+                    const found = freshList.find(t => 
+                        (t.username && t.username.toLowerCase() === uLower) || 
+                        (t.teacher_id && t.teacher_id.toUpperCase() === uClean.toUpperCase()) ||
+                        (t.contact && t.contact === uClean)
+                    );
+                    if (found) {
+                        return { data: found, id: found.teacher_id };
+                    }
+                }
+            } catch(e) {
+                console.warn("GAS lookup fallback note:", e.message);
+            }
+        }
+
         return null;
     },
 
@@ -847,13 +866,18 @@ window.AppAuth = {
                 username: user.toLowerCase(),
                 password_hash: passwordHash,
                 contact: contact,
+                phone: contact,
+                email: contact && contact.includes('@') ? contact : `${user.toLowerCase()}@school.gov.kh`,
                 role: "teacher",
                 roles: ["teacher"],
+                grade: assignedGrade,
                 assigned_grade: assignedGrade,
+                room: assignedRoom,
                 assigned_room: assignedRoom,
                 school_id: "SCH-001",
                 school_name: schoolName,
                 status: "active",
+                source: "google_sheets",
                 created_at: new Date().toISOString(),
                 updated_at: new Date().toISOString()
             };
@@ -1099,33 +1123,33 @@ window.toggleAuthBox = function(type) {
     if (registerBox) registerBox.classList.add('hidden');
     if (helpBox) helpBox.classList.add('hidden');
 
-    const deactiveClass = ['text-slate-500', 'dark:text-slate-400', 'border-transparent'];
-    const activeClass = ['text-indigo-600', 'dark:text-indigo-400', 'border-indigo-600', 'dark:border-indigo-400'];
+    const deactiveClass = ['text-slate-500', 'dark:text-slate-400', 'border-transparent', 'bg-transparent', 'shadow-none'];
+    const activeClass = ['text-indigo-600', 'dark:text-indigo-400', 'bg-white', 'dark:bg-slate-700', 'shadow-sm', 'border-slate-200/60', 'dark:border-slate-600/60'];
 
     [tabLogin, tabRegister, tabHelp].forEach(t => {
         if (t) {
-            t.classList.remove(...activeClass);
-            t.classList.add(...deactiveClass);
+            t.classList.remove('text-indigo-600', 'dark:text-indigo-400', 'border-indigo-600', 'dark:border-indigo-400', 'bg-white', 'dark:bg-slate-700', 'shadow-sm', 'border-slate-200/60', 'dark:border-slate-600/60');
+            t.classList.add('text-slate-500', 'dark:text-slate-400', 'border-transparent');
         }
     });
 
     if (type === 'register') {
         if (registerBox) registerBox.classList.remove('hidden');
         if (tabRegister) {
-            tabRegister.classList.remove(...deactiveClass);
-            tabRegister.classList.add(...activeClass);
+            tabRegister.classList.remove('text-slate-500', 'dark:text-slate-400', 'border-transparent');
+            tabRegister.classList.add('text-indigo-600', 'dark:text-indigo-400', 'bg-white', 'dark:bg-slate-700', 'shadow-sm', 'border-slate-200/60', 'dark:border-slate-600/60');
         }
     } else if (type === 'help') {
         if (helpBox) helpBox.classList.remove('hidden');
         if (tabHelp) {
-            tabHelp.classList.remove(...deactiveClass);
-            tabHelp.classList.add(...activeClass);
+            tabHelp.classList.remove('text-slate-500', 'dark:text-slate-400', 'border-transparent');
+            tabHelp.classList.add('text-indigo-600', 'dark:text-indigo-400', 'bg-white', 'dark:bg-slate-700', 'shadow-sm');
         }
     } else {
         if (loginBox) loginBox.classList.remove('hidden');
         if (tabLogin) {
-            tabLogin.classList.remove(...deactiveClass);
-            tabLogin.classList.add(...activeClass);
+            tabLogin.classList.remove('text-slate-500', 'dark:text-slate-400', 'border-transparent');
+            tabLogin.classList.add('text-indigo-600', 'dark:text-indigo-400', 'bg-white', 'dark:bg-slate-700', 'shadow-sm', 'border-slate-200/60', 'dark:border-slate-600/60');
         }
     }
 };
@@ -1909,7 +1933,7 @@ window.DataServiceGuard = {
 // ១០. គ្រប់គ្រងគណនីគ្រូ (CRUD Operations & Multi-role Management)
 // =========================================================================
 
-window.fetchTeacherAccounts = async function() {
+window.fetchTeacherAccounts = async function(forceSync = false) {
     let teachers = [];
 
     // ១. ទាញពី Firestore បើមាន
@@ -1919,7 +1943,7 @@ window.fetchTeacherAccounts = async function() {
             if (!snap.empty) {
                 teachers = snap.docs.map(doc => {
                     const data = doc.data();
-                    const roles = window.normalizeRoles(data.roles || data.role, "teacher");
+                    const roles = typeof window.normalizeRoles === 'function' ? window.normalizeRoles(data.roles || data.role, "teacher") : [data.role || "teacher"];
                     return {
                         teacher_id: data.teacher_id || doc.id,
                         name: data.name || data.full_name || "លោកគ្រូ អ្នកគ្រូ",
@@ -1927,16 +1951,67 @@ window.fetchTeacherAccounts = async function() {
                         role: roles[0] || "teacher",
                         roles: roles,
                         contact: data.contact || data.phone || "",
-                        assigned_grade: data.assigned_grade || data.teacher_level || "ថ្នាក់ទី ១",
-                        assigned_room: data.assigned_room || data.teacher_room || "«ក»",
+                        phone: data.phone || data.contact || "",
+                        email: data.email || "",
+                        assigned_grade: data.assigned_grade || data.teacher_level || data.grade || "ថ្នាក់ទី ១",
+                        assigned_room: data.assigned_room || data.teacher_room || data.room || "«ក»",
+                        grade: data.grade || data.assigned_grade || data.teacher_level || "ថ្នាក់ទី ១",
+                        room: data.room || data.assigned_room || data.teacher_room || "«ក»",
                         school_id: data.school_id || "SCH-001",
                         status: data.status || "active",
+                        source: "firestore",
                         created_at: data.created_at || ""
                     };
                 });
             }
         } catch (e) {
             console.warn("Firestore fetchTeacherAccounts error:", e.message);
+        }
+    }
+
+    // ១.២. ទាញពី Google Sheets (GAS) ផ្ទាល់ (Action: getTeachers)
+    if (typeof window.apiGet === 'function') {
+        try {
+            const resp = await window.apiGet('getTeachers');
+            if (resp && resp.status === 'success' && Array.isArray(resp.data) && resp.data.length > 0) {
+                const gasTeachers = resp.data.map(t => {
+                    const roles = typeof window.normalizeRoles === 'function' ? window.normalizeRoles(t.roles || t.role, "teacher") : [t.role || "teacher"];
+                    return {
+                        teacher_id: t.teacher_id,
+                        name: t.name || t.full_name || t.username,
+                        username: (t.username || t.teacher_id).toLowerCase(),
+                        role: roles[0] || "teacher",
+                        roles: roles,
+                        contact: t.phone || t.contact || t.email || "",
+                        phone: t.phone || t.contact || "",
+                        email: t.email || "",
+                        assigned_grade: t.grade || t.assigned_grade || "ថ្នាក់ទី ១",
+                        assigned_room: t.room || t.assigned_room || "«ក»",
+                        grade: t.grade || t.assigned_grade || "ថ្នាក់ទី ១",
+                        room: t.room || t.assigned_room || "«ក»",
+                        school_id: t.school_id || "SCH-001",
+                        school_name: t.school_name || "",
+                        status: t.status || "active",
+                        source: "google_sheets",
+                        created_at: t.created_at || ""
+                    };
+                });
+
+                // បញ្ចូលគណនីពី Google Sheets ដោយមិនជាន់ Key គ្នា
+                const map = new Map();
+                teachers.forEach(t => map.set((t.username || t.teacher_id).toLowerCase(), t));
+                gasTeachers.forEach(t => {
+                    const k = (t.username || t.teacher_id).toLowerCase();
+                    if (!map.has(k)) {
+                        map.set(k, t);
+                    } else {
+                        map.set(k, Object.assign({}, map.get(k), t));
+                    }
+                });
+                teachers = Array.from(map.values());
+            }
+        } catch(gasErr) {
+            console.warn("Google Sheets fetchTeacherAccounts error:", gasErr.message);
         }
     }
 
@@ -3534,10 +3609,36 @@ window.loadUsersList = async function() {
     try {
         let users = [];
         if (typeof window.apiGet === 'function') {
-            const res = await window.apiGet("getUsers");
-            if (res && res.status === "success" && Array.isArray(res.data)) {
-                users = res.data;
+            try {
+                const resT = await window.apiGet("getTeachers");
+                if (resT && resT.status === "success" && Array.isArray(resT.data)) {
+                    users = resT.data.map(t => ({
+                        user_id: t.teacher_id,
+                        display_name: t.name || t.username,
+                        email: t.email || t.phone || t.contact || "",
+                        phone: t.phone || t.contact || "",
+                        role: t.role || "teacher",
+                        status: t.status || "active",
+                        assigned_grade: t.grade || t.assigned_grade || "-",
+                        assigned_room: t.room || t.assigned_room || "-",
+                        source: "Google Sheets"
+                    }));
+                }
+            } catch(eGasT) {
+                console.warn("GAS getTeachers error:", eGasT);
             }
+
+            try {
+                const resU = await window.apiGet("getUsers");
+                if (resU && resU.status === "success" && Array.isArray(resU.data)) {
+                    const existingIds = new Set(users.map(u => u.user_id));
+                    resU.data.forEach(u => {
+                        if (!existingIds.has(u.user_id)) {
+                            users.push(u);
+                        }
+                    });
+                }
+            } catch(eGasU) {}
         }
         if (users.length === 0 && window.db) {
             const snap = await window.db.collection("teachers").get();
@@ -3971,4 +4072,191 @@ window.filterAuditLogs = function() {
             </tr>
         `;
     }).join("");
+};
+
+// =========================================================================
+// ម៉ូដាល់ពិនិត្យ និងទាញបញ្ជីគណនីពី Google Sheets (Live Google Sheets Accounts)
+// =========================================================================
+
+window.openGoogleSheetAccountsModal = async function() {
+    let modal = document.getElementById("googleSheetAccountsModal");
+    if (!modal) {
+        modal = document.createElement("div");
+        modal.id = "googleSheetAccountsModal";
+        modal.className = "fixed inset-0 z-[9999] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4";
+        modal.innerHTML = `
+            <div class="bg-white dark:bg-slate-800 rounded-[2rem] shadow-2xl border border-slate-200 dark:border-slate-700 w-full max-w-2xl overflow-hidden animate-scaleIn">
+                <!-- Header -->
+                <div class="p-5 bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 text-white flex justify-between items-center">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center text-xl shadow-inner">
+                            <i class="fa-solid fa-table-cells"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-moul text-base leading-tight">បញ្ជីគណនីគ្រូ (Google Sheets)</h3>
+                            <p class="text-xs text-emerald-100">ទិន្នន័យគណនីដែលបានរក្សាទុកក្នុង Google Sheets</p>
+                        </div>
+                    </div>
+                    <button type="button" onclick="document.getElementById('googleSheetAccountsModal').classList.add('hidden')" class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition text-white outline-none">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+
+                <!-- Search & Actions -->
+                <div class="p-4 bg-slate-50 dark:bg-slate-700/40 border-b border-slate-200 dark:border-slate-700 flex flex-wrap gap-2.5 items-center justify-between text-xs">
+                    <div class="flex items-center gap-2 flex-1 min-w-[220px] bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 px-3 py-2 rounded-xl">
+                        <i class="fa-solid fa-magnifying-glass text-slate-400"></i>
+                        <input type="text" id="searchGsheetAccounts" oninput="window.filterGsheetAccountsModal()" placeholder="ស្វែងរកតាមឈ្មោះ, Username ឬថ្នាក់..." class="w-full bg-transparent font-bold outline-none text-slate-700 dark:text-white">
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button type="button" id="btnSyncGsheetAccounts" onclick="window.syncGsheetAccountsModal()" class="px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold transition flex items-center gap-1.5 shadow-sm active:scale-95">
+                            <i class="fa-solid fa-rotate"></i>
+                            <span>ទាញទិន្នន័យឡើងវិញ</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Accounts Container -->
+                <div class="p-4 max-h-[55vh] overflow-y-auto custom-scrollbar">
+                    <div id="gsheetAccountsLoading" class="text-center py-10 text-slate-400 text-xs font-bold">
+                        <i class="fa-solid fa-circle-notch fa-spin text-2xl mb-2 text-emerald-500"></i><br>កំពុងទាញយកទិន្នន័យគណនីពី Google Sheets...
+                    </div>
+                    <div id="gsheetAccountsList" class="space-y-2.5 hidden"></div>
+                </div>
+
+                <!-- Footer -->
+                <div class="p-4 bg-slate-50 dark:bg-slate-700/50 border-t border-slate-200 dark:border-slate-700 flex justify-between items-center text-xs">
+                    <span id="gsheetAccountsCount" class="text-slate-500 dark:text-slate-400 font-bold">សរុប៖ ០ គណនី</span>
+                    <button type="button" onclick="document.getElementById('googleSheetAccountsModal').classList.add('hidden')" class="px-4 py-2 bg-slate-200 dark:bg-slate-600 hover:bg-slate-300 dark:hover:bg-slate-500 text-slate-700 dark:text-white rounded-xl font-bold transition">
+                        បិទ
+                    </button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+    }
+
+    modal.classList.remove("hidden");
+    modal.classList.add("flex");
+    await window.syncGsheetAccountsModal();
+};
+
+window.cachedGsheetAccounts = [];
+
+window.syncGsheetAccountsModal = async function() {
+    const loading = document.getElementById("gsheetAccountsLoading");
+    const container = document.getElementById("gsheetAccountsList");
+    const btn = document.getElementById("btnSyncGsheetAccounts");
+    if (loading) loading.classList.remove("hidden");
+    if (container) container.classList.add("hidden");
+    if (btn) btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> កំពុងទាញ...';
+
+    try {
+        const teachers = await window.fetchTeacherAccounts(true);
+        window.cachedGsheetAccounts = Array.isArray(teachers) ? teachers : [];
+        window.filterGsheetAccountsModal();
+    } catch(err) {
+        if (loading) {
+            loading.innerHTML = `<span class="text-rose-500 font-bold">❌ បរាជ័យក្នុងការទាញយកពី Google Sheets: ${err.message}</span>`;
+        }
+    } finally {
+        if (btn) btn.innerHTML = '<i class="fa-solid fa-rotate"></i> ទាញទិន្នន័យឡើងវិញ';
+    }
+};
+
+window.filterGsheetAccountsModal = function() {
+    const q = document.getElementById("searchGsheetAccounts")?.value.toLowerCase().trim() || "";
+    const loading = document.getElementById("gsheetAccountsLoading");
+    const container = document.getElementById("gsheetAccountsList");
+    const countEl = document.getElementById("gsheetAccountsCount");
+
+    if (!container) return;
+
+    let list = window.cachedGsheetAccounts || [];
+    if (q) {
+        list = list.filter(t => 
+            String(t.name || '').toLowerCase().includes(q) ||
+            String(t.username || '').toLowerCase().includes(q) ||
+            String(t.teacher_id || '').toLowerCase().includes(q) ||
+            String(t.assigned_grade || t.grade || '').toLowerCase().includes(q) ||
+            String(t.assigned_room || t.room || '').toLowerCase().includes(q)
+        );
+    }
+
+    if (countEl) countEl.textContent = `សរុប៖ ${list.length} គណនី`;
+    if (loading) loading.classList.add("hidden");
+    container.classList.remove("hidden");
+
+    if (list.length === 0) {
+        container.innerHTML = `
+            <div class="text-center py-8 text-slate-400 font-bold text-xs">
+                <i class="fa-solid fa-user-slash text-2xl mb-2 text-slate-300"></i>
+                <p>គ្មានគណនីត្រូវនឹងលក្ខខណ្ឌស្វែងរកឡើយ</p>
+            </div>
+        `;
+        return;
+    }
+
+    container.innerHTML = list.map(t => {
+        const uName = t.name || t.username || "លោកគ្រូ អ្នកគ្រូ";
+        const uUser = t.username || "-";
+        const uId = t.teacher_id || "-";
+        const uGrade = t.assigned_grade || t.grade || "ថ្នាក់ទី ១";
+        const uRoom = t.assigned_room || t.room || "«ក»";
+        const uPhone = t.phone || t.contact || t.email || "មិនបានបញ្ជាក់";
+
+        return `
+            <div class="p-3 bg-slate-50 dark:bg-slate-700/50 hover:bg-emerald-50/50 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 transition">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center text-lg font-bold shrink-0">
+                        <i class="fa-solid fa-chalkboard-user"></i>
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <span class="font-bold text-slate-800 dark:text-white text-sm">${uName}</span>
+                            <span class="px-2 py-0.5 bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 rounded-full text-[10px] font-bold">
+                                <i class="fa-solid fa-table-cells text-[9px] mr-1"></i> Google Sheets
+                            </span>
+                        </div>
+                        <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                            <span><i class="fa-regular fa-user mr-1"></i><strong>${uUser}</strong> (${uId})</span>
+                            <span><i class="fa-solid fa-graduation-cap mr-1"></i>${uGrade} ${uRoom}</span>
+                            <span><i class="fa-solid fa-phone mr-1"></i>${uPhone}</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2 self-end sm:self-center shrink-0">
+                    <button type="button" onclick="window.selectTeacherAccountToLogin('${uUser}', '${uGrade}', '${uRoom}')" class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold text-xs transition flex items-center gap-1.5 shadow-sm active:scale-95">
+                        <i class="fa-solid fa-right-to-bracket"></i>
+                        <span>ជ្រើសរើសចូល</span>
+                    </button>
+                </div>
+            </div>
+        `;
+    }).join("");
+};
+
+window.selectTeacherAccountToLogin = function(username, grade, room) {
+    const modal = document.getElementById("googleSheetAccountsModal");
+    if (modal) modal.classList.add("hidden");
+
+    window.toggleAuthBox('login');
+    const uInput = document.getElementById("usernameOrPhone");
+    const pInput = document.getElementById("password");
+    const gSelect = document.getElementById("loginGrade");
+    const rSelect = document.getElementById("loginRoom");
+
+    if (uInput) {
+        uInput.value = username;
+        uInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+    if (gSelect && grade) gSelect.value = grade;
+    if (rSelect && room) rSelect.value = room;
+    if (pInput) {
+        pInput.focus();
+    }
+
+    if (typeof showToast === 'function') {
+        showToast(`✅ បានជ្រើសរើសគណនី «${username}» រួចរាល់! សូមបញ្ចូលលេខសម្ងាត់ដើម្បីចូល។`);
+    }
 };

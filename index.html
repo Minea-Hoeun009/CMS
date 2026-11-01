@@ -226,12 +226,12 @@
                     <div class="welcome-glass-card rounded-[2.2rem] shadow-[0_20px_50px_rgba(0,0,0,0.12)] p-6 sm:p-8 relative">
                         
                         <!-- Navigation Segment Tabs -->
-                        <div class="flex items-center justify-center gap-6 border-b border-slate-200 dark:border-slate-700 pb-3 mb-5 text-xs font-bold">
-                            <button type="button" id="tabAuthLogin" onclick="window.toggleAuthBox('login')" class="pb-2 border-b-2 border-indigo-600 dark:border-indigo-400 text-indigo-600 dark:text-indigo-400 transition-all outline-none flex items-center gap-1.5 text-sm">
+                        <div class="grid grid-cols-2 p-1.5 bg-slate-100 dark:bg-slate-800/90 rounded-2xl mb-5 border border-slate-200/80 dark:border-slate-700/80 shadow-inner">
+                            <button type="button" id="tabAuthLogin" onclick="window.toggleAuthBox('login')" class="py-2.5 rounded-xl font-bold transition-all outline-none flex items-center justify-center gap-2 text-sm text-indigo-600 dark:text-indigo-400 bg-white dark:bg-slate-700 shadow-sm border border-slate-200/60 dark:border-slate-600/60">
                                 <i class="fa-solid fa-arrow-right-to-bracket"></i>
                                 <span>ចូលប្រព័ន្ធ</span>
                             </button>
-                            <button type="button" id="tabAuthRegister" onclick="window.toggleAuthBox('register')" class="pb-2 border-b-2 border-transparent text-slate-500 dark:text-slate-400 hover:text-indigo-600 transition-all outline-none flex items-center gap-1.5 text-sm">
+                            <button type="button" id="tabAuthRegister" onclick="window.toggleAuthBox('register')" class="py-2.5 rounded-xl font-bold transition-all outline-none flex items-center justify-center gap-2 text-sm text-slate-500 dark:text-slate-400 hover:text-indigo-600 border border-transparent">
                                 <i class="fa-solid fa-user-plus"></i>
                                 <span>ចុះឈ្មោះគ្រូថ្មី</span>
                             </button>
@@ -305,6 +305,15 @@
                                 </button>
                             </div>
 
+                            <!-- ប៊ូតុងទាញ និងពិនិត្យមើលបញ្ជីគណនីពី Google Sheets -->
+                            <div class="pt-2 border-t border-slate-100 dark:border-slate-700/60">
+                                <button type="button" onclick="window.openGoogleSheetAccountsModal()" class="w-full flex items-center justify-center gap-2 py-2.5 px-3 bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/40 dark:hover:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300 rounded-xl font-bold transition border border-emerald-200/80 dark:border-emerald-800/80 shadow-sm text-xs group">
+                                    <i class="fa-solid fa-table-cells text-emerald-600 dark:text-emerald-400 group-hover:scale-110 transition-transform"></i>
+                                    <span>ទាញ និងពិនិត្យគណនីពី Google Sheets</span>
+                                    <span class="ml-auto text-[10px] px-2 py-0.5 bg-emerald-200/70 dark:bg-emerald-800/60 text-emerald-900 dark:text-emerald-100 rounded-full font-bold">ផ្ទាល់</span>
+                                </button>
+                            </div>
+
                             <p class="text-center text-xs text-slate-500 dark:text-slate-400 mt-4 font-bold">
                                 មិនទាន់មានគណនីមែនទេ? 
                                 <button type="button" onclick="window.toggleAuthBox('register')" class="text-indigo-600 dark:text-indigo-400 hover:underline ml-1 font-bold">
@@ -315,9 +324,17 @@
 
                         <!-- ផ្ទាំងចុះឈ្មោះ (Register Box) -->
                         <div id="authRegisterBox" class="text-left hidden">
+                            <!-- Banner Google Sheets Auto Sync -->
+                            <div class="p-2.5 bg-gradient-to-r from-emerald-500/10 via-teal-500/10 to-emerald-500/10 border border-emerald-500/20 rounded-xl mb-3 flex items-center justify-between text-xs">
+                                <span class="flex items-center gap-1.5 font-bold text-emerald-800 dark:text-emerald-300">
+                                    <i class="fa-solid fa-cloud-arrow-up text-emerald-600"></i> ចុះឈ្មោះ និងរក្សាទុកក្នុង Google Sheets
+                                </span>
+                                <span class="text-[10px] px-2 py-0.5 bg-emerald-600 text-white rounded-full font-bold">Auto Sync</span>
+                            </div>
+
                             <form onsubmit="window.handleRegister(event)" class="space-y-3">
                                 <div>
-                                    <label class="block text-[10px] font-bold text-slate-400 mb-1 uppercase tracking-wider">ឈ្មោះ និងនាមត្រកូល *</label>
+                                    <label class="block text-xs font-bold text-slate-700 dark:text-slate-200 mb-1">ឈ្មោះ និងនាមត្រកូល *</label>
                                     <div class="relative group">
                                         <i class="fa-regular fa-id-card absolute left-4 top-3 text-slate-400 text-sm group-focus-within:text-emerald-500 transition-colors"></i>
                                         <input type="text" id="regFullName" required placeholder="ឧ. សុខ សាន្ត" class="w-full pl-10 pr-4 py-2.5 bg-slate-50/70 dark:bg-slate-700/60 border border-slate-200 dark:border-slate-600 rounded-xl text-sm font-bold text-slate-700 dark:text-white outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-all">
@@ -325,7 +342,7 @@
                                 </div>
                                 
                                 <div>
-                                    <label class="block text-[10px] font-bold text-slate-400 mb-1 uppercase tracking-wider">ឈ្មោះគណនី (Username) *</label>
+                                    <label class="block text-xs font-bold text-slate-700 dark:text-slate-200 mb-1">ឈ្មោះគណនី (Username) *</label>
                                     <div class="relative group">
                                         <i class="fa-regular fa-user absolute left-4 top-3 text-slate-400 text-sm group-focus-within:text-emerald-500 transition-colors"></i>
                                         <input type="text" id="regUsername" required placeholder="ឧ. soksan" class="w-full pl-10 pr-4 py-2.5 bg-slate-50/70 dark:bg-slate-700/60 border border-slate-200 dark:border-slate-600 rounded-xl text-sm font-bold text-slate-700 dark:text-white outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-all lowercase">
@@ -333,7 +350,7 @@
                                 </div>
 
                                 <div>
-                                    <label class="block text-[10px] font-bold text-slate-400 mb-1 uppercase tracking-wider">លេខទូរស័ព្ទ ឬ អ៊ីមែល *</label>
+                                    <label class="block text-xs font-bold text-slate-700 dark:text-slate-200 mb-1">លេខទូរស័ព្ទ ឬ អ៊ីមែល *</label>
                                     <div class="relative group">
                                         <i class="fa-solid fa-phone absolute left-4 top-3 text-slate-400 text-sm group-focus-within:text-emerald-500 transition-colors"></i>
                                         <input type="text" id="regContact" required placeholder="ឧ. 012345678" class="w-full pl-10 pr-4 py-2.5 bg-slate-50/70 dark:bg-slate-700/60 border border-slate-200 dark:border-slate-600 rounded-xl text-sm font-bold text-slate-700 dark:text-white outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-all">
@@ -341,14 +358,14 @@
                                 </div>
 
                                 <!-- កំណត់ថ្នាក់ និងបន្ទប់រៀនទទួលបន្ទុក (Homeroom Classroom Setup) -->
-                                <div class="p-3 bg-emerald-50/60 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-800 rounded-2xl space-y-2.5">
-                                    <div class="flex items-center gap-2 text-emerald-800 dark:text-emerald-300 font-bold text-xs">
-                                        <i class="fa-solid fa-chalkboard-user"></i>
-                                        <span>កំណត់ថ្នាក់ និងបន្ទប់រៀនទទួលបន្ទុក *</span>
+                                <div class="p-3 bg-emerald-50/70 dark:bg-emerald-950/30 border border-emerald-200/80 dark:border-emerald-800/80 rounded-2xl space-y-2.5 shadow-sm">
+                                    <div class="flex items-center justify-between text-emerald-800 dark:text-emerald-300 font-bold text-xs">
+                                        <span class="flex items-center gap-1.5"><i class="fa-solid fa-chalkboard-user"></i> កំណត់ថ្នាក់ និងបន្ទប់រៀនទទួលបន្ទុក *</span>
+                                        <span class="text-[10px] text-emerald-600 dark:text-emerald-400 font-normal">ទាមទារ</span>
                                     </div>
                                     <div class="grid grid-cols-2 gap-2">
                                         <div>
-                                            <label class="block text-[10px] font-bold text-slate-500 mb-1">ថ្នាក់ទី *</label>
+                                            <label class="block text-[11px] font-bold text-slate-600 dark:text-slate-300 mb-1">ថ្នាក់ទី *</label>
                                             <select id="regGrade" class="w-full px-2.5 py-2 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-xs font-bold text-slate-700 dark:text-white outline-none focus:ring-2 focus:ring-emerald-500">
                                                 <option value="ថ្នាក់ទី ១" selected>ថ្នាក់ទី ១</option>
                                                 <option value="ថ្នាក់ទី ២">ថ្នាក់ទី ២</option>
@@ -365,7 +382,7 @@
                                             </select>
                                         </div>
                                         <div>
-                                            <label class="block text-[10px] font-bold text-slate-500 mb-1">បន្ទប់ *</label>
+                                            <label class="block text-[11px] font-bold text-slate-600 dark:text-slate-300 mb-1">បន្ទប់ *</label>
                                             <select id="regRoom" class="w-full px-2.5 py-2 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-xs font-bold text-slate-700 dark:text-white outline-none focus:ring-2 focus:ring-emerald-500">
                                                 <option value="«ក»" selected>«ក»</option>
                                                 <option value="«ខ»">«ខ»</option>
@@ -376,13 +393,13 @@
                                         </div>
                                     </div>
                                     <div>
-                                        <label class="block text-[10px] font-bold text-slate-500 mb-1">ឈ្មោះសាលារៀន</label>
-                                        <input type="text" id="regSchool" placeholder="ឧ. សាលាបឋមសិក្សា ខ្សុំ" class="w-full px-2.5 py-1.5 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-xs font-bold text-slate-700 dark:text-white outline-none focus:ring-2 focus:ring-emerald-500">
+                                        <label class="block text-[11px] font-bold text-slate-600 dark:text-slate-300 mb-1">ឈ្មោះសាលារៀន</label>
+                                        <input type="text" id="regSchool" placeholder="ឧ. សាលាបឋមសិក្សា ខ្សុំ" class="w-full px-3 py-1.5 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-xs font-bold text-slate-700 dark:text-white outline-none focus:ring-2 focus:ring-emerald-500">
                                     </div>
                                 </div>
 
                                 <div>
-                                    <label class="block text-[10px] font-bold text-slate-400 mb-1 uppercase tracking-wider">លេខសម្ងាត់ *</label>
+                                    <label class="block text-xs font-bold text-slate-700 dark:text-slate-200 mb-1">លេខសម្ងាត់ *</label>
                                     <div class="relative group">
                                         <i class="fa-solid fa-lock absolute left-4 top-3 text-slate-400 text-sm group-focus-within:text-emerald-500 transition-colors"></i>
                                         <input type="password" id="regPassword" required minlength="8" placeholder="យ៉ាងតិច ៨ តួអក្សរ" class="w-full pl-10 pr-10 py-2.5 bg-slate-50/70 dark:bg-slate-700/60 border border-slate-200 dark:border-slate-600 rounded-xl text-sm font-bold text-slate-700 dark:text-white outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-all" oninput="window.checkPasswordStrength(this.value)">
@@ -397,7 +414,7 @@
                                 </div>
 
                                 <div>
-                                    <label class="block text-[10px] font-bold text-slate-400 mb-1 uppercase tracking-wider">បញ្ជាក់លេខសម្ងាត់ *</label>
+                                    <label class="block text-xs font-bold text-slate-700 dark:text-slate-200 mb-1">បញ្ជាក់លេខសម្ងាត់ *</label>
                                     <div class="relative group">
                                         <i class="fa-solid fa-shield-halved absolute left-4 top-3 text-slate-400 text-sm group-focus-within:text-emerald-500 transition-colors"></i>
                                         <input type="password" id="regConfirmPassword" required minlength="8" placeholder="វាយលេខសម្ងាត់ម្ដងទៀត" class="w-full pl-10 pr-10 py-2.5 bg-slate-50/70 dark:bg-slate-700/60 border border-slate-200 dark:border-slate-600 rounded-xl text-sm font-bold text-slate-700 dark:text-white outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-all">
@@ -405,12 +422,12 @@
                                     </div>
                                 </div>
 
-                                <div class="flex items-start gap-2.5 p-2 bg-emerald-50/50 dark:bg-emerald-950/30 rounded-xl border border-emerald-100 dark:border-emerald-900">
+                                <div class="flex items-start gap-2.5 p-2.5 bg-emerald-50/50 dark:bg-emerald-950/30 rounded-xl border border-emerald-100 dark:border-emerald-900">
                                     <input type="checkbox" id="regTerms" required class="mt-0.5 border-slate-300 text-emerald-600 rounded focus:ring-emerald-500 cursor-pointer w-4 h-4">
-                                    <label for="regTerms" class="text-[10px] text-slate-600 dark:text-slate-300 leading-relaxed cursor-pointer font-bold">ខ្ញុំយល់ព្រមតាម <span class="text-emerald-600 dark:text-emerald-400">លក្ខខណ្ឌប្រើប្រាស់</span> និងរក្សាការសម្ងាត់ទិន្នន័យ។</label>
+                                    <label for="regTerms" class="text-[11px] text-slate-600 dark:text-slate-300 leading-relaxed cursor-pointer font-bold">ខ្ញុំយល់ព្រមតាម <span class="text-emerald-600 dark:text-emerald-400 underline">លក្ខខណ្ឌប្រើប្រាស់</span> និងរក្សាការសម្ងាត់ទិន្នន័យ។</label>
                                 </div>
 
-                                <button type="submit" id="btnRegister" class="w-full bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-bold py-3 rounded-2xl transition-all shadow-lg shadow-emerald-500/20 active:scale-95 text-xs flex items-center justify-center gap-2">
+                                <button type="submit" id="btnRegister" class="w-full bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-bold py-3.5 rounded-2xl transition-all shadow-lg shadow-emerald-500/20 active:scale-95 text-sm flex items-center justify-center gap-2">
                                     <i class="fa-solid fa-user-plus"></i> បង្កើតគណនីឥឡូវនេះ
                                 </button>
                             </form>

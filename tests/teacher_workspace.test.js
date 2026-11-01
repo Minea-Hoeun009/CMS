@@ -266,4 +266,26 @@ describe('Teacher Personal Workspace & Authentication Preferences Tests', () => 
     assert.equal(authCode.includes('window.linkTeacherGoogleAccount ='), true);
     assert.equal(authCode.includes('window.auth.getRedirectResult'), true);
   });
+
+  test('9. Google Sheets Teacher Accounts Integration & Live Modal Verification', () => {
+    const html = fs.readFileSync(path.resolve(__dirname, '../index.html'), 'utf8');
+    assert.equal(html.includes('window.openGoogleSheetAccountsModal()'), true);
+    assert.equal(html.includes('ទាញ និងពិនិត្យគណនីពី Google Sheets'), true);
+    assert.equal(html.includes('id="regFullName"'), true);
+    assert.equal(html.includes('id="regUsername"'), true);
+    assert.equal(html.includes('id="regContact"'), true);
+    assert.equal(html.includes('id="regGrade"'), true);
+    assert.equal(html.includes('id="regRoom"'), true);
+
+    const authCode = fs.readFileSync(path.resolve(__dirname, '../js/auth.js'), 'utf8');
+    assert.equal(authCode.includes('window.openGoogleSheetAccountsModal ='), true);
+    assert.equal(authCode.includes('window.syncGsheetAccountsModal ='), true);
+    assert.equal(authCode.includes('window.filterGsheetAccountsModal ='), true);
+    assert.equal(authCode.includes('window.selectTeacherAccountToLogin ='), true);
+    assert.equal(authCode.includes("window.apiGet('getTeachers')"), true);
+
+    const codeGs = fs.readFileSync(path.resolve(__dirname, '../google-apps-script/Code.gs'), 'utf8');
+    assert.equal(codeGs.includes("action === 'registerUser'"), true);
+    assert.equal(codeGs.includes("upsertRecords(SHEETS.TEACHERS, [teacher], 'teacher_id')"), true);
+  });
 });
