@@ -2463,13 +2463,107 @@ window.handleGoogleLogin = async function() {
 
     } catch (error) {
         console.error("Google Sign-In Error:", error);
-        alert("❌ ការភ្ជាប់ Google បរាជ័យ៖ " + (error.message || error));
+        const errStr = String(error.code || error.message || error);
+        if (errStr.includes("configuration-not-found") || errStr.includes("unauthorized-domain")) {
+            window.showGoogleConfigModal(error.code, error.message);
+        } else {
+            alert("❌ ការភ្ជាប់ Google បរាជ័យ៖ " + (error.message || error));
+        }
     } finally {
         if (btn) {
             btn.innerHTML = origHtml;
             btn.disabled = false;
         }
     }
+};
+
+// ផ្ទាំងណែនាំ និងសម្រួលការកំណត់ Firebase Console (Google Auth Guide & Quick Fallback)
+window.showGoogleConfigModal = function(errorCode, errorMessage) {
+    let modal = document.getElementById("googleConfigNoticeModal");
+    if (!modal) {
+        modal = document.createElement("div");
+        modal.id = "googleConfigNoticeModal";
+        modal.className = "fixed inset-0 z-[99999] bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4 font-siemreap overflow-y-auto animate-fade-in";
+        document.body.appendChild(modal);
+    }
+
+    const isConfigNotFound = String(errorCode || errorMessage).includes("configuration-not-found");
+    const currentHost = window.location.hostname || "cms-fawn-mu.vercel.app";
+
+    modal.innerHTML = `
+        <div class="bg-white dark:bg-slate-800 rounded-3xl w-full max-w-lg overflow-hidden shadow-2xl border border-slate-200 dark:border-slate-700 animate-scale-up my-auto">
+            <!-- Header -->
+            <div class="bg-gradient-to-r from-red-500 via-rose-500 to-amber-500 p-6 text-white relative">
+                <button type="button" onclick="const m=document.getElementById('googleConfigNoticeModal'); if(m){ m.remove(); }" class="absolute top-4 right-4 text-white/80 hover:text-white w-8 h-8 rounded-full bg-white/10 flex items-center justify-center transition">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+                <div class="flex items-center gap-3">
+                    <div class="w-12 h-12 rounded-2xl bg-white flex items-center justify-center text-red-500 text-2xl shadow-inner">
+                        <i class="fa-brands fa-google"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-moul text-base">ការកំណត់ Firebase Google Auth</h3>
+                        <p class="text-xs text-rose-100 mt-0.5">${isConfigNotFound ? 'ត្រូវការ Enable Google Sign-In ក្នុង Firebase' : 'ត្រូវការបន្ថែម Authorized Domain ក្នុង Firebase'}</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Content -->
+            <div class="p-6 space-y-4 text-xs font-siemreap text-left">
+                <!-- Alert Box -->
+                <div class="p-3.5 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 rounded-2xl text-amber-900 dark:text-amber-200 space-y-1.5">
+                    <div class="flex items-center gap-2 font-bold text-amber-800 dark:text-amber-300">
+                        <i class="fa-solid fa-triangle-exclamation text-base"></i>
+                        <span>${isConfigNotFound ? 'Firebase Error: auth/configuration-not-found' : 'Firebase Error: auth/unauthorized-domain'}</span>
+                    </div>
+                    <p class="text-[11px] leading-relaxed">
+                        ${isConfigNotFound ? 
+                        `គម្រោង Firebase <b>cms-v01</b> មិនទាន់បានបើកដំណើរការ (Enable) Google Sign-In Provider នៅក្នុង Firebase Console នៅឡើយទេ។` :
+                        `Domain <b>${currentHost}</b> មិនទាន់ត្រូវបានបញ្ចូលក្នុងបញ្ជី Authorized Domains នៃ Firebase ទេ។`}
+                    </p>
+                </div>
+
+                <!-- Steps to fix in Firebase Console -->
+                <div class="bg-slate-50 dark:bg-slate-700/50 p-4 rounded-2xl border border-slate-200 dark:border-slate-600 space-y-2.5">
+                    <p class="font-bold text-slate-800 dark:text-white text-xs">🛠️ ជំហានដោះស្រាយក្នុង Firebase Console (ចំណាយពេល ១ នាទី)៖</p>
+                    <ol class="list-decimal list-inside space-y-1.5 text-[11px] text-slate-600 dark:text-slate-300">
+                        <li>ចូលទៅកាន់ <a href="https://console.firebase.google.com/project/cms-v01/authentication/providers" target="_blank" class="text-indigo-600 dark:text-indigo-400 font-bold underline">Firebase Console (cms-v01)</a></li>
+                        <li>ចូលផ្នែក <b>Authentication</b> > ម៉ឺនុយ <b>Sign-in method</b></li>
+                        <li>ចុចលើ <b>Google</b> រួចបើក <b>Enable</b> (ជ្រើសរើស Support email របស់លោកគ្រូ) ហើយចុច <b>Save</b></li>
+                        <li>ចូលទៅកាន់ <b>Settings</b> > <b>Authorized domains</b> ហើយចុច Add Domain: <code class="bg-slate-200 dark:bg-slate-600 px-1.5 py-0.5 rounded font-mono font-bold text-slate-800 dark:text-white">${currentHost}</code></li>
+                    </ol>
+                    <a href="https://console.firebase.google.com/project/cms-v01/authentication/providers" target="_blank" class="inline-flex items-center justify-center gap-2 w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold transition shadow-sm mt-2 text-xs">
+                        <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                        <span>បើក Firebase Console (cms-v01) ឥឡូវនេះ</span>
+                    </a>
+                </div>
+
+                <!-- Instant 1-Click Fallback Login Option -->
+                <div class="border-t border-slate-200 dark:border-slate-700 pt-3">
+                    <p class="text-slate-500 dark:text-slate-400 font-bold text-[11px] mb-2 text-center">ឬចូលប្រើប្រាស់ភ្លាមៗដោយមិនបាច់រង់ចាំ៖</p>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button type="button" onclick="const m=document.getElementById('googleConfigNoticeModal'); if(m){ m.remove(); } window.quickLoginAsAdmin && window.quickLoginAsAdmin();" class="py-2.5 px-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold transition text-xs flex items-center justify-center gap-1.5 shadow-sm">
+                            <i class="fa-solid fa-crown text-amber-300"></i>
+                            <span>ចូលជា Admin ភ្លាមៗ</span>
+                        </button>
+                        <button type="button" onclick="const m=document.getElementById('googleConfigNoticeModal'); if(m){ m.remove(); } window.loginAsGuest && window.loginAsGuest();" class="py-2.5 px-3 bg-slate-200 hover:bg-slate-300 dark:bg-slate-600 dark:hover:bg-slate-500 text-slate-700 dark:text-slate-200 rounded-xl font-bold transition text-xs flex items-center justify-center gap-1.5">
+                            <i class="fa-solid fa-eye text-sky-500"></i>
+                            <span>ចូលមើលជា Guest</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="pt-1 text-center">
+                    <button type="button" onclick="const m=document.getElementById('googleConfigNoticeModal'); if(m){ m.remove(); }" class="px-5 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-600 dark:text-slate-300 rounded-xl font-bold transition text-xs">
+                        យល់ព្រម / បិទផ្ទាំង
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+
+    modal.classList.remove("hidden");
+    modal.style.display = "flex";
 };
 
 // មុខងារជំនួយសម្រាប់ Google Login Modal (Direct 1-Click Execution)
