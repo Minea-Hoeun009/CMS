@@ -30,7 +30,7 @@ window.handleReportYearChange = function(newYear) {
     } catch(e) {}
     const currentTeacherId = (window.AuthState && window.AuthState.teacherId) || localStorage.getItem('auth_teacher_id');
     if (currentTeacherId && typeof window.saveTeacherPersonalSettings === 'function') {
-        try { window.saveTeacherPersonalSettings({ academic_year: newYear }, currentTeacherId); } catch(e) {}
+        try { window.saveTeacherPersonalSettings(currentTeacherId, { academic_year: newYear }); } catch(e) {}
     }
     const globalSel = document.getElementById("globalAcademicYear");
     if (globalSel && globalSel.value !== newYear) globalSel.value = newYear;

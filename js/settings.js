@@ -324,8 +324,19 @@ window.linkTeacherTelegramDirectly = async function() {
     }
 };
 
-window.saveTeacherPersonalSettings = async function(teacherId, settings) {
-    const tId = teacherId || localStorage.getItem('auth_teacher_id') || "TCH-001";
+window.saveTeacherPersonalSettings = async function(arg1, arg2) {
+    let tId = null;
+    let settings = {};
+    if (typeof arg1 === 'string') {
+        tId = arg1;
+        settings = (typeof arg2 === 'object' && arg2 !== null) ? arg2 : {};
+    } else if (typeof arg1 === 'object' && arg1 !== null) {
+        settings = arg1;
+        tId = typeof arg2 === 'string' ? arg2 : (settings.teacher_id || localStorage.getItem('auth_teacher_id') || "TCH-001");
+    } else {
+        tId = typeof arg2 === 'string' ? arg2 : (localStorage.getItem('auth_teacher_id') || "TCH-001");
+        settings = {};
+    }
     const existing = window.getTeacherPersonalSettings(tId);
     const payload = {
         ...existing,
@@ -3455,36 +3466,35 @@ document.addEventListener("DOMContentLoaded", () => {
     setTimeout(() => { if (typeof window.updateSidebarFromSettings === 'function') window.updateSidebarFromSettings(); }, 100); 
 });
 
-// មុខងារផ្លាស់ប្តូរឆ្នាំសិក្សា (Dynamic Dropdowns)
+// មុខងារផ្លាស់ប្តូរឆ្នាំសិក្សា (Dynamic Dropdowns - Seamless SPA)
 window.changeGlobalAcademicYear = function(selectElement) {
     if (!selectElement) return;
-    const newYear = selectElement.value;
+    const newYear = typeof selectElement === 'string' ? selectElement : selectElement.value;
+    if (!newYear) return;
     
     localStorage.setItem('selected_academic_year', newYear);
+    localStorage.setItem('academic_year', newYear);
     if (window.appSettings) {
         window.appSettings.academic_year = newYear;
-        localStorage.setItem("school_settings", JSON.stringify(window.appSettings));
+        try { localStorage.setItem("school_settings", JSON.stringify(window.appSettings)); } catch(e) {}
     }
 
-    localStorage.removeItem('academic_scores');
-    localStorage.removeItem('academic_students');
-    localStorage.removeItem('academic_data');
+    const currentTeacherId = (window.AuthState && window.AuthState.teacherId) || localStorage.getItem('auth_teacher_id') || "TCH-001";
+    if (typeof window.saveTeacherPersonalSettings === 'function') {
+        try {
+            window.saveTeacherPersonalSettings(currentTeacherId, { academic_year: newYear });
+        } catch(e) {}
+    }
 
-    const loadingHtml = `
-    <div id="globalYearLoading" class="fixed inset-0 bg-slate-900/80 backdrop-blur-md z-[999999] flex flex-col justify-center items-center font-siemreap">
-        <div class="w-20 h-20 bg-white/10 rounded-3xl flex items-center justify-center mb-5 border border-white/20 shadow-2xl">
-            <i class="fa-solid fa-rotate fa-spin text-4xl text-sky-400"></i>
-        </div>
-        <h2 class="text-white text-2xl font-bold font-moul mb-3 tracking-wide">ប្តូរទៅឆ្នាំសិក្សា ${window.toKhmerNum(newYear)}</h2>
-        <p class="text-sky-200 text-sm font-medium bg-white/10 px-4 py-2 rounded-full">ប្រព័ន្ធកំពុងទាញយកទិន្នន័យថ្មី សូមរង់ចាំបន្តិច...</p>
-    </div>`;
-    document.body.insertAdjacentHTML('beforeend', loadingHtml);
-
-    setTimeout(() => { window.location.reload(); }, 1500); 
+    if (typeof window.handleYearChange === 'function') {
+        window.handleYearChange();
+    }
 };
 
 document.addEventListener("change", function(e) {
-    if (e.target && e.target.id === "globalAcademicYear") window.changeGlobalAcademicYear(e.target);
+    if (e.target && e.target.id === "globalAcademicYear") {
+        window.changeGlobalAcademicYear(e.target);
+    }
 });
 
 window.syncGlobalYearDropdown = function() {

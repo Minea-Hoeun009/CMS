@@ -1368,7 +1368,7 @@
             const currentTeacherId = (window.AuthState && window.AuthState.teacherId) || localStorage.getItem('auth_teacher_id');
             if (currentTeacherId && typeof window.saveTeacherPersonalSettings === 'function') {
                 try {
-                    window.saveTeacherPersonalSettings({ academic_year: year }, currentTeacherId);
+                    window.saveTeacherPersonalSettings(currentTeacherId, { academic_year: year });
                 } catch(e) {}
             }
 
