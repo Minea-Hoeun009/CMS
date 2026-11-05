@@ -73,6 +73,71 @@ window.removeCustomBookColumn = function() {
     }
 };
 
+window.editCustomBookColumn = function() {
+    if (!window.libSubjects || window.libSubjects.length === 0) return alert("មិនមានសៀវភៅសម្រាប់កែសម្រួលទេ!");
+    
+    let modal = document.getElementById("libEditSubjectsModal");
+    if (!modal) {
+        modal = document.createElement("div");
+        modal.id = "libEditSubjectsModal";
+        modal.className = "fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 font-siemreap animate-fade-in";
+        document.body.appendChild(modal);
+    }
+    
+    modal.innerHTML = `
+        <div class="bg-white rounded-3xl p-6 w-full max-w-md shadow-2xl border border-slate-200 animate-scale-up" onclick="event.stopPropagation()">
+            <div class="flex items-center justify-between mb-4 border-b border-slate-100 pb-3">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-9 h-9 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center font-bold">
+                        <i class="fa-solid fa-pen-to-square"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-slate-800 text-sm">កែសម្រួលបញ្ជីសៀវភៅ</h3>
+                        <p class="text-[11px] text-slate-500">កែប្រែឈ្មោះមុខវិជ្ជា/សៀវភៅក្នុងតារាងបណ្ណាល័យ</p>
+                    </div>
+                </div>
+                <button type="button" onclick="const m=document.getElementById('libEditSubjectsModal'); if(m) m.remove();" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center transition">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <div class="space-y-2.5 max-h-[350px] overflow-y-auto custom-scrollbar pr-1">
+                ${window.libSubjects.map((sub, idx) => `
+                    <div class="flex items-center gap-2 bg-slate-50 p-2.5 rounded-xl border border-slate-200/80">
+                        <span class="w-6 text-center text-xs font-bold text-slate-400 font-mono">${idx + 1}</span>
+                        <input type="text" id="libSubInput_${idx}" value="${sub.name}" class="flex-1 px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-bold text-slate-800 outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500" />
+                        <button type="button" onclick="window.saveSingleLibSubject(${idx})" class="px-2.5 py-1.5 bg-amber-50 hover:bg-amber-100 text-amber-700 rounded-lg text-xs font-bold transition flex items-center gap-1" title="រក្សាទុកឈ្មោះថ្មី">
+                            <i class="fa-solid fa-check"></i> <span>កែ</span>
+                        </button>
+                    </div>
+                `).join('')}
+            </div>
+
+            <div class="mt-5 pt-3 border-t border-slate-100 flex items-center justify-between">
+                <button type="button" onclick="const m=document.getElementById('libEditSubjectsModal'); if(m) m.remove(); window.addCustomBookColumn();" class="text-xs font-bold text-emerald-600 hover:underline flex items-center gap-1">
+                    <i class="fa-solid fa-plus"></i> បន្ថែមសៀវភៅថ្មី
+                </button>
+                <button type="button" onclick="const m=document.getElementById('libEditSubjectsModal'); if(m) m.remove();" class="px-4 py-2 bg-slate-800 hover:bg-slate-900 text-white rounded-xl text-xs font-bold transition">
+                    រួចរាល់
+                </button>
+            </div>
+        </div>
+    `;
+    modal.classList.remove("hidden");
+};
+
+window.saveSingleLibSubject = function(idx) {
+    const input = document.getElementById(`libSubInput_${idx}`);
+    if (!input) return;
+    const val = input.value.trim();
+    if (!val) return alert("សូមបញ្ចូលឈ្មោះសៀវភៅ!");
+    window.libSubjects[idx].name = val;
+    localStorage.setItem(`lib_subjects_${window.currentGradeFull}`, JSON.stringify(window.libSubjects));
+    window.renderLibTable();
+    window.saveLibData(true);
+    if (typeof showToast === 'function') showToast("✅ បានកែសម្រួលឈ្មោះសៀវភៅដោយជោគជ័យ!");
+};
+
 // ==========================================
 // ១. Layout មេនៃកម្មវិធី (Main UI)
 // ==========================================
@@ -174,9 +239,9 @@ window.loadLibraryView = async function() {
              </div>
 
              <!-- Tools & Classroom Selector -->
-             <div class="flex flex-wrap items-center justify-start xl:justify-end gap-3 relative z-10 w-full xl:w-auto">
+             <div class="flex flex-wrap items-center justify-start xl:justify-end gap-2.5 relative z-10 w-full xl:w-auto">
                 <!-- ថ្នាក់ទទួលបន្ទុកកំណត់ដោយស្វ័យប្រវត្តិតាមគ្រូផ្ទាល់ -->
-                <div class="flex items-center gap-2 bg-gradient-to-r from-indigo-50 to-blue-50 border border-indigo-200/80 rounded-xl px-3.5 py-2 shadow-sm">
+                <div class="flex items-center gap-2 bg-gradient-to-r from-indigo-50 to-blue-50 border border-indigo-200/80 rounded-xl px-3 py-2 shadow-sm">
                     <i class="fa-solid fa-graduation-cap text-indigo-600 text-sm"></i>
                     <span class="text-xs font-bold text-slate-600 font-siemreap">ថ្នាក់ទទួលបន្ទុក៖</span>
                     <span id="libDocGradeDisplay" class="text-xs font-bold text-indigo-700 font-moul">${window.currentGradeFull}</span>
@@ -189,12 +254,31 @@ window.loadLibraryView = async function() {
                     ${roomsOptions}
                 </select>
 
-                <div class="flex items-center gap-2">
-                   <button onclick="window.addCustomBookColumn()" class="px-3.5 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 rounded-xl text-xs font-bold transition shadow-sm flex items-center gap-1.5">
-                     <i class="fa-solid fa-plus"></i> សៀវភៅ
+                <!-- Book Actions: បន្ថែម & ដក & កែសម្រួល -->
+                <div class="flex items-center gap-1.5 bg-slate-100/90 border border-slate-200 p-1 rounded-xl shadow-inner">
+                   <button onclick="window.addCustomBookColumn()" title="បន្ថែមមុខវិជ្ជា/សៀវភៅថ្មី" class="px-3 py-1.5 bg-white hover:bg-emerald-50 text-emerald-700 hover:text-emerald-800 border border-slate-200 hover:border-emerald-300 rounded-lg text-xs font-bold transition shadow-sm flex items-center gap-1.5 active:scale-95">
+                     <i class="fa-solid fa-plus text-emerald-600"></i> <span>បន្ថែម</span>
                    </button>
-                   <button onclick="window.removeCustomBookColumn()" class="px-3.5 py-2 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 rounded-xl text-xs font-bold transition shadow-sm flex items-center gap-1.5">
-                     <i class="fa-solid fa-minus"></i> សៀវភៅ
+                   <button onclick="window.removeCustomBookColumn()" title="ដកមុខវិជ្ជា/សៀវភៅចេញ" class="px-3 py-1.5 bg-white hover:bg-rose-50 text-rose-700 hover:text-rose-800 border border-slate-200 hover:border-rose-300 rounded-lg text-xs font-bold transition shadow-sm flex items-center gap-1.5 active:scale-95">
+                     <i class="fa-solid fa-minus text-rose-600"></i> <span>ដកសៀវភៅ</span>
+                   </button>
+                   <button onclick="window.editCustomBookColumn()" title="កែសម្រួលឈ្មោះមុខវិជ្ជា/សៀវភៅ" class="px-3 py-1.5 bg-white hover:bg-amber-50 text-amber-700 hover:text-amber-800 border border-slate-200 hover:border-amber-300 rounded-lg text-xs font-bold transition shadow-sm flex items-center gap-1.5 active:scale-95">
+                     <i class="fa-solid fa-pen-to-square text-amber-600"></i> <span>កែសម្រួល</span>
+                   </button>
+                </div>
+
+                <!-- Primary Actions: រក្សាទុក & ព្រីន -->
+                <div class="flex items-center gap-1.5">
+                   <button onclick="window.saveLibData()" id="btnSaveLib" title="រក្សាទុកទិន្នន័យបណ្ណាល័យ" class="px-3.5 py-2 bg-gradient-to-r from-rose-500 to-pink-600 hover:from-rose-600 hover:to-pink-700 text-white rounded-xl text-xs font-bold shadow-sm transition flex items-center gap-1.5 transform hover:-translate-y-0.5 active:scale-95">
+                      <i class="fa-solid fa-cloud-arrow-up"></i> <span>រក្សាទុក</span>
+                   </button>
+                   
+                   <button onclick="window.printLibraryReport()" title="បោះពុម្ពបញ្ជីបណ្ណាល័យ" class="px-3.5 py-2 bg-slate-800 hover:bg-slate-900 text-white rounded-xl text-xs font-bold shadow-sm transition flex items-center gap-1.5 transform hover:-translate-y-0.5 active:scale-95">
+                      <i class="fa-solid fa-print"></i> <span>ព្រីន</span>
+                   </button>
+
+                   <button onclick="window.clearLibData()" title="សម្អាតទិន្នន័យសៀវភៅទាំងអស់" class="px-2.5 py-2 bg-slate-100 hover:bg-rose-50 text-slate-500 hover:text-rose-600 border border-slate-200 rounded-xl text-xs font-bold transition shadow-sm active:scale-95">
+                      <i class="fa-solid fa-trash-can"></i>
                    </button>
                 </div>
              </div>
@@ -259,23 +343,6 @@ window.loadLibraryView = async function() {
 
           </div>
         </div>
-      </div>
-
-      <!-- 🟢 Bottom Floating Action Bar (Responsive Grid) 🟢 -->
-      <div class="fixed bottom-4 left-1/2 -translate-x-1/2 w-[95%] max-w-[600px] bg-white/90 backdrop-blur-md border border-slate-200 p-2.5 rounded-2xl grid grid-cols-3 gap-2 shadow-[0_10px_25px_rgba(0,0,0,0.1)] z-40 no-print transition-all">
-         
-         <button onclick="window.saveLibData()" id="btnSaveLib" class="w-full py-2.5 bg-gradient-to-r from-rose-500 to-pink-600 hover:from-rose-600 hover:to-pink-700 text-white rounded-xl text-[11px] md:text-[13px] font-bold shadow-md transition flex items-center justify-center gap-1.5 transform hover:-translate-y-0.5">
-            <i class="fa-solid fa-cloud-arrow-up"></i> <span class="hidden sm:inline">រក្សាទុកទិន្នន័យ</span><span class="sm:hidden">រក្សាទុក</span>
-         </button>
-         
-         <button onclick="window.printLibraryReport()" class="w-full py-2.5 bg-slate-800 hover:bg-slate-900 text-white rounded-xl text-[11px] md:text-[13px] font-bold shadow-md transition flex items-center justify-center gap-1.5 transform hover:-translate-y-0.5">
-            <i class="fa-solid fa-print"></i> <span class="hidden sm:inline">បោះពុម្ពបញ្ជី</span><span class="sm:hidden">បោះពុម្ព</span>
-         </button>
-
-         <button onclick="window.clearLibData()" class="w-full py-2.5 bg-slate-100 hover:bg-rose-50 text-slate-600 hover:text-rose-600 rounded-xl text-[11px] md:text-[13px] font-bold transition flex items-center justify-center gap-1.5 border border-slate-200 transform hover:-translate-y-0.5">
-            <i class="fa-solid fa-eraser"></i> <span class="hidden sm:inline">សម្អាតទិន្នន័យ</span><span class="sm:hidden">សម្អាត</span>
-         </button>
-
       </div>
     `;
 
